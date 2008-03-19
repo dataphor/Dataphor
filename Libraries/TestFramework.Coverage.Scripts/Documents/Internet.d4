@@ -1,0 +1,13 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// TODO: coverage for the System.Internet library
+
+select URLEncode('Oh what a happy day Steeeempy!  You & I');
+select URLDecode(URLEncode('Oh what a happy day Steeeempy!  You & I'));
+select HTMLEncode('Oh what a happy day Steeeempy!  You & I <are gunna shine>!');
+select HTMLDecode(HTMLEncode('Oh what a happy day Steeeempy!  You & I <are gunna shine>!'));
+select HTMLAttributeEncode('And I say & quote, "the world couldn''t seem any <stranger>"');
+select HTMLDecode(HTMLAttributeEncode('And I say & quote, "the world couldn''t seem any <stranger>"'));

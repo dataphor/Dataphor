@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <row bop:name="Row1">
+    <staticimage image="Image(&quot;Frontend&quot;,&quot;NotebookFramePage&quot;)" bop:name="StaticImage1" />
+    <statictext text="This is a NotebookFramePage.  The text you are reading is stored in another document that is loaded and displayed using the NotebookFramePage." width="50" margintop="10" bop:name="StaticText1" />
+  </row>
+</interface>

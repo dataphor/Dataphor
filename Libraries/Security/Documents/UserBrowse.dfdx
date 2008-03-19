@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.User', 'Browse', '', '', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <showformaction ibop:order="0" bop:name="SetPassword" hint="Set the password for the current user." text="Set Password..." mode="Edit" document="Derive('SetPassword', 'Add', 'Main.ID', 'Main.ID')" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+   <source ibop:order="1" bop:name="Main" useapplicationtransactions="False" />
+   <showformaction ibop:order="2" bop:name="Add" />
+   <showformaction ibop:order="3" bop:name="Edit" />
+   <showformaction ibop:order="4" bop:name="Delete" />
+   <showformaction ibop:order="5" bop:name="View" />
+   <sourceaction ibop:order="6" bop:name="MoveFirst" />
+   <sourceaction ibop:order="7" bop:name="MovePrior" />
+   <sourceaction ibop:order="8" bop:name="MoveNext" />
+   <sourceaction ibop:order="9" bop:name="MoveLast" />
+   <sourceaction ibop:order="10" bop:name="Refresh" />
+   <menu ibop:order="11" bop:name="NavigationMenu" />
+   <column ibop:order="12" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger bop:name="ViewTrigger" visible="False" />
+            <trigger ibop:order="4" bop:name="SetPasswordTrigger" action="SetPassword" />
+            <trigger ibop:order="5" bop:name="DeviceUserTrigger" action="Main.ID.System.DeviceUsers_Users" />
+            <trigger ibop:order="6" bop:name="UserRoleTrigger" action="Main.ID.System.UserRoles_Users" />
+            <trigger ibop:order="7" bop:name="UserRightTrigger" visible="False" action="Main.ID.System.UserRightAssignments_Users" />
+         </column>
+      </row>
+   </column>
+   <showformaction ibop:order="13" bop:name="Main.ID.System.UserRoles_Users" text="Roles..." document="Form('Security', 'UserRoleBrowse')" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.User_ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+   <showformaction ibop:order="14" bop:name="Main.ID.System.DeviceUsers_Users" text="Device Users..." document="Form('Security', 'UserDeviceUserBrowse')" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.User_ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+   <showformaction ibop:order="15" bop:name="Main.ID.System.UserRightAssignments_Users" text="Rights..." document="Form('Security', 'UserRightBrowse')" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+</interface>
+</document>
+</dilx>

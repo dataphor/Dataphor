@@ -1,0 +1,24 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table PhoneType { ID : String, Description : String, key { ID } };
+
+create table Customer { ID : String, Name : String, Primary_PhoneType_ID : String, key { ID } };
+
+create table CustomerPhone { Customer_ID : String, Type_ID : String, Number : String, key { Customer_ID, Type_ID } };
+
+create reference CustomerPhone_Customer CustomerPhone { Customer_ID } references Customer { ID } delete cascade;
+
+create reference CustomerPhone_PhoneType CustomerPhone { Type_ID } references PhoneType { ID };
+
+create reference Customer_CustomerPhone Customer { ID, Primary_PhoneType_ID } references CustomerPhone { Customer_ID, Type_ID };
+
+
+drop reference Customer_CustomerPhone;
+drop reference CustomerPhone_PhoneType;
+drop reference CustomerPhone_Customer;
+drop table CustomerPhone;
+drop table Customer;
+drop table PhoneType;

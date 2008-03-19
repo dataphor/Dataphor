@@ -1,0 +1,41 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Support for CSharp and VB.NET document types and designers
+
+insert
+	table
+	{
+		row { "VB" ID, "VB.NET Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName },
+		row { "CS" ID, "C# Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName }
+	}
+	into .Frontend.Designers;
+	
+insert
+	table
+	{
+		row { "cs" ID, "C# Script" Description, "System.String" DataType },
+		row { "vb" ID, "VB.NET Script" Description, "System.String" DataType }
+	}
+	into .Frontend.DocumentTypes;
+
+insert
+	table
+	{
+		row { "cs" DocumentType_ID, "CS" Designer_ID },
+		row { "cs" DocumentType_ID, "Text" Designer_ID },
+		row { "vb" DocumentType_ID, "VB" Designer_ID },
+		row { "vb" DocumentType_ID, "Text" Designer_ID }
+	}
+	into .Frontend.DocumentTypeDesigners;
+	
+insert
+	table
+	{
+		row { "cs" DocumentType_ID, "CS" Default_Designer_ID },
+		row { "vb" DocumentType_ID, "VB" Default_Designer_ID }
+	}
+	into .Frontend.DocumentTypeDefaultDesigners;
+	

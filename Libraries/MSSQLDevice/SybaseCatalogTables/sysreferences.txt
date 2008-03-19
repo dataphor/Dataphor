@@ -1,0 +1,3 @@
+indexid;constrid;tableid;reftabid;keycnt;status;frgndbid;pmrydbid;spare2;fokey1;fokey2;fokey3;fokey4;fokey5;fokey6;fokey7;fokey8;fokey9;fokey10;fokey11;fokey12;fokey13;fokey14;fokey15;fokey16;refkey1;refkey2;refkey3;refkey4;refkey5;refkey6;refkey7;refkey8;refkey9;refkey10;refkey11;refkey12;refkey13;refkey14;refkey15;refkey16;frgndbname;pmrydbname
+1;320004171;304004114;240003886;2;0;43;43;0;2;3;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;2;0;0;0;0;0;0;0;0;0;0;0;0;0;0;[NULL];[NULL]
+1;336004228;304004114;272004000;1;0;43;43;0;4;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;[NULL];[NULL]

@@ -1,0 +1,28 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Tables
+	// Columns
+		// Defaults
+		// Constraints
+	// Keys
+	// Orders
+	// Constraints
+
+create table TestTable { };
+	// column
+create table TestTable2 { ID : Integer };
+		// default
+create table TestTable3 { ID : Integer { default 0 } };
+		// constraint
+create table TestTable4 { ID : Integer { constraint even value mod 2 = 0 } };
+	// order
+create table TestTable5 { ID : Integer, order { ID } };
+	// key
+create table TestTable6 { ID : Integer, Name : String, key { ID } };
+	// reference 
+create table TestTable7 { ID : Integer, reference TestReference { ID } references TestTable6 { ID } } ;
+
+create table TestTable8 { ID : Integer, Name : String, key { ID }, order { Name sort CompareText(left.value, right.value) } };

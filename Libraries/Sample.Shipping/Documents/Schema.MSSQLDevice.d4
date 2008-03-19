@@ -1,0 +1,29 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+** MSSQL Device
+*/
+
+//* Device: Shipping
+Execute
+(
+	'
+		create device Shipping
+			reconciliation { mode = { command }, master = device }
+			class "MSSQLDevice.MSSQLDevice"
+				attributes
+				{
+					"ServerName" = "' + LibrarySetting('ServerName') + '",
+					"DatabaseName" = "' + LibrarySetting('DatabaseName') + '",
+					"UseIntegratedSecurity" = "true",
+					"ConnectionParameters" = "Max Pool Size=400"
+				};
+	'
+);
+
+ExecuteScript("Sample.Shipping", "Schema.MSSQLOperators");
+
+grant usage on Shipping to role ShippingUser;

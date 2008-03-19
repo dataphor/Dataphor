@@ -1,0 +1,11 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create view AvailableVideo
+ VideoDetail
+ left join (RentedVideo over { Video_ID }) by ID = Video_ID
+  include rowexists
+ where not rowexists
+ over { ID, Name, Type, Rating, Year };

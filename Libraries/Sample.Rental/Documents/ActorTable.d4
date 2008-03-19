@@ -1,0 +1,42 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Actor
+{
+	ID : Integer { default GetNextGenerator("Actor.ID") }
+	   tags { Frontend.Visible = "false" },
+	Name : StrLth50
+		tags
+		{
+		 Frontend.Width = "25",
+		 Frontend.Preview.Include = "true"
+		},
+	Gender : String
+		tags
+		{
+			Frontend.ElementType = "Choice",
+			Frontend.Choice.Items = "Female=F,Male=M",
+			Frontend.Preview.Include = "true",
+			Frontend.Width = "4"
+		},
+	key { ID },
+	order { Name } tags { Frontend.IsDefault = "True" }
+};
+
+Actor := table
+{
+	row { GetNextGenerator("Actor.ID") ID, "Liem Neeson" Name, "M" Gender },
+	row { GetNextGenerator("Actor.ID"), "Natalie Portman", "F" },
+	row { GetNextGenerator("Actor.ID"), "Ewan MacGrgor", "M" },
+	row { GetNextGenerator("Actor.ID"), "Frank Oz", "M" },
+	row { GetNextGenerator("Actor.ID"), "Christopher Lee", "M" },
+	row { GetNextGenerator("Actor.ID"), "Haden Christiansen", "M" },
+	row { GetNextGenerator("Actor.ID"), "Carie Elwes", "F" },
+	row { GetNextGenerator("Actor.ID"), "Mandy Patiken", "F" },
+	row { GetNextGenerator("Actor.ID"), "Andrae the Giant", "M" },
+	row { GetNextGenerator("Actor.ID"), "Billy Crystal", "M" },
+	row { GetNextGenerator("Actor.ID"), "Pat Boone", "M" },
+	row { GetNextGenerator("Actor.ID"), "Audrey Hepburn", "F" }
+};

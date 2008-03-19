@@ -1,0 +1,28 @@
+﻿//	© Copyright 2000-2008 Alphora
+//	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+//
+// Pubs Database Import
+//
+// This script will load up a Pubs database from a SQL server on
+// the local machine.
+//
+//
+// This script will setup appropriate references for the tables.
+//
+//
+
+create device Pubs
+	reconciliation { mode = { none }, master = device}
+	class "MSSQLDevice.MSSQLDevice"
+	attributes
+	{
+		"UseIntegratedSecurity" = "True", // set this to false to use SQL Server Authentication
+		"ServerName" = ".",
+		"DatabaseName" = "pubs"
+	};
+
+// Uncomment the following statements and set the appropriate password to use SQL Server Authentication
+//CreateDeviceUser("Admin", Name("Pubs"), "sa", "");
+//CreateDeviceUser("System", Name("Pubs"), "sa", "");
+	
+Reconcile(Name("Pubs"));

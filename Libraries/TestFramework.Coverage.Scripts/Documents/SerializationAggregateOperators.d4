@@ -1,0 +1,58 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Aggregate Operators
+	// Operands
+	// Constructs
+
+create aggregate operator TestAggregateOperator( Total : Integer) : Integer
+initialization
+begin
+end
+aggregation
+begin
+end
+finalization
+begin
+end;
+
+create aggregate operator StdDev(AValue : Decimal) : Decimal
+initialization
+begin
+	var LSum : Decimal := 0d;
+	var LSumOfSquares : Decimal := 0d;
+	var LCount : Integer := 0;
+	result := 0d;
+end
+aggregation
+begin
+	LSum := LSum + AValue;
+	LSumOfSquares := LSumOfSquares + (AValue ** 2d);
+	LCount := LCount + 1;
+end
+finalization
+begin
+	result := 
+		(
+			(
+				(LSumOfSquares - ((LSum ** 2d) / ToDecimal(LCount))) / 
+				ToDecimal(LCount - 1)
+			) ** 
+			0.5d
+		);
+end;
+
+create aggregate operator Cost(ID : Integer, Amount : Money) : Money
+initialization 
+begin
+	result := $0;
+end
+aggregation 
+begin
+	result := result + Amount * ID;
+end
+finalization 
+begin
+end;

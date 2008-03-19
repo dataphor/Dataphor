@@ -1,0 +1,195 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// Derivation Coverage
+//
+// Provides coverage for derivation layout tags.
+
+// Column Level Tags :
+// Title
+// Hint
+// Visible
+// Width
+// ReadOnly
+// Include // ignored in 1.1
+// ElementType
+// ElementType Specific tags
+
+create table TestColumnTags
+{
+	ID : Integer,
+	TitleColumn : String tags { Frontend.Title = "Title Column", Frontend.Edit.Title = "Edit Title Column" },
+	HintColumn : String tags { Frontend.Hint = "Hint Column", Frontend.Edit.Hint = "Edit Hint Column" },
+	VisibleColumn : Boolean tags { Frontend.Visible = "True", Frontend.Edit.Visible = "False" },
+	WidthColumn : String tags { Frontend.Width = "20", Frontend.Edit.Width = "40" },
+	ReadOnlyColumn : String tags { Frontend.ReadOnly = "True", Frontend.Edit.ReadOnly = "False" },
+	ElementTypeColumn : String tags { Frontend.ElementType = "Choice", Frontend.Edit.ElementType = "TextBox", Frontend.Choice.Items = "Male=M;Female=F" },
+	key { ID }
+};
+
+insert table { row { 1 ID, "Title" TitleColumn, "Hint" HintColumn, false VisibleColumn, "10" WidthColumn, "True" ReadOnlyColumn, "M" ElementTypeColumn } } into TestColumnTags;
+
+// Column Level Layout Tags :
+// Break
+// FlowBreak
+// Flow
+// Priority
+
+create table TestColumnLayoutTags
+{
+	ID : Integer tags { Frontend.Add.Flow = "Vertical", Frontend.Edit.Flow = "Horizontal", Frontend.Priority = "1" },
+	Spacer1 : String tags { Frontend.Add.Priority = "2", Frontend.Edit.Priority = "8" },
+	FlowBreakColumn : String tags { Frontend.FlowBreak = "true", Frontend.Priority = "3" },
+	Spacer2 : String tags { Frontend.Add.Priority = "4", Frontend.Edit.Priority = "6" },
+	FlowColumn : String tags { Frontend.Add.Flow = "Horizontal", Frontend.Edit.Flow = "Vertical", Frontend.Priority = "5" },
+	Spacer3 : String tags { Frontend.Add.Priority = "6", Frontend.Edit.Priority = "4" },
+	BreakColumn : String tags { Frontend.Break = "true", Frontend.Priority = "7" },
+	Spacer4 : String tags { Frontend.Add.Priority = "8", Frontend.Edit.Priority = "8" },
+	key { ID }
+};
+
+create table TestVerticalFlow
+{
+	Column1 : String tags { Frontend.Flow = "Vertical" },
+	Column2 : String,
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestHorizontalFlow
+{
+	Column1 : String tags { Frontend.Flow = "Horizontal" },
+	Column2 : String,
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestVerticalFlowWithBreak
+{
+	Column1 : String tags { Frontend.Flow = "Vertical" },
+	Column2 : String tags { Frontend.Break = "true" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestHorizontalFlowWithBreak
+{
+	Column1 : String tags { Frontend.Flow = "Horizontal" },
+	Column2 : String tags { Frontend.Break = "true" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestVerticalFlowChange
+{
+	Column1 : String tags { Frontend.Flow = "Vertical" },
+	Column2 : String tags { Frontend.Flow = "Horizontal" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestHorizontalFlowChange
+{
+	Column1 : String tags { Frontend.Flow = "Horizontal" },
+	Column2 : String tags { Frontend.Flow = "Vertical" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestVerticalFlowWithFlowBreak
+{
+	Column1 : String tags { Frontend.Flow = "Vertical" },
+	Column2 : String tags { Frontend.FlowBreak = "true" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+create table TestHorizontalFlowWithFlowBreak
+{
+	Column1 : String tags { Frontend.Flow = "Horizontal" },
+	Column2 : String tags { Frontend.FlowBreak = "true" },
+	Column3 : String,
+	Column4 : String,
+	key { Column1 }
+};
+
+// Grid tags
+// Search tags
+
+// Group Level Tags :
+// Title
+// Hint
+// Visible
+// Width
+// ReadOnly
+// Break
+// FlowBreak
+// Flow
+// Priority
+// ElementType
+// ElementType Specific tags
+
+create table TestGroupTags
+{
+	ID : Integer,
+	Column1 : String tags { Frontend.Group = "Group1" },
+	Column2 : String tags { Frontend.Group = "Group1\Group2" },
+	Column3 : String tags { Frontend.Group = "Group1" },
+	Column4 : String,
+	Column5 : String tags { Frontend.Group = "Group2" },
+	Column6 : String tags { Frontend.Group = "Group1" },
+	Column7 : String tags { Frontend.Group = "Group3" },
+	key { ID }
+}
+	tags 
+	{ 
+		Frontend.Group.Group1.Title = "Group Number One", 
+		Frontend.Group.Group2.Hint = "Group Hint Number Two", 
+		Frontend.Edit.Group.Group3.Visible = "false", 
+		Frontend.Edit.Group.Group2.Priority = "1",
+		Frontend.Edit.Group.Group1.Priority = "2",
+		Frontend.Edit.Group.Group1.Break = "true",
+		Frontend.Edit.Group.Group2.FlowBreak = "true"
+	};
+
+// Table Level Tags :
+// Title
+// Hint
+// Query
+// DefaultOrder
+
+create table TestTableTags
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+}
+	tags
+	{ 
+		Frontend.Title = "Test Table Tags",
+		Frontend.Add.Query = "TestTableTags adorn tags { Frontend.Title = 'Add Test Table Tag' }"
+	};
+
+// Reference Level Tags :
+// Title
+// Hint
+// Embedded
+// Exposed
+// Visible
+// Priority
+// UseFullLookup
+// ElementType
+// ElementType specific tags
+
+// Order Level Tags :
+// Title
+// Visible
+// Priority
+

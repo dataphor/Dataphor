@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('TestFramework.Coverage.Devices.DeviceCaseResultsExtended', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <sourceaction ibop:order="0" bop:name="Refresh" />
+   <sourceaction ibop:order="1" bop:name="MoveLast" />
+   <source ibop:order="2" bop:name="Main" />
+   <showformaction ibop:order="3" bop:name="Main.Results.DeviceCase_ID.Coverage.Devices.DeviceCaseResults_DeviceCase" />
+   <showformaction ibop:order="4" bop:name="Add" />
+   <scriptaction ibop:order="5" bop:name="PreRunDeviceCase" script="using (Alphora.Dataphor.Frontend.Client.Windows.StatusForm LStatusForm = new &#xD;&#xA;Alphora.Dataphor.Frontend.Client.Windows.StatusForm(&quot;Running Device Case&quot;))&#xD;&#xA;&#xD;&#xA;{&#xD;&#xA;&#xD;&#xA;      RunDeviceCase.Execute();&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA; " />
+   <datascriptaction ibop:order="6" bop:name="RunDeviceCase" afterexecute="Refresh" script="EnsureDeviceStarted(Main.Cases.DeviceName);&#xD;&#xA;&#xD;&#xA;begin&#xD;&#xA;	RollbackTransaction();&#xD;&#xA;	Coverage.Devices.TestDevice(Main.Cases.DeviceName, Main.Cases.ID);&#xD;&#xA;end;&#xD;&#xA;	&#xD;&#xA;">
+      <dataargument ibop:order="0" bop:name="RunDeviceCaseArguments" columns="Main.Cases.ID, Main.Cases.DeviceName" source="Main" />
+   </datascriptaction>
+   <showformaction ibop:order="7" bop:name="ShowEditDeviceCaseFormAction" document="Form('Coverage', 'DeviceCase')" sourcelink.source="Main" sourcelink.detailkeynames="Main.ID" sourcelink.masterkeynames="Main.Cases.ID" sourcelinktype="Detail" />
+   <menu ibop:order="8" bop:name="NavigationMenu" />
+   <column ibop:order="9" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <textcolumn ibop:order="0" bop:name="MainGridColumnMain.Status" />
+            <textcolumn ibop:order="1" bop:name="MainGridColumnMain.Cases.ID" />
+            <textcolumn ibop:order="2" bop:name="MainGridColumnMain.Cases.DeviceName" />
+            <textcolumn ibop:order="3" bop:name="MainGridColumnMain.Cases.Type" bop:default-width="True" />
+            <textcolumn ibop:order="4" bop:name="MainGridColumnMain.Cases.Name" />
+            <textcolumn ibop:order="5" bop:name="MainGridColumnMain.Results.Status" bop:default-width="True" />
+            <textcolumn ibop:order="6" bop:name="MainGridColumnMain.Results.Results" />
+            <textcolumn ibop:order="7" bop:name="MainGridColumnMain.Results.DateTime" />
+            <textcolumn ibop:order="8" bop:name="MainGridColumnMain.Results.UserID" />
+         </grid>
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="RunDeviceCaseTrigger" margintop="25" text="Run Case" imageheight="13" imagewidth="11" action="PreRunDeviceCase" />
+            <trigger ibop:order="5" bop:name="ShowEditDeviceCaseFormTrigger" text="Edit Case" imageheight="13" action="ShowEditDeviceCaseFormAction" />
+            <trigger ibop:order="6" bop:name="FilterByStatusTrigger" text="View Failed" />
+         </column>
+      </row>
+   </column>
+   <sourceaction ibop:order="10" bop:name="MovePrior" />
+   <showformaction ibop:order="11" bop:name="View" />
+   <showformaction ibop:order="12" bop:name="Main.ID.Coverage.Devices.DeviceCaseResults_DeviceCase" />
+   <sourceaction ibop:order="13" bop:name="MoveNext" />
+   <sourceaction ibop:order="14" bop:name="MoveFirst" />
+   <showformaction ibop:order="15" bop:name="Edit" />
+   <menu ibop:order="16" bop:name="LookupViewMenuItem" />
+   <showformaction ibop:order="17" bop:name="Delete" />
+</interface>
+</document>
+</dilx>

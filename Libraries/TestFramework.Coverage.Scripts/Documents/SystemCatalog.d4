@@ -1,0 +1,122 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// System Tables
+if Count(TableDee) <> 1 then
+	raise Error("Count of TableDee not equal to 1");
+	
+if Count(TableDum) <> 0 then
+	raise Error("Count of TableDum not equal to 0");
+
+// TODO: TestNavigable fails after a reset call	
+/*
+begin
+	var LCursor : cursor(table { Name : Name }) := cursor(TableVars where IsSystem(Name) over { Name });
+	try
+		var LRow : row { Name : Name };
+		while LCursor.Next() do
+		begin
+			LRow := LCursor.Select();
+			Execute("TestNavigable(""" + (Name from LRow) + """, """ + (Name from LRow) + """);");
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+*/
+
+begin
+	var LCursor := cursor(Objects over { ID });
+	try
+		while LCursor.Next() do
+			(ID from LCursor.Select()).DependentObjects();
+	finally
+		LCursor.Close();
+	end;
+end;
+	
+begin
+	var LCursor := cursor(Objects over { ID });
+	try
+		while LCursor.Next() do
+			(ID from LCursor.Select()).RequiredObjects();
+	finally
+		LCursor.Close();
+	end;
+end;
+	
+begin
+	var LCursor := cursor(CatalogObjects over { Name });
+	try
+		while LCursor.Next() do
+			(Name from LCursor.Select()).DependentObjects();
+	finally
+		LCursor.Close();
+	end;
+end;
+	
+begin
+	var LCursor := cursor(CatalogObjects over { Name });
+	try
+		while LCursor.Next() do
+			(Name from LCursor.Select()).RequiredObjects();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+begin
+	var LCursor := cursor(Libraries over { Name });
+	try
+		while LCursor.Next() do
+			RequiredLibraries(Name from LCursor.Select());
+	finally
+		LCursor.Close();
+	end;
+end;
+
+begin
+	var LCursor := cursor(LoadedLibraries);
+	try
+		while LCursor.Next() do
+			DependentLibraries(Name from LCursor.Select());
+	finally
+		LCursor.Close();
+	end;
+end;
+
+TestNavigable("Objects add { ObjectName(ID) ObjectName }", "Objects add { ObjectName(ID) ObjectName }");
+TestNavigable("ObjectDependencies add { ObjectName(Object_ID) ObjectName }", "ObjectDependencies add { ObjectName(Object_ID) ObjectName }");
+TestNavigable("ObjectDependencies add { ObjectName(Dependency_Object_ID) ObjectName }", "ObjectDependencies add { ObjectName(Dependency_Object_ID) ObjectName }");
+TestNavigable("Objects { ID, Description }", "Objects { ID, Description }");
+
+if exists ((ObjectDependencies over { Dependency_Object_ID } rename { Dependency_Object_ID ID }) minus (Objects over { ID })) then
+	raise Error("Object dependencies exist which are unaccounted for in the objects table.");
+
+// Test that the dependents of every object can be enumerated and displayed
+begin
+	var LCursor : cursor(table { Name : Name }) := cursor(CatalogObjects over { Name });
+	try
+		var LDependencies : String;
+		while LCursor.Next() do
+		begin
+			LDependencies :=
+				"
+					ObjectDependencies
+						explode by Object_ID = parent Dependency_Object_ID
+							where Object_ID = ObjectID('" + LCursor.Select().Name + "')
+							include level Level
+							include sequence Sequence
+						add { ObjectDescription(Dependency_Object_ID) Description }
+						remove { Object_ID, Dependency_Object_ID }
+						order by { Level, Sequence }
+				";
+
+			TestNavigable(LDependencies, LDependencies);
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;

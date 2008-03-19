@@ -1,0 +1,686 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Note: All batches in this script must run on the same process, i.e. they must be run as a whole script.
+
+create table Test { ID : Integer, key { ID } };
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+// This should add the Test table to the application transaction space
+begin
+	var LCursor : cursor(typeof(Test)) := cursor(Test capabilities { navigable, updateable });
+	try
+		// This row should be inserted into the application transaction variable, not the real Test variable.
+		LCursor.Insert(row { 1 ID });
+	finally
+		LCursor.Close();
+	end;
+end;
+
+LeaveApplicationTransaction();
+
+if exists (Test) then
+	raise Error("Application Transaction is not isolated on this process.");
+	
+JoinApplicationTransaction(ATID[].ID, false);
+
+begin
+	var LCursor : cursor(typeof(Test)) := cursor(Test capabilities { navigable, updateable });
+	try
+		if LCursor.EOF() then
+			raise Error("Application Transaction read is not repeatable.");
+	finally
+		LCursor.Close();
+	end;
+end;
+	
+LeaveApplicationTransaction();
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (Test) then
+	raise Error("Application Transaction commit did not work.");
+	
+drop table ATID;
+
+drop table Test;
+
+//*
+// Test insert, update, and delete statement enlistment in the A/T
+create table Test { ID : Integer, key { ID } };
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 1 ID } } into Test;
+
+if not exists (Test where ID = 1) then
+	raise Error('Insert statement did not work within the application transaction');
+
+LeaveApplicationTransaction();
+
+if exists (Test where ID = 1) then
+	raise Error('Insert statement did not enlist table into application transaction.');
+	
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (Test where ID = 1) then
+	raise Error('Insert statement application transaction commit failed');
+	
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+update Test set { ID := 2 } where ID = 1;
+
+if not exists (Test where ID = 2) then
+	raise Error('Update statement did not work within the application transaction');
+
+LeaveApplicationTransaction();
+
+if not exists (Test where ID = 1) then
+	raise Error('Update statement did not enlist table into application transaction.');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if exists (Test where ID = 1) then
+	raise Error('Update statement application transaction commit failed');
+	
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+delete Test where ID = 2;
+
+if exists (Test where ID = 2) then
+	raise Error('Delete statement did not work within the application transaction.');
+	
+LeaveApplicationTransaction();
+
+if not exists (Test where ID = 2) then
+	raise Error('Delete statement did not enlist table into application transaction.');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if exists (Test where ID = 2) then
+	raise Error('Delete statement application transaction commit failed');
+	
+drop table ATID;
+
+drop table Test;
+
+//*
+// Test operator enlistment in the A/T
+create table Test { ID : Integer, key { ID } };
+
+create operator TestInsert(const AID : Integer)
+begin
+	insert table { row { AID ID } } into Test;
+end;
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+TestInsert(1);
+
+if not exists (Test where ID = 1) then
+	raise Error('TestInsert had no effect within the application transaction');
+
+LeaveApplicationTransaction();
+
+if exists (Test where ID = 1) then
+	raise Error('TestInsert did not enlist Test in the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (Test where ID = 1) then
+	raise Error('TestInsert commit failed');
+	
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+TestInsert(2);
+
+if not exists (Test where ID = 2) then
+	raise Error('TestInsert had no effect within the application transaction');
+
+LeaveApplicationTransaction();
+
+if exists (Test where ID = 2) then
+	raise Error('TestInsert did not enlist Test in the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (Test where ID = 2) then
+	raise Error('TestInsert commit failed');
+	
+drop table ATID;
+
+drop operator TestInsert(Integer);
+
+drop table Test;
+
+//*
+// Test event handler enlistment in the A/T
+
+create table Test { ID : Integer, Name : String, Phone : String { nil }, key { ID } };
+
+create table TestAudit { ID : Integer, Sequence : Integer, DateTime : DateTime, Name : String, Phone : String { nil }, key { ID, Sequence } };
+
+create operator Test_Insert(const ARow : typeof(Test[]))
+begin
+	insert table { ARow add { IfNil(Max(Sequence from (TestAudit where ID = ARow.ID)), 0) + 1 Sequence, DateTime() DateTime } } into TestAudit;
+end;
+
+attach Test_Insert to Test on { after insert } tags { DAE.ShouldTranslate = "true" };
+
+create table ATID { ID : Guid, key { } };
+
+//*
+// Case 1: Invocation of event handler w/in A/T, effects visible w/in A/T, no invocation on replay
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 1 ID, 'John' Name, '123-1234' Phone } } into Test;
+
+// effects of the event handler should be immediately visible w/in the A/T
+if not exists (TestAudit where ID = 1 and Sequence = 1) then
+	raise Error('TestAudit not visible within the application transaction');
+
+LeaveApplicationTransaction();
+
+if exists (TestAudit where ID = 1 and Sequence = 1) then
+	raise Error('TestAudit not enlisted in the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (TestAudit where ID = 1 and Sequence = 1) then
+	raise Error('TestAudit commit failed');
+	
+if exists (TestAudit where ID = 1 and Sequence = 2) then
+	raise Error('TestAudit invocation not suppressed during A/T replay');
+
+//*
+// Case 2: Invocation of event handler w/in A/T, effects external, no invocation on replay
+
+alter operator Test_Insert(typeof(Test[])) alter tags { create DAE.ShouldTranslate = "false" };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 2 ID, 'Joe' Name, '123-1235' Phone } } into Test;
+
+LeaveApplicationTransaction();
+
+if not exists (TestAudit where ID = 2) then
+	raise Error('TestAudit not visible outside the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if Count(TestAudit where ID = 2) > 1 then
+	raise Error('TestAudit invocation not suppressed during A/T replay');
+
+//*
+// Case 3: Invocation of event handler outside A/T only
+
+detach Test_Insert from Test on { after insert };
+
+attach Test_Insert to Test on { after insert } tags { DAE.ShouldTranslate = "false" };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 3 ID, 'Super' Name, '123-1236' Phone } } into Test;
+
+LeaveApplicationTransaction();
+
+if exists (TestAudit where ID = 3) then
+	raise Error('TestAudit fired within the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (TestAudit where ID = 3) then
+	raise Error('TestAudit not invoked during replay');
+
+//*
+drop table ATID;
+
+detach Test_Insert from Test on { after insert };
+
+drop operator Test_Insert(typeof(Test[]));
+
+drop table TestAudit;
+
+drop table Test;
+
+//*
+// Test view enlistment in the A/T, especially event handlers on views
+create table Test { ID : Integer, Type_ID : String, key { ID } };
+
+create view TestView Test over { ID };
+
+create operator TestView_Insert(var ARow : typeof(TestView[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	insert table { ARow add { 'TST' Type_ID } } into Test;
+end;
+
+attach operator TestView_Insert to TestView on { before insert };
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 1 ID } } into TestView;
+
+if not exists (Test where ID = 1) then
+	raise Error('TestView insert did not work within the application transaction');
+
+LeaveApplicationTransaction();
+
+if exists (Test where ID = 1) then
+	raise Error('TestView insert did not enlist Test in the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (Test where ID = 1) then
+	raise Error('TestView commit failed');
+
+drop table ATID;
+
+detach operator TestView_Insert from TestView on { before insert };
+
+drop operator TestView_Insert(var typeof(TestView[]), var Boolean);
+
+drop view TestView;
+
+drop table Test;
+
+// TODO: Test frontend behavior with this:
+//*
+create table Contact { ID : Integer, Name : String, key { ID } };
+
+create table ContactPhone 
+{
+	Contact_ID : Integer, 
+	Phone : String, 
+	IsPrimary : Boolean { default false } tags { Frontend.Grid.CheckBoxColumn.ReadOnly = "false" }, 
+	key { Contact_ID, Phone } 
+};
+
+create reference ContactPhone_Contact ContactPhone { Contact_ID } references Contact { ID } tags { Frontend.Detail.Embedded = "true" };
+
+create operator EnsurePrimaryContactPhone(const AContactID : Integer, const APhone : String)
+begin
+	if Count(ContactPhone where Contact_ID = AContactID and IsPrimary) > 1 then
+		update ContactPhone set { IsPrimary := false } where Contact_ID = AContactID and IsPrimary and Phone <> APhone;
+	if not exists (ContactPhone where Contact_ID = AContactID and IsPrimary) then
+		update ContactPhone set { IsPrimary := true } where Contact_ID = AContactID and Phone = APhone;
+end;
+
+create operator ContactPhone_Insert(const ARow : typeof(ContactPhone[]))
+begin
+	EnsurePrimaryContactPhone(ARow.Contact_ID, ARow.Phone);
+end;
+
+create operator ContactPhone_Update(const AOldRow : typeof(ContactPhone[]), const ANewRow : typeof(ContactPhone[]))
+begin
+	if AOldRow.Contact_ID <> ANewRow.Contact_ID then
+		if not exists (ContactPhone where (Contact_ID = AOldRow.Contact_ID) and IsPrimary) then
+			update ContactPhone where (Contact_ID = AOldRow.Contact_ID) return 1 by { Phone } set { IsPrimary := true };
+
+	EnsurePrimaryContactPhone(ANewRow.Contact_ID, ANewRow.Phone);
+end;
+
+create operator ContactPhone_Delete(const ARow : typeof(ContactPhone[]))
+begin
+	if not exists (ContactPhone where (Contact_ID = ARow.Contact_ID) and IsPrimary) then
+		update ContactPhone where Contact_ID = ARow.Contact_ID return 1 by { Phone } set { IsPrimary := true };
+end;
+
+attach operator ContactPhone_Insert to ContactPhone on { after insert };
+
+attach operator ContactPhone_Update to ContactPhone on { after update };
+
+attach operator ContactPhone_Delete to ContactPhone on { after delete };
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+insert table { row { 1 ID, 'Joe' Name } } into Contact;
+insert table { row { 1 Contact_ID, '123-1234' Phone } } into ContactPhone;
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+begin
+	var LCursor := cursor(Contact where ID = 1 capabilities { navigable, updateable });
+	try
+		if not(LCursor.Next()) then
+			raise Error('Application transaction did not enlist Contact correctly');
+			
+		LCursor.Update(row { 1 ID, 'John' Name });
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if Contact[1].Name <> 'John' then
+	raise Error('Contact update not visible within the application transaction');
+
+LeaveApplicationTransaction();
+
+if Contact[1].Name = 'John' then
+	raise Error('Contact update visible outside the application transaction');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if Contact[1].Name <> 'John' then
+	raise Error('Contact application transaction commit failed');
+
+drop table ATID;
+
+detach operator ContactPhone_Delete from ContactPhone on { after delete };
+
+detach operator ContactPhone_Update from ContactPhone on { after update };
+
+detach operator ContactPhone_Insert from ContactPhone on { after insert };
+
+drop operator ContactPhone_Delete(typeof(ContactPhone[]));
+
+drop operator ContactPhone_Update(typeof(ContactPhone[]), typeof(ContactPhone[]));
+
+drop operator ContactPhone_Insert(typeof(ContactPhone[]));
+
+drop operator EnsurePrimaryContactPhone(Integer, String);
+
+drop table ContactPhone;
+
+drop table Contact;
+
+//*
+// Contacts with Phone and PrimaryPhone
+create table Contact 
+{ 
+	ID : Integer, 
+	Name : String, 
+	key { ID } 
+} tags { Frontend.UseApplicationTransactions = "true" };
+
+create table PhoneType { ID : String, Description : String, key { ID } };
+
+insert
+	table
+	{
+		row { 'HOM' ID, 'Home Phone' Description },
+		row { 'OFF', 'Office' },
+		row { 'PAG', 'Pager' }
+	}
+	into PhoneType;
+	
+create table ContactPhone 
+{
+	Contact_ID : Integer, 
+	Type_ID : String,
+	Phone : String, 
+	key { Contact_ID, Type_ID },
+	reference ContactPhone_PhoneType { Type_ID } references PhoneType { ID },
+	reference ContactPhone_Contact { Contact_ID } references Contact { ID } tags { Frontend.Detail.Embedded = "true", Frontend.Detail.Query = "ContactPhoneDetail" }
+} tags { Frontend.UseApplicationTransactions = "true" };
+
+create table PrimaryContactPhone
+{
+	Contact_ID : Integer,
+	Type_ID : String,
+	key { Contact_ID },
+	reference PrimaryContactPhone_ContactPhone { Contact_ID, Type_ID } references ContactPhone { Contact_ID, Type_ID } update cascade delete cascade tags { Frontend.Extension.Embedded = "true" }
+} tags { Frontend.UseApplicationTransactions = "true" };
+
+create view ContactPhoneDetail
+	ContactPhone
+		left join PrimaryContactPhone
+			include rowexists IsPrimary;
+			
+create operator PrimaryContactPhone_Insert(var ARow : typeof(PrimaryContactPhone[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	delete PrimaryContactPhone where (Contact_ID = (ARow.Contact_ID)) and (Type_ID <> (ARow.Type_ID));
+end;
+
+attach operator PrimaryContactPhone_Insert to PrimaryContactPhone on { before insert };
+
+create operator PrimaryContactPhone_Delete(const ARow : typeof(PrimaryContactPhone[]))
+begin
+	if exists (ContactPhone where Contact_ID = (ARow.Contact_ID)) and not exists (PrimaryContactPhone where Contact_ID = (ARow.Contact_ID)) then
+		insert ContactPhone over { Contact_ID, Type_ID } return 1 by { Contact_ID, Type_ID } into PrimaryContactPhone;
+end;
+
+attach operator PrimaryContactPhone_Delete to PrimaryContactPhone on { after delete };
+
+create operator ContactPhone_Insert(const ARow : typeof(ContactPhone[]))
+begin
+	if not exists (PrimaryContactPhone where Contact_ID = (ARow.Contact_ID)) then
+		insert table { ARow over { Contact_ID, Type_ID } } into PrimaryContactPhone;
+end;
+
+attach operator ContactPhone_Insert to ContactPhone on { after insert };
+
+create table ATID { ID : Guid, key { } };
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+insert table { row { 1 ID, 'Joe' Name } } into Contact;
+insert table { row { 1 Contact_ID, 'HOM' Type_ID, '123-1234' Phone } } into ContactPhoneDetail;
+
+if not exists (ContactPhoneDetail where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhoneDetail insert not visible w/in the A/T');
+	
+if not exists (ContactPhone where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhoneDetail insert into Contact not visible w/in the A/T');
+	
+LeaveApplicationTransaction();
+
+if exists (ContactPhoneDetail where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhoneDetail insert visible outside the A/T');
+	
+if exists (ContactPhone where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhoneDetail insert into Contact visible outside the A/T');
+
+CommitApplicationTransaction(ATID[].ID);
+
+if not exists (ContactPhoneDetail where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhoneDetail A/T commit failed');
+	
+if not exists (ContactPhone where (Contact_ID = 1) and (Type_ID = 'HOM')) then
+	raise Error('ContactPhone A/T commit failed');
+
+ATID := table { row { BeginApplicationTransaction() ID } };
+
+JoinApplicationTransaction(ATID[].ID, false);
+
+LeaveApplicationTransaction();
+
+CommitApplicationTransaction(ATID[].ID);
+
+drop table ATID;
+
+detach operator ContactPhone_Insert from ContactPhone on { after insert };
+
+detach operator PrimaryContactPhone_Delete from PrimaryContactPhone on { after delete };
+
+detach operator PrimaryContactPhone_Insert from PrimaryContactPhone on { before insert };
+
+drop operator PrimaryContactPhone_Insert(var typeof(PrimaryContactPhone[]), var Boolean);
+
+drop operator PrimaryContactPhone_Delete(typeof(PrimaryContactPhone[]));
+
+drop operator ContactPhone_Insert(typeof(ContactPhone[]));
+
+drop view ContactPhoneDetail;
+
+drop table PrimaryContactPhone;
+
+drop table ContactPhone;
+
+drop table PhoneType;
+
+drop table Contact;
+
+//*
+// SupportContractLocations selection
+create table Organization
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+insert table { row { 1 ID, 'Organization 1' Name } } into Organization;
+insert table { row { 2 ID, 'Organization 2' Name } } into Organization;
+
+create table Location
+{
+	ID : Integer,
+	Organization_ID : Integer,
+	Name : String tags { Frontend.Preview.Include = "true" },
+	key { ID },
+	key { ID, Organization_ID } static tags { DAE.Enforced = "false" },
+	reference Location_Organization { Organization_ID } references Organization { ID } tags { Frontend.Detail.Embedded = "true" }
+};
+
+insert table { row { 1 ID, 1 Organization_ID, 'Location 1' Name } } into Location;
+insert table { row { 2 ID, 1 Organization_ID, 'Location 2' Name } } into Location;
+insert table { row { 3 ID, 2 Organization_ID, 'Location 3' Name } } into Location;
+insert table { row { 4 ID, 2 Organization_ID, 'Location 4' Name } } into Location;
+
+create table SupportContract
+{
+	ID : Integer,
+	Organization_ID : Integer,
+	Date : Date { default Date() },
+	key { ID },
+	key { ID, Organization_ID } static tags { DAE.Enforced = "false" },
+	reference SupportContract_Organization { Organization_ID } references Organization { ID }
+};
+
+create table SupportContractLocation
+{
+	SupportContract_ID : Integer,
+	Location_ID : Integer,
+	key { SupportContract_ID, Location_ID },
+	reference SupportContractLocation_SupportContract { SupportContract_ID } references SupportContract { ID } tags { Frontend.Detail.Embedded = "true" },
+	reference SupportContractLocation_Location { Location_ID } references Location { ID }
+};
+
+// SupportContractLocation must be a valid location of the organization named in the support contract
+alter table SupportContractLocation
+{
+	create transition constraint IsValidLocation
+		on insert Location[new.Location_ID].Organization_ID = SupportContract[new.SupportContract_ID].Organization_ID
+		on update if ((old.SupportContract_ID = new.SupportContract_ID) and (old.Location_ID = new.Location_ID)) then true else (Location[new.Location_ID].Organization_ID = SupportContract[new.SupportContract_ID].Organization_ID)
+};
+
+// The organization named in a support contract cannot change if there are locations from the old organization specified on the support contract
+alter table SupportContract
+{
+	create transition constraint IsValidOrganization
+		on update not exists ((SupportContractLocation where SupportContract_ID = new.ID over { Location_ID }) minus (Location where Organization_ID = new.Organization_ID over { ID } rename { ID Location_ID }))
+};
+
+// An organization of a given location may not be changed if that location is specified in a support contract for the organization
+alter table Location
+{
+	create transition constraint IsValidOrganization
+		on update not exists ((SupportContractLocation where Location_ID = new.ID) join (SupportContract rename { ID SupportContract_ID }) where Organization_ID <> new.Organization_ID)
+};
+
+try
+	insert table { row { 1 ID, 1 Organization_ID } } into SupportContract;
+	insert table { row { 1 SupportContract_ID, 3 Location_ID } } into SupportContractLocation;
+	delete SupportContractLocation where (SupportContract_ID = 1) and (Location_ID = 3);
+commit;
+
+delete SupportContract;
+
+alter table Location { drop transition constraint IsValidOrganization };
+alter table SupportContract { drop transition constraint IsValidOrganization };
+alter table SupportContractLocation { drop transition constraint IsValidLocation };
+
+drop table SupportContractLocation;
+drop table SupportContract;
+drop table Location;
+drop table Organization;
+			
+//*
+SafeDrop('A');
+create table A { ID : Integer, Name : String, key { ID } };
+
+SafeDrop('B');
+create table B { A_ID : Integer, Number : Integer, Phone : String, key { A_ID, Number } };
+
+SafeDrop('C');
+create table C { A_ID : Integer, Number : Integer, Phone : String, key { A_ID, Number } };
+
+create reference B_A B { A_ID } references A { ID } tags { Frontend.Detail.Embedded = "True", Frontend.Detail.Document = "Form('Working', 'Defect28581BBrowse')" };
+
+create reference C_A C { A_ID } references A { ID } tags { Frontend.Detail.Embedded = "True", Frontend.Detail.Document = "Form('Working', 'Defect28581CBrowse')" };
+
+create operator MoveToC(const AID : Integer, const ANumber : Integer)
+begin
+	insert B where A_ID = AID and Number = ANumber into C;
+	delete B where A_ID = AID and Number = ANumber;
+end;
+
+create operator MoveToB(const AID : Integer, const ANumber : Integer)
+begin
+	insert C where A_ID = AID and Number = ANumber into B;
+	delete C where A_ID = AID and Number = ANumber;
+end;
+
+//*
+var LATID := BeginApplicationTransaction();
+JoinApplicationTransaction(LATID, false);
+
+insert table { row { 1 A_ID, 1 Number, '123' Phone } } into B;
+MoveToC(1, 1);
+if exists (B where A_ID = 1 and Number = 1) then
+	raise Error('MoveToC did not delete B');
+if not exists (C where A_ID = 1 and Number = 1) then
+	raise Error('MoveToC did not insert C');
+MoveToB(1, 1);
+if exists (C where A_ID = 1 and Number = 1) then
+	raise Error('MoveToB did not delete C');
+if not exists (B where A_ID = 1 and Number = 1) then
+	raise Error('MoveToB did not insert B');
+
+RollbackApplicationTransaction(LATID);
+
+//*
+SafeDrop('A');
+SafeDrop('B');
+SafeDrop('C');
+
+

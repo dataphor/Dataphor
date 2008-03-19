@@ -1,0 +1,44 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+detach Security.ChangePasswordBase_Insert from Security.ChangePasswordBase on {before insert};
+drop operator ChangePasswordBase_Insert(var typeof(row from ChangePasswordBase), var Boolean);
+drop view Security.ChangePassword;
+drop view Security.ChangePasswordBase;
+
+create view ChangePasswordBase
+	Users
+		over { ID }
+		where ID = UserID()
+		adorn { ID tags { Frontend.Visible = "false" } }
+		add
+		{
+			"" OldPassword tags { DAE.IsComputed = "false", Frontend.Title = "Old Password", Frontend.TextBox.IsPassword = "true" },
+			"" NewPassword tags { DAE.IsComputed = "false", Frontend.Title = "New Password", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmNewPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm New Password", Frontend.TextBox.IsPassword = "true" }
+		};
+		
+create operator ChangePasswordBase_Update(const AOldRow : typeof(row from ChangePasswordBase), var ANewRow : typeof(row from ChangePasswordBase), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	ChangePassword(OldPassword from ANewRow, NewPassword from ANewRow);
+	APerformUpdate := false;
+end;
+
+attach operator ChangePasswordBase_Update to ChangePasswordBase on { before update };
+
+create view ChangePassword
+	ChangePasswordBase
+	{
+		constraint PasswordValid NewPassword = ConfirmNewPassword static tags { DAE.SimpleMessage = "New Password and Confirm New Password must match." }
+	}
+	tags
+	{
+		Frontend.Title = "Change Password"
+	};
+	
+grant usage on ChangePassword to role SecurityUser;
+grant usage on ChangePassword to role System.User;
+

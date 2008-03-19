@@ -1,0 +1,50 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+create view PersonDetail
+	Person join Contact  
+	adorn { Notes tags { Frontend.Break = "true" } }
+	tags { Frontend.Title = "Person" };
+
+//*
+create view OrganizationDetail
+	Organization join Contact
+	tags { Frontend.Title = "Organization" };
+
+//*
+create operator FormatName(AFirst : String, AMiddle : String, ALast : String) : String
+begin
+	if (ALast = "") or (AFirst = "") then
+		result := ALast + AFirst
+	else
+		result := ALast + ", " + AFirst;
+		
+	if (result = "") or (AMiddle = "") then
+		result := result + AMiddle
+	else
+		result := result + " " + AMiddle;
+end;
+
+//*
+create view ContactDetail
+	(Contact rename { ID Contact_ID }) 
+		add 
+		{ 
+			(
+				if exists (Person where ID = Contact_ID) then
+					(Person[Contact_ID] add { FormatName(FirstName.Value, MiddleInitial.Value, LastName.Value) Name }).Name
+				else if exists (Organization where ID = Contact_ID) then
+					Organization[Contact_ID].Name
+				else
+					""
+			) Name tags { Frontend.Preview.Include = "True" }
+		}
+	tags { Frontend.Title = "Contact Details" };
+
+//*
+alter table Person alter tags { create static Frontend.Query = "PersonDetail" };
+alter table Organization alter tags { create static Frontend.Query = "OrganizationDetail" };
+

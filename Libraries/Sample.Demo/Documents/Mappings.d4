@@ -1,0 +1,32 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+alter device Main
+{
+	create type ServerID tags { Storage.Length = "5" },
+	create type ID tags { Storage.Length = "16" },
+	create type ShortID tags { Storage.Length = "3" },
+	create type Description tags { Storage.Length = "50" },
+	create type LongDescription tags { Storage.Length = "500" },
+	create type Notes,
+	
+	create type ProperName tags { Storage.Length = "50" },
+	create type StateID tags { Storage.Length = "2" },
+	create type Zip tags { Storage.Length = "15" },
+	create type WebAddress tags { Storage.Length = "250" },
+	create type WebsiteType tags { Storage.Length = "25" },
+	create type EmailAddress tags { Storage.Length = "100" },
+	create type EmailType tags { Storage.Length = "25" },
+	create type LocationName tags { Storage.Length = "50" },
+	create type Phone tags { Storage.Length = "20" },
+	create type ContactID tags { Storage.Length = "16" },
+	create type LocationID tags { Storage.Length = "16" },
+	create type OrganizationPhoneTypeID tags { Storage.Length = "3" },
+	create type PersonPhoneTypeID tags { Storage.Length = "3" },
+	create type DepartmentID tags { Storage.Length = "3" },
+	create type RoleID tags { Storage.Length = "3" },
+	create type CountryCode tags { Storage.Length = "2" }
+};

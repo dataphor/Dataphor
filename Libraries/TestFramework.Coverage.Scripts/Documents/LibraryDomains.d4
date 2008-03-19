@@ -1,0 +1,119 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// FileReference coverage
+
+begin
+	// Selectors
+	var LFileReference : FileReference := FileReference('Alphora.Dataphor.DAE.dll'i, true);
+	if LFileReference <> FileReference('Alphora.Dataphor.DAE.dll'i, true) then
+		raise Error("FileReference selector failed.");
+		
+	// Accessors
+	if LFileReference.Name <> 'Alphora.Dataphor.DAE.dll'i then
+		raise Error("FileReference name read accessor failed.");
+		
+	LFileReference.Name := 'Alphora.Dataphor.DAE.pdb'i;
+	if LFileReference.Name <> 'Alphora.Dataphor.DAE.pdb'i then
+		raise Error("FileReference name write accessor failed.");
+		
+	if LFileReference.IsAssembly <> true then
+		raise Error("File reference isassembly read accessor failed.");
+		
+	LFileReference.IsAssembly := false;
+	if LFileReference.IsAssembly <> false then
+		raise Error("File reference isassembly write accessor failed.");
+		
+	// Comparison
+	if LFileReference <> FileReference('Alphora.Dataphor.DAE.pdb'i, false) then
+		raise Error("FileReference comparison failed.");
+end;
+
+// LibraryReference coverage
+
+begin
+	// Selectors
+	var LLibraryReference : LibraryReference := LibraryReference('System', VersionNumber(1, 0));
+	if (LLibraryReference <> LibraryReference('System', VersionNumber(1, 0))) then
+		raise Error("LibraryReference selector failed.");
+		
+	// Accessors
+	if (LLibraryReference.Name <> 'System') then
+		raise Error("LibraryReference name read accessor failed.");
+		
+	LLibraryReference.Name := 'SimpleDevice';
+	if (LLibraryReference.Name <> 'SimpleDevice') then
+		raise Error("LibraryReference name write accessor failed.");
+		
+	if (LLibraryReference.Version <> VersionNumber(1, 0)) then
+		raise Error("LibraryReference versionnumber read accessor failed.");
+		
+	LLibraryReference.Version := VersionNumber(2, 0);
+	if (LLibraryReference.Version <> VersionNumber(2, 0)) then
+		raise Error("LibraryReference versionnumber write accessor failed.");
+		
+	// Comparison
+	if LLibraryReference <> LibraryReference('SimpleDevice', VersionNumber(2, 0)) then
+		raise Error("LibraryReference comparison failed.");
+end;
+
+// LibraryDescriptor coverage
+
+begin
+	// Selectors
+	var LLibraryDescriptor : LibraryDescriptor := LibraryDescriptor('SimpleDevice');
+	if (LLibraryDescriptor <> LibraryDescriptor('SimpleDevice', VersionNumberUndefined(), "", list(FileReference){}, list(LibraryReference){})) then
+		raise Error("LibraryDescriptor name selector failed.");
+		
+	LLibraryDescriptor := LibraryDescriptor('SimpleDevice', VersionNumber(1));
+	if (LLibraryDescriptor <> LibraryDescriptor('SimpleDevice', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){})) then
+		raise Error("LibraryDescriptor name, version selector failed.");
+
+	LLibraryDescriptor := LibraryDescriptor('SimpleDevice', VersionNumber(1), 'DeviceName');
+	if (LLibraryDescriptor <> LibraryDescriptor('SimpleDevice', VersionNumber(1), "DeviceName", list(FileReference){}, list(LibraryReference){})) then
+		raise Error("LibraryDescriptor name, version, device name selector failed.");
+
+	LLibraryDescriptor := LibraryDescriptor('SimpleDevice', VersionNumber(1), "DeviceName", {FileReference('Alphora.Dataphor.DAE.Device.SimpleDevice.dll'i, true)}, {LibraryReference('System', VersionNumber(1, 0))});
+	if (LLibraryDescriptor <> LibraryDescriptor('SimpleDevice', VersionNumber(1), "DeviceName", {FileReference('Alphora.Dataphor.DAE.Device.SimpleDevice.dll'i, true)}, {LibraryReference('System', VersionNumber(1, 0))})) then
+		raise Error("LibraryDescriptor selector failed.");
+		
+	// Accessors
+	if (LLibraryDescriptor.Name <> 'SimpleDevice') then
+		raise Error("LibraryDescriptor name read accessor failed.");
+		
+	LLibraryDescriptor.Name := 'Frontend';
+	if (LLibraryDescriptor.Name <> 'Frontend') then
+		raise Error("LibraryDescriptor name write accessor failed.");
+		
+	if (LLibraryDescriptor.Version <> VersionNumber(1)) then
+		raise Error("LibraryDescriptor version read accessor failed.");
+		
+	LLibraryDescriptor.Version := VersionNumber(2, 0);
+	if (LLibraryDescriptor.Version <> VersionNumber(2, 0)) then
+		raise Error("LibraryDescriptor version write accessor failed.");
+		
+	if (LLibraryDescriptor.DefaultDeviceName <> 'DeviceName') then
+		raise Error("LibraryDescriptor device name read accessor failed.");
+		
+	LLibraryDescriptor.DefaultDeviceName := 'Server';
+	if (LLibraryDescriptor.DefaultDeviceName <> 'Server') then
+		raise Error("LibraryDescriptor device name write accessor failed.");
+		
+	if (LLibraryDescriptor.Files <> {FileReference('Alphora.Dataphor.DAE.Device.SimpleDevice.dll'i, true)}) then
+		raise Error("LibraryDescriptor files read accessor failed.");
+		
+	LLibraryDescriptor.Files := {FileReference('Alphora.Dataphor.Frontend.Server.dll'i, true)};
+	if (LLibraryDescriptor.Files <> {FileReference('Alphora.Dataphor.Frontend.Server.dll'i, true)}) then
+		raise Error("LibraryDescriptor files write accessor failed.");
+		
+	if (LLibraryDescriptor.Requisites <> {LibraryReference('System', VersionNumber(1, 0))}) then
+		raise Error("LibraryDescriptor requisites read accessor failed.");
+		
+	LLibraryDescriptor.Requisites := {LibraryReference('SimpleDevice', VersionNumber(1, 0))};
+	if (LLibraryDescriptor.Requisites <> {LibraryReference('SimpleDevice', VersionNumber(1, 0))}) then
+		raise Error("LibraryDescriptor requisites write accessor failed.");
+
+	// Equals
+end;

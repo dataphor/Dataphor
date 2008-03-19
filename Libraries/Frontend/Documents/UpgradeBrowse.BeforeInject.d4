@@ -1,0 +1,16 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// UpgradeBrowse.BeforeInject
+
+if exists (.System.SessionCatalogObjects where Name = 'Frontend.UpgradeBrowse.InjectUpgrade') then
+	Execute('drop table .Frontend.UpgradeBrowse.InjectUpgrade');
+	
+create session table .Frontend.UpgradeBrowse.InjectUpgrade in .System.Temp
+{
+	Library_Name : Name tags { Frontend.Visible = "false" },
+	Script : String tags { Frontend.Width = "50", Frontend.TextBox.Height = "7" },
+	key { }
+};

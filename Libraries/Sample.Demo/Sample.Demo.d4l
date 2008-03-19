@@ -1,0 +1,5 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.1.0" defaultdevicename="" assembliesasstring="" librariesasstring="" name="Sample.Demo" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="Sample.Common" version="*" />
+    <libraries.libraryreference name="MSSQLDevice" version="*" />
+    <libraries.libraryreference name="ADOConnection" version="*" />
+</library>

@@ -1,0 +1,133 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+RollbackTransaction();
+
+RegisterLibrary('System.Internet');
+UpgradeLibrary('System.Internet');
+
+//*
+// Update form documents for the changes to the quicklookup control
+begin
+	var LReferencesScript := Concat(Script from (References where Source_TableVar_Name like "System.Internet%" add { Script(Name) Script }));
+	Execute(Concat(Script from (References where Source_TableVar_Name like "System.Internet%" add { ScriptDrop(Name) Script })));
+	try
+		var LDocumentID : Guid;
+		var LDocument : typeof(row from Documents add { '' Document });
+		var LFormDocuments := 
+			cursor 
+			( 
+				Documents where (Type_ID in { "dfd", "dfdx" }) 
+					add { LoadDocument("." + Library_Name, "." + Name) Document }
+					where (Document matches "align[^m]") or (Document matches "<quicklookup")
+			);
+		try
+			while LFormDocuments.Next() do
+			begin
+				try
+					LDocument := LFormDocuments.Select();
+					
+					// Load the form document
+					delete XMLDocument;
+					delete XMLElement;
+					delete XMLElementParent;
+					delete XMLNamespaceAlias;
+					delete XMLDefaultNamespace;
+					delete XMLAttribute;
+					delete XMLContent;
+				
+					LDocumentID := LoadXML(Document from LDocument);
+					
+					// Align -> HorizontalAlignment
+					update XMLAttribute set { Name := 'horizontalalignment' } where Name.Lower() = 'align';
+					
+					// TitleAlign -> TitleAlignment
+					update XMLAttribute set { Name := 'titlealignment' } where Name.Lower() = 'titlealign';
+					
+					// VerticalAlign -> VerticalAlignment
+					update XMLAttribute set { Name := 'verticalalignment' } where Name.Lower() = 'verticalalign';
+					
+					// Add a textbox under each QuickLookup
+					if not exists (XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Parent_Element_ID } join XMLElementParent) then
+					begin
+						insert 
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Parent_Element_ID }
+								add { NewGuid() Element_ID, LDocumentID Document_ID, '' NamespaceAlias, 'textbox' Name, 0 Sequence }
+							into XMLElement rename { ID Element_ID } join XMLElementParent;
+							
+						// Move attributes to the textbox
+						update 
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Old_ID }
+								lookup (XMLElementParent rename { Element_ID New_ID, Parent_Element_ID Old_ID })
+								join 
+								(
+									XMLAttribute 
+										where Name.Lower() in { 'maxwidth', 'nilifblank', 'textalignment', 'width' }
+										rename { Element_ID Old_ID }
+								) with { Left.PropagateInsert = "false", Left.PropagateUpdate = "false", Left.PropagateDelete = "false" }
+							set { Old_ID := New_ID };
+							
+						// Insert a title alignment attribute of None
+						insert
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Old_ID }
+								join (XMLElementParent rename { Element_ID New_ID, Parent_Element_ID Old_ID } remove { Sequence })
+								remove { Old_ID }
+								rename { New_ID Element_ID }
+								add { "" NamespaceAlias, "titlealignment" Name, "None" Value }
+							into XMLAttribute;
+							
+						// Copy attributes to the textbox
+						insert
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Old_ID }
+								join (XMLAttribute rename { Element_ID Old_ID })
+								where Name.Lower() in { 'columnname', 'helpkeyword', 'helpkeywordbehavior', 'helpstring', 'hint', 'marginbottom', 'marginleft', 'marginright', 'margintop', 'readonly', 'source', 'tabstop', 'verticalalignment', 'visible' }
+								join (XMLElementParent rename { Element_ID New_ID, Parent_Element_ID Old_ID } remove { Sequence })
+								remove { Old_ID }
+								rename { New_ID Element_ID }
+							into XMLAttribute;
+							
+						// Name the textbox
+						insert
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Old_ID }
+								join (XMLAttribute rename { Element_ID Old_ID })
+								where NamespaceAlias.Lower() = "bop" and Name.Lower() = "name"
+								join (XMLElementParent rename { Element_ID New_ID, Parent_Element_ID Old_ID } remove { Sequence })
+								remove { Old_ID }
+								rename { New_ID Element_ID }
+							into XMLAttribute;
+						
+						// Rename the quicklookup
+						update
+							XMLElement where Name.Lower() = "quicklookup" over { ID } rename { ID Old_ID }
+								lookup (XMLElementParent rename { Element_ID New_ID, Parent_Element_ID Old_ID })
+								join (XMLAttribute where NamespaceAlias.Lower() = "bop" and Name.Lower() = "name" rename { Element_ID Old_ID }) 
+									with { Left.PropagateInsert = "false", Left.PropagateUpdate = "false", Left.PropagateDelete = "false" }
+							set { Value := Value + "_Lookup" };
+					end;
+		
+					SaveDocument("." + (Library_Name from LDocument), "." + (Name from LDocument), SaveXML(LDocumentID));
+				except
+					on E : Error do
+						LogError(E);
+				end;
+			end;		
+		finally
+			LFormDocuments.Close();
+		end;
+	finally
+		delete XMLDocument;
+		delete XMLElement;
+		delete XMLElementParent;
+		delete XMLNamespaceAlias;
+		delete XMLDefaultNamespace;
+		delete XMLAttribute;
+		delete XMLContent;
+
+		SetLibrary("System.Internet");	
+		Execute(LReferencesScript);
+		BeginTransaction();
+	end;
+end;
+

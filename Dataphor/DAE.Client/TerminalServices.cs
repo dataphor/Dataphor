@@ -1,0 +1,73 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+using System;
+using System.Runtime.InteropServices;
+
+namespace Alphora.Dataphor.DAE.Client
+{
+	public static class TerminalServiceUtility
+	{
+		public static bool InTerminalSession
+		{
+			get { return System.Windows.Forms.SystemInformation.TerminalServerSession; }
+		}
+		
+		public static string ClientName 
+		{ 
+			get 
+			{ 
+				if (InTerminalSession)
+				{
+					IntPtr LBuffer;
+					uint LSize;
+					if (!WTSQuerySessionInformation(IntPtr.Zero, WTS_CURRENT_SESSION, WTS_INFO_CLASS.WTSClientName, out LBuffer, out LSize))
+						return System.Environment.MachineName;
+					else
+						try
+						{
+							return Marshal.PtrToStringAnsi(LBuffer);
+						}
+						finally
+						{
+							WTSFreeMemory(LBuffer);
+						}
+				}
+				else
+					return System.Environment.MachineName;
+			}
+		}
+
+		public const int WTS_CURRENT_SERVER_HANDLE = -1;
+		public const int WTS_CURRENT_SESSION = -1;
+
+		private enum WTS_INFO_CLASS
+		{
+			WTSInitialProgram,
+			WTSApplicationName,
+			WTSWorkingDirectory,
+			WTSOEMId,
+			WTSSessionId,
+			WTSUserName,
+			WTSWinStationName,
+			WTSDomainName,
+			WTSConnectState,
+			WTSClientBuildNumber,
+			WTSClientName,
+			WTSClientDirectory,
+			WTSClientProductId,
+			WTSClientHardwareId,
+			WTSClientAddress,
+			WTSClientDisplay,
+			WTSClientProtocolType
+		}
+
+		[DllImport("Wtsapi32.dll")]
+		private static extern bool WTSQuerySessionInformation(System.IntPtr hServer, int sessionId, WTS_INFO_CLASS wtsInfoClass, out System.IntPtr ppBuffer, out uint pBytesReturned);
+
+		[DllImport("wtsapi32.dll", ExactSpelling = true, SetLastError = false)]
+		private static extern void WTSFreeMemory(IntPtr memory);
+	}
+}

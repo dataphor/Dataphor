@@ -1,0 +1,135 @@
+// Exists operator coverage
+
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Manipulation Language Coverage Script
+
+// Exists operator
+create table TestExists { ID : Integer, Parent_ID : Integer, key { ID } };
+
+if exists (TestExists) then
+	raise Error("Exists failed on retrieve");
+	
+if exists (TestExists over { ID }) then
+	raise Error("Exists failed on project");
+	
+if exists (TestExists where true) then
+	raise Error("Exists failed on restrict");
+	
+if exists (TestExists return 5 by { ID }) then
+	raise Error("Exists failed on quota");
+	
+if exists (TestExists add { 1 Data }) then
+	raise Error("Exists failed on add");
+	
+if exists (TestExists explode by Parent_ID = parent ID where Parent_ID = 1) then
+	raise Error("Exists failed on explode");
+	
+if exists (TestExists adorn { ID tags { Test = "Test" } }) then
+	raise Error("Exists failed on adorn");
+	
+if exists (TestExists redefine { ID := 1 }) then
+	raise Error("Exists failed on redefine");
+	
+if exists (TestExists rename { ID ID }) then
+	raise Error("Exists failed on rename");
+	
+if exists (TestExists union TestExists) then
+	raise Error("Exists failed on union");
+	
+if exists (TestExists intersect TestExists) then
+	raise Error("Exists failed on intersect");
+	
+if exists ((TestExists rename A) times (TestExists rename B)) then
+	raise Error("Exists failed on times");
+	
+if exists ((TestExists rename A) join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on join");
+	
+if exists ((TestExists rename A) left join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on left join");
+	
+if exists ((TestExists rename A) right join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on right join");
+	
+insert table { row { 1 ID, 0 Parent_ID } } into TestExists;
+	
+if not exists (TestExists) then
+	raise Error("Exists failed on retrieve");
+	
+if not exists (TestExists over { ID }) then
+	raise Error("Exists failed on project");
+	
+if not exists (TestExists where true) then
+	raise Error("Exists failed on restrict");
+	
+if not exists (TestExists return 5 by { ID }) then
+	raise Error("Exists failed on quota");
+	
+if not exists (TestExists add { 1 Data }) then
+	raise Error("Exists failed on add");
+	
+if not exists (TestExists explode by Parent_ID = parent ID where Parent_ID = 0) then
+	raise Error("Exists failed on explode");
+	
+if not exists (TestExists adorn { ID tags { Test = "Test" } }) then
+	raise Error("Exists failed on adorn");
+	
+if not exists (TestExists redefine { ID := 1 }) then
+	raise Error("Exists failed on redefine");
+	
+if not exists (TestExists rename { ID ID }) then
+	raise Error("Exists failed on rename");
+	
+if not exists (TestExists union TestExists) then
+	raise Error("Exists failed on union");
+	
+if not exists ((TestExists where false) union TestExists) then
+	raise Error("Exists failed on union");
+	
+if not exists (TestExists union (TestExists where false)) then
+	raise Error("Exists failed on union");
+	
+if not exists (TestExists intersect TestExists) then
+	raise Error("Exists failed on intersect");
+	
+if not exists ((TestExists rename A) times (TestExists rename B)) then
+	raise Error("Exists failed on times");
+	
+if exists (((TestExists rename A) where false) times (TestExists rename B)) then
+	raise Error("Exists failed on times, left side empty");
+	
+if exists ((TestExists rename A) times ((TestExists rename B) where false)) then
+	raise Error("Exists failed on times, right side empty");
+	
+if not exists ((TestExists rename A) join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on join");
+	
+if exists (((TestExists rename A) where false) join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on join, left side empty");
+	
+if exists ((TestExists rename A) join ((TestExists rename B) where false) by A.ID = B.ID) then
+	raise Error("Exists failed on join, right side empty");
+	
+if not exists ((TestExists rename A) left join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on left join");
+	
+if exists (((TestExists rename A) where false) left join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on left join, left side empty");
+	
+if not exists ((TestExists rename A) left join ((TestExists rename B) where false) by A.ID = B.ID) then
+	raise Error("Exists failed on left join, right side empty");
+	
+if not exists ((TestExists rename A) right join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on right join");
+	
+if not exists (((TestExists rename A) where false) right join (TestExists rename B) by A.ID = B.ID) then
+	raise Error("Exists failed on right join, left side empty");
+	
+if exists ((TestExists rename A) right join ((TestExists rename B) where false) by A.ID = B.ID) then
+	raise Error("Exists failed on right join, right side empty");
+	
+drop table TestExists;
+

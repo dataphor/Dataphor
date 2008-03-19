@@ -1,0 +1,86 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+if not exists ( Country ) then
+	Country := table { row { "US" Code, "United States" Name } };
+	
+//*
+if not exists ( OrganizationPhoneType ) then	
+	OrganizationPhoneType :=
+		table
+		{
+			row { "PRI" ID, "Primary" Description },
+			row { "CST", "Customer Support" },
+			row { "TSP", "Technical Support" },
+			row { "COR", "Corporate Number" },
+			row { "FAX", "Fax" }
+		};
+
+//*
+if not exists ( PersonPhoneType ) then
+	PersonPhoneType :=
+		table
+		{
+			row { "HOM" ID, "Home Phone" Description },
+			row { "OFF", "Office Phone" },
+			row { "MOB", "Mobile Phone" },
+			row { "PAG", "Pager" },
+			row { "FAX", "Fax Machine" },
+			row { "DAT", "Modem Line" }
+		};
+
+//*
+if not exists ( Role ) then
+	Role :=
+		table
+		{
+			row { "CXO" ID, "Chief of Something" Description },
+			row { "CEO", "Chief Executive Officer" },
+			row { "CIO", "Chief Information Officer" },
+			row { "CFO", "Chief Financial Officer" },
+			row { "COO", "Chief Operations Officer" },
+			row { "DIR", "Director" },
+			row { "MGX", "Executive Manager" },
+			row { "GMG", "Group Manager" },
+			row { "MGR", "Manager" },
+			row { "IT", "Information Technology Staff" },
+			row { "ACC", "Accountant" },
+			row { "CLE", "Financial Clerk" },
+			row { "SEC", "Secretary/Receptionist" },
+			row { "PJM", "Project Manager" },
+			row { "DEV", "Developer" },
+			row { "TEL", "Teller" },
+			row { "ARC", "Architect" },
+			row { "DES", "Designer" },
+			row { "SAL", "Sales Person" },
+			row { "ACM", "Account Manager" },
+			row { "SMG", "Store Manager" },
+			row { "CON", "Consultant" }
+		};
+
+//*
+if not exists ( Department ) then
+	Department :=
+		table
+		{
+			row { "SAL" ID, "Sales" Description },
+			row { "MRK", "Marketing" },
+			row { "ADM", "Administration" },
+			row { "HR", "Human Resources" },
+			row { "SHP", "Shipping" },
+			row { "REC", "Receiving" },
+			row { "ACC", "Accounting" },
+			row { "JAN", "Janitorial" },
+			row { "PUR", "Purchasing" },
+			row { "IT", "Information Technology" },
+			row { "ANY", "Anylitics" },
+			row { "CUS", "Customer Service" },
+			row { "ENG", "Engineering" },
+			row { "MFG", "Manufacturing" },
+			row { "SEC", "Security" },
+			row { "OPS", "Operations" },
+			row { "DEV", "Software Development" }
+		};

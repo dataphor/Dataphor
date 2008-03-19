@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+   <column bop:name="RootEditColumn">
+      <column bop:name="Element1">
+         <numerictextbox bop:name="MainColumnMain.ID" nilifblank="True" />
+         <textbox bop:name="MainColumnMain.Name" title="Customized Name" />
+         <textbox bop:name="MainColumnMain.Phone" title="Customized Phone" />
+         <textbox bop:name="MainColumnMain.Address" title="Customized Address" />
+         <textbox bop:name="MainColumnMain.City" title="Customized City" />
+         <textbox bop:name="MainColumnMain.State" title="Customized State" />
+         <textbox bop:name="MainColumnMain.Zip" title="Customized Zip" />
+      </column>
+   </column>
+</interface>

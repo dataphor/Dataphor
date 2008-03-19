@@ -1,0 +1,119 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+// ****************************************
+// Operators that create tables dynamically
+// ****************************************
+
+
+// create a table from a list of strings
+// drop operator CreateListTable(list(String));
+create operator CreateListTable(ATypes : list(String), ASuffix : String, AIsNullable : Boolean)
+begin
+	var LNullAdorn : String := " static tags { Storage.IsNullable = ""true"" } ";
+	var LIndex : Integer := 0;
+	var LString : String := " { ";
+	var LBeginning : String := "create table List";
+	while LIndex < ATypes.Count() do
+	begin
+		LBeginning := LBeginning + ATypes[LIndex];
+		LString := LString + ATypes[LIndex] + (LIndex + 1).ToString() + " : " + ATypes[LIndex];
+		if AIsNullable then 
+			LString := LString + LNullAdorn + ", "
+		else
+			LString := LString + ", ";
+		LIndex := LIndex + 1;
+	end;
+	LString := LString + "*";
+	LString := LString.Replace(", *", "");
+	Execute(LBeginning + "TestTable" + ASuffix + " " + LString + " };");
+end;
+create operator CreateListTable(ATypes : list(String), AIsNullable : Boolean, ASuffix : String)
+begin
+	CreateListTable(ATypes, ASuffix, AIsNullable);
+end;
+create operator CreateListTable(ATypes : list(String), AIsNullable : Boolean)
+begin
+	CreateListTable(ATypes, "", AIsNullable);
+end;
+create operator CreateListTable(ATypes : list(String), ASuffix : String)
+begin
+	CreateListTable(ATypes, ASuffix, false);
+end;
+create operator CreateListTable(ATypes : list(String))
+begin
+	CreateListTable(ATypes, "", false);
+end;
+
+
+// drop said table
+// drop operator DropListTable(list(String));
+create operator DropListTable(ATypes : list(String), ASuffix : String)
+begin
+	var LIndex : Integer := 0;
+	var LString : String := "drop table List";
+	while LIndex < ATypes.Count() do
+	begin
+		LString := LString + ATypes[LIndex];
+		LIndex := LIndex + 1;
+	end;
+	Execute(LString + "TestTable" + ASuffix + ";");
+end;
+create operator DropListTable(ATypes : list(String), ASuffix : String, AIsNullable : Boolean)
+begin
+	DropListTable(ATypes, ASuffix);
+end;
+create operator DropListTable(ATypes : list(String), AIsNullable : Boolean, ASuffix : String)
+begin
+	DropListTable(ATypes, ASuffix);
+end;
+create operator DropListTable(ATypes : list(String), AIsNullable : Boolean)
+begin
+	DropListTable(ATypes, "");
+end;
+create operator DropListTable(ATypes : list(String))
+begin
+	DropListTable(ATypes, "");
+end;
+
+
+// Deprecated:
+
+// this creates a table that has three of the specified type
+// both the data type will be "executed" so should be stored as necessary
+// drop operator CreateTripleTable(String);
+create operator CreateTripleTable(AType : String)
+begin
+	var LString : String := "create table ";
+	LString := LString + "Triple" + AType + "TestTable ";
+	LString := LString + "{ " + AType + "1 : " + AType + ", " + AType + "2 : " + AType + ", " + AType + "3 : " + AType + " };";
+	Execute(LString);
+end;
+
+// drop operator CreateTripleNullTable(String);
+create operator CreateTripleNullTable(AType : String)
+begin
+	var LString : String := "create table ";
+	var LNullAdorn : String := " { nil } ";
+	LString := LString + "TripleNull" + AType + "TestTable ";
+	LString := LString + "{ " + AType + "1 : " + AType + LNullAdorn + ", " + AType + "2 : " + AType + LNullAdorn + ", " + AType + "3 : " + AType + LNullAdorn + "};";
+	//raise Error(LString);
+	Execute(LString);
+end;
+
+// this has the same "signature" as CreateDoubleTable because it is taken from a string. The last two operands aren't used.
+// drop operator DropTripleTable(String);
+create operator DropTripleTable(AType : String)
+begin
+	Execute("drop table Triple" + AType + "TestTable;");
+
+end;
+
+create operator DropTripleNullTable(AType : String)
+begin
+	Execute("drop table TripleNull" + AType + "TestTable;");
+
+end;

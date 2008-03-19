@@ -1,0 +1,30 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Constraints
+
+create table TestTable5 { ID : Integer, order {ID} };
+
+create table TestTable6 { ID : Integer, Name : String, key {ID} };
+
+create view TestView4 TestTable6
+	// reference
+	{
+		reference TestReference { ID } references TestTable5 { ID }
+	};
+
+	// create constraint
+	create constraint TestRootConstraint
+		1 = 1;
+	// alter constraint
+	alter constraint TestRootConstraint
+		not exists ( (TestTable6 rename t) join (TestView4 rename v) by t.ID = v.ID );		
+	// drop constraint
+	drop constraint TestRootConstraint;
+	
+drop view TestView4;
+drop table TestTable6;
+drop table TestTable5;

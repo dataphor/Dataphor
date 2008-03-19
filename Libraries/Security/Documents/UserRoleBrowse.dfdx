@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.UserRole', 'Browse', 'Main.ID', 'Main.User_ID', true)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" useapplicationtransactions="False" />
+   <showformaction bop:name="Add" document="Derive('Security.UserRole', 'Add', 'Main.ID', 'Main.User_ID', true)" />
+   <showformaction bop:name="Edit" document="Derive('Security.UserRole', 'Edit', 'Main.ID', 'Main.User_ID', true)" />
+   <showformaction bop:name="Delete" document="Derive('Security.UserRole', 'Delete', 'Main.ID', 'Main.User_ID', false)" />
+   <showformaction bop:name="View" document="Derive('Security.UserRole', 'View', 'Main.ID', 'Main.User_ID', false)" />
+</interface>
+</document>
+</dilx>

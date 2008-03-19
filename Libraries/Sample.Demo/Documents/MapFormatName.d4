@@ -1,0 +1,40 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+SQLExecute
+(	"Main",
+	"
+		if exists (select * from sysobjects where id = Object_ID('FormatName'))
+			drop function FormatName
+	"
+);
+
+SQLExecute
+(
+	"Main",
+	"
+		create function FormatName(@FirstName varchar(8000), @MiddleName varchar(8000), @LastName varchar(8000))
+		returns varchar(8000)
+		begin
+			declare @Name varchar(8000)
+			if @LastName = '' or @FirstName = ''
+				set @Name = @LastName + @FirstName
+			else
+				set @Name = @LastName + ', ' + @FirstName
+		
+			if @Name = '' or @MiddleName = ''
+				set @Name = @Name + @MiddleName
+			else
+				set @Name = @Name + ' ' + @MiddleName
+			return @Name
+		end
+	"
+);
+
+alter device Main
+{
+	create operator FormatName(String, String, String) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.FormatName" }
+};

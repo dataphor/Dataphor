@@ -1,0 +1,393 @@
+/*
+	TSQL Implementation Script for the Shipping Sample Application
+*/
+
+/*
+	Degree Selector - Returns the decimal representation of a Degree given Degrees, Minutes and Seconds.
+	D4 Signature: Degree(const integer, const integer, const decimal) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree')
+	drop function Shipping_Degree
+go
+	
+create function Shipping_Degree(@Degrees int, @Minutes int, @Seconds decimal(28, 8)) returns decimal(28, 8)
+begin
+	return @Degrees + (@Minutes / 60.0) + (@Seconds / 3600.0)
+end
+go
+
+/*
+	Degree DegreesPart Read Accessor - Gets the Degrees property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.ReadDegreesPart(const Degree) : integer
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_ReadDegreesPart')
+	drop function Shipping_Degree_ReadDegreesPart
+go
+	
+create function Shipping_Degree_ReadDegreesPart(@Degree decimal(28, 8)) returns int
+begin
+	return Round(@Degree, 0, 1)
+end
+go
+
+/*
+	Degree MinutesPart Read Accessor - Gets the Minutes property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.ReadMinutesPart(const Degree) : integer
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_ReadMinutesPart')
+	drop function Shipping_Degree_ReadMinutesPart
+go
+	
+create function Shipping_Degree_ReadMinutesPart(@Degree decimal(28, 8)) returns int
+begin
+	return Round((@Degree - Round(@Degree, 0, 1)) * 60, 0, 1)
+end
+go
+
+/*
+	Degree SecondsPart Read Accessor - Gets the Seconds property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.ReadSecondsPart(const Degree) : decimal
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_ReadSecondsPart')
+	drop function Shipping_Degree_ReadSecondsPart
+go
+	
+create function Shipping_Degree_ReadSecondsPart(@Degree decimal(28, 8)) returns decimal(28, 8)
+begin
+	return Round(((@Degree - Round(@Degree, 0, 1)) - (Round((@Degree - Round(@Degree, 0, 1)) * 60, 0, 1) / 60.0)) * 3600, 2)
+end
+go
+
+/*
+	Degree DegreesPart Write Accessor - Sets the Degrees property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.WriteDegreesPart(const Degree, const integer) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_WriteDegreesPart')
+	drop function Shipping_Degree_WriteDegreesPart
+go
+	
+create function Shipping_Degree_WriteDegreesPart(@Degree decimal(28, 8), @Value integer) returns decimal(28, 8)
+begin
+	return @Value + (@Degree - Round(@Degree, 0, 1))
+end
+go
+
+/*
+	Degree MinutesPart Write Accessor - Sets the Minutes property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.WriteMinutesPart(const Degree, const integer) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_WriteMinutesPart')
+	drop function Shipping_Degree_WriteMinutesPart
+go
+	
+create function Shipping_Degree_WriteMinutesPart(@Degree decimal(28, 8), @Value integer) returns decimal(28, 8)
+begin
+	return Round(@Degree, 0, 1) + (@Value / 60.0) + (dbo.Shipping_Degree_ReadSecondsPart(@Degree) / 3600.0)
+end
+go
+
+/*
+	Degree SecondsPart Write Accessor - Sets the Seconds property of the Degree representation of the Degree data type.
+	D4 Signature: Degree.WriteSecondsPart(const Degree, const decimal) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Degree_WriteSecondsPart')
+	drop function Shipping_Degree_WriteSecondsPart
+go
+	
+create function Shipping_Degree_WriteSecondsPart(@Degree decimal(28, 8), @Value decimal(28, 8)) returns decimal(28, 8)
+begin
+	return Round(@Degree, 0, 1) + (dbo.Shipping_Degree_ReadMinutesPart(@Degree) / 60.0) + (@Value / 3600.0)
+end
+go
+
+/*
+	Coordinate Selector - Returns the string representation of the given Coordinate (Lat/Long)
+	D4 Signature: Coordinate(const Degree, const Degree) : Coordinate
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate')
+	drop function Shipping_Coordinate
+go
+	
+create function Shipping_Coordinate(@Latitude decimal(28, 8), @Longitude decimal(28, 8)) returns varchar(40)
+begin
+	return Convert(varchar, @Latitude) + '/' + Convert(varchar, @Longitude)
+end
+go
+
+/*
+	Coordinate Latitude Read Accessor - Gets the Latitude property of the Coordinate
+	D4 Signature: Coordinate.ReadLatitude(const Coordinate) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate_ReadLatitude')
+	drop function Shipping_Coordinate_ReadLatitude
+go
+	
+create function Shipping_Coordinate_ReadLatitude(@Coordinate varchar(40)) returns decimal(28, 8)
+begin
+	declare @Index int
+	set @Index = CharIndex('/', @Coordinate)
+	return Convert(decimal(28, 8), Substring(@Coordinate, 0, @Index))
+end
+go
+
+/*
+	Coordinate Longitude Read Accessor - Gets the Longitude property of the Coordinate
+	D4 Signature: Coordinate.ReadLongitude(const Coordinate) : Degree
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate_ReadLongitude')
+	drop function Shipping_Coordinate_ReadLongitude
+go
+	
+create function Shipping_Coordinate_ReadLongitude(@Coordinate varchar(40)) returns decimal(28, 8)
+begin
+	declare @Index int
+	set @Index = CharIndex('/', @Coordinate)
+	return Convert(decimal(28, 8), Substring(@Coordinate, @Index + 1, Len(@Coordinate)))
+end
+go
+
+/*
+	Coordinate Latitude Write Accessor - Sets the Latitude property of the Coordinate
+	D4 Signature: Coordinate.WriteLatitude(const Coordinate, const Degree) : Coordinate
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate_WriteLatitude')
+	drop function Shipping_Coordinate_WriteLatitude
+go
+	
+create function Shipping_Coordinate_WriteLatitude(@Coordinate varchar(40), @Latitude decimal(28, 8)) returns varchar(40)
+begin
+	return dbo.Shipping_Coordinate(@Latitude, dbo.Shipping_Coordinate_ReadLongitude(@Coordinate))
+end
+go
+
+/*
+	Coordinate Longitude Write Accessor - Sets the Longitude property of the Coordinate
+	D4 Signature: Coordinate.WriteLongitude(const Coordinate, const Degree) : Coordinate
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate_WriteLongitude')
+	drop function Shipping_Coordinate_WriteLongitude
+go
+	
+create function Shipping_Coordinate_WriteLongitude(@Coordinate varchar(40), @Longitude decimal(28, 8)) returns varchar(40)
+begin
+	return dbo.Shipping_Coordinate(dbo.Shipping_Coordinate_ReadLatitude(@Coordinate), @Longitude)
+end
+go
+
+/*
+	D4 Signature: .iCompare(const Coordinate, const Coordinate) : integer
+*/
+if exists (select * from sysobjects where name = 'Shipping_Coordinate_Compare')
+	drop function Shipping_Coordinate_Compare
+go
+	
+create function Shipping_Coordinate_Compare(@Coordinate1 varchar(40), @Coordinate2 varchar(40)) returns int
+begin
+	declare
+		@Latitude1 decimal(28, 8),
+		@Latitude2 decimal(28, 8),
+		@Longitude1 decimal(28, 8),
+		@Longitude2 decimal(28, 8),
+		@Result integer
+		
+	select
+		@Latitude1 = dbo.Shipping_Coordinate_ReadLatitude(@Coordinate1),
+		@Latitude2 = dbo.Shipping_Coordinate_ReadLatitude(@Coordinate2),
+		@Longitude1 = dbo.Shipping_Coordinate_ReadLongitude(@Coordinate1),
+		@Longitude2 = dbo.Shipping_Coordinate_ReadLongitude(@Coordinate2)
+		
+	if (@Latitude1 = @Latitude2)
+		if (@Longitude1 = @Longitude2)
+			set @Result = 0
+		else if (@Longitude1 < @Longitude2)
+			set @Result = -1
+		else
+			set @Result = 1
+	else if (@Latitude1 < @Latitude2)
+		set @Result = -1
+	else
+		set @Result = 1
+	return @Result
+end
+go
+
+/*
+	D4 Signature: Distance.Kilometers(const decimal) : Distance
+*/
+if exists (select * from sysobjects where name = 'Shipping_Distance_Kilometers')
+	drop function Shipping_Distance_Kilometers
+go
+	
+create function Shipping_Distance_Kilometers(@Value decimal(28, 8)) returns decimal(28, 8)
+begin
+	return @Value * 0.621
+end
+go
+
+/*
+	D4 Signature: Distance.ReadKilometers(const Distance) : decimal
+*/
+if exists (select * from sysobjects where name = 'Shipping_Distance_ReadKilometers')
+	drop function Shipping_Distance_ReadKilometers
+go
+	
+create function Shipping_Distance_ReadKilometers(@Distance decimal(28, 8)) returns decimal(28, 8)
+begin
+	 return @Distance * 1.609
+end
+go
+
+/*
+	D4 Signature: Distance.WriteKilometers(const Distance, const decimal) : Distance
+*/
+if exists (select * from sysobjects where name = 'Shipping_Distance_WriteKilometers')
+	drop function Shipping_Distance_WriteKilometers
+go
+	
+create function Shipping_Distance_WriteKilometers(@Distance decimal(28, 8), @Value decimal(28, 8)) returns decimal(28, 8)
+begin
+	return @Value * 0.621
+end
+go
+
+/*
+	D4 Signature: Distance(const Coordinate, const Coordinate) : Distance
+
+			decimal LDeltaLatitude = AToCoordinate.Latitude - AFromCoordinate.Latitude;
+			decimal LDeltaLongitude = AToCoordinate.Longitude - AFromCoordinate.Latitude;
+			decimal LDistance = (decimal)Math.Sqrt((double)(LDeltaLatitude * LDeltaLatitude + LDeltaLongitude * LDeltaLongitude));
+			return KMToMiles(LDistance / 0.008987m);
+*/
+if exists (select * from sysobjects where name = 'Shipping_Distance')
+	drop function Shipping_Distance
+go
+	
+create function Shipping_Distance(@Coordinate1 varchar(40), @Coordinate2 varchar(40)) returns decimal(28, 8)
+begin
+	declare 
+		@DeltaLatitude decimal(28, 8),
+		@DeltaLongitude decimal(28, 8),
+		@Distance decimal(28, 8)
+
+	set @DeltaLatitude = dbo.Shipping_Coordinate_ReadLatitude(@Coordinate2) - dbo.Shipping_Coordinate_ReadLatitude(@Coordinate1)
+	set @DeltaLongitude = dbo.Shipping_Coordinate_ReadLongitude(@Coordinate2) - dbo.Shipping_Coordinate_ReadLongitude(@Coordinate1)
+	set @Distance = Sqrt(@DeltaLatitude * @DeltaLatitude + @DeltaLongitude * @DeltaLongitude)
+	return (@Distance / 0.008987) * 0.621
+end
+go
+
+/*
+// SQL formulation of SupplyingVendors view:
+
+select 
+	Vendor_ID Vendor_ID, Location_ID Location_ID, ItemType_ID ItemType_ID, ToOrder ToOrder, Cost Cost, Shipping_Cost Shipping_Cost, Total_Cost Total_Cost
+	from (select 
+		Vendor_ID Vendor_ID, ItemType_ID ItemType_ID, Cost Cost, Primary_Address_Number Primary_Address_Number, 
+		ShippingRate ShippingRate, Source_Zip Source_Zip, Source_Location Source_Location, Location_ID Location_ID, 
+		ToOrder ToOrder, Target_Zip Target_Zip, Target_Location Target_Location, Shipping_Distance Shipping_Distance, 
+		Shipping_Cost Shipping_Cost, ((Cost * ToOrder) + Shipping_Cost) Total_Cost
+		from (select 
+			Vendor_ID Vendor_ID, ItemType_ID ItemType_ID, Cost Cost, Primary_Address_Number Primary_Address_Number, ShippingRate ShippingRate, 
+			Source_Zip Source_Zip, Source_Location Source_Location, Location_ID Location_ID, ToOrder ToOrder, Target_Zip Target_Zip, Target_Location Target_Location, 
+			Shipping_Distance Shipping_Distance, (ShippingRate * Shipping_Distance) Shipping_Cost
+			from (select 
+				T19.Vendor_ID Vendor_ID, T19.ItemType_ID ItemType_ID, T19.Cost Cost, T19.Primary_Address_Number Primary_Address_Number, T19.ShippingRate ShippingRate, 
+				T19.Source_Zip Source_Zip, T19.Source_Location Source_Location, T19.Location_ID Location_ID, T19.ToOrder ToOrder, T19.Target_Zip Target_Zip, 
+				T20.Target_Location Target_Location, dbo.Shipping_Distance(Source_Location, Target_Location) Shipping_Distance
+				from (select 
+					T16.Vendor_ID Vendor_ID, T16.ItemType_ID ItemType_ID, T16.Cost Cost, T16.Primary_Address_Number Primary_Address_Number, T16.ShippingRate ShippingRate, 
+					T16.Source_Zip Source_Zip, T16.Source_Location Source_Location, T16.Location_ID Location_ID, T16.ToOrder ToOrder, T17.Target_Zip Target_Zip
+					from (select 
+						T13.Vendor_ID Vendor_ID, T13.ItemType_ID ItemType_ID, T13.Cost Cost, T13.Primary_Address_Number Primary_Address_Number, 
+						T13.ShippingRate ShippingRate, T13.Source_Zip Source_Zip, T13.Source_Location Source_Location, T14.Location_ID Location_ID, T14.ToOrder ToOrder
+						from (select 
+							T8.Vendor_ID Vendor_ID, T8.ItemType_ID ItemType_ID, T8.Cost Cost, T8.Primary_Address_Number Primary_Address_Number, 
+							T8.ShippingRate ShippingRate, T8.Source_Zip Source_Zip, T9.Source_Location Source_Location
+							from (select 
+								T5.Vendor_ID Vendor_ID, T5.ItemType_ID ItemType_ID, T5.Cost Cost, T5.Primary_Address_Number Primary_Address_Number, 
+								T5.ShippingRate ShippingRate, T6.Source_Zip Source_Zip
+								from (select 
+									T2.Vendor_ID Vendor_ID, T2.ItemType_ID ItemType_ID, T2.Cost Cost, T3.Primary_Address_Number Primary_Address_Number, T3.ShippingRate ShippingRate
+									from (select 
+										Vendor_ID Vendor_ID, ItemType_ID ItemType_ID, Cost Cost
+										from Shipping_VendorItemType (fastfirstrow)) as T2
+										inner join (select 
+											Vendor_ID Vendor_ID, Primary_Address_Number Primary_Address_Number, ShippingRate ShippingRate
+											from (select 
+												Entity_ID Vendor_ID, Primary_Address_Number Primary_Address_Number, ShippingRate ShippingRate
+												from Shipping_Vendor (fastfirstrow)) as T1) as T3 on (T2.Vendor_ID = T3.Vendor_ID)) as T5
+									inner join (select 
+										Vendor_ID Vendor_ID, Primary_Address_Number Primary_Address_Number, Source_Zip Source_Zip
+										from (select 
+											Entity_ID Vendor_ID, Number Primary_Address_Number, Zip Source_Zip
+											from Shipping_EntityAddress (fastfirstrow)) as T4) as T6 on ((T5.Vendor_ID = T6.Vendor_ID) and (T5.Primary_Address_Number = T6.Primary_Address_Number))) as T8
+								inner join (select 
+									Source_Zip Source_Zip, Source_Location Source_Location
+									from (select 
+										Zip Source_Zip, Location Source_Location
+										from Shipping_ZipCode (fastfirstrow)) as T7) as T9 on (T8.Source_Zip = T9.Source_Zip)) as T13
+							inner join (select 
+								Location_ID Location_ID, ItemType_ID ItemType_ID, ToOrder ToOrder
+								from (select 
+									Location_ID Location_ID, ItemType_ID ItemType_ID, Par Par, OnHand OnHand, OnOrder OnOrder, OnPurchase OnPurchase, 
+									ProjectedOnHand ProjectedOnHand, RequiredOnHand RequiredOnHand, SuggestedOnHand SuggestedOnHand, (RequiredOnHand + SuggestedOnHand) ToOrder
+									from (select 
+										Location_ID Location_ID, ItemType_ID ItemType_ID, Par Par, OnHand OnHand, OnOrder OnOrder, OnPurchase OnPurchase, ProjectedOnHand ProjectedOnHand, 
+										case when (ProjectedOnHand < OnOrder) then (OnOrder - ProjectedOnHand) else @P1 end RequiredOnHand, 
+										case when (ProjectedOnHand < Par) then (Par - ProjectedOnHand) else @P2 end SuggestedOnHand
+										from (select 
+											Location_ID Location_ID, ItemType_ID ItemType_ID, Par Par, OnHand OnHand, OnOrder OnOrder, OnPurchase OnPurchase, 
+											(OnHand + OnPurchase) ProjectedOnHand
+											from Shipping_Item (fastfirstrow)) as T10) as T11) as T12
+								where (ToOrder > @P3)) as T14 on (T13.ItemType_ID = T14.ItemType_ID)) as T16
+						inner join (select 
+							Location_ID Location_ID, Target_Zip Target_Zip
+							from (select 
+								ID Location_ID, Zip Target_Zip
+								from Shipping_Location (fastfirstrow)) as T15) as T17 on (T16.Location_ID = T17.Location_ID)) as T19
+					inner join (select 
+						Target_Zip Target_Zip, Target_Location Target_Location
+						from (select 
+							Zip Target_Zip, Location Target_Location
+							from Shipping_ZipCode (fastfirstrow)) as T18) as T20 on (T19.Target_Zip = T20.Target_Zip)) as T21) as T22) as T23;
+
+
+select 
+	"T1"."Vendor_ID" as "Vendor_ID", "T5"."Location_ID" as "Location_ID", "T1"."ItemType_ID" as "ItemType_ID", (case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."OnOrder") then ("T5"."OnOrder" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P1 end + case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."Par") then ("T5"."Par" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P2 end) as "ToOrder", "T1"."Cost" as "Cost", ("T2"."ShippingRate" * dbo.Shipping_Distance("T4"."Location", "T7"."Location")) as "Shipping_Cost", (("T1"."Cost" * (case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."OnOrder") then ("T5"."OnOrder" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P1 end + case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."Par") then ("T5"."Par" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P2 end)) + ("T2"."ShippingRate" * dbo.Shipping_Distance("T4"."Location", "T7"."Location"))) as "Total_Cost"
+	from "Shipping_VendorItemType" as "T1" (fastfirstrow)
+		inner join "Shipping_Vendor" as "T2" (fastfirstrow) on ("T1"."Vendor_ID" = "T2"."Entity_ID")
+		inner join "Shipping_EntityAddress" as "T3" (fastfirstrow) on (("T1"."Vendor_ID" = "T3"."Entity_ID") and ("T2"."Primary_Address_Number" = "T3"."Number"))
+		inner join "Shipping_ZipCode" as "T4" (fastfirstrow) on ("T3"."Zip" = "T4"."Zip")
+		inner join "Shipping_Item" as "T5" (fastfirstrow) on ("T1"."ItemType_ID" = "T5"."ItemType_ID")
+		inner join "Shipping_Location" as "T6" (fastfirstrow) on ("T5"."Location_ID" = "T6"."ID")
+		inner join "Shipping_ZipCode" as "T7" (fastfirstrow) on ("T6"."Zip" = "T7"."Zip")
+	where ((case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."OnOrder") then ("T5"."OnOrder" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P1 end + case when (("T5"."OnHand" + "T5"."OnPurchase") < "T5"."Par") then ("T5"."Par" - ("T5"."OnHand" + "T5"."OnPurchase")) else @P2 end) > Convert(decimal(28, 8), @P3))
+order by "T1"."Vendor_ID" asc, "T1"."ItemType_ID" asc, "T5"."Location_ID" asc; 
+*/
+
+/*
+	drop commands for the shipping structures:
+	
+drop table System_Generators;
+drop table Shipping_BidItem;
+drop table Shipping_Customer;
+drop table Shipping_CustomerPicture;
+drop table Shipping_Entity;
+drop table Shipping_EntityAddress;
+drop table Shipping_EntityNotes;
+drop table Shipping_EntityPhone;
+drop table Shipping_Invoice;
+drop table Shipping_InvoiceItem;
+drop table Shipping_InvoiceItemNumbers;
+drop table Shipping_InvoiceStatus;
+drop table Shipping_Item;
+drop table Shipping_ItemType;
+drop table Shipping_Location;
+drop table Shipping_PhoneType;
+drop table Shipping_PurchaseOrder;
+drop table Shipping_SaleOrder;
+drop table Shipping_State;
+drop table Shipping_Vendor;
+drop table Shipping_VendorItemType;
+drop table Shipping_ZipCode;
+*/

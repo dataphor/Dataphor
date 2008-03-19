@@ -1,0 +1,36 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Test 
+{ 
+	Name : String, 
+	Description : String { default "" },
+	Version : VersionNumber { default VersionNumberUndefined() },
+	key { Name } 
+};
+
+create table TestStep
+{
+	Test_Name : String tags { Frontend.Title = "Test Name" },
+	Number : Integer,
+	Description : String,
+	key { Test_Name, Number },
+	reference TestStep_Test { Test_Name } references Test { Name } tags { Frontend.Detail.Title = "Steps", Frontend.Detail.Embedded = "true", Frontend.Lookup.Title = "Test" }
+};
+
+create table TestRequisite 
+{ 
+	Test_Name : String tags { Frontend.Title = "Test Name" }, 
+	Required_Test_Name : String tags { Frontend.Title = "Required Test Name" }, 
+	key { Test_Name, Required_Test_Name },
+	reference TestRequisite_Test { Test_Name } references Test { Name } tags { Frontend.Detail.Title = "Required Tests", Frontend.Detail.Embedded = "true", Frontend.Lookup.Title = "Requiring Test" },
+	reference TestRequisite_Required_Test { Required_Test_Name } references Test { Name } tags { Frontend.Detail.Title = "Requiring Tests", Frontend.Lookup.Title = "Required Test" }
+};
+
+
+drop table TestRequisite;
+drop table TestStep;
+drop table Test;
+

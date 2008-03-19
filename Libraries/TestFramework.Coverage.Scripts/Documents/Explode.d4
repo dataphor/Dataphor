@@ -1,0 +1,133 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Explode operator
+
+create table Node { ID : String, Name : String, key { ID } };
+create table Link { ID : String, Parent_ID : String, key { ID }, reference Link_Node { Parent_ID } references Node { ID } };
+
+insert 
+	table 
+	{ 
+		row { 'A' ID, 'A' Name }, 
+		row { 'A1', 'A1' }, 
+		row { 'A11', 'A11' },
+		row { 'A12', 'A12' },
+		row { 'A2', 'A2' },
+		row { 'A21', 'A21' },
+		row { 'B', 'B' },
+		row { 'B1', 'B1' },
+		row { 'B11', 'B11' },
+		row { 'B12', 'B12' },
+		row { 'B2', 'B2' },
+		row { 'B21', 'B21' }
+	}
+	into Node;
+	
+insert
+	table
+	{
+		row { 'A1' ID, 'A' Parent_ID },
+		row { 'A11', 'A1' },
+		row { 'A12', 'A1' },
+		row { 'A2', 'A' },
+		row { 'A21', 'A2' },
+		row { 'B1', 'B' },
+		row { 'B11', 'B1' },
+		row { 'B12', 'B1' },
+		row { 'B2', 'B' },
+		row { 'B21', 'B2' }
+	}
+	into Link;
+	
+create view LinkExplosion
+	Link rename L explode by Parent_ID = parent.L.ID where not exists (Link where ID = L.Parent_ID) include level;
+	
+TestNavigable('LinkExplosion', "table of { L.ID : System.String, L.Parent_ID : System.String, level : System.Integer, sequence : System.Integer }
+{
+	row{'A1' L.ID, 'A' L.Parent_ID, 1 level, 1 sequence}, 
+	row{'A11' L.ID, 'A1' L.Parent_ID, 2 level, 2 sequence}, 
+	row{'A12' L.ID, 'A1' L.Parent_ID, 2 level, 3 sequence}, 
+	row{'A2' L.ID, 'A' L.Parent_ID, 1 level, 4 sequence}, 
+	row{'A21' L.ID, 'A2' L.Parent_ID, 2 level, 5 sequence}, 
+	row{'B1' L.ID, 'B' L.Parent_ID, 1 level, 6 sequence}, 
+	row{'B11' L.ID, 'B1' L.Parent_ID, 2 level, 7 sequence}, 
+	row{'B12' L.ID, 'B1' L.Parent_ID, 2 level, 8 sequence}, 
+	row{'B2' L.ID, 'B' L.Parent_ID, 1 level, 9 sequence}, 
+	row{'B21' L.ID, 'B2' L.Parent_ID, 2 level, 10 sequence}
+}
+");
+
+update LinkExplosion set { Parent_ID := 'B1' } where ID = 'A1';
+
+TestNavigable('LinkExplosion', "table of { L.ID : System.String, L.Parent_ID : System.String, level : System.Integer, sequence : System.Integer }
+{
+	row{'A2' L.ID, 'A' L.Parent_ID, 1 level, 1 sequence}, 
+	row{'A21' L.ID, 'A2' L.Parent_ID, 2 level, 2 sequence}, 
+	row{'B1' L.ID, 'B' L.Parent_ID, 1 level, 3 sequence}, 
+	row{'A1' L.ID, 'B1' L.Parent_ID, 2 level, 4 sequence}, 
+	row{'A11' L.ID, 'A1' L.Parent_ID, 3 level, 5 sequence}, 
+	row{'A12' L.ID, 'A1' L.Parent_ID, 3 level, 6 sequence}, 
+	row{'B11' L.ID, 'B1' L.Parent_ID, 2 level, 7 sequence}, 
+	row{'B12' L.ID, 'B1' L.Parent_ID, 2 level, 8 sequence}, 
+	row{'B2' L.ID, 'B' L.Parent_ID, 1 level, 9 sequence}, 
+	row{'B21' L.ID, 'B2' L.Parent_ID, 2 level, 10 sequence}
+} order by { sequence }
+");
+
+update LinkExplosion set { Parent_ID := 'A' } where ID = 'A1';
+
+TestNavigable('LinkExplosion', "table of { L.ID : System.String, L.Parent_ID : System.String, level : System.Integer, sequence : System.Integer }
+{
+	row{'A1' L.ID, 'A' L.Parent_ID, 1 level, 1 sequence}, 
+	row{'A11' L.ID, 'A1' L.Parent_ID, 2 level, 2 sequence}, 
+	row{'A12' L.ID, 'A1' L.Parent_ID, 2 level, 3 sequence}, 
+	row{'A2' L.ID, 'A' L.Parent_ID, 1 level, 4 sequence}, 
+	row{'A21' L.ID, 'A2' L.Parent_ID, 2 level, 5 sequence}, 
+	row{'B1' L.ID, 'B' L.Parent_ID, 1 level, 6 sequence}, 
+	row{'B11' L.ID, 'B1' L.Parent_ID, 2 level, 7 sequence}, 
+	row{'B12' L.ID, 'B1' L.Parent_ID, 2 level, 8 sequence}, 
+	row{'B2' L.ID, 'B' L.Parent_ID, 1 level, 9 sequence}, 
+	row{'B21' L.ID, 'B2' L.Parent_ID, 2 level, 10 sequence}
+} order by { sequence }
+");
+
+delete LinkExplosion where ID = 'B2';
+
+TestNavigable('LinkExplosion', "table of { L.ID : System.String, L.Parent_ID : System.String, level : System.Integer, sequence : System.Integer }
+{
+	row{'A1' L.ID, 'A' L.Parent_ID, 1 level, 1 sequence}, 
+	row{'A11' L.ID, 'A1' L.Parent_ID, 2 level, 2 sequence}, 
+	row{'A12' L.ID, 'A1' L.Parent_ID, 2 level, 3 sequence}, 
+	row{'A2' L.ID, 'A' L.Parent_ID, 1 level, 4 sequence}, 
+	row{'A21' L.ID, 'A2' L.Parent_ID, 2 level, 5 sequence}, 
+	row{'B1' L.ID, 'B' L.Parent_ID, 1 level, 6 sequence}, 
+	row{'B11' L.ID, 'B1' L.Parent_ID, 2 level, 7 sequence}, 
+	row{'B12' L.ID, 'B1' L.Parent_ID, 2 level, 8 sequence}, 
+	row{'B21' L.ID, 'B2' L.Parent_ID, 1 level, 9 sequence}
+} order by { sequence }
+");
+
+insert table { row { 'B2' L.ID, 'B' L.Parent_ID } } into LinkExplosion;
+
+TestNavigable('LinkExplosion', "table of { L.ID : System.String, L.Parent_ID : System.String, level : System.Integer, sequence : System.Integer }
+{
+	row{'A1' L.ID, 'A' L.Parent_ID, 1 level, 1 sequence}, 
+	row{'A11' L.ID, 'A1' L.Parent_ID, 2 level, 2 sequence}, 
+	row{'A12' L.ID, 'A1' L.Parent_ID, 2 level, 3 sequence}, 
+	row{'A2' L.ID, 'A' L.Parent_ID, 1 level, 4 sequence}, 
+	row{'A21' L.ID, 'A2' L.Parent_ID, 2 level, 5 sequence}, 
+	row{'B1' L.ID, 'B' L.Parent_ID, 1 level, 6 sequence}, 
+	row{'B11' L.ID, 'B1' L.Parent_ID, 2 level, 7 sequence}, 
+	row{'B12' L.ID, 'B1' L.Parent_ID, 2 level, 8 sequence}, 
+	row{'B2' L.ID, 'B' L.Parent_ID, 1 level, 9 sequence}, 
+	row{'B21' L.ID, 'B2' L.Parent_ID, 2 level, 10 sequence}
+} order by { sequence }
+");
+
+drop view LinkExplosion;
+drop table Link;
+drop table Node;
+

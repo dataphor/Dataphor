@@ -1,0 +1,45 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Account
+{
+	ID : Integer { default GetNextGenerator("Account.ID") }
+		tags { Frontend.Width = "8", Frontend.Add.Visible = "false" },
+	Name : StrLth50
+		tags { Frontend.Width = "20", Frontend.Preview.Include = "true" },
+	Phone : String,
+	Address : StrLth50
+		tags { Frontend.Group = "Address", Frontend.Title = "Line 1" },
+	Address2 : StrLth50
+		{ nil }
+		tags { Frontend.Group = "Address", Frontend.Title = "Line 2" },
+	City : StrLth50
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State : String
+		tags
+		{
+		 Frontend.Group = "Address",
+		 Frontend.FlowBreak = "true",
+		 Frontend.Width = "5"
+		},
+	Zip : String tags { Frontend.Group = "Address", Frontend.Width = "10" },
+	JoinedOn : Date { default Date() },
+	Balance : Money { default $0 } tags { Frontend.Width = "12" },
+	key{ID}
+};
+
+Account := table 
+{
+	row
+	{
+		"Bryan" Name,
+		"Harvest Cove" Address,
+		"Provo" City,
+		"UT" State,
+		"84601" Zip,
+		"555-4444" Phone,
+		$132 Balance
+	}
+};

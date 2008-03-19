@@ -1,0 +1,12 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+insert 
+	publishers 
+		rename { pub_name Name } 
+		add { city + ', ' + state + '  ' + country Notes, GetNextID('Contact.ID') ID }
+		over { ID, Name, Notes }
+	into
+		Organization join Contact;

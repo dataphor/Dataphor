@@ -1,0 +1,52 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Guid Operators
+begin
+  var LGuid1: Guid, LGuid2: Guid;
+  
+  LGuid1 := Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}");
+  if LGuid1 <> Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}") then
+    raise Error("Guid assignment from literal failed");
+    
+  LGuid2 := LGuid1;
+  if LGuid2 <> Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}") then
+    raise Error("Guid assignment from variable failed");
+    
+  LGuid1 := NewGuid();
+  if LGuid2 <> Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}") then
+    raise Error("Guid assignment is not by value");
+    
+  LGuid1 := Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}");
+  LGuid2 := Guid("{F90A83CA-78A5-46a0-8D0C-D1BD76020CCE}");
+  if LGuid1 > LGuid2 then
+    raise Error("Guid greater than failed");
+    
+  if LGuid1 >= LGuid2 then
+    raise Error("Guid inclusive greater than failed, arguments unequal");
+    
+  if LGuid2 < LGuid1 then
+    raise Error("Guid less than failed");
+    
+  if LGuid2 <= LGuid1 then
+    raise Error("Guid inclusive less than failed, arguments unequal");
+     
+  LGuid2 := Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}");
+  if not(LGuid1 >= LGuid2) then
+    raise Error("Guid inclusive greater than failed, arguments equal");
+
+  if not(LGuid1 <= LGuid2) then
+    raise Error("Guid inclusive less than failed, arguments equal");
+    
+  if (LGuid1 ?= LGuid2) <> 0 then
+    raise Error("Guid compare failed, arguments equal");
+
+  if Upper(ToString(LGuid1)) <> "4E939481-8B71-441B-BF31-EDEA97F114C7" then
+    raise Error("GuidToString failed");
+    
+  if ToGuid("{4E939481-8B71-441b-BF31-EDEA97F114C7}") <> Guid("{4E939481-8B71-441b-BF31-EDEA97F114C7}") then
+	raise Error("StringToGuid failed");
+end;
+

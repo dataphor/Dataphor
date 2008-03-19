@@ -1,0 +1,219 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// References
+create table TestTable2 { ID : Integer };
+
+create table TestTable5 { ID : Integer, order {ID} };
+
+create table TestTable6 { ID : Integer, Name : String, key {ID} };
+
+create view TestView4 TestTable6
+	// reference
+	{
+		reference TestReference { ID } references TestTable5 { ID }
+	};
+
+	// create reference
+	create reference TestRootReference
+		TestTable2 {ID} references TestView4 {ID};
+	// alter reference
+	alter reference TestRootReference;	
+	// drop reference
+	drop reference TestRootReference;
+	
+drop view TestView4;
+drop table TestTable6;
+drop table TestTable5;
+drop table TestTable2;
+
+create type ID like Integer { special Unknown -1 };
+
+create table TestType { ID : ID { constraint NotUnknown not(IsUnknown(value)) }, Description : String, key { ID } };
+create table Test { ID : ID, Type_ID : ID, key { ID } };
+create reference Test_TestType Test { Type_ID } references TestType { ID } static tags { DAE.IsDeferred = "false" };
+
+// verify that an invalid row is rejected
+begin
+	var LErrorHit : Boolean := false;
+	try
+		insert table { row { 1 ID, 1 Type_ID } } into Test;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error("Invalid row reference allowed.");
+end;
+
+insert table { row { 1 ID, '1' Description } } into TestType;
+insert table { row { 1 ID, 1 Type_ID } } into Test;
+
+// verify that an invalid update is prevented
+begin
+	var LErrorHit : Boolean := false;
+	try
+		update Test set { Type_ID := 2 } where ID = 1;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error("Invalid row update allowed.");
+end;
+
+// verify that a row with a special is allowed
+insert table { row { 2 ID, -1 Type_ID } } into Test;
+
+// verify that an update to a referenced row is not allowed
+begin
+	var LErrorHit : Boolean := false;
+	try
+		update TestType set { ID := 2 } where ID = 1;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error("Invalid reference target update allowed.");
+end;
+
+// verify that a delete to a referenced row is not allowed
+begin
+	var LErrorHit : Boolean := false;
+	try
+		delete TestType where ID = 1;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error("Invalid reference target delete allowed.");
+end;
+
+drop reference Test_TestType;
+
+delete Test;
+delete TestType;
+
+create reference Test_TestType Test { Type_ID } references TestType { ID } update cascade delete cascade;
+
+insert table { row { 1 ID, '1' Description } } into TestType;
+insert table { row { 1 ID, 1 Type_ID } } into Test;
+
+// verify that an update to the target table is cascaded
+update TestType set { ID := 2 } where ID = 1;
+
+if exists (Test where Type_ID = 1) then
+	raise Error("Update cascade failed.");
+	
+// verify that a delete to the target table is cascaded
+delete TestType where ID = 2;
+
+if exists (Test where Type_ID = 2) then
+	raise Error("Delete cascade failed.");
+
+drop reference Test_TestType;
+
+delete Test;
+delete TestType;
+
+create reference Test_TestType Test { Type_ID } references TestType { ID } update clear delete clear;
+
+insert table { row { 1 ID, '1' Description } } into TestType;
+insert table { row { 1 ID, 1 Type_ID } } into Test;
+
+// verify that an update to the target table clears the referencing row
+update TestType set { ID := 2 } where ID = 1;
+
+if not IsUnknown(Type_ID from row from (Test where ID = 1)) then
+	raise Error("Update clear failed.");
+	
+update Test set { Type_ID := 2 } where ID = 1;
+
+// verify that a delete to the target table clears the referencing row
+delete TestType where ID = 2;
+
+if not IsUnknown(Type_ID from row from (Test where ID = 1)) then
+	raise Error("Delete clear failed.");
+
+drop reference Test_TestType;
+
+delete Test;
+delete TestType;
+
+create reference Test_TestType Test { Type_ID } references TestType { ID } update set { IDUnknown() } delete set { IDUnknown() };
+
+insert table { row { 1 ID, '1' Description } } into TestType;
+insert table { row { 1 ID, 1 Type_ID } } into Test;
+
+// verify that an update to the target table clears the referencing row
+update TestType set { ID := 2 } where ID = 1;
+
+if not IsUnknown(Type_ID from row from (Test where ID = 1)) then
+	raise Error("Update clear failed.");
+
+update Test set { Type_ID := 2 } where ID = 1;
+
+// verify that a delete to the target table clears the referencing row
+delete TestType where ID = 2;
+
+if not IsUnknown(Type_ID from row from (Test where ID = 1)) then
+	raise Error("Delete clear failed.");
+
+drop reference Test_TestType;
+
+drop table Test;
+drop table TestType;
+
+drop type ID;
+
+// Must be able to drop a table with source references attached
+create table Test { ID : Integer };
+create table TestTest { Test_ID : Integer, reference TestTest_Test { Test_ID } references Test { ID } };
+drop table TestTest;
+drop table Test;
+
+// verify that set can be used to clear the value of a column
+create table TestType { ID : Integer, Description : String, key { ID } };
+create table Test { ID : Integer, Type_ID : Integer nil, key { ID } };
+create reference Test_TestType Test { Type_ID } references TestType { ID } update set { nil } delete set { nil };
+
+insert row { 1 ID, '1' Description } into TestType;
+insert row { 1 ID, 1 Type_ID } into Test;
+
+update TestType set { ID := 2 } where ID = 1;
+
+if not(Test[1].Type_ID.IsNil()) then
+	raise Error('Update set nil failed');
+	
+update Test set { Type_ID := 2 } where ID = 1;
+
+delete TestType where ID = 2;
+
+if not(Test[1].Type_ID.IsNil()) then
+	raise Error('Delete set nil failed');
+
+drop table Test;
+drop table TestType;
+
+create table TestType { ID : Integer, Description : String, key { ID } };
+create table Test { ID : Integer, Type_ID : Integer nil, key { ID } };
+create reference Test_TestType Test { Type_ID } references TestType { ID } update clear delete clear;
+
+insert row { 1 ID, '1' Description } into TestType;
+insert row { 1 ID, 1 Type_ID } into Test;
+
+update TestType set { ID := 2 } where ID = 1;
+
+if not(Test[1].Type_ID.IsNil()) then
+	raise Error('Update clear failed');
+	
+update Test set { Type_ID := 2 } where ID = 1;
+
+delete TestType where ID = 2;
+
+if not(Test[1].Type_ID.IsNil()) then
+	raise Error('Delete clear failed');
+
+drop table Test;
+drop table TestType;

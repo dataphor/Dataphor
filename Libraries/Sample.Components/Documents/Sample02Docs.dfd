@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample is designed to show many of the whys help can be incorporated into your application.&#xD;&#xA;&#xD;&#xA;It also introduces the following components.&#xD;&#xA;&#xD;&#xA;   Menu&#xD;&#xA;   Exposed&#xD;&#xA;   HelpAction&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of these components is provided in the other notebook tabs." width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="General" bop:name="GeneralPage">
+        <row bop:name="GeneralRow">
+          <statictext text="There are two types of help that can be implemented on forms.&#xD;&#xA;&#xD;&#xA;1.  Help can be provided for a specific control by using the HelpKeyword, HelpKeywordBehavior, and HelpString properties of the control. This help is displayed by bringing the control into focus and pressing F1.&#xD;&#xA;&#xD;&#xA;2.  Help about a subject can be displayed using the HelpAction. A control, e.g. menu, exposed, or trigger, can then be used to execute the HelpAction.&#xD;&#xA;&#xD;&#xA;Note that the Help button in this sample has context sensitive help and also executes a help action.&#xD;&#xA;" width="50" margintop="10" bop:name="GeneralText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Menu" bop:name="MenuPage">
+        <row bop:name="MenuRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Menu&quot;)" bop:name="MenuImage" />
+          <statictext text="The Menu node is used to create a menu hierarchy on the form.&#xD;&#xA;&#xD;&#xA;The Menu items may contain menus as children. If the menu item is a parent, (has child menus), then the menu action will be to display a sub-menu and click events will not execute an associated action. If the Text of the menu is &quot;-&quot; and this menu is not a parent menu then the menu will act as a menu item group separator (and there will be no way to execute the associated action).&#xD;&#xA;&#xD;&#xA;In this sample the HelpMenu menu is a parent. When it is clicked a sub-menu list will be displayed. The two Menu items in the sub-menu will each display the respective text when clicked. " width="50" margintop="10" bop:name="MenuText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Exposed" bop:name="ExposedPage">
+        <row bop:name="ExposedRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Exposed&quot;)" bop:name="ExposedImage" />
+          <statictext text="The BlockAction allows several action can be chained together in a specified order.&#xD;&#xA;&#xD;&#xA;In this sample, the trigger executes FindVehicleBlockAction which causes SetFindActionValueProperty to execute then FindVehicleAction to execute." width="50" margintop="10" bop:name="ExposedText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="HelpAction" bop:name="HelpActionPage">
+        <row bop:name="HelpActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="HelpActionImage" />
+          <statictext text="The HelpAction element is used to display help about a topic or activity unrelated to a specific element on the form.&#xD;&#xA;&#xD;&#xA;In this sample four HelpAction nodes exist, one for each control that executes an action: The Sample Two Help menu, the About menu, the Help exposed on the toolbar, and the Help button (trigger). Each of these action executes the corresponding HelpAction.&#xD;&#xA;" width="50" margintop="10" bop:name="HelpActionText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

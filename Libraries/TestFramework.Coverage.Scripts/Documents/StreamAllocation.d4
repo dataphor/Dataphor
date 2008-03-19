@@ -1,0 +1,36 @@
+// Stream Allocation Coverage
+// © Copyright 2000-2008 Alphora
+// This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+TestStreamCount(Load('Coverage', 'CursorLibrary'));
+
+select StreamCount();
+Execute(Load('Coverage', 'Cursors'));
+select StreamCount();
+
+select StreamCount();
+begin
+var LRow : row { ID : Integer } := row { 0 ID };
+var LID : Integer := ID from LRow;
+end;
+select StreamCount();
+
+select StreamCount();
+Execute(Load('Coverage', 'CursorLibrary'));
+select StreamCount();
+
+select Documents where Library_Name = 'Coverage' where Type_ID = 'd4';
+
+begin
+	var LRow : typeof(row from Documents);
+	var LCursor : cursor(typeof(Documents)) := cursor(Documents where Library_Name = 'Coverage' where Type_ID = 'd4');
+	try
+		while LCursor.Next() do
+		begin
+			LRow := LCursor.Select();
+			TestStreamCount(Load(Library_Name from LRow, Name from LRow));
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;

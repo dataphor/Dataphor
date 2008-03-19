@@ -1,0 +1,245 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Invoice Processed -> 
+//		if IsPurchase
+//			Add Quantity to OnPurchase for each ItemType
+//		else
+//			Add Quantity to OnOrder for each ItemType
+//
+// Invoice Completed ->
+//		if IsPurchase
+//			Subtract Quantity from OnPurchase for each ItemType
+//			Add Quantity to OnHand for each ItemType
+//		else
+//			Subtract Quantity from OnOrder for each ItemType
+//			Subtract Quantity from OnHand for each ItemType
+
+// A sales order cannot be completed if OnHand < Quantity for each ItemType
+
+//* Operator: UpdateInventory
+create operator UpdateInventory
+(
+	const ALocationID : LocationID, 
+	const AItemTypeID : ItemTypeID, 
+	const ADeltaOnHand : Decimal, 
+	const ADeltaOnPurchase : Decimal, 
+	const ADeltaOnOrder : Decimal
+)
+begin
+	if exists (LocationItem where Location_ID = ALocationID and ItemType_ID = AItemTypeID) then
+	begin
+		update LocationItem
+			set
+			{
+				OnHand := OnHand + ADeltaOnHand,
+				OnPurchase := OnPurchase + ADeltaOnPurchase,
+				OnOrder := OnOrder + ADeltaOnOrder
+			}
+			where Location_ID = ALocationID
+				and ItemType_ID = AItemTypeID;
+	end
+	else
+	begin
+		insert
+			table
+			{
+				row
+				{
+					ALocationID Location_ID,
+					AItemTypeID ItemType_ID,
+					ADeltaOnHand OnHand,
+					ADeltaOnPurchase OnPurchase,
+					ADeltaOnOrder OnOrder
+				}
+			}
+			into LocationItem;
+	end;
+end;
+
+//* Operator: UpdateInvoice
+create operator UpdateInvoice
+(
+	const AOldRow : typeof(Invoice[]),
+	const ANewRow : typeof(Invoice[])
+)
+begin
+	if AOldRow.Status_ID <> ANewRow.Status_ID then
+	begin
+		var LRow : typeof(InvoiceItem[]);
+		var LIsPurchase := exists (PurchaseOrder where ID = ANewRow.ID);
+		var LIsComplete := ANewRow.Status_ID = "COM";
+		
+		var LQuantity : Decimal;
+		var LCursor := cursor(InvoiceItem where Invoice_ID = ANewRow.ID);
+		try
+			while LCursor.Next() do
+			begin
+				LRow := LCursor.Select();
+				LQuantity := LRow.Quantity;
+				
+				if LIsComplete then
+				begin
+					if LIsPurchase then
+						// if this is a purchase order, add LQuantity to OnHand, and subtract it from OnPurchase
+						UpdateInventory(ANewRow.Location_ID, LRow.ItemType_ID, LQuantity, -LQuantity, 0)
+					else
+						// if this is a sales order, subtract LQuantity from OnHand, and subtract it from OnOrder
+						UpdateInventory(ANewRow.Location_ID, LRow.ItemType_ID, -LQuantity, 0, -LQuantity);
+				end
+				else
+				begin
+					if LIsPurchase then
+						// If this is a purchase order, add LQuantity to OnPurchase
+						UpdateInventory(ANewRow.Location_ID, LRow.ItemType_ID, 0, LQuantity, 0)
+					else
+						// If this is a sales order, add LQuantity to OnOrder
+						UpdateInventory(ANewRow.Location_ID, LRow.ItemType_ID, 0, 0, LQuantity);
+				end;
+			end;
+		finally
+			LCursor.Close();
+		end;
+	end;
+end;
+attach operator UpdateInvoice to Invoice on after update;
+
+//* Operator: ProcessInvoice	
+create operator ProcessInvoice(const AInvoiceID : InvoiceID)
+begin
+	update Invoice set { Status_ID := "PRO" } where ID = AInvoiceID;
+end;
+grant usage on ProcessInvoice(InvoiceID) to role InventoryClerk;
+
+//* Operator: CompleteInvoice
+create operator CompleteInvoice(const AInvoiceID : InvoiceID)
+begin
+	update Invoice set { Status_ID := "COM" } where ID = AInvoiceID;
+end;
+grant usage on CompleteInvoice(InvoiceID) to role InventoryClerk;
+
+//* Table: BidItem
+create table BidItem
+{
+	Location_ID : LocationID,
+	ItemType_ID : ItemTypeID,
+	Vendor_ID : ContactID,
+	Quantity : Decimal,
+	key { Location_ID, ItemType_ID }
+}
+	tags { Frontend.UseApplicationTransactions = "false" };
+grant usage on BidItem to role InventoryClerk;
+	
+create reference BidItem_SupplyingVendors 
+	BidItem { Location_ID, ItemType_ID, Vendor_ID } 
+	references SupplyingVendors { Location_ID, ItemType_ID, Vendor_ID };
+
+//* Operator: CreateBidItems
+create operator CreateBidItems(const ALocationID : LocationID)
+begin
+	delete BidItem where Location_ID = ALocationID;
+	insert
+		LocationItemsToOrder
+			where Location_ID = ALocationID
+			rename { Location_ID ToOrder_Location_ID, ItemType_ID ToOrder_ItemType_ID }
+			where exists (VendorItemType where ItemType_ID = ToOrder_ItemType_ID)
+			add 
+			{ 
+				(
+					SupplyingVendors 
+						where Location_ID = ToOrder_Location_ID and ItemType_ID = ToOrder_ItemType_ID 
+						return 1 by { Total_Cost desc, Vendor_ID }
+				)[].Vendor_ID Vendor_ID 
+			}
+			join (Vendor rename { ID Vendor_ID } over { Vendor_ID, ShippingRate })
+			rename { ToOrder_Location_ID Location_ID, ToOrder_ItemType_ID ItemType_ID }
+			join VendorItemType
+			over { Location_ID, ItemType_ID, Vendor_ID, ToOrder }
+			rename { ToOrder Quantity }
+		into BidItem;
+end;
+grant usage on CreateBidItems(LocationID) to role InventoryClerk;
+
+//* View: Bids
+create view Bids
+	BidItem over { Location_ID, Vendor_ID };
+grant { Select } on Bids to role InventoryClerk;
+
+//* Operator: CreatePurchaseOrder
+SafeDrop('CreatePurchaseOrder(LocationID, ContactID)');
+create operator CreatePurchaseOrder(const ALocationID : LocationID, const AVendorID : ContactID)
+begin
+	var LInvoiceID := InvoiceID(GetNextGenerator("Shipping.Invoice.ID"));
+	try
+		// insert the invoice
+		insert table { row { LInvoiceID ID, ALocationID Location_ID } } into Invoice;
+		
+		// insert the purchase order
+		insert table { row { LInvoiceID ID, AVendorID Vendor_ID } } into PurchaseOrder;
+		
+		// insert the invoice items
+		insert
+			(BidItem join VendorItemType)
+				where Location_ID = ALocationID
+					and Vendor_ID = AVendorID
+				over { ItemType_ID, Quantity, Cost }
+				rename { Cost Amount }
+				add
+				{
+					LInvoiceID Invoice_ID,
+					GetNextInvoiceItemNumber(LInvoiceID) Number
+				}
+			into InvoiceItem;
+	commit;
+	
+	ProcessInvoice(LInvoiceID);
+end;
+grant usage on CreatePurchaseOrder(LocationID, ContactID) to role InventoryClerk;
+
+//* Operator: CreatePurchaseOrders
+SafeDrop('CreatePurchaseOrders(LocationID)');
+create operator CreatePurchaseOrders(const ALocationID : LocationID)
+begin
+	var LInvoices := cursor(Bids where Location_ID = ALocationID over { Vendor_ID });
+	try
+		while (LInvoices.Next()) do
+			CreatePurchaseOrder(ALocationID, LInvoices.Select().Vendor_ID);
+	finally
+		LInvoices.Close();
+	end;
+	delete BidItem where Location_ID = ALocationID;
+end;
+grant usage on CreatePurchaseOrders(LocationID) to role InventoryClerk;
+
+//* View: SaleOrdersToProcess
+SafeDrop('SaleOrdersToProcess');
+create view SaleOrdersToProcess
+	SaleOrderEntry
+		where Status_ID = "NEW";
+grant { Select } on SaleOrdersToProcess to role InventoryClerk;
+
+//* View: SaleOrdersToShip		
+create view SaleOrdersToShip
+	(Invoice where Status_ID = InvoiceStatusID("PRO"))
+		join SaleOrder
+		where not exists
+		(	
+			InvoiceItem where Invoice_ID = ID
+				join (LocationItem rename { Location_ID Item_Location_ID } where Item_Location_ID = Location_ID)
+				where Quantity > OnHand
+		);
+grant { Select } on SaleOrdersToShip to role InventoryClerk;
+		
+//* View: PurchaseOrdersToProcess		
+create view PurchaseOrdersToProcess
+	(Invoice where Status_ID = InvoiceStatusID("NEW"))
+		join (PurchaseOrder);
+grant { Select } on PurchaseOrdersToProcess to role InventoryClerk;
+
+//* View: PurchaseOrdersToReceive
+create view PurchaseOrdersToReceive
+	(Invoice where Status_ID = InvoiceStatusID("PRO")) 
+		join (PurchaseOrder);
+grant { Select } on PurchaseOrdersToReceive to role InventoryClerk;

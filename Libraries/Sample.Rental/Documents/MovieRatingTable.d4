@@ -1,0 +1,23 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table MovieRating
+{
+ ID : String tags { Frontend.Width = "10" },
+ Description : StrLth50 tags { Frontend.Width = "30" },
+ Position: Integer tags { Frontend.Visible = "False" },
+ key { ID },
+ key { Position } tags { Frontend.IsDefault = "True" }
+};
+
+MovieRating := table
+{
+	row{"G" ID, "General Audiences" Description, 1 Position},
+	row{"PG", "Parental Guidance Suggested", 2},
+	row{"PG-13", "Parents Strongly Cautioned", 3},
+	row{"R", "Restricted", 4},
+	row{"NC-17", "No One 17 and Under Admitted", 5},
+	row{"NR", "No Rating", 6}
+};

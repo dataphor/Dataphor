@@ -1,0 +1,186 @@
+The following non terminals in the Lexer BNF are referenced by the D4 BNF with equivalent meaning:
+	<identifier>
+	<literal>
+	<string>
+
+The same conventions found in the The Third Manifesto are used here, namely:
+	<XYZ list> ::= {<XYZ>}
+	<XYZ commalist> ::= [<XYZ>{,<XYZ>}]
+	<ne XYZ list> ::= <XYZ>{<XYZ>}
+	<ne XYZ commalist> ::= <XYZ>{,<XYZ>}
+
+
+	<script> ::=
+		<statement>{; <statement>}[;]
+
+	<statement> ::=
+		<select statement> |
+		<insert statement> |
+		<update statement> |
+		<delete statement> |
+		<expression>
+
+	<select statement> ::=
+		<query expression>
+		<order by clause>
+
+	<order by clause> ::=
+		order by <order column expression commalist>
+
+	<order column expression> ::=
+		<column identifier> [asc | desc]
+
+	<column identifier> ::=
+		<qualified identifier>
+
+	<qualified identifier> ::=
+		[<identifier>.]<identifier>
+
+	<query expression> ::=
+		<select expression> [<binary table expression>]
+
+	<binary table expression> ::=
+		[union | intersect | minus] <select expression>
+
+	<select expression> ::=
+		select * | <column expression commalist>
+			<from clause>
+			[<where clause>]
+			[<group by clause>]
+			[<having clause>]
+
+	<column expression> ::=
+		<expression> [as <identifier>]
+
+	<from clause> ::=
+		from <table specifier> [<join clause list>]
+
+	<table specifier> ::=
+		(<table identifier> | "("<query expression>")") [as <table identifier>]
+
+	<table identifier> ::=
+		<identifier>
+
+	<join clause> ::=
+		[cross | inner | ((left | right) [outer])] join <table specifier> [on <expression>]
+
+	<where clause> ::=
+		where <expression>
+
+	<group by clause> ::=
+		group by <expression commalist>
+
+	<having clause> ::=
+		having <expression>
+
+	<insert statement> ::=
+		insert into <table identifier>"("<column identifier commalist>")"
+			(<values clause> | <query expression>)
+
+	<values clause> ::=
+		values"("<expression commalist>")"
+
+	<update statement> ::=
+		update <table identifier> 
+				set <update column expression commalist>
+			[<where clause>]
+
+	<update column expression> ::=
+		<identifier> = <expression>
+
+	<delete statement> ::=
+		delete <table identifier>
+			[<where clause>]
+
+	<expression> ::=
+              <logical and expression> <logical operator clause list>
+
+          <logical operator clause> ::=
+		<logical ternary clause> |
+		<logical binary clause>
+
+	<logical ternary clause> ::=
+		<logical ternary operator> <additive expression> and <additive expression>
+
+	<logical ternary operator> ::=
+		between
+
+          <logical binary clause> ::=
+		<logical binary operator> <logical and expression>
+
+          <logical binary operator> ::=
+              in | or | xor | like | matches
+
+          <logical and expression> ::= 
+              <bitwise binary expression> {<logical and operator> <bitwise binary expression>}
+
+          <logical and operator> ::=
+              and
+
+          <bitwise binary expression> ::= 
+              <comparison expression> {<bitwise binary operator> <comparison expression>}
+
+          <bitwise binary operator> ::=
+              ^ | & | "|" | "<<" | ">>"
+
+          <comparison expression> ::= 
+              <additive expression> {<comparison operator> <additive expression>}
+
+          <comparison operator> ::=
+              = | "<>" | "<" | ">" | "<=" | ">=" | ?=
+
+          <additive expression> ::= 
+              <multiplicative expression> {<additive operator> <multiplicative expression>}
+
+          <additive operator> ::=
+              + | -
+
+          <multiplicative expression> ::= 
+              <exponent expression> {<multiplicative operator> <exponent expression>}
+
+          <multiplicative operator> ::=
+              * | / | %
+
+          <exponent expression> ::= 
+              <unary expression> {<exponent operator> <unary expression>}
+
+          <exponent operator> ::=
+              **
+
+	<unary expression> ::=
+		{<unary operator>} <indexer expression>
+
+	<unary operator> ::=
+		+ | - | ~ | not | exists
+
+
+	<indexer expression> ::=
+		<qualified factor>["["<expression>"]"]
+
+	<qualified factor> ::=
+		[.]{<factor>.}<factor>
+
+          <factor> ::= 
+              "("<expression>")" |
+              "("<query expression>")" |
+              <literal> |
+              <identifier> |
+              <identifier>"("<actual parameter commalist>")" |
+              <identifier>"("[distinct] <expression>")" |
+              <case expression>
+
+	<actual parameter> ::=
+		[var] <expression>
+
+          <case expression> ::=
+              case [<expression>]
+                  <ne case item expression commalist>
+                  else <expression>
+              end
+
+          <case item expression> ::=
+              when <expression> then <expression>
+
+          <qualified identifier> ::=
+              [.]{<identifier>.}<identifier>
+

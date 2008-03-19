@@ -1,0 +1,4 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="RentalDevice" assembliesasstring="" librariesasstring="" settings="" name="Sample.Rental" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="System" version="*" />
+    <libraries.libraryreference name="Frontend" version="*" />
+</library>

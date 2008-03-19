@@ -1,0 +1,232 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Library coverage
+
+begin
+	var LErrorHit : Boolean := false;
+	try
+		// Cannot modify system library
+		SetLibraryDescriptor('System', LibraryDescriptor('System', VersionNumber(1), "", {FileReference("Alphora.Dataphor.DAE.dll", true)}, list(LibraryReference){}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("System library modification allowed.");
+		
+	LErrorHit := false;
+	try
+		RenameLibrary('System', 'Test');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("System library rename allowed.");
+	
+	LErrorHit := false;
+	try
+		// Cannot rename general library
+		SetLibraryDescriptor('General', LibraryDescriptor('System', VersionNumber(1), "", list(FileReference){}, {LibraryReference("System", VersionNumber(1))}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("General library rename through SetLibraryDescriptor allowed.");
+		
+	LErrorHit := false;
+	try
+		RenameLibrary('General', 'Test');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("General library rename allowed.");
+		
+	LErrorHit := false;
+	try
+		UnregisterLibrary('System');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("System library unregister allowed.");
+		
+	LErrorHit := false;
+	try
+		DropLibrary('System');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("System library drop allowed.");
+		
+	LErrorHit := false;
+	try
+		UnregisterLibrary('General');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("General library unregister allowed.");
+		
+	LErrorHit := false;
+	try
+		DropLibrary('General');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("General library drop allowed.");
+end;
+
+CreateLibrary(LibraryDescriptor("Test", VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}));
+if not exists (Libraries where Name = 'Test') then
+	raise Error("CreateLibrary failed.");
+	
+if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(1, 0), "TestDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(-1))}) then
+	raise Error('GetLibraryDescriptor failed.');
+	
+SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(2))}));
+if GetLibraryDescriptor('Test') <> LibraryDescriptor('Test', VersionNumber(2, 0), "TestingDevice", list(FileReference){}, {LibraryReference('System', VersionNumber(2))}) then
+	raise Error("SetLibraryDescriptor failed.");
+	
+if (GetDefaultDeviceName("Test") <> "TestingDevice") then
+	raise Error("GetDefaultDeviceName for library failed.");
+	
+SetDefaultDeviceName("Test", "TestDevice");
+if (GetDefaultDeviceName("Test") <> "TestDevice") then
+	raise Error("SetDefaultDeviceName for library failed.");
+	
+RenameLibrary('Test', 'NewTest');
+if exists (Libraries where Name = 'Test') then
+	raise Error('RenameLibrary failed.');
+
+if not exists (Libraries where Name = 'NewTest') then
+	raise Error('RenameLibrary failed.');
+	
+begin
+	var LLibraryDescriptor : LibraryDescriptor := GetLibraryDescriptor('NewTest');
+	LLibraryDescriptor.Name := 'Test';
+	SetLibraryDescriptor('NewTest', LLibraryDescriptor);
+	if exists (Libraries where Name = 'NewTest') then
+		raise Error("Rename through SetLibraryDescriptor failed.");
+		
+	if not exists (Libraries where Name = 'Test') then
+		raise Error("Rename through SetLibraryDescriptor failed.");
+end;
+
+RegisterLibrary('Test');
+if not exists (LoadedLibraries where Name = 'Test') then
+	raise Error("RegisterLibrary failed.");
+	
+UnregisterLibrary('Test');
+if exists (LoadedLibraries where Name = 'Test') then
+	raise Error("UnregisterLibrary failed.");
+
+CreateLibrary(LibraryDescriptor("TestDependent", VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(3))}));
+
+if (GetDefaultDeviceName("TestDependent") <> "TestDevice") then
+	raise Error("Default device from required libraries failed.");
+
+begin
+	var LErrorHit : Boolean := false;
+	try
+		RegisterLibrary('TestDependent');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Version mismatch allowed.");
+end;
+
+SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+
+RegisterLibrary('TestDependent');
+
+if not exists (LoadedLibraries where Name = 'Test') then
+	raise Error("Required library registration failed.");
+	
+if (GetDefaultDeviceName() <> "TestDevice") then
+	raise Error("GetDefaultDeviceName for current library failed.");
+	
+SetDefaultDeviceName("TestingDevice");
+if (GetDefaultDeviceName() <> "TestingDevice") then
+	raise Error("SetDefaultDeviceName for current library failed.");
+	
+SetLibrary("Test");
+if LibraryName() <> "Test" then
+	raise Error("SetLibrary failed.");
+	
+UnregisterLibrary("TestDependent");
+UnregisterLibrary("Test");
+
+if LibraryName() <> "General" then
+	raise Error("Unregistering current library does not set current library to general.");
+
+SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
+RegisterLibrary('TestDependent');
+
+SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+
+if not exists (LoadedLibraries where Name = 'Test') then
+	raise Error("Adding requisite to registered library does not register required library.");
+	
+begin
+	var LErrorHit : Boolean := false;
+	try
+		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(1), "", list(FileReference){}, list(LibraryReference){}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Requisite removal from registered library allowed.");
+
+	LErrorHit := false;
+	try
+		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependencies', VersionNumber(1), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Registered library rename allowed.");
+
+	LErrorHit := false;
+	try
+		SetLibraryDescriptor('TestDependent', LibraryDescriptor('TestDependent', VersionNumber(2), "", list(FileReference){}, {LibraryReference('Test', VersionNumber(2))}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Registered library version change allowed.");
+
+	LErrorHit := false;
+	try
+		DropLibrary('TestDependent');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Registered library drop allowed.");
+		
+	LErrorHit := false;
+	try
+		SetLibraryDescriptor('Test', LibraryDescriptor('Test', VersionNumber(2, 0), "", list(FileReference){}, {LibraryReference('System', VersionNumber(1)), LibraryReference('TestDependent', VersionNumber(-1))}));
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error("Circular library reference allowed.");
+end;
+
+UnregisterLibrary('TestDependent');
+UnregisterLibrary('Test');
+
+DropLibrary("TestDependent");
+DropLibrary("Test");
+
+if exists (Libraries where Name in {'Test', 'TestDependent'}) then
+	raise Error("DropLibrary failed.");
+
+// TODO: Test assemblies	

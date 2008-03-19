@@ -1,0 +1,7 @@
+System.Data.Odbc.OdbcException: ERROR [HY000] [SYBASE][ODBC Sybase driver][SQL Server]Access to sysgams is disallowed.
+
+   at System.Data.Odbc.OdbcConnection.HandleError(HandleRef hrHandle, SQL_HANDLE hType, RETCODE retcode)
+   at System.Data.Odbc.OdbcCommand.ExecuteReaderObject(CommandBehavior behavior, String method)
+   at System.Data.Odbc.OdbcCommand.ExecuteReader(CommandBehavior behavior)
+   at System.Data.Odbc.OdbcCommand.ExecuteReader()
+   at SYBASE_sys_test.Class1.Main(String[] args) in d:\databas\dataphor_test\sybase_sys_test\class1.cs:line 80

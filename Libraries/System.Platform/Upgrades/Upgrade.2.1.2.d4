@@ -1,0 +1,11 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+drop operator PlatformExecute(String, String, String);
+
+create operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean }) : row { ExitCode : Integer, Output : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+create operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean }, const AStartAs : row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) : row { ExitCode : Integer, Output : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+grant usage on PlatformExecute(String, String, row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean }) to role PlatformUser;
+grant usage on PlatformExecute(String, String, row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean }, row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) to role PlatformUser;

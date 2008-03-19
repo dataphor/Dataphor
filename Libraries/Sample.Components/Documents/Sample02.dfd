@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample02">
+  <menu text="Help" bop:name="HelpMenu">
+    <menu action="Sample02HelpAction" text="Sample02 help" bop:name="Sample02HelpMenuItem" />
+    <menu action="AboutHelpAction" text="About Sample02" bop:name="AboutMenuItem" />
+  </menu>
+  <exposed action="ToolBarHelpAction" text="help" bop:name="ToolBarExposed" />
+  <helpaction helpstring="Help about an individual control can be obtained by bringing the control into focus, then pressing F1.&#xD;&#xA;This help is controled by the HelpKeyword, HelpKeywordBehavior, and HelpString properties of the control.&#xD;&#xA;Try it on the Help trigger button. Press tab until the button is in focus, then press F1.&#xD;&#xA;&#xD;&#xA;Help that is obtained from the HelpAction is displayed when the action is executed.&#xD;&#xA;This can be done from any node capable of executing an action.&#xD;&#xA;In this sample the Menu, Exposed, and Trigger controls are all attached to HelpAction nodes.&#xD;&#xA;Try it by pressing the Help trigger button.&#xD;&#xA;&#xD;&#xA;This text is stored in the HelpString property of Sample02HelpAction." text="Help Numbrer 1" image="Image('Frontend','Help');" bop:name="Sample02HelpAction" />
+  <helpaction helpstring="                          Dataphor Sample02&#xD;&#xA;                                Help Sample&#xD;&#xA;&#xD;&#xA;This text is stored in the AboutHelpAction HelpString property." text="Help Number 2" bop:name="AboutHelpAction" />
+  <helpaction helpstring="You asked for help by pressing the Exposed control on the Toolbar.&#xD;&#xA;The ToolbarHelpAction HelpAction was executed.&#xD;&#xA;This text is stored in the ToolbarHelpAction HelpString property.&#xD;&#xA;&#xD;&#xA;The Exposed control is one way to execute an action from the user interface with one click." text="Help Number 3" image="Image('Frontend','Help');" bop:name="ToolBarHelpAction" />
+  <helpaction helpstring="Pressing the Help trigger button executed the TriggerHelpAction. This text stored in the HelpString property of that action is displayed by the HelpAction." text="Help" bop:name="TriggerHelpAction" />
+  <row bop:name="RootRow">
+    <group title="Sample02" bop:name="SampleGroup">
+      <column bop:name="SampleColumn">
+        <trigger verticalalignment="Middle" action="TriggerHelpAction" hint="Press F1 or click the button." helpstring="Pressing F1 while the Help trigger button has the focus displays help about the trigger.  This text is in the HelpString property of the HelpTrigger." marginright="20" margintop="10" marginbottom="50" bop:name="HelpTrigger" />
+        <textbox title="Click in this textbox then press F1" hint="Hint for the text box." helpkeyword="TextBox" helpstring="This is a text box for displaying and modifying data ." bop:name="TextBox1" />
+      </column>
+    </group>
+    <frame document="Form('Sample.Components','Sample02Docs');" bop:name="Frame1" />
+  </row>
+</interface>

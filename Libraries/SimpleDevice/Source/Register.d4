@@ -1,0 +1,24 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator SaveTable(const ADeviceName : System.Name, const ATableName : System.Name)
+	class "SimpleDevice.SaveTableNode" static tags { DAE.IsRemotable = "false" };
+grant usage on SaveTable(Name, Name) to role User;
+	
+create operator LoadTable(const ADeviceName : System.Name, const ATableName : System.Name)
+	class "SimpleDevice.LoadTableNode" static tags { DAE.IsRemotable = "false" };
+grant usage on LoadTable(Name, Name) to role User;
+
+create operator TruncateTable(const ADeviceName : System.Name, const ATableName : System.Name)
+	class "SimpleDevice.TruncateTableNode" static tags { DAE.IsRemotable = "false" };
+grant usage on TruncateTable(Name, Name) to role User;
+
+create operator BeginUpdate(const ADeviceName : System.Name, const ATableName : System.Name)
+	class "SimpleDevice.BeginUpdateNode" static tags { DAE.IsRemotable = "false" };
+grant usage on BeginUpdate(Name, Name) to role User;
+
+create operator EndUpdate(const ADeviceName : System.Name, const ATableName : System.Name)
+	class "SimpleDevice.EndUpdateNode" static tags { DAE.IsRemotable = "false" };
+grant usage on EndUpdate(Name, Name) to role User;

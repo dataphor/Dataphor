@@ -1,0 +1,121 @@
+/*
+SQLDevice Registration Script
+ © Copyright 2000-2008 Alphora
+ This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+create type SQLText
+{
+	representation SQLText { Value : String }
+};
+
+//create operator iCompare(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Integer class "System.StringCompareNode" static tags { DAE.IsBuiltin = "true" };
+//create operator iEqual(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringEqualNode" static tags { DAE.IsBuiltin = "true" };
+create operator iNotEqual(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringNotEqualNode" static tags { DAE.IsBuiltin = "true" };
+create operator iLess(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringLessNode" static tags { DAE.IsBuiltin = "true" };
+create operator iGreater(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringGreaterNode" static tags { DAE.IsBuiltin = "true" };
+create operator iInclusiveLess(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringInclusiveLessNode" static tags { DAE.IsBuiltin = "true" };
+create operator iInclusiveGreater(const ALeftValue : SQLText, const ARightValue : SQLText) : System.Boolean class "System.StringInclusiveGreaterNode" static tags { DAE.IsBuiltin = "true" };
+create operator iLike(const AString : SQLText, const APattern : String) : Boolean class "System.StringLikeNode" static tags { DAE.IsBuiltin = "true" };
+create operator iIndexer(const AString : SQLText, const AIndex : Integer) : String class "System.StringIndexerNode" static tags { DAE.IsBuiltin = "true" };
+create operator Length(const AString : SQLText) : Integer class "System.StringLengthNode";
+create operator SubString(const AString : SQLText, const AStartIndex : Integer, const ALength : Integer) : String class "System.StringSubStringNode";
+create operator SubString(const AString : SQLText, const AStartIndex : Integer) : String class "System.StringSubStringNode";
+create operator Pos(const ASubString : String, const AString : SQLText) : Integer class "System.StringPosNode";
+create operator IndexOf(const AString : SQLText, const ASubString : String) : Integer class "System.StringIndexOfNode";
+
+create conversion String to SQLText using SQLText widening;
+create conversion SQLText to String using SQLText.ReadValue narrowing;
+
+/*
+create type SQLIText
+{
+	representation SQLIText { Value : IString }
+};
+
+//create operator iCompare(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Integer class "System.IStringCompareNode" static tags { DAE.IsBuiltin = "true" };
+//create operator iEqual(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringEqualNode" static tags { DAE.IsBuiltin = "true" };
+create operator iNotEqual(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringNotEqualNode" static tags { DAE.IsBuiltin = "true" };
+create operator iLess(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringLessNode" static tags { DAE.IsBuiltin = "true" };
+create operator iGreater(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringGreaterNode" static tags { DAE.IsBuiltin = "true" };
+create operator iInclusiveLess(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringInclusiveLessNode" static tags { DAE.IsBuiltin = "true" };
+create operator iInclusiveGreater(const ALeftValue : SQLIText, const ARightValue : SQLIText) : System.Boolean class "System.IStringInclusiveGreaterNode" static tags { DAE.IsBuiltin = "true" };	
+
+create conversion IString to SQLIText using SQLIText widening;
+create conversion SQLIText to IString using SQLIText.ReadValue narrowing;
+*/
+
+create operator D4ToSQL(const AQuery : System.String) : System.String class "SQLDevice.D4ToSQLNode" static tags { DAE.IsRemotable = "false" };
+create operator D4ToSQL(const ADeviceName : System.Name, const AQuery : System.String) : System.String class "SQLDevice.D4ToSQLNode" static tags { DAE.IsRemotable = "false" };
+create operator SQLExecute(const AStatement : System.String) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLExecute(const AStatement : System.String, const AInValues : row) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLExecute(const AStatement : System.String, const AInValues : row, var AOutValues : row) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLExecute(const ADeviceName : System.Name, const AStatement : System.String) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLExecute(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator SQLExecute(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row) class "SQLDevice.SQLExecuteNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator AvailableTables() : table class "SQLDevice.AvailableTablesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "false" };
+create operator AvailableTables(const ADeviceName : Name) : table class "SQLDevice.AvailableTablesNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator AvailableReferences() : table class "SQLDevice.AvailableReferencesNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator AvailableReferences(const ADeviceName : Name) : table class "SQLDevice.AvailableReferencesNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator DeviceReconciliationScript(const ADeviceName : Name) : System.String class "SQLDevice.DeviceReconciliationScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator DeviceReconciliationScript(const ADeviceName : Name, const ATableName : Name) : System.String class "SQLDevice.DeviceReconciliationScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator DeviceReconciliationScript(const ADeviceName : Name, const AOptions : list(String)) : System.String class "SQLDevice.DeviceReconciliationScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+create operator DeviceReconciliationScript(const ADeviceName : Name, const ATableName : Name, const AOptions : list(String)) : System.String class "SQLDevice.DeviceReconciliationScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false" };
+
+// ADeviceName, AStatement, AKeyInfo, and ATableType must be literals (evaluable at compile-time)
+create operator SQLQuery(const AStatement : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+
+grant usage on SQLText to role User;
+grant usage on iEqual(SQLText, SQLText) to role User;
+grant usage on iNotEqual(SQLText, SQLText) to role User;
+grant usage on iLess(SQLText, SQLText) to role User;
+grant usage on iInclusiveLess(SQLText, SQLText) to role User;
+grant usage on iInclusiveGreater(SQLText, SQLText) to role User;
+grant usage on iGreater(SQLText, SQLText) to role User;
+grant usage on iLike(SQLText, String) to role User;
+
+/*
+grant usage on SQLIText to role User;
+grant usage on iEqual(SQLIText, SQLIText) to role User;
+grant usage on iNotEqual(SQLIText, SQLIText) to role User;
+grant usage on iLess(SQLIText, SQLIText) to role User;
+grant usage on iInclusiveLess(SQLIText, SQLIText) to role User;
+grant usage on iInclusiveGreater(SQLIText, SQLIText) to role User;
+grant usage on iGreater(SQLIText, SQLIText) to role User;
+*/
+
+grant usage on D4ToSQL(String) to role User;
+grant usage on D4ToSQL(Name, String) to role User;
+grant usage on SQLExecute(String) to role User;
+grant usage on SQLExecute(String, row) to role User;
+grant usage on SQLExecute(String, row, var row) to role User;
+grant usage on SQLExecute(Name, String) to role User;
+grant usage on SQLExecute(Name, String, row) to role User;
+grant usage on SQLExecute(Name, String, row, var row) to role User;
+grant usage on SQLQuery(String) to role User;
+grant usage on SQLQuery(String, String) to role User;
+grant usage on SQLQuery(String, row) to role User;
+grant usage on SQLQuery(String, row, String) to role User;
+grant usage on SQLQuery(String, row, var row) to role User;
+grant usage on SQLQuery(String, row, var row, String) to role User;
+grant usage on SQLQuery(String, row, var row, String, String) to role User;
+grant usage on SQLQuery(Name, String) to role User;
+grant usage on SQLQuery(Name, String, String) to role User;
+grant usage on SQLQuery(Name, String, row) to role User;
+grant usage on SQLQuery(Name, String, row, String) to role User;
+grant usage on SQLQuery(Name, String, row, var row) to role User;
+grant usage on SQLQuery(Name, String, row, var row, String) to role User;
+grant usage on SQLQuery(Name, String, row, var row, String, String) to role User;

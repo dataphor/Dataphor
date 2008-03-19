@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="CFrameDefaultMenuText">
+		<value>Frame</value>
+	</data>
+	<data name="CDefaultNotebookPageTitle">
+		<value>No Title</value>
+	</data>
+	<data name="CAdvancedButton">
+		<value>&amp;Advanced &gt;&gt;</value>
+	</data>
+	<data name="CBasicButton">
+		<value>&amp;Basic &lt;&lt;</value>
+	</data>
+	<data name="CConfirmAliasDeleteText">
+		<value>Are you sure you wish to delete this Server Alias?</value>
+	</data>
+	<data name="CConfirmAliasDeleteCaption">
+		<value>Delete Server Alias</value>
+	</data>
+	<data name="EnterToContinue">
+		<value>[Enter] to Continue</value>
+	</data>
+	<data name="CtrlTabToContinue">
+		<value>[Ctrl-Tab] to Continue</value>
+	</data>
+	<data name="EnterToDefault">
+		<value>[Enter] to {0}</value>
+	</data>
+	<data name="F9ToDefault">
+		<value>[F9] to {0}</value>
+	</data>
+	<data name="AcceptButtonText">
+		<value>A&amp;ccept</value>
+	</data>
+	<data name="RejectButtonText">
+		<value>&amp;Reject</value>
+	</data>
+	<data name="CloseButtonText">
+		<value>&amp;Close</value>
+	</data>
+	<data name="AcceptMenuText">
+		<value>&amp;Accept</value>
+	</data>
+	<data name="RejectMenuText">
+		<value>&amp;Reject</value>
+	</data>
+	<data name="CloseMenuText">
+		<value>&amp;Close</value>
+	</data>
+	<data name="Close">
+		<value>Close</value>
+	</data>
+	<data name="CMoreDetails">
+		<value>&amp;Details &gt;&gt;</value>
+	</data>
+	<data name="CLessDetails">
+		<value>&lt;&lt; &amp;Details</value>
+	</data>
+	<data name="ExceptionTitle">
+		<value>Error</value>
+	</data>
+</root>

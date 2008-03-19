@@ -1,0 +1,6 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.0.0" defaultdevicename="Forums" issuspect="False" suspectreason="" assembliesasstring="" librariesasstring="" name="Sample.Forum" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="ADOConnection" version="*" />
+    <libraries.libraryreference name="Frontend" version="*" />
+    <libraries.libraryreference name="MSSQLDevice" version="*" />
+    <libraries.libraryreference name="Security" version="*" />
+</library>

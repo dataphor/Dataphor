@@ -1,0 +1,262 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Sales Role
+//
+// Customer Maintenance
+// Customer Report
+// Sale Order Entry
+
+// Add Customer
+/*
+drop operator RunSales();
+drop operator EditCustomer();
+drop operator AddCustomer();
+*/
+create operator AddCustomer()
+begin
+	var LEntityID : EntityID;
+	try
+		LEntityID := EntityID(GetNextGenerator("Shipping.Entity.ID"));
+	commit;
+	var LPhoneTypeID : PhoneTypeID := PhoneTypeID("PAG"); //:= RandomPhoneType();
+//	var LStateID : StateID := RandomState();
+//	var LZipCode : Zip := RandomZipCode();
+	try
+		insert table { row { LEntityID ID, RandomProperName() Name, LPhoneTypeID Primary_PhoneType_ID } } into Entity;
+		insert table { row { LEntityID Entity_ID, LPhoneTypeID PhoneType_ID, RandomPhone() Phone } } into EntityPhone;
+//		insert table { row { LEntityID Entity_ID, 1 Number, RandomStreet() Street, RandomCity() City, LStateID State_ID, LZipCode Zip } } into EntityAddress;
+//		insert table { row { LEntityID Entity_ID, 1 Shipping_Address_Number, 1 Billing_Address_Number } } into Customer;
+//		if Random(2) = 0 then
+//			insert table { row { LEntityID Entity_ID, Notes(RandomName(Random(25, 75))) Notes } } into EntityNotes;
+	commit;
+end;
+
+create view Customers
+	(Entity rename E) join (Customer rename C) by E.ID = C.Entity_ID;
+
+create operator RandomCustomer() : EntityID
+begin
+	var LCursor : cursor(typeof(Customers)) := cursor(Customers browse by { Name } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomProperName() Name });
+		if LCursor.BOF() then
+			LCursor.Next();
+		if LCursor.EOF() then
+			LCursor.Prior();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Edit Customer
+create operator EditCustomer()
+begin
+	var LCursor : cursor(typeof(Customers)) := cursor(Customers browse by { Name } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomProperName() Name });
+		if (LCursor.BOF() or LCursor.EOF()) then
+			AddCustomer()
+		else
+		begin
+			var LEntityID : EntityID := ID from LCursor.Select();
+			case Random(8)
+				// Edit name
+				when 0 then 
+				begin
+					try
+						update Entity set { Name := RandomProperName() } where ID = LEntityID;
+					commit;
+				end;
+
+				// Edit notes
+				when 1 then
+				begin
+					try
+						if exists (EntityNotes where Entity_ID = LEntityID) then
+							update EntityNotes set { Notes := RandomNotes() } where Entity_ID = LEntityID
+						else
+							insert table { row { LEntityID Entity_ID, RandomNotes() Notes } } into EntityNotes;
+					commit;
+				end;
+	
+				// Change primary phone number to a new phone number
+				when 2 then
+				begin
+					var LPhoneTypeID : PhoneTypeID := RandomPhoneType();
+					try
+						if not exists (EntityPhone where Entity_ID = LEntityID and PhoneType_ID = LPhoneTypeID) then
+							insert table { row { LEntityID Entity_ID, LPhoneTypeID PhoneType_ID, RandomPhone() Phone } } into EntityPhone;
+						update Entity set { Primary_PhoneType_ID := LPhoneTypeID } where ID = LEntityID;
+					commit;
+				end;
+
+				// Change shipping address to a new address
+				when 3 then
+				begin
+					var LNextAddressNumber : Integer := Max(Number from (EntityAddress where Entity_ID = LEntityID)) + 1;
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						insert table { row { LEntityID Entity_ID, LNextAddressNumber Number, RandomStreet() Street, RandomCity() City, LStateID State_ID, LZipCode Zip } } into EntityAddress;
+						update Customer set { Shipping_Address_Number := LNextAddressNumber } where Entity_ID = LEntityID;
+					commit;
+				end;
+
+				// Change billing address to a new address
+				when 4 then
+				begin
+					var LNextAddressNumber : Integer := Max(Number from (EntityAddress where Entity_ID = LEntityID)) + 1;
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						insert table { row { LEntityID Entity_ID, LNextAddressNumber Number, RandomStreet() Street, RandomCity() City, LStateID State_ID, LZipCode Zip } } into EntityAddress;
+						update Customer set { Billing_Address_Number := LNextAddressNumber } where Entity_ID = LEntityID;
+					commit;
+				end;
+
+				// Change primary phone number
+				when 5 then
+				begin
+					try
+						update EntityPhone set { Phone := RandomPhone() } 
+							where Entity_ID = LEntityID 
+								and PhoneType_ID = (Primary_PhoneType_ID from row from (Entity where ID = LEntityID));
+					commit;
+				end;
+
+				// Change shipping address
+				when 6 then
+				begin
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						update EntityAddress set
+						{
+							Street := RandomStreet(),
+							City := RandomCity(),
+							State_ID := LStateID,
+							Zip := LZipCode
+						}
+							where Entity_ID = LEntityID
+								and Number = (Shipping_Address_Number from row from (Customer where Entity_ID = LEntityID));
+					commit;
+				end;
+
+				// Change billing address
+				when 7 then
+				begin
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						update EntityAddress set
+						{
+							Street := RandomStreet(),
+							City := RandomCity(),
+							State_ID := LStateID,
+							Zip := LZipCode
+						}
+							where Entity_ID = LEntityID
+								and Number = (Billing_Address_Number from row from (Customer where Entity_ID = LEntityID));
+					commit;
+				end;
+			end;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Sell Items
+create operator SellItems()
+begin
+	var LLocationID : LocationID := RandomLocation();
+	var LEntityID : EntityID := RandomCustomer();
+	var LInvoiceID : InvoiceID := InvoiceID(GetNextGenerator("Shipping.Invoice.ID"));
+	var LInvoiceItems : table { Number : Integer, ItemType_ID : ItemTypeID, Quantity : Decimal, Amount : Money, key { Number } };
+	for LNumber : Integer := 1 to Random(2, 10) + 1 do
+	begin
+		var LItemTypeID : ItemTypeID := RandomItemType();
+		var LCharge : Money := Max(Cost from VendorItemType where ItemType_ID = LItemTypeID) * (Random(10, 25) / 100);
+		var LQuantity : Decimal := Random(2, 200).ToDecimal();
+		var LAmount : Money := LCharge * LQuantity;
+		insert table { row { LNumber Number, LItemTypeID ItemType_ID, LQuantity Quantity, LAmount Amount } } into LInvoiceItems;
+	end;
+	try
+		insert table { row { LInvoiceID ID, LLocationID Location_ID } } into Invoice;
+		insert table { row { LInvoiceID Invoice_ID, LEntityID Customer_ID } } into SaleOrder;
+		insert LInvoiceItems add { LInvoiceID Invoice_ID } into InvoiceItem;
+	commit;
+end;
+
+if not exists (TestRole where Name = "Sales") then
+	insert table { row { "Sales" Name } } into TestRole;
+
+if exists (Operators where OperatorName = Name("Shipping.RunSales")) then
+	Execute("drop operator RunSales();");
+
+create operator RunSales()
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Sales");
+	try
+		while exists(TestActive) do
+		begin
+			//Sleep(Random(1000, 5000));
+			try
+				AddCustomer();
+//				case Random(2)
+//					when 0 then AddCustomer();
+//					when 1 then EditCustomer();
+//					//when 2 then RunReport("CustomerReport");
+//					//when 3 then SellItems();
+//				end;
+			except
+				on E : Error do
+					LogError(E);
+			end;
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;
+
+if not exists (TestRole where Name = "Generators") then
+	insert table { row { "Generators" Name } } into TestRole;
+
+create table Test { ID : Integer, key { ID } };
+
+create operator RunGenerators()
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Generators");
+	try
+		while exists(TestActive) do
+		begin
+			Sleep(Random(2000, 5000));
+			try
+				try
+					insert table { row { GetNextGenerator("Test") ID } } into Test;
+					//GetNextGenerator("Test");
+//					update Generators set { NextKey := NextKey + 1 } where ID = "Test";
+//					ID from row from (Generators where ID = "Test");
+				commit;
+			except
+				on E : Error do
+					LogError(E);
+			end;
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;
+

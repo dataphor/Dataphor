@@ -1,0 +1,3 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="Sample.Forms" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="Frontend" version="*" />
+</library>

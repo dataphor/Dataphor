@@ -1,0 +1,37 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator TestInputParams(const AInput : String) : String
+begin
+	result := AInput;
+end;
+
+create operator TestOutputParams(const AInput : String, var AOutput : String) : String
+begin
+	AOutput := 'Blah';
+	result := AInput;
+end;
+
+var LRow := row { nil as String Data };
+
+begin
+	if (Evaluate('1') as Integer) <> 1 then
+		raise Error("Evaluate failed");
+		
+	var LInput := row { "John" Input };
+	if (Evaluate('TestInputParams(Input)', LInput) as String) <> (Input from LInput) then
+		raise Error("Evaluate with input params failed");
+
+	var LOutput : row { Output : String } := row { (nil as String) Output };
+	if (Evaluate('TestOutputParams(Input, var Output)', LInput, var LOutput) as String) <> (Input from LInput) then
+		raise Error("Evaluate with output params failed");
+	
+	if (Output from LOutput) <> "Blah" then
+		raise Error("Evaluate with output params did not set output parameter");
+end;
+
+drop operator TestOutputParams(String, var String);
+drop operator TestInputParams(String);
+

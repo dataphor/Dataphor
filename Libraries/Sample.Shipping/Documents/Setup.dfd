@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" iconimage="Image(&quot;Sample.Shipping&quot;, &quot;Alphora&quot;)" text="Alphora Shipping Application - Setup">
+  <showformaction document="Form('Security', 'GroupManage')" text="Groups" bop:name="ShowFormAction" />
+  <showformaction document="Form('Security', 'RoleBrowse');" text="Roles" bop:name="ShowFormAction1" />
+  <showformaction document="Derive('Location', 'Browse')" text="Locations" bop:name="ShowFormAction2" />
+  <row bop:name="Row">
+    <column bop:name="Column">
+      <statictext text="The follwoing options can be configured." width="50" bop:name="StaticText" />
+      <statictext text="Groups - Setup gruops to access the database." width="50" bop:name="StaticText1" />
+      <statictext text="Roles - Setup roles in the database security" bop:name="StaticText3" />
+      <statictext text="Locations - Setup store locations." width="50" bop:name="StaticText2" />
+    </column>
+    <column bop:name="Column1">
+      <trigger action="ShowFormAction" bop:name="Trigger" />
+      <trigger action="ShowFormAction1" bop:name="Trigger1" />
+      <trigger action="ShowFormAction2" bop:name="Trigger2" />
+    </column>
+  </row>
+</interface>

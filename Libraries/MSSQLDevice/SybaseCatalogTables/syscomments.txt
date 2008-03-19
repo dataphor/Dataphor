@@ -1,0 +1,278 @@
+id;number;colid;texttype;language;text;colid2;status
+352004285;0;1;0;0;create trigger tD_TestB on TestB for DELETE as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* DELETE trigger on TestB */
+begin
+  declare  @errno   int,
+           @errmsg  varchar(255)
+    /* ERwin Builtin Sat May 14 00:11:48 2005 */
+    /* TestB ;0;0
+352004285;0;2;0;0;R/3 TestC ON PARENT DELETE SET NULL */
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.BKey1 = NULL,
+        TestC.BKey2 = NULL
+      from TestC,deleted
+      where
+        /* %JoinFKPK(TestC,deleted," = "," and") */
+   ;0;0
+352004285;0;3;0;0;     TestC.BKey1 = deleted.BKey1 and
+        TestC.BKey2 = deleted.BKey2
+
+
+    /* ERwin Builtin Sat May 14 00:11:48 2005 */
+    return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0
+368004342;0;1;0;0;create trigger tU_TestB on TestB for UPDATE as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* UPDATE trigger on TestB */
+begin
+  declare  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBKey1 int, 
+           @insB;0;0
+368004342;0;2;0;0;Key2 int,
+           @errno   int,
+           @errmsg  varchar(255)
+
+  select @numrows = @@rowcount
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  /* TestB R/3 TestC ON PARENT UPDATE SET NULL */
+  if
+    /* %ParentPK(" or",update) */
+    update;0;0
+368004342;0;3;0;0;(BKey1) or
+    update(BKey2)
+  begin
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.BKey1 = NULL,
+        TestC.BKey2 = NULL
+      from TestC,deleted
+      where
+        /* %JoinFKPK(TestC,deleted," = "," and") */
+   ;0;0
+368004342;0;4;0;0;     TestC.BKey1 = deleted.BKey1 and
+        TestC.BKey2 = deleted.BKey2
+  end
+
+
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0
+384004399;0;1;0;0;create trigger tD_TestA on TestA for DELETE as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* DELETE trigger on TestA */
+begin
+  declare  @errno   int,
+           @errmsg  varchar(255)
+    /* ERwin Builtin Sat May 14 00:11:48 2005 */
+    /* TestA ;0;0
+384004399;0;2;0;0;R/2 TestC ON PARENT DELETE SET NULL */
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.AKey = NULL
+      from TestC,deleted
+      where
+        /* %JoinFKPK(TestC,deleted," = "," and") */
+        TestC.AKey = deleted.AKey;0;0
+384004399;0;3;0;0;
+
+
+    /* ERwin Builtin Sat May 14 00:11:48 2005 */
+    return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0
+400004456;0;1;0;0;create trigger tU_TestA on TestA for UPDATE as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* UPDATE trigger on TestA */
+begin
+  declare  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insAKey int,
+           @errno ;0;0
+400004456;0;2;0;0;  int,
+           @errmsg  varchar(255)
+
+  select @numrows = @@rowcount
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  /* TestA R/2 TestC ON PARENT UPDATE SET NULL */
+  if
+    /* %ParentPK(" or",update) */
+    update(AKey)
+  begin
+    update T;0;0
+400004456;0;3;0;0;estC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.AKey = NULL
+      from TestC,deleted
+      where
+        /* %JoinFKPK(TestC,deleted," = "," and") */
+        TestC.AKey = deleted.AKey
+  end
+
+
+  /* ERwin Builtin Sat May 14 00:11:48 ;0;0
+400004456;0;4;0;0;2005 */
+  return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0
+416004513;0;1;0;0;create trigger tI_TestC on TestC for INSERT as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* INSERT trigger on TestC */
+begin
+  declare  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @errno   int,
+           @errmsg;0;0
+416004513;0;2;0;0;  varchar(255)
+
+  select @numrows = @@rowcount
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  /* TestB R/3 TestC ON CHILD INSERT SET NULL */
+  if
+    /* %ChildFK(" or",update) */
+    update(BKey1) or
+    update(BKey2)
+  begin
+    update TestC;0;0
+416004513;0;3;0;0;
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.BKey1 = NULL,
+        TestC.BKey2 = NULL
+      from TestC,inserted
+      where
+        /* %JoinPKPK(TestC,inserted," = "," and") */
+        TestC.CKey = inserted.CKey and
+        not exists;0;0
+416004513;0;4;0;0; (
+          select * from TestB
+          where
+            /* %JoinFKPK(inserted,TestB," = "," and") */
+            inserted.BKey1 = TestB.BKey1 and
+            inserted.BKey2 = TestB.BKey2
+        )
+  end
+
+  /* ERwin Builtin Sat May 14 00:11:4;0;0
+416004513;0;5;0;0;8 2005 */
+  /* TestA R/2 TestC ON CHILD INSERT SET NULL */
+  if
+    /* %ChildFK(" or",update) */
+    update(AKey)
+  begin
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.AKey = NULL
+      from TestC,inserted
+      wher;0;0
+416004513;0;6;0;0;e
+        /* %JoinPKPK(TestC,inserted," = "," and") */
+        TestC.CKey = inserted.CKey and
+        not exists (
+          select * from TestA
+          where
+            /* %JoinFKPK(inserted,TestA," = "," and") */
+            inserted.AKey = Te;0;0
+416004513;0;7;0;0;stA.AKey
+        )
+  end
+
+
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0
+432004570;0;1;0;0;create trigger tU_TestC on TestC for UPDATE as
+/* ERwin Builtin Sat May 14 00:11:48 2005 */
+/* UPDATE trigger on TestC */
+begin
+  declare  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insCKey int,
+           @errno ;0;0
+432004570;0;2;0;0;  int,
+           @errmsg  varchar(255)
+
+  select @numrows = @@rowcount
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  /* TestB R/3 TestC ON CHILD UPDATE SET NULL */
+  if
+    /* %ChildFK(" or",update) */
+    update(BKey1) or
+    update(BKey2)
+;0;0
+432004570;0;3;0;0;  begin
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.BKey1 = NULL,
+        TestC.BKey2 = NULL
+      from TestC,inserted
+      where
+        /* %JoinPKPK(TestC,inserted," = "," and") */
+        TestC.CKey = inserted.CK;0;0
+432004570;0;4;0;0;ey and 
+        not exists (
+          select * from TestB
+          where
+            /* %JoinFKPK(inserted,TestB," = "," and") */
+            inserted.BKey1 = TestB.BKey1 and
+            inserted.BKey2 = TestB.BKey2
+        )
+  end
+
+  /* ERwin;0;0
+432004570;0;5;0;0; Builtin Sat May 14 00:11:48 2005 */
+  /* TestA R/2 TestC ON CHILD UPDATE SET NULL */
+  if
+    /* %ChildFK(" or",update) */
+    update(AKey)
+  begin
+    update TestC
+      set
+        /* %SetFK(TestC,NULL) */
+        TestC.AKey = NULL
+      from;0;0
+432004570;0;6;0;0; TestC,inserted
+      where
+        /* %JoinPKPK(TestC,inserted," = "," and") */
+        TestC.CKey = inserted.CKey and 
+        not exists (
+          select * from TestA
+          where
+            /* %JoinFKPK(inserted,TestA," = "," and") */
+  ;0;0
+432004570;0;7;0;0;          inserted.AKey = TestA.AKey
+        )
+  end
+
+
+  /* ERwin Builtin Sat May 14 00:11:48 2005 */
+  return
+error:
+    raiserror @errno @errmsg
+    rollback transaction
+;0;0

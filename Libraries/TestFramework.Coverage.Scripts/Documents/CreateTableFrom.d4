@@ -1,0 +1,12 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Test { ID : Integer, Name : String, key { ID } };
+insert table { row { 1 ID, 'Joe' Name } } into Test;
+create table Testing from Test;
+if (Test <> Testing) then
+	raise Error("From failed to copy data");
+drop table Test; // If this drop fails it is because the from incorrectly assigned a dependency on the from table
+drop table Testing;

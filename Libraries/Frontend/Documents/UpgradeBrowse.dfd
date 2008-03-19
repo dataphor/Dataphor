@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse Upgrades" mainsource="Upgrades">
+  <source expression="System.LibraryView" isreadonly="True" bop:name="Libraries" />
+  <source expression="System.UpgradeVersions(AMasterMain_Library_Name) &#xD;&#xA;	add &#xD;&#xA;	{ &#xD;&#xA;		AMasterMain_Library_Name Library_Name, &#xD;&#xA;		LoadUpgrade(AMasterMain_Library_Name, Version) Script &#xD;&#xA;	} &#xD;&#xA;	rename Main" useapplicationtransactions="False" isreadonly="True" masterkeynames="Name" detailkeynames="Main.Library_Name" master="Libraries" writewhereclause="False" bop:name="Upgrades" />
+  <sourceaction action="Refresh" source="Upgrades" bop:name="RefreshUpgradesAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.BeforeAdd')" bop:name="BeforeAddAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Name" sourcelink.detailkeynames="Main.Library_Name" sourcelink.source="Libraries" sourcelinkrefresh="False" onformclose="AfterAddCleanupAction" onformaccepted="AfterAddAction" document="Frontend.Derive('Frontend.UpgradeBrowse.AddUpgrade', 'Add')" mode="Insert" beforeexecute="BeforeAddAction" text="Add..." image="Frontend.Image('Frontend', 'Image.Add')" bop:name="AddUpgradeAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.AfterAdd');" afterexecute="RefreshUpgradesAction" bop:name="AfterAddAction" />
+  <datascriptaction script="drop table .Frontend.UpgradeBrowse.AddUpgrade;" bop:name="AfterAddCleanupAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.BeforeInject');" bop:name="BeforeInjectAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Name" sourcelink.detailkeynames="Main.Library_Name" sourcelink.source="Libraries" sourcelinkrefresh="False" onformclose="AfterInjectCleanupAction" onformaccepted="AfterInjectAction" document="Frontend.Derive('Frontend.UpgradeBrowse.InjectUpgrade', 'Add')" mode="Insert" beforeexecute="BeforeInjectAction" text="Inject..." image="Frontend.Image('Frontend', 'Image.Add');" bop:name="InjectUpgradeAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.AfterInject');&#xD;&#xA;" afterexecute="RefreshUpgradesAction" bop:name="AfterInjectAction" />
+  <datascriptaction script="drop table .Frontend.UpgradeBrowse.InjectUpgrade;" bop:name="AfterInjectCleanupAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.BeforeEdit');" bop:name="BeforeEditAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.detailkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.source="Upgrades" onformclose="AfterEditCleanupAction" onformaccepted="AfterEditAction" document="Frontend.Derive('Frontend.UpgradeBrowse.EditUpgrade', 'Edit');" mode="Edit" beforeexecute="BeforeEditAction" text="Edit..." image="Frontend.Image('Frontend', 'Image.Edit');" bop:name="EditUpgradeAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.AfterEdit');" afterexecute="RefreshUpgradesAction" bop:name="AfterEditAction" />
+  <datascriptaction script="drop table .Frontend.UpgradeBrowse.EditUpgrade;" bop:name="AfterEditCleanupAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.detailkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.source="Upgrades" onformclose="AfterEditCleanupAction" onformaccepted="AfterDeleteAction" document="Frontend.Derive('Frontend.UpgradeBrowse.EditUpgrade', 'Delete');" mode="Edit" beforeexecute="BeforeEditAction" text="Delete" image="Frontend.Image('Frontend', 'Image.Delete');" bop:name="DeleteUpgradeAction" />
+  <datascriptaction script="Frontend.ExecuteScript('Frontend', 'UpgradeBrowse.AfterDelete');" afterexecute="RefreshUpgradesAction" bop:name="AfterDeleteAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.detailkeynames="Main.Library_Name;Main.Version;Main.Script" sourcelink.source="Upgrades" onformclose="AfterEditCleanupAction" document="Frontend.Derive('Frontend.UpgradeBrowse.EditUpgrade', 'View');" beforeexecute="BeforeEditAction" text="View" image="Frontend.Image('Frontend', 'Image.View');" bop:name="ViewUpgradeAction" />
+  <column bop:name="RootColumn">
+    <group title="Current Library" bop:name="LibrariesGroup">
+      <row bop:name="LibrariesRow">
+        <textbox width="40" columnname="Name" source="Libraries" readonly="True" bop:name="LibraryNameTextBox" />
+        <textbox width="20" columnname="Version" source="Libraries" readonly="True" bop:name="LibraryVersionTextBox" />
+        <textbox width="15" columnname="LoadedVersion" title="Loaded Version" source="Libraries" readonly="True" bop:name="LoadedLibraryVersionTextBox" />
+        <checkbox columnname="UpgradeRequired" title="Upgrade Required?" source="Libraries" readonly="True" marginbottom="10" bop:name="UpgradeRequiredCheckBox" />
+      </row>
+    </group>
+    <search source="Upgrades" bop:name="Search">
+      <searchcolumn columnname="Main.Version" width="20" bop:name="SearchColumn" />
+    </search>
+    <row bop:name="Row">
+      <grid source="Upgrades" bop:name="Grid">
+        <textcolumn columnname="Main.Version" width="20" bop:name="VersionTextColumn" />
+        <textcolumn wordwrap="True" maxrows="4" columnname="Main.Script" width="70" bop:name="ScriptTextColumn" />
+      </grid>
+      <column bop:name="Column">
+        <trigger action="AddUpgradeAction" bop:name="AddUpgradeTrigger" />
+        <trigger action="InjectUpgradeAction" bop:name="InjectUpgradeTrigger" />
+        <trigger action="EditUpgradeAction" bop:name="EditUpgradeTrigger" />
+        <trigger action="DeleteUpgradeAction" bop:name="DeleteUpgradeTrigger" />
+        <trigger action="ViewUpgradeAction" visible="False" bop:name="ViewUpgradeTrigger" />
+      </column>
+    </row>
+  </column>
+</interface>

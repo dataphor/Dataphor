@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Launch Form">
+  <source requestedcapabilities="Navigable, Bookmarkable" expression="TableDee&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		&quot;&quot; Query tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		&quot;Browse&quot; PageType tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		&quot;&quot; MasterKeyNames tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		&quot;&quot; DetailKeyNames tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		true Elaborate tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		&quot;Form('', '')&quot; ManualExpression tags { DAE.IsComputed = &quot;false&quot; }&#xD;&#xA;	}&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		&quot;Derive('&quot; + Query.Replace(&quot;'&quot;, &quot;''&quot;) + &quot;', '&quot; + PageType + &quot;', '&quot; + MasterKeyNames + &quot;', '&quot; + DetailKeyNames + &quot;', &quot; + Elaborate.ToString() + &quot;)&quot; DocumentExpression &#xD;&#xA;	}&#xD;&#xA;" usebrowse="False" useapplicationtransactions="False" openstate="Edit" bop:name="Main" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Query" sourcelink.detailkeynames="Main.Name" sourcelink.source="Main" sourcelinkrefresh="False" document="Derive('TableVarsList', 'View', 'Main.Query', 'Main.Name', true)" text="Query..." bop:name="Main.Query.TableVarsList" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.PageType" sourcelink.detailkeynames="Main.ID" sourcelink.source="Main" sourcelinkrefresh="False" document="Derive('Frontend.PageTypes', 'View', 'Main.PageType', 'Main.ID', true)" text="Page Type..." bop:name="Main.PageType.PageTypes" />
+  <menu text="Vie&amp;w" bop:name="LookupViewMenuItem">
+    <menu action="Main.Query.TableVarsList" bop:name="Main.Query.TableVarsListLookupMenuItem" />
+    <menu action="Main.PageType.PageTypes" bop:name="Main.PageType.PageTypesLookupMenuItem" />
+  </menu>
+  <column bop:name="RootEditColumn">
+    <notebook activepage="NotebookPage" bop:name="Notebook">
+      <notebookpage title="Derive" bop:name="NotebookPage">
+        <column bop:name="Column">
+          <group title="Derivation Criteria" bop:name="Group">
+            <column bop:name="Element1">
+              <textbox height="5" columnname="Query" title="Query" source="Main" bop:name="TextBox" />
+              <quicklookup columnname="PageType" lookupcolumnname="Main.ID" source="Main" document="Derive('Frontend.PageTypes', 'Browse', '', '', true)" title="Page Type" bop:name="MainColumnMain.PageType_Lookup">
+                <textbox width="20" titlealignment="None" columnname="PageType" source="Main" bop:name="MainColumnMain.PageType" />
+              </quicklookup>
+              <textbox width="20" columnname="MasterKeyNames" title="Master Key Names" source="Main" hint="Master key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.MasterKeyNames" />
+              <textbox width="20" columnname="DetailKeyNames" title="Detail Key Names" source="Main" hint="Detail key names as a semi-colon delimited list of column names." bop:name="MainColumnMain.DetailKeyNames" />
+              <checkbox width="20" columnname="Elaborate" title="Elaborate" source="Main" bop:name="MainColumnMain.Elaborate" />
+            </column>
+          </group>
+          <textbox width="50" columnname="DocumentExpression" title="Document Expression" source="Main" readonly="True" bop:name="MainColumnMain.DocumentExpression" />
+          <row horizontalalignment="Right" bop:name="Row">
+            <trigger action="LaunchDerive" imagewidth="16" imageheight="16" bop:name="ShowDerivedFormTrigger" />
+          </row>
+        </column>
+      </notebookpage>
+      <notebookpage bop:name="NotebookPage1" title="Manual">
+        <column bop:name="Column1">
+          <group title="Manual Criteria" bop:name="Group1">
+            <textbox height="4" width="50" columnname="ManualExpression" title="Expression" source="Main" bop:name="TextBox1" />
+          </group>
+          <row horizontalalignment="Right" bop:name="Row1">
+            <trigger action="LaunchManual" imagewidth="16" imageheight="16" bop:name="Trigger" />
+          </row>
+        </column>
+      </notebookpage>
+    </notebook>
+  </column>
+  <blockaction text="Launch Derived Form" image="Image('.Frontend', 'Image.Launch')" bop:name="LaunchDerive">
+    <sourceaction action="RequestSave" source="Main" bop:name="UpdateSource" />
+    <setpropertyaction node="ShowDerivedForm" membername="Document" source="Main" columnname="DocumentExpression" bop:name="SetPropertyAction" />
+    <showformaction document="Derive('Documents', 'Edit', '', '', true)" bop:name="ShowDerivedForm" />
+  </blockaction>
+  <blockaction bop:name="LaunchManual" text="Launch Manual Form" image="Image('.Frontend', 'Image.Launch')">
+    <sourceaction action="RequestSave" source="Main" bop:name="UpdateSource1" />
+    <setpropertyaction node="ShowDerivedForm1" membername="Document" source="Main" columnname="ManualExpression" bop:name="SetPropertyAction1" />
+    <showformaction bop:name="ShowDerivedForm1" document="SaveXML(Guid('8ad1aa55-ddfc-4d53-9396-c572f35b45f7'))" />
+  </blockaction>
+</interface>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" iconimage="Image(&quot;Sample.Shipping&quot;, &quot;Alphora&quot;)" text="Alphora Shipping Application - Main" onactivate="EnsureCurrentLocationTable">
+  <showformaction document="Derive(&quot;Sample.Shipping.Location&quot;, &quot;Browse&quot;)" text="Locations" hint="Setup store locations" bop:name="LocationBrowseAction" />
+  <showformaction document="Form(&quot;Sample.Shipping&quot;, &quot;Sales&quot;)" text="Sales" bop:name="SalesAction" />
+  <showformaction document="Form(&quot;Sample.Shipping&quot;, &quot;Inventory&quot;)" text="Inventory" bop:name="InventoryAction" />
+  <showformaction document="Form(&quot;Sample.Shipping&quot;, &quot;Processing&quot;)" text="Processing" bop:name="ProcessingAction" />
+  <datascriptaction script="EnsureCurrentLocationTable();" bop:name="EnsureCurrentLocationTable" />
+  <row bop:name="Row">
+    <column bop:name="Column" />
+    <staticimage image="Image(&quot;Sample.Shipping&quot;, &quot;Shipping&quot;)" bop:name="StaticImage" />
+    <column bop:name="Column1">
+      <trigger action="LocationBrowseAction" bop:name="LocationBrowseTrigger" />
+      <trigger action="SalesAction" bop:name="SalesTrigger" />
+      <trigger action="InventoryAction" bop:name="InventoryTrigger" />
+      <trigger action="ProcessingAction" bop:name="ProcessingTrigger" />
+    </column>
+  </row>
+</interface>

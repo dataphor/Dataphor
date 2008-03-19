@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="SampleSix Form B">
+  <row bop:name="Row1">
+    <statictext text="This is Form B" bop:name="StaticText1" />
+  </row>
+</interface>

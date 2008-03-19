@@ -1,0 +1,24 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+// A contact may not be both an organization and a person
+create constraint PersonOrganizationExclusive
+	not exists ( Person join Organization ) 
+		tags { DAE.SimpleMessage = "A Contact cannot be both a Person and and Organization." };
+		
+//*
+// A contact must be either an organization or a person	
+create constraint PersonOrganizationInclusive
+	not exists 
+	( 
+		Contact over { ID } 
+		minus 
+		(
+			Person over { ID } union ( Organization over { ID } )
+		) 
+	)
+		tags { DAE.SimpleMessage = "A Contact must be either a Person or an Organization." }
+

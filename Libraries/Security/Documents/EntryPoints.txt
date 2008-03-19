@@ -1,0 +1,11 @@
+Security Module Entry Points:
+
+// User Management:
+Form('Security', 'UserBrowse');
+
+// Role Browse:
+Form('Security', 'RoleBrowse');
+
+// Right Browse:
+Derive('Security.Right', 'Browse', true);
+

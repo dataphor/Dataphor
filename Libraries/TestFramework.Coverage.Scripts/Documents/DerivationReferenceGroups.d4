@@ -1,0 +1,326 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Basically, we should be able to use the element-level tags on a reference and have those tags
+	pass through to the lookup element created for a reference. This is how the derivation was
+	designed, but it does not appear to be working this way.
+*/
+
+/*
+	Applicable Tags ->
+	
+		Frontend.Title
+		Frontend.Hint
+		Frontend.Priority
+		Frontend.Flow
+		Frontend.FlowBreak
+		Frontend.Break
+		Frontend.Group
+		Frontend.<elementtype>.<property>
+*/
+
+/*
+	Given a form consisting of several quick-lookups and full-lookups, potentially grouped, I should
+	be able to control the layout of the form just as though they were simple edit controls without
+	customization.
+*/
+
+//* Table: IntegerLookup
+SafeDrop('IntegerLookup');
+create table IntegerLookup 
+{ 
+	ID : Integer, 
+	key { ID } 
+};
+
+//* Table: DateLookup
+SafeDrop('DateLookup');
+create table DateLookup 
+{ 
+	ID : Date, 
+	key { ID } 
+};
+
+//* Table: ShortIDLookup
+SafeDrop('ShortIDLookup');
+create table ShortIDLookup 
+{ 
+	ID : String, 
+	Description : String tags { Frontend.Preview.Include = "true" }, 
+	key { ID } 
+};
+
+//* Table: IDLookup
+SafeDrop('IDLookup');
+create table IDLookup 
+{ 
+	ID : String, 
+	Description : String tags { Frontend.Preview.Include = "true" }, 
+	key { ID } 
+};
+
+//* Table: MakeLookup
+SafeDrop('MakeLookup');
+create table MakeLookup 
+{ 
+	ID : String, 
+	key { ID } 
+};
+
+//* Table: ModelLookup
+SafeDrop('ModelLookup');
+create table ModelLookup 
+{ 
+	Make_ID : String, 
+	ID : String, 
+	key { Make_ID, ID }, 
+	reference ModelLookup_MakeLookup { Make_ID } references MakeLookup { ID } 
+};
+
+//* Table: FullLookup
+SafeDrop('FullLookup');
+create table FullLookup 
+{ 
+	X : Integer, 
+	Y : Integer, 
+	key { X, Y } 
+};
+
+//* Case 1: Unmodified - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } tags { Storage.Enforced = "true" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y }
+};
+
+//* Case 2: Frontend.Title, Frontend.Hint - Verified BTR 01/11/2006 - The hints are being set for the lookup groups/controls, but there is no mechanism for displaying the hint of a group/lookup control
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } 
+		tags { Frontend.Lookup.Title = "Integer Lookup", Frontend.Lookup.Hint = "The integer to be looked up" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID }
+		tags { Frontend.Lookup.Title = "Date Lookup", Frontend.Lookup.Hint = "The date to be looked up" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID }
+		tags { Frontend.Lookup.Title = "Short ID Lookup", Frontend.Lookup.Hint = "The short id to be looked up" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID }
+		tags { Frontend.Lookup.Title = "ID Lookup", Frontend.Lookup.Hint = "The id to be looked up" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } 
+		tags { Storage.Enforced = "true", Frontend.Lookup.Title = "Make", Frontend.Lookup.Hint = "The make to be looked up" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID }
+		tags { Frontend.Lookup.Title = "Model", Frontend.Lookup.Hint = "The model to be looked up" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y }
+		tags { Frontend.Lookup.Title = "Full Lookup", Frontend.Lookup.Hint = "The full to be looked up" }
+};
+
+//* Case 3: Frontend.Priority - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } 
+		tags { Frontend.Lookup.Priority = "700" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID } 
+		tags { Frontend.Lookup.Priority = "600" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID } 
+		tags { Frontend.Lookup.Priority = "500" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID } 
+		tags { Frontend.Lookup.Priority = "400" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } 
+		tags { Storage.Enforced = "true", Frontend.Lookup.Priority = "300" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID } 
+		tags { Frontend.Lookup.Priority = "200" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y } 
+		tags { Frontend.Lookup.Priority = "100" }
+};
+
+//* Case 4: Frontend.Flow - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } 
+		tags { Frontend.Lookup.Flow = "Horizontal" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID }
+		tags { Storage.Enforced = "true" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y }
+};
+
+//* Case 5: Frontend.FlowBreak - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } tags { Frontend.Lookup.FlowBreak = "true" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID } tags { Frontend.Lookup.FlowBreak = "true" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID } tags { Frontend.Lookup.FlowBreak = "true" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID } tags { Frontend.Lookup.FlowBreak = "true" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } tags { Storage.Enforced = "true", Frontend.Lookup.FlowBreak = "true" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID } tags { Frontend.Lookup.FlowBreak = "true" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y } tags { Frontend.Lookup.FlowBreak = "true" }
+};
+
+//* Case 6: Frontend.Break - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } tags { Frontend.Lookup.Break = "true" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID } tags { Frontend.Lookup.Break = "true" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID } tags { Frontend.Lookup.Break = "true" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID } tags { Frontend.Lookup.Break = "true" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } tags { Storage.Enforced = "true", Frontend.Lookup.Break = "true" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID } tags { Frontend.Lookup.Break = "true" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y } tags { Frontend.Lookup.Break = "true" }
+};
+
+//* Case 7: Frontend.Group - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID } tags { Frontend.Lookup.Group = "LookupGroup" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID } tags { Frontend.Lookup.Group = "LookupGroup" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID } tags { Frontend.Lookup.Group = "LookupGroup" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID } tags { Frontend.Lookup.Group = "LookupGroup" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } tags { Storage.Enforced = "true", Frontend.Lookup.Group = "LookupGroup" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID } tags { Frontend.Lookup.Group = "LookupGroup" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y } tags { Frontend.Lookup.Group = "LookupGroup" }
+};
+
+//* Case 8: Combined - Verified BTR 01/11/2006
+
+//* Table: T
+SafeDrop('T');
+create table T 
+{ 
+	ID : Integer, 
+	IntegerLookup_ID : Integer, 
+	DateLookup_ID : Date, 
+	ShortIDLookup_ID : String, 
+	IDLookup_ID : String tags { Frontend.Visible = "false" }, 
+	Make_ID : String, 
+	Model_ID : String, 
+	FullLookup_X : Integer, 
+	FullLookup_Y : Integer, 
+	key { ID },
+	reference T_IntegerLookup { IntegerLookup_ID } references IntegerLookup { ID }
+		tags { Frontend.Lookup.Group = "SimpleLookupGroup", Frontend.Lookup.FlowBreak = "true" },
+	reference T_DateLookup { DateLookup_ID } references DateLookup { ID }
+		tags { Frontend.Lookup.Group = "SimpleLookupGroup" },
+	reference T_ShortIDLookup { ShortIDLookup_ID } references ShortIDLookup { ID }
+		tags { Frontend.Lookup.Group = "IDLookupGroup", Frontend.Lookup.FlowBreak = "true" },
+	reference T_IDLookup { IDLookup_ID } references IDLookup { ID }
+		tags { Frontend.Lookup.Group = "IDLookupGroup" },
+	reference T_MakeLookup { Make_ID } references MakeLookup { ID } 
+		tags { Frontend.Lookup.Group = "CarLookupGroup", Frontend.Lookup.FlowBreak = "true", Storage.Enforced = "true" },
+	reference T_ModelLookup { Make_ID, Model_ID } references ModelLookup { Make_ID, ID }
+		tags { Frontend.Lookup.Group = "CarLookupGroup" },
+	reference T_FullLookup { FullLookup_X, FullLookup_Y } references FullLookup { X, Y }
+}
+	tags { Frontend.Group.SimpleLookupGroup.FlowBreak = "true" };
+
+//* Table: E
+SafeDrop('E');
+create table E
+{
+	ID : Integer,
+	Description : String,
+	DateLookup_ID : Date,
+	key { ID },
+	reference E_T { ID } references T { ID } tags { Frontend.Extension.Embedded = "true", Frontend.Extension.Group = "EDateLookupGroup" },
+	reference E_DateLookup { DateLookup_ID } references DateLookup { ID }
+};
+

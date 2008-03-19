@@ -1,0 +1,36 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// ADeviceName, AStatement, AKeyInfo, and ATableType must be literals (evaluable at compile-time)
+create operator SQLQuery(const AStatement : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const AStatement : String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+create operator SQLQuery(const ADeviceName : System.Name, const AStatement : System.String, const AInValues : row, var AOutValues : row, const ATableType : String, const AKeyInfo : String) : table class "SQLDevice.SQLQueryNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+
+grant usage on SQLQuery(String) to role User;
+grant usage on SQLQuery(String, String) to role User;
+grant usage on SQLQuery(String, row) to role User;
+grant usage on SQLQuery(String, row, String) to role User;
+grant usage on SQLQuery(String, row, var row) to role User;
+grant usage on SQLQuery(String, row, var row, String) to role User;
+grant usage on SQLQuery(String, row, var row, String, String) to role User;
+grant usage on SQLQuery(Name, String) to role User;
+grant usage on SQLQuery(Name, String, String) to role User;
+grant usage on SQLQuery(Name, String, row) to role User;
+grant usage on SQLQuery(Name, String, row, String) to role User;
+grant usage on SQLQuery(Name, String, row, var row) to role User;
+grant usage on SQLQuery(Name, String, row, var row, String) to role User;
+grant usage on SQLQuery(Name, String, row, var row, String, String) to role User;
+

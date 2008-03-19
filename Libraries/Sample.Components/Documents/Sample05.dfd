@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample05" ondefault="SetHtmlBoxURLPropertyAction">
+  <source expression="TableDee&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		&quot;http://www.alphora.com&quot; ShowLinkActionURL tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		&quot;http://www.alphora.com&quot; HtmlBoxURL tags{ DAE.IsComputed = &quot;false&quot; }&#xD;&#xA;	};&#xD;&#xA;		" openstate="Edit" bop:name="Source1" />
+  <showlinkaction url="file:///c:/" beforeexecute="SetShowLinkActionURLPropertyAction" text="E&amp;xecute" bop:name="ShowLinkAction1" />
+  <setpropertyaction node="HtmlBox1" membername="URL" source="Source1" columnname="HtmlBoxURL" text="Refresh" bop:name="SetHtmlBoxURLPropertyAction" />
+  <setpropertyaction node="ShowLinkAction1" membername="URL" source="Source1" columnname="ShowLinkActionURL" bop:name="SetShowLinkActionURLPropertyAction" />
+  <row bop:name="MainRow">
+    <column bop:name="Column1">
+      <statictext text="Sample05" bop:name="SampleLable" />
+      <group title="Sho&amp;wLinkAction" bop:name="ShowLinkActionGroup">
+        <row bop:name="Row2">
+          <textbox width="35" maxwidth="35" columnname="ShowLinkActionURL" title="Enter the desired URL or path." source="Source1" bop:name="TextBox1" />
+          <trigger action="ShowLinkAction1" marginleft="5" margintop="10" bop:name="Trigger1" />
+        </row>
+      </group>
+      <group title="H&amp;tmlBox" bop:name="HtmlBoxGroup">
+        <column bop:name="Column2">
+          <row bop:name="Row3">
+            <textbox acceptsreturn="False" width="35" maxwidth="35" columnname="HtmlBoxURL" title="Enter the desired URL or path." source="Source1" bop:name="TextBox2" />
+            <trigger action="SetHtmlBoxURLPropertyAction" marginleft="5" margintop="10" bop:name="Trigger2" />
+          </row>
+          <htmlbox pixelwidth="300" pixelheight="300" url="http://www.alphora.com" bop:name="HtmlBox1" />
+        </column>
+      </group>
+    </column>
+    <frame document="Form('Sample.Components','Sample05Docs');" bop:name="Frame1" />
+  </row>
+</interface>

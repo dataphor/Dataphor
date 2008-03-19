@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Sample.Rental.SaleItem', 'Browse', 'Main.ID', 'Main.Sale_ID')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger ibop:order="1" bop:name="AddRentalTrigger" action="AddRental" />
+            <trigger ibop:order="2" bop:name="EditTrigger" />
+            <trigger ibop:order="3" bop:name="DeleteTrigger" />
+            <trigger ibop:order="4" bop:name="ViewTrigger" />
+         </column>
+      </row>
+      <textbox ibop:order="2" bop:name="TotalTextBox" tabstop="False" readonly="True" source="TotalSource" columnname="Total" titlealignment="Left" />
+   </column>
+   <showformaction ibop:order="15" bop:name="AddRental" image="Image('Frontend', 'Image.Add')" hint="Add a new row." text="Add Rental..." mode="Insert" document=".Frontend.Derive('Sample.Rental.NewRental', 'Add', 'Main.ID', 'Main.Sale_ID', true)" sourcelink.source="Main" sourcelink.attachmaster="True" sourcelinktype="Detail" />
+   <source ibop:order="16" bop:name="TotalSource" master="Main" detailkeynames="Sale_ID" masterkeynames="Main.Sale_ID" expression="SaleItem&#xD;&#xA; group by { Sale_ID }&#xD;&#xA;  add { Sum(Cost) Total };" />
+</interface>
+</document>
+</dilx>

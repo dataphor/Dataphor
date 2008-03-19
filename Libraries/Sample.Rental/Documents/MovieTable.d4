@@ -1,0 +1,50 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Movie
+{
+	ID : Integer { default GetNextGenerator("Movie.ID") }
+			tags { Frontend.Visible = "false" },
+	Name : StrLth50
+		tags
+		{
+			Frontend.Width = "30",
+			StaticByteSize = "40",
+			Frontend.Preview.Include = "true"
+		},
+	Type : String tags { Frontend.Width = "6", Frontend.Browse.Visible = "false" },
+	Rating : String tags { Frontend.Width = "7" },
+	Year : Integer
+	   {
+	     constraint YearValid value >= 1891
+	       tags { DAE.SimpleMessage = "Year must be 1891 or later." }
+	   }
+		tags { Frontend.Width = "4" },
+	key { ID },
+	order { Name } tags { Frontend.IsDefault = "True" },
+	reference Movies_MovieType { Type } references MovieType { ID },
+	reference Movies_MovieRating { Rating } references MovieRating { ID }
+};
+
+Movie := table 
+{
+ row
+ {
+  GetNextGenerator("Movie.ID") ID,
+  "Episode II - Attack of the Clones" Name,
+  "SF" Type,
+  "PG-13" Rating,
+  2002 Year
+ },
+ row { GetNextGenerator("Movie.ID"), "Space Balls", "COM", "PG-13", 1985 },
+ row { GetNextGenerator("Movie.ID"), "The Matrix", "SF", "R", 1999 },
+ row { GetNextGenerator("Movie.ID"), "Ferris Beuler's Day Off", "COM", "PG", 1982 },
+ row { GetNextGenerator("Movie.ID"), "The Princess Bride", "COM", "PG", 1984 },
+ row { GetNextGenerator("Movie.ID"), "Crimson Tide", "ACT", "R", 1993 },
+ row { GetNextGenerator("Movie.ID"), "Toy Story", "ANM", "G", 1995 },
+ row { GetNextGenerator("Movie.ID"), "My Fair Lady", "MUS", "G", 1976 },
+ row { GetNextGenerator("Movie.ID"), "Forget Paris", "ROM", "PG-13", 1987 },
+ row { GetNextGenerator("Movie.ID"), "State Fair", "MUS", "G", 1962 }
+};

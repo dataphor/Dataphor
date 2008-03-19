@@ -1,0 +1,167 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+// ServerID
+create type ServerID like String
+{
+	constraint LengthValid (Length(value.Value) > 0) and (Length(value.Value) <= 5)
+}
+	tags { Frontend.Width = "5" };
+
+//*
+// ID	
+create type ID like String
+{
+	constraint LengthValid Length(value.Value) <= 16
+}
+	tags { Frontend.Width = "20" };
+
+//*
+// ShortID
+create type ShortID like String
+{
+	constraint ShortIDValid Length(value.Value) between 1 and 3
+}
+	tags { Frontend.Title = "ID", Frontend.Width = "5" };
+
+//*
+// Description
+create type Description like String
+{
+	constraint LengthValid Length(value.Value) <= 50
+}
+	tags { Frontend.Width = "30" };
+
+//*
+// LongDescription
+create type LongDescription like String
+{
+	constraint LengthValid Length(value.Value) <= 500
+}
+	tags { Frontend.Width = "50", Frontend.TextBox.Height = "3" };
+
+//*
+// Notes
+create type Notes like String
+	tags { Frontend.TextBox.Height = "3" };
+
+//*
+// ProperName
+create type ProperName like String
+{
+	constraint LengthValid Length(value.Value) <= 50
+}
+	tags { Frontend.Width = "20" };
+
+//*
+// StateID
+create type StateID like String
+{
+	constraint StateIDValid (Length(value.Value) = 2)
+}
+	tags { Frontend.Title = "State", Frontend.Width = "4" };
+	
+//*
+// Zip
+create type Zip like String
+{
+	constraint LengthValid (Length(value.Value) <= 15)
+}
+	tags { Frontend.Width = "10" };
+
+//*
+// CountryCode
+create type CountryCode like String
+{
+	constraint CountryCodeValid (Length(value.Value) in {0, 2}),
+	default CountryCode("US")
+}
+	tags { Frontend.Title = "Code", Frontend.Width = "4" };
+
+//*
+// WebAddress
+create type WebAddress like String
+{
+	constraint LengthValid Length(value.Value) <= 250
+}
+	tags { Frontend.Title = "Web Address", Frontend.Width = "30" };
+
+//*
+// WebsiteType
+create type WebsiteType like String
+{
+	constraint LengthValid Length(value.Value) <= 25
+}
+	tags { Frontend.Title = "Website Type", Frontend.Width = "15" };
+
+//*
+// EmailAddress
+create type EmailAddress like String
+{
+	constraint LengthValid Length(value.Value) <= 100
+}
+	tags { Frontend.Title = "Email Address", Frontend.Width = "30" };
+
+//*
+// EmailType
+create type EmailType like String
+{
+	constraint LengthValid Length(value.Value) <= 25
+}
+	tags { Frontend.Title = "Email Type", Frontend.Width = "15" };
+
+//*
+// LocationName
+create type LocationName like String
+{
+	constraint LengthValid Length(value.Value) <= 50
+}
+	tags { Frontend.Width = "30" };
+
+//*
+// Phone
+create type Phone like String
+{
+	constraint LengthValid (Length(value.Value) <= 20)
+}
+	tags { Frontend.Title = "Phone #", Frontend.Width = "15" };
+
+//*
+// ContactID
+create type ContactID like ID
+	tags { Frontend.Title = "Contact ID" };
+
+//*
+// OrganizationPhoneTypeID
+create type OrganizationPhoneTypeID like ShortID
+	tags { Frontend.Title = "Phone Type ID" };
+
+//*
+// PersonPhoneTypeID
+create type PersonPhoneTypeID like ShortID
+	tags { Frontend.Title = "Phone Type ID" };
+
+//*
+// RoleID
+create type RoleID like ShortID
+	tags { Frontend.Title = "Role ID" };
+
+//*
+// DepartmentID
+create type DepartmentID like ShortID
+	tags { Frontend.Title = "Department ID" };
+
+//*
+// LocationID
+create type LocationID like ID
+	tags { Frontend.Title = "Location ID" };
+
+//*
+// GetNextID
+create operator GetNextID(const AID : String) : ID
+begin
+	result := 'CORP-' + PadLeft(GetNextGenerator(AID).ToString(), 10, '0');
+end;

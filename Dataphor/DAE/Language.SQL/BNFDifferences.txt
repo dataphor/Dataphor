@@ -1,0 +1,31 @@
+select statement
+from clause
+	Oracle SQL ->
+		from <table specifier commalist>
+
+		<table specifier> ::= 
+			(<table identifier> | "("<query expression>")") [<table alias>]
+			
+table operator expression
+	Oracle SQL ->
+		union is the only operator allowed to specify an all modifier.
+		uses minus instead of the ANSI standard except.
+
+insert statement
+update statement
+delete statement
+create table statement
+column definition
+	DB2 -> 
+		<column definition> ::=
+			<column name> <domain name> [not null]
+			
+alter table statement
+	DB2 -> same as create table for adding columns, dropping columns is not allowed
+	Oracle ->
+		<alter table statement> ::=
+			alter table <tablename> add "("<column name> <domain name> [[not] null]")" | drop "("<column name>")"
+drop table statement
+create index statement
+drop index statement
+	TSQL -> drop index <tablename>.<indexname>

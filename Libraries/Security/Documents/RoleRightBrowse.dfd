@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Browse RoleRights" mainsource="Main" ondefault="Edit">
+  <source expression="(&#xD;&#xA;	(&#xD;&#xA;		Security.Role&#xD;&#xA;			rename Main&#xD;&#xA;	)&#xD;&#xA;)&#xD;&#xA;capabilities {navigable, backwardsnavigable, bookmarkable, searchable, updateable}&#xD;&#xA;isolation browse&#xD;&#xA;type dynamic" isreadonly="True" bop:name="Main" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Role_Name, Main.Right_Name" sourcelink.detailkeynames="Main.Role_Name, Main.Right_Name" sourcelink.source="RoleRights" onformclose="AfterEdit" document="Derive('EditRoleRights', 'Edit', 'Main.Role_Name;Main.Right_Name', 'Main.Role_Name;Main.Right_Name', false)" mode="Edit" beforeexecute="BeforeEdit" text="&amp;Edit..." hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" bop:name="Edit" />
+  <sourceaction action="First" source="Main" text="&amp;First" image="Image('Frontend', 'Image.First')" bop:name="MoveFirst" />
+  <sourceaction action="Prior" source="Main" text="&amp;Prior" image="Image('Frontend', 'Image.Prior')" bop:name="MovePrior" />
+  <sourceaction action="Next" source="Main" text="&amp;Next" image="Image('Frontend', 'Image.Next')" bop:name="MoveNext" />
+  <sourceaction action="Last" source="Main" text="&amp;Last" image="Image('Frontend', 'Image.Last')" bop:name="MoveLast" />
+  <sourceaction action="Refresh" source="Main" text="&amp;Refresh" image="Image('Frontend', 'Image.Refresh')" bop:name="Refresh" />
+  <menu text="&amp;Navigation" bop:name="NavigationMenu">
+    <menu action="MoveFirst" bop:name="MoveFirstMenu" />
+    <menu action="MovePrior" bop:name="MovePriorMenu" />
+    <menu action="MoveNext" bop:name="MoveNextMenu" />
+    <menu action="MoveLast" bop:name="MoveLastMenu" />
+    <menu text="-" bop:name="NavSepMenu1" />
+    <menu action="Refresh" bop:name="RefreshMenu" />
+  </menu>
+  <column bop:name="RootBrowseColumn">
+    <search title="Search" document="Derive('Security.RoleRights', 'OrderBrowse', 'Main.Name', 'Main.Role_Name', false)" lookupcolumnname="OrderName" source="RoleRights" hint="Search for a specific row." bop:name="MainSearch">
+      <searchcolumn title="Role_Name" columnname="Main.Role_Name" width="20" bop:name="MainSearchColumnMain.Role_Name" />
+      <searchcolumn title="Right Name" columnname="Main.Right_Name" width="50" bop:name="MainSearchColumnMain.Right_Name" />
+    </search>
+    <row bop:name="GridRow">
+      <grid source="RoleRights" hint="RoleRights" bop:name="Grid">
+        <textcolumn columnname="Main.Right_Name" title="Right Name" width="50" bop:name="MainGridColumnMain.Right_Name" />
+        <checkboxcolumn columnname="Main.HasRight" title="Has Right" width="20" bop:name="MainGridColumnMain.HasRight" />
+        <checkboxcolumn columnname="Main.HasAssignment" title="Has Assignment" width="20" bop:name="MainGridColumnMain.HasAssignment" />
+        <checkboxcolumn columnname="Main.IsGranted" title="Granted" width="20" bop:name="MainGridColumnMain.IsGranted" />
+      </grid>
+      <column bop:name="GridBar">
+        <trigger action="Edit" imagewidth="11" imageheight="13" bop:name="EditTrigger" />
+      </column>
+    </row>
+  </column>
+  <source expression="Rights&#xD;&#xA;	over { Name } &#xD;&#xA;	rename { Name Right_Name }&#xD;&#xA;	add { ARoleName Role_Name, RoleHasRight(ARoleName, Right_Name) HasRight }&#xD;&#xA;	left join (RoleRightAssignments where Role_Name = ARoleName)&#xD;&#xA;		include rowexists HasAssignment &#xD;&#xA;	rename Main&#xD;&#xA;&#xD;&#xA;" bop:name="RoleRights">
+    <dataargument source="Main" columns="ARoleName=Main.Name" bop:name="RoleRightsArgument" />
+  </source>
+  <datascriptaction script="// BeforeEdit&#xA;create session table EditRoleRights in System.Temp&#xD;&#xA;{&#xD;&#xA;	Role_Name : System.Name,&#xD;&#xA;	Right_Name : System.Name,&#xD;&#xA;	HasAssignment : System.Boolean,&#xD;&#xA;	IsGranted : System.Boolean static tags { Storage.IsNullable = &quot;true&quot; },&#xD;&#xA;	key { Role_Name, Right_Name }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;insert &#xD;&#xA;	(Roles where Name = ARoleName over { Name } rename { Name Role_Name })&#xD;&#xA;		join (Rights where Name = ARightName over { Name } rename { Name Right_Name })&#xD;&#xA;		left join (RoleRightAssignments where Role_Name = ARoleName and Right_Name = ARightName) &#xD;&#xA;			include rowexists HasAssignment&#xD;&#xA;	into EditRoleRights;&#xD;&#xA;&#xD;&#xA;attach operator RoleRights_Update to EditRoleRights on { before update };&#xD;&#xA;&#xD;&#xA;" bop:name="BeforeEdit">
+    <dataargument source="RoleRights" columns="ARoleName=Main.Role_Name;ARightName=Main.Right_Name" bop:name="BeforeEditArgument" />
+  </datascriptaction>
+  <datascriptaction script="// AfterEdit&#xA;detach operator RoleRights_Update from EditRoleRights on { before update };&#xA;drop table EditRoleRights;&#xA;" bop:name="AfterEdit" />
+</interface>

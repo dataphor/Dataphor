@@ -1,0 +1,243 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Dataphor 
+	System.Platform Library
+*/
+
+//* Role: PlatformUser
+CreateRole('PlatformUser');
+
+//* Type: FileName
+create type FileName like String 
+{
+	constraint LengthValid value.Length() <= 260
+}
+	tags
+	{
+		Storage.Length = "260",
+		Frontend.Title = "File Name",
+		Frontend.Width = "80",
+		Frontend.TextBox.MaxLength = "260"
+	};
+grant usage on FileName to role PlatformUser;
+
+//* Operator: FileExists
+// Returns true if the file given by AFileName exists, false otherwise.
+create operator FileExists(const AFileName : FileName) : Boolean class "System.Platform.FileExistsNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on FileExists(FileName) to role PlatformUser;
+
+//* Operator: DeleteFile
+// Deletes the file AFileName.
+create operator DeleteFile(const AFileName : FileName) class "System.Platform.DeleteFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on DeleteFile(FileName) to role PlatformUser;
+
+//* Operator: CopyFile
+// Copies ASourceFileName to ATargetFileName. If ATargetFileName already exists, an error is raised.
+create operator CopyFile(const ASourceFileName : FileName, const ATargetFileName : FileName) class "System.Platform.CopyFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CopyFile(FileName, FileName) to role PlatformUser;
+
+//* Operator: CopyFile
+// Copies ASourceFileName to ATargetFileName. If ATargetFileName already exists, AOverwrite indicates whether or not it should be overwritten.
+create operator CopyFile(const ASourceFileName : FileName, const ATargetFileName : FileName, const AOverwrite : Boolean) class "System.Platform.CopyFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CopyFile(FileName, FileName, Boolean) to role PlatformUser;
+
+//* Operator: CreateFile
+// Creates a file named AFileName.
+create operator CreateFile(const AFileName : FileName) class "System.Platform.CreateFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CreateFile(FileName) to role PlatformUser;
+
+//* Operator: CreateTextFile
+// Creates a file named AFileName, with the contents given by AData.
+create operator CreateTextFile(const AFileName : FileName, const AData : String) class "System.Platform.CreateFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CreateTextFile(FileName, String) to role PlatformUser;
+
+//* Operator: CreateBinaryFile
+// Creates a file named AFileName, with the contents given by AData.
+create operator CreateBinaryFile(const AFileName : FileName, const AData : Binary) class "System.Platform.CreateFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CreateBinaryFile(FileName, Binary) to role PlatformUser;
+
+//* Operator: AppendTextFile
+// Appends AData to the file AFileName. If AFileName does not exist, an error is raised.
+create operator AppendTextFile(const AFileName : FileName, const AData : String) class "System.Platform.AppendFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on AppendTextFile(FileName, String) to role PlatformUser;
+
+//* Operator: AppendBinaryFile
+// Appends AData to the file AFileName, If AFileName does not exist, an error is raised.
+create operator AppendBinaryFile(const AFileName : FileName, const AData : Binary) class "System.Platform.AppendFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on AppendBinaryFile(FileName, Binary) to role PlatformUser;
+
+//* Operator: LoadTextFile
+// Returns the contents of AFileName.
+create operator LoadTextFile(const AFileName : FileName) : String class "System.Platform.LoadTextFileNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on LoadTextFile(FileName) to role PlatformUser;
+
+//* Operator: LoadBinaryFile
+// Returns the contents of AFileName.
+create operator LoadBinaryFile(const AFileName : FileName) : Binary class "System.Platform.LoadBinaryFileNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on LoadBinaryFile(FileName) to role PlatformUser;
+
+//* Operator: SaveTextFile
+// Replaces the contents of AFileName with AData.
+create operator SaveTextFile(const AFileName : FileName, const AData : String) class "System.Platform.SaveFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SaveTextFile(FileName, String) to role PlatformUser;
+
+//* Operator: SaveBinaryFile
+// Replaces the contents of AFileName with AData.
+create operator SaveBinaryFile(const AFileName : FileName, const AData : Binary) class "System.Platform.SaveFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SaveBinaryFile(FileName, Binary) to role PlatformUser;
+
+//* Operator: MoveFile
+// Moves ASourceFileName to ATargetFileName. If ATargetFileName already exists, an error is raised.
+create operator MoveFile(const ASourceFileName : FileName, const ATargetFileName : FileName) class "System.Platform.MoveFileNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on MoveFile(FileName, FileName) to role PlatformUser;
+
+//* Operator: DirectoryExists
+// Returns true if the directory given by ADirectoryName exists, false otherwise.
+create operator DirectoryExists(const ADirectoryName : FileName) : Boolean class "System.Platform.DirectoryExistsNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on DirectoryExists(FileName) to role PlatformUser;
+
+//* Operator: GetFileName
+// Returns the file name of the path given by AFileName.
+create operator GetFileName(const AFileName : FileName) : FileName class "System.Platform.GetFileNameNode";
+grant usage on GetFileName(FileName) to role PlatformUser;
+
+//* Operator: GetDirectoryName
+// Returns the directory information for the path given by AFileName.
+create operator GetDirectoryName(const AFileName : FileName) : FileName class "System.Platform.GetDirectoryNameNode";
+grant usage on GetDirectoryName(FileName) to role PlatformUser;
+
+//* Operator: GetFileExtension
+// Returns the extension, if any, of the file given by AFileName.
+create operator GetFileExtension(const AFileName : FileName) : FileName class "System.Platform.GetFileExtensionNode";
+grant usage on GetFileExtension(FileName) to role PlatformUser;
+
+//* Operator: ChangeFileExtension
+// Returns the file name given by AFileName with the extension changed to AExtension.
+create operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName class "System.Platform.ChangeFileExtensionNode";
+grant usage on ChangeFileExtension(FileName, FileName) to role PlatformUser;
+
+//* Operator: FileNameHasExtension
+// Returns true if the file name given by AFileName has an extension.
+create operator FileNameHasExtension(const AFileName : FileName) : Boolean class "System.Platform.FileNameHasExtensionNode";
+grant usage on FileNameHasExtension(FileName) to role PlatformUser;
+
+//* Operator: CombinePath
+// Returns the combined path given by APath and ASubPath, with a directory separator if necessary.
+create operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName class "System.Platform.CombinePathNode";
+grant usage on CombinePath(FileName, FileName) to role PlatformUser;
+
+//* Operator: CreateDirectory
+// Creates a directory at the path given by ADirectoryName.
+create operator CreateDirectory(const ADirectoryName : FileName) class "System.Platform.CreateDirectoryNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on CreateDirectory(FileName) to role PlatformUser;
+
+//* Operator: DeleteDirectory
+// Deletes the directory given by ADirectoryName.
+create operator DeleteDirectory(const ADirectoryName : FileName) class "System.Platform.DeleteDirectoryNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on DeleteDirectory(FileName) to role PlatformUser;
+
+//* Operator: MoveDirectory
+// Moves ASourceDirectoryName to ATargetDirectoryName. If ATargetDirectoryName already exists, an error is raised.
+create operator MoveDirectory(const ASourceDirectoryName : FileName, const ATargetDirectoryName : FileName) class "System.Platform.MoveDirectoryNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on MoveDirectory(FileName, FileName) to role PlatformUser;
+
+//* Operator: GetAttributes
+// Returns the attributes of the file or directory given by APath.
+create operator GetAttributes(const APath : FileName) : Integer class "System.Platform.GetAttributesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on GetAttributes(FileName) to role PlatformUser;
+
+//* Operator: SetAttributes
+// Sets the attributes of the file or directory given by APath.
+create operator SetAttributes(const APath : FileName, const AAttributes : Integer) class "System.Platform.SetAttributesNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SetAttributes(FileName, Integer) to role PlatformUser;
+
+//* Operator: GetCreationTime
+// Returns the date and time that the file or directory given by APath was created.
+create operator GetCreationTime(const APath : FileName) : DateTime class "System.Platform.GetCreationTimeNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on GetCreationTime(FileName) to role PlatformUser;
+
+//* Operator: SetCreationTime
+// Sets the date and time that the file or directory given by APath was created.
+create operator SetCreationTime(const APath : FileName, const ADateTime : DateTime) class "System.Platform.SetCreationTimeNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SetCreationTime(FileName, DateTime) to role PlatformUser;
+
+//* Operatr: GetLastWriteTime
+// Returns the date and time that the file or directory given by APath was last written to.
+create operator GetLastWriteTime(const APath : FileName) : DateTime class "System.Platform.GetLastWriteTimeNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on GetLastWriteTime(FileName) to role PlatformUser;
+
+//* Operator: SetLastWriteTime
+// Sets the date and time that the file or directory given by APath was last written to.
+create operator SetLastWriteTime(const APath : FileName, const ADateTime : DateTime) class "System.Platform.SetLastWriteTimeNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SetLastWriteTime(FileName, DateTime) to role PlatformUser;
+
+//* Operator: GetLastAccessTime
+// Returns the date and time that the file or directory given by APath was last accessed.
+create operator GetLastAccessTime(const APath : FileName) : DateTime class "System.Platform.GetLastAccessTimeNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on GetLastAccessTime(FileName) to role PlatformUser;
+
+//* Operator: SetLastAccessTime
+// Sets the date and time that the file or directory given by APath was last accessed.
+create operator SetLastAccessTime(const APath : FileName, const ADateTime : DateTime) class "System.Platform.SetLastAccessTimeNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false" };
+grant usage on SetLastAccessTime(FileName, DateTime) to role PlatformUser;
+
+//* Operator: ListDrives
+// Returns a table specifying the logical drives available on the server.
+create operator ListDrives() : table { Path : FileName } class "System.Platform.ListDrivesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on ListDrives() to role PlatformUser;
+
+//* Operator: ListDirectories
+// Returns a table specifying the directories available under APath, optionally limited to the directories matching AMask.
+create operator ListDirectories(const APath : FileName) : table { Path : FileName } class "System.Platform.ListDirectoriesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on ListDirectories(FileName) to role PlatformUser;
+create operator ListDirectories(const APath : FileName, const AMask : FileName) : table { Path : FileName } class "System.Platform.ListDirectoriesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on ListDirectories(FileName, FileName) to role PlatformUser;
+
+//* Operator: ListFiles
+// Returns a table specifying the files available under APath, optionally limited to the files matching AMask.
+create operator ListFiles(const APath : FileName) : table { Path : FileName } class "System.Platform.ListFilesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on ListFiles(FileName) to role PlatformUser;
+create operator ListFiles(const APath : FileName, const AMask : FileName) : table { Path : FileName } class "System.Platform.ListFilesNode" tags { DAE.IsRemotable = "false", DAE.IsLiteral = "false" };
+grant usage on ListFiles(FileName, FileName) to role PlatformUser;
+
+//* Operator: PlatformExecute
+// Executes the command-line given by ACommandLine.
+// Returns the exit code of the process, and the output, if any.
+create operator PlatformExecute(const AFileName : String) : row { ExitCode : Integer, Output : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+grant usage on PlatformExecute(String) to role PlatformUser;
+create operator PlatformExecute(const AFileName : String, const AArguments : String) : row { ExitCode : Integer, Output : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+grant usage on PlatformExecute(String, String) to role PlatformUser;
+create operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }) : row { ExitCode : Integer, Output : String, Errors : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+grant usage on PlatformExecute(String, String, row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }) to role PlatformUser;
+create operator PlatformExecute(const AFileName : String, const AArguments : String, const AWorkingDirectory : String) : row { ExitCode : Integer, Output : String }
+begin
+	var LResult := PlatformExecute(AFileName, AArguments, row { AWorkingDirectory WorkingDirectory, nil NoWindow, nil WindowStyle, nil RedirectOutput, nil RedirectErrors });
+	result := row { LResult.ExitCode ExitCode, LResult.Output Output };
+end;
+grant usage on PlatformExecute(String, String, String) to role PlatformUser;
+create operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }, const AStartAs : row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) : row { ExitCode : Integer, Output : String, Errors : String } class "System.Platform.PlatformExecuteNode" tags { DAE.IsRemotable = "false", DAE.IsFunctional = "false", DAE.IsLiteral = "false", DAE.IsDeterministic = "false", DAE.IsRepeatable = "false" };
+grant usage on PlatformExecute(String, String, row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }, row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) to role PlatformUser;
+
+//* Operator: ReplaceFile
+// Creates or replaces the contents of the specified file.
+create operator ReplaceFile(AFileName : FileName, AText : String)
+begin
+	if FileExists(AFileName) then
+		DeleteFile(AFileName);
+	CreateTextFile(AFileName, AText);
+end;
+grant usage on ReplaceFile(FileName, String) to role PlatformUser;
+
+//* Operator: SetCurrentDirectory
+// Sets the process specific current directory
+create operator SetCurrentDirectory(const APath : String) class "System.Platform.SetCurrentDirectoryNode";
+grant usage on SetCurrentDirectory(String) to role PlatformUser;
+
+//* Operator: GetCurrentDirectory
+// Gets the process specific current directory
+create operator GetCurrentDirectory() : String class "System.Platform.GetCurrentDirectoryNode";
+grant usage on GetCurrentDirectory() to role PlatformUser;

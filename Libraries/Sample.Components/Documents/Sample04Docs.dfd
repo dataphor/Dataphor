@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample illustrates one use of the lookup elements available in Dataphor.&#xD;&#xA;&#xD;&#xA;The QuickLookup and FullLookup controls and the LookupAction all provide a means of selecting a row from a query to provide values to one or more columns of the source.  QuickLookup can only edit the value of one column while FullLookup and LookupAction can edit one or more columns.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   LookupAction&#xD;&#xA;   QuickLookup&#xD;&#xA;   FullLookup" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="General" bop:name="GeneralPage">
+        <row bop:name="GeneralRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Source&quot;)" bop:name="LookupActionImage1" />
+          <statictext text="The Expression property of the Source uses a left lookup to provide the state and capital names that are needed to for displaying on the form.  Note that the names are not persisted in the SelectedValues table.&#xD;&#xA;" width="50" margintop="10" bop:name="GeneralText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="LookupAction" bop:name="LookupActionPage">
+        <row bop:name="LookupActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="LookupActionImage" />
+          <statictext text="A LookupAction provides a method of selecting a row from a query. The value(s) from one or more of the columns from the query are used to set the value(s) of an equal number of columns in the source.&#xD;&#xA;&#xD;&#xA;In this sample the LookupAction is used to display the list of states. When one is selected, the ID is placed in the Warmest_ID column of the SelectedValues table.&#xD;&#xA;" width="50" margintop="10" bop:name="LookupActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="QuickLookup" bop:name="QuickLookupPage">
+        <row bop:name="QuickLookupRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;QuickLookup&quot;)" bop:name="QuickLookupImage" />
+          <statictext text="A QuickLookup control provides a method of selecting a row from a query. The value from one column of the query is used to set the value of one column in the source.&#xD;&#xA;&#xD;&#xA;In this sample the QuickLookup is used to select a state from the list of states.  When one is selected, the ID is placed in the State_ID column of the SelectedValues table.&#xD;&#xA;" width="50" margintop="10" bop:name="QuickLookupText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="FullLookup" bop:name="FullLookupPage">
+        <row bop:name="FullLookupRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;FullLookup&quot;)" bop:name="FullLookupImage" />
+          <statictext text="A FullLookup control provides a method of selecting a row from a query. The value(s) from one or more of the columns from the query are used to set the value(s) of an equal number of columns in the source.&#xD;&#xA;&#xD;&#xA;The FullLookup can have a single child node.   In this sample the child is a row.  This allows several controls to be placed within the FullLookup.  The nodes are not functionally tied to the FullLookup however they are visually enclosed by the FullLookup.&#xD;&#xA;&#xD;&#xA;In this sample the FullLookup is used to display the state and capital name of the selected state.  When one is selected, the ID is placed in the Capital_State_ID column of the SelectedValues table.  This causes the Choices source to update setting the State.Name and State.Capital columns so they are displayed by the TextBox controls under the FullLookup." width="50" margintop="10" bop:name="FullLookupText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

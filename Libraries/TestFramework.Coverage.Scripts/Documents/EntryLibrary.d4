@@ -1,0 +1,60 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// Entry Library
+
+// Row Variables
+begin
+  var LEntry1 : entry {ID : Integer, Name : String};
+  var LEntry2 : entry {ID : Integer, Name : String};
+  var LEntry3 : entry {Name : String, Phone : Integer};
+  var LRow1 : row {ID : Integer, Name : String};
+  
+  LEntry1 := entry { Nil() as Integer ID, Nil() as String Name };
+
+
+  if not(LEntry1 = entry { Nil() as Integer ID, Nil() as String Name }) then
+	raise Error("Entry assignment or entry equal operator failed");
+	
+  LEntry2 := LEntry1;
+  if not(LEntry2 = LEntry1) then
+	raise Error("entry assignment or entry not equal operator failed");
+	
+  if not IsNil( LEntry1, "ID" ) then
+	raise Error("entry IsNil(entry, integer) failed");
+	
+  if not IsNil( LEntry2, "Name") then
+    raise Error("entry IsNil(entry, string) failed");
+    
+  if entry { 5 id } = entry { 6 id } then
+    raise Error("entry equal failed");
+
+  if entry { 5 id } <> entry { 5 id } then
+    raise Error("entry not equal failed");
+    
+  if (entry { 5 id, 'Blah' name } over { id }) <> entry { 5 id } then
+    raise Error("entry over failed");
+    
+  if (entry { 5 id, 'Blah' name } remove { name }) <> entry { 5 id } then
+    raise Error("entry remove failed");
+    
+  if (entry { 5 id } rename { id name }) <> entry { 5 name } then
+    raise Error("entry rename failed");
+    
+  if (entry { 5 id } add { 'Blah' name }) <> entry { 5 id, 'Blah' name } then
+    raise Error("entry extend failed");
+    
+  if (entry { 5 id } redefine { id := 6 }) <> entry { 6 id } then
+    raise Error("entry redefine failed");
+    
+  LEntry1 := entry { 5 ID, 'Blah' Name };
+  update LEntry1 set { ID := 6 };
+  if (ID from LEntry1) <> 6 then
+    raise Error("entry update failed");
+  
+  LEntry3 := entry { 'Bob' Name, 5556678 Phone };
+  LEntry1 := entry { 6 ID, 'Bob' Name };
+  var LEntry4 : typeof (LEntry1 join LEntry3) := LEntry1 join LEntry3;
+  if (Name from LEntry4) <> 'Bob' then
+   	raise Error("entry join failed");
+end; 

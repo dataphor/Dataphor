@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SaveChangesCaption" xml:space="preserve">
+    <value>Save Changes?</value>
+  </data>
+  <data name="SchemaFormTitle" xml:space="preserve">
+    <value>Schema Designer</value>
+  </data>
+  <data name="RenameMenuItemText" xml:space="preserve">
+    <value>&amp;Rename</value>
+  </data>
+  <data name="DetailsMenuItemText" xml:space="preserve">
+    <value>&amp;Details</value>
+  </data>
+  <data name="DeleteMenuItemText" xml:space="preserve">
+    <value>D&amp;elete</value>
+  </data>
+  <data name="FileOpenTitle" xml:space="preserve">
+    <value>Open File</value>
+  </data>
+  <data name="ObjectTree.RefreshMenuText" xml:space="preserve">
+    <value>&amp;Refresh</value>
+  </data>
+  <data name="ObjectTree.AddMenuText" xml:space="preserve">
+    <value>&amp;Add...</value>
+  </data>
+  <data name="ObjectTree.EditMenuText" xml:space="preserve">
+    <value>&amp;Edit...</value>
+  </data>
+  <data name="ObjectTree.DeleteMenuText" xml:space="preserve">
+    <value>&amp;Delete...</value>
+  </data>
+  <data name="ObjectTree.ViewMenuText" xml:space="preserve">
+    <value>&amp;View...</value>
+  </data>
+  <data name="ObjectTree.SecurityNodeText" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="ObjectTree.UsersNodeText" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="ObjectTree.GroupsNodeText" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="ObjectTree.RolesNodeText" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="ObjectTree.OpenScriptMenuText" xml:space="preserve">
+    <value>Open &amp;Script...</value>
+  </data>
+  <data name="ObjectTree.RegisterMenuText" xml:space="preserve">
+    <value>&amp;Register With Reconciliation</value>
+  </data>
+  <data name="ObjectTree.UnregisterMenuText" xml:space="preserve">
+    <value>Un&amp;register With Reconciliation</value>
+  </data>
+  <data name="ObjectTree.LoadMenuText" xml:space="preserve">
+    <value>Register Without Reconci&amp;liation</value>
+  </data>
+  <data name="ObjectTree.UnloadMenuText" xml:space="preserve">
+    <value>Unregister Without Reconci&amp;liation</value>
+  </data>
+  <data name="ObjectTree.AttachMenuText" xml:space="preserve">
+    <value>A&amp;ttach...</value>
+  </data>
+  <data name="ObjectTree.AttachLibrariesMenuText" xml:space="preserve">
+    <value>Attach &amp;Libraries...</value>
+  </data>
+  <data name="ObjectTree.DetachMenuText" xml:space="preserve">
+    <value>De&amp;tach...</value>
+  </data>
+  <data name="ObjectTree.SetAsCurrentMenuText" xml:space="preserve">
+    <value>&amp;Set As Current</value>
+  </data>
+  <data name="ObjectTree.SchemaNodeText" xml:space="preserve">
+    <value>Schema</value>
+  </data>
+  <data name="ObjectTree.BrowseMenuText" xml:space="preserve">
+    <value>&amp;Browse</value>
+  </data>
+  <data name="ObjectTree.OpenMenuText" xml:space="preserve">
+    <value>&amp;Open</value>
+  </data>
+  <data name="ObjectTree.OpenWithMenuText" xml:space="preserve">
+    <value>Open &amp;With...</value>
+  </data>
+  <data name="ObjectTree.StartMenuText" xml:space="preserve">
+    <value>&amp;Start</value>
+  </data>
+  <data name="ObjectTree.CustomizeMenuText" xml:space="preserve">
+    <value>&amp;New Customization</value>
+  </data>
+  <data name="ObjectTree.ShowMenuText" xml:space="preserve">
+    <value>&amp;Show</value>
+  </data>
+  <data name="ObjectTree.EmitCreateScriptMenuText" xml:space="preserve">
+    <value>Em&amp;it Create Script</value>
+  </data>
+  <data name="ObjectTree.EmitDropScriptMenuText" xml:space="preserve">
+    <value>Emi&amp;t Drop Script</value>
+  </data>
+  <data name="ObjectTree.DropMenuText" xml:space="preserve">
+    <value>&amp;Drop...</value>
+  </data>
+  <data name="ObjectTree.OpenRegisterScriptMenuText" xml:space="preserve">
+    <value>&amp;Open Register Script</value>
+  </data>
+  <data name="ObjectTree.UpgradesMenuText" xml:space="preserve">
+    <value>&amp;Upgrades...</value>
+  </data>
+  <data name="ObjectTree.ExecuteMenuText" xml:space="preserve">
+    <value>&amp;Execute</value>
+  </data>
+  <data name="ObjectTree.ReconciliationModeMenuText" xml:space="preserve">
+    <value>Reconciliation &amp;Mode</value>
+  </data>
+  <data name="ObjectTree.ReconciliationModeNoneMenuText" xml:space="preserve">
+    <value>&amp;None</value>
+  </data>
+  <data name="ObjectTree.ReconciliationModeStartupMenuText" xml:space="preserve">
+    <value>&amp;Startup</value>
+  </data>
+  <data name="ObjectTree.ReconciliationModeCommandMenuText" xml:space="preserve">
+    <value>&amp;Command</value>
+  </data>
+  <data name="ObjectTree.ReconciliationModeAutomaticMenuText" xml:space="preserve">
+    <value>&amp;Automatic</value>
+  </data>
+  <data name="DocumentModifiedCaption" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="DocumentModifiedText" xml:space="preserve">
+    <value>The document ('{0}') was modified, save changes?</value>
+  </data>
+  <data name="UntitledDocumentDescription" xml:space="preserve">
+    <value>Untitled</value>
+  </data>
+  <data name="ScriptSuccessful" xml:space="preserve">
+    <value>Script Executed Successfully</value>
+  </data>
+  <data name="ScriptPrepareSuccessful" xml:space="preserve">
+    <value>Script Prepared Successfully</value>
+  </data>
+  <data name="ScriptFailed" xml:space="preserve">
+    <value>Script Failed</value>
+  </data>
+  <data name="ScriptPrepareFailed" xml:space="preserve">
+    <value>Script Prepare Failed</value>
+  </data>
+  <data name="ScriptInjected" xml:space="preserve">
+    <value>Script injected into library {0} as upgrade version {1}.</value>
+  </data>
+  <data name="SaveDialogTitle" xml:space="preserve">
+    <value>Save As File</value>
+  </data>
+  <data name="AllFilesFilter" xml:space="preserve">
+    <value>All files (*.*)|*.*</value>
+  </data>
+  <data name="SelectDesigner" xml:space="preserve">
+    <value>Select a designer...</value>
+  </data>
+  <data name="ExportSaveDialogTitle" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="LiveDesigner" xml:space="preserve">
+    <value>Live Designer</value>
+  </data>
+  <data name="Designer" xml:space="preserve">
+    <value>Designer</value>
+  </data>
+  <data name="CustomizeMenuText" xml:space="preserve">
+    <value>C&amp;ustomize...</value>
+  </data>
+  <data name="EditMenuText" xml:space="preserve">
+    <value>&amp;Edit...</value>
+  </data>
+  <data name="EditCopyMenuText" xml:space="preserve">
+    <value>E&amp;dit Copy...</value>
+  </data>
+  <data name="SaveAsDialogReplaceText" xml:space="preserve">
+    <value>"{0}: {1}" already exists.  Do you want to replace it?</value>
+  </data>
+  <data name="SaveAsDocumentFormTitle" xml:space="preserve">
+    <value>Save As Document</value>
+  </data>
+  <data name="DropMenu.Copy" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="DropMenu.Move" xml:space="preserve">
+    <value>&amp;Move</value>
+  </data>
+  <data name="DropMenu.Cancel" xml:space="preserve">
+    <value>C&amp;ancel</value>
+  </data>
+  <data name="SelectTargetNode" xml:space="preserve">
+    <value>Select a target node for move or copy operation.</value>
+  </data>
+  <data name="UnspecifiedCategory" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Results" xml:space="preserve">
+    <value>- Results</value>
+  </data>
+  <data name="PrepareSuccessful" xml:space="preserve">
+    <value>Statement Prepared Successfully
+Prepare Time: {0} (Compile Time: {1} Optimize Time: {2} Bind Time: {3})</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved.</value>
+  </data>
+  <data name="ProcessingQuery" xml:space="preserve">
+    <value>Processing Query...</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Exporting...</value>
+  </data>
+  <data name="DisconnectMenuText" xml:space="preserve">
+    <value>&amp;Disconnect</value>
+  </data>
+  <data name="ViewLogMenuText" xml:space="preserve">
+    <value>&amp;View Log...</value>
+  </data>
+  <data name="NewDesignerMenuText" xml:space="preserve">
+    <value>&amp;New Designer...</value>
+  </data>
+  <data name="OpenFileMenuText" xml:space="preserve">
+    <value>&amp;Open File...</value>
+  </data>
+  <data name="OpenFileWithMenuText" xml:space="preserve">
+    <value>Open File &amp;With...</value>
+  </data>
+  <data name="EditSchemaMenuText" xml:space="preserve">
+    <value>&amp;Edit Schema</value>
+  </data>
+  <data name="SaveCatalogMenuText" xml:space="preserve">
+    <value>&amp;Save Catalog</value>
+  </data>
+  <data name="BackupCatalogMenuText" xml:space="preserve">
+    <value>&amp;Backup Catalog</value>
+  </data>
+  <data name="SaveCatalogSuccess" xml:space="preserve">
+    <value>Catalog save completed successfully.</value>
+  </data>
+  <data name="BackupCatalogSuccess" xml:space="preserve">
+    <value>Catalog backup completed successfully.</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Disconnecting...</value>
+  </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="OtherDesignerOpen" xml:space="preserve">
+    <value>Another designer is editing this document.  Close the existing designer and open the document using the selected designer?</value>
+  </data>
+  <data name="OtherDesignerOpenTitle" xml:space="preserve">
+    <value>Document is already open</value>
+  </data>
+  <data name="ObjectTree.ViewDependents" xml:space="preserve">
+    <value>Vie&amp;w Dependents</value>
+  </data>
+  <data name="ObjectTree.ViewDependencies" xml:space="preserve">
+    <value>View De&amp;pendencies</value>
+  </data>
+  <data name="DependentObjects" xml:space="preserve">
+    <value>Dependent Objects</value>
+  </data>
+  <data name="RequiredObjects" xml:space="preserve">
+    <value>Required Objects</value>
+  </data>
+  <data name="ObjectTree.DeriveMenuText" xml:space="preserve">
+    <value>D&amp;erive...</value>
+  </data>
+  <data name="ObjectTree.ManageGroupsText" xml:space="preserve">
+    <value>Manage &amp;Groups</value>
+  </data>
+  <data name="ObjectTree.ManageUsersText" xml:space="preserve">
+    <value>Manage &amp;Users</value>
+  </data>
+  <data name="LibraryNode.CannotEditWhileRegistered" xml:space="preserve">
+    <value> (Cannot edit while registered)</value>
+  </data>
+  <data name="ObjectTree.ShowGeneratedObjects" xml:space="preserve">
+    <value>Show Generated Objects</value>
+  </data>
+  <data name="ObjectTree.ShowSystemObjects" xml:space="preserve">
+    <value>Show System Objects</value>
+  </data>
+  <data name="ObjectTree.ScriptChangesText" xml:space="preserve">
+    <value>Script &amp;Changes...</value>
+  </data>
+  <data name="ObjectTree.ViewListNodeText" xml:space="preserve">
+    <value>Views</value>
+  </data>
+  <data name="ObjectTree.TableListNodeText" xml:space="preserve">
+    <value>Tables</value>
+  </data>
+  <data name="ComparingSchema" xml:space="preserve">
+    <value>Comparing Schemas...</value>
+  </data>
+  <data name="UpgradeLibrariesMenuText" xml:space="preserve">
+    <value>&amp;Upgrade Libraries...</value>
+  </data>
+  <data name="UpgradeLibrariesSuccess" xml:space="preserve">
+    <value>Libraries upgraded successfully.</value>
+  </data>
+  <data name="ObjectTree.UpgradeLibraryMenuText" xml:space="preserve">
+    <value>U&amp;pgrade</value>
+  </data>
+  <data name="UpgradeLibrarySuccess" xml:space="preserve">
+    <value>Library upgraded successfully.</value>
+  </data>
+  <data name="UserAbort" xml:space="preserve">
+    <value>Execution Canceled.</value>
+  </data>
+  <data name="ReplacementsPerformed" xml:space="preserve">
+    <value>{0} occurrence(s) have been replaced.</value>
+  </data>
+  <data name="HelpLoading" xml:space="preserve">
+    <value>The online help file is currently loading.  Online help will be available when it is completely loaded.</value>
+  </data>
+  <data name="FindTextNotFound" xml:space="preserve">
+    <value>Text not found.</value>
+  </data>
+  <data name="AttemptingToCloseWhileExecuting" xml:space="preserve">
+    <value>A script is currently being executed.  The script execution will be cancelled in order for the editor to close.</value>
+  </data>
+  <data name="AttemptingToCloseWhileExecutingCaption" xml:space="preserve">
+    <value>Cancel Execution?</value>
+  </data>
+  <data name="ScriptAnalyzeSuccessful" xml:space="preserve">
+    <value>Script Analyzed Successfully</value>
+  </data>
+  <data name="ScriptAnalyzeFailed" xml:space="preserve">
+    <value>Script Analysis Failed</value>
+  </data>
+  <data name="Analyzer.AttributeTable.AttributeTitle" xml:space="preserve">
+    <value>Attribute</value>
+  </data>
+  <data name="Analyzer.AttributeTable.ValueTitle" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Analyzer.MainSurfaceTitle" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Analyzer.TextDetailTitle" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Analyzer.DetailsColumnTitle" xml:space="preserve">
+    <value>Details...</value>
+  </data>
+  <data name="Analyzer.PlanNodeTitle" xml:space="preserve">
+    <value>{0} - Tree</value>
+  </data>
+  <data name="Analyzer.DetailNodeTitle" xml:space="preserve">
+    <value>{0} - Details</value>
+  </data>
+	<data name="DataphoriaTitle"><value>Dataphoria</value></data>
+</root>

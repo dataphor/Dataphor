@@ -1,0 +1,139 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Money tests
+begin
+	// Everything should add up to 100
+	var LStaticMoney: Money := Money(123456.78);
+	var LTestMoney: Money;
+	
+	// Money assignment
+	LTestMoney := Money(123456.78);
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money assignment Error");
+	
+	// Money + Money
+	LTestMoney := Money(123000.0) + Money(456.78);
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money+Money Error");	
+		
+	// Money - Money
+	LTestMoney := Money(124691.34) - Money(1234.56);
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money-Money Error");	
+		
+	// Money * Decimal
+	LTestMoney = Money(1234.5678) * 100.00;
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money*Decimal Error");
+		
+	// Money * Integer
+	LTestMoney = Money(1234.5678) * 100;
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money*Integer Error");
+		
+	// Decimal * Money
+	LTestMoney = 100.00 * Money(1234.5678);
+	if LTestMoney <> LStaticMoney then
+		raise Error("Decimal*Money Error");
+		
+	// Integer * Money
+	LTestMoney = 100 * Money(1234.5678);
+	if LTestMoney <> LStaticMoney then
+		raise Error("Integer*Money Error");		
+	
+	// Money / Decimal
+	LTestMoney = Money(12345678.00) / 100.00;
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money/Decimal Error");
+		
+	// Money / Integer
+	LTestMoney = Money(12345678.00) / 100;
+	if LTestMoney <> LStaticMoney then
+		raise Error("Money/Integer Error");
+		
+	// Money / Money
+	if ($123456.78 / LStaticMoney) <> 1.0 then
+		raise Error("Money/Money Error");
+		
+	if LTestMoney = LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money=Money Error");
+	end;
+	
+	if LTestMoney >= LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money>=Money Error");
+	end;
+	
+	if LTestMoney <= LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money<=Money Error");
+	end;
+	
+	LTestMoney := Money(0.0);
+	if LTestMoney < LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money<Money Error");
+	end;
+	
+	if LTestMoney <= LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money<=Money Error");
+	end;
+	
+	LTestMoney := Money(999999.99);
+	if LTestMoney > LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money>Money Error");
+	end;
+	
+	if LTestMoney >= LStaticMoney then
+	begin
+	end
+	else
+	begin
+		raise Error("Money>=Money Error");
+	end;
+end;
+
+begin
+   var LMoney1 := $10.5;
+   if LMoney1.Floor() <> $10 then
+     raise Error("Money Floor failed");
+     
+   if LMoney1.Ceiling() <> $11 then
+     raise Error("Money Ceiling failed");
+     
+   if LMoney1.Round(0) <> $11 then
+     raise Error("Money round failed");
+     
+   if LMoney1.Truncate() <> $10 then
+     raise Error("Money truncate failed");
+     
+   if LMoney1.Frac() <> $0.5 then
+     raise Error("Money Frac failed");
+     
+   if LMoney1.Abs() <> $10.5 then
+     raise Error("Money Abs failed");
+end;

@@ -1,0 +1,96 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Derivation Maps coverage for the frontend library
+
+// Insert, Update, and Delete a derivation map for an unregistered library
+CreateLibrary(LibraryDescriptor('Test', VersionNumber(1), "", list(FileReference){}, {LibraryReference('System', VersionNumber(1))}));
+
+insert table { row { 'Test' Library_Name, 'Test' Query, 'Browse' PageType, '' MasterKeyNames, '' DetailKeyNames, true Elaborate, 'Load("Test", "Test")' DocumentExpression } }
+	into LibraryDerivationMaps;
+	
+if not exists (LibraryDerivationMaps where Library_Name = 'Test' and Query = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps insert failed.");
+	
+update LibraryDerivationMaps set { PageType := 'Add' }
+	where Library_Name = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true;
+	
+if exists (LibraryDerivationMaps where Library_Name = 'Test' and Query = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps update failed.");
+if not exists (LibraryDerivationMaps where Library_Name = 'Test' and Query = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps update failed.");
+	
+delete LibraryDerivationMaps
+	where Library_Name = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true;
+
+if exists (LibraryDerivationMaps where Library_Name = 'Test' and Query = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps delete failed.");
+	
+// Insert, Update, and Delete a derivation map for a registered library
+RegisterLibrary('Test');
+
+insert table { row { 'Test' Library_Name, 'Test' Query, 'Browse' PageType, '' MasterKeyNames, '' DetailKeyNames, true Elaborate, 'Load("Test", "Test")' DocumentExpression } }
+	into LibraryDerivationMaps;
+	
+if not exists (DerivationMaps where Query = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps insert failed while registered.");
+	
+update LibraryDerivationMaps set { PageType := 'Add' }
+	where Library_Name = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true;
+	
+if exists (DerivationMaps where Query = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps update failed while registered.");
+if not exists (DerivationMaps where Query = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps update failed while registered.");
+	
+delete LibraryDerivationMaps
+	where Library_Name = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true;
+
+if exists (DerivationMaps where Query = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps delete failed while registered.");
+	
+UnregisterLibrary('Test');
+
+// Registering and unregistering a library loads and unloads its derivation maps
+insert table { row { 'Test' Library_Name, 'Test' Query, 'Browse' PageType, '' MasterKeyNames, '' DetailKeyNames, true Elaborate, 'Load("Test", "Test")' DocumentExpression } }
+	into LibraryDerivationMaps;
+	
+RegisterLibrary('Test');
+
+if not exists (DerivationMaps where Query = 'Test' and PageType = 'Browse' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps insert failed while registered.");
+	
+UnregisterLibrary('Test');
+
+if exists (DerivationMaps where Query = 'Test' and PageType = 'Add' and MasterKeyNames = '' and DetailKeyNames = '' and Elaborate = true) then
+	raise Error("LibraryDerivationMaps delete failed while registered.");
+	
+// Insert a conflicting derivation map in a new unregsitered library and attempt to register the library
+
+RegisterLibrary('Test');
+
+CreateLibrary(LibraryDescriptor('Testing', VersionNumber(1), "", list(FileReference){}, {LibraryReference('System', VersionNumber(1))}));
+
+insert table { row { 'Testing' Library_Name, 'Test' Query, 'Browse' PageType, '' MasterKeyNames, '' DetailKeyNames, true Elaborate, 'Load("Test", "Test")' DocumentExpression } }
+	into LibraryDerivationMaps;
+	
+begin
+	var LErrorHit : Boolean := false;
+	try
+		RegisterLibrary('Testing');
+	except
+		LErrorHit := true;
+	end;
+	
+	if not LErrorHit then
+		raise Error("Conflicting derivation map allowed.");
+end;
+
+UnregisterLibrary('Testing');
+UnregisterLibrary('Test');
+
+DropLibrary('Testing');
+DropLibrary('Test');
+

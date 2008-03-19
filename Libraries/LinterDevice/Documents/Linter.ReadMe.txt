@@ -1,0 +1,30 @@
+The LinterDevice provided with Dataphor provides a device for 
+communicating with Linter SQL Server.
+
+This LinterDevice is a BETA version!
+
+===============================================
+
+EXAMPLE:
+
+create device Linter
+ reconciliation { mode = { command }, master = device }
+ class "LinterDevice"
+  attributes
+  {
+   "DataSource" = "LinterServer"
+  };
+		
+CreateDeviceUser("System", "Linter", "SYSTEM", "LinterPassword");
+CreateDeviceUser("Admin", "Linter", "SYSTEM", "LinterPassword");
+
+In this example:
+ The name of the device is "Linter".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "LinterDevice".
+ The data will be stored on the Linter server
+  running under the name of LinterServer.
+
+ Two Dataphor users are created, both are mapped to the
+  Linter server user named SYSTEM.

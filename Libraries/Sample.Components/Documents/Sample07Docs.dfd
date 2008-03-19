@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroductionRow">
+          <statictext text="This sample illustrates the use of D4 scripts, C# scripts, code reuse, and two methods of filtering the data.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   BlockAction&#xD;&#xA;   ScriptAction&#xD;&#xA;   CallAction&#xD;&#xA;   Search&#xD;&#xA;   Filtering&#xD;&#xA;      EditFilterAction&#xD;&#xA;      Custom Filter&#xD;&#xA;" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="BlockAction" bop:name="BlockActionPage">
+        <row bop:name="BlockRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="BlockImage" />
+          <statictext text="The BlockAction allows several action can be chained together in a specified order.  When a BlockAction is executed each action in the block is executed one at a time in the order listed.&#xD;&#xA;&#xD;&#xA;An action that is a child of a BlockAction will still be listed as available in the Action property of components so it can be executed independently.&#xD;&#xA;&#xD;&#xA;The same results can be achieved by using the AfterExecute and/or BeforeExecute properties.  Using the BlockAction has the advantage of being able to see the sequence on the Component Tree.  Using the BlockAction also leaves the individual actions available to be used independently.&#xD;&#xA;&#xD;&#xA;In this sample:&#xD;&#xA;    When the SetFilter BlockAction is executed, it executes the SetMainFilter ScriptAction then the CallRefreshFilter&amp;Counter CallAction.&#xD;&#xA;    When the ClearFilter BlockAction is executed, it executes the ClearMainFilter ScriptAction then the RefreshFilter&amp;Counter ScriptAction." width="50" margintop="10" bop:name="BlockText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="ScriptAction" bop:name="ScriptActionPage">
+        <row bop:name="ScriptActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="ScriptActionImage" />
+          <statictext text="A ScriptAction allows a C# or Visual Basic script to be executed in the context of the client.  It is used to effect changes in the form or data at the client.&#xD;&#xA;&#xD;&#xA;In this sample two ScriptAction components are used.  The SetMainFilter script action uses data from the FilterSource to build a D4 expression that is placed in the Countries source Filter property.  The ClearMainFilter script action sets the Countries.Filter property to an empty string.&#xD;&#xA;" width="50" margintop="10" bop:name="ScriptActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="CallAction" bop:name="CallActionPage">
+        <row bop:name="CallActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="CallActionImage" />
+          <statictext text="The CallAction provides code (or action) reuse capability.&#xD;&#xA;&#xD;&#xA;In this sample the CallRefreshFilter&amp;Counter CallAction executes the RefreshFitler&amp;Counter ScriptAction.&#xD;&#xA;&#xD;&#xA;Note that the ClearMainFilter and RefreshFilter&amp;Counter script actions could have been combined into one ScriptAction.  Keeping them separate allowed for the reuse of the code in the RefreshFilter&amp;Counter script.&#xD;&#xA;" width="50" margintop="10" bop:name="CallActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Search" bop:name="SearchPage">
+        <row bop:name="SearchRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Search&quot;)" bop:name="SearchImage" />
+          <statictext text="The Search is a group component used to provides incremental searching of the data.  Key and ordered columns are can be used in the search.&#xD;&#xA;&#xD;&#xA;SearchColumn controls are used to provide access to the key and ordered columns.&#xD;&#xA;&#xD;&#xA;As a value is entered into a SearchColumn control, the source will automatically navigate to the first matching row.  If no match exists, the source will navigate to the first row following where a match would be or to the last row.&#xD;&#xA;&#xD;&#xA;When more than one column can be search, the down arrow to the right of the search will allow the selection of which column(s) to search.&#xD;&#xA;" width="50" margintop="10" bop:name="SearchText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Filter" bop:name="FilterPage">
+        <notebook activepage="FilterIntroNotebookPage" bop:name="FilterNotebook">
+          <notebookpage title="Filter Introduction" bop:name="FilterIntroNotebookPage">
+            <row bop:name="FilterIntroRow">
+              <statictext text="The EditFilterAction provides the end user with complete control of the Source’s filter property.  However the end user has to enter a valid D4 expressions into the editor provided by the action.  This requires the end user to be familiar with the D4 language.&#xD;&#xA;&#xD;&#xA;The custom filter provides the end user with a filter that can be used without any knowledge of the D4 language.  The custom filter can be as simple or as complex as desired.  However the filter will be limited to whatever capabilities the developer of the form provided.  This filter is implemented using several components and scripts.&#xD;&#xA;" width="50" margintop="10" bop:name="FilterIntroText" />
+            </row>
+          </notebookpage>
+          <notebookpage title="EditFilterAction" bop:name="EditFilterActionPage">
+            <row bop:name="EditFilterActionRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="EditFilterActionImage" />
+              <statictext text="An EditFilterAction allows the end user to modify the D4 expression in the Source’s Filter property.&#xD;&#xA;&#xD;&#xA;In this sample the EditFilterAction is attached to the Countries source.  Editing the Filter property will determine what rows are retrieved by the source.&#xD;&#xA;&#xD;&#xA;The text entered into the Filter property must be a valid D4 expression which restricts the rows and evaluates as a boolean value.&#xD;&#xA;" width="50" margintop="10" bop:name="EditFilterActionText" />
+            </row>
+          </notebookpage>
+          <notebookpage title="Custom Filter" bop:name="CustomFilterPage">
+            <notebook activepage="CFIntroNotebookPage" bop:name="CFNotebook">
+              <notebookpage title="Custom Filter Introduction" bop:name="CFIntroNotebookPage">
+                <row bop:name="CFIntroRow">
+                  <statictext text="The custom filter provides the user with a method of restricting the rows.  It can be implemented as simple or as complex as desired or necessary.  In most cases the end user will not need any knowledge of D4 expressions to use a custom filter.&#xD;&#xA;&#xD;&#xA;The Row Count feature is not required to implement a filter.&#xD;&#xA;&#xD;&#xA;NOTE:  This is only an example of how a custom filter might be implemented.  You can use whatever components are necessary to provide the capabilities you need for your application.&#xD;&#xA;" width="50" margintop="10" bop:name="CFIntroText" />
+                </row>
+              </notebookpage>
+              <notebookpage title="FilterSource" marginbottom="0" bop:name="CFFilterSourcePage">
+                <row bop:name="CFFilterSourceRow">
+                  <statictext text="The FilterSource is used to provide a place to store the filter criteria.&#xD;&#xA;&#xD;&#xA;Expression property:&#xD;&#xA;    Each column of the Countries Source that can participate in the filter has a corresponding column in the FilterSource and nil is allowed.  Three other columns exist.  SearchType is used to select the operator to use for string comparison (like or matches).  PopulationTest and AreaTest are used to select the comparison operator to use for the numeric fields.&#xD;&#xA;    The DAE.IsComputed = “false” tags are used to tell the Dataphor server not to calculate the value of the columns.  The default for this tag is true.  Normally a column that is “added” to a row is automatically computed by the Dataphor server, as would be done with aggregate operators such as Count().&#xD;&#xA;&#xD;&#xA;    OnRowChange property: is set to the SetFilter BlockAction.  This is done so the filter will be automatically updated when any of the columns (filter criteria) are changed." width="50" margintop="10" marginbottom="0" bop:name="CFFilterSourceStaticText" />
+                </row>
+              </notebookpage>
+              <notebookpage title="RowCountSource" bop:name="CFRowCountSourceNotebookPage">
+                <row bop:name="CFRowCountSourceRow">
+                  <statictext text="The RowCountSource is used to count the number of rows returned based on the current filter expression.  The RowCountSource.Expression property is set by the ResetFilter&amp;Counter ScriptAction based on the current expression in the Countries.Filter property." width="50" margintop="10" bop:name="CFRowCountSourceText" />
+                </row>
+              </notebookpage>
+              <notebookpage title="SetMainFilter" bop:name="CFSetMainFilterScriptNotebookPage">
+                <row bop:name="CFSetMainFilterScriptRow">
+                  <statictext text="The SetMainFilter script action builds the D4 expression and places it in the Countries.Filter property.&#xD;&#xA;&#xD;&#xA;The columns in the FilterSource used to store the text and numeric values are allowed to be nil.  The NilIfBlank property is set to True for each of the controls associated with the columns for the text and numeric values.  This is useful so the only check needed is the .HasValue.  If the column has a value it is to be used in the filter." width="50" margintop="10" bop:name="CFSetMainFilterScriptStaticText" />
+                </row>
+              </notebookpage>
+              <notebookpage title="ClearMainFilter" bop:name="CFClearMainFilterSciptNotebookPage">
+                <row bop:name="CFClearMainFilterRow">
+                  <statictext text="The ClearMainFilter script action set the Countries.Filter property to an empty string.&#xD;&#xA;" width="50" margintop="10" bop:name="CFClearMainFilterScriptStaticText" />
+                </row>
+              </notebookpage>
+              <notebookpage title="RefreshAll" bop:name="CFRefreshAllScriptNotebookPage">
+                <row bop:name="CFRefreshAllScriptRow">
+                  <statictext text="The RefreshAllScriptAction sets the SetClearFilterTrigger Action property and the RowCountSource Expression property based on the state of the filter.&#xD;&#xA;" width="50" margintop="10" bop:name="CFRefreshAllScriptStaticText" />
+                </row>
+              </notebookpage>
+            </notebook>
+          </notebookpage>
+        </notebook>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

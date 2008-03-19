@@ -1,0 +1,63 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Views
+	// Constructs
+	// Keys
+	// Orders
+	// Constraints
+
+create table TestTable5 { ID : Integer, order { ID } };
+create table TestTable6 { ID : Integer, Name : String, key { ID } };
+
+create view TestView TestTable6;
+
+create view TestView2 TestTable6
+// order
+{
+	order { ID asc }
+};
+
+create view TestView3 TestTable6
+// key
+{
+	key {	Name }
+};
+
+create view TestView4 TestTable6
+// reference
+{
+	reference TestReference { ID } references TestTable5 { ID }
+};
+
+create view TestView5 TestTable6
+{
+	constraint IsValid ID > 5
+};
+
+create table Test { ID : Integer, Name : String };
+create table TestLink { Test_ID : Integer, Parent_Test_ID : Integer, key { Test_ID } };
+
+create view TestView6 Test where ID > 5;
+create view TestView7 Test over { ID };
+create view TestView8 Test remove { Name };
+create view TestView9 Test return 1 by { Name };
+create view TestView10 Test add { Name + Name LongName };
+create view TestView11 Test redefine { Name := Name + Name };
+create view TestView12 Test adorn { Name tags { Frontend.Title = "Name" } };
+create view TestView13 Test group by { Name } add { Count() NameCount };
+create view TestView14 Test rename { Name RenamedName };
+create view TestView15 TestLink explode by parent Test_ID = Parent_Test_ID where Test_ID = 1;
+create view TestView16 Test join (TestLink rename { Test_ID ID });
+create view TestView17 Test join TestLink by ID = Test_ID;
+create view TestView18 Test intersect Test;
+create view TestView19 Test union Test;
+create view TestView20 Test minus Test;
+create view TestView21 Test left join (TestLink rename { Test_ID ID });
+create view TestView22 Test left join TestLink by ID = Test_ID;
+create view TestView23 Test right join (TestLink rename { Test_ID ID });
+create view TestView24 Test right join TestLink by ID = Test_ID;
+create view TestView25 (Test rename A) times (Test rename B);
+create view TestView26 Test { order { Name sort CompareText(left.value, right.value) } };

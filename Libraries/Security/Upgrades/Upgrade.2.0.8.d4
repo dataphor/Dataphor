@@ -1,0 +1,18 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+drop view AddUserDeviceUser;
+create view AddUserDeviceUser
+	AddUserDeviceUserBase
+		adorn
+		{
+			drop reference DeviceUsers_Devices
+		}
+	{
+		constraint PasswordValid Password = ConfirmPassword 
+			static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	};
+	
+grant usage on AddUserDeviceUser to role SecurityUser;

@@ -1,0 +1,96 @@
+The Oracle Device provided with Dataphor provides a device 
+for communicating with Oracle Server, versions 8i, and 9i.
+
+The default connectivity implementation for this device is the
+MSOracleConnection, which utilizes the Microsoft Data Provider
+for Oracle. This provider requires the Oracle OCI (Oracle Call Interface) be installed
+on the machine running the Dataphor Server instance. The OCI
+can be installed with the Oracle Client installation.
+
+For more information on connectivity issues, please refer to
+the documentation for the Oracle Client and the Oracle Data Provider for .net (ODP)
+
+===============================================
+
+EXAMPLE:
+
+create device OracleTestDevice
+  reconciliation { mode = { command }, master = device }
+  class "OracleDevice"
+    attributes
+    {
+      "HostName" = "TNSName",
+      "Schema" = "SchemaName"
+    };
+
+CreateDeviceUser("System", "OracleTestDevice", "system", "manager");
+CreateDeviceUser("Admin", "OracleTestDevice", "system", "manager");
+
+EnsureDeviceStarted("OracleTestDevice");
+
+In this example:
+ The name of the device is "OracleTestDevice".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "OracleDevice"
+ The HostName attribute is the TNSNames file entry for the instance you 
+ 	wish to connect to if you are using the TNSNames method of connection.
+ The Schema attribute is used to set the Schema that the device will map to. 
+
+ Two Dataphor users are created, both are mapped to the
+  Oracle server user "system" with a password of "manager".
+
+For more information refer to documentation in the 
+Dataphor Reference under Libraries, OracleDevice.
+
+Outter joins in some cases do not translate for Oracle 8.1.7. 
+A work around is to use the "ShouldSupport" modifier for the portion of the query that will
+not be supported. 
+	with { ShouldSupport = "false" }
+
+================================================
+
+Empty Strings and NULL in Oracle
+
+Oracle DBMSs do not distinguish between the empty string and NULL, resulting in some strange
+comparison results when dealing with empty strings. In an attempt to compensate for this behavior,
+the Dataphor Oracle Device translates all empty string values as strings of a single space. In the
+vast majority of cases, this solves the problem, resulting in string comparison semantics roughly
+equivalent to the D4 language. However, there are cases where this behavior can lead to unexpected
+results.
+
+===============================================
+
+Nationalization Support in Oracle
+
+Oracle DBMSs support a sophisticated set of features aimed at enabling multi-language applications.
+These features are exposed through a set of parameters (prefixed NLS_) available at the instance,
+database, and session level. In terms of the interaction between Dataphor and the Oracle system, the
+most important of these are NLS_LANGUAGE, NLS_SORT and NLS_COMP. NLS_LANGUAGE determines the default
+value for NLS_SORT, which ultimately determines the collation order for result sets requested from
+the Oracle system. NLS_COMP determines whether or not the string comparison operators follow the
+same semantics, or use binary comparison semantics. By default, setting NLS_LANGUAGE will set
+NLS_SORT, but will not set NLS_COMP. The result is that the comparison operators used by the
+Dataphor Server to reposition cursors and locate bookmarks internally are not consistent with the
+result sets being returned by the Oracle server. This in turn produces essentially random result
+sets from cursors and query expressions in the Dataphor Server. There are two options to address
+this issue:
+
+1) Set the NLS_SORT parameter to BINARY. This will force all sorting to occur using the same
+binary comparison semantics as the string comparison operators. Unfortunately, this will also
+prevent result sets from being ordered by any collation order other than binary.
+
+2) Set the NLS_COMP parameter to ANSI. This will force all string comparison operators to use the
+same semantics as the collation order for the currently selected NLS_SORT. This option allows the
+result set to ordered by the language-specific collation order, however, care should be taken to
+ensure that large datasets are appropriately backed with indexes matching the language-specific
+collation order. The Oracle nationalization documentation refers to these indexes as linguistic
+indexes.
+
+There is a proposal underway to extend the Oracle device to include native support for the
+nationalization features of the Oracle DBMS.
+
+For more information on Oracle National Language Support, refer to the Oracle documentation.
+
+<HT> Jon Heggland for the research on this issue.
+

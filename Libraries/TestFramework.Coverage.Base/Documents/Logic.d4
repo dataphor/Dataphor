@@ -1,0 +1,103 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+   Most of the TestFramework.Coverage.Base logic (the Operators) is created here with the exception of that 
+   which is required for the creation of particular tables. Those operators are created in the the 
+   'TableLogic' script which contains the logic required to build specific tables and is therefore
+   run prior to running the 'Tables' script.
+*/
+
+
+create operator ResequenceCase(const ACurrentSequence : Integer, const ANewSequence : Integer)
+begin
+	update Cases set { Sequence := -1 } where Sequence = ACurrentSequence;
+	update Cases set { Sequence := Sequence - 1 } where Sequence > ACurrentSequence;
+	var LCursor : cursor(typeof(Cases));
+	LCursor := cursor(Cases where Sequence >= ANewSequence order by { Sequence desc } capabilities { navigable, updateable } type static);
+	try
+		while LCursor.Next() do
+			LCursor.Update(row { (Sequence from LCursor.Select()) + 1 Sequence });
+	finally
+		LCursor.Close();
+	end;
+	update Cases set { Sequence := ANewSequence } where Sequence = -1;
+end;
+
+
+// drop operator RunCoverage(System.Integer);
+create operator RunCoverage(ACaseID : Integer)
+begin
+	SetDefaultIsolationLevel("Browse");
+/*	while TransactionCount() > 0 do
+	begin
+		RollbackTransaction();
+	end; 
+*/	
+	var LRunDate : DateTime := DateTime();
+	var LStatus : RunStatus := "Succeeded";
+	var LCase : typeof(row from Cases);
+	
+	var LCases := cursor(Cases where ID = IfNil(ACaseID, ID ) browse by { ID } );
+
+	try
+	
+		while LCases.Next() do
+		begin
+			try
+				LCase := LCases.Select();
+							
+				if Enabled from LCase then
+				begin
+					try
+						var LCurrentLibrary : Name := LibraryName();
+						try
+							Execute(Command from LCase);
+						finally
+							SetLibrary(LCurrentLibrary);
+						end;
+						if (exists(CaseResults where Case_ID = ID from LCase)) then
+						begin
+							delete CaseResults where Case_ID = ID from LCase;
+							insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Succeeded" Status, "Succeeded" Results } } into CaseResults;
+						end
+						else
+							insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Succeeded" Status, "Succeeded" Results } } into CaseResults;
+					except
+						on E : Error do
+						begin
+							if (exists(CaseResults where Case_ID = ID from LCase)) then
+							begin
+								delete CaseResults where Case_ID = ID from LCase;
+								insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Failed" Status, E.Message Results } } into CaseResults;
+							end
+							else
+								insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Failed" Status, E.Message Results } } into CaseResults;
+								LStatus := "Failed";
+						end;
+					end;
+				end
+				else
+				begin
+					if (exists(CaseResults where Case_ID = ID from LCase)) then
+					begin		
+						delete CaseResults where Case_ID = ID from LCase;
+						insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Skipped" Status, "Skipped" Results } } into CaseResults;
+					end
+					else
+						insert table { row { ID from LCase Case_ID, UserID() User_ID, DateTime() DateTime, "Skipped" Status, "Skipped" Results } } into CaseResults;
+						
+					if LStatus = "Succeeded" then
+						LStatus := "Skipped";
+				end;
+			commit;
+		end;
+	finally
+		LCases.Close();
+	end;
+end;
+
+
+

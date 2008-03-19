@@ -1,0 +1,53 @@
+/*
+Register.d4 script for Sample.Demo Library
+© Copyright 2000-2008 Alphora
+This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+This script registers the Sample.Demo library and
+executes the Base.d4 script.  The Base.d4 script creates
+the differnt types that this library uses as well
+as a few operators before the creation of any tables, constraints
+or events.
+*/
+
+ExecuteScript('Sample.Demo', 'Base');
+
+/*
+After running the Register.d4 script, the following
+scripts should be run in the order seen below:
+
+//*
+ExecuteScript('Sample.Demo', 'Tables');
+//This script creates the tables that the Sample.Demo library will use.
+
+ExecuteScript('Sample.Demo', 'Views');
+//This script creates the different views used by the Sample.Demo library.
+
+ExecuteScript('Sample.Demo', 'Events');
+//This script creates the different Events used by the Sample.Demo library.
+
+ExecuteScript('Sample.Demo', 'Constraints');
+//This script creates the user-defined constraints used in Sample.Demo
+
+ExecuteScript('Sample.Demo', 'Data');
+//This script inserts sample data for use in the Sample.Demo library.
+
+ExecuteScript('Sample.Demo', 'CreateApplication');
+//This script creates an application with the MainForm as the entry point.
+//*
+
+If you wish to create the Sample.Demo library utilizing a SQL Server Device then 
+we advise that you bypass the scripts outlined above and  
+run the Device.d4 script instead.  The Device.d4 script will create a SQL Server device,
+run the scripts outlined above, and create the type mappings for SQL server.
+
+Other scripts contained within the Sample.Demo library are as follows:
+
+Integrate.d4 - this script, when using the SQLServer Device, integrates data from
+the "Pubs" database in SQL Server into the Organization table of Sample.Demo
+
+Mappings.d4 - this script is utilized by the Device.d4 script to create type 
+mappings fromt he user-defined types in Sample.Demo to SQL Server.
+
+MapFormatName.d4 - this script is utilized by Mappings.d4 to map the formatted name.
+*/

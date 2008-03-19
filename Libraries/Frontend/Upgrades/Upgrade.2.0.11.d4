@@ -1,0 +1,176 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Deprecating column and row extractors
+
+//* Operator: Applications_DefaultDescription
+SafeDrop('Applications_DefaultDescription(var typeof(Applications[]))');
+create operator Applications_DefaultDescription(var ARow : typeof(Applications[])) : Boolean
+begin
+	if IsNil(ARow.Description) then
+	begin
+		update ARow set { Description := ID };
+		result := true;
+	end
+	else
+		result := false;
+end;
+attach Applications_DefaultDescription to ID in Applications on change;
+
+//* Operator: Applications_ID_Change(typeof(Applications[]), var typeof(Applications[]))
+SafeDrop('Applications_ID_Change(typeof(Applications[]), var typeof(Applications[]))');
+create operator Applications_ID_Change(const AOldRow : typeof(Applications[]), var ANewRow : typeof(Applications[])) : Boolean
+begin
+	result := false;
+	update ApplicationLibraries where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update ClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update WindowsClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+end;
+attach operator Applications_ID_Change to ID in Applications on change;
+
+//* Operator: GetNodeTypes
+SafeDrop('GetNodeTypes(String, table { Library_Name : Name })');
+create operator GetNodeTypes(const AClientTypeID : String, const ALibraries : table { Library_Name : Name }) : String
+begin
+    result := '<?xml version="1.0" encoding="utf-8" ?> <nodetypes xmlns="http://www.alphora.com/schemas/nodetypes">';
+    
+    var LCursor : cursor(table { Library_Name : Name }) :=
+        cursor
+        (
+            LibraryRequisites
+                explode by Library_Name = parent Required_Library_Name
+                    where Library_Name in ALibraries
+                over { Required_Library_Name }
+                rename { Required_Library_Name Library_Name }
+                union ALibraries
+        );
+    try
+        var LLibraryName : Name;
+        var LDocumentName : Name := AClientTypeID + ".NodeTypes";
+        while LCursor.Next() do
+        begin
+            LLibraryName := LCursor.Select().Library_Name;
+            if DocumentExists(LLibraryName, LDocumentName) then
+                result := result + Load(LLibraryName, LDocumentName);
+        end;
+    finally
+        LCursor.Close();
+    end;
+
+    result := result + "</nodetypes>";
+end;
+grant usage on GetNodeTypes(const String, const table { Library_Name : Name }) to role User;
+
+//* Operator: GetApplicationNodeTypes
+SafeDrop('GetApplicationNodeTypes(String, Name)');
+create operator GetApplicationNodeTypes(const AClientTypeID : String, const AApplicationID : Name) : String
+begin
+	result := GetNodeTypes(AClientTypeID, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name });
+end;
+grant usage on GetApplicationNodeTypes(String, Name) to role User;
+
+//* Operator: GetLibraryNodeTypes
+SafeDrop('GetLibraryNodeTypes(String, Name)');
+create operator GetLibraryNodeTypes(const AClientTypeID : String, const ALibraryName : System.Name) : String
+begin
+    result := '<?xml version="1.0" encoding="utf-8" ?> <nodetypes xmlns="http://www.alphora.com/schemas/nodetypes">';
+    
+    var LCursor : cursor(table { Library_Name : Name }) :=
+        cursor
+        (
+            LibraryRequisites
+                explode by Library_Name = parent Required_Library_Name
+                    where Library_Name = ALibraryName
+                over { Required_Library_Name }
+                rename { Required_Library_Name Library_Name }
+                union table { row { ALibraryName Library_Name } }
+        );
+    try
+        var LLibraryName : Name;
+        var LDocumentName : Name := AClientTypeID + ".NodeTypes";
+        while LCursor.Next() do
+        begin
+            LLibraryName := LCursor.Select().Library_Name;
+            if DocumentExists(LLibraryName, LDocumentName) then
+                result := result + Load(LLibraryName, LDocumentName);
+        end;
+    finally
+        LCursor.Close();
+    end;
+
+    result := result + "</nodetypes>";
+end;
+grant usage on GetLibraryNodeTypes(String, Name) to role User;
+
+//* Operator: GetWindowsSettings
+SafeDrop('GetWindowsSettings(Name)');
+create operator GetWindowsSettings(const AApplicationID : Name) 
+	: 
+	row 
+	{ 
+		IconImage : Graphic, 
+		Theme : String, 
+		DocumentCacheSize : Integer, 
+		ImageCacheSize : Integer, 
+		HelpDocument : String 
+	}
+begin
+	result := row { nil IconImage, nil Theme, nil DocumentCacheSize, nil ImageCacheSize, nil HelpDocument };
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LRow := WindowsClientApplications[AApplicationID];
+
+		// Image
+		var LImageExpression := LRow.DefaultIconImage;
+		if LImageExpression <> "" then
+			update result set { IconImage := Evaluate(LImageExpression) as Graphic };
+			
+		// Theme
+		var LThemeExpression := LRow.ThemeDocument;
+		if LThemeExpression <> "" then
+			update result set { Theme := Evaluate(LThemeExpression) as String };
+		
+		// DocumentCacheSize & ImageCacheSize
+		update result 
+			set 
+			{ 
+				DocumentCacheSize := LRow.DocumentCacheSize, 
+				ImageCacheSize := LRow.ImageCacheSize, 
+				HelpDocument := LRow.HelpDocument 
+			};
+	end;
+end;
+grant usage on GetWindowsSettings(Name) to role User;
+
+//* Operator: PrepareApplication
+SafeDrop('PrepareApplication(Name)');
+create operator PrepareApplication(const AApplicationID : Name) : String
+begin
+	result := Applications[AApplicationID].StartDocument;
+	var LCursor : cursor(table { Library_Name : Name }) :=
+		cursor
+		(
+			ApplicationLibraries where Application_ID = AApplicationID over { Library_Name }
+		);
+	try
+		while LCursor.Next() do
+			RegisterLibrary(LCursor.Select().Library_Name);
+	finally
+		LCursor.Close();
+	end;
+end;
+grant usage on PrepareApplication(Name) to role User;
+
+//* Operator: GetDefaultDocumentType
+SafeDrop('GetDefaultDocumentType(String)');
+create operator GetDefaultDocumentType(const ADesignerID : String) : String
+begin
+	if not exists (DocumentTypeDesigners where Designer_ID = ADesignerID) then
+		raise Error('Designer (' + ADesignerID + ') is not associated with any document types.');
+	// TODO: better method for determining the default document type for a designer
+	result := (DocumentTypeDesigners where Designer_ID = ADesignerID return 1 by { DocumentType_ID })[].DocumentType_ID;
+end;
+grant usage on GetDefaultDocumentType(String) to role User;
+

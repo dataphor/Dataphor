@@ -1,0 +1,40 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create type StrLth50 like String 
+{
+ constraint LengthValid Length(value) <= 50
+  tags { DAE.SimpleMessage = "The Length of the string must be less than 50 characters." }
+} static tags { Storage.Length = "50" };
+
+create table MovieType
+{
+	ID : String tags { Frontend.Width = "6" },
+	Genre : StrLth50 tags { Frontend.Preview.Include = "true" },
+	key { ID }
+};
+
+// Movie Types courtesy of IMDB (imdb.com)
+MovieType := table {
+	row{"ACT" ID, "Action" Genre},
+	row{"ADV", "Adventure"},
+	row{"ANM", "Animation"},
+	row{"FAM", "Family"},
+	row{"COM", "Comedy"},
+	row{"CRI", "Crime"},
+	row{"DOC", "Documentary"},
+	row{"DRA", "Drama"},
+	row{"FAN", "Fantasy"},
+	row{"FNO", "Film-Noir"},
+	row{"HOR", "Horror"},
+	row{"IND", "Independent"},
+	row{"MUS", "Musical"},
+	row{"MYS", "Mystery"},
+	row{"ROM", "Romance"},
+	row{"SF",  "Science Fiction"},
+	row{"THR", "Thriller"},
+	row{"WAR", "War"},
+	row{"WST", "Western"}
+};

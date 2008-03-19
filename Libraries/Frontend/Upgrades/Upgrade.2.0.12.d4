@@ -1,0 +1,23 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Upgrade: Dropped the unused ClientApplications table
+*/
+
+drop reference Frontend.ClientApplications_ClientTypes;
+drop reference Frontend.ClientApplications_Applications;
+detach Frontend.Applications_ID_Change from ID in Frontend.Applications on { change };
+drop operator Frontend.Applications_ID_Change(const row { ID : System.Name, Description : System.String, StartDocument : System.String }, var row { ID : System.Name, Description : System.String, StartDocument : System.String });
+drop table Frontend.ClientApplications;
+
+//* Operator: Applications_ID_Change(typeof(Applications[]), var typeof(Applications[]))
+create operator Applications_ID_Change(const AOldRow : typeof(Applications[]), var ANewRow : typeof(Applications[])) : Boolean
+begin
+	result := false;
+	update ApplicationLibraries where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update WindowsClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+end;
+attach operator Applications_ID_Change to ID in Applications on change;

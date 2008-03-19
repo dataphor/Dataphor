@@ -1,0 +1,362 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Operators
+	// Operands
+	// Constructs
+
+// Empty
+create operator TestEmpty()
+begin
+end;
+
+// Operands
+create operator TestOperands(const AValue1 : String, const AValue2 : String) : Boolean
+begin
+	result := AValue1 = AValue2;
+end;
+
+// If
+create operator TestIf(const ACondition : Boolean) : Boolean
+begin
+	if ACondition then
+		result := true;
+	
+	if not ACondition then
+		result := false;
+		
+	if result then
+		result := result or result
+	else if ACondition then
+		result := result and result
+	else
+		result := false;
+		
+	if ACondition or ACondition then
+	begin
+		if ACondition and ACondition then
+		begin
+			result := false;
+		end
+		else
+		begin
+			result := true;
+		end;
+	end
+	else
+	begin
+	end;
+end;
+
+// While
+create operator TestWhile(ACount : Integer)
+begin
+	while ACount > 0 do
+		ACount := ACount - 1;
+		
+	while ACount > -5 do
+	begin
+		ACount := ACount - 1;
+		ACount := ACount + 2;
+		ACount := ACount - 2;
+	end;
+end;
+
+// For
+create operator TestFor(const ACount : Integer)
+begin
+	for LIndex : Integer := 1 to ACount do;
+	
+	var LStepper : Integer := 0;
+	for LIndex : Integer := 1 to ACount do
+	begin
+		LStepper := LStepper + 1;
+	end;
+	
+	var LIndex : Integer;
+	for LIndex := 1 to 100 step 10 do
+	begin
+		LStepper := LStepper + 1;
+	end;
+end;
+
+// Do
+create operator TestDo(ACount : Integer)
+begin
+	do
+		var LIndex : Integer := ACount;
+		ACount := ACount - 1;
+	while ACount > 0;
+end;
+
+// Repeat
+create operator TestRepeat(ACount : Integer)
+begin
+	repeat
+		ACount := ACount - 1;
+	until ACount = 0;
+end;
+
+// Case
+create operator TestCase(AIndex : Integer)
+begin
+	case AIndex
+		when 1 then ;
+		when 2 then
+		begin
+		end;
+		when 3 then
+		begin
+			AIndex := AIndex + 1;
+		end;
+		else
+			AIndex := AIndex - 1;
+	end;
+end;
+
+// Assignment
+create operator TestAssignment(AValue : String)
+begin
+	AValue := AValue + '1';
+	var LValue : String := AValue;
+	LValue := '15';
+end;
+
+// Try
+create operator TestTry() : Integer
+begin
+	try
+		var LIndex : Integer := 10;
+	commit;
+	
+	try
+		var LIndex : Integer := 10;
+	except
+	end;
+
+	try
+		var LIndex : Integer := 10;
+	except
+		on Error do;
+	end;
+
+	try
+		var LIndex : Integer := 10;
+	except
+		on Error do result := 10;
+	end;
+	
+	try
+		var LIndex : Integer := 10;
+	except
+		on Error do
+		begin
+			result := result + 10;
+		end;
+	end;
+	
+	try
+		try
+			try
+				var LIndex : Integer := 10;
+			commit;
+		finally
+			result := 0;
+		end;
+	except
+		result := 10;
+	end;
+
+end;
+
+
+// Block
+create operator TestBlock()
+begin
+	begin
+		var LIndex : Integer;
+	end;
+	var LIndex : Integer;
+	begin
+		begin
+			begin
+				var LCount : Integer;
+			end;
+		end;
+	end;
+end;
+
+// Call
+create operator TestCall()
+begin
+	var LGuid : Guid := NewGuid();
+	var LDateTime : DateTime := DateTime();
+	var LInteger : Integer := "Blah".Length();
+end;
+
+// Index
+create operator TestIndexOperator()
+begin
+	var LIndex : Integer := 'Blah'[0].ASCII[0];
+	var LString : String;
+	LString := 'Blah';
+	//LString[0] := 'A';
+end;
+
+// Qualifier
+create operator TestQualifier()
+begin
+	var LDateTime : DateTime := DateTime();
+	LDateTime.Year := 2002;
+	var LMonth : Integer := LDateTime.Month;
+	var LString : String := LMonth.ToString();
+	var A.B : Integer;
+	var A.C : Integer;
+	var A.A : Integer;
+	B := C + A;
+end;
+
+// Parser Literals
+create operator TestParserLiterals()
+begin
+	var LTrue : Boolean := true;
+	var LFalse : Boolean := false;
+	var LIndex : Integer := 100;
+	LIndex := -100;
+	LIndex := 0x00FF;
+	var LDecimal : Decimal := 10.0;
+	LDecimal := 10d;
+	LDecimal := -10d;
+	var LMoney : Money := $10;
+	LMoney := $10.50;
+	var LString : String := "Blah";
+	//var LIString : IString := "Blah"i;
+end;
+
+// Builtin Operators
+create operator TestBuiltinOperators()
+begin
+	var LValue : Integer := 1 + 1 * 10;
+	LValue := LValue mod 10;
+	LValue := LValue div 10;
+	LValue := Truncate(LValue ** -2).ToInteger();
+	var LByteValue : Byte := (1 << 4) & (1 << 3) & (1 << 2);
+	LByteValue := LByteValue >> 2;
+	LByteValue := LByteValue & ~1;
+	LByteValue := LByteValue ^ 0xFF;
+	LByteValue := LByteValue | 1;
+end;
+
+create table Test { ID : Integer, Name : String, key { ID } };
+create table TestLink { Test_ID : Integer, Parent_Test_ID : Integer, key { Test_ID } };
+
+// Table Operators
+create operator TestTableOperators()
+begin
+	var LTest : typeof(Test) := Test;
+	Test where ID > 5;
+	Test over { ID };
+	Test remove { Name };
+	Test return 1 by { Name };
+	Test add { Name + Name LongName };
+	Test redefine { Name := Name + Name };
+	Test adorn { Name tags { Frontend.Title = "Name" } };
+	Test group by { Name } add { Count() NameCount };
+	Test rename { Name RenamedName };
+	TestLink explode by parent Test_ID = Parent_Test_ID where Test_ID = 1;
+	Test join (TestLink rename { Test_ID ID });
+	Test join TestLink by ID = Test_ID;
+	Test intersect Test;
+	Test union Test;
+	Test minus Test;
+	Test left join (TestLink rename { Test_ID ID });
+	Test left join TestLink by ID = Test_ID;
+	Test right join (TestLink rename { Test_ID ID });
+	Test right join TestLink by ID = Test_ID;
+	(Test rename A) times (Test rename B);
+	if exists (Test) then
+		delete Test;
+	if Test > Test then
+		if Test >= Test then
+			delete Test
+		else
+			insert Test into Test
+	else if Test < Test then
+		if Test <= Test then
+			delete Test
+		else
+			update Test set { Name := "Blah" };
+	if Test <> Test then
+		delete Test;
+		
+	if Test = Test then
+		insert Test into Test;
+		
+	if 1 in (Test over { ID }) then
+		delete Test where ID = 1;
+		
+	if row { 1 ID, "Blah" Name } in Test then
+		delete Test where ID = 1;
+end;
+
+// List Operators
+create operator TestListOperators()
+begin
+	var LList : list(Integer) := { 1, 2, 3 };
+	if LList = LList then
+		LList := LList;
+	if 1 in LList then
+		LList.Remove(1);
+	LList.Add(1);
+	LList.Clear();
+	LList.Add(1);
+	LList.Add(2);
+	LList.Add(3);
+	LList.Insert(4, LList.IndexOf(1));
+	LList.Remove(1);
+	LList.RemoveAt(1);
+end;
+
+// Row Operators
+create operator TestRowOperators()
+begin
+	var LRow : row { ID : Integer, Name : String } := row { 1 ID, "Blah" Name };
+	if LRow = LRow then
+		LRow := LRow;
+		
+	if LRow <> LRow then
+		LRow := LRow;
+		
+	LRow add { Name + Name LongName };
+	LRow redefine { Name := Name + Name };
+	LRow join (LRow add { '123-1234' Phone });
+	LRow over { ID };
+	LRow remove { Name };
+end;
+
+// Table/List/Row Selectors
+create operator TestSelectors()
+begin
+	Test := table { row { 1 ID, "Blah" Name } };
+	var LRow : row { ID : Integer, Name : String } := row { 1 ID, "Blah" Name };
+	var LList : list(Integer) := { 1, 2, 3 };
+end;
+
+// Accessors
+create operator TestAccessors()
+begin
+	var LDateTime : DateTime := DateTime();
+	LDateTime.Hour := 10;
+	if LDateTime.Hour <> 10 then
+		raise Error("DateTime Hour write accessor failed.");
+end;
+
+// If/Case expressions
+create operator TestIfCaseExpressions()
+begin
+	var LIndex : Integer := if true then 1 else 0;
+	var LValue : Integer := case when true then 0 else 1 end;
+	var LData : Integer := case LValue when 0 then 1 else 0 end;
+end;

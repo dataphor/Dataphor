@@ -1,0 +1,111 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Integer Operators
+begin
+  var LInteger1: Integer, LInteger2: Integer;
+
+  LInteger1 := 5;
+  if LInteger1 <> 5 then
+    raise Error("Integer assignment from literal failed");
+
+  LInteger2 := LInteger1;
+  if not(LInteger1 = LInteger2) then
+    raise Error("Integer assignment from variable failed");
+
+  LInteger2 := 10;
+  if (LInteger1 = 10) then
+    raise Error("Integer assignment is not by value");
+
+  LInteger1 := LInteger1 + 5;
+  if LInteger1 <> 10 then
+    raise Error("Integer addition failed");
+
+  LInteger1 := LInteger1 - 5;
+  if LInteger1 <> 5 then
+    raise Error("Integer subtraction failed");
+
+  LInteger1 := LInteger1 * 10;
+  if LInteger1 <> 50 then
+    raise Error("Integer multiplication failed");
+
+  LInteger1 := LInteger1 div 10;
+  if LInteger1 <> 5 then
+    raise Error("Integer div failed");
+    
+  if LInteger1 / 2 <> 2.5 then
+	raise Error("Integer division failed");
+    
+  if LInteger1 mod 2 <> 1 then
+	raise Error("Integer mod failed");
+    
+  LInteger1 := ToInteger(LInteger1 ** 2);
+  if LInteger1 <> 25 then
+    raise Error("Integer exponentiation failed");
+    
+  LInteger1 := 5;
+  LInteger1 := -(LInteger1);
+  if (LInteger1 <> -5) then
+    raise Error("Integer negation failed");
+
+  LInteger1 := 5;
+  LInteger2 := 10;
+  if LInteger1 > LInteger2 then
+    raise Error("Integer greater than failed");
+  
+  if LInteger1 >= LInteger2 then
+    raise Error("Integer inclusive greater than failed, arguments unequal");
+
+  if LInteger2 < LInteger1 then
+    raise Error("Integer less than failed");
+
+  if LInteger2 <= LInteger1 then
+    raise Error("Integer inclusive less than failed, arguments unequal");
+
+  LInteger1 := 10;
+  if not(LInteger1 >= LInteger2) then
+    raise Error("Integer inclusive greater than failed, arguments equal");
+
+  if not(LInteger1 <= LInteger2) then
+    raise Error("Integer inclusive less than failed, arguments equal");
+    
+  if (LInteger1 ?= LInteger2) <> 0 then
+    raise Error("Integer compare failed, arguments equal");
+    
+  LInteger1 := 0;
+  LInteger2 := 0;
+
+  if (~LInteger1 <> -1) then
+    raise Error("Bitwise not failed");
+  
+  if (LInteger1 & LInteger2) <> 0 then
+    raise Error("Bitwise and failed, arguments equal");
+    
+  if (LInteger1 | LInteger2) <> 0 then
+    raise Error("Bitwise or failed, arguments equal");
+    
+  if (LInteger1 ^ LInteger2) <> 0 then
+    raise Error("Bitwise xor failed, arguments equal");
+
+  LInteger2 := 1;
+  if (LInteger1 & LInteger2) <> 0 then
+    raise Error("Bitwise and failed, arguments unequal");
+    
+  if (LInteger1 | LInteger2) <>	1 then
+    raise Error("Bitwise or failed, arguments unequal");
+    
+  if (LInteger1 ^ LInteger2) <> 1 then
+    raise Error("Bitwise xor failed, arguments unequal");
+    
+  if (LInteger1.Abs() <> LInteger1) then
+    raise Error("Integer Abs failed");
+   
+  if ((1).Max(50) <> 50) then
+  	 raise Error("Integer Max failed");
+   
+  if ((1).Min(50) <> 1) then
+  	 raise Error("Integer Min failed");
+end;
+

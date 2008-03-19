@@ -1,0 +1,61 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" backgroundimageuri="http://www.alphora.com/images/news_events_rn.gif" imageuri="http://www.alphora.com/images/dataphor.jpg" text="Interface Title" mainsource="source" onpost="BlockAction" oncancel="BlockAction" onactivate="BlockAction" hint="Interface Hint" bop:name="MyInterface">
+    <source expression="System.Generators&#xD;&#xA; add { true BooleanColumn}&#xD;&#xA; order by {ID}" onchange="BlockAction" usebrowse="False" useapplicationtransactions="False" isreadonly="True" openstate="Inactive" beginscript="EnsureGenerators();" endscript="EnsureGenerators();" bop:name="source">
+        <dataargument columns="dfsa=12" bop:name="DataArgument1" />
+    </source>
+    <blockaction text="&amp;Block" enabled="False" hint="Block of actions" imageuri="Derivation.Image.Add.aspx" bop:name="BlockAction" />
+    <callaction action="BlockAction" text="Call Action Text" enabled="False" hint="Call Action Hint" imageuri="Derivation.Image.Add.aspx" bop:name="CallAction" />
+    <clearnextrequestaction text="&amp;ClearNext" enabled="False" hint="Clears the chained UI" imageuri="Derivation.Image.Add.aspx" bop:name="ClearNextRequest" />
+    <datascriptaction script="EnsureGenerators();" text="DataScriptAction Text" enabled="False" hint="DataScriptAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="DataScriptAction">
+        <dataargument source="source" columns="wfe=1" bop:name="DataArgument" />
+    </datascriptaction>
+    <dynamicaction uri="Derivation.dil?Query=Objects" text="DynamicAction Text" enabled="False" hint="DynamicAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="DynamicAction" />
+    <editfilteraction source="source" text="Post Text" enabled="False" hint="EditFilterAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="EditFilterAction" />
+    <findaction mode="Exact" columnname="ID" value="1" source="source" text="Find Action Text" enabled="False" hint="Find Action Hint" imageuri="Derivation.Image.Add.aspx" bop:name="FindAction" />
+    <formaction behavior="AcceptOrClose" text="FormAction" enabled="False" hint="Form Action Hint" imageuri="Derivation.Image.Add.aspx" bop:name="FormAction" />
+    <reportaction designuri="Derivation.dil?pagetype=browsereport&amp;table=Objects" text="ReportAction" enabled="False" hint="Report Action Hint" imageuri="Derivation.Image.Add.aspx" bop:name="ReportAction" />
+    <scriptaction language="CSharp" script="" bop:name="ScriptAction" />
+    <setnextrequestaction uri="Derivation.dil?Query=Objects" text="&amp;SetNext" enabled="False" hint="Chains this UI to another for execution is sequence" imageuri="Derivation.Image.Add.aspx" bop:name="SetNextRequest" />
+    <setpropertyaction node="Menu" membername="Text" value="SetPropertyAction Value" source="source" columnname="ID" text="SetPropertyAction Text" enabled="False" hint="SetPropertyAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="SetPropertyAction" />
+    <showformaction bop:name="ShowFormAction" />
+    <showlinkaction uri="http://www.alphora.com/" text="ShowLinkAction Text" enabled="False" hint="ShowLinkAction Hint" imageuri="http://www.alphora.com/images/dataphor.jpg" bop:name="ShowLinkAction" />
+    <sourceaction action="Last" source="source" text="SourceAction Text" enabled="False" hint="SourceAction Hint" imageuri="Derivation.Image.Add.aspx" bop:name="SourceAction" />
+    <post source="source" bop:name="Post" />
+    <menu action="BlockAction" enabled="False" text="Menu Text" bop:name="Menu">
+        <menu action="BlockAction" enabled="False" text="menu1 text" bop:name="Menu1" />
+    </menu>
+    <exposed action="BlockAction" enabled="False" text="Exposed Text" bop:name="Exposed" />
+    <column hint="Column Hint" bop:name="Column">
+        <row hint="Row Hint" bop:name="Row" />
+        <group hint="Group Hint" bop:name="Group" />
+        <trigger action="BlockAction" imagewidth="10" imageheight="10" text="Trigger Text" enabled="False" hint="Trigger Hint" bop:name="Trigger" />
+        <statictext text="StaticText Text" width="12" hint="StaticText Hint" bop:name="StaticText" />
+        <staticimage imagewidth="20" imageheight="20" uri="Derivation.Image.Add.aspx" hint="Image Hint" bop:name="StaticImage" />
+        <htmlbox pixelwidth="90" pixelheight="110" uri="http://www.alphora.com" hint="HtmlBox Hint" bop:name="HtmlBox" />
+        <text textalign="Center" titlealign="Left" width="20" title="Text Title" source="source" readonly="True" hint="Text Hint" bop:name="Text" />
+        <image imagewidth="40" imageheight="40" stretchstyle="StretchFill" center="False" titlealign="Left" width="5" title="Image Title" source="source" readonly="True" hint="Image Hint" bop:name="Image" />
+        <textbox ispassword="True" wordwrap="True" height="2" textalign="Right" titlealign="Left" width="11" title="TextBox Title" source="source" readonly="True" hint="TextBox Hint" bop:name="TextBox" />
+        <numerictextbox smallincrement="2" largeincrement="11" textalign="Right" titlealign="Left" width="12" title="NumericTextBox Title" bop:name="NumericTextBox" />
+        <checkbox title="CheckBox Title" source="source" readonly="True" hint="CheckBox Hint" bop:name="CheckBox" />
+        <choice width="0" items="Item1=1;Item2=2;Item3=3" title="Choice Title" source="source" readonly="True" hint="That's Just Choice." bop:name="Choice" />
+        <datetimebox textalign="Right" titlealign="Left" width="11" title="DateTimeBox Title" source="source" readonly="True" hint="DateTimeBox Hint" bop:name="DateTimeBox" />
+        <search title="Search Title" uri="Derivation.dil?Query=Objects" source="source" readonly="True" hint="Search Hint" bop:name="Search">
+            <searchcolumn hint="SearchColumn Hint" title="SearchColumn Title" columnname="BooleanColumn" width="16" textalign="Right" bop:name="SearchColumn" />
+        </search>
+        <grid rowcount="3" source="source" readonly="True" hint="Grid Hint" bop:name="Grid">
+            <textcolumn textalign="Right" verticalalign="Bottom" readonly="False" columnname="ID" title="GridColumn Title" width="11" bop:name="TextColumn" />
+            <triggercolumn action="BlockAction" text="Text Title" title="Trigger Title" width="12" bop:name="TriggerColumn" />
+            <checkboxcolumn readonly="True" columnname="BooleanColumn" title="CheckBoxColumnTitle" width="20" bop:name="CheckBoxColumn" />
+            <imagecolumn horizontalalign="Right" maxrowheight="50" readonly="False" title="ImageColumnTitle" width="12" bop:name="ImageColumn" />
+            <sequencecolumn imageuri="http://www.alphora.com/images/dataphor.jpg" script="GetNextGenerator(AFromRow.ToString());" title="Sequence Title" width="4" bop:name="SequenceColumn" />
+        </grid>
+        <tree source="source" readonly="True" hint="Tree Hint" bop:name="Tree" />
+        <fulllookup readonly="False" source="source" uri="Derivation.dil?Query=Objects" hint="FullLookup Hint" bop:name="FullLookup">
+            <quicklookup uri="Derivation.dil?Query=Objects" textalign="Right" titlealign="Left" width="11" title="QuickLookup Title" source="source" readonly="True" hint="QuickLookup Hint" bop:name="QuickLookup" />
+        </fulllookup>
+        <frame bop:name="Frame" />
+        <notebook activepage="NotebookFramePage" bop:name="Notebook">
+            <notebookframepage bop:name="NotebookFramePage" />
+            <notebookpage bop:name="NotebookPage" />
+        </notebook>
+    </column>
+</interface>

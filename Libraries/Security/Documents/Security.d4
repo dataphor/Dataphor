@@ -1,0 +1,548 @@
+/*
+	Security Module
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+//* Role: SecurityUser
+CreateRole("SecurityUser");
+
+//* View: DevicesView
+create view DevicesView
+	Devices 
+		where not IsSystem and not IsGenerated 
+		over { Name }
+		adorn
+		{
+			Name tags { Frontend.Width = "50" }
+		}
+	tags
+	{ 
+		Frontend.Title = "Devices",
+		Frontend.UseList = "true",
+		Frontend.Elaborate = "false"
+	};
+grant { Select } on DevicesView to role SecurityUser;
+
+//* View: User
+SafeDrop('.Security.User');
+create view User
+	Users
+		adorn 
+		{ 
+			ID tags { Frontend.Edit.ReadOnly = "true" }
+		}
+	tags 
+	{
+		Frontend.Elaborate = "false",
+		Frontend.Add.Query = "Security.AddUser"
+	};
+grant usage on User to role SecurityUser;
+
+//* Operator: User_Update
+SafeDrop('User_Update(const typeof(User[]), var typeof(User[]), var Boolean)');
+create operator User_Update(const AOldRow : typeof(User[]), var ANewRow : typeof(User[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.Name <> ANewRow.Name then
+		SetUserName(ANewRow.ID, ANewRow.Name);
+	APerformUpdate := false;
+end;
+attach operator User_Update to User on before update;
+
+//* Operator: User_Delete
+SafeDrop('User_Delete(typeof(User[]), var Boolean)');
+create operator User_Delete(const ARow : typeof(User[]), var APerformUpdate : Boolean)
+begin
+	DropUser(ARow.ID);
+	APerformUpdate := false;
+end;
+attach operator User_Delete to User on before delete;
+
+//* View: AddUser
+SafeDrop('AddUser');
+create view AddUserBase
+	User
+		add
+		{
+			"" Password tags { DAE.IsComputed = "false", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm Password", Frontend.TextBox.IsPassword = "true" }
+		};
+
+//* Operator: AddUserBase_Insert		
+SafeDrop('AddUserBase_Insert(var typeof(AddUserBase[]), var Boolean)');
+create operator AddUserBase_Insert(var ARow : typeof(AddUserBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	CreateUser(ARow.ID, ARow.Name, ARow.Password); //, ARow.Group_Name);
+end;
+attach operator AddUserBase_Insert to AddUserBase on before insert;
+
+//* View: AddUser
+create view AddUser
+	AddUserBase
+	{
+		constraint PasswordValid Password = ConfirmPassword static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }//,
+//		reference AddUser_Group { Group_Name } references Group { Name } tags { Storage.Enforced = "true", Frontend.Detail.Visible = "false", Frontend.Lookup.Title = "Group" }
+	}
+	tags
+	{
+		Frontend.Title = "User"
+	};
+grant usage on AddUser to role SecurityUser;
+
+//* View: ChangePasswordBase
+create view ChangePasswordBase
+	Users
+		over { ID }
+		where ID = UserID()
+		adorn { ID tags { Frontend.Visible = "false" } }
+		add
+		{
+			"" OldPassword tags { DAE.IsComputed = "false", Frontend.Title = "Old Password", Frontend.TextBox.IsPassword = "true" },
+			"" NewPassword tags { DAE.IsComputed = "false", Frontend.Title = "New Password", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmNewPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm New Password", Frontend.TextBox.IsPassword = "true" }
+		};
+
+//* Operator: ChangePasswordBase_Update
+SafeDrop('ChangePasswordBase_Update(typeof(ChangePasswordBase[]), var typeof(ChangePasswordBase[]), var Boolean)');		
+create operator ChangePasswordBase_Update(const AOldRow : typeof(ChangePasswordBase[]), var ANewRow : typeof(ChangePasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	ChangePassword(ANewRow.OldPassword, ANewRow.NewPassword);
+	APerformUpdate := false;
+end;
+attach operator ChangePasswordBase_Update to ChangePasswordBase on before update;
+
+//* View: ChangePassword
+create view ChangePassword
+	ChangePasswordBase
+	{
+		constraint PasswordValid NewPassword = ConfirmNewPassword static tags { DAE.SimpleMessage = "New Password and Confirm New Password must match." }
+	}
+	tags
+	{
+		Frontend.Caption = "Change Password"
+	};
+grant usage on ChangePassword to role SecurityUser;
+grant usage on ChangePassword to role System.User;
+
+//* View: SetPasswordBase
+SafeDrop('SetPasswordBase');
+create view SetPasswordBase
+	Users
+		over { ID }
+		add
+		{
+			"" Password tags { DAE.IsComputed = "false", Frontend.Title = "Password", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm Password", Frontend.TextBox.IsPassword = "true" }
+		};
+
+//* Operator: SetPasswordBase_Update
+SafeDrop('SetPasswordBase_Update(typeof(SetPasswordBase[]), var typeof(SetPasswordBase[]), var Boolean)');		
+create operator SetPasswordBase_Update(const AOldRow : typeof(SetPasswordBase[]), var ANewRow : typeof(SetPasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	SetPassword(ANewRow.ID, ANewRow.Password);
+end;
+attach operator SetPasswordBase_Update to SetPasswordBase on before update;
+
+//* View: SetPassword
+create view SetPassword
+	SetPasswordBase
+	{
+		constraint PasswordValid Password = ConfirmPassword static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	}
+	tags
+	{
+		Frontend.Title = "Set Password"
+	};
+grant usage on SetPassword to role SecurityUser;
+
+//* View: UserDeviceUser
+create view UserDeviceUser
+	DeviceUsers
+		adorn 
+		{ 
+			Device_Name tags { Frontend.Title = "Device Name", Frontend.Edit.ReadOnly = "true" }, 
+			User_ID tags { Frontend.Title = "User ID", Frontend.Edit.ReadOnly = "true" },
+			UserID tags { Frontend.Title = "User ID", Frontend.Hint = "The user id used to login to the given device." },
+			ConnectionParameters { default "" } tags { Frontend.Title = "Connection Parameters", Frontend.Hint = "A semi-colon delimited list of name=value pairs of connection parameters to be used when connecting to this device" }
+		}
+	{
+		transition constraint UserDeviceUser_Update on update
+			old.User_ID = new.User_ID and old.Device_Name = new.Device_Name,
+		reference UserDeviceUser_DevicesView { Device_Name } references DevicesView { Name }
+			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Device", Frontend.Detail.Visible = "false" }
+	}
+	tags 
+	{
+		Frontend.Title = "Device User",
+		Frontend.Elaborate = "false",
+		Frontend.Add.Query = "Security.AddUserDeviceUser",
+		Frontend.UseApplicationTransactions = "false" 
+	};
+grant usage on UserDeviceUser to role SecurityUser;
+
+//* Operator: UserDeviceUser_Update
+SafeDrop('UserDeviceUser_Update(typeof(UserDeviceUser[]), var typeof(UserDeviceUser[]), var Boolean)');
+create operator UserDeviceUser_Update(const AOldRow : typeof(UserDeviceUser[]), var ANewRow : typeof(UserDeviceUser[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.UserID <> ANewRow.UserID then
+		SetDeviceUserID(ANewRow.User_ID, ANewRow.Device_Name, ANewRow.UserID);
+	if AOldRow.ConnectionParameters <> ANewRow.ConnectionParameters then
+		SetDeviceUserConnectionParameters(ANewRow.User_ID, ANewRow.Device_Name, ANewRow.ConnectionParameters);
+	APerformUpdate := false;
+end;
+attach operator UserDeviceUser_Update to UserDeviceUser on before update;
+
+//* Operator: UserDeviceUser_Delete
+SafeDrop('UserDeviceUser_Delete(typeof(UserDeviceUser[]), var Boolean)');
+create operator UserDeviceUser_Delete(const ARow : typeof(UserDeviceUser[]), var APerformUpdate : Boolean)
+begin
+	DropDeviceUser(ARow.User_ID, ARow.Device_Name);
+	APerformUpdate := false;
+end;
+attach operator UserDeviceUser_Delete to UserDeviceUser on before delete;
+
+//* View: AddUserDeviceUserBase
+create view AddUserDeviceUserBase
+	UserDeviceUser
+	add
+	{
+		"" Password tags { DAE.IsComputed = "false", Frontend.TextBox.IsPassword = "true" },
+		"" ConfirmPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm Password", Frontend.TextBox.IsPassword = "true" }
+	};
+
+//* Operator: AddUserDeviceUserBase_Insert
+SafeDrop('AddUserDeviceUserBase_Insert(var typeof(AddUserDeviceUserBase[]), var Boolean)');	
+create operator AddUserDeviceUserBase_Insert(var ARow : typeof(AddUserDeviceUserBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	CreateDeviceUser(ARow.User_ID, ARow.Device_Name, ARow.UserID, ARow.Password, ARow.ConnectionParameters);
+	APerformUpdate := false;
+end;
+attach operator AddUserDeviceUserBase_Insert to AddUserDeviceUserBase on before insert;
+
+//* View: AddUserDeviceUser
+SafeDrop('AddUserDeviceUser');
+create view AddUserDeviceUser
+	AddUserDeviceUserBase
+		adorn
+		{
+			drop reference DeviceUsers_Devices
+		}
+	{
+		constraint PasswordValid Password = ConfirmPassword 
+			static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	};
+grant usage on AddUserDeviceUser to role SecurityUser;
+
+//* View: SetUserDeviceUserPasswordBase
+create view SetUserDeviceUserPasswordBase
+	UserDeviceUser 
+		over { Device_Name, User_ID }
+		add
+		{
+			"" Password tags { DAE.IsComputed = "false", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm Password", Frontend.TextBox.IsPassword = "true" }
+		};
+
+//* Operator: SetUserDeviceUserPasswordBase_Insert
+SafeDrop('SetUserDeviceUserPasswordBase_Insert(var typeof(SetUserDeviceUserPasswordBase[]), var Boolean)');		
+create operator SetUserDeviceUserPasswordBase_Insert(var ARow : typeof(SetUserDeviceUserPasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	SetDeviceUserPassword(ARow.User_ID, ARow.Device_Name, ARow.Password);
+end;
+attach operator SetUserDeviceUserPasswordBase_Insert to SetUserDeviceUserPasswordBase on before insert;
+
+//* View: SetUserDeviceUserPassword
+create view SetUserDeviceUserPassword
+	SetUserDeviceUserPasswordBase
+	{
+		constraint PasswordValid Password = ConfirmPassword static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	}
+	tags
+	{
+		Frontend.Title = "Set Device User Password"
+	};
+grant usage on SetUserDeviceUserPassword to role SecurityUser;
+
+//* View: Role
+create view Role
+	Roles { Name }
+		adorn
+		{
+			Name tags { Frontend.Width = "50" }
+		}
+	tags 
+	{ 
+		Frontend.Title = "Role",
+		Frontend.UseList = "false", 
+		Frontend.Elaborate = "false", 
+		Frontend.UseApplicationTransactions = "false" 
+	};
+grant usage on Role to role SecurityUser;
+
+//* Operator: Role_Insert
+SafeDrop('Role_Insert(var typeof(Role[]), var Boolean)');
+create operator Role_Insert(var ARow : typeof(Role[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	CreateRole(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Role_Insert to Role on before insert;
+
+//* Operator: Role_Update
+SafeDrop('Role_Update(typeof(Role[]), var typeof(Role[]), var Boolean)');
+create operator Role_Update(const AOldRow : typeof(Role[]), var ANewRow : typeof(Role[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.Name <> ANewRow.Name then
+	begin
+		DropRole(AOldRow.Name);
+		CreateRole(ANewRow.Name);
+	end;
+	APerformUpdate := false;
+end;
+attach operator Role_Update to Role on before update;
+
+//* Operator: Role_Delete
+SafeDrop('Role_Delete(typeof(Role[]), var Boolean)');
+create operator Role_Delete(const ARow : typeof(Role[]), var APerformUpdate : Boolean)
+begin
+	DropRole(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Role_Delete to Role on before delete;
+
+//* View: UserRole
+create view UserRole
+	UserRoles
+		adorn
+		{
+			Role_Name tags { Frontend.Title = "Role Name", Frontend.Width = "50" },
+			drop reference UserRoles_Roles
+		}
+	{
+		reference UserRole_Role { Role_Name } references Role { Name }
+			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Role", Frontend.Detail.Visible = "false" }
+	}
+	tags 
+	{ 
+		Frontend.Title = "Role",
+		Frontend.UseList = "false", 
+		Frontend.UseApplicationTransactions = "false" 
+	};
+grant usage on UserRole to role SecurityUser;
+
+//* Operator: UserRole_Insert(var typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Insert(var typeof(UserRole[]), var Boolean)');
+create operator UserRole_Insert(var ARow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	AddUserToRole(ARow.User_ID, ARow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Insert to UserRole on before insert;
+
+//* Operator: UserRole_Update(typeof(UserRole[]), var typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Update(typeof(UserRole[]), var typeof(UserRole[]), var Boolean)');
+create operator UserRole_Update(const AOldRow : typeof(UserRole[]), var ANewRow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	RemoveUserFromRole(AOldRow.User_ID, AOldRow.Role_Name);
+	AddUserToRole(ANewRow.User_ID, ANewRow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Update to UserRole on before update;
+
+//* Operator: UserRole_Delete(typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Delete(typeof(UserRole[]), var Boolean)');
+create operator UserRole_Delete(const ARow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	RemoveUserFromRole(ARow.User_ID, ARow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Delete to UserRole on before delete;
+
+// TODO: Right, GroupRightAssignment, RoleRightAssignment, UserRightAssignment
+//* View: Right
+create view Right
+	Rights over { Name }
+	adorn { Name tags { Frontend.Width = "50" } }
+	tags { Frontend.UseApplicationTransactions = "false", Frontend.Elaborate = "false" };
+grant usage on Right to role SecurityUser;
+
+//* Operator: Right_Insert(var typeof(Right[]), var Boolean)
+SafeDrop('Right_Insert(var typeof(Right[]), var Boolean)');
+create operator Right_Insert(var ARow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.CreateRight(ARow.Name, System.UserID());
+	APerformUpdate := false;
+end;
+attach operator Right_Insert to Right on before insert;
+
+//* Operator: Right_Update(typeof(Right[]), var typeof(Right[]), var Boolean)
+SafeDrop('Right_Update(typeof(Right[]), var typeof(Right[]), var Boolean)');
+create operator Right_Update(const AOldRow : typeof(Right[]), var ANewRow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.DropRight(AOldRow.Name);
+	System.CreateRight(ANewRow.Name, System.UserID());
+	APerformUpdate := false;
+end;
+attach operator Right_Update to Right on before update;
+
+//* Operator: Right_Delete(typeof(Right[]), var Boolean)
+SafeDrop('Right_Delete(typeof(Right[]), var Boolean)');
+create operator Right_Delete(const ARow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.DropRight(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Right_Delete to Right on before delete;
+
+//* View: UserRights
+create view UserRights
+	(Users over { ID } rename { ID User_ID }) 
+		join (Rights over { Name } rename { Name Right_Name }) 
+		add { UserHasRight(User_ID, Right_Name) HasRight }
+		left join UserRightAssignments include rowexists HasAssignment
+		adorn
+		{
+			Right_Name tags { Frontend.Title = "Right Name", Frontend.Width = "50", Frontend.ReadOnly = "true" },
+			HasRight tags { Frontend.Title = "Has Right", Frontend.ReadOnly = "true", Frontend.Grid.ElementType = "CheckBoxColumn" },
+			HasAssignment tags { Frontend.Title = "Has Assignment", Frontend.ReadOnly = "true", Frontend.Grid.ElementType = "CheckBoxColumn" },
+			IsGranted tags { Frontend.ReadOnly = "true", Frontend.Grid.ElementType = "CheckBoxColumn" }
+		}
+	tags 
+	{ 
+		Frontend.ReadOnly = "true",
+		Frontend.Elaborate = "false"
+	};
+grant usage on UserRights to role SecurityUser;
+
+/*
+// BeforeEdit
+select Rights;
+create session table EditUserRights in Temp
+{
+	User_ID : System.UserID,
+	Right_Name : System.Name,
+	HasAssignment : System.Boolean,
+	IsGranted : System.Boolean static tags { Storage.IsNullable = "true" },
+	key { User_ID, Right_Name }
+} tags { Frontend.Title = "User Right", Frontend.UseApplicationTransactions = "false" };
+
+begin
+	var AUserID : System.UserID := "Admin";
+	var ARightName : System.Name := "Frontend.ApplicationLibraries_ApplicationsAlter";
+
+	insert 
+		(Users where ID = AUserID over { ID } rename { ID User_ID })
+			join (Rights where Name = ARightName over { Name } rename { Name Right_Name })
+			left join (UserRightAssignments where User_ID = AUserID and Right_Name = ARightName) include rowexists HasAssignment
+		into EditUserRights;
+end;
+
+attach operator UserRights_Update to EditUserRights on { before update };
+
+// AfterEdit
+detach operator UserRights_Update from EditUserRights on { before update };
+drop table EditUserRights;
+*/
+
+//* Operator: UserRights_Update
+SafeDrop('UserRights_Update(const row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : System.Boolean, IsGranted : System.Boolean }, var row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : Boolean, IsGranted : Boolean }, var Boolean)');
+create operator UserRights_Update(const AOldRow : row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : System.Boolean, IsGranted : System.Boolean }, var ANewRow : row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : Boolean, IsGranted : Boolean }, var APerformUpdate : Boolean)
+begin
+	if ANewRow.HasAssignment then
+	begin
+		if ANewRow.IsGranted then
+			GrantRightToUser(ANewRow.Right_Name, ANewRow.User_ID)
+		else
+			RevokeRightFromUser(ANewRow.Right_Name, ANewRow.User_ID);
+	end
+	else
+		RevertRightForUser(ANewRow.Right_Name, ANewRow.User_ID);
+	APerformUpdate := false;
+end;
+
+/*
+select Rights over { Name } rename { Name Right_Name }
+	add { RoleHasRight(ARoleName, Right_Name) HasRight }
+	left join (RoleRightAssignments where Role_Name = ARoleName) 
+			include rowexists HasAssignment
+	rename Main
+	order by { Main.Right_Name asc };
+*/
+
+//* View: RoleRights
+create view RoleRights
+	(Roles over { Name } rename { Name Role_Name })
+		join (Rights over { Name } rename { Name Right_Name })
+		add { RoleHasRight(Role_Name, Right_Name) HasRight }
+		left join RoleRightAssignments include rowexists HasAssignment
+		adorn
+		{
+			Right_Name tags { Frontend.Title = "Right Name", Frontend.Width = "50", Frontend.ReadOnly = "true" },
+			HasRight tags { Frontend.Title = "Has Right", Frontend.ReadOnly = "true", Frontend.Grid.ElementType = "CheckBoxColumn" },
+			HasAssignment tags { Frontend.Title = "Has Assignment", Frontend.Grid.ElementType = "CheckBoxColumn" },
+			IsGranted tags { Frontend.Grid.ElementType = "CheckBoxColumn" }
+		}
+	tags
+	{
+		Frontend.ReadOnly = "true",
+		Frontend.Elaborate = "false"
+	};
+grant usage on RoleRights to role SecurityUser;
+
+/*
+// BeforeEdit
+create session table EditRoleRights in Temp
+{
+	Role_Name : System.Name,
+	Right_Name : System.Name,
+	HasAssignment : System.Boolean,
+	IsGranted : System.Boolean static tags { Storage.IsNullable = "true" }
+	key { Role_Name, Right_Name }
+};
+
+insert 
+	(Roles where Name = ARoleName over { ID } rename { ID User_ID })
+		join (Rights where Name = ARightName over { Name } rename { Name Right_Name })
+		left join (RoleRightAssignments where Role_Name = ARoleName and Right_Name = ARightName) include rowexists HasAssignment
+	into EditRoleRights;
+
+attach operator RoleRights_Update to EditRoleRights on { before update };
+
+// AfterEdit
+detach operator RoleRights_Update from EditRoleRights on { before update };
+drop table EditRoleRights;
+*/
+
+//* Operator: RoleRights_Update(row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, var row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, var Boolean)
+SafeDrop('RoleRights_Update(row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, var row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, var Boolean)');
+create operator RoleRights_Update
+(
+	const AOldRow : row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, 
+	var ANewRow : row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, IsGranted : Boolean }, 
+	var APerformUpdate : Boolean
+)
+begin
+	if ANewRow.HasAssignment then
+	begin
+		if ANewRow.IsGranted then
+			GrantRightToRole(ANewRow.Right_Name, ANewRow.Role_Name)
+		else
+			RevokeRightFromRole(ANewRow.Right_Name, ANewRow.Role_Name);
+	end
+	else
+		RevertRightForRole(ANewRow.Right_Name, ANewRow.Role_Name);
+	APerformUpdate := false;
+end;
+

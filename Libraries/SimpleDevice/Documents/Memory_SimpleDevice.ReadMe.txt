@@ -1,0 +1,37 @@
+The simple device is a memory device with the added ability 
+to persist the data in files on the Dataphor Server local 
+storage media.  The Simple Device, while it will persist the 
+data, is only intended for small amounts data that do not require 
+concurrent access.
+
+===============================================
+
+EXAMPLE:
+
+MemoryDevice Example:
+
+  create device TempDevice
+   class "System.MemoryDevice";
+
+SimpleDevice Example:
+
+  create device DataDevice
+    reconciliation { mode = { Command }, master = device }
+    class "SimpleDevice"
+      attributes
+      {
+        "DirectoryName" = "c:\Data",
+        "AutoSave" = "true"
+      };
+
+In this example:
+ The name of the device is "DataDevice".
+ The reconciliation mode is "Command".
+ The reconciliation master is "device".
+ The class is "SimpleDevice".
+ The data files will be stored in the C:\Data directory.
+ The data will be save each time any change takes place
+  because of the Autosave being set to true.
+
+For more information refer to documentation in the 
+Dataphor Reference under Libraries, SimpleDevice.

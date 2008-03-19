@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="105100" xml:space="preserve">
+    <value>Unknown statement class "{0}".</value>
+  </data>
+  <data name="105101" xml:space="preserve">
+    <value>Unknown expression class "{0}".</value>
+  </data>
+  <data name="105102" xml:space="preserve">
+    <value>Identifier "{0}" is not a valid expression.</value>
+  </data>
+  <data name="105103" xml:space="preserve">
+    <value>The identifier "{0}" is already defined in this scope.</value>
+  </data>
+  <data name="105104" xml:space="preserve">
+    <value>Unable to resolve type for literal token "{0}".</value>
+  </data>
+  <data name="105105" xml:space="preserve">
+    <value>Boolean expression expected.</value>
+  </data>
+  <data name="105106" xml:space="preserve">
+    <value>Integer expression expected.</value>
+  </data>
+  <data name="105107" xml:space="preserve">
+    <value>Error expression expected.</value>
+  </data>
+  <data name="105108" xml:space="preserve">
+    <value>Expression type "{0}" cannot be assigned to type "{1}".</value>
+  </data>
+  <data name="105109" xml:space="preserve">
+    <value>Table expression expected.</value>
+  </data>
+  <data name="105110" xml:space="preserve">
+    <value>Presentation expression expected.</value>
+  </data>
+  <data name="105111" xml:space="preserve">
+    <value>Table or row expression expected.</value>
+  </data>
+  <data name="105112" xml:space="preserve">
+    <value>Row expression expected.</value>
+  </data>
+  <data name="105113" xml:space="preserve">
+    <value>Entry expression expected.</value>
+  </data>
+  <data name="105114" xml:space="preserve">
+    <value>List expression expected.</value>
+  </data>
+  <data name="105115" xml:space="preserve">
+    <value>Cursor expression expected.</value>
+  </data>
+  <data name="105116" xml:space="preserve">
+    <value>Type "{0}" is not compatible with type "{1}".</value>
+  </data>
+  <data name="105117" xml:space="preserve">
+    <value>Scalar expression expected.</value>
+  </data>
+  <data name="105118" xml:space="preserve">
+    <value>Scalar type specifier expected.</value>
+  </data>
+  <data name="105119" xml:space="preserve">
+    <value>Table identifier expected.</value>
+  </data>
+  <data name="105120" xml:space="preserve">
+    <value>View identifier expected.</value>
+  </data>
+  <data name="105121" xml:space="preserve">
+    <value>Scalar type identifier expected.</value>
+  </data>
+  <data name="105122" xml:space="preserve">
+    <value>Constraint identifier expected.</value>
+  </data>
+  <data name="105123" xml:space="preserve">
+    <value>Reference identifier expected.</value>
+  </data>
+  <data name="105124" xml:space="preserve">
+    <value>Device identifier expected.</value>
+  </data>
+  <data name="105125" xml:space="preserve">
+    <value>Server link identifier expected.</value>
+  </data>
+  <data name="105126" xml:space="preserve">
+    <value>Server link expected.</value>
+  </data>
+  <data name="105127" xml:space="preserve">
+    <value>Join expression must be an equi-join.</value>
+  </data>
+  <data name="105128" xml:space="preserve">
+    <value>Column name expected.</value>
+  </data>
+  <data name="105129" xml:space="preserve">
+    <value>No catalog available in compiler "{0}".</value>
+  </data>
+  <data name="105130" xml:space="preserve">
+    <value>Table must have a key defined.</value>
+  </data>
+  <data name="105131" xml:space="preserve">
+    <value>Row expression cannot be converted to the row type for this table selector: {0}.</value>
+  </data>
+  <data name="105132" xml:space="preserve">
+    <value>Unable to determine a unique key for use in updating the given expression.</value>
+  </data>
+  <data name="105133" xml:space="preserve">
+    <value>Conveyor class expected.  Given "{0}".</value>
+  </data>
+  <data name="105134" xml:space="preserve">
+    <value>Unknown type specifier class "{0}".</value>
+  </data>
+  <data name="105135" xml:space="preserve">
+    <value>Reference "{0}" cannot be defined on object "{1}".</value>
+  </data>
+  <data name="105136" xml:space="preserve">
+    <value>Reference "{0}" must target a key of table "{1}".</value>
+  </data>
+  <data name="105137" xml:space="preserve">
+    <value>Reference "{0}" is invalid because column "{1}" of type "{2}" cannot reference column "{3}" of type "{4}" in table "{5}".</value>
+  </data>
+  <data name="105138" xml:space="preserve">
+    <value>Device class expected.  Given "{0}".</value>
+  </data>
+  <data name="105139" xml:space="preserve">
+    <value>DeviceScalarType class expected.  Given "{0}".</value>
+  </data>
+  <data name="105140" xml:space="preserve">
+    <value>DeviceOperator class expected.  Given "{0}".</value>
+  </data>
+  <data name="105141" xml:space="preserve">
+    <value>Invalid element type "{0}".</value>
+  </data>
+  <data name="105142" xml:space="preserve">
+    <value>Unknown order reference "{0}".</value>
+  </data>
+  <data name="105143" xml:space="preserve">
+    <value>No operator available to override "{0}({1})".</value>
+  </data>
+  <data name="105144" xml:space="preserve">
+    <value>Host instructions may not be virtual calls "{0}({1})".</value>
+  </data>
+  <data name="105145" xml:space="preserve">
+    <value>Unable to condense qualifier expression.</value>
+  </data>
+  <data name="105146" xml:space="preserve">
+    <value>Unable to collapse qualifier expression.</value>
+  </data>
+  <data name="105147" xml:space="preserve">
+    <value>Scalar type "{0}" does not contain a component named "{1}".</value>
+  </data>
+  <data name="105148" xml:space="preserve">
+    <value>Invalid qualifier "{0}".</value>
+  </data>
+  <data name="105149" xml:space="preserve">
+    <value>Unable to resolve operator reference "{0}" with signature "{1}".</value>
+  </data>
+  <data name="105150" xml:space="preserve">
+    <value>Column "{0}" cannot be extracted from an expression of type "{1}".</value>
+  </data>
+  <data name="105151" xml:space="preserve">
+    <value>Target of an assignment must be a variable.</value>
+  </data>
+  <data name="105152" xml:space="preserve">
+    <value>Invalid data modification target.</value>
+  </data>
+  <data name="105153" xml:space="preserve">
+    <value>Constant value cannot be passed to a var or out parameter.</value>
+  </data>
+  <data name="105154" xml:space="preserve">
+    <value>Invalid entry selector in presentation selector.</value>
+  </data>
+  <data name="105155" xml:space="preserve">
+    <value>Invalid retrieve target.</value>
+  </data>
+  <data name="105156" xml:space="preserve">
+    <value>Typeof cannot be called on object "{0}".</value>
+  </data>
+  <data name="105157" xml:space="preserve">
+    <value>Aggregate operator "{0}" cannot be called in this context.</value>
+  </data>
+  <data name="105158" xml:space="preserve">
+    <value>Raise statement cannot be invoked without an argument outside of a catch block.</value>
+  </data>
+  <data name="105159" xml:space="preserve">
+    <value>Ambiguous clear value for scalar type "{0}".</value>
+  </data>
+  <data name="105160" xml:space="preserve">
+    <value>Key column "{0}" not found.</value>
+  </data>
+  <data name="105161" xml:space="preserve">
+    <value>Unable to determine a default conveyor for scalar type "{0}".</value>
+  </data>
+  <data name="105162" xml:space="preserve">
+    <value>Default selector cannot be provided for representation "{0}" on scalar type "{1}" because it does not have a single property.</value>
+  </data>
+  <data name="105163" xml:space="preserve">
+    <value>Default read accessor cannot be provided for property "{0}" of representation "{1}" on scalar type "{2}" because the representation is not system-provided.</value>
+  </data>
+  <data name="105164" xml:space="preserve">
+    <value>Default write accessor cannot be provided for property "{0}" of representation "{1}" on scalar type "{2}" because the representation is not system-provided.</value>
+  </data>
+  <data name="105165" xml:space="preserve">
+    <value>Constant data object "{0}" cannot be assigned a value.</value>
+  </data>
+  <data name="105166" xml:space="preserve">
+    <value>Constant data object cannot be passed by reference to parameter "{0}".</value>
+  </data>
+  <data name="105167" xml:space="preserve">
+    <value>Unknown identifier "{0}".</value>
+  </data>
+  <data name="105168" xml:space="preserve">
+    <value>Unimplemented: virtual aggregate calls.</value>
+  </data>
+  <data name="105169" xml:space="preserve">
+    <value>Object "{0}" cannot be modified because it has dependent constraints.</value>
+  </data>
+  <data name="105170" xml:space="preserve">
+    <value>Object "{0}" is inherited and cannot be dropped.</value>
+  </data>
+  <data name="105171" xml:space="preserve">
+    <value>Object "{0}" cannot be altered or dropped because it is referenced by at least the following objects: {1}.</value>
+  </data>
+  <data name="105172" xml:space="preserve">
+    <value>Object "{0}" cannot be modified because it is referenced by object "{1}".</value>
+  </data>
+  <data name="105173" xml:space="preserve">
+    <value>In operator cannot be invoked on values of type "{0}" and "{1}".</value>
+  </data>
+  <data name="105174" xml:space="preserve">
+    <value>List type specifier expected.</value>
+  </data>
+  <data name="105175" xml:space="preserve">
+    <value>Table type specifier expected.</value>
+  </data>
+  <data name="105177" xml:space="preserve">
+    <value>Schema object "{0}" is not a valid source for events of type "{1}".</value>
+  </data>
+  <data name="105178" xml:space="preserve">
+    <value>Unknown event source specifier class "{0}".</value>
+  </data>
+  <data name="105179" xml:space="preserve">
+    <value>Event source "{0}" does not trigger events of type "{1}".</value>
+  </data>
+  <data name="105180" xml:space="preserve">
+    <value>Operator "{0}" is incompatible with event signature "{1}".</value>
+  </data>
+  <data name="105181" xml:space="preserve">
+    <value>No casting path was found from "{0}" to "{1}".</value>
+  </data>
+  <data name="105182" xml:space="preserve">
+    <value>Physical casting operator from "{0}" to "{1}" not found.  This operator is required because the physical representations of the scalar types are different.</value>
+  </data>
+  <data name="105183" xml:space="preserve">
+    <value>Break or continue statement must appear within a looping construct.</value>
+  </data>
+  <data name="105184" xml:space="preserve">
+    <value>Cannot cast a value of type "{0}" to type "{1}".</value>
+  </data>
+  <data name="105185" xml:space="preserve">
+    <value>Constraint expression must be deterministic and have no side effects.</value>
+  </data>
+  <data name="105186" xml:space="preserve">
+    <value>Special value expression must be deterministic and have no side effects.</value>
+  </data>
+  <data name="105187" xml:space="preserve">
+    <value>Compare expression must be deterministic and have no side effects.</value>
+  </data>
+  <data name="105188" xml:space="preserve">
+    <value>Identifier "{0}" was compiled as a variable reference, but is binding as a column reference.</value>
+  </data>
+  <data name="105189" xml:space="preserve">
+    <value>Join specifier not allowed for a row join.</value>
+  </data>
+  <data name="105190" xml:space="preserve">
+    <value>Expression to be aggregated must be deterministic.</value>
+  </data>
+  <data name="105191" xml:space="preserve">
+    <value>Table value passed by reference to parameter "{0}" must be deterministic.</value>
+  </data>
+  <data name="105192" xml:space="preserve">
+    <value>Cursor must be ordered to perform searchable calls.</value>
+  </data>
+  <data name="105193" xml:space="preserve">
+    <value>All specification can only used to assign rights for specific catalog objects.</value>
+  </data>
+  <data name="105194" xml:space="preserve">
+    <value>Only database-wide and transition constraints may reference global table variables.</value>
+  </data>
+  <data name="105195" xml:space="preserve">
+    <value>Unable to determine a default scalar type map for scalar type "{0}".</value>
+  </data>
+  <data name="105196" xml:space="preserve">
+    <value>Role identifier expected.</value>
+  </data>
+  <data name="105197" xml:space="preserve">
+    <value>Unknown grantee type "{0}".</value>
+  </data>
+  <data name="105198" xml:space="preserve">
+    <value>Column extractor expression must reference a single column unless invoking an aggregate operator.</value>
+  </data>
+  <data name="105199" xml:space="preserve">
+    <value>Row extractor expression must reference a table expression with at most one row.  Use a restriction or quota query to limit the number of rows in the source table expression.</value>
+  </data>
+  <data name="105200" xml:space="preserve">
+    <value>No default device specified.</value>
+  </data>
+  <data name="105201" xml:space="preserve">
+    <value>Errors occurred while attempting to resolve the default device name "{0}" for the current library.</value>
+  </data>
+  <data name="105202" xml:space="preserve">
+    <value>The identifier "{0}" is ambiguous between the following identifiers: {1}.</value>
+  </data>
+  <data name="105203" xml:space="preserve">
+    <value>Internal Error: Optimization phase exceptions occurred.</value>
+  </data>
+  <data name="105204" xml:space="preserve">
+    <value>Internal Error: Binding phase exceptions occurred.</value>
+  </data>
+  <data name="105205" xml:space="preserve">
+    <value>Unable to resolve variable identifier "{0}".</value>
+  </data>
+  <data name="105206" xml:space="preserve">
+    <value>The identifier "{0}" cannot be defined in this scope because it would hide the identifier "{1}".</value>
+  </data>
+  <data name="105207" xml:space="preserve">
+    <value>The identifier "{0}" cannot be defined in this scope because it would be hidden by the identifier "{1}".</value>
+  </data>
+  <data name="105208" xml:space="preserve">
+    <value>Operator name "{0}" is ambiguous between the following operator names: {1}.</value>
+  </data>
+  <data name="105209" xml:space="preserve">
+    <value>No signature for operator "{0}" has ({1}) parameters.</value>
+  </data>
+  <data name="105210" xml:space="preserve">
+    <value>The call "{0}{1}" is ambiguous between the following operators: {2}.</value>
+  </data>
+  <data name="105211" xml:space="preserve">
+    <value>The closest matching signature to the call "{0}{1}" is "{2}" which has some invalid arguments.</value>
+  </data>
+  <data name="105212" xml:space="preserve">
+    <value>Argument ({0}) cannot be converted from "{1}" to "{2}".</value>
+  </data>
+  <data name="105213" xml:space="preserve">
+    <value>No signature for operator "{0}" matches the call signature "{1}" exactly.</value>
+  </data>
+  <data name="105214" xml:space="preserve">
+    <value>An object named "{0}" is already defined.</value>
+  </data>
+  <data name="105215" xml:space="preserve">
+    <value>The name "{0}" cannot be used because it would hide the name "{1}".</value>
+  </data>
+  <data name="105216" xml:space="preserve">
+    <value>The name "{0}" cannot be used because it would be hidden by the name "{1}".</value>
+  </data>
+  <data name="105217" xml:space="preserve">
+    <value>The operator "{0}" already has a definition for the signature "{1}".</value>
+  </data>
+  <data name="105218" xml:space="preserve">
+    <value>The operator name "{0}" cannot be used because it would hide the operator name "{1}".</value>
+  </data>
+  <data name="105219" xml:space="preserve">
+    <value>The operator name "{0}" cannot be used because it would be hidden by the operator name "{1}".</value>
+  </data>
+  <data name="105220" xml:space="preserve">
+    <value>Non-fatal compiler errors encountered.</value>
+  </data>
+  <data name="105221" xml:space="preserve">
+    <value>Fatal compiler error encountered.  Compilation terminated.</value>
+  </data>
+  <data name="105222" xml:space="preserve">
+    <value>Unable to construct a sort for data type "{0}".</value>
+  </data>
+  <data name="105223" xml:space="preserve">
+    <value>Cannot determine a default special value for data type "{0}".</value>
+  </data>
+  <data name="105224" xml:space="preserve">
+    <value>Cannot convert a value of type "{0}" to a value of type "{1}".</value>
+  </data>
+  <data name="105225" xml:space="preserve">
+    <value>Cannot convert values in column "{0}" of type "{1}" to values of type "{2}".</value>
+  </data>
+  <data name="105226" xml:space="preserve">
+    <value>The conversion from values of type "{0}" to type "{1}" is ambiguous among the following conversion paths: {2}.</value>
+  </data>
+  <data name="105227" xml:space="preserve">
+    <value>Narrowing conversion used to convert a value of type "{0}" to type "{1}".</value>
+  </data>
+  <data name="105228" xml:space="preserve">
+    <value>The operator "{0}" is not attached to the "{1}" event of object "{2}".</value>
+  </data>
+  <data name="105229" xml:space="preserve">
+    <value>The operator "{0}" is not attached to the "{1}" event of column "{2}" in table "{3}".</value>
+  </data>
+  <data name="105230" xml:space="preserve">
+    <value>Unable to extract row from data type "{0}".</value>
+  </data>
+  <data name="105231" xml:space="preserve">
+    <value>Unable to extract entry from data type "{0}".</value>
+  </data>
+  <data name="105232" xml:space="preserve">
+    <value>Possibly incorrect use of expression as a statement.</value>
+  </data>
+  <data name="105233" xml:space="preserve">
+    <value>Unable to determine data type for variable declaration.</value>
+  </data>
+  <data name="105234" xml:space="preserve">
+    <value>DDL statements must be dynamically executed within an operator block.  Use System.Execute to perform this operation.</value>
+  </data>
+  <data name="105235" xml:space="preserve">
+    <value>A default selector for representation "{0}" in scalar type "{1}" cannot be provided because a conveyor has been specified for the scalar type.</value>
+  </data>
+  <data name="105236" xml:space="preserve">
+    <value>A default selector and accessors for representation "{0}" in scalar type "{1}" cannot be provided because another representation has already determined the native representation for the scalar type.</value>
+  </data>
+  <data name="105237" xml:space="preserve">
+    <value>Device "{0}" already has a type map for type "{1}".</value>
+  </data>
+  <data name="105238" xml:space="preserve">
+    <value>Device "{0}" already has an operator map for operator "{1}" with signature "{2}".</value>
+  </data>
+  <data name="105239" xml:space="preserve">
+    <value>Unable to determine a default device operator class for operator "{0}" in device "{1}".</value>
+  </data>
+  <data name="105240" xml:space="preserve">
+    <value>Selector for representation "{0}" of type "{1}" is invalid because selectors must be deterministic, have no side effects, and be evaluable in isolation.</value>
+  </data>
+  <data name="105241" xml:space="preserve">
+    <value>Read accessor for property "{0}" of representation "{1}" of type "{2}" is invalid because read accessors must be deterministic, have no side effects and be evaluable in isolation.</value>
+  </data>
+  <data name="105242" xml:space="preserve">
+    <value>Write accessor for property "{0}" of representation "{1}" of type "{2}" is invalid because write accessors must be deterministic and be evaluable in isolation.</value>
+  </data>
+  <data name="105243" xml:space="preserve">
+    <value>Device "{0}" did not support the plan "{1}" for the following reasons:
+{2}</value>
+  </data>
+  <data name="105244" xml:space="preserve">
+    <value>Table expression of type "{0}" contains common column names with table expression of type "{1}" and would result in duplicate column names if used in a times expression.</value>
+  </data>
+  <data name="105245" xml:space="preserve">
+    <value>Table expression of type "{0}" does not have common column names with table expression of type "{1}", resulting in a possibly incorrect times expression.</value>
+  </data>
+  <data name="105246" xml:space="preserve">
+    <value>Reference "{0}" must target the same number of columns in both tables.</value>
+  </data>
+  <data name="105247" xml:space="preserve">
+    <value>Table or view identifier expected.</value>
+  </data>
+  <data name="105248" xml:space="preserve">
+    <value>Expression expected.</value>
+  </data>
+  <data name="105249" xml:space="preserve">
+    <value>Target row type does not have a column named "{0}".</value>
+  </data>
+  <data name="105250" xml:space="preserve">
+    <value>Source row type does not have a column named "{0}".</value>
+  </data>
+  <data name="105251" xml:space="preserve">
+    <value>Target table type does not have a column named "{0}".</value>
+  </data>
+  <data name="105252" xml:space="preserve">
+    <value>Source table type does not have a column named "{0}".</value>
+  </data>
+  <data name="105253" xml:space="preserve">
+    <value>Variable declarations after a cursor definition may affect cursor execution. Ensure that all variable declarations appear before opening any cursors.</value>
+  </data>
+  <data name="105254" xml:space="preserve">
+    <value>Outer joins cannot be natural, they must have a condition specified.</value>
+  </data>
+  <data name="105255" xml:space="preserve">
+    <value>Outer joins cannot be many-to-many, because the resulting set would have only sparse keys.</value>
+  </data>
+  <data name="105256" xml:space="preserve">
+    <value>Table selector cannot be evaluated because the key includes columns that have no relative comparison operators defined.</value>
+  </data>
+  <data name="105257" xml:space="preserve">
+    <value>No signature for operator "{0}" matches the call signature "{1}".</value>
+  </data>
+  <data name="105258" xml:space="preserve">
+    <value>Restriction condition is invalid because it contains non-repeatable operator invocations.</value>
+  </data>
+  <data name="105259" xml:space="preserve">
+    <value>Table indexer expression is ambiguous. Specify a key to be used using the by clause.</value>
+  </data>
+  <data name="105260" xml:space="preserve">
+    <value>Table indexer expression is invalid because no keys have the required number of columns.</value>
+  </data>
+  <data name="105261" xml:space="preserve">
+    <value>Table indexer expression is invalid because the resolved key does not have the same number of columns as the indexer expression.</value>
+  </data>
+  <data name="105262" xml:space="preserve">
+    <value>Row extraction using the from keyword has been deprecated and will not be supported in future releases. Use a table indexer expression ([]) to extract row values.</value>
+  </data>
+  <data name="105263" xml:space="preserve">
+    <value>Column extraction using the from keyword has been deprecated and will not be supported in future releases. Use a qualifier expression (.) to extract column values.</value>
+  </data>
+  <data name="105264" xml:space="preserve">
+    <value>Table indexer expression has too many terms for efficient implicit key resolution. Specify a key to be used using the by clause.</value>
+  </data>
+  <data name="105265" xml:space="preserve">
+    <value>The row variable name is only valid for table-based foreach statements.</value>
+  </data>
+  <data name="105266" xml:space="preserve">
+    <value>Foreach statement may only operator on list or table values.</value>
+  </data>
+  <data name="105267" xml:space="preserve">
+    <value>Column reference not allowed in this context.</value>
+  </data>
+  <data name="105268" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="105269" xml:space="preserve">
+    <value>Explode expression must specify an order by clause if it includes a level or sequence column.</value>
+  </data>
+  <data name="105270" xml:space="preserve">
+    <value>Order specified for explode expression must include some key of the source expression.</value>
+  </data>
+  <data name="105271" xml:space="preserve">
+    <value>Aggregate operator "{0}" is order-dependent. Use the order by clause to specify an ordering for this operation.</value>
+  </data>
+  <data name="105272" xml:space="preserve">
+    <value>Order specified for order-dependent aggregate operator invocation "{0}" must include some key of the source expression.</value>
+  </data>
+  <data name="105273" xml:space="preserve">
+    <value>Argument ({0}) must be literal (evaluable at compile-time).</value>
+  </data>
+  <data name="105274" xml:space="preserve">
+    <value>Operator "{0}" has been deprecated and will no longer be supported in a future version.</value>
+  </data>
+  <data name="105275" xml:space="preserve">
+    <value>Source expression has multiple keys with columns of the same types, resulting in a potentially ambiguous implicit table indexer expression. Specify a key to be used using the by clause.</value>
+  </data>
+  <data name="105276" xml:space="preserve">
+    <value>Transition constraint expression must be repeatable and have no side effects.</value>
+  </data>
+  <data name="105277" xml:space="preserve">
+    <value>Table expression of type "{0}" does not have common column names with table expression of type "{1}", resulting in a possibly incorrect having or without expression.</value>
+  </data>
+  <data name="105278" xml:space="preserve">
+    <value>Indexer expression must contain one and only one indexing expression.</value>
+  </data>
+  <data name="105279" xml:space="preserve">
+    <value>The tag "{0}" has been deprecated. Use tag "{1}" instead. For more information, see the Tags Reference in the Dataphor Developer's Guide.</value>
+  </data>
+  <data name="105280" xml:space="preserve">
+    <value>Row type specifier expected.</value>
+  </data>
+  <data name="105281" xml:space="preserve">
+    <value>Internal error: Unexpected exception encountered during compilation.</value>
+  </data>
+  <data name="105282" xml:space="preserve">
+    <value>The clear referential action cannot be used for source column "{0}" because it is marked not nil and the type of the column does not have an unambiguous special defined.</value>
+  </data>
+  <data name="105283" xml:space="preserve">
+    <value>The operator "{0}" is already attached to the "{1}" event of object "{2}".</value>
+  </data>
+  <data name="105284" xml:space="preserve">
+    <value>The operator "{0}" is already attached to the "{1}" event of column "{2}" in table "{3}".</value>
+  </data>
+  <data name="105285" xml:space="preserve">
+    <value>Errors occurred attempting to compile custom error message for constraint "{0}".</value>
+  </data>
+</root>

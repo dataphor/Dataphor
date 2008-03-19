@@ -1,0 +1,366 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Deprecating column and row extractors
+
+//* Operator: AddGroup_Insert
+SafeDrop('AddGroup_Insert(var typeof(AddGroup[]), var Boolean)');
+create operator AddGroup_Insert(var ARow : typeof(AddGroup[]), var APerformInsert : Boolean) : Boolean
+begin
+	result := false;
+	APerformInsert := false;
+	CreateGroup(ARow.Name, ARow.Parent_Group_Name);
+end;
+attach operator AddGroup_Insert to AddGroup on before insert;
+
+//* Operator: Group_Update
+SafeDrop('Group_Update(typeof(Group[]), var typeof(Group[]), var Boolean)');
+create operator Group_Update(const AOldRow : typeof(Group[]), var ANewRow : typeof(Group[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	if AOldRow.Name <> ANewRow.Name then
+	begin
+		DropGroup(AOldRow.Name);
+		CreateGroup(ANewRow.Name, ANewRow.Parent_Group_Name);
+	end
+	else if AOldRow.Parent_Group_Name <> ANewRow.Parent_Group_Name then
+	begin
+		SetGroupParentGroup(ANewRow.Name, ANewRow.Parent_Group_Name);
+	end;
+end;
+attach operator Group_Update to Group on before update;
+
+//* Operator: Group_Delete
+SafeDrop('Group_Delete(typeof(Group[]), var Boolean)');
+create operator Group_Delete(const ARow : typeof(Group[]), var APerformUpdate : Boolean)
+begin
+	APerformUpdate := false;
+	DropGroup(ARow.Name);
+end;
+attach operator Group_Delete to Group on before delete;
+
+//* Operator: AddGroupDeviceUserBase_Insert
+SafeDrop('AddGroupDeviceUserBase_Insert(var typeof(AddGroupDeviceUserBase[]), var Boolean)');
+create operator AddGroupDeviceUserBase_Insert(var ARow : typeof(AddGroupDeviceUserBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	CreateGroupDeviceUser(ARow.Group_Name, ARow.Device_Name, ARow.UserID, ARow.Password, ARow.ConnectionParameters);
+end;
+attach operator AddGroupDeviceUserBase_Insert to AddGroupDeviceUserBase on { before insert };
+
+//* Operator: GroupDeviceUser_Update
+SafeDrop('GroupDeviceUser_Update(typeof(GroupDeviceUser[]), var typeof(GroupDeviceUser[]), var Boolean)');
+create operator GroupDeviceUser_Update(const AOldRow : typeof(GroupDeviceUser[]), var ANewRow : typeof(GroupDeviceUser[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.UserID <> ANewRow.UserID then
+		SetGroupDeviceUserID(ANewRow.Group_Name, ANewRow.Device_Name, ANewRow.UserID);
+	if AOldRow.ConnectionParameters <> ANewRow.ConnectionParameters then
+		SetGroupDeviceUserConnectionParameters(ANewRow.Group_Name, ANewRow.Device_Name, ANewRow.ConnectionParameters);
+	APerformUpdate := false;
+end;
+attach operator GroupDeviceUser_Update to GroupDeviceUser on { before update };
+
+//* Operator: GroupDeviceUser_Delete
+SafeDrop('GroupDeviceUser_Delete(typeof(GroupDeviceUser[]), var Boolean)');
+create operator GroupDeviceUser_Delete(const ARow : typeof(GroupDeviceUser[]), var APerformUpdate : Boolean)
+begin
+	DropGroupDeviceUser(ARow.Group_Name, ARow.Device_Name);
+	APerformUpdate := false;
+end;
+attach operator GroupDeviceUser_Delete to GroupDeviceUser on { before delete };
+
+//* Operator: SetGroupDeviceUserPasswordBase_Insert(var typeof(SetGroupDeviceUserPasswordBase[]), var Boolean)
+SafeDrop('SetGroupDeviceUserPasswordBase_Insert(var typeof(SetGroupDeviceUserPasswordBase[]), var Boolean)');
+create operator SetGroupDeviceUserPasswordBase_Insert(var ARow : typeof(SetGroupDeviceUserPasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	SetGroupDeviceUserPassword(ARow.Group_Name, ARow.Device_Name, ARow.Password);
+	APerformUpdate := false;
+end;
+attach operator SetGroupDeviceUserPasswordBase_Insert to SetGroupDeviceUserPasswordBase on before insert;
+
+//* Operator: User_Update
+SafeDrop('User_Update(const typeof(User[]), var typeof(User[]), var Boolean)');
+create operator User_Update(const AOldRow : typeof(User[]), var ANewRow : typeof(User[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.Name <> ANewRow.Name then
+		SetUserName(ANewRow.ID, ANewRow.Name);
+	if AOldRow.Group_Name <> ANewRow.Group_Name then
+		SetUserGroup(ANewRow.ID, ANewRow.Group_Name);
+	APerformUpdate := false;
+end;
+attach operator User_Update to User on before update;
+
+//* Operator: User_Delete
+SafeDrop('User_Delete(typeof(User[]), var Boolean)');
+create operator User_Delete(const ARow : typeof(User[]), var APerformUpdate : Boolean)
+begin
+	DropUser(ARow.ID);
+	APerformUpdate := false;
+end;
+attach operator User_Delete to User on before delete;
+
+//* Operator: AddUserBase_Insert		
+SafeDrop('AddUserBase_Insert(var typeof(AddUserBase[]), var Boolean)');
+create operator AddUserBase_Insert(var ARow : typeof(AddUserBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	CreateUser(ARow.ID, ARow.Name, ARow.Password, ARow.Group_Name);
+end;
+attach operator AddUserBase_Insert to AddUserBase on before insert;
+
+//* Operator: ChangePasswordBase_Update
+SafeDrop('ChangePasswordBase_Update(typeof(ChangePasswordBase[]), var typeof(ChangePasswordBase[]), var Boolean)');		
+create operator ChangePasswordBase_Update(const AOldRow : typeof(ChangePasswordBase[]), var ANewRow : typeof(ChangePasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	ChangePassword(ANewRow.OldPassword, ANewRow.NewPassword);
+	APerformUpdate := false;
+end;
+attach operator ChangePasswordBase_Update to ChangePasswordBase on { before update };
+
+//* Operator: SetPasswordBase_Update
+SafeDrop('SetPasswordBase_Update(typeof(SetPasswordBase[]), var typeof(SetPasswordBase[]), var Boolean)');		
+create operator SetPasswordBase_Update(const AOldRow : typeof(SetPasswordBase[]), var ANewRow : typeof(SetPasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	SetPassword(ANewRow.ID, ANewRow.Password);
+end;
+attach operator SetPasswordBase_Update to SetPasswordBase on { before update };
+
+//* Operator: UserDeviceUser_Update
+SafeDrop('UserDeviceUser_Update(typeof(UserDeviceUser[]), var typeof(UserDeviceUser[]), var Boolean)');
+create operator UserDeviceUser_Update(const AOldRow : typeof(UserDeviceUser[]), var ANewRow : typeof(UserDeviceUser[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.UserID <> ANewRow.UserID then
+		SetDeviceUserID(ANewRow.User_ID, ANewRow.Device_Name, ANewRow.UserID);
+	if AOldRow.ConnectionParameters <> ANewRow.ConnectionParameters then
+		SetDeviceUserConnectionParameters(ANewRow.User_ID, ANewRow.Device_Name, ANewRow.ConnectionParameters);
+	APerformUpdate := false;
+end;
+attach operator UserDeviceUser_Update to UserDeviceUser on before update;
+
+//* Operator: UserDeviceUser_Delete
+SafeDrop('UserDeviceUser_Delete(typeof(UserDeviceUser[]), var Boolean)');
+create operator UserDeviceUser_Delete(const ARow : typeof(UserDeviceUser[]), var APerformUpdate : Boolean)
+begin
+	DropDeviceUser(ARow.User_ID, ARow.Device_Name);
+	APerformUpdate := false;
+end;
+attach operator UserDeviceUser_Delete to UserDeviceUser on before delete;
+
+//* Operator: AddUserDeviceUserBase_Insert
+SafeDrop('AddUserDeviceUserBase_Insert(var typeof(AddUserDeviceUserBase[]), var Boolean)');	
+create operator AddUserDeviceUserBase_Insert(var ARow : typeof(AddUserDeviceUserBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	CreateDeviceUser(ARow.User_ID, ARow.Device_Name, ARow.UserID, ARow.Password, ARow.ConnectionParameters);
+	APerformUpdate := false;
+end;
+attach operator AddUserDeviceUserBase_Insert to AddUserDeviceUserBase on before insert;
+
+//* Operator: SetUserDeviceUserPasswordBase_Insert
+SafeDrop('SetUserDeviceUserPasswordBase_Insert(var typeof(SetUserDeviceUserPasswordBase[]), var Boolean)');		
+create operator SetUserDeviceUserPasswordBase_Insert(var ARow : typeof(SetUserDeviceUserPasswordBase[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	SetDeviceUserPassword(ARow.User_ID, ARow.Device_Name, ARow.Password);
+end;
+attach operator SetUserDeviceUserPasswordBase_Insert to SetUserDeviceUserPasswordBase on before insert;
+
+//* Operator: Role_Insert
+SafeDrop('Role_Insert(var typeof(Role[]), var Boolean)');
+create operator Role_Insert(var ARow : typeof(Role[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	CreateRole(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Role_Insert to Role on before insert;
+
+//* Operator: Role_Update
+SafeDrop('Role_Update(typeof(Role[]), var typeof(Role[]), var Boolean)');
+create operator Role_Update(const AOldRow : typeof(Role[]), var ANewRow : typeof(Role[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	if AOldRow.Name <> ANewRow.Name then
+	begin
+		DropRole(AOldRow.Name);
+		CreateRole(ANewRow.Name);
+	end;
+	APerformUpdate := false;
+end;
+attach operator Role_Update to Role on before update;
+
+//* Operator: Role_Delete
+SafeDrop('Role_Delete(typeof(Role[]), var Boolean)');
+create operator Role_Delete(const ARow : typeof(Role[]), var APerformUpdate : Boolean)
+begin
+	DropRole(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Role_Delete to Role on before delete;
+
+//* Operator: GroupRole_Insert
+SafeDrop('GroupRole_Insert(var typeof(GroupRole[]), var Boolean)');
+create operator GroupRole_Insert(var ARow : typeof(GroupRole[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	AddGroupToRole(ARow.Group_Name, ARow.Role_Name, ARow.Inherited);
+	APerformUpdate := false;
+end;
+attach operator GroupRole_Insert to GroupRole on before insert;
+
+//* Operator: GroupRole_Update
+SafeDrop('GroupRole_Update(typeof(GroupRole[]), var typeof(GroupRole[]), var Boolean)');
+create operator GroupRole_Update(const AOldRow : typeof(GroupRole[]), var ANewRow : typeof(GroupRole[]), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	RemoveGroupFromRole(AOldRow.Group_Name, AOldRow.Role_Name);
+	AddGroupToRole(ANewRow.Group_Name, ANewRow.Role_Name, ANewRow.Inherited);
+	APerformUpdate := false;
+end;
+attach operator GroupRole_Update to GroupRole on before update;
+
+//* Operator: GroupRole_Delete(typeof(GroupRole[]), var Boolean)
+SafeDrop('GroupRole_Delete(typeof(GroupRole[]), var Boolean)');
+create operator GroupRole_Delete(const ARow : typeof(GroupRole[]), var APerformUpdate : Boolean)
+begin
+	RemoveGroupFromRole(ARow.Group_Name, ARow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator GroupRole_Delete to GroupRole on before delete;
+
+//* Operator: UserRole_Insert(var typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Insert(var typeof(UserRole[]), var Boolean)');
+create operator UserRole_Insert(var ARow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	AddUserToRole(ARow.User_ID, ARow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Insert to UserRole on before insert;
+
+//* Operator: UserRole_Update(typeof(UserRole[]), var typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Update(typeof(UserRole[]), var typeof(UserRole[]), var Boolean)');
+create operator UserRole_Update(const AOldRow : typeof(UserRole[]), var ANewRow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	RemoveUserFromRole(AOldRow.User_ID, AOldRow.Role_Name);
+	AddUserToRole(ANewRow.User_ID, ANewRow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Update to UserRole on before update;
+
+//* Operator: UserRole_Delete(typeof(UserRole[]), var Boolean)
+SafeDrop('UserRole_Delete(typeof(UserRole[]), var Boolean)');
+create operator UserRole_Delete(const ARow : typeof(UserRole[]), var APerformUpdate : Boolean)
+begin
+	RemoveUserFromRole(ARow.User_ID, ARow.Role_Name);
+	APerformUpdate := false;
+end;
+attach operator UserRole_Delete to UserRole on before delete;
+//* Operator: Right_Insert(var typeof(Right[]), var Boolean)
+SafeDrop('Right_Insert(var typeof(Right[]), var Boolean)');
+create operator Right_Insert(var ARow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.CreateRight(ARow.Name, System.UserID());
+	APerformUpdate := false;
+end;
+attach operator Right_Insert to Right on before insert;
+
+//* Operator: Right_Update(typeof(Right[]), var typeof(Right[]), var Boolean)
+SafeDrop('Right_Update(typeof(Right[]), var typeof(Right[]), var Boolean)');
+create operator Right_Update(const AOldRow : typeof(Right[]), var ANewRow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.DropRight(AOldRow.Name);
+	System.CreateRight(ANewRow.Name, System.UserID());
+	APerformUpdate := false;
+end;
+attach operator Right_Update to Right on before update;
+
+//* Operator: Right_Delete(typeof(Right[]), var Boolean)
+SafeDrop('Right_Delete(typeof(Right[]), var Boolean)');
+create operator Right_Delete(const ARow : typeof(Right[]), var APerformUpdate : Boolean)
+begin
+	System.DropRight(ARow.Name);
+	APerformUpdate := false;
+end;
+attach operator Right_Delete to Right on before delete;
+
+//* Operator: UserRights_Update
+SafeDrop('UserRights_Update(const row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : System.Boolean, Granted : System.Boolean }, var row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : Boolean, Granted : Boolean }, var Boolean)');
+create operator UserRights_Update(const AOldRow : row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : System.Boolean, Granted : System.Boolean }, var ANewRow : row { User_ID : System.UserID, Right_Name : System.Name, HasAssignment : Boolean, Granted : Boolean }, var APerformUpdate : Boolean)
+begin
+	if ANewRow.HasAssignment then
+	begin
+		if ANewRow.Granted then
+			GrantRightToUser(ANewRow.Right_Name, ANewRow.User_ID)
+		else
+			RevokeRightFromUser(ANewRow.Right_Name, ANewRow.User_ID);
+	end
+	else
+		RevertRightForUser(ANewRow.Right_Name, ANewRow.User_ID);
+	APerformUpdate := false;
+end;
+
+//* Operator: GroupRights_Update
+SafeDrop
+(
+	'
+		GroupRights_Update
+		(
+			const row { Group_Name : GroupName, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean, Inherited : Boolean, ApplyRecursively : Boolean, IncludeUsers : Boolean }, 
+			var row { Group_Name : GroupName, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean, Inherited : Boolean, ApplyRecursively : Boolean, IncludeUsers : Boolean }, 
+			var Boolean
+		)
+	'
+);
+create operator GroupRights_Update
+(
+	const AOldRow : row { Group_Name : GroupName, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean, Inherited : Boolean, ApplyRecursively : Boolean, IncludeUsers : Boolean }, 
+	var ANewRow : row { Group_Name : GroupName, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean, Inherited : Boolean, ApplyRecursively : Boolean, IncludeUsers : Boolean }, 
+	var APerformUpdate : Boolean
+)
+begin
+	if ANewRow.HasAssignment then
+	begin
+		if ANewRow.Granted then
+			GrantRightToGroup(ANewRow.Right_Name, ANewRow.Group_Name, ANewRow.Inherited, ANewRow.ApplyRecursively, ANewRow.IncludeUsers)
+		else
+			RevokeRightFromGroup(ANewRow.Right_Name, ANewRow.Group_Name, ANewRow.Inherited, ANewRow.ApplyRecursively, ANewRow.IncludeUsers);
+	end
+	else
+		RevertRightForGroup(ANewRow.Right_Name, ANewRow.Group_Name, ANewRow.ApplyRecursively, ANewRow.IncludeUsers);
+	APerformUpdate := false;
+end;
+
+//* Operator: RoleRights_Update(row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, var row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, var Boolean)
+SafeDrop('RoleRights_Update(row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, var row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, var Boolean)');
+create operator RoleRights_Update
+(
+	const AOldRow : row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, 
+	var ANewRow : row { Role_Name : Name, Right_Name : Name, HasAssignment : Boolean, Granted : Boolean }, 
+	var APerformUpdate : Boolean
+)
+begin
+	if ANewRow.HasAssignment then
+	begin
+		if ANewRow.Granted then
+			GrantRightToRole(ANewRow.Right_Name, ANewRow.Role_Name)
+		else
+			RevokeRightFromRole(ANewRow.Right_Name, ANewRow.Role_Name);
+	end
+	else
+		RevertRightForRole(ANewRow.Right_Name, ANewRow.Role_Name);
+	APerformUpdate := false;
+end;
+

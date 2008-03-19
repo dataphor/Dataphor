@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DBFile.Menu.CopyText" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="DBFile.Menu.PasteText" xml:space="preserve">
+    <value>&amp;Paste</value>
+  </data>
+  <data name="DBFile.Menu.SaveAsText" xml:space="preserve">
+    <value>&amp;Save As...</value>
+  </data>
+  <data name="DBFile.Menu.LoadText" xml:space="preserve">
+    <value>&amp;Load...</value>
+  </data>
+  <data name="DBFile.Menu.ClearText" xml:space="preserve">
+    <value>Cl&amp;ear</value>
+  </data>
+  <data name="DBFile.Menu.OpenText" xml:space="preserve">
+    <value>&amp;Open</value>
+  </data>
+  <data name="DBFileForm.SaveFileCaption" xml:space="preserve">
+    <value>Save File</value>
+  </data>
+  <data name="DBFileForm.LoadFileCaption" xml:space="preserve">
+    <value>Load File</value>
+  </data>  
+  <data name="DBFileForm.FileLockedText" xml:space="preserve">
+    <value>The temporary file is being accessed by another application.  Close the application then click "OK" to capture changes. [ {0} ]</value>
+  </data>
+  <data name="DBFileForm.FileLockedCaption" xml:space="preserve">
+    <value>File In Use</value>
+  </data>
+  <data name="DBFileForm.ClosingText" xml:space="preserve">
+    <value>The contol that opened the file is closing; changes cannot be captured. Click "OK" to backup changes to a temporary file.</value>
+  </data>
+  <data name="DBFileForm.ClosingCaption" xml:space="preserve">
+    <value>Control Closing</value>
+  </data>
+  <data name="DBFileForm.UserInputRequiredInstructionsText" xml:space="preserve">
+    <value>Click "OK" when you are ready to capture changes (you may need to close the application that opened the file first).</value>
+  </data>
+  <data name="DBFileForm.UserInputRequiredInstructionsCaption" xml:space="preserve">
+    <value>Instructions - Undetermined Application</value>
+  </data>
+  <data name="DBFileForm.FileAttachedInstructionsText" xml:space="preserve">
+    <value>Close the application that opened the file before clicking "Accept" or "Reject".</value>
+  </data>
+  <data name="DBFileForm.FileAttachedInstructionsCaption" xml:space="preserve">
+    <value>Instructions - [{0}]</value>
+  </data>
+  <data name="DBFileForm.FileLockedInstructionsText" xml:space="preserve">
+    <value>Close the application that opened the file before clicking "Accept" or "Reject".</value>
+  </data>
+  <data name="DBFileForm.FileLockedInstructionsCaption" xml:space="preserve">
+    <value>Instructions - File In Use</value>
+  </data>
+  <data name="DBFileForm.CannotWriteText" xml:space="preserve">
+    <value>The temporary file is being accessed by another application.  Close the application then click "Retry". [ {0} ]</value>
+  </data>
+  <data name="DBFileForm.CannotWriteCaption" xml:space="preserve">
+    <value>Unable To Open File</value>
+  </data>
+  <data name="DBFileForm.FileNameLockedText" xml:space="preserve">
+    <value>The file is being accessed by another application. Press "Ignore" to open as a different file. [ {0} ]</value>
+  </data>
+  <data name="DBFileForm.FileNameLockedCaption" xml:space="preserve">
+    <value>File In Use</value>
+  </data>
+  <data name="DBFileForm.ProcessStartFailedText" xml:space="preserve">
+    <value>Unable to open "{0}".  {1}</value>
+  </data>
+  <data name="DBFileForm.ProcessStartFailedCaption" xml:space="preserve">
+    <value>Start Process Failed</value>
+  </data>
+  <data name="DBFileForm.OverwriteBoxText" xml:space="preserve">
+    <value>File "{0}" already exists.  Overwrite?</value>
+  </data>
+  <data name="DBFileForm.OverwriteBoxCaption" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="DBFileForm.UnknownFileDescription" xml:space="preserve">
+    <value>{0} File</value>
+  </data>
+  <data name="DBFileForm.AllFileFilter" xml:space="preserve">
+    <value>All files (*.*)|*.*</value>
+  </data>  
+</root>

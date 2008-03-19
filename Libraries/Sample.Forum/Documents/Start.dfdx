@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Frontend.Derive('Sample.Forum.ForumView', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" iconimage="Image('Sample.Forum', 'Alphora')" bop:default-OnDefault="True">
+   <datascriptaction ibop:order="10" bop:name="DropGetForumIDSessionTable" script="SafeDrop(&quot;GetForumID&quot;)&#xD;&#xA;		" />
+   <datascriptaction ibop:order="11" bop:name="CreateGetForumIDSessionTable" script="create session table GetForumID&#xD;&#xA;{&#xD;&#xA;	Forum_ID : ForumID,&#xD;&#xA;	key { Forum_ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;GetForumID := table { row { ForumID(Main.ID) Forum_ID} };&#xD;&#xA;		">
+      <dataargument ibop:order="0" bop:name="DataArgument" columns="Main.ID" source="Main" />
+   </datascriptaction>
+   <showformaction ibop:order="12" bop:name="ShowFormSelectAction" text="Select Forum..." afterexecute="DropGetForumIDSessionTable" beforeexecute="CreateGetForumIDSessionTable" document="Load('Sample.Forum', 'ForumManager')" sourcelink.source="Main" sourcelink.detailkeynames="Forum_ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+   <menu ibop:order="13" bop:name="NavigationMenu" />
+   <column ibop:order="14" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="SelectTrigger" action="ShowFormSelectAction" />
+         </column>
+      </row>
+   </column>
+   <sourceaction ibop:order="15" bop:name="MoveLast" />
+   <sourceaction ibop:order="16" bop:name="Refresh" />
+</interface>
+</document>
+</dilx>

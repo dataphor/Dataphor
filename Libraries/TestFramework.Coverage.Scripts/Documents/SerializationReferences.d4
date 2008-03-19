@@ -1,0 +1,59 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// References
+create table TestTable2{ ID : Integer };
+
+create table TestTable5 { ID : Integer, order {ID} };
+
+create table TestTable6 { ID : Integer, Name : String, key {ID} };
+
+create view TestView4 TestTable6
+	// reference
+	{
+		reference TestReference { ID } references TestTable5 { ID }
+	};
+
+	// create reference
+	create reference TestRootReference
+		TestTable2 {ID} references TestView4 {ID};
+	// alter reference
+	alter reference TestRootReference;	
+	// drop reference
+	drop reference TestRootReference;
+	
+create type ID like Integer { special Unknown -1 };
+
+create table TestType { ID : ID { constraint NotUnknown not(IsUnknown(value)) }, Description : String, key { ID } };
+create table Test { ID : ID, Type_ID : ID, key { ID } };
+create reference Test_TestType Test { Type_ID } references TestType { ID };
+
+create table TestType2 { ID : ID { constraint NotUnknown not(IsUnknown(value)) }, Description : String, key { ID } };
+create table Test2 { ID : ID, Type_ID : ID, key { ID } };
+create reference Test2_TestType2 Test2 { Type_ID } references TestType2 { ID } update cascade delete cascade;
+
+create table TestType3 { ID : ID { constraint NotUnknown not(IsUnknown(value)) }, Description : String, key { ID } };
+create table Test3 { ID : ID, Type_ID : ID, key { ID } };
+create reference Test3_TestType3 Test3 { Type_ID } references TestType3 { ID } update clear delete clear;
+
+create table TestType4 { ID : ID { constraint NotUnknown not(IsUnknown(value)) }, Description : String, key { ID } };
+create table Test4 { ID : ID, Type_ID : ID, key { ID } };
+create reference Test4_TestType4 Test4 { Type_ID } references TestType4 { ID } update set { IDUnknown() } delete set { IDUnknown() };
+
+create table Test { ID : Integer, Test_ID : Integer nil, key { ID }, reference Test_Test { Test_ID } references Test { ID } };
+
+create table TestA { ID : Integer, B_ID : Integer, key { ID } };
+create table TestB { ID : Integer, A_ID : Integer, key { ID } };
+
+create reference TestA_TestB TestA { B_ID } references TestB { ID };
+create reference TestB_TestA TestB { A_ID } references TestA { ID };
+
+create view TestAView TestA;
+create view TestBView TestB;
+
+create reference TestAView_TestB TestAView { B_ID } references TestB { ID };
+create reference TestBView_TestA TestBView { A_ID } references TestA { ID };
+create reference TestAView_TestBView TestAView { B_ID } references TestBView { ID };
+create reference TestBView_TestAView TestBView { A_ID } references TestAView { ID };

@@ -1,0 +1,12 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+CopyDocument("Sample.Rental", "AddSaleCompleted", "Sample.Rental", "AddSale");
+CopyDocument("Sample.Rental", "BrowseMovieActorCompleted", "Sample.Rental", "BrowseMovieActor");
+CopyDocument("Sample.Rental", "MainFormCompleted", "Sample.Rental", "MainForm");
+CopyDocument("Sample.Rental", "RegisterCompleted", "Sample.Rental", "Register");
+CopyDocument("Sample.Rental", "ReturnVideoCompleted", "Sample.Rental", "ReturnVideo");
+CopyDocument("Sample.Rental", "SaleItemFrameCompleted", "Sample.Rental", "SaleItemFrame");
+RefreshDocuments("Sample.Rental");

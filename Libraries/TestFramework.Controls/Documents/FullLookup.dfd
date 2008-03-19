@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="FullLookup">
+  <source expression="TableDee add { '' Test tags { DAE.IsComputed = 'False' } }" bop:name="Source1" />
+  <column bop:name="Column1">
+    <row bop:name="Row1">
+      <statictext text="Empty, No Title" bop:name="StaticText1" />
+      <fulllookup bop:name="FullLookup1" />
+    </row>
+    <row bop:name="Row2">
+      <statictext text="Empty, With Title" bop:name="StaticText2" />
+      <fulllookup title="&amp;Test &amp; Be Tested" bop:name="FullLookup2" />
+    </row>
+    <row bop:name="Row3">
+      <statictext text="Contains Static, No Title" bop:name="StaticText3" />
+      <fulllookup bop:name="FullLookup3">
+        <statictext text="Static Text" bop:name="StaticText4" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row5">
+      <statictext text="Contains Static, With Title" bop:name="StaticText6" />
+      <fulllookup title="T&amp;est &amp; Be Tested" bop:name="FullLookup5">
+        <statictext text="Static Text" bop:name="StaticText7" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row4">
+      <statictext text="Contains Tiny" bop:name="StaticText5" />
+      <fulllookup bop:name="FullLookup4">
+        <staticimage imagewidth="1" imageheight="1" bop:name="StaticImage1" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row6">
+      <statictext text="Contains Big" bop:name="StaticText8" />
+      <fulllookup bop:name="FullLookup6">
+        <staticimage imagewidth="100" imageheight="100" bop:name="StaticImage2" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row7">
+      <statictext text="Contains Focusable" bop:name="StaticText9" />
+      <fulllookup bop:name="FullLookup7">
+        <textbox columnname="Test" source="Source1" bop:name="TextBox1" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row8">
+      <statictext text="Contains Focusable" bop:name="StaticText10" />
+      <fulllookup columnnames="Test" source="Source1" document="Derive('Test')" bop:name="FullLookup8">
+        <textbox columnname="Test" source="Source1" bop:name="TextBox2" />
+      </fulllookup>
+    </row>
+    <row bop:name="Row9">
+      <statictext text="Contains Focusable, With Title" bop:name="StaticText11" />
+      <fulllookup columnnames="Test" source="Source1" document="Derive('Test')" title="Test Title" bop:name="FullLookup9">
+        <textbox columnname="Test" source="Source1" bop:name="TextBox3" />
+      </fulllookup>
+    </row>
+  </column>
+</interface>

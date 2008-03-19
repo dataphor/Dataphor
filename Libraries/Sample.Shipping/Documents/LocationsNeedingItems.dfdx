@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Frontend.Derive('Sample.Shipping.LocationsNeedingItems', 'List')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+   <source bop:name="Main" isreadonly="True" />
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column ibop:order="1" bop:name="GridBar">
+            <trigger ibop:order="0" bop:name="CreateBidItemsTrigger" action="CreateBidItems" />
+         </column>
+      </row>
+   </column>
+   <datascriptaction ibop:order="10" bop:name="CreateBidItems" text="Create Bid Items..." afterexecute="ShowBidItems" script="CreateBidItems(Main.Location_ID);">
+      <dataargument ibop:order="0" bop:name="DataArgument1" columns="" source="Main" />
+   </datascriptaction>
+   <showformaction ibop:order="11" bop:name="ShowBidItems" mode="Query" document="Derive('BidItem', 'List')" onformaccepted="CreatePurchaseOrders" />
+   <scriptaction ibop:order="12" bop:name="CreatePurchaseOrders" text="Create Purchase Orders..." afterexecute="Refresh" script="Host.Session.ExecuteScript&#xD;&#xA;(&#xD;&#xA;	String.Format&#xD;&#xA;	(&#xD;&#xA;		&quot;CreatePurchaseOrders(LocationID(\&quot;{0}\&quot;));&quot;, &#xD;&#xA;		Main[&quot;Main.Location_ID&quot;].AsString&#xD;&#xA;	)&#xD;&#xA;);&#xD;&#xA;" />
+</interface>
+</document>
+</dilx>

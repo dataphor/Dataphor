@@ -1,0 +1,30 @@
+<interface xmlns:bop="www.alphora.com/schemas/bop" mainsource="DocumentExpression" text="Document Expression Editor">
+  <notebook activepage="nbpLoad" bop:name="Notebook">
+    <notebookpage title="Load" bop:name="nbpLoad">
+      <column bop:name="Column">
+        <quicklookup columnname="Library_Name" document="Derive('Libraries over {Name} adorn tags { Frontend.Title = &quot;Libraries&quot; }', 'List')" lookupcolumnname="Main.Name" source="DocumentExpression" title="Library Name" bop:name="qlLibraryName_Lookup">
+          <textbox columnname="Library_Name" source="DocumentExpression" titlealignment="None" width="40" bop:name="qlLibraryName" />
+        </quicklookup>
+        <quicklookup columnname="Document_Name" detailkeynames="Main.Library_Name" document="Derive('Documents', 'List', 'Library_Name', 'Main.Library_Name')" lookupcolumnname="Main.Name" masterkeynames="Library_Name" source="DocumentExpression" title="Document Name" bop:name="qlDocumentName_Lookup">
+          <textbox columnname="Document_Name" source="DocumentExpression" titlealignment="None" width="40" bop:name="qlDocumentName" />
+        </quicklookup>
+      </column>
+    </notebookpage>
+    <notebookpage title="Derive" bop:name="nbpDerive">
+      <column bop:name="Column1">
+        <textbox columnname="Query" height="4" source="DocumentExpression" title="Query" width="20" bop:name="txtQuery" />
+        <quicklookup columnname="PageType" document="Derive('PageTypes', 'List')" lookupcolumnname="Main.ID" source="DocumentExpression" title="Page Type" bop:name="qlPageType_Lookup">
+          <textbox columnname="PageType" source="DocumentExpression" titlealignment="None" width="20" bop:name="qlPageType" />
+        </quicklookup>
+        <textbox columnname="MKN" hint="Comma separated list of column names from the source form." source="DocumentExpression" title="Master Key Names" width="40" bop:name="txtMKN" />
+        <textbox columnname="DKN" hint="Comma separated list of column names in the target form." source="DocumentExpression" title="Detail Key Names" width="40" bop:name="txtDKN" />
+        <checkbox columnname="Elaborate" source="DocumentExpression" title="Elaborate" bop:name="chkElaborate" />
+      </column>
+    </notebookpage>
+    <notebookpage title="Other" bop:name="nbpOther">
+      <textbox columnname="Expression" height="2" source="DocumentExpression" bop:name="txtExpression" />
+    </notebookpage>
+  </notebook>
+  <scriptaction script="// Ensure that the required columns for whatever page are satisfied&#xA;switch (Notebook.ActivePage.Name)&#xA;{&#xA;	case &quot;nbpLoad&quot; :&#xD;&#xA;		if (!(DocumentExpression.DataView[&quot;Library_Name&quot;].HasValue()) || !(DocumentExpression.DataView[&quot;Document_Name&quot;].HasValue()))&#xD;&#xA;		{&#xD;&#xA;			throw new Exception(&quot;Library Name and Document Name must ahve a value.&quot;);&#xD;&#xA;		}&#xA;		break;&#xD;&#xA;	case &quot;nbpDerive&quot; :&#xD;&#xA;		if &#xD;&#xA;		(&#xD;&#xA;			!(DocumentExpression.DataView[&quot;Query&quot;].HasValue())  ||&#xD;&#xA;			!(DocumentExpression.DataView[&quot;PageType&quot;].HasValue()) ||&#xD;&#xA;			!(DocumentExpression.DataView[&quot;MKN&quot;].HasValue()) ||&#xD;&#xA;			!(DocumentExpression.DataView[&quot;DKN&quot;].HasValue()) ||&#xD;&#xA;			!(DocumentExpression.DataView[&quot;Elaborate&quot;].HasValue())&#xD;&#xA;		)&#xD;&#xA;		{&#xD;&#xA;			throw new Exception(&quot;Query, PageType, Master &amp; Detail Names and Elaborate cannot contain null values.&quot;);&#xD;&#xA;		}&#xA;		break;&#xA;	case &quot;nbpOther&quot; :&#xD;&#xA;		if (!(DocumentExpression.DataView[&quot;Expression&quot;].HasValue()))&#xD;&#xA;		{&#xD;&#xA;			throw new Exception(&quot;Tab Other expression cannot be null.&quot;);&#xD;&#xA;		}&#xA;		break;&#xD;&#xA;}" bop:name="ValidateRequireds" />
+  <source expression="TableDee&#xA;	add&#xA;	{&#xD;&#xA;		String(nil) Library_Name tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		String(nil) Document_Name tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		String(nil) Query tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		'Browse' PageType tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		'' MKN tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		'' DKN tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		true Elaborate tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		String(nil) Expression tags { DAE.IsComputed = &quot;false&quot; }&#xA;	}&#xD;&#xA;" onvalidate="ValidateRequireds" openstate="Edit" useapplicationtransactions="False" bop:name="DocumentExpression" />
+</interface>

@@ -1,0 +1,72 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// the following lines are to test the selection before running the operator to create the files
+//select Operators over {Name} where 'System.'.Pos(Name) = 0 order by {Name}
+//select Count(Operators over {Name} where 'System.'.Pos(Name) = 0 )
+//select TableVars over {Name} where 'System.'.Pos(Name) = 0 order by {Name}
+//select Count(TableVars over {Name} where 'System.'.Pos(Name) = 0)
+
+/*
+	Notes on parameters for DocOperator:
+	ATempate is the output template to use
+		TopicXML		is the old model used for building documentation, not used
+		Docbook		is the current (11/12/03) model for building documentation
+						default is to write out the name and the comment to a text file with newline separations
+
+	ATitle is the title to use for the "sect1" level tag
+	
+	AOutput is the filename (include full path) for the output file. It does not prompt overwrite, just does it
+	
+	AObjects is an expression to select the items desired for documentation, must be a cursor of names only
+	
+	note:
+	a backward navigable cursor is required for operators as they have overloads that must be found...
+*/
+
+// register the documentation operator moved to register script
+//create operator DocOperator ( const ATemplate: String, const ATitle: String, const AOutput: String, const AObjects: cursor(table {Name: System.Name}) ) class "DocOperator";
+
+// generate documentation for the system operators
+DocOperator
+(
+	"Docbook",
+	"System Library Operators",
+	"c:\DocBuild\Alphora\docbook\SystemLibrary.xml",
+	cursor 
+	(
+		Operators over {Name} 
+		where 'System.'.Pos(Name) = 0
+		order by {Name} 
+		capabilities {navigable, backwardsnavigable}
+	)
+);
+
+// generate documentation for the system tables
+DocOperator
+(
+	"Docbook",
+	"System Tables",
+	"c:\docbuild\Alphora\docbook\SystemTables.xml",
+	cursor
+	(
+		TableVars over {Name} 
+		where 'System.'.Pos(Name) = 0
+		order by {Name} 
+		capabilities {navigable, backwardsnavigable}
+	)
+);
+
+// new document library operator moved to register
+// create operator DocLibrary ( const ALibraryName: String, const AXMLTemplate: String, const AExtDocPath: String, const AOutputPath: String ) class "DocLibrary";
+
+DocLibrary
+(
+	"System",
+	"C:\src\Alphora\Docs\Docs2.0\SystemLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\tmp",
+	"off"
+);

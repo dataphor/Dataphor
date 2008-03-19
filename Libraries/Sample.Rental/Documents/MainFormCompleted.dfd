@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Video Rental System">
+  <column bop:name="MainColumn">
+    <statictext text="Welcome to Alphora Video" bop:name="TitleStaticText" />
+    <row bop:name="ButtonRow">
+      <column marginright="10" bop:name="ButtonColumn1">
+        <trigger action="ShowMoviesActorsAction" text="Movies-&amp;Actors" marginbottom="10" bop:name="MoviesActorsTrigger" />
+        <trigger action="ShowAvailableVideoAction" text="Available &amp;Videos" marginbottom="10" bop:name="AvailableVideosTrigger" />
+        <trigger action="NewRentalSaleAction" text="Rentals/&amp;Sales" marginbottom="10" bop:name="RentalsSalesTrigger" />
+        <trigger action="ShowRentedVideoAction" text="Return Videos" marginbottom="10" bop:name="ReturnVideosTrigger" />
+      </column>
+      <column bop:name="ButtonColumn2">
+        <trigger action="ShowMoviesAction" text="View/Update &amp;Movies" marginbottom="10" bop:name="MoviesTrigger" />
+        <trigger action="ShowAccountAction" text="View/Update Accounts" marginbottom="10" bop:name="AccountsTrigger" />
+        <trigger action="ShowVideoAction" text="View/Update Videos" marginbottom="10" bop:name="VideosTrigger" />
+      </column>
+    </row>
+    <statictext text="Thursday, May 12, 2005  11:27:53" bop:name="ClockStaticText" />
+  </column>
+  <showformaction document="Form('Sample.Rental','BrowseMovieActor')" bop:name="ShowMoviesActorsAction" />
+  <showformaction document="Derive('Movie', 'Browse')" bop:name="ShowMoviesAction" />
+  <showformaction document="Derive('AvailableVideo', 'Browse')" bop:name="ShowAvailableVideoAction" />
+  <showformaction document="Derive('Account', 'Browse')" bop:name="ShowAccountAction" />
+  <showformaction document="Derive('Video', 'Browse')" bop:name="ShowVideoAction" />
+  <scriptaction script="ClockStaticText.Text =&#xD;&#xA; DateTime.Now.ToLongDateString()&#xD;&#xA; + &quot;  &quot;&#xD;&#xA; + DateTime.Now.ToLongTimeString();&#xD;&#xA;" bop:name="SetClockAction" />
+  <timer enabled="True" interval="1000" onelapsed="SetClockAction" bop:name="ClockTimer" />
+  <showformaction document="Form('Sample.Rental', 'AddSale')" mode="Insert" bop:name="NewRentalSaleAction" />
+  <showformaction document="Form('Sample.Rental', 'ReturnVideo')" bop:name="ShowRentedVideoAction" />
+</interface>

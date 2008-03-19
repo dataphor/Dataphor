@@ -1,0 +1,101 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Dataphor Exceptions Diagnostics Script
+// Verifies resource string backing for all exception messages in the DAE and supporting libraries.
+
+TestExceptions("Alphora.Dataphor.dll", "Alphora.Dataphor.BaseException");
+TestExceptions("Alphora.Dataphor.BOP.dll", "Alphora.Dataphor.BOP.BOPException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Design.DesignException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Device.DeviceException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Device.ApplicationTransaction.ApplicationTransactionException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Device.Catalog.CatalogException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Device.Heap.HeapDeviceException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Device.Memory.MemoryDeviceException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Language.LanguageException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Language.LexerException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Language.ParserException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Language.SyntaxException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Language.D4.CompilerException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Runtime.RuntimeException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Runtime.Data.IndexException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Runtime.Data.ScanException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Schema.SchemaException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Server.ServerException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Storage.StorageException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Streams.StreamsException");
+TestExceptions("Alphora.Dataphor.DAE.dll", "Alphora.Dataphor.DAE.Streams.ConveyorException");
+TestExceptions("Alphora.Dataphor.DAE.Client.dll", "Alphora.Dataphor.DAE.Client.ClientException");
+TestExceptions("Alphora.Dataphor.DAE.Client.Controls.dll", "Alphora.Dataphor.DAE.Client.Controls.ControlsException");
+TestExceptions("Alphora.Dataphor.DAE.Client.Provider.dll", "Alphora.Dataphor.DAE.Client.Provider.ProviderException");
+TestExceptions("Dataphoria.exe", "Alphora.Dataphor.Dataphoria.DataphoriaException");
+TestExceptions("Alphora.Dataphor.Frontend.Client.dll", "Alphora.Dataphor.Frontend.Client.ClientException");
+TestExceptions("Alphora.Dataphor.Frontend.Server.dll", "Alphora.Dataphor.Frontend.Server.Device.FrontendDeviceException");
+TestExceptions("Alphora.Dataphor.Frontend.Server.dll", "Alphora.Dataphor.Frontend.Server.ServerException");
+TestExceptions("Alphora.Dataphor.DAE.Connection.dll", "Alphora.Dataphor.DAE.Connection.ConnectionException");
+TestExceptions("Alphora.Dataphor.DAE.Device.Simple.dll", "Alphora.Dataphor.DAE.Device.Simple.SimpleDeviceException");
+TestExceptions("Alphora.Dataphor.DAE.Device.SQL.dll", "Alphora.Dataphor.DAE.Device.SQL.SQLException");
+
+// Error type
+
+//* Selectors
+begin
+	var LError := Error('Testing');
+	if LError.Message <> 'Testing' then
+		raise Error('Error(String) selector failed');
+		
+	LError := Error('Testing', Error('Test'));
+	if LError.InnerError.Message <> 'Test' then
+		raise Error('Error(String, Error) selector failed');
+	
+	LError := Error(500100, "Testing");
+	if LError.Code <> 500100 or LError.Message <> "Testing" then
+		raise Error('Error(Integer, String) selector failed');
+		
+	LError := Error(500100, "Testing", Error('Test'));
+	if LError.InnerError.Message <> 'Test' then
+		raise Error('Error(Integer, String, Error) selector failed');
+		
+	LError := Error("User", "Testing");
+	if LError.Severity <> "User" or LError.Message <> "Testing" then
+		raise Error('Error(String, String) selector failed');
+		
+	LError := Error("User", "Testing", Error("Test"));
+	if LError.InnerError.Message <> 'Test' then
+		raise Error('Error(String, String, Error) selector failed');
+		
+	LError := Error("User", 500100, "Testing");
+	if LError.Severity <> "User" or LError.Code <> 500100 or LError.Message <> "Testing" then
+		raise Error('Error(String, Integer, String) selector failed');
+		
+	LError := Error("User", 500100, "Testing", LError);
+	if LError.Severity <> "User" or LError.Code <> 500100 or LError.Message <> "Testing" or LError.InnerError.Severity <> "User" then
+		raise Error('Error(String, Integer, String, Error) selector failed');
+
+	// Severity write accessors
+	LError.Severity := "Application";
+	if LError.Severity <> "Application" then
+		raise Error('Severity write accessor failed');
+		
+	// Code accessors
+	LError.Code := 500101;
+	if LError.Code <> 500101 then
+		raise Error("Code write accessor failed");
+		
+	// Message accessors
+	LError.Message := "Testing Again";
+	if LError.Message <> "Testing Again" then
+		raise Error("Message write accessor failed");
+		
+	// Inner exception accessors
+	LError.InnerError := Error("Testing Again");
+	if LError.InnerError.Message <> "Testing Again" then
+		raise Error("InnerError write accessor failed");
+		
+	// GetErrorDescription
+	LError.GetErrorDescription();
+	
+	// GetDetailedErrorDescription
+	LError.GetDetailedErrorDescription();
+end;

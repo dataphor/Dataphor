@@ -1,0 +1,707 @@
+/*
+	Frontend Server Registration Script
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+//* Role: User
+CreateRole("User");
+
+//* Role: Developer
+CreateRole("Developer");
+//AddGroupToRole("User", "Frontend.User", true);
+
+grant usage on RegisterLibrary(Name) to role Developer;
+grant usage on UnregisterLibrary(Name) to role Developer;
+grant usage on RegisterLibrary(Name, Boolean) to role Developer;
+grant usage on UnregisterLibrary(Name, Boolean) to role Developer;
+grant usage on EnsureLibraryRegistered(Name) to role Developer;
+grant usage on UpgradeLibrary(Name) to role Developer;
+grant usage on RefreshLibraries() to role Developer;
+
+//* Device: Server
+create device Server
+	class "Frontend.FrontendDevice";
+grant { Read } on Server to role User;
+grant { Read, Write } on Server to role Developer;
+
+//* Device: ServerStore
+create device ServerStore
+	class "SimpleDevice.SimpleDevice";
+grant { Read } on ServerStore to role User;
+grant { Read, Write } on ServerStore to role Developer;
+
+//* Table: DocumentTypes
+// One row for each document type known to the frontend server
+// DataType describes the type of values contained in the document
+create table DocumentTypes in Server
+{
+	ID : String tags { Frontend.Preview.Include = "true" },
+	Description : String tags { Frontend.Preview.Include = "true", Frontend.Width = "35" },
+	DataType : Name tags { Frontend.Title = "Data Type" },
+	key { ID } static tags { Storage.Enforced = "true" }
+} tags { static Frontend.Title = "Document Types" };
+grant usage on DocumentTypes to role User;
+
+if not exists (DocumentTypes) then
+	insert
+		table
+		{
+			row { "d4" ID, "D4 Script" Description, "System.String" DataType },
+			row { "d4c" ID, "D4 Catalog" Description, "System.String" DataType },
+			row { "sql" ID, "SQL Script" Description, "System.String" DataType },
+			row { "dfd" ID, "Dataphor Form Document" Description, "System.String" DataType },
+			row { "dfdx" ID, "Customized Dataphor Form Document" Description, "System.String" DataType },
+			row { "txt" ID, "Text" Description, "System.String" DataType },
+			row { "xml" ID, "XML" Description, "System.String" DataType },
+			row { "dnt" ID, "Dataphor Node Types" Description, "System.String" DataType },
+			row { "dft" ID, "Dataphor Frontend Theme" Description, "System.String" DataType },
+			row { "bmp" ID, "Bitmap" Description, "System.Graphic" DataType },
+			row { "gif" ID, "GIF" Description, "System.Graphic" DataType },
+			row { "jpg" ID, "JPEG" Description, "System.Graphic" DataType },
+			row { "exif" ID, "EXIF" Description, "System.Graphic" DataType },
+			row { "png" ID, "Portable Network Graphic" Description, "System.Graphic" DataType },
+			row { "tiff" ID, "TIFF" Description, "System.Graphic" DataType },
+			row { "wmf" ID, "Windows Metafile" Description, "System.Graphic" DataType },
+			row { "ico" ID, "Icon" Description, "System.Graphic" DataType },
+			row { "emf" ID, "Enhanced Metafile" Description, "System.Graphic" DataType },
+			row { "cs" ID, "C# Script" Description, "System.String" DataType },
+			row { "vb" ID, "VB.NET Script" Description, "System.String" DataType },
+			row { "chm" ID, "Compiled Help" Description, "System.Binary" DataType },
+			row { "htm" ID, "HTML" Description, "System.String" DataType },
+			row { "pla" ID, "Dataphor Execution Plan" Description, "System.String" DataType }
+		}
+		into DocumentTypes;
+
+//* Table: Designers	
+// One row for each document designer known to the frontend server
+create table Designers in Server
+{
+	ID : String tags { Frontend.Preview.Include = "true" },
+	Description : String tags { Frontend.Preview.Include = "true", Frontend.Width = "25" },
+	ClassName : String tags { Frontend.Title = "Class Name " },
+	key { ID } static tags { Storage.Enforced = "true" }
+};
+grant usage on Designers to role User;
+
+if not exists (Designers) then
+	insert
+		table
+		{
+			row { "D4" ID, "D4 Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.D4Editor,Dataphoria" ClassName },
+			row { "SQL" ID, "RealSQL Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.D4Editor,Dataphoria" ClassName },
+			row { "Text" ID, "Text Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName },
+			row { "XML" ID, "XML Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName },
+			row { "VB" ID, "VB.NET Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName },
+			row { "CS" ID, "C# Script Editor" Description, "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor,Dataphoria" ClassName },
+			row { "DFD" ID, "Form Designer" Description, "Alphora.Dataphor.Dataphoria.FormDesigner.FormDesigner,Dataphoria" ClassName },
+			row { "DFDX" ID, "Custom Form Designer" Description, "Alphora.Dataphor.Dataphoria.FormDesigner.CustomFormDesigner,Dataphoria" ClassName },
+			row { "ANY" ID, "Execution Plan Analyzer" Description, "Alphora.Dataphor.Dataphoria.Analyzer.Analyzer,Dataphoria" ClassName }
+		}
+		into Designers;
+
+//* DocumentTypeDesigners
+// One for each designer type supported for the given document type
+create table DocumentTypeDesigners in Server
+{
+	DocumentType_ID : String tags { Frontend.Title = "Document Type" },
+	Designer_ID : String tags { Frontend.Title = "Designer" },
+	key { DocumentType_ID, Designer_ID } static tags { Storage.Enforced = "true" },
+	reference DocumentTypeDesigners_DocumentTypes { DocumentType_ID } references DocumentTypes { ID } tags { Frontend.Detail.Title = "Designers", Frontend.Lookup.Title = "Document Type" } static tags { Storage.Enforced = "true" },
+	reference DocumentTypeDesigners_Designers { Designer_ID } references Designers { ID } tags { Frontend.Detail.Title = "Document Types", Frontend.Lookup.Title = "Designer" } static tags { Storage.Enforced = "true" },
+	order { Designer_ID, DocumentType_ID }
+} tags { static Frontend.Title = "Document Type Designers" };
+grant usage on DocumentTypeDesigners to role User;
+
+if not exists (DocumentTypeDesigners) then
+	insert
+		table
+		{
+			row { "d4" DocumentType_ID, "D4" Designer_ID },
+			row { "d4" DocumentType_ID, "Text" Designer_ID },
+			row { "d4c" DocumentType_ID, "D4" Designer_ID },
+			row { "d4c" DocumentType_ID, "Text" Designer_ID },
+			row { "sql" DocumentType_ID, "SQL" Designer_ID },
+			row { "sql" DocumentType_ID, "Text" Designer_ID },
+			row { "dfd" DocumentType_ID, "DFD" Designer_ID },
+			row { "dfd" DocumentType_ID, "XML" Designer_ID },
+			row { "dfd" DocumentType_ID, "Text" Designer_ID },
+			row { "dfdx" DocumentType_ID, "DFDX" Designer_ID },
+			row { "dfdx" DocumentType_ID, "XML" Designer_ID },
+			row { "dfdx" DocumentType_ID, "Text" Designer_ID },
+			row { "txt" DocumentType_ID, "Text" Designer_ID },
+			row { "xml" DocumentType_ID, "XML" Designer_ID },
+			row { "xml" DocumentType_ID, "Text" Designer_ID },
+			row { "cs" DocumentType_ID, "CS" Designer_ID },
+			row { "cs" DocumentType_ID, "Text" Designer_ID },
+			row { "vb" DocumentType_ID, "VB" Designer_ID },
+			row { "vb" DocumentType_ID, "Text" Designer_ID },
+			row { "dnt" DocumentType_ID, "XML" Designer_ID },
+			row { "dnt" DocumentType_ID, "Text" Designer_ID },
+			row { "dft" DocumentType_ID, "XML" Designer_ID },
+			row { "dft" DocumentType_ID, "Text" Designer_ID },
+			row { "htm" DocumentType_ID, "Text" Designer_ID },
+			row { "pla" DocumentType_ID, "ANY" Designer_ID },
+			row { "pla" DocumentType_ID, "XML" Designer_ID }
+		}
+		into DocumentTypeDesigners;
+
+//* Table: DocumentTypeDefaultDesigners		
+create table DocumentTypeDefaultDesigners in ServerStore
+{
+	DocumentType_ID : String tags { Frontend.Title = "Document Type" },
+	Default_Designer_ID : String tags { Frontend.Title = "Default Designer" },
+	key { DocumentType_ID },
+	reference DocumentTypeDefaultDesigners_DocumentTypes { DocumentType_ID } references DocumentTypes { ID } tags { Frontend.Parent.Title = "Document Type Designer", Frontend.Extension.Title = "Default Designer", Frontend.Embedded = "true" } static tags { Storage.Enforced = "true" },
+	reference DocumentTypeDefaultDesigners_DocumentTypeDesigners { DocumentType_ID, Default_Designer_ID } references DocumentTypeDesigners { DocumentType_ID, Designer_ID } static tags { Storage.Enforced = "true" }
+} tags { static Frontend.Title = "Document Type Default Designers" };
+grant usage on DocumentTypeDefaultDesigners to role User;
+
+if not exists (DocumentTypeDefaultDesigners) then
+	insert
+		table
+		{
+			row { "d4" DocumentType_ID, "D4" Default_Designer_ID },
+			row { "d4c" DocumentType_ID, "D4" Default_Designer_ID },
+			row { "sql" DocumentType_ID, "SQL" Default_Designer_ID },
+			row { "dfd" DocumentType_ID, "DFD" Default_Designer_ID },
+			row { "dfdx" DocumentType_ID, "DFDX" Default_Designer_ID },
+			row { "txt" DocumentType_ID, "Text" Default_Designer_ID },
+			row { "xml" DocumentType_ID, "XML" Default_Designer_ID },
+			row { "dnt" DocumentType_ID, "XML" Default_Designer_ID },
+			row { "dft" DocumentType_ID, "XML" Default_Designer_ID },
+			row { "cs" DocumentType_ID, "CS" Default_Designer_ID },
+			row { "vb" DocumentType_ID, "VB" Default_Designer_ID },
+			row { "htm" DocumentType_ID, "Text" Default_Designer_ID },
+			row { "pla" DocumentType_ID, "ANY" Default_Designer_ID }
+		}
+		into DocumentTypeDefaultDesigners;
+
+//* Table: PageTypes		
+create table PageTypes in ServerStore
+{
+	ID : String,
+	key { ID }
+} tags { static Frontend.Title = "Form Types" };
+grant usage on PageTypes to role User;
+
+if not exists (PageTypes) then
+	insert
+		table
+		{
+			row { "Browse" ID },
+			row { "List" ID },
+			row { "Add" ID },
+			row { "Edit" ID },
+			row { "Delete" ID },
+			row { "View" ID },
+			row { "Manage" ID },
+			row { "OrderBrowse" ID },
+			row { "Preview" ID },
+			row { "Filter" ID }
+		}
+		into PageTypes;
+
+//* Table: Documents
+create table Documents in Server
+{
+	Library_Name : Name
+		tags { Frontend.Title = "Library Name" },
+	Name : Name,
+	Type_ID : String
+		tags { Frontend.Edit.ReadOnly = "true", Frontend.Title = "Document Type" },
+	key { Library_Name, Name } static tags { Storage.Enforced = "true" },
+	reference Documents_Libraries { Library_Name } references Libraries { Name } tags { Frontend.Lookup.Title = "Library" } static tags { Storage.Enforced = "true" },
+	reference Documents_DocumentTypes { Type_ID } references DocumentTypes { ID } tags { Frontend.Lookup.Title = "Document Type" } static tags { Storage.Enforced = "true" }
+};
+grant usage on Documents to role User;
+
+//* Table: Applications
+create table Applications in ServerStore
+{
+	ID : Name tags { Frontend.Width = "25" },
+	Description : String tags { Frontend.Width = "35", Frontend.Preview.Include = "true" },
+	StartDocument : String { default "" } tags { Frontend.Title = "Start Document" },
+	key { ID } static tags { Storage.Enforced = "true" }
+};
+grant usage on Applications to role User;
+
+//* Operator: Applications_DefaultDescription
+// SafeDrop('Applications_DefaultDescription(var typeof(Applications[]))');
+create operator Applications_DefaultDescription(var ARow : typeof(Applications[])) : Boolean
+begin
+	if IsNil(ARow.Description) then
+	begin
+		update ARow set { Description := ID };
+		result := true;
+	end
+	else
+		result := false;
+end;
+attach Applications_DefaultDescription to ID in Applications on change;
+
+//* Table: ApplicationLibraries
+create table ApplicationLibraries in ServerStore
+{
+	Application_ID : Name,
+	Library_Name : Name
+		tags { Frontend.Title = "Library Name" },
+	key { Application_ID, Library_Name } static tags { Storage.Enforced = "true" },
+	reference ApplicationLibraries_Applications { Application_ID } references Applications { ID } update cascade delete cascade tags { Frontend.Detail.Title = "Libraries", Frontend.Lookup.Title = "Application", Frontend.Lookup.UseFullLookup = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true" },
+	reference ApplicationLibraries_Libraries { Library_Name } references System.Libraries { Name } tags { Frontend.Detail.Title = "Applications", Frontend.Lookup.Title = "Library" }
+} tags { Frontend.Title = "Application Libraries" };
+grant usage on ApplicationLibraries to role User;
+
+//* Table: ClientTypes
+create table ClientTypes in ServerStore
+{
+	ID : String,
+	Description : String tags { Frontend.Width = "35" },
+	key { ID }
+} tags { Frontend.Title = "Client Types" };
+grant usage on ClientTypes to role User;
+
+if not exists (ClientTypes) then
+	insert
+		table
+		{
+			row { "Windows" ID, "Dataphor Windows Client" Description },
+			row { "Web" ID, "Dataphor Web Client" Description }
+		}
+		into ClientTypes;
+
+//* Table: WindowsClientApplications
+create table WindowsClientApplications in ServerStore
+{
+	Application_ID : Name,
+	ThemeDocument : String { default "" } tags { Frontend.Title = "Theme Document" },
+	DefaultIconImage : String { default "" } tags { Frontend.Title = "Default Form Icon Image" },
+	DocumentCacheSize : Integer { default 800 } tags { Frontend.Title = "Document Cache Size", Frontend.Hint = "0 = client-side document cache off" },
+	ImageCacheSize : Integer { default 60 } tags { Frontend.Title = "Image Cache Size", Frontend.Hint = "0 = client-side image cache off" },
+	HelpDocument : String { default "" } tags { Frontend.Title = "Help Document" },
+	key { Application_ID } static tags { Storage.Enforced = "true" },
+	reference WindowsClientApplications_Applications { Application_ID } references Applications { ID } update cascade delete cascade
+} tags { static Frontend.Title = "Windows Client Application Settings" };
+grant usage on WindowsClientApplications to role User;
+
+//* Operator: Applications_ID_Change(typeof(Applications[]), var typeof(Applications[]))
+create operator Applications_ID_Change(const AOldRow : typeof(Applications[]), var ANewRow : typeof(Applications[])) : Boolean
+begin
+	result := false;
+	update ApplicationLibraries where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update WindowsClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+end;
+attach operator Applications_ID_Change to ID in Applications on change;
+
+//* Table: FormDesignerLibraries
+create table FormDesignerLibraries in ServerStore
+{
+	Library_Name : Name
+		tags { Frontend.Title = "Library Name" },
+	key { Library_Name },
+	reference FormDesignerLibraries_Library { Library_Name } references System.Libraries { Name } tags { Frontend.Parent.Title = "Library", Frontend.Extension.Title = "Form Designer Library" }
+} tags { static Frontend.Title = "Form Designer Libraries" };
+grant usage on FormDesignerLibraries to role User;
+
+if not exists (FormDesignerLibraries) then
+	insert
+		table
+		{
+			row { "Frontend" Library_Name }
+		}
+		into FormDesignerLibraries;
+
+//* Operator: CreateDocument
+create operator CreateDocument(const ALibraryName : Name, const AName : Name, const ADocumentType : String)
+	class "Frontend.CreateNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on CreateDocument(Name, Name, String) to role User;
+
+//* Operator: DeleteDocument
+create operator DeleteDocument(const ALibraryName : Name, const AName : Name)
+	class "Frontend.DeleteNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on DeleteDocument(Name, Name) to role User;
+
+//* Operator: RenameDocument
+create operator RenameDocument(const AOldLibraryName : Name, const AOldName : Name, const ANewLibraryName : Name, const ANewName : Name)
+	class "Frontend.RenameNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on RenameDocument(Name, Name, Name, Name) to role User;
+
+//* Operator: DocumentExists
+create operator DocumentExists(const ALibraryName : Name, const AName : Name) : System.Boolean
+	class "Frontend.ExistsNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on DocumentExists(Name, Name) to role User;
+
+//* Operator: LoadDocument
+create operator LoadDocument(const ALibraryName : Name, const AName : Name) : String
+	class "Frontend.LoadNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on LoadDocument(Name, Name) to role User;
+
+//* Operator: Load
+create operator Load(const ALibraryName : Name, const AName : Name) : String
+	class "Frontend.LoadNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Load(Name, Name) to role User;
+
+//* Operator: LoadAndProcess
+create operator LoadAndProcess(const ALibraryName : Name, const AName : Name) : String
+	class "Frontend.LoadAndProcessNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on LoadAndProcess(Name, Name) to role User;
+
+//* Operator: Form
+create operator Form(const ALibraryName : Name, const AName : Name) : String
+	class "Frontend.LoadAndProcessNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Form(Name, Name) to role User;
+
+//* Operator: LoadCustomization	
+create operator LoadCustomization(const ADilxDocument : String) : String
+	class "Frontend.LoadCustomizationNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on LoadCustomization(String) to role User;
+
+//* Operator: Merge
+create operator Merge(const AForm : String, const ADelta : String) : String
+	class "Frontend.MergeNode" static tags { DAE.IsRemotable = "false" };
+grant usage on Merge(String, String) to role User;
+
+//* Operator: Difference
+create operator Difference(const AForm : String, const ADelta : String) : String
+	class "Frontend.DifferenceNode" static tags { DAE.IsRemotable = "false" };
+grant usage on Difference(String, String) to role User;
+
+//* Operator: LoadBinary
+create operator LoadBinary(const ALibraryName : Name, const AName : Name) : Binary
+	class "Frontend.LoadBinaryNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on LoadBinary(Name, Name) to role User;
+
+//* Operator: Image
+create operator Image(const ALibraryName : Name, const AName : Name) : Graphic
+	class "Frontend.ImageNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Image(Name, Name) to role User;
+
+//* Operator: SaveDocument	
+create operator SaveDocument(const ALibraryName : Name, const AName : Name, const ADocument : Scalar)
+	class "Frontend.SaveNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on SaveDocument(Name, Name, Scalar) to role User;
+
+//* Operator: Save
+create operator Save(const ALibraryName : Name, const AName : Name, const ADocument : Scalar)
+	class "Frontend.SaveNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on Save(Name, Name, Scalar) to role User;
+
+//* Operator: GetDocumentType
+create operator GetDocumentType(const ALibraryName : Name, const AName : Name) : String
+	class "Frontend.GetDocumentTypeNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on GetDocumentType(Name, Name) to role User;
+
+//* Operator: Derive
+create operator Derive(const AQuery : String, const APageType : String, const AMasterKeyNames : String, const ADetailKeyNames : String, const AElaborate : Boolean) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String, String, String, String, Boolean) to role User;
+
+create operator Derive(const AQuery : String, const APageType : String, const AMasterKeyNames : String, const ADetailKeyNames : String) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String, String, String, String) to role User;
+
+create operator Derive(const AQuery : String, const APageType : String, const AElaborate : Boolean) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String, String, Boolean) to role User;
+
+create operator Derive(const AQuery : String, const APageType : String) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String, String) to role User;
+
+create operator Derive(const AQuery : String, const AElaborate : Boolean) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String, Boolean) to role User;
+
+create operator Derive(const AQuery : String) : String
+	class "Frontend.DeriveNode" static tags { DAE.IsRemotable = "false", DAE.IsLiteral = "False" };
+grant usage on Derive(String) to role User;
+
+//* Operator: ExecuteScript
+create operator ExecuteScript(const ADocumentName : Name)
+	class "Frontend.ExecuteScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+grant usage on ExecuteScript(Name) to role User;
+
+create operator ExecuteScript(const ALibraryName : Name, const ADocumentName : Name)
+	class "Frontend.ExecuteScriptNode" static tags { DAE.IsLiteral = "false", DAE.IsRemotable = "false", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+grant usage on ExecuteScript(Name, Name) to role User;
+
+//* Operator: RefreshDocuments
+create operator RefreshDocuments(const ALibraryName : Name) 
+	class "Frontend.RefreshNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on RefreshDocuments(Name) to role User;
+
+//* Operator: CopyDocument
+create operator CopyDocument(const ASourceLibrary : Name, const ASourceDocument : Name, const ATargetLibrary : Name, const ATargetDocument : Name)
+	class "Frontend.CopyNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on CopyDocument(Name, Name, Name, Name) to role User;
+
+//* Operator: MoveDocument
+create operator MoveDocument(const ASourceLibrary : Name, const ASourceDocument : Name, const ATargetLibrary : Name, const ATargetDocument : Name)
+	class "Frontend.MoveNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on MoveDocument(Name, Name, Name, Name) to role User;
+
+//* Operator: ClearDerivationCache
+create operator ClearDerivationCache() 
+	class "Frontend.ClearDerivationCacheNode" static tags { DAE.IsRemotable = "false", DAE.IsFunctional = "False" };
+grant usage on ClearDerivationCache() to role User;
+
+//* Operator: GetNodeTypes
+// SafeDrop('GetNodeTypes(String, table { Library_Name : Name })');
+create operator GetNodeTypes(const AClientTypeID : String, const ALibraries : table { Library_Name : Name }) : String
+begin
+    result := '<?xml version="1.0" encoding="utf-8" ?> <nodetypes xmlns="http://www.alphora.com/schemas/nodetypes">';
+    
+    var LCursor : cursor(table { Library_Name : Name }) :=
+        cursor
+        (
+            LibraryRequisites
+                explode by Library_Name = parent Required_Library_Name
+                    where Library_Name in ALibraries
+                over { Required_Library_Name }
+                rename { Required_Library_Name Library_Name }
+                union ALibraries
+        );
+    try
+        var LLibraryName : Name;
+        var LDocumentName : Name := AClientTypeID + ".NodeTypes";
+        while LCursor.Next() do
+        begin
+            LLibraryName := LCursor.Select().Library_Name;
+            if DocumentExists(LLibraryName, LDocumentName) then
+                result := result + Load(LLibraryName, LDocumentName);
+        end;
+    finally
+        LCursor.Close();
+    end;
+
+    result := result + "</nodetypes>";
+end;
+grant usage on GetNodeTypes(const String, const table { Library_Name : Name }) to role User;
+
+//* Operator: GetApplicationNodeTypes
+// SafeDrop('GetApplicationNodeTypes(String, Name)');
+create operator GetApplicationNodeTypes(const AClientTypeID : String, const AApplicationID : Name) : String
+begin
+	result := GetNodeTypes(AClientTypeID, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name });
+end;
+grant usage on GetApplicationNodeTypes(String, Name) to role User;
+
+//* Operator: GetLibraryNodeTypes
+// SafeDrop('GetLibraryNodeTypes(String, Name)');
+create operator GetLibraryNodeTypes(const AClientTypeID : String, const ALibraryName : System.Name) : String
+begin
+    result := '<?xml version="1.0" encoding="utf-8" ?> <nodetypes xmlns="http://www.alphora.com/schemas/nodetypes">';
+    
+    var LCursor : cursor(table { Library_Name : Name }) :=
+        cursor
+        (
+            LibraryRequisites
+                explode by Library_Name = parent Required_Library_Name
+                    where Library_Name = ALibraryName
+                over { Required_Library_Name }
+                rename { Required_Library_Name Library_Name }
+                union table { row { ALibraryName Library_Name } }
+        );
+    try
+        var LLibraryName : Name;
+        var LDocumentName : Name := AClientTypeID + ".NodeTypes";
+        while LCursor.Next() do
+        begin
+            LLibraryName := LCursor.Select().Library_Name;
+            if DocumentExists(LLibraryName, LDocumentName) then
+                result := result + Load(LLibraryName, LDocumentName);
+        end;
+    finally
+        LCursor.Close();
+    end;
+
+    result := result + "</nodetypes>";
+end;
+grant usage on GetLibraryNodeTypes(String, Name) to role User;
+
+//* Operator: GetWindowsSettings
+// SafeDrop('GetWindowsSettings(Name)');
+create operator GetWindowsSettings(const AApplicationID : Name) 
+	: 
+	row 
+	{ 
+		IconImage : Graphic, 
+		Theme : String, 
+		DocumentCacheSize : Integer, 
+		ImageCacheSize : Integer, 
+		HelpDocument : String 
+	}
+begin
+	result := row { nil IconImage, nil Theme, nil DocumentCacheSize, nil ImageCacheSize, nil HelpDocument };
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LRow := WindowsClientApplications[AApplicationID];
+
+		// Image
+		var LImageExpression := LRow.DefaultIconImage;
+		if LImageExpression <> "" then
+			update result set { IconImage := Evaluate(LImageExpression) as Graphic };
+			
+		// Theme
+		var LThemeExpression := LRow.ThemeDocument;
+		if LThemeExpression <> "" then
+			update result set { Theme := Evaluate(LThemeExpression) as String };
+		
+		// DocumentCacheSize & ImageCacheSize
+		update result 
+			set 
+			{ 
+				DocumentCacheSize := LRow.DocumentCacheSize, 
+				ImageCacheSize := LRow.ImageCacheSize, 
+				HelpDocument := LRow.HelpDocument 
+			};
+	end;
+end;
+grant usage on GetWindowsSettings(Name) to role User;
+
+//* Operator: GetLibraryFiles
+create operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime }
+	class "Frontend.GetLibraryFilesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+grant usage on GetLibraryFiles(table { Library_Name : Name }) to role User;
+
+//* Operator: PrepareApplication
+// SafeDrop('PrepareApplication(Name)');
+create operator PrepareApplication(const AApplicationID : Name) : String
+begin
+	result := Applications[AApplicationID].StartDocument;
+	var LCursor : cursor(table { Library_Name : Name }) :=
+		cursor
+		(
+			ApplicationLibraries where Application_ID = AApplicationID over { Library_Name }
+		);
+	try
+		while LCursor.Next() do
+			EnsureLibraryRegistered(LCursor.Select().Library_Name);
+	finally
+		LCursor.Close();
+	end;
+end;
+grant usage on PrepareApplication(Name) to role User;
+
+//* Operator: CreateAndSave
+create operator CreateAndSave(const ALibraryName : Name, const AName : Name, ADocumentType : String, const ADocument : Scalar)
+begin
+	if ADocumentType = "" then
+		ADocumentType := GetDocumentType(ALibraryName, AName);
+	if not exists(DocumentTypes where ID = ADocumentType) then
+		raise Error("Document type '" + ADocumentType + "' not found.");
+	if DocumentExists(ALibraryName, AName) then
+		DeleteDocument(ALibraryName, AName);
+	CreateDocument(ALibraryName, AName, ADocumentType);
+	SaveDocument(ALibraryName, AName, ADocument);
+end;
+grant usage on CreateAndSave(Name, Name, String, Scalar) to role User;
+
+//* Operator: GetDefaultDocumentType
+// SafeDrop('GetDefaultDocumentType(String)');
+create operator GetDefaultDocumentType(const ADesignerID : String) : String
+begin
+	if not exists (DocumentTypeDesigners where Designer_ID = ADesignerID) then
+		raise Error('Designer (' + ADesignerID + ') is not associated with any document types.');
+	// TODO: better method for determining the default document type for a designer
+	result := (DocumentTypeDesigners where Designer_ID = ADesignerID return 1 by { DocumentType_ID })[].DocumentType_ID;
+end;
+grant usage on GetDefaultDocumentType(String) to role User;
+
+//* Operator: AddApplication
+create operator AddApplication(AID : Name, ADescription : String, AStartDocument : String, ALibraryName : Name)
+begin
+	insert table { row { AID ID, ADescription Description, AStartDocument StartDocument } } into Applications;
+	insert table { row { AID Application_ID, ALibraryName Library_Name } } into ApplicationLibraries;
+end;
+grant usage on AddApplication(Name, String, String, Name) to role User;
+
+//* Operator: GetCRC32
+create operator GetCRC32(AValue : generic) : Integer class "Frontend.GetCRC32Node" static tags { DAE.IsRemotable = "false" };
+grant usage on GetCRC32(generic) to role User;
+
+//* Operator: LoadIfNecessary
+// SafeDrop('LoadIfNecessary(String, Integer)');
+create operator LoadIfNecessary(ADocument : String, ACRC32 : Integer) : row { CRCMatches : Boolean, Value : Scalar, ActualCRC32 : Integer }
+begin
+	var LData := 
+		(
+			Evaluate(ADocument) 
+				with
+				{
+					IsFunctional = "false",
+					IsDeterministic = "false",
+					IsRepeatable = "false"
+				}
+		) as Scalar;
+	if not IsNil(LData) then
+	begin
+		var LCRC32 := GetCRC32(LData);
+		if LCRC32 = ACRC32 then
+			result := row { true CRCMatches, nil Value, LCRC32 ActualCRC32 }
+		else
+			result := row { false CRCMatches, LData Value, LCRC32 ActualCRC32 };
+	end
+	else
+		result := row { false CRCMatches, LData Value, 0 ActualCRC32 };
+end;
+grant usage on LoadIfNecessary(String, Integer) to role User;
+
+//* Operator: ScriptApplication
+// SafeDrop('ScriptApplication(Name)');
+create operator ScriptApplication(AApplicationID : Name) : String
+begin
+	var LApplication := '';
+	foreach row in Applications where ID = AApplicationID do
+		LApplication := 
+			(if LApplication = '' then '' else LApplication + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID + '") ID, "' 
+				+ Description.Replace('"', '""') + '" Description, "' 
+				+ StartDocument.Replace('"', '""') + '" StartDocument }';
+	
+	var LApplicationLibraries := '';
+	foreach row in ApplicationLibraries where Application_ID = AApplicationID do
+		LApplicationLibraries :=
+			(if LApplicationLibraries = '' then '' else LApplicationLibraries + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID 
+				+ '") Application_ID, System.Name("' + Library_Name + '") Library_Name }';
+	
+	var LWindowsClientApplications := '';
+	foreach row in WindowsClientApplications where Application_ID = AApplicationID do
+		LWindowsClientApplications :=
+			(if LWindowsClientApplications = '' then '' else LWindowsClientApplications + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID + '") Application_ID, "' 
+				+ ThemeDocument.Replace('"', '""') + '" ThemeDocument, "' 
+				+ DefaultIconImage.Replace('"', '""') + '" DefaultIconImage, ' + DocumentCacheSize.ToString()
+				+ ' DocumentCacheSize, ' + ImageCacheSize.ToString() + ' ImageCacheSize, "' 
+				+ HelpDocument.Replace('"', '""') + '" HelpDocument }';
+	
+	result :=
+		(
+			if LApplication = '' then
+				''
+			else
+				'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+					+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LApplication 
+					+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into Applications;' + Unicode({ 13, 10 })
+		)
+			+
+			(
+				if LApplicationLibraries = '' then
+					''
+				else
+					'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+						+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LApplicationLibraries
+						+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into ApplicationLibraries;' + Unicode({ 13, 10 })
+			)
+			+
+			(
+				if LWindowsClientApplications = '' then
+					''
+				else
+					'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+						+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LWindowsClientApplications
+						+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into WindowsClientApplications;' + Unicode({ 13, 10 })
+			);
+end;
+grant usage on ScriptApplication(Name) to role User;

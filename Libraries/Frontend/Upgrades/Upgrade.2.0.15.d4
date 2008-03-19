@@ -1,0 +1,22 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+if not exists ( DocumentTypes where ID = "pla" ) then
+	insert row { "pla" ID, "Dataphor Execution Plan" Description, "System.String" DataType } into DocumentTypes;
+
+if not exists ( Designers where ID = "ANY" ) then
+	insert row { "ANY" ID, "Execution Plan Analyzer" Description, "Alphora.Dataphor.Dataphoria.Analyzer.Analyzer,Dataphoria" ClassName } into Designers;
+
+if not exists ( DocumentTypeDesigners where DocumentType_ID = "pla" ) then
+	insert
+		table
+		{
+			row { "pla" DocumentType_ID, "ANY" Designer_ID },
+			row { "pla" DocumentType_ID, "XML" Designer_ID }
+		}
+		into DocumentTypeDesigners;
+
+if not exists ( DocumentTypeDefaultDesigners where DocumentType_ID = "pla" ) then
+	insert row { "pla" DocumentType_ID, "ANY" Default_Designer_ID } into DocumentTypeDefaultDesigners;

@@ -1,0 +1,214 @@
+/*
+	Transition Constraints coverage
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	<row constraint definition> ::=
+		<constraint definition> |
+		<transition constraint definition>
+				
+	<transition constraint definition> ::=
+		transition constraint <constraint name>
+			[on insert <expression>]
+			[on update <expression>]
+			[on delete <expression>]
+			<metadata>
+		
+	// BaseTableVars
+	// DerivedTableVars
+	// Adorn Expressions
+	// Alter BaseTableVar
+	// Alter DerivedTableVar
+*/
+
+create table TestInsertTransitionConstraint
+{
+	ID : Integer,
+	Value : String,
+	key { ID },
+	transition constraint InsertValueValid on insert new.Value = 'Test'
+};
+
+NegativeTest('insert table { row { 1 ID, "Testing" Value } } into TestInsertTransitionConstraint;', 'Insert transition constraint failed');
+
+drop table TestInsertTransitionConstraint;
+
+create table TestUpdateTransitionConstraint
+{
+	ID : Integer,
+	Count : Integer,
+	key { ID },
+	transition constraint CountValid on update new.Count >= old.Count
+};
+
+insert table { row { 1 ID, 5 Count } } into TestUpdateTransitionConstraint;
+
+NegativeTest('update TestUpdateTransitionConstraint set { Count := 4 };', 'Update transition constraint failed');
+
+drop table TestUpdateTransitionConstraint;
+
+create table TestDeleteTransitionConstraint
+{
+	ID : Integer,
+	key { ID },
+	transition constraint DeleteValid on delete false
+};
+
+insert table { row { 1 ID } } into TestDeleteTransitionConstraint;
+
+NegativeTest('delete TestDeleteTransitionConstraint;', 'Delete transition constraint failed');
+
+drop table TestDeleteTransitionConstraint;
+
+// Generalized key and reference
+create table Invoice
+{
+	ID : Integer,
+	key { ID }
+};
+
+create table SalesOrder
+{
+	ID : Integer,
+	key { ID },
+	reference SalesOrder_Invoice { ID } references Invoice { ID }
+};
+
+create table PurchaseOrder
+{
+	ID : Integer,
+	key { ID },
+	reference PurchaseOrder_Invoice { ID } references Invoice { ID }
+};
+
+// Generalized key
+alter table SalesOrder 
+{ 
+	create transition constraint SalesOrderUnique 
+		on insert not exists (PurchaseOrder where ID = new.ID)
+		on update (new.ID = old.ID) or not exists (PurchaseOrder where ID = new.ID)
+};
+
+alter table PurchaseOrder
+{
+	create transition constraint PurchaseOrderUnique
+		on insert not exists (SalesOrder where ID = new.ID)
+		on update (new.ID = old.ID) or not exists (SalesOrder where ID = new.ID)
+};
+
+// Generalized reference
+alter table Invoice
+{
+	create transition constraint InvoiceReference
+		on insert exists (SalesOrder where ID = new.ID) or exists (PurchaseOrder where ID = new.ID)
+		on update (new.ID = old.ID) or exists (SalesOrder where ID = new.ID) or exists (PurchaseOrder where ID = new.ID)
+};
+
+alter table SalesOrder
+{
+	create transition constraint SalesOrderReference
+		on update (new.ID = old.ID) or (not exists (Invoice where ID = old.ID) or exists (PurchaseOrder where ID = old.ID))
+		on delete not exists (Invoice where ID = old.ID) or exists (PurchaseOrder where ID = old.ID)
+};
+
+alter table PurchaseOrder
+{
+	create transition constraint PurchaseOrderReference
+		on update (new.ID = old.ID) or (not exists (Invoice where ID = old.ID) or exists (SalesOrder where ID = old.ID))
+		on delete not exists (Invoice where ID = old.ID) or exists (SalesOrder where ID = old.ID)
+};
+
+// Valid data
+try
+	insert table { row { 1 ID }, row { 2 ID } } into Invoice;
+	insert table { row { 1 ID } } into SalesOrder;
+	insert table { row { 2 ID } } into PurchaseOrder;
+commit;
+
+// can't delete any row by itself
+NegativeTest('delete Invoice where ID = 1;', 'Invoice delete allowed');
+NegativeTest('delete SalesOrder where ID = 1;', 'SalesOrder delete allowed');
+NegativeTest('delete PurchaseOrder where ID = 2;', 'PurchaseOrder delete allowed');
+
+// can't insert any row by itself
+NegativeTest('insert table { row { 3 ID } } into Invoice;', 'Invoice insert allowed');
+NegativeTest('insert table { row { 3 ID } } into SalesOrder;', 'SalesOrder insert allowed');
+NegativeTest('insert table { row { 3 ID } } into PurchaseOrder;', 'PurchaseOrder insert allowed');
+
+// can't update any row by itself
+NegativeTest('update Invoice set { ID := 3 } where ID = 1;', 'Invoice update allowed');
+NegativeTest('update SalesOrder set { ID := 3 } where ID = 1;', 'SalesOrder update allowed');
+NegativeTest('update PurchaseOrder set { ID := 3 } where ID = 2;', 'PurchaseOrder update allowed');
+
+// Valid update
+try
+	update Invoice set { ID := 3 } where ID = 1;
+	update SalesOrder set { ID := 3 } where ID = 1;
+commit;
+
+// Valid delete
+try
+	delete Invoice where ID = 2;
+	delete PurchaseOrder where ID = 2;
+commit;
+
+// Valid update to invalid insert
+try
+	insert table { row { 1 ID } } into Invoice;
+	insert table { row { 2 ID } } into PurchaseOrder;
+	update PurchaseOrder set { ID := 1 } where ID = 2;
+commit;
+
+// update of update
+try
+	update PurchaseOrder set { ID := 2 } where ID = 1;
+	update PurchaseOrder set { ID := 1 } where ID = 2;
+commit;
+
+// delete followed by insert
+try
+	delete PurchaseOrder where ID = 1;
+	insert table { row { 1 ID } } into PurchaseOrder;
+commit;
+
+alter table PurchaseOrder 
+{ 
+	drop transition constraint PurchaseOrderUnique,
+	drop transition constraint PurchaseOrderReference
+};
+
+alter table SalesOrder
+{
+	drop transition constraint SalesOrderUnique,
+	drop transition constraint SalesOrderReference
+};
+
+alter table Invoice
+{
+	drop transition constraint InvoiceReference
+};
+
+drop table PurchaseOrder;
+drop table SalesOrder;
+drop table Invoice;
+
+// transition constraints on views
+create table TestTable { ID : Integer, Value : Integer, key { ID } };
+create view TestView TestTable { transition constraint InsertValid on insert new.Value = 5 };
+
+NegativeTest('insert table { row { 1 ID, 4 Value } } into TestView;', 'View transition constraint failed');
+
+drop view TestView;
+
+// transition constraints in adorn expressions
+// TODO: Fix constraints on adorn operator
+/*
+create view TestView TestTable adorn { transition constraint InsertValid on insert new.Value = 5 };
+
+NegativeTest('insert table { row { 1 ID, 4 Value } } into TestView;', 'Adorn transition constraint failed');
+
+drop view TestView;
+*/
+drop table TestTable;

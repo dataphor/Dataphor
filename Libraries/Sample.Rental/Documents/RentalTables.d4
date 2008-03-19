@@ -1,0 +1,32 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create view VideoDetail
+	Video join (Movie rename { ID Movie_ID });
+
+create table RentedVideo
+{
+ Video_ID : Integer tags { Frontend.Width = "8" },
+ ID : Integer tags { Frontend.Visible = "false" },
+ RentedOn : Date { default Date() },
+ DueOn : Date { default (Date() + Days(3)).DatePart() },
+ reference RentedVideo_SaleItem { ID } references SaleItem { ID },
+ reference RentedVideo_VideoDetail { Video_ID } references VideoDetail { ID },
+ key { Video_ID },
+ key { ID }
+};
+
+create table ReturnedVideo
+{
+ ID : Integer tags { Frontend.Width = "8" },
+ Video_ID : Integer tags { Frontend.Width = "8" },
+ RentedOn : Date,
+ DueOn : Date,
+ ReturnedOn : Date { default Date() },
+ LateFee : Money,
+ reference ReturnedVideo_SaleItem { ID } references SaleItem { ID },
+ reference ReturnedVideo_VideoDetail { Video_ID } references VideoDetail { ID },
+ key { ID }
+};

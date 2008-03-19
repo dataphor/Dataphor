@@ -1,0 +1,117 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// IString Operators
+begin
+  var
+    LString1: IString,
+    LString2: IString;
+
+  LString1 := "Blah"i;
+  if not(LString1 = "Blah"i) then
+    raise Error("IString Assignment from literal failed");
+
+  LString2 := LString1;
+  if not(LString2 = LString1) then
+    raise Error("IString Assignment from variable failed");
+
+  LString1 := "Who"i;
+  if LString1 = LString2 then
+    raise Error("IString Assignment is not by value");
+
+  LString1 := LString1 + LString2;
+  if LString1 <> "WhoBlah"i then
+    raise Error("IString Concatenation failed");
+
+  if Length(LString1) <> 7 then
+    raise Error("IString Length failed");
+
+  if Pos("H"i, LString1) <> 1 then
+    raise Error("IString Pos failed");
+    
+  if IndexOf(LString1, "H"i) <> 1 then
+    raise Error("IString IndexOf failed");
+    
+  if LastPos("H"i, LString1) <> 6 then
+    raise Error("IString LastPos failed");
+    
+  if LastIndexOf(LString1, "H"i) <> 6 then
+    raise Error("IString LastIndexOf failed");
+
+  LString1 := SubString(LString1, 0, 3);
+  if LString1 <> "Who"i then
+    raise Error("IString SubString failed");
+
+  LString1 := PadLeft(LString1, 5);
+  if LString1 <> "  Who"i then
+	raise Error("IString PadLeft failed");
+	
+  LString1 := TrimLeft(LString1);
+  if LString1 <> "Who"i then
+	raise Error("IString TrimLeft failed");
+	
+  LString1 := PadRight(LString1, 5);
+  if LString1 <> "Who  "i then
+	raise Error("IString PadRight failed");
+	
+  LString1 := TrimRight(LString1);
+  if LString1 <> "Who"i then
+    raise Error("IString TrimRight failed");
+    
+  LString1 := Trim(PadRight(PadLeft(LString1, 5), 7));
+  if LString1 <> "Who"i then
+	raise Error("IString Trim failed");
+	
+  LString1 := Insert(LString1, 1, LString2);
+  if LString1 <> "WBlahho"i then
+	raise Error("IString Insert failed");
+	
+  LString1 := Remove(LString1, 1, Length(LString2));
+  if LString1 <> "Who"i then
+	raise Error("IString Remove failed");
+	
+  LString1 := Replace(LString1, "H"i, "hh"i);
+  if LString1 <> "Whho"i then
+    raise Error("IString Replace failed");
+    
+  LString1 := Replace(LString1, "hh"i, "h"i);
+	
+  if Upper(LString1) <> "WHO"i then
+    raise Error("IString Upper failed");
+
+  if Lower(LString1) <> "who"i then
+    raise Error("IString Lower failed");
+    
+  if not(LString1 like "W%"i) then
+	raise Error("IString like failed");
+	
+  if not(LString1 matches "W.*"i) then
+	raise Error("IString matches failed");
+	
+  if not(LString1 between "Wh"i and "Who2"i) then
+    raise Error("IString between failed");
+
+  if LString1 < LString2 then
+    raise Error("IString less than failed");
+    
+  if LString1 <= LString2 then
+    raise Error("IString inclusive less than failed (arguments unequal)");
+  
+  if LString2 > LString1 then
+    raise Error("IString greater than failed");
+
+  if LString2 >= LString1 then
+    raise Error("IString inclusive greater than failed (arguments unequal)");
+
+  LString1 := LString2;
+  if not(LString1 >= LString2) then
+    raise Error("IString inclusive greater than failed (arguments equal)");
+
+  if not(LString1 <= LString2) then
+    raise Error("IString inclusive less than failed (arguments equal)");
+    
+   if (LString1 ?= LString2) <> 0 then
+     raise Error("IString compare failed (arguments equal)");
+end;

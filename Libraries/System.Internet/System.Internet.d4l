@@ -1,0 +1,4 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.2.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="System.Internet" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <files.filereference filename="System.Internet.dll" isassembly="True" />
+    <libraries.libraryreference name="System" version="*" />
+</library>

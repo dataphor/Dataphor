@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample Application">
+  <showformaction document="Derive('PersonDetail', 'Browse')" text="People..." bop:name="BrowsePerson" />
+  <showformaction document="Derive('OrganizationDetail', 'Browse')" text="Organizations..." bop:name="BrowseOrganization" />
+  <column bop:name="Column">
+    <trigger action="BrowsePerson" hint="Browse people" bop:name="PersonTrigger" />
+    <trigger action="BrowseOrganization" hint="Browse organizations" bop:name="OrganizationTrigger" />
+  </column>
+</interface>

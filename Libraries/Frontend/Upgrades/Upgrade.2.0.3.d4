@@ -1,0 +1,12 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator Merge(const AForm : String, const ADelta : String) : String
+	class "Frontend.MergeNode" static tags { DAE.IsRemotable = "false" };
+grant usage on Merge(String, String) to role User;
+
+create operator Difference(const AForm : String, const ADelta : String) : String
+	class "Frontend.DifferenceNode" static tags { DAE.IsRemotable = "false" };
+grant usage on Difference(String, String) to role User;

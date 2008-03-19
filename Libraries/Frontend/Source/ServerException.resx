@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="200100">
+		<value>Expression not prepared.</value>
+	</data>
+	<data name="200101">
+		<value>Expression data for this page is unavailable.</value>
+	</data>
+	<data name="200102">
+		<value>Unable to retrieve expression data for this page.</value>
+	</data>
+	<data name="200103">
+		<value>CGI Query parameter "{0}" expected.</value>
+	</data>
+	<data name="200104">
+		<value>Group "{0}" not found.</value>
+	</data>
+	<data name="200105">
+		<value>No current group available.</value>
+	</data>
+	<data name="200106">
+		<value>Main table already set for this expression.</value>
+	</data>
+	<data name="200107">
+		<value>Main table required.</value>
+	</data>
+	<data name="200108">
+		<value>Elaborated table "{0}" not found.</value>
+	</data>
+	<data name="200109">
+		<value>Internal Error: Invalid reference "{0}" encountered while deriving expression from table ({1}).</value>
+	</data>
+	<data name="200110">
+		<value>Internal Error: Elaborated reference is already set for derived table "{0}".</value>
+	</data>
+	<data name="200111">
+		<value>Internal Error: Embedded flag is already set for derived table "{0}".</value>
+	</data>
+	<data name="200112">
+		<value>Invalid XML document node "{0}".</value>
+	</data>
+	<data name="200115">
+		<value>Unknown form type "{0}".  Form types are case sensitive.</value>
+	</data>
+	<data name="200116">
+		<value>Table expression expected.</value>
+	</data>
+	<data name="200118">
+		<value>Unable to process file with given extension "{0}".</value>
+	</data>
+	<data name="200119">
+		<value>Unable to start or connect to DAE Server.</value>
+	</data>
+	<data name="200120">
+		<value>Unqualified group name "{0}" is not a valid sub group of "{1}".</value>
+	</data>
+	<data name="200121">
+		<value>Element name required.</value>
+	</data>
+	<data name="200122">
+		<value>Duplicate element name "{0}".</value>
+	</data>
+	<data name="200123">
+		<value>Null element may not be added to the list.</value>
+	</data>
+	<data name="200124">
+		<value>The web.config file for the Frontend Server must have the FormsAuthenticationLoginUrl AppSetting set</value>
+	</data>
+	<data name="200125">
+		<value>Invalid XML Document: {0}</value>
+	</data>
+	<data name="200126">
+		<value>Cannot change the document type.</value>
+	</data>
+	<data name="200127"><value>Elaborated column "{0}" not found.</value></data>
+	<data name="200128"><value>Cannot construct a search column for column "{0}" of "{1}".</value></data>
+</root>

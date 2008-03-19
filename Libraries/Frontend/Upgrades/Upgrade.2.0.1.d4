@@ -1,0 +1,61 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Save old data
+create session table TempWindowsClientApplications from Frontend.WindowsClientApplications;
+
+// Drop operators and table
+drop operator Frontend.GetWindowsTheme(const System.Guid);
+drop reference Frontend.WindowsClientApplications_ClientApplications;
+drop table Frontend.WindowsClientApplications;
+
+// Create new table
+create table WindowsClientApplications in ServerStore
+{
+	Application_ID : Guid tags { Frontend.Visible = "false" },
+	ThemeDocument : String { default "" } tags { Frontend.Title = "Theme Document" },
+	DefaultIconImage : String { default "" } tags { Frontend.Title = "Default Form Icon Image" },
+	key { Application_ID } static tags { Storage.Enforced = "true" },
+	reference WindowsClientApplications_Applications { Application_ID } references Applications { ID } update cascade delete cascade
+} tags { static Frontend.Title = "Windows Client Application Settings" };
+grant usage on WindowsClientApplications to role User;
+
+// Populate with old data
+insert TempWindowsClientApplications remove { ClientType_ID } into WindowsClientApplications;
+
+// Drop the temp table
+drop table TempWindowsClientApplications;
+
+// Re/Create the operators
+
+create operator GetWindowsTheme(const AApplicationID : Guid) : String
+begin
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LThemeExpression := ThemeDocument from row from (WindowsClientApplications where Application_ID = AApplicationID);
+		if LThemeExpression <> "" then
+			result := Evaluate(LThemeExpression) as String
+		else
+			result := nil;
+	end
+	else
+		result := nil;
+end;
+grant usage on GetWindowsTheme(Guid) to role User;
+
+create operator GetWindowsDefaultIconImage(const AApplicationID : Guid) : Binary
+begin
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LImageExpression := DefaultIconImage from row from (WindowsClientApplications where Application_ID = AApplicationID);
+		if LImageExpression <> "" then
+			result := Evaluate(LImageExpression) as Binary
+		else
+			result := nil;
+	end
+	else
+		result := nil;
+end;
+grant usage on GetWindowsDefaultIconImage(Guid) to role User;

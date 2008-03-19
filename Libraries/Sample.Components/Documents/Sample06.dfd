@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample06">
+  <blockaction text="Show Form A on Close" bop:name="BlockActionA">
+    <setnextrequestaction document="Form('Sample.Components','Sample06A');" bop:name="SetNextRequestAction1" />
+    <setpropertyaction node="StaticText1" membername="Text" value="Form A" bop:name="SetPropertyAction1" />
+  </blockaction>
+  <blockaction text="Show Form B on Close" bop:name="BlockActionB">
+    <setnextrequestaction document="Form('Sample.Components','Sample06B');" bop:name="SetNextRequestAction2" />
+    <setpropertyaction node="StaticText1" membername="Text" value="Form B" bop:name="SetPropertyAction2" />
+  </blockaction>
+  <clearnextrequestaction afterexecute="NoFormSetPropertyAction" text="Don't Show a Form on Close" bop:name="ClearNextRequestAction1" />
+  <setpropertyaction node="StaticText1" membername="Text" value="No Form" bop:name="NoFormSetPropertyAction" />
+  <showformaction document="Form('Sample.Components','Sample06A');" text="Show Form A Now" bop:name="ShowFormAction1" />
+  <formaction text="Close This Form" bop:name="CloseFormAction" />
+  <row bop:name="MainRow">
+    <column bop:name="Column1">
+      <statictext text="Sample06" bop:name="SampleTitle" />
+      <group title="Form To Show On Close" bop:name="NextFormGroup">
+        <column bop:name="Column2">
+          <statictext text="No Form" margintop="20" marginbottom="0" bop:name="StaticText1" />
+          <trigger action="BlockActionA" bop:name="SetFormATrigger" />
+          <trigger action="BlockActionB" margintop="10" bop:name="SetFormBTrigger" />
+          <trigger action="ClearNextRequestAction1" margintop="10" bop:name="SetNoFormTrigger" />
+        </column>
+      </group>
+      <trigger action="ShowFormAction1" margintop="10" bop:name="ShowFormATrigger" />
+      <trigger action="CloseFormAction" margintop="15" bop:name="CloseFormTrigger" />
+    </column>
+    <frame document="Form('Sample.Components','Sample06Docs');" bop:name="Frame1" />
+  </row>
+</interface>

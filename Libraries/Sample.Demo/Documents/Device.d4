@@ -1,0 +1,31 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/* Please see the notes in Register.d4 before proceeding to use this script, thank you. */
+
+//*
+create device Main
+	reconciliation { mode = { command }, master = server }
+	class "MSSQLDevice"
+		attributes
+		{
+			"ServerName" = ".",
+			"DatabaseName" = "Contact"
+		};
+		
+CreateDeviceUser("System", "Main", "sa", "");
+CreateDeviceUser("Admin", "Main", "sa", "");
+
+SetDefaultDeviceName("Main");
+
+//*
+ExecuteScript('Sample.Demo', 'Mappings');
+ExecuteScript('Sample.Demo', 'Tables');
+ExecuteScript('Sample.Demo', 'Views');
+ExecuteScript('Sample.Demo', 'Events');
+ExecuteScript('Sample.Demo', 'Data');
+ExecuteScript('Sample.Demo', 'Constraints');
+//ExecuteScript('Sample.Demo', 'Integrate');
+ExecuteScript('Sample.Demo', 'MapFormatName');

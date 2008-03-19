@@ -1,0 +1,607 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Contact Tables
+*/
+
+//* Table: Contact
+// The Contact named [Name], is identified by [ID], with primary phone type [Primary_PhoneType_ID]
+// and has had this name since [NameSince], as recorded by user [NameBy].
+// Customers and Vendors are both contacts.
+create table Contact
+{
+	ID : ContactID { default GetNextGenerator("Shipping.Contact.ID") } 
+		tags { Frontend.Visible = "false", Frontend.Plural.Visible = "true" },
+	Name : ProperName tags { Frontend.Preview.Include = "true" },
+	NameSince : DateTime { default DateTime() } tags { Frontend.Visible = "false" },
+	NameBy : UserID { default UserID() } tags { Frontend.Visible = "false" },
+	Primary_PhoneType_ID : PhoneTypeID { nil } tags { Frontend.Title = "Primary Phone", Frontend.Plural.Visible = "false" },
+	key { ID },
+	order { Name } tags { Frontend.IsDefault = "true" }
+}
+	static tags
+	{
+		Frontend.Title = "Contact",
+		Frontend.Plural.Title = "Contacts"
+	};
+grant { Select } on Contact to role ShippingUser;
+
+//* Table: ContactNameDuring
+// Contact [Contact_ID] was recorded as having name [Name] from [From] to [To] by [By].
+create table ContactNameDuring
+{
+	Contact_ID : ContactID,
+	From : DateTime,
+	To : DateTime,
+	Name : ProperName,
+	By : UserID,
+	key { Contact_ID, From },
+	constraint DatesValid From <= To
+};
+
+//* View: ContactNameHistory
+SafeDrop('ContactNameHistory');
+create view ContactNameHistory
+	ContactNameDuring
+		union 
+		(
+			Contact 
+			{ 
+				ID Contact_ID, 
+				NameSince From, 
+				DateTime() To, 
+				Name, 
+				NameBy By 
+			}
+		)
+		adorn
+		{
+			From tags { Frontend.Visible = "true" },
+			key { Contact_ID, From } tags { Frontend.Visible = "false" },
+			drop key { Contact_ID, From, To, Name, By },
+			drop order { Name },
+			order { Contact_ID, From desc } tags { Frontend.IsDefault = "true" }
+		}
+	tags 
+	{ 
+		Frontend.Title = "Name History",
+		Frontend.Caption = "Contact Name History", 
+		Frontend.UseList = "true", 
+		Frontend.Elaborate = "false",
+		Frontend.Search.Visible = "false"
+	};
+grant { Select } on ContactNameHistory to role ShippingUser;
+	
+//* Reference: ContactNameHistory_Contact
+SafeDrop('ContactNameHistory_Contact');
+create reference ContactNameHistory_Contact
+	ContactNameHistory { Contact_ID }
+	references Contact { ID };
+	
+//* Operator: ContactBeforeUpdate
+// Records the current user and date if the name of the contact changes
+// Note that this event handler will be invoked within the A/T space because it is a
+// before handler, but that the operator body will not be translated, because the
+// Dataphor Server detects it is unnecessary to do so (the operator does not access or change global state).
+// This behavior could be changed using a DAE.ShouldTranslate on the operator, on the
+// attach statement, or both.
+create operator ContactBeforeUpdate(const AOldRow : typeof(Contact[]), var ANewRow : typeof(Contact[]), var APerformUpdate : Boolean)
+begin
+	if AOldRow.Name <> ANewRow.Name then
+		update ANewRow set { NameSince := DateTime(), NameBy := UserID() };
+end;
+attach ContactBeforeUpdate to Contact on before update;
+
+//* Operator: ContactAfterUpdate
+// Records a ContactNameDuring row if the contact name changes
+// Note that this event handler will not be invoked into the A/T space because it is an after handler.
+// This behavior could be changed using a DAE.ShouldTranslate tag on the operator and the attach statement,
+// but this is unneccessary, since we are only concerned with logging changes that actually occur in
+// the database, not with changes that may occur during the A/T.
+// SafeDrop('ContactAfterUpdate(typeof(Contact[]), typeof(Contact[]))');
+create operator ContactAfterUpdate(const AOldRow : typeof(Contact[]), const ANewRow : typeof(Contact[]))
+begin
+	if (AOldRow over { ID, Name }) <> (ANewRow over { ID, Name }) then
+		insert 
+			table
+			{
+				AOldRow 
+					over { ID, Name, NameSince, NameBy } 
+					rename { ID Contact_ID, NameSince From, NameBy By }
+					add { DateTime() To }
+			}
+			into ContactNameDuring with { PropagateInsert = "Ensure" };
+end;
+attach ContactAfterUpdate to Contact on after update;
+
+//* Operator: ContactAfterDelete
+// Records a ContactNameDuring row if the contact name changes
+// Note that this event handler will be not be invoked within the A/T space because it is an after handler.
+// SafeDrop('ContactAfterDelete(typeof(Contact[]))');
+create operator ContactAfterDelete(const ARow : typeof(Contact[]))
+begin
+	insert
+		table
+		{
+			ARow
+				over { ID, Name, NameSince, NameBy }
+				rename { ID Contact_ID, NameSince From, NameBy By }
+				add { DateTime() To }
+		}
+		into ContactNameDuring with { PropagateInsert = "Ensure" };
+end;
+attach ContactAfterDelete to Contact on after delete;
+
+//* Table: ContactNotes
+// The Contact [Contact_ID] has notes [Notes]
+create table ContactNotes
+{
+	Contact_ID : ContactID,
+	Notes : Notes,
+	key { Contact_ID }
+}
+	static tags { Frontend.Title = "Notes" };
+
+create reference ContactNotes_Contact ContactNotes { Contact_ID } 
+	references Contact { ID } update cascade delete cascade
+	tags { Frontend.Visible = "false" };
+
+//* View: EnterContactNotes	
+// View used to enter contact notes
+create view EnterContactNotes
+	ContactNotes add { nil as Notes NewNotes tags { DAE.IsComputed = "false" } }
+		over { Contact_ID, NewNotes, Notes }
+		adorn 
+		{ 
+			NewNotes tags { Frontend.Title = "Enter Notes" },
+			Notes tags { Frontend.ReadOnly = "true" }
+		}
+	tags
+	{
+		Frontend.Title = "Notes"
+	};
+grant usage on EnterContactNotes to role ShippingUser;
+		
+create reference EnterContactNotes_Contact
+	EnterContactNotes { Contact_ID }
+	references Contact { ID }
+	tags
+	{
+		Frontend.Visible = "false",
+		Frontend.Singular.Embedded = "true"
+	};
+
+//* Operator: UpdateNotesRow(var typeof(EnterContactNotes[]))
+// Prepends the notes with the new notes entered and the current user and datetime.
+SafeDrop('UpdateNotesRow(var typeof(EnterContactNotes[]))');
+create operator UpdateNotesRow(var ARow : typeof(EnterContactNotes[]))
+begin
+	if not(IsNil(ARow.NewNotes)) then
+	begin
+		update ARow 
+			set 
+			{
+				Notes := 
+					UserID() + 
+					" wrote on " + 
+					DateTime().ToString() + 
+					" -->" + 
+					Unicode({13, 10}) + 
+					NewNotes + 
+					(if IsNil(Notes) then "" else (Unicode({13, 10, 13, 10}) + Notes))
+			};
+	end;
+end;
+
+//* Operator: EnterContactNotesInsert	
+create operator EnterContactNotesInsert(var ARow : typeof(EnterContactNotes[]), var APerformUpdate : Boolean)
+begin
+	UpdateNotesRow(var ARow);
+end;
+attach EnterContactNotesInsert to EnterContactNotes on before insert;
+
+//* Operator: EnterContactNotesUpdate
+create operator EnterContactNotesUpdate(const AOldRow : typeof(EnterContactNotes[]), var ANewRow : typeof(EnterContactNotes[]), var APerformUpdate : Boolean)
+begin
+	UpdateNotesRow(var ANewRow);
+end;
+attach EnterContactNotesUpdate to EnterContactNotes on before update;
+
+//* Table: PhoneType
+// Phone number type [ID] is described with [Description]
+create table PhoneType
+{
+	ID : PhoneTypeID,
+	Description : Description,
+	key { ID }
+}
+	static tags
+	{
+		Frontend.Title = "Phone Type",
+		Frontend.Plural.Title = "Phone Types"
+	};
+grant usage on PhoneType to role ShippingUser;
+
+PhoneType :=
+	table
+	{
+		row { PhoneTypeID("HOM") ID, Description("Home Phone") Description },
+		row { PhoneTypeID("WOR") ID, Description("Work Phone") Description },
+		row { PhoneTypeID("MOB") ID, Description("Mobile Phone") Description },
+		row { PhoneTypeID("PAG") ID, Description("Pager") Description },
+		row { PhoneTypeID("FAX") ID, Description("Fax Machine") Description },
+		row { PhoneTypeID("DAT") ID, Description("Modem Line") Description }
+	};
+
+//* Table: ContactPhone
+// Contact [Contact_ID] has phone number [Phone] of type [PhoneType_ID]
+create table ContactPhone
+{
+	Contact_ID : ContactID,
+	PhoneType_ID : PhoneTypeID,
+	Phone : Phone tags { Frontend.Preview.Include = "true" },
+	Since : DateTime { default DateTime() } tags { Frontend.Visible = "false" },
+	By : UserID { default UserID() } tags { Frontend.Visible = "false" },
+	key { Contact_ID, PhoneType_ID }
+}
+	static tags
+	{
+		Frontend.Title = "Phone",
+		Frontend.Plural.Title = "Phones"
+	};
+grant usage on ContactPhone to role ShippingUser;
+
+create reference ContactPhone_Contact ContactPhone { Contact_ID } references Contact { ID }
+	update cascade delete cascade;
+create reference ContactPhone_PhoneType ContactPhone { PhoneType_ID } references PhoneType { ID };
+create reference Contact_ContactPhone Contact { ID, Primary_PhoneType_ID } 
+	references ContactPhone { Contact_ID, PhoneType_ID } 
+	tags { Frontend.Plural.Lookup.Group.Title = "Primary" };
+
+//* Table: ContactPhoneDuring
+create table ContactPhoneDuring
+{
+	Contact_ID : ContactID,
+	PhoneType_ID : PhoneTypeID,
+	From : DateTime,
+	To : DateTime,
+	By : UserID,
+	Phone : Phone,
+	key { Contact_ID, PhoneType_ID, From },
+	constraint DatesValid From <= To
+};
+
+//* View: ContactPhoneHistory
+if ObjectExists('ContactPhoneHistory') then Execute(ScriptDrop('ContactPhoneHistory'));
+create view ContactPhoneHistory
+	ContactPhoneDuring
+		union 
+		(
+			ContactPhone over { Contact_ID, PhoneType_ID, Phone, Since, By }
+				rename { Since From }
+				add { DateTime() To }
+		)
+		adorn
+		{
+			From tags { Frontend.Visible = "true" },
+			key { Contact_ID, PhoneType_ID, From } tags { Frontend.Visible = "false" },
+			drop key { Contact_ID, PhoneType_ID, From, To, By, Phone },
+			order { Contact_ID, PhoneType_ID, From desc } tags { Frontend.IsDefault = "true" }
+		}
+	tags 
+	{ 
+		Frontend.Title = "Phone History",
+		Frontend.Caption = "Contact Phone History", 
+		Frontend.UseList = "true", 
+		Frontend.Elaborate = "false",
+		Frontend.Search.Visible = "false"
+	};
+grant { Select } on ContactPhoneHistory to role ShippingUser;
+
+create reference ContactPhoneHistory_Contact
+	ContactPhoneHistory { Contact_ID }
+	references Contact { ID }
+	tags { Storage.Enforced = "true" };
+	
+//* Operator: ContactPhoneBeforeUpdate(typeof(ContactPhone[]), var typeof(ContactPhone[]), var Boolean)
+// Records the datetime and user of the latest change.
+create operator ContactPhoneBeforeUpdate(const AOldRow : typeof(ContactPhone[]), var ANewRow : typeof(ContactPhone[]), var APerformUpdate : Boolean)
+begin
+	if (AOldRow remove { Since, By }) <> (ANewRow remove { Since, By }) then
+		update ANewRow set { Since := DateTime(), By := UserID() };
+end;
+attach ContactPhoneBeforeUpdate to ContactPhone on before update;
+
+//* Operator: ContactPhoneAfterUpdate(typeof(ContactPhone[]), typeof(ContactPhone[]))
+// Records contact phone changes in the phone history.
+create operator ContactPhoneAfterUpdate(const AOldRow : typeof(ContactPhone[]), const ANewRow : typeof(ContactPhone[]))
+begin
+	if (AOldRow remove { Since, By }) <> (ANewRow remove { Since, By }) then
+		insert
+			table
+			{
+				AOldRow over { Contact_ID, PhoneType_ID, Phone, Since, By }
+					rename { Since From }
+					add { DateTime() To }
+			}
+			into ContactPhoneDuring;
+end;
+attach ContactPhoneAfterUpdate to ContactPhone on after update;
+
+//* Operator: ContactPhoneAfterDelete(typeof(ContactPhone[]))
+// Records contact phone deletions in the phone history.
+create operator ContactPhoneAfterDelete(const ARow : typeof(ContactPhone[]))
+begin
+	insert
+		table
+		{
+			ARow over { Contact_ID, PhoneType_ID, Phone, Since, By }
+				rename { Since From }
+				add { DateTime() To }
+		}
+		into ContactPhoneDuring;
+end;
+attach ContactPhoneAfterDelete to ContactPhone on after delete;
+
+//* Table: ContactAddress
+// Contact [Contact_ID] has an address numbered [Number] of [Street], [City], [State_ID], [ZipCode]
+create table ContactAddress
+{
+	Contact_ID : ContactID,
+	Number : Integer,
+	Street : Description tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	City : Description tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State_ID : StateID tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	ZipCode : Zip tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	Since : DateTime { default DateTime() } tags { Frontend.Visible = "false" },
+	By : UserID { default UserID() } tags { Frontend.Visible = "false" },
+	key { Contact_ID, Number }
+}
+	static tags
+	{
+		Frontend.Title = "Address",
+		Frontend.Plural.Title = "Addresses"
+	};
+grant usage on ContactAddress to role ShippingUser;
+
+create reference ContactAddress_Contact ContactAddress { Contact_ID } references Contact { ID };
+create reference ContactAddress_State ContactAddress { State_ID } references State { ID } 
+	tags { DAE.IsDeferred = "false", Frontend.Embedded = "false" };
+create reference ContactAddress_ZipCode ContactAddress { ZipCode } references ZipCode { ZipCode } 
+	tags { DAE.IsDeferred = "false", Frontend.Embedded = "false" };
+
+//* Operator: ContactAddressChange(var typeof(ContactAddress[]))
+// Sets the address number based on the highest address number for the selected contact
+// Note that this will be invoked within the A/T, and the DAE.Translate is used to force the
+// operator to be translated into the A/T space. By default it would not be translated because
+// it does not update any tables.
+SafeDrop('ContactAddressChange(var typeof(ContactAddress[]))');
+create operator ContactAddressChange(var ARow : typeof(ContactAddress[])) : Boolean
+begin
+	result := false;
+	if not(IsNil(ARow.Contact_ID)) and IsNil(ARow.Number) then
+	begin
+		result := true;
+		update ARow set { Number := IfNil(Max(Number from (ContactAddress where Contact_ID = ARow.Contact_ID)), 0) + 1 };
+	end;
+end
+	tags { DAE.ShouldTranslate = "true" };
+attach ContactAddressChange to Contact_ID in ContactAddress on change;
+
+//* Operator: ContactAddressZipCodeChange
+// Sets the City and State_ID based on the value of the ZipCode column
+// Note that this will be invoked within the A/T, but the operator will 
+// not be translated because it is does not update any tables.
+create operator ContactAddressZipCodeChange(var ARow : typeof(ContactAddress[])) : Boolean
+begin
+	result := false;
+	if not(IsNil(ARow.ZipCode)) and IsNil(ARow.City) and IsNil(ARow.State_ID) then
+	begin
+		result := true;
+		var LZipRow := ZipCode[ARow.ZipCode] { ZipCode, City, State_ID };
+		update ARow set { City := LZipRow.City, State_ID := LZipRow.State_ID };
+	end;
+end;
+attach ContactAddressZipCodeChange to ZipCode in ContactAddress on change;
+
+//* Table: ContactAddressDuring
+// Address number [Number] for contact [Contact_ID] was recorded as
+// [Street], [City], [State_ID], [ZipCode] by [By] from [From] to [To].
+// The requirements specify only that historical demographic information
+// be tracked, and so it was deemed acceptable to track the address
+// as a whole, rather than the individual components.
+create table ContactAddressDuring
+{
+	Contact_ID : ContactID,
+	Number : Integer,
+	From : DateTime,
+	To : DateTime,
+	By : UserID,
+	Street : Description,
+	City : Description,
+	State_ID : StateID,
+	ZipCode : Zip,
+	key { Contact_ID, Number, From },
+	constraint DatesValid From <= To
+};
+
+//* View: ContactAddressHistory
+if ObjectExists('ContactAddressHistory') then Execute(ScriptDrop('ContactAddressHistory'));
+create view ContactAddressHistory
+	ContactAddressDuring
+		union 
+		(
+			ContactAddress over { Contact_ID, Number, Street, City, State_ID, ZipCode, Since, By }
+				rename { Since From }
+				add { DateTime() To }
+		)
+		adorn
+		{
+			From tags { Frontend.Visible = "true" },
+			key { Contact_ID, Number, From } tags { Frontend.Visible = "false" },
+			drop key { Contact_ID, Number, From, To, By, Street, City, State_ID, ZipCode },
+			order { Contact_ID, Number, From desc } tags { Frontend.IsDefault = "true" }
+		}
+	tags 
+	{ 
+		Frontend.Title = "Address History",
+		Frontend.Caption = "Contact Address History", 
+		Frontend.UseList = "true", 
+		Frontend.Elaborate = "false",
+		Frontend.Search.Visible = "false"
+	};
+grant { Select } on ContactAddressHistory to role ShippingUser;
+
+create reference ContactAddressHistory_Contact
+	ContactAddressHistory { Contact_ID }
+	references Contact { ID }
+	tags { Storage.Enforced = "true" };
+
+//* Operator: ContactAddressBeforeUpdate(typeof(ContactAddress[]), var typeof(ContactAddress[]), var Boolean)	
+// Updates the since and by columns based on the current datetime and user.
+create operator ContactAddressBeforeUpdate(const AOldRow : typeof(ContactAddress[]), var ANewRow : typeof(ContactAddress[]), var APerformUpdate : Boolean)
+begin
+	if (AOldRow remove { Since, By }) <> (ANewRow remove { Since, By }) then
+		update ANewRow set { Since := DateTime(), By := UserID() };
+end;
+attach ContactAddressBeforeUpdate to ContactAddress on before update;
+
+//* Operator: ContactAddressAfterUpdate(typeof(ContactAddress[]), typeof(ContactAddress[]))
+// Records contact address changes in the address history.
+create operator ContactAddressAfterUpdate(const AOldRow : typeof(ContactAddress[]), const ANewRow : typeof(ContactAddress[]))
+begin
+	if (AOldRow remove { Since, By }) <> (ANewRow remove { Since, By }) then
+		insert
+			table
+			{
+				AOldRow over { Contact_ID, Number, Street, City, State_ID, ZipCode, Since, By }
+					rename { Since From }
+					add { DateTime() To }
+			}
+			into ContactAddressDuring;
+end;
+attach ContactAddressAfterUpdate to ContactAddress on after update;
+
+//* Operator: ContactAddressAfterDelete(typeof(ContactAddress[]))
+// Records contact address deletions in the address history.
+create operator ContactAddressAfterDelete(const ARow : typeof(ContactAddress[]))
+begin
+	insert
+		table
+		{
+			ARow over { Contact_ID, Number, Street, City, State_ID, ZipCode, Since, By }
+				rename { Since From }
+				add { DateTime() To }
+		}
+		into ContactAddressDuring;
+end;
+attach ContactAddressAfterDelete to ContactAddress on after delete;
+
+//* Table: Category
+// Category [ID] described as [Description]
+create table Category
+{
+	ID : CategoryID { default GetNextGenerator("Shipping.Category.ID") } tags { Frontend.Visible = "false" },
+	Description : Description tags { Frontend.Preview.Include = "true" },
+	key { ID },
+	key { Description } tags { Frontend.IsDefault = "true" }
+} 
+	tags 
+	{ 
+		Frontend.Title = "Category", 
+		Frontend.Plural.Title = "Categories" 
+	};
+grant usage on Category to role ShippingUser;
+	
+//* Table: ContactCategory
+// Contact [Contact_ID] has category [Category_ID]
+create table ContactCategory
+{
+	Contact_ID : ContactID,
+	Category_ID : CategoryID,
+	key { Contact_ID, Category_ID }
+};
+grant usage on ContactCategory to role ShippingUser;
+
+create reference ContactCategory_Contact
+	ContactCategory { Contact_ID } 
+	references Contact { ID } delete cascade
+	tags
+	{
+		Frontend.Include = "false"
+	};
+	
+create reference ContactCategory_Category
+	ContactCategory { Category_ID }
+	references Category { ID } delete cascade
+	tags
+	{
+		Frontend.Include = "false"
+	};
+
+//* View: ContactCategories
+SafeDrop('ContactCategories');
+create view ContactCategories
+	Contact { ID } 
+		add 
+		{ 
+			Concat
+			(
+				{ Description, Delimiter } from 
+				(ContactCategory where Contact_ID = ID join (Category { ID Category_ID, Description }) add { ', ' Delimiter })
+			) Categories tags { DAE.IsComputed = "false" }
+		}
+		rename { ID Contact_ID }
+	tags 
+	{ 
+		Frontend.Title = "Categories"
+	};
+grant usage on ContactCategories to role ShippingUser;		
+
+create reference ContactCategories_Contact
+	ContactCategories { Contact_ID }
+	references Contact { ID }
+	tags
+	{
+		Frontend.Include = "false",
+		Frontend.Extension.Include = "true",
+		Frontend.Extension.Title = "Categories",
+		Frontend.Extension.Document = "Form('Sample.Shipping', 'ContactCategoriesEdit')"
+	};
+
+//* Operator: ContactCategoriesUpdate
+SafeDrop('ContactCategoriesUpdate(typeof(ContactCategories[]), var typeof(ContactCategories[]), var Boolean)');
+create operator ContactCategoriesUpdate
+(
+	const AOldRow : typeof(ContactCategories[]), 
+	var ANewRow : typeof(ContactCategories[]), 
+	var APerformUpdate : Boolean
+)
+begin
+	APerformUpdate := false;
+	delete ContactCategory where Contact_ID = AOldRow.Contact_ID;
+	var LCategories := ANewRow.Categories.Split();
+	for LIndex : Integer := 0 to LCategories.Count() - 1 do
+	begin
+		var LCategory := LCategories[LIndex].Trim();
+
+		if IfNil(LCategory.Length(), 0) > 0 then
+		begin
+			var LCategoryID := Category[LCategory].ID;
+			if IsNil(LCategoryID) then
+			begin
+				LCategoryID := GetNextGenerator("Shipping.Category.ID");
+				insert table { row { LCategoryID ID, LCategory Description } } into Category;
+			end;
+
+			insert 
+				table { row { ANewRow.Contact_ID Contact_ID, LCategoryID Category_ID } }
+				into ContactCategory adorn with { PropagateInsert = "Ignore" };
+		end;
+	end;
+end;
+attach operator ContactCategoriesUpdate to ContactCategories on before update;

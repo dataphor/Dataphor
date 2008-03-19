@@ -1,0 +1,1086 @@
+/*
+	Security Library Coverage
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+SetLibrary('Coverage.Base');
+SetDefaultDeviceName('Temp');
+
+//CreateRight(const ARightName : Name);
+CreateRight('TestRight');
+if not exists (Rights where Name = 'TestRight') then
+	raise Error('CreateRight failed');
+	
+if not RightExists('TestRight') then
+	raise Error('RightExists failed');
+	
+/*
+NegativeTest("CreateGroup('TestGroup', 'System');", 'Sub-group of group System allowed');
+	
+CreateGroup('TestGroup', 'User');
+if not exists (Groups where Name = 'TestGroup') then
+	raise Error('CreateGroup failed');
+	
+if not GroupExists('TestGroup') then
+	raise Error('GroupExists failed');
+	
+if (Parent_Group_Name from row from (GroupParentGroups where Group_Name = 'TestGroup')) <> 'User' then
+	raise Error('Parent group incorrectly set from CreateGroup');
+	
+CreateGroup('TestSubGroup', 'User');
+SetGroupParentGroup('TestSubGroup', 'TestGroup');
+if (Parent_Group_Name from row from (GroupParentGroups where Group_Name = 'TestSubGroup')) <> 'TestGroup' then
+	raise Error('SetGroupParentGroup failed');
+*/
+	
+CreateUser('TestUser', 'TestUser', 'TestUser'); //, 'TestGroup');
+//if (Group_Name from row from (Users where ID = 'TestUser')) <> 'TestGroup' then
+//	raise Error('CreateUser with group specified failed');
+
+if not exists (Users where ID = 'TestUser') then
+	raise Error('CreateUser failed');
+	
+if not exists (UserRoles where User_ID = 'TestUser' and Role_Name = 'System.User') then
+	raise Error('CreateUser did not add the user to the User role');
+	
+DropUser('TestUser');
+
+CreateUserWithEncryptedPassword('TestUser', 'TestUser', EncryptPassword('TestUser'));
+if not exists (Users where ID = 'TestUser') then
+	raise Error('CreateUserWithEncryptedPassword failed');
+//if (Group_Name from row from (Users where ID = 'TestUser')) <> 'User' then
+//	raise Error('CreateUserWithEncryptedPassword failed');
+
+if not exists (UserRoles where User_ID = 'TestUser' and Role_Name = 'System.User') then
+	raise Error('CreateUser did not add the user to the User role');
+
+ExecuteAs('SetUserName("TestUser", "TestUser");', 'TestUser', 'TestUser');
+DropUser('TestUser');
+
+/*
+CreateUserWithEncryptedPassword('TestUser', 'TestUser', EncryptPassword('TestUser'), 'TestGroup');
+if (Group_Name from row from (Users where ID = 'TestUser')) <> 'TestGroup' then
+	raise Error('CreateUserWithEncryptedPassword with group specified failed');
+	
+ExecuteAs('SetUserName("TestUser", "TestUser");', 'TestUser', 'TestUser');
+DropUser('TestUser');
+*/
+
+CreateUser('TestUser', 'TestUser', 'TestUser'); // Should be a member of User
+if not exists (Users where ID = 'TestUser') then
+	raise Error('CreateUser failed');
+	
+if not UserExists('TestUser') then
+	raise Error('UserExists failed');
+	
+SetUserName('TestUser', 'TestUserName');
+if Users['TestUser'].Name <> 'TestUserName' then
+	raise Error('SetUserName failed');
+	
+/*
+SetUserGroup('TestUser', 'TestGroup');
+if (Group_Name from row from (Users where ID = 'TestUser')) <> 'TestGroup' then
+	raise Error('SetUserGroup failed');
+*/
+
+ExecuteAs('if UserID() <> "TestUser" then raise Error("UserID failed");', 'TestUser', 'TestUser');
+ExecuteAs('if UserName() <> "TestUserName" then raise Error("UserName failed");', 'TestUser', 'TestUser');
+//ExecuteAs('if GroupName() <> "TestGroup" then raise Error("GroupName failed");', 'TestUser', 'TestUser');
+
+SetPassword('TestUser', 'TestUserPassword');
+ExecuteAs("ChangePassword('TestUserPassword', 'TestUser');", 'TestUser', 'TestUserPassword');
+
+SetEncryptedPassword('TestUser', EncryptPassword('TestPassword'));
+ExecuteAs("ChangePassword('TestPassword', 'TestUser');", 'TestUser', 'TestPassword');
+
+CreateUser('TestPeerUser', 'TestPeerUser', 'TestPeerUser'); //, 'TestGroup');
+//CreateUser('TestSubUser', 'TestSubUser', 'TestSubUser', 'TestSubGroup');
+
+//NegativeTestAs('SetUserGroup("TestPeerUser", "User");', 'User allowed to set group of a peer user', 'TestUser', 'TestUser');
+NegativeTestAs('SetUserName("TestPeerUser", "TestPeerUserName");', 'User allowed to set the name of a peer user', 'TestUser', 'TestUser');
+NegativeTestAs('SetPassword("TestPeerUser", "TestPeerUserPassword");', 'User allowed to set the password of a peer user', 'TestUser', 'TestUser');
+
+create table TestOwnedTable { ID : Integer };
+
+NegativeTestAs('select TestOwnedTable;', 'TestUser allowed to select from unowned table TestOwnedTable', 'TestUser', 'TestUser');
+
+SetObjectOwner('TestOwnedTable', 'TestUser');
+
+ExecuteAs('select TestOwnedTable;', 'TestUser', 'TestUser');
+
+NegativeTest('DropUser(''TestUser'')', 'User dropped with owned objects');
+
+NegativeTestAs('select TestOwnedTable;', 'TestPeerUser allowed to select from TestOwnedTable', 'TestPeerUser', 'TestPeerUser');
+
+CreateRole('TestRole');
+if not exists (Roles where Name like '%TestRole') then
+	raise Error('CreateRole failed');
+	
+if not RoleExists('TestRole') then
+	raise Error('RoleExists failed');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has access to an unowned, ungranted right.');
+
+NegativeTestAs("GrantRightToUser('TestRight', 'TestPeerUser');", 'TestUser allowed to administer unowned right TestRight', 'TestUser', 'TestUser');
+	
+SetRightOwner('TestRight', 'TestUser');
+if Rights['TestRight'].Owner_User_ID <> 'TestUser' then
+	raise Error('SetRightOwner failed');
+	
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser does not have access to an owned right.');
+	
+/*
+ExecuteAs("GrantRightToUser('TestRight', 'TestSubUser');", 'TestUser', 'TestUser');
+if not UserHasRight('TestSubUser', 'TestRight') then
+	raise Error('TestSubUser does not have TestRight after a Grant from TestUser');
+*/
+	
+NegativeTestAs("GrantRightToUser('TestRight', 'TestPeerUser');", 'TestUser allowed to manage right assignments for peer user TestPeerUser', 'TestUser', 'TestUser');
+	
+SetRightOwner('TestRight', 'Admin');
+
+//RevokeRightFromUser('TestRight', 'TestSubUser');
+RevokeRightFromUser('TestRight', 'TestPeerUser');
+if UserHasRight('TestPeerUser', 'TestRight') then
+	raise Error('TestPeerUser still has TestRight after a Revoke from TestRight owner.');
+	
+AddUserToRole('TestUser', 'TestRole');
+if not exists (UserRoles where (User_ID = 'TestUser') and (Role_Name like '%TestRole')) then
+	raise Error('AddUserToRole failed');
+	
+RemoveUserFromRole('TestUser', 'TestRole');
+if exists (UserRoles where (User_ID = 'TestUser') and (Role_Name like '%TestRole')) then
+	raise Error('RemoveUserFromRole failed');
+
+/*
+AddGroupToRole('TestGroup', 'TestRole');
+if not exists (GroupRoles where Group_Name = 'TestGroup' and (Role_Name like '%TestRole')) then
+	raise Error('AddGroupToRole failed');
+	
+RemoveGroupFromRole('TestGroup', 'TestRole');
+if exists (GroupRoles where Group_Name = 'TestGroup' and (Role_Name like '%TestRole')) then
+	raise Error('RemoveGroupFromRole failed');
+*/
+	
+// Grant TestRight to TestRole, add TestUser to TestRole, verify UserHasRight, verify RoleHasRight
+GrantRightToRole('TestRight', 'TestRole');
+if not exists(RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('GrantRightToRole failed');
+	
+if not((RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted) then
+	raise Error('GrantRightToRole failed to set granted');
+	
+if not(RoleHasRight('TestRole', 'TestRight')) then
+	raise Error('RoleHasRight failed.');
+	
+RevertRightForRole('TestRight', 'TestRole');
+if exists (RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('RevertRightForRole failed');
+	
+if RoleHasRight('TestRole', 'TestRight') then
+	raise Error('RoleHasRight failed.');
+
+RevokeRightFromRole('TestRight', 'TestRole');
+if not exists(RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('RevokeRightFromRole failed');
+	
+if (RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted then
+	raise Error('RevokeRightFromRole failed to revoke');
+	
+if RoleHasRight('TestRole', 'TestRight') then
+	raise Error('RoleHasRight failed');
+
+grant {TestRight} to role TestRole;
+if not exists(RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('"grant TestRight..." failed');
+	
+if not((RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted) then
+	raise Error('"grant TestRight..." failed to set granted');
+	
+if not(RoleHasRight('TestRole', 'TestRight')) then
+	raise Error('RoleHasRight failed.');
+	
+revert {TestRight} for role TestRole;
+if exists (RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('"revert TestRight..." failed');
+	
+if RoleHasRight('TestRole', 'TestRight') then
+	raise Error('RoleHasRight failed.');
+
+revoke {TestRight} from role TestRole;
+if not exists(RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight') then
+	raise Error('"revoke TestRight..." failed');
+	
+if (RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted then
+	raise Error('"revoke TestRight..." failed to revoke');
+	
+if RoleHasRight('TestRole', 'TestRight') then
+	raise Error('RoleHasRight failed');
+
+grant {TestRight} to role TestRole;
+if not((RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted) then
+	raise Error('"grant TestRight...inherited" failed to set granted');
+	
+AddUserToRole('TestUser', 'TestRole');
+
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser does not have TestRight from membership in TestRole.');
+
+RevokeRightFromRole('TestRight', 'TestRole');
+if (RoleRightAssignments where (Role_Name like '%TestRole') and Right_Name = 'TestRight')[].IsGranted then
+	raise Error('RevokeRightFromRole failed to clear granted');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight after it was revoked from TestRole');
+	
+RemoveUserFromRole('TestUser', 'TestRole');
+
+/*
+AddGroupToRole('TestGroup', 'TestRole');
+
+GrantRightToRole('TestRight', 'TestRole');
+
+if not GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup does not have TestRight through membership in TestRole.');
+	
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser does not have TestRight through membership in TestGroup.');
+
+RemoveGroupFromRole('TestGroup', 'TestRole');
+
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser still has TestRight through membership in TestGroup.');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup still has TestRight through membership in TestRole.');
+
+AddGroupToRole('User', 'TestRole');
+
+if not GroupHasRight('User', 'TestRight') then
+	raise Error('User does not have TestRight through membership in TestRole.');
+	
+SetGroupRoleInherited('User', 'TestRole', true);
+
+if not(Inherited from row from (GroupRoles where Group_Name = 'User' and (Role_Name like '%TestRole'))) then
+	raise Error('SetGroupRoleInherited failed');
+	
+if not GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup does not inherit TestRight through membership in User.');
+	
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser does not inherit TestRight through membership in TestGroup');
+	
+RemoveGroupFromRole('User', 'TestRole');
+
+if GroupHasRight('User', 'TestRight') then
+	raise Error('User group still has TestRight');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup still has TestRight');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser still has TestRight');
+
+RevertRightForRole('TestRight', 'TestRole');
+
+// Grant right to users group
+GrantRightToGroup('TestRight', 'TestGroup');
+if not exists (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup failed');
+	
+if not(Granted from row from (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight')) then
+	raise Error('GrantRightToGroup did not set Granted correctly');
+	
+if not(Inherited from row from (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight')) then
+	raise Error('GrantRightToGroup did not set Inherited correctly');
+	
+if not(GroupHasRight('TestGroup', 'TestRight')) then
+	raise Error('GroupHasRight failed');
+	
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser does not have TestRight through membership in TestGroup');
+	
+// Revoke right from users group
+RevokeRightFromGroup('TestRight', 'TestGroup');
+if not exists (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('RevokeRightFromGroup failed');
+	
+if Granted from row from (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('RevokeRightFromGroup did not set Granted correctly');
+	
+if not(Inherited from row from (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight')) then
+	raise Error('RevokeRightFromGroup did not set Inherited correctly');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('GroupHasRight failed');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('UserHasRight failed');
+
+// Revert right for users group
+RevertRightForGroup('TestRight', 'TestGroup');
+if exists (GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('RevertRightForGroup failed');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup still has TestRight.');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser still has TestRight');
+
+// Grant right to users groups immediate parent, not inherited, verify no right access
+GrantRightToGroup('TestRight', 'User', false);
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+	
+// Grant right to users groups immediate parent, inherited, verify right access
+GrantRightToGroup('TestRight', 'User', true);
+if not(GroupHasRight('TestGroup', 'TestRight')) then
+	raise Error('TestGroup does not have TestRight through membership in User');
+	
+if not(UserHasRight('TestUser', 'TestRight')) then
+	raise Error('TestUser does not have TestRight through membership in User');
+	
+// Revoke right from users groups immediate parent, inherited, verify no right access
+RevokeRightFromGroup('TestRight', 'User', true);
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+	
+// Revert right for users groups immediate parent, verify no right access
+RevertRightForGroup('TestRight', 'User');
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+
+// Grant right to users groups immediate parent, not inherited, apply recursively, verify right access
+// TODO: Verify semantics of apply recursively
+// option A: Apply the right assignment as described to all child groups
+// option B: Remove any right assignment if AInherited is true, apply the right assignment if AInherited is false?
+// option A was chosen for simplicity
+GrantRightToGroup('TestRight', 'User', false, true, false);
+if not exists(GroupRightAssignments where Group_Name = 'User' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively failed.');
+	
+if not exists(GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively failed.');
+	
+if not(GroupHasRight('User', 'TestRight')) then
+	raise Error('GroupHasRight failed');
+	
+if not(GroupHasRight('TestGroup', 'TestRight')) then
+	raise Error('GroupHasRight failed');
+	
+if not UserHasRight('TestUser', 'TestRight') then
+	raise Error('UserHasRight failed');
+
+// Revoke right from users groups immediate parent, not inherited, apply recursively, verify no right access
+RevokeRightFromGroup('TestRight', 'User', false, true, false);
+if GroupHasRight('User', 'TestRight') then
+	raise Error('Group User has right TestRight after Revoke');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+
+// Revert right for users groups immediate parent, apply recursively, verify no right access
+RevertRightForGroup('TestRight', 'User', true, false);
+if exists(GroupRightAssignments where Group_Name = 'User' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively failed.');
+	
+if exists(GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively failed.');
+
+if GroupHasRight('User', 'TestRight') then
+	raise Error('User has TestRight after Revoke');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+
+// Grant right to users groups immediate parent, not inherited, apply recursively, include users, verify right access
+GrantRightToGroup('TestRight', 'User', false, true, true);
+if not exists(GroupRightAssignments where Group_Name = 'User' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively including users failed.');
+	
+if not exists(GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively including users failed.');
+	
+if not exists(UserRightAssignments where User_ID = 'TestUser' and Right_Name = 'TestRight') then
+	raise Error('GrantRightToGroup applied recursively including users failed.');
+	
+if not(GroupHasRight('User', 'TestRight')) then
+	raise Error('GroupHasRight failed');
+	
+if not(GroupHasRight('TestGroup', 'TestRight')) then
+	raise Error('GroupHasRight failed');
+	
+if not(UserHasRight('TestUser', 'TestRight')) then
+	raise Error('UserHasRight failed');
+
+// Revoke right from users groups immediate parent, not inherited, apply recursively, include users, verify no right access
+RevokeRightFromGroup('TestRight', 'User', false, true, true);
+if GroupHasRight('User', 'TestRight') then
+	raise Error('User has TestRight after Revoke');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('TestGroup has TestRight through membership in User');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('TestUser has TestRight through membership in TestGroup');
+
+// Revert right for users groups immediate parent, apply recursively, include children, verify no right access
+RevertRightForGroup('TestRight', 'User', true, true);
+if exists(GroupRightAssignments where Group_Name = 'User' and Right_Name = 'TestRight') then
+	raise Error('RevertRightForGroup applied recursively including users failed.');
+	
+if exists(GroupRightAssignments where Group_Name = 'TestGroup' and Right_Name = 'TestRight') then
+	raise Error('RevertRightForGroup applied recursively including users failed.');
+	
+if exists(UserRightAssignments where User_ID = 'TestUser' and Right_Name = 'TestRight') then
+	raise Error('RevertRightForGroup applied recursively including users failed.');
+	
+if GroupHasRight('User', 'TestRight') then
+	raise Error('RevertRightForGroup failed');
+	
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('GroupHasRight failed');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('UserHasRight failed');
+
+// Verify that no cycles can be created in the groups hierarchy
+begin
+	var LErrorHit : Boolean := false;
+	
+	try
+		CreateGroup('TestGroup1', 'TestGroup1');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error('CreateGroup allowed circular group reference.');
+		
+	CreateGroup('TestGroup1', 'User');
+	LErrorHit := false;
+	try
+		SetGroupParentGroup('TestGroup1', 'TestGroup1');
+	except
+		LErrorHit := true;
+	end;
+	if not LErrorHit then
+		raise Error('SetGroupParentGroup allowed circular group reference.');
+
+	DropGroup('TestGroup1');
+end;
+
+// Verify conflicting right assignments
+// Grant to TestGroup, Revoke from TestUser, verify no right access
+GrantRightToGroup('TestRight', 'TestGroup');
+RevokeRightFromUser('TestRight', 'TestUser');
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+// Revoke from TestGroup, Grant to TestUser, verify right access
+RevokeRightFromGroup('TestRight', 'TestGroup');
+GrantRightToUser('TestRight', 'TestUser');
+if not(UserHasRight('TestUser', 'TestRight')) then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+
+// Grant to User inherited, Revoke from TestGroup, verify no right access
+GrantRightToGroup('TestRight', 'User', true);
+RevokeRightFromGroup('TestRight', 'TestGroup');
+RevertRightForUser('TestRight', 'TestUser');
+if GroupHasRight('TestGroup', 'TestRight') then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+// Revoke from User inherited, Grant to TestGroup, verify right access
+RevokeRightFromGroup('TestRight', 'User', true);
+GrantRightToGroup('TestRight', 'TestGroup');
+if not(GroupHasRight('TestGroup', 'TestRight')) then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+if not(UserHasRight('TestUser', 'TestRight')) then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+RevertRightForGroup('TestRight', 'User', true, true);
+*/
+
+CreateRole('TestRole2');
+
+// Grant to TestRole, Revoke from TestRole2, add TestUser to both Roles, verify no right access
+GrantRightToRole('TestRight', 'TestRole');
+RevokeRightFromRole('TestRight', 'TestRole2');
+AddUserToRole('TestUser', 'TestRole');
+AddUserToRole('TestUser', 'TestRole2');
+if UserHasRight('TestUser', 'TestRight') then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+	
+RemoveUserFromRole('TestUser', 'TestRole');
+RemoveUserFromRole('TestUser', 'TestRole2');
+
+/*
+// Grant to TestRole, Revoke from TestRole2, add TestGroup to TestRole2, add TestUser to TestRole verify right access
+AddGroupToRole('TestGroup', 'TestRole2');
+AddUserToRole('TestUser', 'TestRole');
+if not(UserHasRight('TestUser', 'TestRight')) then
+	raise Error('Conflicting assignment failed to resolve correctly.');
+
+RemoveGroupFromRole('TestGroup', 'TestRole2');
+RemoveUserFromRole('TestUser', 'TestRole');	
+*/
+	
+DropRole('TestRole2');
+
+// Type Rights
+// CreateType - inherited
+RevokeRightFromUser('System.CreateType', 'TestUser');
+NegativeTestAs('create type TestType like String;', 'TestUser allowed to create a type.', 'TestUser', 'TestUser');
+
+create type TestType like String { special TestSpecial "" };
+
+// Alter
+NegativeTestAs('alter type TestType { create default "blah" };', 'TestUser allowed to alter TestType', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop type TestType;', 'TestUser allowed to drop TestType', 'TestUser', 'TestUser');
+
+// All
+	// alter
+	// drop
+	// selector alter/drop/execute
+	// read/write accessor alter/drop/execute
+	// comparison operator alter/drop/execute
+	// isspecial operator alter/drop/execute
+	// special selector/comparer alter/drop/execute
+	
+grant all on TestType to user 'TestUser';
+foreach row in (Rights join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID })) union (table { row { ObjectID('TestType') Catalog_Object_ID } }))) do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestType from user 'TestUser';
+foreach row in (Rights join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID })) union (table { row { ObjectID('TestType') Catalog_Object_ID } }))) do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestType for user 'TestUser';
+if exists ((UserRightAssignments where User_ID = 'TestUser' { Right_Name Name }) join (Rights join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID })) union (table { row { ObjectID('TestType') Catalog_Object_ID } })))) then
+	raise Error('TestType revert all failed');
+
+// Usage
+	// selector execute
+	// read/write accessor execute
+	// comparison execute
+	// isspecial execute
+	// special selector/comparer execute
+	
+grant usage on TestType to user 'TestUser';
+foreach row in ((Rights where Name like '%Execute') join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID })))) do
+	CheckUserRight('TestUser', Name);
+
+revoke usage on TestType from user 'TestUser';
+foreach row in ((Rights where Name like '%Execute') join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID })))) do
+	CheckUserRightDenied('TestUser', Name);
+
+revert usage on TestType for user 'TestUser';
+if exists ((UserRightAssignments where User_ID = 'TestUser' { Right_Name Name }) join ((Rights where Name like '%Execute') join (((DependentObjects(ObjectID('TestType'), true) join (Objects where IsGenerated = true and (Type = 'Operator')) by ID = Object_ID { Object_ID Catalog_Object_ID }))))) then
+	raise Error('TestType revert usage failed');
+
+drop type TestType;
+if exists (Rights where Name like '%TestType%') then
+	raise Error('Dropping TestType did not drop all associated rights.');
+
+// Operator Rights
+// CreateOperator - inherited
+RevokeRightFromUser('System.CreateOperator', 'TestUser');
+NegativeTestAs('create operator TestOperator() begin end;', 'TestUser was allowed to create an operator.', 'TestUser', 'TestUser');
+
+create operator TestOperator() begin end;
+
+// Alter
+NegativeTestAs('alter operator TestOperator();', 'TestUser allowed to alter TestOperator', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop operator TestOperator();', 'TestUser allowed to drop TestOperator', 'TestUser', 'TestUser');
+
+// Execute
+NegativeTestAs('TestOperator();', 'TestUser allowed to execute TestOperator', 'TestUser', 'TestUser');
+
+// All
+grant all on TestOperator() to user 'TestUser';
+foreach row in (Rights where Catalog_Object_ID = ObjectID('TestOperator()')) do
+	if not(UserHasRight('TestUser', Name)) then
+		raise Error('TestUser does not have ' + Name);
+	
+revoke all on TestOperator() from user 'TestUser';
+foreach row in (Rights where Catalog_Object_ID = ObjectID('TestOperator()')) do
+	if UserHasRight('TestUser', Name) then
+		raise Error('TestUser has ' + Name);
+	
+revert all on TestOperator() for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join (Rights where Catalog_Object_ID = ObjectID('TestOperator()'))) then
+	raise Error('Revert all for TestOperator() failed');
+	
+// Usage
+grant usage on TestOperator() to user 'TestUser';
+foreach row in (Rights where Name like '%Execute' where Catalog_Object_ID = ObjectID('TestOperator()')) do
+	if not(UserHasRight('TestUser', Name)) then
+		raise Error('TestUser does not have ' + Name);
+
+revoke usage on TestOperator() from user 'TestUser';
+foreach row in (Rights where Name like '%Execute' where Catalog_Object_ID = ObjectID('TestOperator()')) do
+	if UserHasRight('TestUser', Name) then
+		raise Error('TestUser does not have ' + Name);
+	
+revert usage on TestOperator() for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join (Rights where Name like '%Execute' where Catalog_Object_ID = ObjectID('TestOperator()'))) then
+	raise Error('TestUser still has a right assignment for TestOperator');
+	
+drop operator TestOperator();
+
+// Table Rights
+// CreateTable - inherited
+RevokeRightFromUser('System.CreateTable', 'TestUser');
+NegativeTestAs('create table TestTable { ID : Integer, key { ID } };', 'TestUser allowed to create table TestTable', 'TestUser', 'TestUser');
+
+// CreateView - inherited
+RevokeRightFromUser('System.CreateView', 'TestUser');
+NegativeTestAs('create view TestView table { row { 5 ID } };', 'TestUser allowed to create view TestView', 'TestUser', 'TestUser');
+
+create table TestTable { ID : Integer, key { ID } };
+
+// Alter
+NegativeTestAs('alter table TestTable alter tags { create Frontend.Title = "Test" };', 'TestUser allowed to alter table TestTable', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop table TestTable;', 'TestUser allowed to drop table TestTable', 'TestUser', 'TestUser');
+
+// Select
+NegativeTestAs('select TestTable;', 'TestUser allowed to select from table TestTable', 'TestUser', 'TestUser');
+
+// Insert
+NegativeTestAs('insert table { row { 1 ID } } into TestTable;', 'TestUser allowed to insert into table TestTable', 'TestUser', 'TestUser');
+
+// Update
+NegativeTestAs('update TestTable set { ID := 1 };', 'TestUser allowed to update table TestTable', 'TestUser', 'TestUser');
+
+// Delete
+NegativeTestAs('delete TestTable;', 'TestUser allowed to delete TestTable', 'TestUser', 'TestUser');
+
+create table ObjectRights from (Rights where Catalog_Object_ID = ObjectID('TestTable'));
+
+// All
+grant all on TestTable to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestTable from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestTable for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestTable revert all failed');
+
+delete ObjectRights where Name like '%Alter';
+delete ObjectRights where Name like '%Drop';
+
+// Usage
+grant usage on TestTable to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke usage on TestTable from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert usage on TestTable for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestTable revert usage failed');
+
+drop table TestTable;
+drop table ObjectRights;
+
+// Reference Rights
+create table TestTable { ID : Integer, key { ID } };
+create table TestDetailTable { TestTable_ID : Integer, key { TestTable_ID } };
+
+// CreateReference - inherited
+RevokeRightFromUser('System.CreateReference', 'TestUser');
+NegativeTestAs('create reference TestReference TestDetailTable { TestTable_ID } references TestTable { ID };', 'TestUser allowed to create reference TestReference', 'TestUser', 'TestUser');
+
+create reference TestDetailTable_TestTable TestDetailTable { TestTable_ID } references TestTable { ID };
+
+// Alter
+NegativeTestAs('alter reference TestDetailTable_TestTable alter tags { create Frontend.Title = "Test" };', 'TestUser allowed to alter reference TestDetailTable_TestTable', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop reference TestDetailTable_TestTable;', 'TestUser allowed to drop reference TestDetailTable_TestTable', 'TestUser', 'TestUser');
+
+create table ObjectRights from (Rights where Catalog_Object_ID = ObjectID('TestDetailTable_TestTable'));
+
+// All
+grant all on TestDetailTable_TestTable to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestDetailTable_TestTable from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestDetailTable_TestTable for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestDetailTable_TestTable revert all failed');
+
+drop reference TestDetailTable_TestTable;
+drop table TestDetailTable;
+drop table TestTable;
+drop table ObjectRights;
+
+// Constraint Rights
+create table TestTable { ID : Integer, key { ID } };
+
+// CreateConstraint - inherited
+RevokeRightFromUser('System.CreateConstraint', 'TestUser');
+NegativeTestAs('create constraint TestConstraint not exists(TestTable);', 'TestUser allowed to create constraint TestConstraint', 'TestUser', 'TestUser');
+
+create constraint TestConstraint not exists (TestTable);
+
+// Alter
+NegativeTestAs('alter constraint TestConstraint alter tags { create Frontend.Title = "Test" };', 'TestUser allowed to alter constraint TestConstraint', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop constraint TestConstraint;', 'TestUser allowed to drop constraint TestConstraint', 'TestUser', 'TestUser');
+
+create table ObjectRights from (Rights where Catalog_Object_ID = ObjectID('TestConstraint'));
+
+// All
+grant all on TestConstraint to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestConstraint from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestConstraint for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestDetailTable_TestTable revert all failed');
+
+drop constraint TestConstraint;
+drop table TestTable;
+drop table ObjectRights;
+
+// DeviceUsers
+
+create device TestDevice class "MemoryDevice";
+if not exists (Devices where ID = ObjectID('TestDevice')) then
+	raise Error('TestDevice not created.');
+	
+/*
+CreateGroupDeviceUser('TestGroup', 'TestDevice', 'Test', 'Test');
+if not exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('CreateGroupDeviceUser failed');
+	
+if not(GroupDeviceUserExists('TestGroup', 'TestDevice')) then
+	raise Error('GroupDeviceUserExists failed');
+	
+if (UserID from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+if (ConnectionParameters from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> '' then
+	raise Error('CreateGroupDeviceUser failed');
+
+DropGroupDeviceUser('TestGroup', 'TestDevice');
+if exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('DropGroupDeviceUser failed');
+
+CreateGroupDeviceUser('TestGroup', 'TestDevice', 'Test', 'Test', 'Test=Test');
+if not exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('CreateGroupDeviceUser failed');
+	
+if (UserID from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+if (ConnectionParameters from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test=Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+DropGroupDeviceUser('TestGroup', 'TestDevice');
+if exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('DropGroupDeviceUser failed');
+
+CreateGroupDeviceUserWithEncryptedPassword('TestGroup', 'TestDevice', 'Test', EncryptPassword('Test'));
+if not exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('CreateGroupDeviceUser failed');
+	
+if (UserID from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+if (ConnectionParameters from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> '' then
+	raise Error('CreateGroupDeviceUser failed');
+
+DropGroupDeviceUser('TestGroup', 'TestDevice');
+if exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('DropGroupDeviceUser failed');
+
+CreateGroupDeviceUserWithEncryptedPassword('TestGroup', 'TestDevice', 'Test', EncryptPassword('Test'), 'Test=Test');
+if not exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('CreateGroupDeviceUser failed');
+	
+if (UserID from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+if (ConnectionParameters from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test=Test' then
+	raise Error('CreateGroupDeviceUser failed');
+
+DropGroupDeviceUser('TestGroup', 'TestDevice');
+if exists(GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice') then
+	raise Error('DropGroupDeviceUser failed');
+*/
+
+CreateDeviceUser('TestUser', 'TestDevice', 'Test', '');
+if not exists(DeviceUsers where User_ID = 'TestUser' and Device_Name = ObjectName('TestDevice')) then
+	raise Error('CreateDeviceUser failed');
+	
+if not(DeviceUserExists('TestUser', 'TestDevice')) then
+	raise Error('DeviceUserExists failed');
+	
+if (DeviceUsers['TestUser', ObjectName('TestDevice')].UserID <> 'Test') then
+	raise Error('CreateDeviceUser failed');
+
+if (DeviceUsers['TestUser', ObjectName('TestDevice')].ConnectionParameters <> '') then
+	raise Error('CreateDeviceUser failed');
+
+DropDeviceUser('TestUser', 'TestDevice');
+if exists(DeviceUsers where User_ID = 'TestUser' and Device_Name = ObjectName('TestDevice')) then
+	raise Error('DropDeviceUser failed');
+
+CreateDeviceUser('TestUser', 'TestDevice', 'Test', 'Test', 'Test=Test');
+if DeviceUsers['TestUser', ObjectName('TestDevice')].IsNil() then
+	raise Error('CreateDeviceUser failed');
+
+if (DeviceUsers['TestUser', ObjectName('TestDevice')] { UserID, ConnectionParameters }) <> row { 'Test' UserID, 'Test=Test' ConnectionParameters } then
+	raise Error('CreateDeviceUser failed');
+
+DropDeviceUser('TestUser', 'TestDevice');
+if exists(DeviceUsers where User_ID = 'TestUser' and Device_Name = ObjectName('TestDevice')) then
+	raise Error('DropDeviceUser failed');
+
+CreateDeviceUserWithEncryptedPassword('TestUser', 'TestDevice', 'Test', EncryptPassword('Test'));
+if (DeviceUsers['TestUser', ObjectName('TestDevice')] { UserID, ConnectionParameters }) <> row { 'Test' UserID, '' ConnectionParameters } then
+	raise Error('CreateDeviceUser failed');
+
+DropDeviceUser('TestUser', 'TestDevice');
+if exists(DeviceUsers where User_ID = 'TestUser' and Device_Name = ObjectName('TestDevice')) then
+	raise Error('DropDeviceUser failed');
+
+CreateDeviceUserWithEncryptedPassword('TestUser', 'TestDevice', 'Test', EncryptPassword('Test'), 'Test=Test');
+if (DeviceUsers['TestUser', ObjectName('TestDevice')] { UserID, ConnectionParameters }) <> row { 'Test' UserID, 'Test=Test' ConnectionParameters } then
+	raise Error('CreateDeviceUser failed');
+
+DropDeviceUser('TestUser', 'TestDevice');
+if exists(DeviceUsers where User_ID = 'TestUser' and Device_Name = ObjectName('TestDevice')) then
+	raise Error('DropDeviceUser failed');
+	
+/*
+CreateGroupDeviceUser('TestGroup', 'TestDevice', 'Test', 'Test');
+SetGroupDeviceUserID('TestGroup', 'TestDevice', 'Testing');
+if (UserID from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Testing' then
+	raise Error('SetGroupDeviceUserID failed');
+
+SetGroupDeviceUserPassword('TestGroup', 'TestDevice', 'Testing');
+
+SetGroupDeviceUserConnectionParameters('TestGroup', 'TestDevice', 'Test=Test');
+if (ConnectionParameters from row from (GroupDeviceUsers where Group_Name = 'TestGroup' and Device_Name = 'Coverage.Base.TestDevice')) <> 'Test=Test' then
+	raise Error('SetGroupDeviceUserConnectionParameters failed');
+	
+DropGroupDeviceUser('TestGroup', 'TestDevice');
+*/
+
+CreateDeviceUser('TestUser', 'TestDevice', 'Test', 'Test');
+
+SetDeviceUserPassword('TestUser', 'TestDevice', 'Testing');
+ExecuteAs('ChangeDeviceUserPassword("TestDevice", "Testing", "Test");', 'TestUser', 'TestUser');
+
+SetDeviceUserID('TestUser', 'TestDevice', 'Testing');
+if DeviceUsers['TestUser', ObjectName('TestDevice')].UserID <> 'Testing' then
+	raise Error('CreateDeviceUser failed');
+
+SetDeviceUserConnectionParameters('TestUser', 'TestDevice', 'Test=Test');
+if DeviceUsers['TestUser', ObjectName('TestDevice')].ConnectionParameters <> 'Test=Test' then
+	raise Error('CreateDeviceUser failed');
+	
+DropDeviceUser('TestUser', 'TestDevice');
+
+// Device Rights
+// CreateDevice - inherited
+RevokeRightFromUser('System.CreateDevice', 'TestUser');
+NegativeTestAs('create device TestCreateDevice class "MemoryDevice";', 'TestUser allowed to create TestCreateDevice', 'TestUser', 'TestUser');
+
+// MaintainSystemDeviceUsers - not inherited
+NegativeTestAs('CreateDeviceUser("System", "TestDevice", "sa", "");', 'TestUser allowed to maintain system device users', 'TestUser', 'TestUser');
+
+// Alter
+NegativeTestAs('alter device TestDevice alter tags { create Frontend.Title = "Test" };', 'TestUser allowed to alter TestDevice', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('drop device TestDevice;', 'TestUser allowed to drop TestDevice', 'TestUser', 'TestUser');
+
+create table TestTable in TestDevice { ID : Integer, key { ID } };
+
+// Read
+NegativeTestAs('select TestTable;', 'TestUser allowed to select TestTable', 'TestUser', 'TestUser');
+
+// Write
+NegativeTestAs('insert table { row { 1 ID } } into TestTable;', 'TestUser allowed to insert into TestTable', 'TestUser', 'TestUser');
+
+grant all on TestTable to user 'TestUser';
+drop table TestTable;
+
+// CreateStore
+NegativeTestAs('create table TestTable in TestDevice { ID : Integer, key { ID } };', 'TestUser allowed to create a table in TestDevice', 'TestUser', 'TestUser');
+
+create table TestTable in TestDevice { ID : Integer, key { ID } };
+
+// AlterStore
+NegativeTestAs('alter table TestTable { alter column ID alter tags { create Frontend.Title = "Test" } };', 'TestUser allowed to alter TestTable in device TestDevice', 'TestUser', 'TestUser');
+
+// DropStore
+NegativeTestAs('drop table TestTable;', 'TestUser allowed to drop table TestTable in device TestDevice', 'TestUser', 'TestUser');
+
+drop table TestTable;
+
+// MaintainUsers
+NegativeTestAs('CreateDeviceUser("TestUser", "TestDevice", "sa", "");', 'TestUser allowed to create a device user in TestDevice', 'TestUser', 'TestUser');
+
+// Reconcile
+NegativeTestAs('Reconcile("TestDevice");', 'TestUser allowed to reconcile TestDevice', 'TestUser', 'TestUser');
+
+create table ObjectRights from Rights where Catalog_Object_ID = ObjectID('TestDevice');
+
+// All
+	// alter/drop
+	// read/write
+	// create/alter/drop store
+	// maintain users
+	// reconcile
+grant all on TestDevice to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestDevice from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestDevice for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestDevice revert all failed.');
+
+// Usage
+	// read/write
+grant usage on TestDevice to user 'TestUser';
+delete ObjectRights where not((Name like '%Read') or (Name like '%Write'));
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke usage on TestDevice from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert usage on TestDevice for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestDevice revert usage failed.');
+	
+drop table ObjectRights;
+	
+// Role Rights
+// Alter
+NegativeTestAs('AddUserToRole("TestPeerUser", "TestRole");', 'TestUser allowed to add user TestPeerUser to role TestRole', 'TestUser', 'TestUser');
+
+// Drop
+NegativeTestAs('DropRole("TestRole");', 'TestUser allowed to drop role TestRole', 'TestUser', 'TestUser');
+
+create table ObjectRights from Rights where Catalog_Object_ID = ObjectID('TestRole');
+
+// All
+grant all on TestRole to user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRight('TestUser', Name);
+
+revoke all on TestRole from user 'TestUser';
+foreach row in ObjectRights do
+	CheckUserRightDenied('TestUser', Name);
+
+revert all on TestRole for user 'TestUser';
+if exists (UserRightAssignments where User_ID = 'TestUser' { Right_Name Name } join ObjectRights) then
+	raise Error('TestRole revert all failed.');
+	
+drop device TestDevice;
+if exists (Devices where Name like '%TestDevice') then
+	raise Error('TestDevice not dropped.');
+	
+// Verify that a role with users cannot be dropped
+// TODO: This is probably a semantics change BTR 6/6/2004
+/*
+AddUserToRole('TestUser', 'TestRole');
+NegativeTest("DropRole('TestRole');", 'DropRole dropped TestRole with users assigned.');
+RemoveUserFromRole('TestUser', 'TestRole');
+
+// Verify that a role with groups cannot be dropped
+AddGroupToRole('TestGroup', 'TestRole');
+NegativeTest("DropRole('TestRole');", 'DropRole dropped TestRole with groups assigned.');
+RemoveGroupFromRole('TestGroup', 'TestRole');
+*/
+
+DropRole('TestRole');
+if exists (Roles where Name like '%TestRole') then
+	raise Error('DropRole failed');
+	
+if RoleExists('TestRole') then
+	raise Error('DropRole failed');
+
+drop table TestOwnedTable;
+	
+DropUser('TestPeerUser');
+//DropUser('TestSubUser');
+DropUser('TestUser');
+if exists(Users where ID = 'TestUser') then
+	raise Error('DropUser failed');
+	
+drop table ObjectRights;
+
+/*
+NegativeTest("CreateUser('TestUser', 'TestUser', 'TestUser', 'Admin');", 'User created as peer of current group');
+NegativeTest("DropGroup('TestGroup');", 'Group with child groups was dropped');
+
+DropGroup('TestSubGroup');
+if exists (Groups where Name = 'TestSubGroup') then
+	raise Error('DropGroup failed');
+	
+DropGroup('TestGroup');
+if GroupExists('TestGroup') then
+	raise Error('DropGroup failed');
+*/
+	
+DropRight('TestRight');
+if exists (Rights where Name = 'TestRight') then
+	raise Error('DropRight failed');
+	
+if RightExists('TestRight') then
+	raise Error('RightExists failed');

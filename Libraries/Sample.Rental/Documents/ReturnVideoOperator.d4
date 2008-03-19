@@ -1,0 +1,46 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator ReturnVideo(AVideoID : Integer)
+begin
+ // retrieve rental row
+ var LRentedVideoRow: typeof(RentedVideo[]);
+ LRentedVideoRow := RentedVideo[AVideoID by { Video_ID }];
+
+ // calculate late fee
+ var LLateFee : Money;
+ if Date() > LRentedVideoRow.DueOn then
+  LLateFee := (Date() - LRentedVideoRow.DueOn).Days * $2
+ else
+  LLateFee := $0;
+
+ // update tables
+ delete RentedVideo where Video_ID = AVideoID;
+
+ insert table
+ {
+  row
+  {
+   LRentedVideoRow.ID ID,
+   AVideoID Video_ID,
+   LRentedVideoRow.RentedOn RentedOn,
+   LRentedVideoRow.DueOn DueOn,
+   Date() ReturnedOn,
+   LLateFee LateFee
+  }
+ } into ReturnedVideo;
+
+ if LLateFee > $0 then
+  update Account set
+  {
+   Balance := Balance + LLateFee
+  } 
+   where ID = 
+   (
+    (Sale rename { ID SaleID })
+    join SaleItem by SaleID = Sale_ID
+   )[LRentedVideoRow.ID by { ID }].Account_ID;
+
+end;

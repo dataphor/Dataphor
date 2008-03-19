@@ -1,0 +1,37 @@
+/*
+	Sample.Forms
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+	
+	Sample library showing the use of multiple visual inheritance.
+	
+	Three forms in the library:
+		CustomerRow (dfd containing the desired customizations for both add and edit)
+		CustomerAdd (dfdx based on a derived add form and the CustomerRow document)
+		CustomerEdit (dfdx based on a derived edit form and the CustomerRow document)
+		
+	CustomerRow was created by deriving an add on Customer and making the desired customizations.
+	This was saved as CustomerCustomizedRow [dfdx]. This document was then opened with the XML editor,
+	and the interface tag and all its contents copied. Then create a new dfd, and save it as CustomerRow.
+	Open this document with the XML editor and past the copied interface tag (less the customization to the
+	MainSource, all it has is OpenState="Insert" which we don't want for both add and edit forms). This is
+	the finished CustomerRow document. Then derive new add and edit forms, saving each, and then editing
+	each in the XML editor and adding the ancestor tag to load the CustomerRow document as the second
+	ancestor. Edits made to the CustomerRow document will now affect both the Add and Edit forms derived
+	for the Customer, while still allowing derivation to be a dynamic process underneath.
+*/
+
+//* Table: Customer
+SafeDrop('Customer');
+create table Customer
+{
+	ID : Integer,
+	Name : String,
+	Phone : String,
+	Address : String,
+	City : String,
+	State : String,
+	Zip : String,
+	key { ID }
+};
+

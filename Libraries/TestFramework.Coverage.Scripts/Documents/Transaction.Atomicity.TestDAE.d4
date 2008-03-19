@@ -1,0 +1,20 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+begin
+	var LCurrentDeviceName : Name := GetDefaultDeviceName();
+	try // to ensure the device gets set back to what it was
+		SetDefaultDeviceName("System.Temp");
+		ExecuteScript("Coverage.Scripts", "Transaction.Atomicity.SetOne");
+		ExecuteScript("Coverage.Scripts", "Transaction.Atomicity.SetTwo");
+		ExecuteScript("Coverage.Scripts", "Transaction.Atomicity.Run");
+	finally
+		SetDefaultDeviceName(LCurrentDeviceName);
+	end;
+end;
+
+ExecuteScript("Coverage.Scripts", "Transaction.Atomicity.Cleanup");
+
+select CurrentCaseItems;

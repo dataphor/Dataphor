@@ -1,0 +1,241 @@
+// Node Optimization Coverage Script
+// © Copyright 2000-2008 Alphora
+// This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// TODO: More node coverage, specifically bound cases on seek and scan tables.
+
+// Tables
+create table A
+{
+	X : Integer,
+	Y : Integer,
+	Z : Integer,
+	key { X, Y, Z },
+	order { X, Y desc }
+};
+
+create table B
+{
+	X : Integer,
+	Y : Integer,
+	Z : Integer,
+	key { X, Y, Z }
+};
+
+begin
+  var X : Integer := 1;
+  while (X <= 5) do
+  begin
+	var Y : Integer := 1;
+	while (Y <= 5) do
+	begin
+	  var Z : Integer := 1;
+	  while (Z <= 5) do
+	  begin
+	    insert table { row { X X, Y Y, Z Z } } into A;
+	    insert table { row { X X, Y Y, Z Z } } into B;
+	    Z := Z + 1;
+	  end;
+	  Y := Y + 1;
+	end;
+	X := X + 1;
+  end;
+end;
+
+// Order
+//select ShowPlan('select A order by { X }');
+//select A order by { X }; // should make use of key { x, y, z }
+CheckSupported('System.Temp', 'select A order by { X }');
+	
+//select ShowPlan('select A order by { X desc }');
+//select A order by { X desc }; // should make use of key { x }
+CheckSupported('System.Temp', 'select A order by { X desc }');
+
+//select ShowPlan('select A order by { X, Y desc }');
+//select A order by { X, Y desc }; // should make use of order { x, y desc }
+CheckSupported('System.Temp', 'select A order by { X, Y desc }');
+
+//select ShowPlan('select A order by { X desc, Y }');
+//select A order by { X desc, Y }; // should make use of order { x, y desc }
+CheckSupported('System.Temp', 'select A order by { X desc, Y }');
+
+// Restrict
+create table TestValues { LX : Integer, LY : Integer, LZ : Integer, key { } };
+insert table { row { 1 LX, 1 LY, 1 LZ } } into TestValues;
+TestRestriction('A where X = (LX from row from TestValues) and Y = (LY from row from TestValues) and Z = (LZ from row from TestValues)', 'table { row { 1 X, 1 Y, 1 Z } }', 'SeekTable');
+drop table TestValues;
+
+//select A where X = 1 and Y = 1 and Z = 1; // should use a seek on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z = 1', 'table { row { 1 X, 1 Y, 1 Z } }', 'SeekTable');
+
+//select A where X = 1; // should use a scan on key { x, y, z }
+if Count(A where X = 1) <> 25 then
+	raise Error('A where X = 1 failed');
+CheckRestrictionAlgorithm('A where X = 1', 'ScanTable');
+
+select A where X > 3; // should use a scan on key { x, y, z }
+CheckRestrictionAlgorithm('A where X > 3', 'ScanTable');
+
+select A where X >= 3; // should use a scan on key { x, y, z }
+select A where X < 3; // should use a scan on key { x, y, z }
+select A where X <= 3; // should use a scan on key { x, y, z }
+select A where X > 2 and X < 4; // should use a scan on key { x, y, z }
+select A where X > 2 and X <= 4; // should use a scan on key { x, y, z }
+select A where X >= 2 and X < 4; // should use a scan on key { x, y, z }
+select A where X >= 2 and X <= 4; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 2 and Z > 3; // should use a scan on key { x, y, z }
+select A where X = 2 and Y = 1 and Z >= 3; // should use a scan on key { x, y, z }
+select A where X = 2 and Y = 2 and Z < 3; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 1 and Z <= 3; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 1 and Z > 2 and Z < 4; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 1 and Z > 2 and Z <= 4; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 1 and Z >= 2 and Z < 4; // should use a scan on key { x, y, z }
+select A where X = 1 and Y = 1 and Z >= 2 and Z <= 4; // should use a scan on key { x, y, z }
+
+// Union
+// need to implement a merge union
+
+// Difference
+select A minus B;
+// need to implement a merge difference
+
+drop table B;
+drop table A;
+
+// Join
+
+create table R { ID : String, Name : String, key { ID } };
+create table S { ID : String, R_ID : String, Name : String, key { ID } };
+create table T { S_ID : String, Name : String, key { S_ID } };
+
+insert table { row { '001' ID, 'Albert' Name } } into R;
+insert table { row { '002' ID, 'Mary' Name } } into R;
+insert table { row { '003' ID, 'Jane' Name } } into R;
+insert table { row { '004' ID, 'Joe' Name } } into R;
+
+insert table { row { '001' ID, '001' R_ID, 'John' Name } } into S;
+insert table { row { '002' ID, '001' R_ID, 'Jacob' Name } } into S;
+insert table { row { '003' ID, '001' R_ID, 'Jingle' Name } } into S;
+insert table { row { '004' ID, '001' R_ID, 'Heimer' Name } } into S;
+insert table { row { '005' ID, '002' R_ID, 'John' Name } } into S;
+insert table { row { '006' ID, '002' R_ID, 'Jacob' Name } } into S;
+insert table { row { '007' ID, '003' R_ID, 'Jingle' Name } } into S;
+insert table { row { '008' ID, '003' R_ID, 'Heimer' Name } } into S;
+
+insert table { row { '001' S_ID, 'John' Name } } into T;
+insert table { row { '002' S_ID, 'Jacob' Name } } into T;
+insert table { row { '003' S_ID, 'Jingle' Name } } into T;
+insert table { row { '004' S_ID, 'Heimer' Name } } into T;
+
+// TimesTable
+select (R rename A) times (R rename B);
+
+// UniqueMergeJoinTable
+// One to One join, both inputs ordered by join keys
+select (S rename S) join (T rename T) by S.R_ID = T.S_ID;
+
+select (S rename S where ID > '001') join (T rename T where S_ID > '002') by S.ID = T.S_ID;
+
+select (S rename S where ID > '002') join (T rename T where S_ID > '001') by S.ID = T.S_ID;
+
+// LeftUniqueMergeJoinTable
+// One to One or Many join, both inputs ordered by join keys
+select (R rename A) join (S where R_ID > '001' rename B) by A.ID = B.R_ID;
+
+// RightUniqueMergeJoinTable
+// One or Many to One join, both inputs ordered by join keys
+select (S where R_ID > '001' rename A) join (R rename B) by A.R_ID = B.ID;
+
+// LeftUniqueSearchedJoinTable
+// One to One or Many join, left input ordered by join key
+select (R rename A) join (S rename B) by A.ID = B.R_ID;
+
+// NonUniqueLeftSearchedJoinTable
+// Many to One or Many join, left input ordered by join key
+select (S where Name > 'Jacob' rename A) join (S rename B) by A.Name = B.Name;
+
+// RightUniqueSearchedJoinTable
+// One or Many to One join, right input ordered by join key
+select (S rename A) join (R rename B) by A.R_ID = B.ID;
+
+// NonUniqueRightSearchedJoinTable
+// One or Many to Many join, right input ordered by join key
+select (S rename A) join (S where Name > 'Jacob' rename B) by A.Name = B.Name;
+
+// LeftUniqueNestedLoopJoinTable
+// One to One or Many join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// RightUniqueNestedLoopJoinTable
+// One or Many to One join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// NonUniqueNestedLoopJoinTable
+// Many to Many join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// MergeLeftJoinTable
+// One to One left join, both inputs ordered by join keys
+select (S rename A) left join (T rename B) by A.ID = B.S_ID;
+select (S rename A where A.ID > '001') left join (T rename B) by A.ID = B.S_ID;
+select (S rename A) left join (T rename B where S_ID > '001') by A.ID = B.S_ID;
+
+// One to Many left join, both inputs ordered by join keys
+select (R rename R) left join (S rename S where R_ID > '001') by R.ID = S.R_ID;
+
+// Many to One left join, both inputs ordered by join keys
+select (S rename S where R_ID > '001') left join (R rename R where ID > '002') by S.R_ID = R.ID;
+
+// RightUniqueSearchedLeftJoinTable
+// One or Many to One left join, right input ordered by join keys
+select (S rename S) left join (R rename R where ID > '001') by S.R_ID = R.ID;
+
+// NonUniqueSearchedLeftJoinTable
+// One or Many to Many left join, right input ordered by join keys
+select (S rename A) left join (S where Name > 'Jacob' rename B) by A.Name = B.Name;
+
+// RightUniqueNestedLoopLeftJoinTable
+// One or Many to One left join, neither input ordered
+// NOTE: Node level optimizations will not select this algorithm
+
+// NonUniqueNestedLoopLeftJoinTable
+// One or Many to Many left join, neither input ordered
+// NOTE: Node level optimizations will not select this algorithm
+
+// MergeRightJoinTable
+// One to One right join, both inputs ordered by join keys
+select (T rename T) right join (S rename S) by T.S_ID = S.ID;
+select (T rename T) right join (S rename S where ID > '001') by T.S_ID = S.ID;
+select (T rename T where S_ID > '001') right join (S rename S) by T.S_ID = S.ID;
+
+// One to Many right join, both inputs ordered by join keys
+select (S rename S where R_ID > '001') right join (R rename R) by R.ID = S.R_ID;
+
+// Many to One right join, both inputs ordered by join keys
+select (R rename R where ID > '002') right join (S rename S where R_ID > '001') by R.ID = S.R_ID;
+
+// LeftUniqueSearchedRightJoinTable
+// One to One or Many right join, left input ordered by join keys
+select (R rename R where ID > '001') right join (S rename S) by S.R_ID = R.ID;
+
+// NonUniqueSearchedRightJoinTable
+// Many to One or Many right join, left input ordered by join keys
+select (S where Name > 'Jacob' rename A) right join (S rename B) by A.Name = B.Name;
+
+// LeftUniqueNestedLoopRightJoinTable
+// One to One or Many right join, neither input ordered
+// NOTE: Node level optimization will not select this algorithm
+
+// NonUniqueNestedLoopRightJoinTable
+// Many to One or Many right join, neither input ordered
+// NOTE: Node level optimization will not select this algorithm
+
+// TODO: Table Comparison Operators
+
+// TODO: In Operator
+
+// TODO: Update Statements
+
+drop table T;
+drop table S;
+drop table R;

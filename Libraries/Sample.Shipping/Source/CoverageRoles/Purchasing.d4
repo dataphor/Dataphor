@@ -1,0 +1,276 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Purchasing Role
+//
+// Vendor Maintenance
+// Vendor Report
+// Inventory Maintenance
+// Inventory Report
+// Purchase Order Entry
+
+create operator RandomShippingRate() : ShippingRate
+begin
+	result := DollarsPerMile(Random(3, 8).ToMoney());
+end;
+
+// Add Vendor
+create operator AddVendor()
+begin
+	var LEntityID : EntityID := EntityID(GetNextGenerator("Shipping.Entity.ID"));
+	var LPhoneTypeID : PhoneTypeID := RandomPhoneType();
+	var LStateID : StateID := RandomState();
+	var LZipCode : Zip := RandomZipCode();
+	try
+		insert table { row { LEntityID ID, RandomProperName() Name, LPhoneTypeID Primary_PhoneType_ID } } into Entity;
+		insert table { row { LEntityID Entity_ID, LPhoneTypeID PhoneType_ID, RandomPhone() Phone } }into EntityPhone;
+		insert table { row { LEntityID Entity_ID, 1 Number, RandomStreet() Street, RandomCity() City, LStateID State_ID, LZipCode Zip } } into EntityAddress;
+		insert table { row { LEntityID Entity_ID, 1 Primary_Address_Number, RandomShippingRate() ShippingRate } } into Vendor;
+		if Random(2) = 0 then
+			insert table { row { LEntityID Entity_ID, RandomNotes() Notes } } into EntityNotes;
+	commit;
+end;
+
+create view Vendors
+	(Entity rename E) join (Vendor rename V) by E.ID = V.Entity_ID;
+
+create operator RandomVendor() : EntityID
+begin
+	var LCursor : cursor(typeof(Vendors)) := cursor(Vendors browse by { Name } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomProperName() Name });
+		if LCursor.BOF() then
+			LCursor.Next();
+		if LCursor.EOF() then
+			LCursor.Prior();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Edit Vendor
+create operator EditVendor()
+begin
+	var LCursor : cursor(typeof(Vendors)) := cursor(Vendors browse by { Name } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomProperName() Name });
+		if (LCursor.BOF() or LCursor.EOF()) then
+			AddVendor()
+		else
+		begin
+			var LEntityID : EntityID := ID from LCursor.Select();
+			case Random(7)
+				// Edit name
+				when 0 then try update Entity set { Name := RandomProperName() } where ID = LEntityID; commit;
+
+				// Edit shipping rate
+				when 1 then try update Vendor set { ShippingRate := RandomShippingRate() } where Entity_ID = LEntityID; commit;
+
+				// Edit notes
+				when 2 then
+					try
+						if exists (EntityNotes where Entity_ID = LEntityID) then
+							update EntityNotes set { Notes := RandomNotes() } where Entity_ID = LEntityID
+						else
+							insert table { row { LEntityID Entity_ID, RandomNotes() Notes } } into EntityNotes;
+					commit;
+	
+				// Change primary phone number to a new phone number
+				when 3 then
+				begin
+					var LPhoneTypeID : PhoneTypeID := RandomPhoneType();
+					try
+						if not exists (EntityPhone where Entity_ID = LEntityID and PhoneType_ID = LPhoneTypeID) then
+							insert table { row { LEntityID Entity_ID, LPhoneTypeID PhoneType_ID, RandomPhone() Phone } } into EntityPhone;
+						update Entity set { Primary_PhoneType_ID := LPhoneTypeID } where ID = LEntityID;
+					commit;
+				end;
+
+				// Change primary address to a new address
+				when 4 then
+				begin
+					var LNextAddressNumber : Integer := Max(Number from (EntityAddress where Entity_ID = LEntityID)) + 1;
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						insert table { row { LEntityID Entity_ID, LNextAddressNumber Number, RandomStreet() Street, RandomCity() City, LStateID State_ID, LZipCode Zip } } into EntityAddress;
+						update Vendor set { Primary_Address_Number := LNextAddressNumber } where Entity_ID = LEntityID;
+					commit;
+				end;
+
+				// Change primary phone number
+				when 5 then
+				begin
+					try
+						update EntityPhone set { Phone := RandomPhone() } 
+							where Entity_ID = LEntityID 
+								and PhoneType_ID = (Primary_PhoneType_ID from row from (Entity where ID = LEntityID));
+					commit;
+				end;
+
+				// Change primary address
+				when 6 then
+				begin
+					var LStateID : StateID := RandomState();
+					var LZipCode : Zip := RandomZipCode();
+					try
+						update EntityAddress set
+						{
+							Street := RandomStreet(),
+							City := RandomCity(),
+							State_ID := LStateID,
+							Zip := LZipCode
+						}
+							where Entity_ID = LEntityID
+								and Number = (Primary_Address_Number from row from (Vendor where Entity_ID = LEntityID));
+					commit;
+				end;
+			end;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomDescription() : Description
+begin
+	result := Description(RandomName(Random(6, 16)));
+end;
+
+// Add ItemType
+create operator AddItemType()
+begin
+	try
+		insert table { row { RandomItemTypeID() ID, RandomDescription() Description } } into ItemType;
+	commit;
+end;
+
+// Edit ItemType
+create operator EditItemType()
+begin
+	var LItemTypeID : ItemTypeID := RandomItemType();
+	try
+		update ItemType set { Description := RandomDescription() } where ID = LItemTypeID;
+	commit;
+end;
+
+// EnsureItemsStocked
+create operator EnsureItemsStocked()
+begin
+	var LCursor : cursor(typeof(UnstockedItems)) := cursor(UnstockedItems isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				insert table { row { ID from LCursor.Select() ItemType_ID, RandomLocation() Location_ID, Random(20, 200) Par } } into Item;
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// SetParLevels
+create operator SetParLevels()
+begin
+	var LCursor : cursor(typeof(ItemsUnderPar)) := cursor(ItemsUnderPar isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				update Item set { Par := OnHand + OnPurchase + Random(20) } 
+					where Location_ID = (Location_ID from LCursor.Select())
+						and ItemType_ID = (ItemType_ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// EnsureItemsSupplied
+create operator EnsureItemsSupplied()
+begin
+	var LCursor : cursor(typeof(UnsuppliedItems)) := cursor(UnsuppliedItems isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				insert 
+					table 
+					{ 
+						row 
+						{ 
+							RandomVendor() Vendor_ID, 
+							ID from LCursor.Select() ItemType_ID, 
+							Random(2, 200).ToMoney() Cost 
+						} 
+					} 
+					into VendorItemType;
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Create Purchase Orders
+create operator PurchaseItems()
+begin
+	var LCursor : cursor(typeof(LocationsNeedingItems)) := cursor(LocationsNeedingItems isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				CreateBidItems(Location_ID from LCursor.Select());
+				CreatePurchaseOrders(Location_ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if not exists (TestRole where Name = "Purchasing") then
+	insert table { row { "Purchasing" Name } } into TestRole;
+	
+create operator RunPurchasing()
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Purchasing");
+	try
+		while exists(TestActive) do
+		begin
+			try
+				case Random(10)
+					when 0 then AddVendor();
+					when 1 then EditVendor();
+					when 2 then RunReport("VendorReport");
+					when 3 then AddItemType();
+					when 4 then EditItemType();
+					when 5 then RunReport("InventoryReport");
+					when 6 then EnsureItemsStocked();
+					when 7 then EnsureItemsSupplied();
+					when 8 then SetParLevels();
+					when 9 then PurchaseItems();
+				end;
+			except
+				on E : Error do
+					LogError(E);
+			end;
+			Sleep(Random(1000, 5000));
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;

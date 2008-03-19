@@ -1,0 +1,355 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Sample Shipping Application
+	Data Types Script
+*/
+
+//* Type: ContactID
+// ID type for contacts (customers and vendors are both contacts)
+create type ContactID like Integer 
+	tags { Frontend.Title = "Contact #", Frontend.Width = "10" };
+grant usage on ContactID to role ShippingUser;
+	
+//* Type: CategoryID
+// ID type for contact categories
+create type CategoryID like Integer
+	tags { Frontend.Visible = "false" };
+grant usage on CategoryID to role ShippingUser;
+
+//* Type: InvoiceID	
+// ID type for invoices (sales and purchase orders are both invoices)
+create type InvoiceID like Integer 
+	tags { Frontend.Title = "Invoice #", Frontend.Width = "10" };
+grant usage on InvoiceID to role ShippingUser;
+
+//* Type: ProperName
+// Person or organization name
+create type ProperName like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+	tags { Frontend.Width = "30" }
+	static tags { Storage.Length = "50" };
+grant usage on ProperName to role ShippingUser;
+
+//* Type: Description
+// Generic description type
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+	tags { Frontend.Width = "30" }
+	static tags { Storage.Length = "50" };
+grant usage on Description to role ShippingUser;
+
+//* Type: LocationID
+// ID type for locations, 5 digit alphanumeric code
+create type LocationID like String
+{
+	constraint LocationIDValid Length(value) between 1 and 5
+}
+	tags { Frontend.Title = "Location #", Frontend.Width = "7" }
+	static tags { Storage.Length = "5" };
+grant usage on LocationID to role ShippingUser;
+
+//* Type: PhoneTypeID
+// ID type for phone types, 3 digit alphanumeric code	
+create type PhoneTypeID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "Phone Type", Frontend.Width = "5" }
+	static tags { Storage.Length = "3" };
+grant usage on PhoneTypeID to role ShippingUser;
+
+//* Type: ItemTypeID
+// ID type for item types, 3 digit alphanumeric code
+create type ItemTypeID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "Item Type", Frontend.Width = "5" }
+	static tags { Storage.Length = "3" };
+grant usage on ItemTypeID to role ShippingUser;
+
+//* Type: InvoiceStatusID
+// ID type for invoice status types, 3 digit alphanumeric code	
+create type InvoiceStatusID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "Status", Frontend.Width = "5" }
+	static tags { Storage.Length = "3" };
+grant usage on InvoiceStatusID to role ShippingUser;
+
+//* Type: Phone
+create type Phone like String
+{
+	constraint LengthValid (Length(value) <= 20)
+}
+	tags { Frontend.Title = "Phone #", Frontend.Width = "15" }
+	static tags { Storage.Length = "20" };
+grant usage on Phone to role ShippingUser;
+
+//* Type: StateID
+// ID type for state codes, 2 digit alphanumeric code
+create type StateID like String
+{
+	constraint StateIDValid (Length(value) = 2)
+}
+	tags { Frontend.Title = "State", Frontend.Width = "4" }
+	static tags { Storage.Length = "2" };
+grant usage on StateID to role ShippingUser;
+
+// Operator: StateIDUpper(StateID)
+create operator StateIDUpper(var AStateID : StateID) : Boolean
+begin
+	result := false;
+	if not(IsUpper(AStateID)) then
+	begin
+		AStateID := Upper(AStateID);
+		result := true; // AStateID has been changed
+	end;
+end;
+attach operator StateIDUpper to StateID on validate;
+
+//* Operator: IsZipCode(String)
+create operator IsZipCode(const AString : String) : Boolean
+begin
+	result := (AString.Length() = 5) or (AString.Length() = 10 and AString.IndexOf('-') = 5);
+end;
+
+// Type: Zip
+// Zip code type, 5-4 numeric code
+create type Zip like String
+{
+	constraint ZipCodeValid IsZipCode(value)
+}
+	tags 
+	{ 
+		Frontend.Title = "Zip Code",
+		Frontend.Width = "10" 
+	}
+	static tags { Storage.Length = "10" };
+grant usage on Zip to role ShippingUser;
+
+//* Type: Notes	
+create type Notes like SQLText
+	tags { Frontend.TextBox.Height = "5" };
+grant usage on Notes to role ShippingUser;
+	
+//* Operator: GetDegrees(Integer, Integer, Decimal)
+// Degree type for modeling latitude and longitude degrees
+create operator GetDegrees(const ADegreesPart : Integer, const AMinutesPart : Integer, const ASecondsPart : Decimal) : Decimal
+begin
+	result := ADegreesPart + (AMinutesPart / 60) + (ASecondsPart / 60);
+end;
+
+// Operator: GetDegreesPart(Decimal)
+create operator GetDegreesPart(const ADegrees : Decimal) : Integer
+begin
+	result := Truncate(ADegrees).ToInteger();
+end;
+
+// Operator: GetMinutesPart(Decimal)
+create operator GetMinutesPart(const ADegrees : Decimal) : Integer
+begin
+	result := Truncate(Frac(ADegrees) * 60).ToInteger();
+end;
+
+// Operator: GetSecondsPart(Decimal)
+create operator GetSecondsPart(const ADegrees : Decimal) : Decimal
+begin
+	result := Round((Frac(ADegrees) - (GetMinutesPart(ADegrees) / 60)) * 3600, 2);
+end;
+
+// Operator: SetDegreesPart(Decimal, Integer)	
+create operator SetDegreesPart(const ADegrees : Decimal, const ADegreesPart : Integer) : Decimal
+begin
+	result := GetDegrees(ADegreesPart, GetMinutesPart(ADegrees), GetSecondsPart(ADegrees));
+end;
+
+// Operator: SetMinutesPart(Decimal, Integer)
+create operator SetMinutesPart(const ADegrees : Decimal, const AMinutesPart : Integer) : Decimal
+begin
+	result := GetDegrees(GetDegreesPart(ADegrees), AMinutesPart, GetSecondsPart(ADegrees));
+end;
+
+// Operator: SetSecondsPart(Decimal, Decimal)
+create operator SetSecondsPart(const ADegrees : Decimal, const ASecondsPart : Decimal) : Decimal
+begin
+	result := GetDegrees(GetDegreesPart(ADegrees), GetMinutesPart(ADegrees), ASecondsPart);
+end;
+
+// Operator: StringToDegrees(String)
+create operator StringToDegrees(const AString : String) : Decimal
+begin
+	var LSpaceIndex := AString.IndexOf(" ");
+	var LSingleQuoteIndex := AString.IndexOf("'");
+	var LDegrees : Integer := 0;
+	var LMinutes : Integer := 0;
+	var LSeconds : Decimal := 0;
+	if (LSpaceIndex < 0) or (LSingleQuoteIndex < 0) then
+		LDegrees := AString.ToInteger()
+	else
+	begin
+		if LSingleQuoteIndex < LSpaceIndex then
+			LDegrees := AString.ToInteger()
+		else
+		begin
+			LDegrees := AString.SubString(0, LSpaceIndex).ToInteger();
+			LMinutes := AString.SubString(LSpaceIndex + 1, LSingleQuoteIndex - (LSpaceIndex + 1)).ToInteger();
+			var LDoubleQuoteIndex := AString.IndexOf('"');
+			if (LDoubleQuoteIndex >= 0) and (LDoubleQuoteIndex > LSingleQuoteIndex) then
+				LSeconds := AString.SubString(LSingleQuoteIndex + 1, LDoubleQuoteIndex - (LSingleQuoteIndex + 1)).ToDecimal();
+		end;
+	end;
+	result := GetDegrees(LDegrees, LMinutes, LSeconds);
+end;
+
+// Operator: DegreesToString(Decimal)
+create operator DegreesToString(const ADegrees : Decimal) : String
+begin
+	result := GetDegreesPart(ADegrees).ToString() + " " + GetMinutesPart(ADegrees).ToString() + "' " + GetSecondsPart(ADegrees).ToString();
+end;
+
+// Type: Degree
+create type Degree
+{
+	representation Degrees { Degrees : Decimal },
+	representation Degree
+	{
+		DegreesPart : Integer
+			read GetDegreesPart(value.Degrees)
+			write Degrees(SetDegreesPart(value.Degrees, DegreesPart)),
+		MinutesPart : Integer
+			read GetMinutesPart(value.Degrees)
+			write Degrees(SetMinutesPart(value.Degrees, MinutesPart)),
+		SecondsPart : Decimal
+			read GetSecondsPart(value.Degrees)
+			write Degrees(SetSecondsPart(value.Degrees, SecondsPart))
+	} selector Degrees(GetDegrees(DegreesPart, MinutesPart, SecondsPart)),
+	representation AsString 
+	{ 
+		AsString : String 
+			read DegreesToString(value.Degrees)
+			write Degrees(StringToDegrees(AsString))
+	} selector Degrees(StringToDegrees(AsString))
+};
+grant usage on Degree to role ShippingUser;
+
+//* Type: Coordinate 
+// Coordinate type for modeling geographical location
+create type Coordinate
+{
+	representation Coordinate
+	{
+		Latitude : Degree
+			read class "Shipping.LatitudeReadAccessor" 
+			write class "Shipping.LatitudeWriteAccessor",
+		Longitude : Degree
+			read class "Shipping.LongitudeReadAccessor"
+			write class "Shipping.LongitudeWriteAccessor"
+	} class "Shipping.CoordinateSelector",
+	representation AsString
+	{
+		AsString : String
+			read value.Latitude.AsString + "/" + value.Longitude.AsString
+			write 
+				Coordinate
+				(
+					Degree.AsString(AsString.SubString(0, AsString.IndexOf("/"))), 
+					Degree.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+				)
+	}
+		selector
+			Coordinate
+			(
+				Degree.AsString(AsString.SubString(0, AsString.IndexOf("/"))),
+				Degree.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+			)
+} class "Shipping.CoordinateConveyor"
+	tags { Storage.Length = "45" };
+grant usage on Coordinate to role ShippingUser;
+
+// Operator: iCompare(Coordinate, Coordinate)
+create operator iCompare(const ACoordinate1 : Coordinate, const ACoordinate2 : Coordinate) : Integer
+	class "Shipping.CoordinateCompare";
+grant usage on iCompare(Coordinate, Coordinate) to role ShippingUser;
+
+//* Type: Distance
+// Distance type with representations in miles or kilometers
+create type Distance
+{
+	representation Miles { Miles : Decimal	},
+	representation Kilometers
+	{
+		Kilometers : Decimal
+			read value.Miles * 1.609
+			write Miles(Kilometers * 0.621)
+	} selector Miles(Kilometers * 0.621)
+};
+grant usage on Distance to role ShippingUser;
+
+// Operator: Distance(Coordinate, Coordinate)
+create operator Distance(const AFrom : Coordinate, const ATo : Coordinate) : Distance
+begin
+	result := 
+		Kilometers
+		(
+			(
+				(
+					((ATo.Latitude.Degrees - AFrom.Latitude.Degrees) ** 2) + 
+					((ATo.Longitude.Degrees - AFrom.Longitude.Degrees) ** 2)
+				) ** 
+				0.5
+			) / 
+			0.008987
+		);
+end;
+grant usage on Distance(Coordinate, Coordinate) to role ShippingUser;
+
+//* Type: ShippingRate
+// Shipping rate type with a representation of dollars / mile
+create type ShippingRate 
+{ 
+	representation DollarsPerMile { Rate : Money	},
+	representation AsString 
+	{ 
+		AsString : String 
+			read value.Rate.AsString 
+			write DollarsPerMile(AsString.ToMoney()) 
+	} selector DollarsPerMile(AsString.ToMoney()),
+	representation AsDisplayString
+	{
+		AsDisplayString : String
+			read value.Rate.AsDisplayString + '/mi.'
+			write DollarsPerMile(AsDisplayString.SubString(0, AsDisplayString.IndexOf('/mi.')).ToMoney())
+	} selector DollarsPerMile(AsDisplayString.SubString(0, AsDisplayString.IndexOf('/mi.')).ToMoney())
+}
+	tags 
+	{ 
+		static DAE.AsString = "AsString",
+		static DAE.AsDisplayString = "AsDisplayString",
+		Frontend.Title = "Shipping Rate" 
+	};
+grant usage on ShippingRate to role ShippingUser;
+
+// Operator: iMultiplication(Distance, ShippingRate)
+create operator iMultiplication(const ADistance : Distance, const ARate : ShippingRate) : Money
+begin
+	result := ADistance.Miles * ARate.Rate;
+end;
+grant usage on iMultiplication(Distance, ShippingRate) to role ShippingUser;
+
+// Operator: iMultiplication(ShippingRate, Distance)	
+create operator iMultiplication(const ARate : ShippingRate, const ADistance : Distance) : Money
+begin
+	result := ADistance.Miles * ARate.Rate;
+end;
+grant usage on iMultiplication(ShippingRate, Distance) to role ShippingUser;
+

@@ -1,0 +1,15 @@
+id;number;depid;depnumber;status;selall;resultobj;readobj
+352004285;0;240003886;0;1;False;False;False
+352004285;0;304004114;0;1;False;True;True
+368004342;0;240003886;0;1;False;False;False
+368004342;0;304004114;0;1;False;True;True
+384004399;0;272004000;0;1;False;False;False
+384004399;0;304004114;0;1;False;True;True
+400004456;0;272004000;0;1;False;False;False
+400004456;0;304004114;0;1;False;True;True
+416004513;0;240003886;0;1;False;False;False
+416004513;0;272004000;0;1;False;False;False
+416004513;0;304004114;0;1;False;True;True
+432004570;0;240003886;0;1;False;False;False
+432004570;0;272004000;0;1;False;False;False
+432004570;0;304004114;0;1;False;True;True

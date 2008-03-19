@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="127100">
+		<value>There is already a transaction in progress for this connection.</value>
+	</data>
+	<data name="127101">
+		<value>There is no transaction in progress for this connection.</value>
+	</data>
+	<data name="127102">
+		<value>Deferred read overflow.</value>
+	</data>
+	<data name="127103">
+		<value>Source data type "{0}" does not support deferred reading.</value>
+	</data>
+	<data name="127104">
+		<value>Unknown SQL data type class "{0}".</value>
+	</data>
+	<data name="127105">
+		<value>Exceptions occurred while executing SQL command.</value>
+	</data>
+	<data name="127106">
+		<value>Unable to convert deferred stream value.</value>
+	</data>
+	<data name="127107">
+		<value>Connection is busy.</value>
+	</data>
+	<data name="127108">
+		<value>Connectivity implementation does not support output parameters.</value>
+	</data>
+	<data name="127109">
+		<value>Unsupported updateable call.</value>
+	</data>
+	<data name="127110">
+		<value>Unsupported searchable call.</value>
+	</data>
+	<data name="127120">
+		<value>String value exceeds length ({1}) of parameter "{0}".</value>
+	</data>
+	<data name="127121">
+		<value>Connection is closed.</value>
+	</data>
+  <data name="127122">
+    <value>Unable to open cursor.</value>
+  </data>
+</root>

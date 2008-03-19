@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('Sample.Shipping.ContactCategories', 'Edit', 'Main.ID', 'Main.Contact_ID', true)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+   <source bop:name="Main" detailkeynames="Main.Contact_ID" masterkeynames="Main.ID" openstate="Edit" />
+   <column bop:name="RootEditColumn">
+      <row ibop:order="0" bop:name="Row1">
+         <textbox ibop:order="0" bop:name="MainColumnMain.Categories" maxwidth="40" width="40" />
+         <trigger ibop:order="1" bop:name="Trigger1" action="AddCategory" verticalalignment="Bottom" />
+      </row>
+   </column>
+   <showformaction ibop:order="3" bop:name="AddCategory" text="+ Category" mode="Query" document="Derive('Category', 'Browse')" onformaccepted="AddCategoryAccepted" />
+   <scriptaction ibop:order="4" bop:name="AddCategoryAccepted" script="IFormInterface LForm = AParams[&quot;AForm&quot;] as IFormInterface;&#xD;&#xA;&#xD;&#xA;Alphora.Dataphor.DAE.Client.DataField LField = Form.MainSource[&quot;Main.Categories&quot;];&#xD;&#xA;&#xD;&#xA;if (LField.IsNil || (LField.AsString == &quot;&quot;))&#xD;&#xA;	LField.AsString = LForm.MainSource[&quot;Main.Description&quot;].AsString;&#xD;&#xA;else&#xD;&#xA;	LField.AsString =&#xD;&#xA;		LField.AsString + &quot;, &quot; + LForm.MainSource[&quot;Main.Description&quot;].AsString;&#xD;&#xA;" />
+</interface>
+</document>
+</dilx>

@@ -1,0 +1,1 @@
+state;id;partitionid;firstpage;controlpage;spare

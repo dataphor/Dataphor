@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="100100">
+		<value>Unable to set property ({0}).</value>
+	</data>
+	<data name="100101">
+		<value>Member ({0}) not found for class ({1}).  Overloaded and indexed properties are not supported.</value>
+	</data>
+	<data name="100102">
+		<value>Multiple attributes found.  Expecting single attribute ({0}).</value>
+	</data>
+	<data name="100103">
+		<value>A constructor matching the default constructor signature ({0}) is not found.</value>
+	</data>
+	<data name="100104">
+		<value>This list does not allow null items.</value>
+	</data>
+	<data name="100105">
+		<value>Cannot add an item of type ({0}), collection only allows items of type ({1}).</value>
+	</data>
+	<data name="100106">
+		<value>Child cover is read only.</value>
+	</data>
+	<data name="100107">
+		<value>List index ({0}) out of bounds.</value>
+	</data>
+	<data name="100108">
+		<value>Method is not supported.</value>
+	</data>
+	<data name="100109">
+		<value>Child ({0}) not found.</value>
+	</data>
+	<data name="100110">
+		<value>Child component must derive from ComponentBase.</value>
+	</data>
+	<data name="100111">
+		<value>Parent component may not contain itself.</value>
+	</data>
+	<data name="100112">
+		<value>Child component already referenced by this parent.</value>
+	</data>
+	<data name="100113">
+		<value>Object ({0}) is not a container.</value>
+	</data>
+	<data name="100114">
+		<value>Component ({0}) not found.</value>
+	</data>
+	<data name="100115">
+		<value>Duplicate value inserted ({0}).</value>
+	</data>
+	<data name="100116">
+		<value>List index out of bounds ({0}).  Valid range is (0-{1}).</value>
+	</data>
+	<data name="100117">
+		<value>Cannot perform this operation on a sorted list.</value>
+	</data>
+	<data name="100118">
+		<value>List cover is read only.</value>
+	</data>
+	<data name="100119">
+		<value>Objects cannot be inserted into a hash table, use the Add method instead.</value>
+	</data>
+	<data name="100120">
+		<value>Object at index ({0}) not found.</value>
+	</data>
+	<data name="100121">
+		<value>Size must be at least two (2).</value>
+	</data>
+	<data name="100122"><value>Finalizer invoked.</value></data>
+	<data name="100123"><value>Only 'Exception' based instances can be added to the errors list.  Attempted to add a ({0}).</value></data>
+</root>

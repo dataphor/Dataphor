@@ -1,0 +1,34 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Specify Clause test cases
+
+SafeDrop('TestSpecify');
+create table TestSpecify
+{
+	ID : Integer,
+	Data : String,
+	key { ID }
+};
+
+insert table { row { 1 ID, "One" Data }, row { 2, "Two" }, row { 3, "Threee" } } into TestSpecify;
+
+// Specify as a project
+if (TestSpecify { ID, Data }) <> (TestSpecify over { ID, Data }) then
+	raise Error('Test specify as a project failed');
+	
+// Specify as a rename
+if (TestSpecify { ID ID1, Data Data1 }) <> (TestSpecify rename { ID ID1, Data Data1 }) then
+	raise Error('Test specify as a rename failed');
+	
+// Specify as an extend
+if (TestSpecify { ID, Data, Data + "One" NewData }) <> (TestSpecify add { Data + "One" NewData }) then
+	raise Error('Test specify as an extend failed');
+	
+// Specify as all of the above
+if (TestSpecify { ID ID1, ID ID2, Data, Data + "One" NewData }) <> (TestSpecify add { ID ID2, Data + "One" NewData } rename { ID ID1 }) then
+	raise Error('Test specify as all three failed');
+
+drop table TestSpecify;

@@ -1,0 +1,132 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+delete CurrentCaseItems;
+
+// Lost Update Always Fails
+create table TestIsolation from table { row { 1 ID, 0 Data } };
+try
+	var A: String := "";
+	var LLevels : list(String) := { "Browse", "CursorStability", "Isolated" };
+	for LI : Integer := 0 to 2 do
+	begin
+		for LJ : Integer := 0 to 2 do
+		begin
+			var LShouldThrow : Boolean := true;
+
+			var LTransaction1 : Integer := StartProcess();
+			var LTransaction2 : Integer := StartProcess();
+			try
+				Execute(LTransaction1, 'SetDefaultIsolationLevel("' + LLevels[LI] + '");');
+				Execute(LTransaction2, 'SetDefaultIsolationLevel("' + LLevels[LJ] + '");');
+				
+				ExecuteAsync(LTransaction1, 'try update TestIsolation where ID = 1 set { Data := 1 }; Sleep(1000); commit');
+
+				var LErrorHit : Boolean := false;
+
+				try
+					Sleep(400); // to give the async call time to get a lock
+					ExecuteWithTimeout(LTransaction2, 'try update TestIsolation where ID = 1 set { Data := 2 }; commit', 200);
+				except
+					LErrorHit := true;
+				end;
+				Sleep(400); // to give the async call time to clean up after the lock
+				RaiseCurrentCaseItem("Lost Update (" + LLevels[LI] + ", " + LLevels[LJ] + ")",
+				                     LShouldThrow = LErrorHit,
+				                     "LostUpdate did not behave properly with " + LLevels[LI] + ", " + LLevels[LJ] + " as Isolation settings.");
+			finally
+				StopProcess(LTransaction1);
+			end;		
+		end;		
+	end;
+finally
+	drop table TestIsolation;
+end;
+
+// Dirty Read Only Succeeds on t1 is a browse
+create table TestIsolation from table { row { 1 ID, 0 Data } };
+try
+	var A: String := "";
+	var LLevels : list(String) := { "Browse", "CursorStability", "Isolated" };
+	for LI : Integer := 0 to 2 do
+	begin
+		for LJ : Integer := 0 to 2 do
+		begin
+			var LShouldThrow : Boolean := LI <> 0; // should throw when not Browse
+
+			var LTransaction1 : Integer := StartProcess();
+			var LTransaction2 : Integer := StartProcess();
+			try
+				Execute(LTransaction1, 'SetDefaultIsolationLevel("' + LLevels[LI] + '");');
+				Execute(LTransaction2, 'SetDefaultIsolationLevel("' + LLevels[LJ] + '");');
+				
+				ExecuteAsync(LTransaction2, 'try update TestIsolation where ID = 1 set { Data := 1 }; Sleep(1000); commit');
+
+				var LErrorHit : Boolean := false;
+
+				try
+					Sleep(400); // to give the async call time to get a lock
+					ExecuteWithTimeout(LTransaction1, 'try select TestIsolation where ID = 1; commit', 200);
+				except
+					LErrorHit := true;
+				end;
+				Sleep(400); // to give the async call time to clean up after the lock
+				RaiseCurrentCaseItem("Dirty Read (" + LLevels[LI] + ", " + LLevels[LJ] + ")",
+				                     LShouldThrow = LErrorHit,
+				                     "DirtyRead did not behave properly with " + LLevels[LI] + ", " + LLevels[LJ] + " as Isolation settings.");
+			finally
+				StopProcess(LTransaction2);
+			end;		
+		end;		
+	end;
+finally
+	drop table TestIsolation;
+end;
+
+
+// Non Repeatable Read Only throws In t1 is Isolated
+create table TestIsolation from table { row { 1 ID, 0 Data } };
+try
+	var A: String := "";
+	var LLevels : list(String) := { "Browse", "CursorStability", "Isolated" };
+	for LI : Integer := 0 to 2 do
+	begin
+		for LJ : Integer := 0 to 2 do
+		begin
+			var LShouldThrow : Boolean := LI = 3; // should throw when not Isolated
+
+			var LTransaction1 : Integer := StartProcess();
+			var LTransaction2 : Integer := StartProcess();
+			try
+				Execute(LTransaction1, 'SetDefaultIsolationLevel("' + LLevels[LI] + '");');
+				Execute(LTransaction2, 'SetDefaultIsolationLevel("' + LLevels[LJ] + '");');
+				
+				ExecuteAsync(LTransaction1, 'try select TestIsolation where ID = 1; Sleep(1000); commit');
+
+				var LErrorHit : Boolean := false;
+
+				try
+					Sleep(400); // to give the async call time to get a lock
+					ExecuteWithTimeout(LTransaction1, 'try update TestIsolation where ID = 1 set { Data := 1 }; commit', 200);
+				except
+					LErrorHit := true;
+				end;
+				Sleep(400); // to give the async call time to clean up after the lock
+				RaiseCurrentCaseItem("Non Repeatable Read (" + LLevels[LI] + ", " + LLevels[LJ] + ")",
+				                     LShouldThrow = LErrorHit,
+				                     "NonRepeatableRead did not behave properly with " + LLevels[LI] + ", " + LLevels[LJ] + " as Isolation settings.");
+			finally
+				StopProcess(LTransaction2);
+			end;		
+		end;		
+	end;
+finally
+	drop table TestIsolation;
+end;
+
+// */
+
+select CurrentCaseItems;
+

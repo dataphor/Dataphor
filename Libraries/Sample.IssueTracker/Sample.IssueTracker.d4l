@@ -1,0 +1,3 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.0.0" defaultdevicename="" issuspect="False" suspectreason="" assembliesasstring="" librariesasstring="" name="Sample.IssueTracker" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="Sample.Common" version="*" />
+</library>

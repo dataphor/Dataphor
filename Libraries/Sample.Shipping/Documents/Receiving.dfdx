@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Frontend.Derive('Sample.Shipping.PurchaseOrdersToReceive', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <textcolumn bop:name="MainGridColumnMain.ID" bop:default-width="True" />
+            <textcolumn bop:name="MainGridColumnSample.Shipping.Invoice_User_Main.User_ID" bop:default-width="True" />
+            <textcolumn bop:name="MainGridColumnMain.Date" bop:default-width="True" />
+            <textcolumn bop:name="MainGridColumnSample.Shipping.PurchaseOrder_Vendor_Main.Vendor_ID" bop:default-width="True" />
+         </grid>
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="ReceiveInvoiceTrigger" action="ReceiveInvoice" />
+         </column>
+      </row>
+      <notebook bop:name="MainEmbeddedDetailsNotebook" activepage="Sample.Shipping.InvoiceItem_InvoiceFrame" />
+   </column>
+   <scriptaction ibop:order="20" bop:name="ReceiveInvoice" text="Receive Invoice" afterexecute="Refresh" script="Host.Session.ExecuteScript&#xD;&#xA;(&#xD;&#xA;	String.Format&#xD;&#xA;	(&#xD;&#xA;		&quot;CompleteInvoice({0});&quot;, &#xD;&#xA;		Main[&quot;Main.ID&quot;].AsString&#xD;&#xA;	)&#xD;&#xA;);" />
+</interface>
+</document>
+</dilx>

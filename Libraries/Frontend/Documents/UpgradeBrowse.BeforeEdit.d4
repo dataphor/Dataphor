@@ -1,0 +1,17 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// UpgradeBrowse.BeforeEdit
+
+if exists (.System.SessionCatalogObjects where Name = 'Frontend.UpgradeBrowse.EditUpgrade') then
+	Execute('drop table .Frontend.UpgradeBrowse.EditUpgrade');
+	
+create session table .Frontend.UpgradeBrowse.EditUpgrade in .System.Temp
+{
+	Library_Name : Name tags { Frontend.Visible = "false" },
+	Version : VersionNumber tags { Frontend.Width = "20", Frontend.ReadOnly = "true" },
+	Script : String tags { Frontend.Width = "50", Frontend.TextBox.Height = "7" },
+	key { }
+};

@@ -1,0 +1,126 @@
+// D4 Lexer Coverage
+// © Copyright 2000-2008 Alphora
+// This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Verify comments
+/*
+	This is a comment
+	/*
+		This is a nested comment
+	*/
+	
+	This is also a comment, even though the syntax highlighter doesnt think it is
+	// This one's good too
+	
+	/*
+		This is another comment within a comment
+		// Here is yet another
+	*/
+//* Block comment within a comment
+//* Multiple block comments in a row
+//*/ ignored block terminator (line comments superceed)
+*/
+
+// Identifiers
+var SimpleIdentifier : Integer;
+var _TestingIdentifiers : Decimal;
+var _Test._Test : Money;
+
+NegativeTest("var 0Invalid#Identifier : Integer;", "Invalid identifier allowed");
+NegativeTest("var Invalid.0Invalid : Integer;", "Invalid identifier allowed");
+
+// Integer literals
+var LInteger1 : Integer := 0;
+var LInteger2 : Integer := 1;
+var LInteger3 : Integer := -1;
+var LInteger4 : Integer := 2147483647;
+var LInteger5 : Integer := -2147483648;
+var LInteger6 : Integer := 0x0;
+var LInteger7 : Integer := 0x1;
+var LInteger8 : Integer := -0x1;
+var LInteger9 : Integer := 0x7FFFFFFF;
+var LInteger10 : Integer := -0x80000000;
+var LLong1 : Long := 2147483648;
+var LLong2 : Long := -2147483648;
+var LLong3 : Long := 9223372036854775807;
+var LLong4 : Long := -9223372036854775807;
+var LLong5 : Long := 0x80000000;
+var LLong6 : Long := -0x80000000;
+var LLong7 : Long := 0x7FFFFFFFFFFFFFFF;
+var LLong8 : Long := -0x7FFFFFFFFFFFFFFF;
+
+// Decimal literals
+var LDecimal1 : Decimal := 0d;
+var LDecimal2 : Decimal := 1d;
+var LDecimal3 : Decimal := -1d;
+var LDecimal4 : Decimal := 0.0;
+var LDecimal5 : Decimal := 0.1;
+var LDecimal6 : Decimal := -0.1;
+var LDecimal7 : Decimal := 0.0d;
+var LDecimal8 : Decimal := 0.1;
+var LDecimal9 : Decimal := 0.1d;
+var LDecimal10 : Decimal := -0.1d;
+var LDecimal11 : Decimal := 79228162514264337593543950335d;
+var LDecimal12 : Decimal := -79228162514264337593543950335d;
+var LDecimal13 : Decimal := 0.0000000000000000000000000001;
+var LDecimal14 : Decimal := -0.0000000000000000000000000001;
+var LDecimal15 : Decimal := 0e+0;
+var LDecimal16 : Decimal := 1e+0;
+var LDecimal17 : Decimal := -1e+0;
+var LDecimal18 : Decimal := 0E+0;
+var LDecimal19 : Decimal := 1E+0;
+var LDecimal20 : Decimal := 0e-0;
+var LDecimal21 : Decimal := 1e-0;
+var LDecimal22 : Decimal := -1e-0;
+var LDecimal23 : Decimal := 0E-0;
+var LDecimal24 : Decimal := 1E-0;
+var LDecimal25 : Decimal := -1E-0;
+var LDecimal26 : Decimal := 1e+1;
+var LDecimal27 : Decimal := -1e+1;
+var LDecimal28 : Decimal := 1E+1;
+var LDecimal29 : Decimal := -1E+1;
+var LDecimal30 : Decimal := 1e-1;
+var LDecimal31 : Decimal := -1e-1;
+var LDecimal32 : Decimal := 1E-1;
+var LDecimal33 : Decimal := -1E-1;
+var LDecimal34 : Decimal := 1E+28;
+var LDecimal35 : Decimal := -1E+28;
+var LDecimal36 : Decimal := 1E-28;
+var LDecimal37 : Decimal := 1E+28;
+var LDecimal38 : Decimal := 1.9999E+28;
+var LDecimal39 : Decimal := 9.9999E-28;
+
+// Money literals
+var LMoney1 : Money := $0;
+var LMoney2 : Money := $1;
+var LMoney3 : Money := -$1;
+var LMoney4 : Money := $0.0;
+var LMoney5 : Money := $0.1;
+var LMoney6 : Money := -$0.1;
+var LMoney7 : Money := $79228162514264337593543950335;
+var LMoney8 : Money := -$79228162514264337593543950335;
+var LMoney9 : Money := $0.0000000000000000000000000001;
+var LMoney10 : Money := -$0.0000000000000000000000000001;
+
+// String literals
+var LString : String := "This is a string literal";
+
+// IString literals
+//var LIString : IString := "This is an istring literal"i;
+
+// Boolean literals
+var LBoolean : Boolean := true or false;
+
+// nil literal
+var LNillable := nil;
+
+NegativeTest
+(
+	"
+begin
+	var i := 1;
+	insert into #x;
+end;
+	",
+	"Invalid token allowed"
+);

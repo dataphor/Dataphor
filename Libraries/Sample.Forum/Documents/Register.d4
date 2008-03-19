@@ -1,0 +1,311 @@
+﻿//	© Copyright 2000-2008 Alphora
+//	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+//
+//
+
+create device Forums
+	reconciliation { mode = { command }, master = device}
+	class "MSSQLDevice.MSSQLDevice"
+	attributes
+	{
+		//"UseIntegratedSecurity" = "True", // uncomment this to use windows authentication
+		"ServerName" = ".",
+		"DatabaseName" = "Forums"
+	};
+
+// the following are not needed when using windows authentication
+CreateDeviceUser("Admin", Name("Forums"), "sa", "");
+CreateDeviceUser("System", Name("Forums"), "sa", "");
+	
+SetDefaultDeviceName("Forums");
+
+EnsureGenerators();
+
+create type ForumID like Integer 
+	tags { Frontend.Title = "Forum #", Frontend.Width = "10" };
+	
+create type CategoryID like Integer 
+	tags { Frontend.Title = "Category #", Frontend.Width = "10" };
+	
+create type PostID like Integer 
+	tags { Frontend.Title = "Post #", Frontend.Width = "10" };
+
+create type CountryID like String
+{
+	constraint CountryIDValid (Length(value) = 3)
+}
+	tags { Frontend.Title = "Country", Frontend.Width = "20" }
+	static tags { DAE.StaticByteSize = "12", Storage.Length = "3"};
+
+create type Notes like SQLText
+	tags { Frontend.TextBox.Height = "5" }
+	static tags { DAE.StaticByteSize = "164" };
+
+create type IconID like Integer 
+	tags { Frontend.Title = "Icon #", Frontend.Width = "3" }
+	static tags { DAE.StaticByteSize = "12", Storage.Length = "3" };
+	
+create type StatusID like String
+{
+	constraint StatusIDValid (Length(value) = 3)
+}
+	tags { Frontend.Title = "Status", Frontend.Width = "4" }
+	static tags { DAE.StaticByteSize = "12", Storage.Length = "3"};
+	
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+	tags { Frontend.Width = "30" }
+	static tags { DAE.StaticByteSize = "104", Storage.Length = "50" };
+	
+alter device Forums
+{
+	create type ForumID,
+	create type CategoryID,
+	create type PostID,
+	create type CountryID,
+	create type IconID,
+	create type StatusID,
+	create type Description,
+	create type Notes
+};
+
+create table Country
+{
+	ID : CountryID,
+	Name : Description,
+	key { ID }
+}
+tags { Frontend.SecureBehavior = "Hidden" };
+
+Country :=
+	table
+	{
+		row { CountryID ("AND") ID, Description("Andorra") Name}, 
+		row { CountryID ("ARG") ID, Description("Argentina") Name}, 
+		row { CountryID ("ARM") ID, Description("Armenia") Name},
+		row { CountryID ("AUS") ID, Description("Australia") Name},
+		row { CountryID ("AUT") ID, Description("Austria") Name},
+		row { CountryID ("AZE") ID, Description("Azerbaijan") Name},
+		row { CountryID ("BAH") ID, Description("Bahamas") Name},
+		row { CountryID ("BAI") ID, Description("Bahrain") Name},
+		row { CountryID ("BAN") ID, Description("Bangladesh") Name},
+		row { CountryID ("BAR") ID, Description("Barbados") Name},
+		row { CountryID ("BEL") ID, Description("Belarus") Name},
+		row { CountryID ("BEG") ID, Description("Belgium") Name},
+		row { CountryID ("BEZ") ID, Description("Belize") Name},
+		row { CountryID ("BHU") ID, Description("Bhutan") Name},
+		row { CountryID ("BOL") ID, Description("Bolivia") Name},
+		row { CountryID ("BOT") ID, Description("Botswana") Name},
+		row { CountryID ("BRA") ID, Description("Brazil") Name},
+		row { CountryID ("BUL") ID, Description("Bulgaria") Name},
+		row { CountryID ("CAM") ID, Description("Cambodia") Name},
+		row { CountryID ("CAN") ID, Description("Canada") Name},
+		row { CountryID ("CHA") ID, Description("Chad") Name},
+		row { CountryID ("CHI") ID, Description("Chile") Name},
+		row { CountryID ("CHN") ID, Description("China") Name},
+		row { CountryID ("COL") ID, Description("Colombia") Name},
+		row { CountryID ("COS") ID, Description("Costa Rica") Name},
+		row { CountryID ("CRO") ID, Description("Croatia") Name},
+		row { CountryID ("CYP") ID, Description("Cyprus") Name},
+		row { CountryID ("CZE") ID, Description("Czech Republic") Name},
+		row { CountryID ("DEN") ID, Description("Denmark") Name},
+		row { CountryID ("DOM") ID, Description("Dominican Republic") Name},
+		row { CountryID ("ECU") ID, Description("Ecuador") Name},
+		row { CountryID ("EGY") ID, Description("Egypt") Name},
+		row { CountryID ("ELS") ID, Description("El Salvador") Name},
+		row { CountryID ("EST") ID, Description("Estonia") Name},
+		row { CountryID ("ETH") ID, Description("Ethiopia") Name},
+		row { CountryID ("FIN") ID, Description("Finland") Name},
+		row { CountryID ("FRA") ID, Description("France") Name},
+		row { CountryID ("GEO") ID, Description("Georgia") Name},
+		row { CountryID ("GER") ID, Description("Germany") Name},
+		row { CountryID ("GRE") ID, Description("Greece") Name},
+		row { CountryID ("GUA") ID, Description("Guatemala") Name},
+		row { CountryID ("HAI") ID, Description("Haiti") Name},
+		row { CountryID ("HON") ID, Description("Honduras") Name},
+		row { CountryID ("HUN") ID, Description("Hungary") Name},
+		row { CountryID ("ICE") ID, Description("Iceland") Name},
+		row { CountryID ("IND") ID, Description("India") Name},
+		row { CountryID ("INO") ID, Description("Indonesia") Name},
+		row { CountryID ("IRA") ID, Description("Iran") Name},
+		row { CountryID ("IRE") ID, Description("Ireland") Name},
+		row { CountryID ("ISR") ID, Description("Israel") Name},
+		row { CountryID ("ITA") ID, Description("Italy") Name},
+		row { CountryID ("JAM") ID, Description("Jamaica") Name},
+		row { CountryID ("JAP") ID, Description("Japan") Name},
+		row { CountryID ("JOR") ID, Description("Jordan") Name},
+		row { CountryID ("KAZ") ID, Description("Kazakhstan") Name},
+		row { CountryID ("KEN") ID, Description("Kenya") Name},
+		row { CountryID ("KOR") ID, Description("Korea, South") Name},
+		row { CountryID ("KUW") ID, Description("Kuwait") Name},
+		row { CountryID ("LAO") ID, Description("Laos") Name},
+		row { CountryID ("LAT") ID, Description("Latvia") Name},
+		row { CountryID ("LEB") ID, Description("Lebanon") Name},
+		row { CountryID ("LEI") ID, Description("Liechtenstein") Name},
+		row { CountryID ("LUX") ID, Description("Luxembourg") Name},
+		row { CountryID ("MAC") ID, Description("Macedonia, Former Yugoslav Republic of") Name},
+		row { CountryID ("MAY") ID, Description("Malaysia") Name},
+		row { CountryID ("MAL") ID, Description("Maldives") Name},
+		row { CountryID ("MAU") ID, Description("Mauritius") Name},
+		row { CountryID ("MEX") ID, Description("Mexico") Name},
+		row { CountryID ("MON") ID, Description("Mongolia") Name},
+		row { CountryID ("MOR") ID, Description("Morocco") Name},
+		row { CountryID ("MYA") ID, Description("Myanmar") Name}, 
+		row { CountryID ("NEP") ID, Description("Nepal") Name},
+		row { CountryID ("NET") ID, Description("Netherlands") Name},
+		row { CountryID ("NEW") ID, Description("New Zealand") Name},
+		row { CountryID ("NIC") ID, Description("Nicaragua") Name},
+		row { CountryID ("NIG") ID, Description("Nigeria") Name},
+		row { CountryID ("NOR") ID, Description("Norway") Name},
+		row { CountryID ("OMA") ID, Description("Oman") Name},
+		row { CountryID ("PAK") ID, Description("Pakistan") Name},
+		row { CountryID ("PAN") ID, Description("Panama") Name},
+		row { CountryID ("PAP") ID, Description("Papua New Guinea") Name},
+		row { CountryID ("PER") ID, Description("Peru") Name},
+		row { CountryID ("PHI") ID, Description("Philippines") Name},
+		row { CountryID ("POL") ID, Description("Poland") Name},
+		row { CountryID ("POR") ID, Description("Portugal") Name},
+		row { CountryID ("QAT") ID, Description("Qatar") Name},
+		row { CountryID ("ROM") ID, Description("Romania") Name},
+		row { CountryID ("RUS") ID, Description("Russia") Name},
+		row { CountryID ("RWA") ID, Description("Rwanda") Name},
+		row { CountryID ("SAI") ID, Description("Saint Vincent and The Grenadines") Name},
+		row { CountryID ("SAU") ID, Description("Saudi Arabia") Name},
+		row { CountryID ("SER") ID, Description("Serbia and Montenegro") Name},
+		row { CountryID ("SEY") ID, Description("Seychelles") Name},
+		row { CountryID ("SIE") ID, Description("Sierra Leone") Name},
+		row { CountryID ("SIN") ID, Description("Singapore") Name},
+		row { CountryID ("SLO") ID, Description("Slovakia") Name},
+		row { CountryID ("SLV") ID, Description("Slovenia") Name},
+		row { CountryID ("SOU") ID, Description("South Africa") Name},
+		row { CountryID ("SPA") ID, Description("Spain") Name},
+		row { CountryID ("SRI") ID, Description("Sri Lanka") Name},
+		row { CountryID ("SUD") ID, Description("Sudan") Name},
+		row { CountryID ("SWA") ID, Description("Swaziland") Name},
+		row { CountryID ("SWE") ID, Description("Sweden") Name},
+		row { CountryID ("SWI") ID, Description("Switzerland") Name},
+		row { CountryID ("SYR") ID, Description("Syria") Name},
+		row { CountryID ("TAI") ID, Description("Taiwan") Name},
+		row { CountryID ("TAN") ID, Description("Tanzania") Name},
+		row { CountryID ("THA") ID, Description("Thailand") Name},
+		row { CountryID ("TON") ID, Description("Tonga") Name},
+		row { CountryID ("TRI") ID, Description("Trinidad and Tobago") Name},
+		row { CountryID ("TUR") ID, Description("Turkey") Name},
+		row { CountryID ("UGA") ID, Description("Uganda") Name},
+		row { CountryID ("UKR") ID, Description("Ukraine") Name},
+		row { CountryID ("UAE") ID, Description("United Arab Emirates") Name},
+		row { CountryID ("UKI") ID, Description("United Kingdom") Name},
+		row { CountryID ("USA") ID, Description("United States") Name},
+		row { CountryID ("URU") ID, Description("Uruguay") Name},
+		row { CountryID ("VEN") ID, Description("Venezuela") Name},
+		row { CountryID ("VIE") ID, Description("Vietnam") Name},
+		row { CountryID ("YEM") ID, Description("Yemen") Name},
+		row { CountryID ("ZAM") ID, Description("Zambia") Name},
+		row { CountryID ("ZIM") ID, Description("Zimbabwe") Name}
+	};
+
+create table Icon
+{
+	ID : IconID { default IconID(GetNextGenerator("Forums.Icon.ID")) } tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true" },
+	Name : String,
+	Desc : Description,
+	key { ID }
+}
+tags { Frontend.SecureBehavior = "Hidden" };
+
+Icon :=
+	table
+	{
+		row { IconID(001) ID, String("Alphora") Name, Description("The Alphora icon.") Desc }
+	};
+
+create table Status
+{
+	ID : StatusID,
+	Name : Description,
+	key { ID }
+}
+tags { Frontend.SecureBehavior = "Hidden" };
+
+Status :=
+	table
+	{
+		row { StatusID("ACT") ID, Description("Active") Name },
+		row { StatusID("INA") ID, Description("Inactive") Name },
+		row { StatusID("SUS") ID, Description("Suspended") Name }
+	};
+
+create table Forum
+{
+	ID : ForumID { default ForumID(GetNextGenerator("Forums.Forum.ID")) } tags { Frontend.Visible = "false"},
+	Name : String,
+	Desc : Description,
+	CreationDate : DateTime { default DateTime() },
+	Status_ID : StatusID { default "ACT" },
+	key { ID }
+}
+tags { Frontend.SecureBehavior = "Hidden" };
+
+create reference Forum_Status Forum { Status_ID } references Status { ID } tags { Frontend.Embedded = "false" };
+
+create view ForumView
+	Forum over { ID, Name, Desc } adorn { ID tags { Frontend.Visible = "false" } };
+
+create table Member
+{
+	ID : UserID,
+	Email : String,
+	Name : String,
+	LastLogon : DateTime { default DateTime() },
+	Country_ID : CountryID { default "USA" },
+	EmailVisible : Boolean,
+	RealNameVisible : Boolean,
+	Status_ID : StatusID { default "ACT" },
+	key { ID }
+};
+
+create reference Member_User Member { ID } references Security.User { ID } tags { Frontend.Embedded = "false" };
+create reference Member_Status Member { Status_ID } references Status { ID } tags { Frontend.Embedded = "false" };
+create reference Member_Country Member { Country_ID } references Country { ID } tags { Frontend.Embedded = "false" };
+
+create table Post
+{
+	ID : PostID { default PostID(GetNextGenerator("Forums.Post.ID")) } tags { Frontend.Visible = "false" },
+	Member_ID : UserID { default UserID() }  tags { Frontend.Visible = "false" },
+	Forum_ID : ForumID tags { Frontend.Visible = "false" },
+	Topic : String,
+	Body : Notes,
+	CreationDate : DateTime { default DateTime() } tags { Frontend.ReadOnly = "true" },
+	Status_ID : StatusID { default "ACT" } tags { Frontend.Visible = "false" },
+	Icon_ID : IconID,
+	key { ID }
+}
+tags {Frontend.UseApplicationTransactions = "false"};
+create reference Post_Member Post { Member_ID } references Member{ ID } tags { Frontend.Embedded = "false" };
+create reference Post_Status Post { Status_ID } references Status { ID } tags { Frontend.Embedded = "false" };
+create reference Post_Icon Post { Icon_ID } references Icon { ID } tags { Frontend.Embedded = "false" };
+create reference Post_Forum Post { Forum_ID } references Forum{ ID } tags { Frontend.Embedded = "false" };
+
+create table Reply
+{
+	Post_ID : PostID,
+	Parent_Post_ID : PostID,
+	key { Post_ID }
+}
+tags {Frontend.UseApplicationTransactions = "false"};
+create reference Reply_Post_Parent Reply { Parent_Post_ID } references Post { ID } tags { Frontend.Embedded = "false" };
+create reference Reply_Post Reply { Post_ID } references Post { ID } tags { Frontend.Embedded = "false" };
+
+/*
+//Security
+
+grant { Select } on Forum to group 'ForumUsers';
+grant { usage } on Country to group 'ForumUsers';
+grant { Select } on ForumView to group 'ForumUsers';
+grant { Select } on Icon to group 'ForumUsers';
+grant { usage } on Member to group 'ForumUsers';
+grant { all } on Post to group 'ForumUsers';
+grant { all } on Reply to group 'ForumUsers';
+*/

@@ -1,0 +1,522 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// String Operators
+begin
+	var
+		LString1: String,
+		LString2: String,
+		LIndex: Integer;
+	
+	LString1 := "Blah";
+	if not(LString1 = "Blah") then
+		raise Error("String Assignment from literal failed");
+	
+	LString2 := LString1;
+	if not(LString2 = LString1) then
+		raise Error("String Assignment from variable failed");
+	
+	LString1 := "Who";
+	if LString1 = LString2 then
+		raise Error("String Assignment is not by value");
+	
+	LString1 := LString1 + LString2;
+	if LString1 <> "WhoBlah" then
+		raise Error("String Concatenation failed");
+	
+	if LString1[0] <> "W" then
+		raise Error("String Indexer failed");
+	
+	if LString1[-1] <> "" then
+		raise Error("Negative bound string indexer failed");
+	
+	if LString1[7] <> "" then
+		raise Error("Positive bound string indexer failed");
+	
+	if LString1[10] <> "" then
+		raise Error("Over positive bound string indexer failed");
+	
+	if Length(LString1) <> 7 then
+		raise Error("String Length failed");
+	
+	if Pos("h", LString1) <> 1 then
+		raise Error("String Pos failed");
+	
+	if LastPos("h", LString1) <> 6 then
+		raise Error("String LastPos failed");
+	
+	if IndexOf("WhoBlah", "h") <> 1 then
+		raise Error("String IndexOf failed");
+	
+	if IndexOf("WhoBlah", "") <> -1 then
+		raise Error("String IndexOf an empty string failed");
+	
+	if IndexOf("", "") <> -1 then
+		raise Error("String IndexOf empty string of an empty string failed");
+	
+	if IndexOf("WhoBlah", "h", 2) <> 6 then
+		raise Error("String IndexOf with starting index failed");
+	
+	if IndexOf("WhoBlah", "h", 50) <> -1 then
+		raise Error("String IndexOf with out of range starting index failed");
+	
+	if IndexOf("WhoBlah", "h", 6) <> 6 then
+		raise Error("String IndexOf with max starting index failed");
+	
+	if IndexOf("WhoBlah", "h", 3, 3) <> -1 then
+		raise Error("String IndexOf with starting index and count failed");
+		
+	if IndexOf("WhoBlah", "B", -1, 10) <> 3 then
+		raise Error("String IndexOf with starting index and count (exceeding bounds) failed");
+	
+	var LError := false;
+	try
+		LIndex := IndexOf("WhoBlah", "W", 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String IndexOf with negative count didn't throw");
+	
+	if IndexOfAny("WhoBlah", list(String){}) <> -1 then
+		raise Error("String IndexOfAny with empty criteria failed");
+	
+	if IndexOfAny("WhoBlah", {""}) <> -1 then
+		raise Error("String IndexOfAny with empty string criteria failed");
+	
+	if IndexOfAny("", {""}) <> -1 then
+		raise Error("String IndexOfAny and empty string with empty string criteria failed");
+	
+	if IndexOfAny("WhoBlah", {"W"}) <> 0 then
+		raise Error("String IndexOfAny failed");
+	
+	if IndexOfAny("WhoBlah", {"x", "W"}) <> 0 then
+		raise Error("String IndexOfAny with multiple criteria failed");
+	
+	if IndexOfAny("WhoBlah", {"B", "W"}) <> 0 then
+		raise Error("String IndexOfAny with multiple matches failed");
+	
+	if IndexOfAny("WhoBlah", {"B", "W"}, 1) <> 3 then
+		raise Error("String IndexOfAny with starting index failed");
+	
+	if IndexOfAny("WhoBlah", {"h"}, 6) <> 6 then
+		raise Error("String IndexOfAny with max starting index failed");
+	
+	if IndexOfAny("WhoBlah", {"B", "W"}, 2, 3) <> 3 then
+		raise Error("String IndexOfAny with starting index and count failed");
+	
+	if IndexOfAny("WhoBlah", {"B", "a"}, -1, 10) <> 3 then
+		raise Error("String IndexOfAny with starting index and count (exceeding bounds) failed");
+	
+	LError := false;
+	try
+		LIndex := IndexOfAny("WhoBlah", {"W"}, 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String IndexOfAny with negative count didn't throw");
+	
+	if LastIndexOf("WhoBlah", "h") <> 6 then
+		raise Error("String LastIndexOf failed");
+	
+	if LastIndexOf("WhoBlah", "") <> -1 then
+		raise Error("String LastIndexOf with empty string failed");
+	
+	if LastIndexOf("", "") <> -1 then
+		raise Error("String LastIndexOf of empty string with empty string failed");
+	
+	if LastIndexOf("WhoBlah", "h", 2) <> 1 then
+		raise Error("String LastIndexOf with starting index failed");
+	
+	if LastIndexOf("WhoBlah", "h", 6) <> 6 then
+		raise Error("String LastIndexOf with max starting index failed");
+	
+	if LastIndexOf("WhoBlah", "h", 2, 3) <> 1 then
+		raise Error("String LastIndexOf with starting index and count failed");
+	
+	if LastIndexOf("WhoBlah", "h", 10, 30) <> 6 then
+		raise Error("String LastIndexOf with starting index and count (exceeding bounds) failed");
+	
+	LError := false;
+	try
+		LIndex := LastIndexOf("WhoBlah", "W", 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String LastIndexOf with negative count didn't throw");
+	
+	if LastIndexOfAny("WhoBlah", list(String){}) <> -1 then
+		raise Error("String LastIndexOfAny with empty criteria failed");
+	
+	if LastIndexOfAny("WhoBlah", {""}) <> -1 then
+		raise Error("String LastIndexOfAny failed");
+	
+	if LastIndexOfAny("", {""}) <> -1 then
+		raise Error("String LastIndexOfAny of empty string with empty string criteria failed");
+	
+	if LastIndexOfAny("WhoBlah", {"h"}) <> 6 then
+		raise Error("String LastIndexOfAny failed");
+	
+	if LastIndexOfAny("WhoBlah", {"x", "h"}) <> 6 then
+		raise Error("String LastIndexOfAny with multiple criteria failed");
+	
+	if LastIndexOfAny("WhoBlah", {"o", "h"}) <> 6 then
+		raise Error("String LastIndexOfAny with multiple matches failed");
+	
+	if LastIndexOfAny("WhoBlah", {"h", "d"}, 3) <> 1 then
+		raise Error("String LastIndexOfAny with starting index failed");
+	
+	if LastIndexOfAny("WhoBlah", {"h", "d"}, 3, 3) <> 1 then
+		raise Error("String LastIndexOfAny with starting index and count failed");
+	
+	if LastIndexOfAny("WhoBlah", {"h", "o"}, 10, 30) <> 6 then
+		raise Error("String LastIndexOfAny with starting index and count (exceeding bounds) failed");
+	
+	if LastIndexOfAny("WhoBlah", {"h"}, 6) <> 6 then
+		raise Error("String LastIndexOfAny with max starting index failed");
+	
+	LError := false;
+	try
+		LIndex := LastIndexOfAny("WhoBlah", {"W"}, 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String LastIndexOfAny with negative count didn't throw");
+	
+	if SubString("Who", 0, 3) <> "Who" then
+		raise Error("String SubString failed");
+
+	if SubString("", 0, 0) <> "" then
+		raise Error("String SubString of empty string failed");
+
+	if SubString("Who", 0, 3) <> "Who" then
+		raise Error("String SubString failed");
+	
+	if SubString("Who", -1, 4) <> "Who" then
+		raise Error("String SubString with negative lower and positive upper bound failed");
+	
+	if SubString("Who", 0, 5) <> "Who" then
+		raise Error("String SubString with extra Length failed");
+	
+	if SubString("WhoBlah", 7) <> "" then
+		raise Error("String SubString with exceeding start index failed");
+
+	if SubString("", 1) <> "" then
+		raise Error("Empty SubString failed");
+
+	LError := false;
+	try
+		LString1 := SubString("WhoBlah", 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String SubString with negative count didn't throw");
+
+	if PadLeft("", 3) <> "   " then
+		raise Error("String PadLeft with empty string failed");
+	
+	if PadLeft("Who", 5) <> "  Who" then
+		raise Error("String PadLeft failed");
+	
+	if PadLeft("Who", 0) <> "Who" then
+		raise Error("String PadLeft bounds check failed");
+	
+	if TrimLeft("") <> "" then
+		raise Error("String TrimLeft with empty string failed");
+
+	if TrimLeft("  Who ") <> "Who " then
+		raise Error("String TrimLeft failed");
+	
+	if PadRight("", 3) <> "   " then
+		raise Error("String PadRight with empty string failed");
+	
+	if PadRight("Who", 5) <> "Who  " then
+		raise Error("String PadRight failed");
+	
+	if PadRight("Who", 0) <> "Who" then
+		raise Error("String PadRight bounds check failed");
+	
+	if TrimRight(" Who  ") <> " Who" then
+		raise Error("String TrimRight failed");
+	
+	if TrimRight("") <> "" then
+		raise Error("String TrimRight with empty string failed");
+
+	if Trim(" Who ") <> "Who" then
+		raise Error("String Trim failed");
+	
+	LString1 := Insert("Who", 1, "Blah");
+	if LString1 <> "WBlahho" then
+		raise Error("String Insert failed");
+	
+	if Insert("Who", -1, "Blah") <> "BlahWho" then
+		raise Error("String Insert with negative lower bound failed");
+	
+	if Insert("Who", 12, "Blah") <> "WhoBlah" then
+		raise Error("String Insert with positive upper bound failed");
+	
+	LString1 := Remove(LString1, 1, Length(LString2));
+	if LString1 <> "Who" then
+		raise Error("String Remove failed");
+	
+	if Remove("WhoBlah", 3, 12) <> "Who" then
+		raise Error("String Remove with extra length failed");
+	
+	if Remove("WhoBlah", -1, 4) <> "lah" then
+		raise Error("String Remove with negative lower bound failed");
+	
+	if Remove("WhoBlah", -1, 15) <> "" then
+		raise Error("String Remove with negative lower bound and extra length failed");
+	
+	LError := false;
+	try
+		LString1 := Remove("WhoBlah", 0, -1);
+	except
+		LError := true;
+	end;
+	if not LError then
+		raise Error("String Remove with negative count didn't throw");
+	
+	LString1 := Replace(LString1, "h", "hh");
+	if LString1 <> "Whho" then
+		raise Error("String Replace failed");
+	
+	LString1 := Replace(LString1, "hh", "h");
+	
+	if Replace("", "", "Blah") <> "" then
+		raise Error("String Replace with empty string failed");
+		
+   if Replace("This is a CASE-SENSITIVE old string", " Case-SENSITIVE", "n", false) <> "This is an old string" then
+      raise Error("Case-insensitive String Replace failed");
+	
+	if Replace("This is a CASE-SENSITIVE old string", "Case-SENSITIVE", "", true) <> "This is a CASE-SENSITIVE old string" then
+	   raise Error("Case-sensitive String Replace variant failed");
+
+	if Upper(LString1) <> "WHO" then
+		raise Error("String Upper failed");
+	
+	if Lower(LString1) <> "who" then
+		raise Error("String Lower failed");
+	
+	if not(IsUpper("WHO")) then
+		raise Error("String IsUpper failed");
+	
+	if not(IsUpper("")) then
+		raise Error("String IsUpper with an empty string failed");
+	
+	if not(IsUpper("123")) then
+		raise Error("String IsUpper with a numeric string failed");
+	
+	if not(IsUpper(LString1, 0)) then
+		raise Error("String IsUpper failed");
+	
+	if IsUpper(LString1, -1) then
+		raise Error("String IsUpper with negative lower bound failed");
+	
+	if IsUpper(LString1, 12) then
+		raise Error("String IsUpper with positive upper bound failed");
+	
+	if not(IsLower("who")) then
+		raise Error("String IsLower failed");
+	
+	if not(IsLower("")) then
+		raise Error("String IsLower with an empty string failed");
+	
+	if not(IsLower("123")) then
+		raise Error("String IsLower with a numberic string failed");
+	
+	if not(IsLower(LString1, 1)) then
+		raise Error("String IsLower failed");
+	
+	if IsLower(LString1, -1) then
+		raise Error("String IsLower with negative lower bound failed");
+	
+	if IsLower(LString1, 12) then
+		raise Error("String IsLower with positive upper bound failed");
+	
+	if not(LString1 like "W%") then
+		raise Error("String like failed");
+	
+	if not(LString1 matches "W.*") then
+		raise Error("String matches failed");
+	
+	if not(LString1 between "Wh" and "Who2") then
+		raise Error("String between failed");
+	
+	if LString1 < LString2 then
+		raise Error("String less than failed");
+	
+	if " " <= "" then
+		raise Error("String empty less than failed");
+	
+	if LString1 <= LString2 then
+		raise Error("String inclusive less than failed (arguments unequal)");
+	
+	if LString2 > LString1 then
+		raise Error("String greater than failed");
+	
+	if LString2 >= LString1 then
+		raise Error("String inclusive greater than failed (arguments unequal)");
+	
+	LString1 := LString2;
+	if not(LString1 >= LString2) then
+		raise Error("String inclusive greater than failed (arguments equal)");
+	
+	if not(LString1 <= LString2) then
+		raise Error("String inclusive less than failed (arguments equal)");
+	
+	if (LString1 ?= LString2) <> 0 then
+		raise Error("String compare failed (arguments equal)");
+	
+	if ("A" ?= "B") > 0 then
+		raise Error("String compare failed (arguments equal)");
+end;
+
+// ASCII
+if ASCII(list(Byte){66, 108, 97, 104}) <> 'Blah' then
+	raise Error('ASCII selector failed.');
+	
+if 'B'.ASCII[0] <> 66 then
+	raise Error('ASCII read accessor failed.');
+	
+begin
+	var LBlah : String := 'blah';
+	LBlah.ASCII := list(Byte){66, 108, 97, 104};
+	if LBlah <> 'Blah' then
+		raise Error('ASCII write accessor failed.');
+end;
+
+// UTF8
+if UTF8(list(Byte){66, 108, 97, 104}) <> 'Blah' then
+	raise Error('UTF8 selector failed.');
+	
+if 'B'.UTF8[0] <> 66 then
+	raise Error('UTF8 read accessor failed.');
+	
+begin
+	var LBlah : String := 'blah';
+	LBlah.UTF8 := list(Byte){66, 108, 97, 104};
+	if LBlah <> 'Blah' then
+		raise Error('UTF8 write accessor failed.');
+end;
+
+// Unicode
+if Unicode({66, 108, 97, 104}) <> 'Blah' then
+	raise Error('Unicode selector failed.');
+	
+if 'B'.Unicode[0] <> 66 then
+	raise Error('Unicode read accessor failed.');
+	
+begin
+	var LBlah : String := 'blah';
+	LBlah.Unicode := {66, 108, 97, 104};
+	if LBlah <> 'Blah' then
+		raise Error('Unicode write accessor failed.');
+end;
+
+if not(IsDigit("123")) then
+	raise Error("IsDigit on valid digit string failed");
+	
+if IsDigit("123ABC") then
+	raise Error("IsDigit on invalid digit string failed");
+	
+if not(IsDigit("123ABC", 0)) then
+	raise Error("IsDigit on valid digit failed");
+	
+if IsDigit("123ABC", 3) then
+	raise Error("IsDigit on invalid digit failed");
+	
+if IsDigit("123ABC", -1) then
+	raise Error("IsDigit with negative lower bound failed");
+	
+if IsDigit("123ABC", 12) then
+	raise Error("IsDigit with positive upper bound failed");
+	
+if not(IsLetter("ABC")) then
+	raise Error("IsLetter on valid letter string failed");
+	
+if IsLetter("123") then
+	raise Error("IsLetter on invalid letter string failed");
+	
+if not(IsLetter("ABC123", 0)) then
+	raise Error("IsLetter on valid letter failed");
+	
+if IsLetter("ABC123", 3) then
+	raise Error("IsLetter on invalid letter failed");
+	
+if IsLetter("ABC123", -1) then
+	raise Error("IsLetter with negative lower bound failed");
+	
+if IsLetter("ABC123", 12) then
+	raise Error("IsLetter with positive upper bound failed");
+	
+if not(IsLetterOrDigit("ABC123")) then
+	raise Error("IsLetterOrDigit on valid letter or digit string failed");
+	
+if IsLetterOrDigit("ABC123!@#") then
+	raise Error("IsLetterOrDigit on invalid letter or digit string failed");
+	
+if not(IsLetterOrDigit("ABC123!@#", 0)) then
+	raise Error("IsLetterOrDigit on valid letter failed");
+	
+if not(IsLetterOrDigit("ABC123!@#", 3)) then
+	raise Error("IsLetterOrDigit on valid digit failed");
+	
+if IsLetterOrDigit("ABC123!@#", 6) then
+	raise Error("IsLetterOrDigit on invalid letter or digit failed");
+	
+if IsLetterOrDigit("ABC123!@#", -1) then
+	raise Error("IsLetterOrDigit with negative lower bound failed");
+	
+if IsLetterOrDigit("ABC123!@#", 12) then
+	raise Error("IsLetterOrDigit with positive upper bound failed");
+
+//* Concat
+if Concat({ "A", "B", "C" }) <> "ABC" then
+	raise Error("String concat without delimiter failed");
+	
+if Concat({ "A", "B", "C" }, ", ") <> "A, B, C" then
+	raise Error("String concat with delimiter failed");
+	
+if Concat({ "", "", "" }, ",") <> ",," then
+	raise Error("String concat of empty strings failed");
+
+if Concat({ "", "", "" }) <> "" then
+	raise Error("String concat of empty strings without delimiter failed");
+
+//* Split	
+if Split("A,B,C") <> { "A", "B", "C" } then
+	raise Error("Split with implicit delimiters failed");
+	
+if Split("A,B,C", ",") <> { "A", "B", "C" } then
+	raise Error("Split with explicit delimiter failed");
+	
+if Split("A,B;C", { ",", ";" }) <> { "A", "B", "C" } then
+	raise Error("Split with explicit delimiters failed");
+	
+if Split("A;B,C", { ",", ";" }) <> { "A", "B", "C" } then
+	raise Error("Split with reversed explicit delimiters failed");
+	
+if Split("") <> { "" } then
+	raise Error("Split with an empty string failed");
+	
+if Split(",") <> { "", "" } then
+	raise Error("Split with only a delimiter failed");
+
+if Split(",A") <> { "", "A" } then
+	raise Error("Split with a preceding delimiter failed");
+	
+if Split("A,") <> { "A", "" } then
+	raise Error("Split with a trailing delimiter failed");
+
+if Split(",,") <> { "", "", "" } then
+	raise Error("Split with a mutliple exclusive delimiters failed");
+
+if Split(",A") <> { "", "A" } then
+	raise Error("Split with a preceding delimiter failed");

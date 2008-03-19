@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroductionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Tree&quot;)" bop:name="IntroImage" />
+          <statictext text="The Tree control is capable of displaying the structure of a hierarchy.  The data may be from a single table or multiple tables.  The Tree control can also display data that is stored as a network. The Tree control can not display a node as having more than one parent but the node will appear as the child of each parent individually.&#xD;&#xA;&#xD;&#xA;The Tree control is used to display the structure of the data in a tree format.  Two samples are available.  Sample11STH illustrates the Tree control with the hierarchy maintained in a single table. Sample11MTH illustrates the Tree control with the hierarchy maintained in multiple tables.&#xD;&#xA;&#xD;&#xA;See the other tabs for more information&#xD;&#xA;" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage bop:name="TreePage" title="Tree">
+        <notebook activepage="TreeIntroPage" bop:name="TreeNotebook">
+          <notebookpage bop:name="TreeIntroPage" title="Introduction">
+            <row bop:name="TreeInroRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Tree&quot;)" bop:name="TreeInroImage" />
+              <statictext text="The Tree control is a data aware component that displays the data in a tree format.&#xD;&#xA;&#xD;&#xA;The Tree has the Source and ColumnName properties like most data aware controls.  In addition there are three properties that are critical to the proper function of the Tree control.&#xD;&#xA;&#xD;&#xA;The RootExpression, ParentExpression, and ChildExpression properties of the Tree control and the Expression property of the Source component are D4 expressions.  The expressions must return a value of type table.  The values returned from these four expressions must associate properly with one another.&#xD;&#xA;&#xD;&#xA;The explode operator can be used to express the hierarchical query necessary for proper use of the Tree control.&#xD;&#xA;&#xD;&#xA;See the remaining tabs under Tree for an explanation of these expressions." margintop="10" bop:name="TreeInroText" />
+            </row>
+          </notebookpage>
+          <notebookpage bop:name="ExplodePage" title="Explode">
+            <row bop:name="ExplodeRow">
+              <statictext text="The explode operator can be used to produce a table value containing on some of the original rows.  This is useful when only a portion of the total hierarchy is desired.&#xD;&#xA;&#xD;&#xA;The explode operator can be used in the Expression property of the source component.&#xD;&#xA;&#xD;&#xA;For detailed information about the explode operator refer to Table Expressions in the D4 Language Guide. &#xD;&#xA;" margintop="10" bop:name="ExplodeText" />
+            </row>
+          </notebookpage>
+          <notebookpage bop:name="Source.ExpressionPage" title="Source.Expression">
+            <row bop:name="Source.ExpressionRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Source&quot;)" bop:name="Source.ExpressionImage" />
+              <statictext text="If a row will be returned by even one of the three expressions in the Tree control it must be returned by the expression in the Source component.  Any row that will not be returned by any expression in the Tree control must not be returned by the expression in the Source component.&#xD;&#xA;&#xD;&#xA;Put another way:&#xD;&#xA;&#xD;&#xA;The table value returned by the Expression property of the source component must return all the rows needed for the tree.  It must not return any rows that will not be used in the tree.&#xD;&#xA;&#xD;&#xA;The explode operator is a good choice for properly restricting the rows returned by the source." margintop="10" bop:name="Source.ExpressionText" />
+            </row>
+          </notebookpage>
+          <notebookpage bop:name="Tree.RootExpressionPage" title="Tree.RootExpression">
+            <row bop:name="Tree.RootExpressionRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Tree&quot;)" bop:name="Tree.RootExpressionImage" />
+              <statictext text="The RootExpression must return only the set of rows for the root(s) of the tree.  It must return all roots that exists in the set returned by the expression of the source but no more.&#xD;&#xA;&#xD;&#xA;The columns in the result of this expression must include the order columns for the data source of the tree and the column selected in the Tree.ColumnName property.&#xD;&#xA;&#xD;&#xA;The master key and other parameters of the associated DataView are available as variables such as AMasterXXX where XXX is the name of the detail column with '.'s (periods) changed to '_'s (underscores)." margintop="10" bop:name="Tree.RootExpressionText" />
+            </row>
+          </notebookpage>
+          <notebookpage bop:name="Tree.ParentExpressionPage" title="Tree.ParentExpression">
+            <row bop:name="Tree.ParentExpressionRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Tree&quot;)" bop:name="Tree.ParentExpressionImage" />
+              <statictext text="The ParentExpression is used to return the parent node.  It answers the question: What is the parent of this given node?&#xD;&#xA;&#xD;&#xA;The values for the current key are available as variables.  They are named ACurrentXXX where XXX is the name of the key column.  The columns in this result must include the order columns for the data source of the tree, and the column associated with the ColumnName property.&#xD;&#xA;&#xD;&#xA;The Tree control can be used with data where a node can have more than one parent, however, if the parent expression returns more than one row, only the first row will be used." margintop="10" bop:name="Tree.ParentExpressionText" />
+            </row>
+          </notebookpage>
+          <notebookpage bop:name="Tree.ChildExpressionPage" title="Tree.ChildExpression">
+            <row bop:name="Tree.ChildExpressionRow">
+              <staticimage image="Image(&quot;Frontend&quot;,&quot;Tree&quot;)" bop:name="Tree.ChildExpressionImage" />
+              <statictext text="The ChildExpression is used to return the child nodes.  It answers the question: What is/are the child/children of this given node?&#xD;&#xA;&#xD;&#xA;The values for the current key are available as variables.  They are named ACurrentXXX where XXX is the name of the key column.  The columns in this result must include the order columns for the data source of the tree, and the column associated with the ColumnName property." margintop="10" bop:name="Tree.ChildExpressionText" />
+            </row>
+          </notebookpage>
+        </notebook>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

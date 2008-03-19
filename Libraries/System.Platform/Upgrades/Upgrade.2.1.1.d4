@@ -1,0 +1,14 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Operator: SetCurrentDirectory
+// Sets the process specific current directory
+create operator SetCurrentDirectory(const APath : String) class "System.Platform.SetCurrentDirectoryNode";
+grant usage on SetCurrentDirectory(String) to role PlatformUser;
+
+//* Operator: GetCurrentDirectory
+// Gets the process specific current directory
+create operator GetCurrentDirectory() : String class "System.Platform.GetCurrentDirectoryNode";
+grant usage on GetCurrentDirectory() to role PlatformUser;

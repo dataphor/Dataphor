@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.GroupDeviceUser', 'Browse', 'Main.Name', 'Main.Group_Name', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" useapplicationtransactions="False" />
+   <showformaction ibop:order="1" bop:name="Edit" />
+   <showformaction ibop:order="2" bop:name="Delete" />
+   <showformaction ibop:order="3" bop:name="View" />
+   <sourceaction ibop:order="4" bop:name="MoveFirst" />
+   <sourceaction ibop:order="5" bop:name="MovePrior" />
+   <sourceaction ibop:order="6" bop:name="MoveNext" />
+   <sourceaction ibop:order="7" bop:name="MoveLast" />
+   <sourceaction ibop:order="8" bop:name="Refresh" />
+   <menu ibop:order="9" bop:name="NavigationMenu" />
+   <column ibop:order="10" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <textcolumn bop:name="MainGridColumnMain.UserID" bop:default-hint="True" />
+            <textcolumn bop:name="MainGridColumnMain.ConnectionParameters" bop:default-hint="True" />
+         </grid>
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="SetPasswordTrigger" action="SetPassword" />
+         </column>
+      </row>
+   </column>
+   <showformaction ibop:order="11" bop:name="Add" document="Derive('AddGroupDeviceUser', 'Add', 'Main.Name', 'Main.Group_Name', true)" sourcelink.detailkeynames="Main.Group_Name" sourcelink.masterkeynames="Main.Name" />
+   <showformaction ibop:order="12" bop:name="SetPassword" hint="Set the password for current group device user." text="Set Password..." document="Derive('SetGroupDeviceUserPassword', 'Add', 'Main.Group_Name;Main.Device_Name', 'Main.Group_Name;Main.Device_Name', false)" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.Group_Name;Main.Device_Name" sourcelink.masterkeynames="Main.Group_Name;Main.Device_Name" sourcelinktype="Detail" />
+</interface>
+</document>
+</dilx>

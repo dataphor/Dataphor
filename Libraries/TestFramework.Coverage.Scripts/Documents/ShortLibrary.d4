@@ -1,0 +1,98 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Short Operators
+begin
+  var LShort1: Short, LShort2: Short;
+
+  LShort1 := ToShort(5);
+  if LShort1 <> ToShort(5) then
+    raise Error("Short assignment from literal failed");
+
+  LShort2 := LShort1;
+  if not(LShort1 = LShort2) then
+    raise Error("Short assignment from variable failed");
+
+  LShort2 := ToShort(10);
+  if (LShort1 = ToShort(10)) then
+    raise Error("Short assignment is not by value");
+
+  LShort1 := LShort1 + ToShort(5);
+  if LShort1 <> ToShort(10) then
+    raise Error("Short addition failed");
+
+  LShort1 := LShort1 - ToShort(5);
+  if LShort1 <> ToShort(5) then
+    raise Error("Short subtraction failed");
+
+  LShort1 := LShort1 * ToShort(10);
+  if LShort1 <> ToShort(50) then
+    raise Error("Short multiplication failed");
+
+  LShort1 := LShort1 div ToShort(10);
+  if LShort1 <> ToShort(5) then
+    raise Error("Short div failed");
+    
+  if LShort1 / ToShort(2) <> 2.5 then
+	raise Error("Short division failed");
+    
+  if LShort1 mod ToShort(2) <> ToShort(1) then
+	raise Error("Short mod failed");
+    
+  LShort1 := ToShort(5);
+  LShort1 := -(LShort1);
+  if (LShort1 <> ToShort(-5)) then
+    raise Error("Short negation failed");
+
+  LShort1 := ToShort(5);
+  LShort2 := ToShort(10);
+  if LShort1 > LShort2 then
+    raise Error("Short greater than failed");
+  
+  if LShort1 >= LShort2 then
+    raise Error("Short inclusive greater than failed, arguments unequal");
+
+  if LShort2 < LShort1 then
+    raise Error("Short less than failed");
+
+  if LShort2 <= LShort1 then
+    raise Error("Short inclusive less than failed, arguments unequal");
+
+  LShort1 := ToShort(10);
+  if not(LShort1 >= LShort2) then
+    raise Error("Short inclusive greater than failed, arguments equal");
+
+  if not(LShort1 <= LShort2) then
+    raise Error("Short inclusive less than failed, arguments equal");
+    
+  if (LShort1 ?= LShort2) <> 0 then
+    raise Error("Short compare failed, arguments equal");
+    
+  LShort1 := ToShort(0);
+  LShort2 := ToShort(0);
+  
+  if (~LShort1 <> ToShort(-1)) then
+    raise Error("Bitwise not failed");
+  
+  if (LShort1 & LShort2) <> ToShort(0) then
+    raise Error("Bitwise and failed, arguments equal");
+    
+  if (LShort1 | LShort2) <> ToShort(0) then
+    raise Error("Bitwise or failed, arguments equal");
+    
+  if (LShort1 ^ LShort2) <> ToShort(0) then
+    raise Error("Bitwise xor failed, arguments equal");
+
+  LShort2 := ToShort(1);
+  if (LShort1 & LShort2) <> ToShort(0) then
+    raise Error("Bitwise and failed, arguments unequal");
+    
+  if (LShort1 | LShort2) <> ToShort(1) then
+    raise Error("Bitwise or failed, arguments unequal");
+    
+  if (LShort1 ^ LShort2) <> ToShort(1) then
+    raise Error("Bitwise xor failed, arguments unequal");
+end;
+

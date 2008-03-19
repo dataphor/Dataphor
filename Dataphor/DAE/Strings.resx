@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="SystemDisplayTextNode.Representation">
+		<value>Representation '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Property">
+		<value>Property '{0}' of Representation '{1}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Default">
+		<value>Default</value>
+	</data>
+	<data name="SystemDisplayTextNode.Constraint">
+		<value>Constraint '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Special">
+		<value>Special Value '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.ScalarTypeMap">
+		<value>Scalar Type Mapping '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OperatorMap">
+		<value>Operator Mapping '{0}{1}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Column">
+		<value>Column '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.ColumnDefault">
+		<value>Default of Column '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.ColumnConstraint">
+		<value>Constraint '{0}' of Column '{1}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Key">
+		<value>Key {0}</value>
+	</data>
+	<data name="SystemDisplayTextNode.Order">
+		<value>Order {0}</value>
+	</data>
+	<data name="SystemDisplayTextNode.CatalogConstraint">
+		<value>Constraint '</value>
+	</data>
+	<data name="SystemDisplayTextNode.ScalarType">
+		<value>Type '</value>
+	</data>
+	<data name="SystemDisplayTextNode.Reference">
+		<value>Reference '</value>
+	</data>
+	<data name="SystemDisplayTextNode.Table">
+		<value>Table '</value>
+	</data>
+	<data name="SystemDisplayTextNode.View">
+		<value>View '</value>
+	</data>
+	<data name="SystemDisplayTextNode.AggregateOperator">
+		<value>Aggregate Operator '{0}{1}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Operator">
+		<value>Operator '{0}{1}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Device">
+		<value>Device '</value>
+	</data>
+	<data name="SystemDisplayTextNode.Role">
+		<value>Role '</value>
+	</data>
+	<data name="SystemDisplayTextNode.CatalogObject">
+		<value>Catalog Object '</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfScalarType">
+		<value> of Type '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.Operand">
+		<value>Operand '{0}' of Operator '{1}{2}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfDevice">
+		<value> of Device '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfTable">
+		<value> of Table '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfView">
+		<value> of View '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfResult">
+		<value> of Result '{0}'</value>
+	</data>
+	<data name="SystemDisplayTextNode.OfTableVar">
+		<value> of TableVar '{0}</value>
+	</data>
+	<data name="SystemDisplayTextNode.Conversion"><value>{0} conversion from '{1}' to '{2}'</value></data>
+	<data name="SystemDisplayTextNode.Sort"><value>Sort '{0}'</value></data>
+	<data name="SystemDisplayTextNode.UniqueSort"><value>Unique Sort '{0}'</value></data>
+	<data name="SchemaObjectDescription.Representation"><value>Representation "{0}" of type "{1}"</value></data>
+	<data name="SchemaObjectDescription.Property"><value>Property "{0}" of representation "{1}" of type "{2}"</value></data>
+	<data name="SchemaObjectDescription.ScalarType"><value>Type "{0}"</value></data>
+	<data name="SchemaObjectDescription.ScalarTypeDefault"><value>Default for type "{0}"</value></data>
+	<data name="SchemaObjectDescription.TableVarColumnDefault"><value>Default for column "{0}" of table variable "{1}"</value></data>
+	<data name="SchemaObjectDescription.ScalarTypeConstraint"><value>Constraint "{0}" on type "{1}"</value></data>
+	<data name="SchemaObjectDescription.TableVarColumnConstraint"><value>Constraint "{0}" on column "{1}" of table variable "{2}"</value></data>
+	<data name="SchemaObjectDescription.RowConstraint"><value>Row constraint "{0}" on table variable "{1}"</value></data>
+	<data name="SchemaObjectDescription.TransitionConstraint"><value>Transition constraint "{0}" on table variable "{1}"</value></data>
+	<data name="SchemaObjectDescription.CatalogConstraint"><value>Catalog constraint "{0}"</value></data>
+	<data name="SchemaObjectDescription.Special"><value>Special "{0}" of type "{1}"</value></data>
+	<data name="SchemaObjectDescription.Sort"><value>Sort "{0}" of type "{1}"</value></data>
+	<data name="SchemaObjectDescription.Conversion"><value>{0} conversion from "{1}" to "{2}"</value></data>
+	<data name="SchemaObjectDescription.Narrowing"><value>Narrowing</value></data>
+	<data name="SchemaObjectDescription.Widening"><value>Widening</value></data>
+	<data name="SchemaObjectDescription.Device"><value>Device "{0}"</value></data>
+	<data name="SchemaObjectDescription.DeviceOperator"><value>Operator map for operator "{0}" with signature "{1}" for device "{2}"</value></data>
+	<data name="SchemaObjectDescription.DeviceScalarType"><value>Type map for type "{0}" for device "{1}"</value></data>
+	<data name="SchemaObjectDescription.TableVarColumn"><value>Column "{0}" of table variable "{1}"</value></data>
+	<data name="SchemaObjectDescription.BaseTableVar"><value>Base table variable "{0}"</value></data>
+	<data name="SchemaObjectDescription.DerivedTableVar"><value>Derived table variable "{0}"</value></data>
+	<data name="SchemaObjectDescription.Key"><value>Key "{0}"</value></data>
+	<data name="SchemaObjectDescription.Order"><value>Order "{0}"</value></data>
+	<data name="SchemaObjectDescription.Reference"><value>Reference "{0}"</value></data>
+	<data name="SchemaObjectDescription.Operator"><value>Operator "{0}" with signature "{1}"</value></data>
+	<data name="SchemaObjectDescription.AggregateOperator"><value>Aggregate operator "{0}" with signature "{1}"</value></data>
+	<data name="SchemaObjectDescription.Role"><value>Role "{0}"</value></data>
+	<data name="SchemaObjectDescription.ScalarTypeEventHandler"><value>Attachment of operator "{0}" to event "{1}" of scalar type "{2}"</value></data>
+	<data name="SchemaObjectDescription.TableVarColumnEventHandler"><value>Attachment of operator "{0}" to event "{1}" of column "{2}" in table "{3}"</value></data>
+	<data name="SchemaObjectDescription.TableVarEventHandler"><value>Attachment of operator "{0}" to event "{1}" of table "{2}"</value></data>
+	<data name="BinaryAsDisplayStringReadAccessorNode.BinaryData"><value>&lt;binary data&gt;</value></data>
+	<data name="GraphicAsDisplayStringReadAccessorNode.GraphicData"><value>&lt;graphic data&gt;</value></data>
+	<data name="Storage.UnknownIOError"><value>Unknown IO error ({0}).</value></data>
+	<data name="Characteristics.Literal"><value>literal</value></data>
+	<data name="Characteristics.NonLiteral"><value>non-literal</value></data>
+	<data name="Characteristics.Functional"><value>functional</value></data>
+	<data name="Characteristics.NonFunctional"><value>non-functional</value></data>
+	<data name="Characteristics.Deterministic"><value>deterministic</value></data>
+	<data name="Characteristics.NonDeterministic"><value>non-deterministic</value></data>
+	<data name="Characteristics.Repeatable"><value>repeatable</value></data>
+	<data name="Characteristics.NonRepeatable"><value>non-repeatable</value></data>
+	<data name="Characteristics.Nilable"><value>nilable</value></data>
+	<data name="Characteristics.NonNilable"><value>non-nilable</value></data>
+</root>

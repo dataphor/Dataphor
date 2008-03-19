@@ -1,0 +1,218 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Time tests
+create table TimeTest
+{
+	ID: Integer,
+	TestTime: Time,
+	key{ID}
+};
+
+begin
+	var LTime: Time;
+	var LString: String;
+
+	// Selectors
+	LTime := Time();
+	
+	Sleep(2000);
+	BeginTransaction(); // sets up a new transaction so that the time of the start of the transaction is different.
+	
+	if (Time() = LTime) then 
+		raise Error("Time() selector failed. Time staying the same.");
+
+	if (Time() < LTime) then 
+		raise Error("Time() selector failed. Time not increasing.");
+
+	LTime := Time(20, 04, 15);
+	if (LTime <> Time(20, 4, 15)) then
+		raise Error("Time(Hours, Minutes, Seconds) selector failed.");
+
+	/*
+	LTime := Time(20, 04, 15, 314.159);
+	if (LTime <> Time(20, 4, 15, 314.159)) then
+		raise Error("Time(Hours, Minutes, Seconds, Milliseconds) selector failed.");
+	*/
+	
+	// Accessors
+	if LTime.Hour <> 20 then
+		raise Error("Time read hours part failed.");
+		
+	if LTime.Minute <> 4 then
+		raise Error("Time read Minutes part failed.");
+		
+	if LTime.Second <> 15 then
+		raise Error("Time read Seconds part failed.");
+
+	/*
+	if LTime.Millisecond <> 314.159 then
+		raise Error("Time read Milliseconds part failed.");
+	*/
+
+	LTime.Hour := 22;
+	if LTime.Hour <> 22 then
+		raise Error("Time write hours part failed.");
+		
+	LTime.Minute := 8;
+	if LTime.Minute <> 8 then
+		raise Error("Time write Minutes part failed.");
+		
+	LTime.Second := 45;
+	if LTime.Second <> 45 then
+		raise Error("Time write Seconds part failed.");
+
+	/*
+	LTime.Millisecond := 2.718;
+	if LTime.Millisecond <> 2.718 then
+		raise Error("Time write Milliseconds part failed." + " " + LTime.ToString() + " " + LTime.Millisecond.ToString());
+	*/
+	
+	/*
+	LTime := Time(0, 0, 0, 0.045);
+	if LTime.Ticks <> ToLong(450) then
+		raise Error("Time read ticks failed.");
+	*/
+	
+	LTime.Ticks := Time(0, 0, 1).Ticks;
+	if LTime.Ticks <> Time(0, 0, 1).Ticks then
+		raise Error("Time write ticks failed.");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Conversions										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	LTime := Time(12, 57, 36);
+	LString := LTime.ToString();
+	if LString <> "12:57:36 PM" then
+		raise Error("Time.ToString() Error.");
+
+	// String->TimeSpan	
+	if LTime <> LTime.ToString().ToTime() then
+		raise Error("ToTime(System.String) Error." + LTime.ToString().ToTime().ToString());
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Comparison										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	var LTime1: Time;
+	var LTime2: Time;
+	
+	// Equals
+	LTime1 := Time(20, 12, 25);
+	LTime2 := Time(20, 12, 25);
+	if LTime1 = LTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time = Time Error.");
+	end;
+
+	// Not Equal
+	LTime2 := Time(20, 12, 26);
+	if LTime1 <> LTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time <> Time Error.");
+	end;
+	
+	// less than, exclusive
+	if LTime1 < LTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time < Time Error.");
+	end;
+	
+	// less than, inclusive
+	if LTime1 <= LTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time <= Time Error.");
+	end;
+	
+	// greater than, exclusive
+	if LTime2 > LTime1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time > Time Error.");
+	end;
+	
+	// greater than, inclusive
+	if LTime2 >= LTime1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time >= Time Error.");
+	end;
+	
+	// icompare
+	if (LTime2 ?= LTime1) = 1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Time ?= Time Error.");
+	end;
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Misc											   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	  
+	LTime1 := Time(1,1,1);
+	var LTimeSpan1 : TimeSpan;
+	LTimeSpan1 := TimeSpan(0);
+	LTimeSpan1.Minutes := 6;
+	LTime2 := LTime1 + LTimeSpan1;
+	if (LTime2 <> Time(1,7,1)) then
+		raise Error("iAddition (Time + TimeSpan) failed");
+
+	LTime1 := Time(1,1,1);
+	LTimeSpan1 := TimeSpan(2);
+	LTime2 := LTime1 + LTimeSpan1;
+	if (LTime2 <> LTime1) then
+	  raise Error("iAddition (Time + TimeSpan) failed to produce the same result from cyclical addition.");
+	
+	LTime1 := Time(1,1,2);
+	LTime2 := Time(1,1,1);
+	LTimeSpan1 := LTime1 - LTime2;
+	if (LTimeSpan1.Seconds <> 1) then
+	  raise Error("iSubtract(Time, Time) Failed.");
+
+	LTime1 := Time(10,5,23);
+	LTime2 := LTime1 - LTimeSpan1;
+	if (LTime2.ToString() <> "10:05:22 AM") then
+	  raise Error("iSubtract(Time, TimeSpan) Failed.");
+
+	LTime1 := Time(10,5,23);
+	LTimeSpan1 := TimeSpan(1); // this is one whole day
+	LTime2 := LTime1 - LTimeSpan1;
+	if (LTime2.ToString() <> "10:05:23 AM") then
+	  raise Error("iSubtract(Time, TimeSpan) Failed. Cyclical results");
+
+	insert table{row{1 ID, Time(0, 0, 0) TestTime}} into TimeTest;
+	insert table{row{2 ID, Time(0, 0, 1) TestTime}} into TimeTest;
+	insert table{row{3 ID, Time(0, 0, 2) TestTime}} into TimeTest;
+	insert table{row{4 ID, Time(0, 0, 3) TestTime}} into TimeTest;
+
+	// Min
+	if Min(TestTime from TimeTest) <> Time(0, 0, 0) then
+		raise Error("Time Min Error.");
+
+	// Max
+	if Max(TestTime from TimeTest) <> Time(0, 0, 3) then
+		raise Error("Time Max Error.");
+
+end;
+
+drop table TimeTest;

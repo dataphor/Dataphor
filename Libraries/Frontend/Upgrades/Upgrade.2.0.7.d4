@@ -1,0 +1,9 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime }
+	class "Frontend.GetLibraryFilesNode";
+grant usage on GetLibraryFiles(table { Library_Name : Name }) to role User;
+

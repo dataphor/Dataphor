@@ -1,0 +1,14 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+
+This Library doesn't actually do anything.
+It just provides a place for scripts to reside.
+This so it doesn't fill up the other libraries.
+This is made for scripts that are directly executed as tests.
+
+*/

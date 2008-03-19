@@ -1,0 +1,92 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table TestProject { ID : Integer, Name : String { nil }, Phone : String { nil }, key { ID } };
+
+insert table { row { 1 ID, 'Blah' Name } } into TestProject;
+insert table { row { 2 ID, '123-1234' Phone } } into TestProject;
+insert table { row { 3 ID } } into TestProject;
+insert table { row { 4 ID } } into TestProject;
+
+if ((TestProject over { Name, Phone }) <> table { row { nil as String Name, nil as String Phone }, row { nil as String, '123-1234' }, row { 'Blah', nil as String } }) then
+	raise Error('Projection over nils failed');
+
+if ((TestProject over { Name } where Name = 'Blah') <> table { row { 'Blah' Name } }) then
+	raise Error('Projection with restriction and nils failed');
+	
+if ((TestProject group by { Name } add { Count() Count }) <> table { row { nil as String Name, 3 Count }, row { 'Blah', 1 } }) then
+	raise Error('Aggregate with nils failed');
+	
+if (((TestProject over { Name } rename O) add { Count(TestProject where if IsNil(Name) or IsNil(O.Name) then IsNil(Name) = IsNil(O.Name) else Name = O.Name) Count }) <> table { row { nil as String O.Name , 3 Count }, row { 'Blah', 1 } }) then
+	raise Error('Scalar aggregate invocation with nils failed');
+	
+drop table TestProject;
+
+create table TestKey { ID : Integer { nil }, Name : String { nil }, key { ID } };
+
+insert table { row { nil as Integer ID, 'Blah' Name } } into TestKey;
+
+begin
+	var LErrorHit := false;
+	try
+		insert table { row { nil as Integer ID, 'Joe' Name } } into TestKey;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error("Key not enforced with nils");
+end;
+
+insert table { row { 1 ID, 'John' Name } } into TestKey;
+
+delete TestKey;
+
+drop table TestKey;
+
+create table TestReference { ID : Integer, key { ID } };
+
+create table TestReferenceDetail { ID : Integer, TestReference_ID : Integer { nil }, key { ID } };
+
+create reference TestReferenceDetail_TestReference TestReferenceDetail { TestReference_ID } references TestReference { ID };
+
+insert table { row { 1 ID, nil as Integer TestReference_ID } } into TestReferenceDetail;
+
+drop table TestReferenceDetail;
+
+drop table TestReference;
+
+// Quota
+create table TestQuota { ID : Integer, Name : String { nil }, key { ID } };
+
+insert table { row { 1 ID, nil as String Name } } into TestQuota;
+insert table { row { 2 ID, nil as String Name } } into TestQuota;
+insert table { row { 3 ID, 'Joe' Name } } into TestQuota;
+insert table { row { 4 ID, 'Joe' Name } } into TestQuota;
+
+if ((TestQuota return 1 by { Name }) <> table { row { 1 ID, nil as String Name }, row { 2, nil as String } }) then
+	raise Error('Quota with nils failed');
+	
+if ((TestQuota return 2 by { Name }) <> table { row { 1 ID, nil as String Name }, row { 2, nil as String }, row { 3, 'Joe' }, row { 4, 'Joe' } }) then
+	raise Error('Quota with nils failed');
+	
+drop table TestQuota;
+
+create table TestUnion { ID : Integer, Name : String { nil }, key { ID } };
+
+insert table { row { 1 ID, nil as String Name } } into TestUnion;
+
+if (((TestUnion over { Name }) union (TestUnion over { Name })) <> table { row { nil as String Name } }) then
+	raise Error('Union with nils failed');
+	
+drop table TestUnion;
+
+create table TestDifference { ID : Integer, Name : String { nil }, key { ID } };
+
+insert table { row { 1 ID, nil as String Name } } into TestDifference;
+
+if (((TestDifference over { Name }) minus (TestDifference over { Name })) <> table of { Name : String } { }) then
+	raise Error('Difference with nils failed');
+	
+drop table TestDifference;

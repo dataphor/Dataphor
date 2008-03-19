@@ -1,0 +1,145 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Upgrade: changes the application ID from a Guid to a Name
+
+//* Drop the old Applications table and related objects
+
+drop reference Frontend.ClientApplications_Applications;
+drop reference Frontend.ApplicationLibraries_Applications;
+drop reference Frontend.WindowsClientApplications_Applications;
+drop operator Frontend.PrepareApplication(const System.Guid);
+drop operator Frontend.AddApplication(const System.String, const System.String, const System.Name);
+drop table Frontend.Applications;
+
+drop operator Frontend.GetWindowsSettings(const System.Guid);
+drop table Frontend.WindowsClientApplications;
+
+drop operator Frontend.GetApplicationNodeTypes(const System.String, const System.Guid);
+drop reference Frontend.ApplicationLibraries_Libraries;
+drop table Frontend.ApplicationLibraries;
+
+drop reference Frontend.ClientApplications_ClientTypes;
+drop table Frontend.ClientApplications;
+
+//* Recreate the objects
+
+create table Applications in ServerStore
+{
+	ID : Name tags { Frontend.Width = "25" },
+	Description : String tags { Frontend.Width = "35", Frontend.Preview.Include = "true" },
+	StartDocument : String { default "" } tags { Frontend.Title = "Start Document" },
+	key { ID } static tags { Storage.Enforced = "true" }
+};
+grant usage on Applications to role User;
+
+create operator Applications_DefaultDescription(var ARow : typeof(row from Applications)) : Boolean
+begin
+	if IsNil(Description from ARow) then
+	begin
+		update ARow set { Description := ID };
+		result := true;
+	end
+	else
+		result := false;
+end;
+attach Applications_DefaultDescription to ID in Applications on { change };
+
+create table ApplicationLibraries in ServerStore
+{
+	Application_ID : Name,
+	Library_Name : Name
+		tags { Frontend.Title = "Library Name" },
+	key { Application_ID, Library_Name } static tags { Storage.Enforced = "true" },
+	reference ApplicationLibraries_Applications { Application_ID } references Applications { ID } update cascade delete cascade tags { Frontend.Detail.Title = "Libraries", Frontend.Lookup.Title = "Application", Frontend.Lookup.UseFullLookup = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true" },
+	reference ApplicationLibraries_Libraries { Library_Name } references System.Libraries { Name } tags { Frontend.Detail.Title = "Applications", Frontend.Lookup.Title = "Library" }
+} tags { Frontend.Title = "Application Libraries" };
+grant usage on ApplicationLibraries to role User;
+
+create table ClientApplications in ServerStore
+{
+	Application_ID : Name,
+	ClientType_ID : String tags { Frontend.Title = "Client Type" },
+	UseDerivationCache : Boolean { default true } tags { Frontend.Title = "Use Derivation Cache" },
+	key { Application_ID, ClientType_ID } static tags { Storage.Enforced = "true" },
+	reference ClientApplications_Applications { Application_ID } references Applications { ID } update cascade delete cascade tags { Frontend.Detail.Title = "Client Types", Frontend.Lookup.Title = "Application", Frontend.Lookup.UseFullLookup = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true" },
+	reference ClientApplications_ClientTypes { ClientType_ID } references ClientTypes { ID } tags { Frontend.Detail.Title = "Applications", Frontend.Lookup.Title = "Client Type" }
+} tags { static Frontend.Title = "Client Applications" };
+grant usage on ClientApplications to role User;
+
+create table WindowsClientApplications in ServerStore
+{
+	Application_ID : Name,
+	ThemeDocument : String { default "" } tags { Frontend.Title = "Theme Document" },
+	DefaultIconImage : String { default "" } tags { Frontend.Title = "Default Form Icon Image" },
+	DocumentCacheSize : Integer { default 800 } tags { Frontend.Title = "Document Cache Size", Frontend.Hint = "0 = client-side document cache off" },
+	ImageCacheSize : Integer { default 60 } tags { Frontend.Title = "Image Cache Size", Frontend.Hint = "0 = client-side image cache off" },
+	HelpDocument : String { default "" } tags { Frontend.Title = "Help Document" },
+	key { Application_ID } static tags { Storage.Enforced = "true" },
+	reference WindowsClientApplications_Applications { Application_ID } references Applications { ID } update cascade delete cascade
+} tags { static Frontend.Title = "Windows Client Application Settings" };
+grant usage on WindowsClientApplications to role User;
+
+create operator GetApplicationNodeTypes(const AClientTypeID : String, const AApplicationID : Name) : String
+begin
+	result := GetNodeTypes(AClientTypeID, ApplicationLibraries where Application_ID = AApplicationID over { Library_Name });
+end;
+grant usage on GetApplicationNodeTypes(String, Name) to role User;
+
+create operator GetWindowsSettings(const AApplicationID : Name) 
+	: 
+	row 
+	{ 
+		IconImage : Graphic, 
+		Theme : String, 
+		DocumentCacheSize : Integer, 
+		ImageCacheSize : Integer, 
+		HelpDocument : String 
+	}
+begin
+	result := row { nil IconImage, nil Theme, nil DocumentCacheSize, nil ImageCacheSize, nil HelpDocument };
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LRow := row from (WindowsClientApplications where Application_ID = AApplicationID);
+
+		// Image
+		var LImageExpression := DefaultIconImage from LRow;
+		if LImageExpression <> "" then
+			update result set { IconImage := Evaluate(LImageExpression) as Graphic };
+			
+		// Theme
+		var LThemeExpression := ThemeDocument from LRow;
+		if LThemeExpression <> "" then
+			update result set { Theme := Evaluate(LThemeExpression) as String };
+		
+		// DocumentCacheSize & ImageCacheSize
+		update result 
+			set 
+			{ 
+				DocumentCacheSize := (DocumentCacheSize from LRow), 
+				ImageCacheSize := (ImageCacheSize from LRow), 
+				HelpDocument := (HelpDocument from LRow) 
+			};
+	end;
+end;
+grant usage on GetWindowsSettings(Name) to role User;
+
+create operator PrepareApplication(const AApplicationID : Name) : String
+begin
+   result := StartDocument from row from (Applications where ID = AApplicationID);
+	var LCursor : cursor(table { Library_Name : Name }) :=
+		cursor
+		(
+			ApplicationLibraries where Application_ID = AApplicationID over { Library_Name }
+		);
+	try
+		while LCursor.Next() do
+			RegisterLibrary(Library_Name from LCursor.Select());
+	finally
+		LCursor.Close();
+	end;
+end;
+grant usage on PrepareApplication(Name) to role User;
+

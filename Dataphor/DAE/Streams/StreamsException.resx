@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="112100">
+		<value>Cannot compare values of type StreamID to values of type {0}.</value>
+	</data>
+	<data name="112101">
+		<value>Stream is in use and cannot be deallocated.</value>
+	</data>
+	<data name="112102">
+		<value>StreamID ({0}) not found.</value>
+	</data>
+	<data name="112103">
+		<value>Copy on write overflow.</value>
+	</data>
+	<data name="112104">
+		<value>Offset for a cover stream must be non-negative.</value>
+	</data>
+	<data name="112105">
+		<value>Invalid row stream.</value>
+	</data>
+	<data name="112106">
+		<value>Display accessors cannot be used to set the AValue of a stream conveyor.</value>
+	</data>
+	<data name="112107">
+		<value>Display accessors cannot be used to set the AValue of a BOP object conveyor.</value>
+	</data>
+	<data name="112108">
+		<value>Display accessors cannot be used to set the AValue of an object conveyor.</value>
+	</data>
+	<data name="112109">
+		<value>Cursor "{0}" not found.</value>
+	</data>
+	<data name="112110">
+		<value>Data type of a value cannot be changed.</value>
+	</data>
+	<data name="112111">
+		<value>Data type required.</value>
+	</data>
+	<data name="112112">
+		<value>No value available.</value>
+	</data>
+	<data name="112113">
+		<value>Invalid row data format.</value>
+	</data>
+	<data name="112114">
+		<value>Scalar AValue size exceeds maximum byte array size.</value>
+	</data>
+	<data name="112115">
+		<value>Row value size exceeds maximum byte array size.</value>
+	</data>
+	<data name="112116">
+		<value>Minimum static byte size is required to support value overflow.</value>
+	</data>
+	<data name="112117"><value>Cover stream source may not be null.</value></data>
+</root>

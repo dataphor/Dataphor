@@ -1,0 +1,78 @@
+Operators not supported in the DB2 device:
+
+
+LibraryReference Operators
+   The LibraryReference selector/accessor operators and any operator that take an argument of type 
+   LibraryReference are not supported by the DB2 device. This date type is not currently supported 
+   for the DB2 device.
+
+LibraryDescriptor Operators
+   The LibraryDescriptor selector/accessor operators and any operator that take an argument of type 
+   LibraryDescriptor are not supported by the DB2 device. This date type is not currently supported 
+   for the DB2 device.
+
+FileReference Operators
+   The LibraryDescriptor selector/accessor operators and any operator that take an argument of type 
+   LibraryDescriptor are not supported by the DB2 device. This date type is not currently supported 
+   for the DB2 device.
+
+System.IsUpper(System.String)
+   DB2 provides no function to evaluate the case of a string. Also there is no way of iterating 
+   through a string to evaluate each character within an expression.
+
+System.IsLower(System.String)
+   DB2 provides no function to evaluate the case of a string. Also there is no way of iterating 
+   through a string to evaluate each character within an expression.
+
+System.PadLeft(System.String, System.Integer)
+   DB2 does not provide an equivalent function and there is no method for adding characters recursively
+   until the length is equal to that specified by the second parameter within an expression. 
+
+System.PadLeft(System.String, System.Integer, System.String)
+   DB2 does not provide an equivalent function and there is no method for adding characters recursively
+   until the length is equal to that specified by the second parameter within an expression. 
+
+System.PadRight(System.String, System.Integer, System.String)
+   DB2 does not provide an equivalent function and there is no method for adding characters recursively
+   until the length is equal to that specified by the second parameter within an expression. 
+
+System.Math.Factorial(System.Integer)
+   Recursion which is necessary is not possible within an expression.
+
+System.Math.Random(System.Integer)  
+
+System.Math.Random(System.Integer, System.Integer)
+
+System.Math.Seed()
+
+System.Math.Seed(System.Integer)
+
+System.All(System.Boolean)
+   DB2 has no support for the Boolean data type.
+
+System.Any(System.Boolean)
+   DB2 has no support for the Boolean data type.
+
+System.ToTimeSpan(System.String)
+   The function to parse a string and convert to the expected
+   input format for timespan is not written. 
+  
+System.TimeSpan.AsString(System.String)
+   The function to parse a string and convert to the expected
+   input format for timespan is not written. 
+   
+System.TimeSpan.ReadAsString(System.TimeSpan)
+   The function to parse a string and convert to the expected
+   input format for timespan is not written. 
+   
+System.TimeSpan.WriteAsString(System.TimeSpan, System.String)
+   The function to parse a string and convert to the expected
+   input format for timespan is not written. 
+   
+System.LastIndexOf(System.String, System.String)
+   No recursion available in an expression in order to find the last occurence of the substring within the string.
+
+System.LastPos(System.String, System.String)
+   No recursion available in an expression in order to find the last occurence of the substring within the string.
+
+   

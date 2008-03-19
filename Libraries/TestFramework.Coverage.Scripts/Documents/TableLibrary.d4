@@ -1,0 +1,207 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Table Selectors
+if Count(table{}) <> 0 then
+	raise Error("Count of empty table not equal to 0");
+	
+if Count(table{row{}}) <> 1 then
+	raise Error("Count of empty table with one row not equal to 1");
+	
+// Table Selector without rows
+begin
+	var LTable : table { ID : Integer } := table of { ID : Integer } { };
+	
+	if exists (LTable) then
+		raise Error("Table selector without rows failed");
+end;
+
+// Table Variables
+begin
+  var LTable : table{id : Integer} := table{row{5 id}};
+
+  if not((row from LTable) = row{5 id}) then
+    raise Error("Row extraction failed");
+
+  if ((id from row from LTable) <> 5) then
+    raise Error("Column extraction failed");
+    
+  LTable := table{row{6 id}};
+  if not((row from LTable) = row{6 id}) then
+    raise Error("Table assignment failed");
+    
+  delete LTable;
+  
+  if (Count(LTable) <> 0) then
+    raise Error("Table variable delete failed");
+  
+  insert table{row{7 id}} into LTable;
+  
+  if not((row from LTable) = row{7 id}) then
+    raise Error("Table variable insert failed");
+    
+  update LTable set {id := 8};
+  
+  if not((row from LTable) = row{8 id}) then
+    raise Error("Table variable update failed");
+    
+  var LTable1 : table { id : Integer } := table { row { 1 id }, row { 2 id } };
+  var LTable2 : table { id : Integer } := table { row { 1 id } };
+  
+  if LTable1 = LTable2 then
+	raise Error("Table equal failed");
+	
+  if LTable1 < LTable2 then
+	raise Error("Table proper subset failed");
+	
+  if LTable2 > LTable1 then
+    raise Error("Table proper superset failed");
+	
+  insert table { row { 2 id } } into LTable2;
+  
+  if LTable1 <> LTable2 then
+	raise Error("Table not equal failed");
+
+  if not(LTable1 >= LTable2) then
+	raise Error("Table superset failed");
+	
+  if not(LTable2 <= LTable1) then
+    raise Error("Table subset failed");
+end;
+
+// Key-affecting update involving a local table variable
+begin
+	var LTable := table { row { 5 ID } };
+	if LTable <> table { row { 5 ID } } then
+		raise Error('Table variable creation failed');
+
+	delete LTable;
+	if LTable <> table of { ID : Integer } { } then
+		raise Error('Table variable delete failed');
+
+	insert row { 5 ID } into LTable;
+	if LTable <> table { row { 5 ID } } then
+		raise Error('Table variable insert failed');
+
+	update LTable set { ID := 10 } where ID = 5;
+	if LTable <> table { row { 10 ID } } then
+		raise Error('Table variable update failed');
+
+	update LTable set { ID := ID + 1 };
+	if LTable <> table { row { 11 ID } } then
+		raise Error('Key-affecting table variable update failed');
+end;
+
+// Table-Valued return value
+create operator Test() : table { ID : Integer, Name : String }
+begin
+	result := table { row { 5 ID, 'Blah' Name } };
+end;
+
+begin
+	var LTable : table { ID : Integer, Name : String } := Test();
+	if (LTable <> table { row { 5 ID, 'Blah' Name } }) then
+		raise Error("Table-valued user-defined operator failed");
+end;
+
+if (Count from row from (Test() group add { Count() Count })) <> 1 then
+	raise Error("Aggregate invocation on user-defined table-valued operator failed");
+	
+drop operator Test();
+
+// Table-valued parameters
+
+create operator Test(const ATable : table { ID : Integer }) : Integer
+begin
+	result := Sum(ID from ATable);
+end;
+
+if (Test(table { row { 1 ID }, row { 2 }, row { 3 } }) <> 6) then
+	raise Error("Table-valued parameters failed");
+	
+drop operator Test(table { ID : Integer });
+
+// Table-valued var parameters
+
+create operator Test(var ATable : table { ID : Integer })
+begin
+	ATable := table { row { 5 ID } };
+end;
+
+begin
+	var ATable : table { ID : Integer };
+	Test(var ATable);
+	if ATable <> table { row { 5 ID } } then
+		raise Error("Table-valued parameters by reference failed");
+end;
+
+drop operator Test(var table { ID : Integer });
+
+// Table-valued parameters w/ non-local table variables
+
+create operator Test(const ATable : table { ID : Integer }) : Integer
+begin
+	result := Sum(ID from ATable);
+end;
+
+create table TestTable { ID : Integer };
+
+insert table { row { 1 ID }, row { 2 }, row { 3 } } into TestTable;
+
+if Test(TestTable) <> 6 then
+	raise Error("Table-valued parameters with non-local table variables failed");
+	
+drop table TestTable;
+
+drop operator Test(table { ID : Integer });
+
+create operator Test(const AID : Integer) : table { ID : Integer }
+begin
+	result := table of { ID : Integer } { };
+	for LIndex : Integer := 1 to AID do
+		insert table { row { LIndex ID } } into result;
+end;
+
+if Test(5) <> table { row { 1 ID }, row { 2 }, row { 3 }, row { 4 }, row { 5 } } then
+	raise Error("Test table-valued output failed");
+
+drop operator Test(Integer);
+
+//* Insert nil in the presence of a default
+SafeDrop('HasDefaults');
+create table HasDefaults { ID : Integer, Name : String nil { default "Default" }, key { ID } };
+
+insert table { row { 1 ID } } into HasDefaults;
+
+if HasDefaults[1].Name <> 'Default' then
+	raise Error('Default with table expression failed');
+
+insert row of typeof(HasDefaults[]) { 2 ID } into HasDefaults;
+
+if not(HasDefaults[2].Name.IsNil()) then
+	raise Error('Insert of nil failed');
+
+insert table { row { 3 ID, nil as String Name } } into HasDefaults;
+
+if not(HasDefaults[3].Name.IsNil()) then
+	raise Error('Insert nil failed');
+
+insert row { 4 ID, nil as String Name } into HasDefaults;
+
+if not(HasDefaults[4].Name.IsNil()) then
+	raise Error('Insert nil failed');
+	
+drop table HasDefaults;
+
+//* Ensure that local table variables do not incorrectly assume keys inferred from assignments:
+begin
+	var X := table { row { 1 X, 1 Y }, row { 1, 2 }, row { 1, 3 } };
+	var Y := X where X = 1;
+	var Z := Y where X = 1;
+	if Z <> table { row { 1 X, 1 Y }, row { 1, 2 }, row { 1, 3 } } then
+		raise Error('Local table variable assuming access path from assignment');
+end;
+
+

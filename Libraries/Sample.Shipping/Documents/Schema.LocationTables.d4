@@ -1,0 +1,195 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Location Tables
+*/
+
+//* Table: State
+// State [Name] has postal state code [ID]
+create table State
+{
+	ID : StateID,
+	Name : Description,
+	key { ID }
+}
+	static tags
+	{
+		Frontend.Title = "State",
+		Frontend.Plural.Title = "States"
+	};
+grant usage on State to role ShippingUser;
+	
+if not exists (State) then
+	insert
+		table
+		{
+			row { StateID("AL") ID, Description("ALABAMA") Name },
+			row { StateID("AK") ID, Description("ALASKA") Name },
+			row { StateID("AS") ID, Description("AMERICAN SAMOA") Name },
+			row { StateID("AZ") ID, Description("ARIZONA") Name },
+			row { StateID("AR") ID, Description("ARKANSAS") Name },
+			row { StateID("CA") ID, Description("CALIFORNIA") Name },
+			row { StateID("CO") ID, Description("COLORADO") Name },
+			row { StateID("CT") ID, Description("CONNECTICUT") Name },
+			row { StateID("DE") ID, Description("DELAWARE") Name },
+			row { StateID("DC") ID, Description("DISTRICT OF COLUMBIA") Name },
+			row { StateID("FM") ID, Description("FEDERATED STATES OF MICRONESIA") Name },
+			row { StateID("FL") ID, Description("FLORIDA") Name },
+			row { StateID("GA") ID, Description("GEORGIA") Name },
+			row { StateID("GU") ID, Description("GUAM") Name },
+			row { StateID("HI") ID, Description("HAWAII") Name },
+			row { StateID("ID") ID, Description("IDAHO") Name },
+			row { StateID("IL") ID, Description("ILLINOIS") Name },
+			row { StateID("IN") ID, Description("INDIANA") Name },
+			row { StateID("IA") ID, Description("IOWA") Name },
+			row { StateID("KS") ID, Description("KANSAS") Name },
+			row { StateID("KY") ID, Description("KENTUCKY") Name },
+			row { StateID("LA") ID, Description("LOUISIANA") Name },
+			row { StateID("ME") ID, Description("MAINE") Name },
+			row { StateID("MH") ID, Description("MARSHALL ISLANDS") Name },
+			row { StateID("MD") ID, Description("MARYLAND") Name },
+			row { StateID("MA") ID, Description("MASSACHUSETTS") Name },
+			row { StateID("MI") ID, Description("MICHIGAN") Name },
+			row { StateID("MN") ID, Description("MINNESOTA") Name },
+			row { StateID("MS") ID, Description("MISSISSIPPI") Name },
+			row { StateID("MO") ID, Description("MISSOURI") Name },
+			row { StateID("MT") ID, Description("MONTANA") Name },
+			row { StateID("NE") ID, Description("NEBRASKA") Name },
+			row { StateID("NV") ID, Description("NEVADA") Name },
+			row { StateID("NH") ID, Description("NEW HAMPSHIRE") Name },
+			row { StateID("NJ") ID, Description("NEW JERSEY") Name },
+			row { StateID("NM") ID, Description("NEW MEXICO") Name },
+			row { StateID("NY") ID, Description("NEW YORK") Name },
+			row { StateID("NC") ID, Description("NORTH CAROLINA") Name },
+			row { StateID("ND") ID, Description("NORTH DAKOTA") Name },
+			row { StateID("MP") ID, Description("NORTHERN MARIANA ISLANDS") Name },
+			row { StateID("OH") ID, Description("OHIO") Name },
+			row { StateID("OK") ID, Description("OKLAHOMA") Name },
+			row { StateID("OR") ID, Description("OREGON") Name },
+			row { StateID("PW") ID, Description("PALAU") Name },
+			row { StateID("PA") ID, Description("PENNSYLVANIA") Name },
+			row { StateID("PR") ID, Description("PUERTO RICO") Name },
+			row { StateID("RI") ID, Description("RHODE ISLAND") Name },
+			row { StateID("SC") ID, Description("SOUTH CAROLINA") Name },
+			row { StateID("SD") ID, Description("SOUTH DAKOTA") Name },
+			row { StateID("TN") ID, Description("TENNESSEE") Name },
+			row { StateID("TX") ID, Description("TEXAS") Name },
+			row { StateID("UT") ID, Description("UTAH") Name },
+			row { StateID("VT") ID, Description("VERMONT") Name },
+			row { StateID("VI") ID, Description("VIRGIN ISLANDS") Name },
+			row { StateID("VA") ID, Description("VIRGINIA") Name },
+			row { StateID("WA") ID, Description("WASHINGTON") Name },
+			row { StateID("WV") ID, Description("WEST VIRGINIA") Name },
+			row { StateID("WI") ID, Description("WISCONSIN") Name },
+			row { StateID("WY") ID, Description("WYOMING") Name }
+		}
+		into State;
+
+//* Table: ZipCode
+// Zip code [Zip] is located in city [City], state [State_ID], 
+// and geographically located at [Location]	
+create table ZipCode
+{
+	ZipCode : Zip,
+	City : Description,
+	State_ID : StateID,
+	Coordinate : Coordinate { nil },
+	key { ZipCode }
+}
+	static tags
+	{
+		Frontend.Title = "Zip Code",
+		Frontend.Plural.Title = "Zip Codes"
+	};
+grant usage on ZipCode to role ShippingUser;
+
+// The DAE.IsDeferred tag is used as a performance optimization
+// to prevent unnecessary deferred checking of the constraint.
+// This is acceptable because we are unlikely to add a State
+// and then ZipCodes underneath that new state. If this behavior is
+// necessary, the DAE.IsDeferred tag can be removed.
+create reference ZipCode_State ZipCode { State_ID } references State { ID } 
+	tags { DAE.IsDeferred = "false" };
+
+//* Table: Location
+// Location designated by [ID] is named [Name], has phone # [Phone], 
+// and address [Street], [City], [State_ID], [Zip]
+create table Location
+{
+	ID : LocationID,
+	Name : ProperName tags { Frontend.Preview.Include = "true" },
+	Phone : Phone,
+	Street : Description tags { Frontend.Group = "Address" },
+	City : Description tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State_ID : StateID tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	ZipCode : Zip tags { Frontend.Group = "Address" },
+	key { ID }
+}
+	static tags
+	{
+		Frontend.Title = "Location",
+		Frontend.Plural.Title = "Locations"
+	};
+grant usage on Location to role InventoryClerk;
+grant { Select } on Location to role CustomerService;
+	
+// The DAE.IsDeferred tags on these appear here for the same reason as the
+// ZipCode_State reference.
+create reference Location_State Location { State_ID } references State { ID } 
+	tags { DAE.IsDeferred = "false" };
+
+create reference Location_ZipCode Location { ZipCode } references ZipCode { ZipCode } 
+	tags { DAE.IsDeferred = "false" };
+
+//* Operator: LocationZipCodeChange
+// Sets the City and State_ID based on the value of the ZipCode column
+// Note that this will be invoked within the A/T, but the operator will 
+// not be translated because it is does not update any tables.
+create operator LocationZipCodeChange(var ARow : typeof(Location[])) : Boolean
+begin
+	result := false;
+	if not(IsNil(ARow.ZipCode)) and IsNil(ARow.City) and IsNil(ARow.State_ID) then
+	begin
+		result := true;
+		var LZipRow := ZipCode[ARow.ZipCode] { ZipCode, City, State_ID };
+		update ARow set { City := LZipRow.City, State_ID := LZipRow.State_ID };
+	end;
+end;
+attach LocationZipCodeChange to ZipCode in Location on change;
+
+//* Operator: EnsureCurrentLocationTable
+create operator EnsureCurrentLocationTable()
+begin
+	if not(ObjectExists('CurrentLocation')) then
+		Execute
+		(
+			'
+				create session table CurrentLocation { Location_ID : LocationID, key { } };
+				create session reference CurrentLocation_Location 
+					CurrentLocation { Location_ID } 
+					references Location { ID }
+					tags 
+					{ 
+						Frontend.Include = "false", 
+						Frontend.Lookup.Include = "true", 
+						Frontend.Lookup.Title = "Current Location" 
+					};
+			'
+		);
+end;
+grant usage on EnsureCurrentLocationTable() to role ShippingUser;
+
+//* Operator: CurrentLocationID()
+SafeDrop('CurrentLocationID()');
+create operator CurrentLocationID() : LocationID
+begin
+	result := 
+		Evaluate('CurrentLocation[].Location_ID')
+			as LocationID;
+end
+	tags { DAE.ShouldTranslate = "false" };
+grant usage on CurrentLocationID() to role ShippingUser;

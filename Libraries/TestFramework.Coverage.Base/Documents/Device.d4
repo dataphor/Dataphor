@@ -1,0 +1,34 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//create device Coverage
+//   reconciliation { mode = { command }, master = device }
+//   class "MSSQLDevice.MSSQLDevice"
+//	   attributes
+//	   {
+//	   	"ServerName" = "at-at",
+//	      "DatabaseName" = "Coverage"
+//	   };
+//
+//CreateDeviceUserWithEncryptedPassword("Admin", "Onyx", "sa", "EP2o1xgS1qTLwPBKKXnEql0=");
+//CreateDeviceUserWithEncryptedPassword("System", "Onyx", "sa", "EP2o1xgS1qTLwPBKKXnEql0=");
+//
+//SetDefaultDeviceName("Coverage");
+
+
+
+
+//create device CoverageDevice
+//	reconciliation { mode = { none }, master = device }
+//	class "MSSQLDevice"
+//		attributes
+//		{
+//			"ServerName" = ".",
+//			"DatabaseName" = "Coverage"
+//			//"IsCaseSensitive" = "true"
+//		};
+//		
+//CreateDeviceUser("System", "CoverageDevice", "sa", "");
+//CreateDeviceUser("Admin", "CoverageDevice", "sa", "");

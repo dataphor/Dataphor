@@ -1,0 +1,4 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="TestFramework.Controls" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="TestFramework" version="*" />
+    <libraries.libraryreference name="Frontend" version="*" />
+</library>

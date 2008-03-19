@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Single-Table Hierarchy" ondefault="EditAction">
+  <source expression="STH" beginscript="// Create a table for Single-Table Hierarchy&#xD;&#xA;&#xD;&#xA;EnsureGenerators();&#xD;&#xA;&#xD;&#xA;delete Generators where ID = &quot;STH.ID&quot;;&#xD;&#xA;&#xD;&#xA;insert table&#xD;&#xA;{&#xD;&#xA; row { &quot;STH.ID&quot; ID, 47 NextKey }&#xD;&#xA;} into Generators;&#xD;&#xA;&#xD;&#xA;create session table STH&#xD;&#xA;{&#xD;&#xA;	ID : Byte { default GetNextGenerator(&quot;STH.ID&quot;) }&#xD;&#xA;	 tags { Frontend.Width = &quot;5&quot;, Frontend.ReadOnly = &quot;true&quot; },&#xD;&#xA;	Description : String&#xD;&#xA;	 tags { Frontend.Width = &quot;20&quot;, Frontend.Preview.Include = &quot;true&quot; },&#xD;&#xA;	Parent_ID : Byte { nil, default nil }&#xD;&#xA;	 tags { Frontend.Width = &quot;5&quot;, Frontend.Add.ReadOnly = &quot;true&quot; },&#xD;&#xA;	key { ID },&#xD;&#xA;	reference STH_STH { Parent_ID } references STH { ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;STH := table&#xD;&#xA; {&#xD;&#xA;	row { 1 ID, &quot;Chevy&quot; Description, Byte(nil) Parent_ID },&#xD;&#xA;	row { 2, &quot;Chevy&quot;, 1 },&#xD;&#xA;	row { 3, &quot;Avalanche&quot;, 2 },&#xD;&#xA;	row { 4, &quot;1500&quot;, 3 },&#xD;&#xA;	row { 5, &quot;2500&quot;, 3 },&#xD;&#xA;	row { 6, &quot;Blazer&quot;, 2 },&#xD;&#xA;	row { 7, &quot;2 Door&quot;, 6 },&#xD;&#xA;	row { 8, &quot;Equinox&quot;, 2 },&#xD;&#xA;	row { 9, &quot;LS&quot;, 8 },&#xD;&#xA;	row { 10, &quot;LT&quot;, 8 },&#xD;&#xA;	row { 11, &quot;Suburban&quot;, 2 },&#xD;&#xA;	row { 12, &quot;Half Ton&quot;, 11 },&#xD;&#xA;	row { 13, &quot;Three Quarter Ton&quot;, 11 },&#xD;&#xA;	row { 14, &quot;Tahoe&quot;, 2 },&#xD;&#xA;	row { 15, &quot;LS&quot;, 14 },&#xD;&#xA;	row { 16, &quot;Z71&quot;, 14 },&#xD;&#xA;	row { 17, &quot;LT&quot;, 14 },&#xD;&#xA;	row { 18, &quot;TrailBlazer&quot;, 2 },&#xD;&#xA;	row { 19, &quot;5 Passenger&quot;, 18 },&#xD;&#xA;	row { 20, &quot;7 Passenger EXT&quot;, 18 },&#xD;&#xA;	row { 21, &quot;Ford&quot;, 1 },&#xD;&#xA;	row { 22, &quot;Escape&quot;, 21 },&#xD;&#xA;	row { 23, &quot;XLS&quot;, 22 },&#xD;&#xA;	row { 24, &quot;XLT&quot;, 22 },&#xD;&#xA;	row { 25, &quot;Limited&quot;, 22 },&#xD;&#xA;	row { 26, &quot;Excursion&quot;, 21 },&#xD;&#xA;	row { 27, &quot;XLS&quot;, 26 },&#xD;&#xA;	row { 28, &quot;XLT&quot;, 26 },&#xD;&#xA;	row { 29, &quot;Eddie Bauer&quot;, 26 },&#xD;&#xA;	row { 30, &quot;Limited&quot;, 26 },&#xD;&#xA;	row { 31, &quot;Expedition&quot;, 21 },&#xD;&#xA;	row { 32, &quot;XLS&quot;, 31 },&#xD;&#xA;	row { 33, &quot;XLT&quot;, 31 },&#xD;&#xA;	row { 34, &quot;NBX&quot;, 31 },&#xD;&#xA;	row { 35, &quot;Eddie Bauer&quot;, 31 },&#xD;&#xA;	row { 36, &quot;Explorer&quot;, 21 },&#xD;&#xA;	row { 37, &quot;XLS&quot;, 36 },&#xD;&#xA;	row { 38, &quot;XLT&quot;, 36 },&#xD;&#xA;	row { 39, &quot;NBX&quot;, 36 },&#xD;&#xA;	row { 40, &quot;Eddie Bauer&quot;, 36 },&#xD;&#xA;	row { 41, &quot;Limited&quot;, 36 },&#xD;&#xA;	row { 42, &quot;Explorer Sport Trac&quot;, 21 },&#xD;&#xA;	row { 43, &quot;XLS&quot;, 42 },&#xD;&#xA;	row { 44, &quot;XLT&quot;, 42 },&#xD;&#xA;	row { 45, &quot;XLT Premium&quot;, 42 },&#xD;&#xA;	row { 46, &quot;Adrenalin&quot;, 42 }&#xD;&#xA; };&#xD;&#xA;" endscript="drop table STH;&#xD;&#xA;&#xD;&#xA;delete Generators where ID = &quot;STH.ID&quot;;" bop:name="STH" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.Parent_ID" sourcelink.source="STH" document=".Frontend.Derive('Sample.Tree.STH', 'Add', '', '', true)" mode="Insert" text="&amp;Add..." hint="Add a new row." image="Image('Frontend', 'Image.Add')" bop:name="AddAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.ID" sourcelink.source="STH" document=".Frontend.Derive('Sample.Tree.STH', 'Edit', '', '', true)" mode="Edit" text="&amp;Edit..." hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" bop:name="EditAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.ID" sourcelink.source="STH" document=".Frontend.Derive('Sample.Tree.STH', 'Delete', '', '', true)" mode="Delete" text="&amp;Delete..." hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" bop:name="DeleteAction" />
+  <scriptaction script="Tree.RootExpression&#xD;&#xA; = &quot;STH where ID = &quot;&#xD;&#xA; + STH.DataView.Fields[&quot;ID&quot;].AsString;&#xD;&#xA;STH.Expression =&#xD;&#xA; &quot;STH explode by Parent_ID = parent ID where ID = &quot;&#xD;&#xA; + STH.DataView.Fields[&quot;ID&quot;].AsString&#xD;&#xA; + &quot; adorn { key { ID } } remove { sequence }&quot;;&#xD;&#xA;" text="Set As Root" bop:name="SetAsRootAction" />
+  <scriptaction script="if (STH.DataView.Fields[&quot;Parent_ID&quot;].AsString != String.Empty)&#xD;&#xA;{&#xD;&#xA;  Tree.RootExpression&#xD;&#xA;   = &quot;STH where ID = &quot;&#xD;&#xA;   + STH.DataView.Fields[&quot;Parent_ID&quot;].AsString;&#xD;&#xA;  STH.Expression =&#xD;&#xA;   &quot;STH explode by Parent_ID = parent ID where ID = &quot;&#xD;&#xA;   + STH.DataView.Fields[&quot;Parent_ID&quot;].AsString&#xD;&#xA;   + &quot; adorn { key { ID } } remove { sequence }&quot;;&#xD;&#xA;};" text="Set Parent As Root" bop:name="SetParentAsRootAction" />
+  <blockaction text="Restore Root" bop:name="RestoreRootAction">
+    <setpropertyaction node="Tree" membername="RootExpression" value="STH where IsNil(Parent_ID)" bop:name="SetTreeRootExpression" />
+    <setpropertyaction node="STH" membername="Expression" value="STH" bop:name="SetSourceExpression" />
+  </blockaction>
+  <row bop:name="RootRow">
+    <group title="Sample11STH (Single-Table Hierarchy)" bop:name="Group1">
+      <column bop:name="Column1">
+        <row bop:name="Row1">
+          <tree columnname="Description" rootexpression="STH where IsNil(Parent_ID)" childexpression="STH where Parent_ID = ACurrentID" parentexpression="STH where ID = STH[ACurrentID].Parent_ID" width="21" height="15" source="STH" bop:name="Tree" />
+          <column bop:name="Buttons">
+            <trigger action="AddAction" bop:name="Add" />
+            <trigger action="EditAction" bop:name="Edit" />
+            <trigger action="DeleteAction" bop:name="Delete" />
+            <trigger action="SetAsRootAction" margintop="20" bop:name="SetAsRoot" />
+            <trigger action="SetParentAsRootAction" bop:name="SetParentAsRoot" />
+            <trigger action="RestoreRootAction" bop:name="RestoreRoot" />
+          </column>
+          <grid source="STH" readonly="True" bop:name="Grid">
+            <textcolumn columnname="ID" width="4" bop:name="GridID" />
+            <textcolumn columnname="Description" width="16" bop:name="GridDescription" />
+            <textcolumn columnname="Parent_ID" width="5" bop:name="GridParent_ID" />
+          </grid>
+        </row>
+        <staticimage image="Image('Sample.Components', 'TreeSTHImage')" bop:name="Diagram" />
+      </column>
+    </group>
+    <frame document="Form('Sample.Components', 'Sample11Docs')" bop:name="Frame1" />
+  </row>
+</interface>

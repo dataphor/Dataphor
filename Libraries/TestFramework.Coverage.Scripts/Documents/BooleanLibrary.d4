@@ -1,0 +1,71 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Boolean Operators
+begin
+  var LBoolean1: Boolean, LBoolean2: Boolean;
+  
+  LBoolean1 := false;
+  if LBoolean1 <> false then
+    raise Error("Boolean assignment from literal failed");
+    
+  LBoolean2 := LBoolean1;
+  if LBoolean2 <> false then
+    raise Error("Boolean assignment from variable failed");
+    
+  LBoolean1 := true;
+  if LBoolean2 <> false then
+    raise Error("Boolean assignment is not by value");
+    
+  LBoolean2 := not(LBoolean2);
+  if LBoolean2 <> true then
+    raise Error("Boolean not failed");
+    
+  LBoolean1 := true;
+  LBoolean2 := false;
+  if not(LBoolean1 or LBoolean2) then
+    raise Error("Boolean or failed, arguments unequal");
+    
+  if not(LBoolean1 xor LBoolean2) then
+    raise Error("Boolean xor failed, arguments unequal");
+    
+  if LBoolean1 and LBoolean2 then
+    raise Error("Boolean and failed, arguments unequal");
+    
+  LBoolean2 := true;
+  if not(LBoolean1 or LBoolean2) then
+    raise Error("Boolean or failed, arguments equal");
+    
+  if LBoolean1 xor LBoolean2 then
+    raise Error("Boolean xor failed, arguments equal");
+     
+  if not(LBoolean1 and LBoolean2) then
+    raise Error("Boolean and failed, arguments equal");
+    
+  LBoolean1 := false;
+  LBoolean2 := true;
+  if LBoolean1 > LBoolean2 then
+    raise Error("Boolean greater than failed");
+    
+  if LBoolean1 >= LBoolean2 then
+    raise Error("Boolean inclusive greater than failed, arguments unequal");
+    
+  if LBoolean2 < LBoolean1 then
+    raise Error("Boolean less than failed");
+    
+  if LBoolean2 <= LBoolean1 then
+    raise Error("Boolean inclusive less than failed, arguments unequal");
+     
+  LBoolean2 := false;
+  if not(LBoolean1 >= LBoolean2) then
+    raise Error("Boolean inclusive greater than failed, arguments equal");
+
+  if not(LBoolean1 <= LBoolean2) then
+    raise Error("Boolean inclusive less than failed, arguments equal");
+    
+  if (LBoolean1 ?= LBoolean2) <> 0 then
+    raise Error("Boolean compare failed, arguments equal");
+end;
+

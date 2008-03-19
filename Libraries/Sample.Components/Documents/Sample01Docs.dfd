@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample provides an example for the use of the following components:&#xD;&#xA;   Source&#xD;&#xA;   SetPropertyAction&#xD;&#xA;   FindAction&#xD;&#xA;   Rows and Columns&#xD;&#xA;   Group&#xD;&#xA;   TextBox&#xD;&#xA;   Trigger&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of these components is provided in the other notebook tabs." width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Source" bop:name="SourcePage">
+        <row bop:name="SourceRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Source&quot;)" bop:name="SourceImage" />
+          <statictext text="The Source node is used to access data.&#xD;&#xA;Data-aware elements connect to the source to display and edit the data.&#xD;&#xA;&#xD;&#xA;The data for this sample is generated using a D4 script in the BeginScript property.  A session table is created and filled.  The BeginScript is executed just before the Source is enabled.&#xD;&#xA;&#xD;&#xA;The EndScript D4 script deletes the session table. The EndScript D4 script is executed just after the Source disabled.&#xD;&#xA;&#xD;&#xA;Since FindAction requires an ordered column to work, the Expression property includes a D4 order by clause.&#xD;&#xA;&#xD;&#xA;The Source named Temp is used to create a table for storing a temparary value.  For a complete example of this refer to &quot;Customizing a Form, add a filter&quot; in the Rental Movie Store tutorial. " width="50" margintop="10" bop:name="SourceText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="SetPropertyAction" bop:name="SetPropertyActionPage">
+        <row bop:name="SetPropertyActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="SetPropertyActionImage" />
+          <statictext text="The SetPropertyAction provides a mean of modifying a property of a node.&#xD;&#xA;&#xD;&#xA;In this sample SetFindActionValueProperty gets the value of FindValue column of the Temp source and sets the Value property of FindVehicleAction to the same value." width="50" margintop="10" bop:name="SetPropertyActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="FindAction" bop:name="FindActionPage">
+        <row bop:name="FindActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="FindActionImage" />
+          <statictext text="The FindAction provides a mean of positioning the dataset to a row where the value of a specified ordered column is equal to (or close to) the value in the FindAction Value property.&#xD;&#xA;" width="50" margintop="10" bop:name="FindActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Ro&amp;w/Column" bop:name="Row_ColumnPage">
+        <row bop:name="Row_ColumnRow">
+          <column bop:name="Row_ColumnColumn">
+            <staticimage image="Image(&quot;Frontend&quot;,&quot;Row&quot;)" bop:name="Row_ColumnImage1" />
+            <staticimage image="Image(&quot;Frontend&quot;,&quot;Column&quot;)" bop:name="Row_ColumnImage2" />
+          </column>
+          <statictext text="Rows and Columns provides a mean of positioning elements on the form.&#xD;&#xA;&#xD;&#xA;Rows will place elements side by side (horizontally arranged) on the form while columns will place elements over or under one another (vertically arranged)." width="50" margintop="10" bop:name="Row_ColumnText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Gr&amp;oup" bop:name="GroupPage">
+        <row bop:name="GroupRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Group&quot;)" bop:name="GroupImage" />
+          <statictext text="A Group is used to visually and functionally group controls. A group can have a single child node. If the group's Title property is set, the title will be displayed near the upper left corner of the group.&#xD;&#xA;&#xD;&#xA;In this sample the Group is used to collect the controls used for the Find.  A row is the child node of the Group so the controls are displayed beside each other. The row contains a TextBox and a Trigger.&#xD;&#xA;&#xD;&#xA;" width="50" margintop="10" bop:name="GroupText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="TextBox" bop:name="TextBoxPage">
+        <row bop:name="TextBoxRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;TextBox&quot;)" bop:name="TextBoxImage" />
+          <statictext text="A TextBox is used to display and, optionally modify, data from a dataset.&#xD;&#xA;&#xD;&#xA;In this sample the TextBox displays and modifies the value of the FindValue column from the Temp source.&#xD;&#xA;&#xD;&#xA;" width="50" margintop="10" bop:name="TextBoxText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Tri&amp;gger" bop:name="TriggerPage">
+        <row bop:name="TriggerRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Trigger&quot;)" bop:name="TriggerImage" />
+          <statictext text="A TextBox is used to display and, optionally modify, data from a dataset.&#xD;&#xA;&#xD;&#xA;In this sample the TextBox displays and modifies the value of the FindValue column from the Temp source.&#xD;&#xA;&#xD;&#xA;" width="50" margintop="10" bop:name="TriggerText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

@@ -1,0 +1,27 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator PayFees
+(
+ ASaleID: Integer,
+ AAccountID : Integer,
+ ABalance : Money
+)
+begin
+ // create saleitem
+ insert 
+  table
+  {
+   row
+   {
+    ASaleID Sale_ID,
+    "Late Fee Payment" Description,
+    ABalance Cost
+   }
+  } into SaleItem;
+
+ // clear account balance
+ update Account set { Balance := $0 } where ID = AAccountID;
+end;

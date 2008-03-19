@@ -1,0 +1,151 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Operators
+// create operator
+create operator TestOperator(Num : Integer): Integer
+begin
+	result := Num;	
+end;
+create operator TestOperator2()
+begin
+end;
+// alter operator
+alter operator TestOperator2()
+begin
+		true;
+end;
+// drop operator
+drop operator TestOperator2();
+
+drop operator TestOperator(Integer);
+
+
+// Alphora Dataphor
+//  Copyright 2001,2002 Alphora
+// System Library
+
+// TODO: Test user-defined host-implemented operators
+// TODO: Test operator characteristics inference
+
+// Parameter Passing and Results with Scalar, Row and Table Variables
+create operator TestScalarParameters(AValue : Integer, var AReference : Integer)
+begin
+  AValue := 5;
+  AReference := 5;
+end;
+
+begin
+  var LValue : Integer := 10;
+  var LReference : Integer := 10;
+  TestScalarParameters(LValue, var LReference);
+  if (LValue <> 10) then
+    raise Error("Scalar parameter passing by value failed");
+    
+  if (LReference <> 5) then
+    raise Error("Scalar parameter passing by reference failed");
+end;
+
+drop operator TestScalarParameters(Integer, var Integer);
+
+create operator TestRowParameters(AValue : row{id : Integer}, var AReference : row{id : Integer})
+begin
+  AValue := row{5 id};
+  AReference := row{5 id};
+end;
+
+begin
+  var LValue : row{id : Integer} := row{10 id};
+  var LReference : row{id : Integer} := row{10 id};
+  
+  TestRowParameters(LValue, var LReference);
+  if not(LValue = row{10 id}) then
+    raise Error("Row parameter passing by value failed");
+    
+  if not(LReference = row{5 id}) then
+    raise Error("Row parameter passing by reference failed");
+end;
+
+drop operator TestRowParameters(row { id : Integer }, var row { id : Integer });
+
+/*
+// TODO: Table-valued parameters can no longer be passed by reference, update this coverage when they can again (probably 3.*)
+create operator TestTableParameters(AValue : table{id : Integer}, var AReference : table{id : Integer})
+begin
+  AValue := table{row{5 id}};
+  AReference := table{row{5 id}};
+end;
+
+begin
+  var LValue : table{id : Integer} := table{row{10 id}};
+  var LReference : table{id : Integer} := table{row{10 id}};
+  
+  TestTableParameters(LValue, var LReference);
+  if (id from row from LValue) <> 10 then
+    raise Error("Table parameter passing by value failed");
+    
+   if (id from row from LReference) <> 5 then
+     raise Error("Table parameter passing by reference failed");
+end;
+*/
+
+create operator TestListParameters(AValue : list(Integer), var AReference : list(Integer))
+begin
+	AValue := { 5 };
+	AReference := { 5 };
+end;
+
+begin
+	var LValue : list(Integer) := { 10 };
+	var LReference : list(Integer) := { 10 };
+	
+	TestListParameters(LValue, var LReference);
+	if not(LValue = { 10 }) then
+		raise Error("List parameter passing by value failed");
+		
+	if not(LReference = { 5 }) then
+		raise Error("List parameter passing by reference failed");
+end;
+
+drop operator TestListParameters(list(Integer), var list(Integer));
+
+//* Verify that an in parameter functions correctly
+// Test case for defect #31453
+create operator TestByVarParameters(var AValue : Integer)
+begin
+	AValue := 10;
+end;
+
+create operator TestByValueParameters(AValue : Integer)
+begin
+	TestByVarParameters(var AValue);
+end;
+
+var LValue := 5;
+TestByValueParameters(LValue);
+if LValue = 10 then
+	raise Error('In Parameter not copied');
+
+drop operator TestByValueParameters(Integer);
+drop operator TestByVarParameters(var Integer);
+
+//* Verify that an in parameter marked as const by the compiler functions correctly
+// Test case for defect #31448
+create operator TestInParameterMarkedAsConst(AValue : Integer)
+begin
+end;
+
+create operator TestConstParameterInCursor(const AValue : Integer)
+begin
+	foreach var LRow in Sessions where ID = AValue do;
+end;
+
+var LValue2 := SessionID();
+TestInParameterMarkedAsConst(LValue2);
+TestConstParameterInCursor(LValue2);
+
+drop operator TestConstParameterInCursor(Integer);
+drop operator TestInParameterMarkedAsConst(Integer);

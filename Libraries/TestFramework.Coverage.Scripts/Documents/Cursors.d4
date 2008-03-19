@@ -1,0 +1,1818 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Cursors coverage
+
+//TestSearchable('ServerSettings browse by { }', 'ServerSettings');
+create table TestServerSettings from ServerSettings;
+TestSearchable('TestServerSettings browse by { }', 'TestServerSettings');
+drop table TestServerSettings;
+create table TestTableVars from TableVars;
+TestSearchable('TableVars browse by { ID }', 'TestTableVars');
+drop table TestTableVars;
+
+// Browsing on an empty key
+create table TestEmptyKey { Name : String, key { } };
+insert table { row { '000' Name } } into TestEmptyKey;
+TestSearchable('TestEmptyKey browse by { }', 'TestEmptyKey');
+TestSearchable('TestEmptyKey rename Main browse by { }', 'TestEmptyKey rename Main');
+
+begin
+	var LCursor : cursor(typeof(TestEmptyKey)) := cursor(TestEmptyKey browse by { });
+	try
+		LCursor.Next();
+		var LKey : row := LCursor.GetKey();
+		LCursor.Next();
+		if not(LCursor.FindKey(LKey)) then
+			raise Error("FindKey() failed.");
+		if LCursor.Prior() then
+			raise Error("Unexpected row after Prior()");
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// closing a closed cursor
+begin
+	var LCursor : cursor(typeof(TestEmptyKey)) := cursor(TestEmptyKey browse by { });
+	LCursor.Close();
+	var LFailed := false;
+	try
+		LCursor.Close();
+	except
+		LFailed := true;
+	end;
+	if not LFailed then
+		raise Error("Closing a closed cursor did not raise.");
+end;
+
+// operating on an unopened cursor
+begin
+	var LCursor : cursor(typeof(TestEmptyKey)) := cursor(TestEmptyKey browse by { });
+	LCursor.Close();
+	
+	var LFailed := false;
+	try
+		LCursor.EOF();
+	except
+		LFailed := true;
+	end;
+	if not LFailed then
+		raise Error("Performing an EOF on a closed cursor did not raise.");
+	
+	LFailed := false;
+	try
+		LCursor.Next();
+	except
+		LFailed := true;
+	end;
+	if not LFailed then
+		raise Error("Performing a Next on a closed cursor did not raise.");
+end;
+
+drop table TestEmptyKey;
+
+create table TestTable { ID: Integer, Another: Integer };
+
+TestTable := table { row { 1 ID, 0 Another}, row { 2, 0 }, row { 3, 0 }, row { 4, 0 }, row { 5, 0 } };
+
+begin
+	var LErrorHit : Boolean := false;
+	try
+		try
+			var TestCursor : cursor(typeof(TestTable));
+			TestCursor := cursor(TestTable capabilities {Navigable, Updateable} type static); // it doesn't matter whether or not it is static.
+			try
+				TestCursor.Next();
+				TestCursor.Update( row { 1 Another } );
+				TestCursor.Update( row { 2 Another } );
+			finally
+				TestCursor.Close();
+			end;
+		commit;
+	except
+		LErrorHit := true;
+	end;
+	
+	if not(LErrorHit) then
+		raise Error("Optimistic concurrency check did not catch the change.");
+end;
+
+begin
+	var TestCursor : cursor(typeof(TestTable)) := cursor(TestTable capabilities { Navigable, Updateable } type static);
+	try
+		while TestCursor.Next() do
+			TestCursor.Update(row { (TestCursor.Select().ID) Another });
+	finally
+		TestCursor.Close();
+	end;
+end;
+
+if TestTable <> table { row { 1 ID, 1 Another }, row { 2, 2 }, row { 3, 3 }, row { 4, 4 }, row { 5, 5 } } then
+	raise Error("Static cursor update failed.");
+
+drop table TestTable;
+
+create table TestTableVars from TableVars over { Name } where false;
+
+begin
+	var LCursor : cursor(typeof(TableVars over { Name })) := cursor(TableVars over { Name } browse by { Name });
+	try
+		while LCursor.Next() do
+		begin
+			insert table { row { LCursor.Select().Name Name } } into TestTableVars;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if (TestTableVars <> (TableVars over { Name })) then
+	raise Error("Cursor population failed.");
+	
+delete TestTableVars;
+
+begin
+	var LCursor : cursor(typeof(TableVars over { Name })) := cursor(TableVars over { Name } browse by { Name });
+	try
+		var LCurrentName : Name := "";
+		while LCursor.Next() do
+		begin
+			insert table { row { LCursor.Select().Name Name } } into TestTableVars;
+			LCursor.Next();
+			LCursor.Prior();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if (TestTableVars <> (TableVars over { Name })) then
+	raise Error("Cursor population failed.");
+	
+delete TestTableVars;
+	
+begin
+	var LCursor : cursor(typeof(TableVars over { Name })) := cursor(TableVars over { Name } browse by { Name });
+	try
+		var LCurrentName : Name := "";
+		while LCursor.Next() do
+			if (LCursor.Select().Name) <> LCurrentName then
+			begin
+				LCurrentName := LCursor.Select().Name;
+				insert table { row { LCurrentName Name } } into TestTableVars;
+			end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if (TestTableVars <> (TableVars over { Name })) then
+	raise Error("Cursor population failed.");
+	
+drop table TestTableVars;
+
+create table TestOperators { OperatorName : Name };
+
+begin
+	var LCursor : cursor(typeof(Operators)) := cursor(Operators browse by { Name });
+	try
+		var LCurrentName : Name := "";
+		while LCursor.Next() do
+			if (LCursor.Select().OperatorName) <> LCurrentName then
+			begin
+				LCurrentName := LCursor.Select().OperatorName;
+				insert table { row { LCurrentName OperatorName } } into TestOperators;
+			end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if exists((Operators over { OperatorName }) minus TestOperators) then
+	raise Error("Cursor population failed.");
+
+drop table TestOperators;
+
+// Updateable repro
+create table UpRepro
+{
+	ID : Integer,
+	Worth : String,
+	key {ID}
+};
+
+delete UpRepro;
+insert table { row { 1 ID , "a" Worth}, row { 2, "b" }, row { 3 , "a" }, row { 4, "b" }, row { 5 , "a" }} into UpRepro;
+
+begin
+	var UpCursor : cursor(typeof(UpRepro));
+	UpCursor := cursor(UpRepro capabilities { navigable, updateable, searchable });
+	try
+		var x : Integer := 0;
+		while x <> 5 do
+		begin
+			UpCursor.Next();
+			UpCursor.Update(row { "Test" + x.ToString() Worth });
+			x := x + 1;			
+		end;
+	finally
+		UpCursor.Close();
+	end;
+end;
+
+if (UpRepro <> table { row { 1 ID, 'Test0' Worth }, row { 2, 'Test1' }, row { 3, 'Test2' }, row { 4, 'Test3' }, row { 5, 'Test4' } }) then
+	raise Error("UpRepro failed.");
+
+drop table UpRepro;
+
+// Node Optimization Coverage Script
+// © Copyright 2002 Alphora
+
+/*
+	Cursor capabilities by table algorithm ->
+	
+		FilterTable -> Navigable
+		ScanTable -> Navigable, BackwardsNavigable, Searchable
+		SeekTable -> Navigable, BackwardsNavigable
+		AdornTable -> Navigable
+		ProjectTable -> Navigable
+		AggregateTable -> Navigable, (BackwardsNavigable, Bookmarkable, Searchable, Countable if Source supported)
+		OrderTable -> Navigable, BackwardsNavigable, Bookmarkable, Searchable, Countable
+		CopyTable -> Navigable, BackwardsNavigable, Bookmarkable, Searchable, Countable
+		BrowseTable -> Navigable, BackwardsNavigable, Bookmarkable, Searchable
+		QuotaTable -> Navigable
+		ExplodeTable -> Navgiable
+		ExtendTable -> Navigable
+		RedefineTable -> Navigable
+		RenameTable -> Navigable, (BackwardsNavigable, Searchable if Source supported)
+		UnionTable -> Navigable, BackwardsNavigable
+		SearchedDifferenceTable -> Navigable, (BackwardsNavigable if left supported)
+		LeftUniqueNestedLoopJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueNestedLoopJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueNestedLoopJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		TimesTable -> Navigable, BackwardsNavigable if left and right supported
+		UniqueMergeJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		LeftUniqueMergeJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueMergeJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		LeftUniqueSearchedJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueSearchedJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueRightSearchedJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueLeftSearchedJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueNestedLoopLeftJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueNestedLoopLeftJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		MergeLeftJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueSearchedLeftJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueSearchedLeftJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		LeftUniqueNestedLoopRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueNestedLoopRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		MergeRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		UniqueMergeRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		LeftUniqueMergeRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		RightUniqueMergeRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		LeftUniqueSearchedRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+		NonUniqueSearchedRightJoinTable -> Navigable, BackwardsNavigable if left and right supported
+*/
+
+// Tables
+create table A
+{
+	X : Integer,
+	Y : Integer,
+	Z : Integer,
+	key { X, Y, Z },
+	order { X, Y desc }
+};
+
+create table B
+{
+	X : Integer,
+	Y : Integer,
+	Z : Integer,
+	key { X, Y, Z }
+};
+
+begin
+  var X : Integer := 1;
+  while (X <= 5) do
+  begin
+	var Y : Integer := 1;
+	while (Y <= 5) do
+	begin
+	  var Z : Integer := 1;
+	  while (Z <= 5) do
+	  begin
+	    insert table { row { X X, Y Y, Z Z } } into A;
+	    insert table { row { X X, Y Y, Z Z } } into B;
+	    Z := Z + 1;
+	  end;
+	  Y := Y + 1;
+	end;
+	X := X + 1;
+  end;
+end;
+
+// Order
+//select ShowPlan('select A order by { X }');
+//select A order by { X }; // should make use of key { x, y, z }
+CheckSupported('System.Temp', 'select A order by { X }');
+	
+//select ShowPlan('select A order by { X desc }');
+//select A order by { X desc }; // should make use of key { x }
+CheckSupported('System.Temp', 'select A order by { X desc }');
+
+//select ShowPlan('select A order by { X, Y desc }');
+//select A order by { X, Y desc }; // should make use of order { x, y desc }
+CheckSupported('System.Temp', 'select A order by { X, Y desc }');
+
+//select ShowPlan('select A order by { X desc, Y }');
+//select A order by { X desc, Y }; // should make use of order { x, y desc }
+CheckSupported('System.Temp', 'select A order by { X desc, Y }');
+
+// Restrict
+create table TestValues { LX : Integer, LY : Integer, LZ : Integer, key { } };
+insert table { row { 1 LX, 1 LY, 1 LZ } } into TestValues;
+TestRestriction('A where X = (LX from row from TestValues) and Y = (LY from row from TestValues) and Z = (LZ from row from TestValues)', 'table { row { 1 X, 1 Y, 1 Z } }', 'SeekTable');
+drop table TestValues;
+
+//select A where X = 1 and Y = 1 and Z = 1; // should use a seek on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z = 1', 'table { row { 1 X, 1 Y, 1 Z } }', 'SeekTable');
+
+//select A where X = 1; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{1 X, 1 Y, 1 Z}, 
+	row{1 X, 1 Y, 2 Z}, 
+	row{1 X, 1 Y, 3 Z}, 
+	row{1 X, 1 Y, 4 Z}, 
+	row{1 X, 1 Y, 5 Z}, 
+	row{1 X, 2 Y, 1 Z}, 
+	row{1 X, 2 Y, 2 Z}, 
+	row{1 X, 2 Y, 3 Z}, 
+	row{1 X, 2 Y, 4 Z}, 
+	row{1 X, 2 Y, 5 Z}, 
+	row{1 X, 3 Y, 1 Z}, 
+	row{1 X, 3 Y, 2 Z}, 
+	row{1 X, 3 Y, 3 Z}, 
+	row{1 X, 3 Y, 4 Z}, 
+	row{1 X, 3 Y, 5 Z}, 
+	row{1 X, 4 Y, 1 Z}, 
+	row{1 X, 4 Y, 2 Z}, 
+	row{1 X, 4 Y, 3 Z}, 
+	row{1 X, 4 Y, 4 Z}, 
+	row{1 X, 4 Y, 5 Z}, 
+	row{1 X, 5 Y, 1 Z}, 
+	row{1 X, 5 Y, 2 Z}, 
+	row{1 X, 5 Y, 3 Z}, 
+	row{1 X, 5 Y, 4 Z}, 
+	row{1 X, 5 Y, 5 Z}
+}
+', 'ScanTable');
+CheckRestrictionCount('A where X = 1', 25, 'ScanTable');
+TestSearchable('A where X = 1', 'A where X = 1');
+
+//select A where X > 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X > 3', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{4 X, 1 Y, 1 Z}, 
+	row{4 X, 1 Y, 2 Z}, 
+	row{4 X, 1 Y, 3 Z}, 
+	row{4 X, 1 Y, 4 Z}, 
+	row{4 X, 1 Y, 5 Z}, 
+	row{4 X, 2 Y, 1 Z}, 
+	row{4 X, 2 Y, 2 Z}, 
+	row{4 X, 2 Y, 3 Z}, 
+	row{4 X, 2 Y, 4 Z}, 
+	row{4 X, 2 Y, 5 Z}, 
+	row{4 X, 3 Y, 1 Z}, 
+	row{4 X, 3 Y, 2 Z}, 
+	row{4 X, 3 Y, 3 Z}, 
+	row{4 X, 3 Y, 4 Z}, 
+	row{4 X, 3 Y, 5 Z}, 
+	row{4 X, 4 Y, 1 Z}, 
+	row{4 X, 4 Y, 2 Z}, 
+	row{4 X, 4 Y, 3 Z}, 
+	row{4 X, 4 Y, 4 Z}, 
+	row{4 X, 4 Y, 5 Z}, 
+	row{4 X, 5 Y, 1 Z}, 
+	row{4 X, 5 Y, 2 Z}, 
+	row{4 X, 5 Y, 3 Z}, 
+	row{4 X, 5 Y, 4 Z}, 
+	row{4 X, 5 Y, 5 Z}, 
+	row{5 X, 1 Y, 1 Z}, 
+	row{5 X, 1 Y, 2 Z}, 
+	row{5 X, 1 Y, 3 Z}, 
+	row{5 X, 1 Y, 4 Z}, 
+	row{5 X, 1 Y, 5 Z}, 
+	row{5 X, 2 Y, 1 Z}, 
+	row{5 X, 2 Y, 2 Z}, 
+	row{5 X, 2 Y, 3 Z}, 
+	row{5 X, 2 Y, 4 Z}, 
+	row{5 X, 2 Y, 5 Z}, 
+	row{5 X, 3 Y, 1 Z}, 
+	row{5 X, 3 Y, 2 Z}, 
+	row{5 X, 3 Y, 3 Z}, 
+	row{5 X, 3 Y, 4 Z}, 
+	row{5 X, 3 Y, 5 Z}, 
+	row{5 X, 4 Y, 1 Z}, 
+	row{5 X, 4 Y, 2 Z}, 
+	row{5 X, 4 Y, 3 Z}, 
+	row{5 X, 4 Y, 4 Z}, 
+	row{5 X, 4 Y, 5 Z}, 
+	row{5 X, 5 Y, 1 Z}, 
+	row{5 X, 5 Y, 2 Z}, 
+	row{5 X, 5 Y, 3 Z}, 
+	row{5 X, 5 Y, 4 Z}, 
+	row{5 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X > 3', 50, 'ScanTable');
+TestSearchable('A where X > 3', 'A where X > 3');
+
+//select A where X >= 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X >= 3', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}, 
+	row{4 X, 1 Y, 1 Z}, 
+	row{4 X, 1 Y, 2 Z}, 
+	row{4 X, 1 Y, 3 Z}, 
+	row{4 X, 1 Y, 4 Z}, 
+	row{4 X, 1 Y, 5 Z}, 
+	row{4 X, 2 Y, 1 Z}, 
+	row{4 X, 2 Y, 2 Z}, 
+	row{4 X, 2 Y, 3 Z}, 
+	row{4 X, 2 Y, 4 Z}, 
+	row{4 X, 2 Y, 5 Z}, 
+	row{4 X, 3 Y, 1 Z}, 
+	row{4 X, 3 Y, 2 Z}, 
+	row{4 X, 3 Y, 3 Z}, 
+	row{4 X, 3 Y, 4 Z}, 
+	row{4 X, 3 Y, 5 Z}, 
+	row{4 X, 4 Y, 1 Z}, 
+	row{4 X, 4 Y, 2 Z}, 
+	row{4 X, 4 Y, 3 Z}, 
+	row{4 X, 4 Y, 4 Z}, 
+	row{4 X, 4 Y, 5 Z}, 
+	row{4 X, 5 Y, 1 Z}, 
+	row{4 X, 5 Y, 2 Z}, 
+	row{4 X, 5 Y, 3 Z}, 
+	row{4 X, 5 Y, 4 Z}, 
+	row{4 X, 5 Y, 5 Z}, 
+	row{5 X, 1 Y, 1 Z}, 
+	row{5 X, 1 Y, 2 Z}, 
+	row{5 X, 1 Y, 3 Z}, 
+	row{5 X, 1 Y, 4 Z}, 
+	row{5 X, 1 Y, 5 Z}, 
+	row{5 X, 2 Y, 1 Z}, 
+	row{5 X, 2 Y, 2 Z}, 
+	row{5 X, 2 Y, 3 Z}, 
+	row{5 X, 2 Y, 4 Z}, 
+	row{5 X, 2 Y, 5 Z}, 
+	row{5 X, 3 Y, 1 Z}, 
+	row{5 X, 3 Y, 2 Z}, 
+	row{5 X, 3 Y, 3 Z}, 
+	row{5 X, 3 Y, 4 Z}, 
+	row{5 X, 3 Y, 5 Z}, 
+	row{5 X, 4 Y, 1 Z}, 
+	row{5 X, 4 Y, 2 Z}, 
+	row{5 X, 4 Y, 3 Z}, 
+	row{5 X, 4 Y, 4 Z}, 
+	row{5 X, 4 Y, 5 Z}, 
+	row{5 X, 5 Y, 1 Z}, 
+	row{5 X, 5 Y, 2 Z}, 
+	row{5 X, 5 Y, 3 Z}, 
+	row{5 X, 5 Y, 4 Z}, 
+	row{5 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X >= 3', 75, 'ScanTable');
+TestSearchable('A where X >= 3', 'A where X >= 3');
+
+//select A where X < 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X < 3', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{1 X, 1 Y, 1 Z}, 
+	row{1 X, 1 Y, 2 Z}, 
+	row{1 X, 1 Y, 3 Z}, 
+	row{1 X, 1 Y, 4 Z}, 
+	row{1 X, 1 Y, 5 Z}, 
+	row{1 X, 2 Y, 1 Z}, 
+	row{1 X, 2 Y, 2 Z}, 
+	row{1 X, 2 Y, 3 Z}, 
+	row{1 X, 2 Y, 4 Z}, 
+	row{1 X, 2 Y, 5 Z}, 
+	row{1 X, 3 Y, 1 Z}, 
+	row{1 X, 3 Y, 2 Z}, 
+	row{1 X, 3 Y, 3 Z}, 
+	row{1 X, 3 Y, 4 Z}, 
+	row{1 X, 3 Y, 5 Z}, 
+	row{1 X, 4 Y, 1 Z}, 
+	row{1 X, 4 Y, 2 Z}, 
+	row{1 X, 4 Y, 3 Z}, 
+	row{1 X, 4 Y, 4 Z}, 
+	row{1 X, 4 Y, 5 Z}, 
+	row{1 X, 5 Y, 1 Z}, 
+	row{1 X, 5 Y, 2 Z}, 
+	row{1 X, 5 Y, 3 Z}, 
+	row{1 X, 5 Y, 4 Z}, 
+	row{1 X, 5 Y, 5 Z}, 
+	row{2 X, 1 Y, 1 Z}, 
+	row{2 X, 1 Y, 2 Z}, 
+	row{2 X, 1 Y, 3 Z}, 
+	row{2 X, 1 Y, 4 Z}, 
+	row{2 X, 1 Y, 5 Z}, 
+	row{2 X, 2 Y, 1 Z}, 
+	row{2 X, 2 Y, 2 Z}, 
+	row{2 X, 2 Y, 3 Z}, 
+	row{2 X, 2 Y, 4 Z}, 
+	row{2 X, 2 Y, 5 Z}, 
+	row{2 X, 3 Y, 1 Z}, 
+	row{2 X, 3 Y, 2 Z}, 
+	row{2 X, 3 Y, 3 Z}, 
+	row{2 X, 3 Y, 4 Z}, 
+	row{2 X, 3 Y, 5 Z}, 
+	row{2 X, 4 Y, 1 Z}, 
+	row{2 X, 4 Y, 2 Z}, 
+	row{2 X, 4 Y, 3 Z}, 
+	row{2 X, 4 Y, 4 Z}, 
+	row{2 X, 4 Y, 5 Z}, 
+	row{2 X, 5 Y, 1 Z}, 
+	row{2 X, 5 Y, 2 Z}, 
+	row{2 X, 5 Y, 3 Z}, 
+	row{2 X, 5 Y, 4 Z}, 
+	row{2 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X < 3', 50, 'ScanTable');
+TestSearchable('A where X < 3', 'A where X < 3');
+
+//select A where X <= 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X <= 3', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{1 X, 1 Y, 1 Z}, 
+	row{1 X, 1 Y, 2 Z}, 
+	row{1 X, 1 Y, 3 Z}, 
+	row{1 X, 1 Y, 4 Z}, 
+	row{1 X, 1 Y, 5 Z}, 
+	row{1 X, 2 Y, 1 Z}, 
+	row{1 X, 2 Y, 2 Z}, 
+	row{1 X, 2 Y, 3 Z}, 
+	row{1 X, 2 Y, 4 Z}, 
+	row{1 X, 2 Y, 5 Z}, 
+	row{1 X, 3 Y, 1 Z}, 
+	row{1 X, 3 Y, 2 Z}, 
+	row{1 X, 3 Y, 3 Z}, 
+	row{1 X, 3 Y, 4 Z}, 
+	row{1 X, 3 Y, 5 Z}, 
+	row{1 X, 4 Y, 1 Z}, 
+	row{1 X, 4 Y, 2 Z}, 
+	row{1 X, 4 Y, 3 Z}, 
+	row{1 X, 4 Y, 4 Z}, 
+	row{1 X, 4 Y, 5 Z}, 
+	row{1 X, 5 Y, 1 Z}, 
+	row{1 X, 5 Y, 2 Z}, 
+	row{1 X, 5 Y, 3 Z}, 
+	row{1 X, 5 Y, 4 Z}, 
+	row{1 X, 5 Y, 5 Z}, 
+	row{2 X, 1 Y, 1 Z}, 
+	row{2 X, 1 Y, 2 Z}, 
+	row{2 X, 1 Y, 3 Z}, 
+	row{2 X, 1 Y, 4 Z}, 
+	row{2 X, 1 Y, 5 Z}, 
+	row{2 X, 2 Y, 1 Z}, 
+	row{2 X, 2 Y, 2 Z}, 
+	row{2 X, 2 Y, 3 Z}, 
+	row{2 X, 2 Y, 4 Z}, 
+	row{2 X, 2 Y, 5 Z}, 
+	row{2 X, 3 Y, 1 Z}, 
+	row{2 X, 3 Y, 2 Z}, 
+	row{2 X, 3 Y, 3 Z}, 
+	row{2 X, 3 Y, 4 Z}, 
+	row{2 X, 3 Y, 5 Z}, 
+	row{2 X, 4 Y, 1 Z}, 
+	row{2 X, 4 Y, 2 Z}, 
+	row{2 X, 4 Y, 3 Z}, 
+	row{2 X, 4 Y, 4 Z}, 
+	row{2 X, 4 Y, 5 Z}, 
+	row{2 X, 5 Y, 1 Z}, 
+	row{2 X, 5 Y, 2 Z}, 
+	row{2 X, 5 Y, 3 Z}, 
+	row{2 X, 5 Y, 4 Z}, 
+	row{2 X, 5 Y, 5 Z}, 
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X <= 3', 75, 'ScanTable');
+TestSearchable('A where X <= 3', 'A where X <= 3');
+
+//select A where X > 2 and X < 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X > 2 and X < 4', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X > 2 and X < 4', 25, 'ScanTable');
+TestSearchable('A where X > 2 and X < 4', 'A where X > 2 and X < 4');
+
+//select A where X > 2 and X <= 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X > 2 and X <= 4', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}, 
+	row{4 X, 1 Y, 1 Z}, 
+	row{4 X, 1 Y, 2 Z}, 
+	row{4 X, 1 Y, 3 Z}, 
+	row{4 X, 1 Y, 4 Z}, 
+	row{4 X, 1 Y, 5 Z}, 
+	row{4 X, 2 Y, 1 Z}, 
+	row{4 X, 2 Y, 2 Z}, 
+	row{4 X, 2 Y, 3 Z}, 
+	row{4 X, 2 Y, 4 Z}, 
+	row{4 X, 2 Y, 5 Z}, 
+	row{4 X, 3 Y, 1 Z}, 
+	row{4 X, 3 Y, 2 Z}, 
+	row{4 X, 3 Y, 3 Z}, 
+	row{4 X, 3 Y, 4 Z}, 
+	row{4 X, 3 Y, 5 Z}, 
+	row{4 X, 4 Y, 1 Z}, 
+	row{4 X, 4 Y, 2 Z}, 
+	row{4 X, 4 Y, 3 Z}, 
+	row{4 X, 4 Y, 4 Z}, 
+	row{4 X, 4 Y, 5 Z}, 
+	row{4 X, 5 Y, 1 Z}, 
+	row{4 X, 5 Y, 2 Z}, 
+	row{4 X, 5 Y, 3 Z}, 
+	row{4 X, 5 Y, 4 Z}, 
+	row{4 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X > 2 and X <= 4', 50, 'ScanTable');
+TestSearchable('A where X > 2 and X <= 4', 'A where X > 2 and X <= 4');
+
+//select A where X >= 2 and X < 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X >= 2 and X < 4', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{2 X, 1 Y, 1 Z}, 
+	row{2 X, 1 Y, 2 Z}, 
+	row{2 X, 1 Y, 3 Z}, 
+	row{2 X, 1 Y, 4 Z}, 
+	row{2 X, 1 Y, 5 Z}, 
+	row{2 X, 2 Y, 1 Z}, 
+	row{2 X, 2 Y, 2 Z}, 
+	row{2 X, 2 Y, 3 Z}, 
+	row{2 X, 2 Y, 4 Z}, 
+	row{2 X, 2 Y, 5 Z}, 
+	row{2 X, 3 Y, 1 Z}, 
+	row{2 X, 3 Y, 2 Z}, 
+	row{2 X, 3 Y, 3 Z}, 
+	row{2 X, 3 Y, 4 Z}, 
+	row{2 X, 3 Y, 5 Z}, 
+	row{2 X, 4 Y, 1 Z}, 
+	row{2 X, 4 Y, 2 Z}, 
+	row{2 X, 4 Y, 3 Z}, 
+	row{2 X, 4 Y, 4 Z}, 
+	row{2 X, 4 Y, 5 Z}, 
+	row{2 X, 5 Y, 1 Z}, 
+	row{2 X, 5 Y, 2 Z}, 
+	row{2 X, 5 Y, 3 Z}, 
+	row{2 X, 5 Y, 4 Z}, 
+	row{2 X, 5 Y, 5 Z}, 
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X >= 2 and X < 4', 50, 'ScanTable');
+TestSearchable('A where X >= 2 and X < 4', 'A where X >= 2 and X < 4');
+
+//select A where X >= 2 and X <= 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X >= 2 and X <= 4', 'table of { X : System.Integer, Y : System.Integer, Z : System.Integer }
+{
+	row{2 X, 1 Y, 1 Z}, 
+	row{2 X, 1 Y, 2 Z}, 
+	row{2 X, 1 Y, 3 Z}, 
+	row{2 X, 1 Y, 4 Z}, 
+	row{2 X, 1 Y, 5 Z}, 
+	row{2 X, 2 Y, 1 Z}, 
+	row{2 X, 2 Y, 2 Z}, 
+	row{2 X, 2 Y, 3 Z}, 
+	row{2 X, 2 Y, 4 Z}, 
+	row{2 X, 2 Y, 5 Z}, 
+	row{2 X, 3 Y, 1 Z}, 
+	row{2 X, 3 Y, 2 Z}, 
+	row{2 X, 3 Y, 3 Z}, 
+	row{2 X, 3 Y, 4 Z}, 
+	row{2 X, 3 Y, 5 Z}, 
+	row{2 X, 4 Y, 1 Z}, 
+	row{2 X, 4 Y, 2 Z}, 
+	row{2 X, 4 Y, 3 Z}, 
+	row{2 X, 4 Y, 4 Z}, 
+	row{2 X, 4 Y, 5 Z}, 
+	row{2 X, 5 Y, 1 Z}, 
+	row{2 X, 5 Y, 2 Z}, 
+	row{2 X, 5 Y, 3 Z}, 
+	row{2 X, 5 Y, 4 Z}, 
+	row{2 X, 5 Y, 5 Z}, 
+	row{3 X, 1 Y, 1 Z}, 
+	row{3 X, 1 Y, 2 Z}, 
+	row{3 X, 1 Y, 3 Z}, 
+	row{3 X, 1 Y, 4 Z}, 
+	row{3 X, 1 Y, 5 Z}, 
+	row{3 X, 2 Y, 1 Z}, 
+	row{3 X, 2 Y, 2 Z}, 
+	row{3 X, 2 Y, 3 Z}, 
+	row{3 X, 2 Y, 4 Z}, 
+	row{3 X, 2 Y, 5 Z}, 
+	row{3 X, 3 Y, 1 Z}, 
+	row{3 X, 3 Y, 2 Z}, 
+	row{3 X, 3 Y, 3 Z}, 
+	row{3 X, 3 Y, 4 Z}, 
+	row{3 X, 3 Y, 5 Z}, 
+	row{3 X, 4 Y, 1 Z}, 
+	row{3 X, 4 Y, 2 Z}, 
+	row{3 X, 4 Y, 3 Z}, 
+	row{3 X, 4 Y, 4 Z}, 
+	row{3 X, 4 Y, 5 Z}, 
+	row{3 X, 5 Y, 1 Z}, 
+	row{3 X, 5 Y, 2 Z}, 
+	row{3 X, 5 Y, 3 Z}, 
+	row{3 X, 5 Y, 4 Z}, 
+	row{3 X, 5 Y, 5 Z}, 
+	row{4 X, 1 Y, 1 Z}, 
+	row{4 X, 1 Y, 2 Z}, 
+	row{4 X, 1 Y, 3 Z}, 
+	row{4 X, 1 Y, 4 Z}, 
+	row{4 X, 1 Y, 5 Z}, 
+	row{4 X, 2 Y, 1 Z}, 
+	row{4 X, 2 Y, 2 Z}, 
+	row{4 X, 2 Y, 3 Z}, 
+	row{4 X, 2 Y, 4 Z}, 
+	row{4 X, 2 Y, 5 Z}, 
+	row{4 X, 3 Y, 1 Z}, 
+	row{4 X, 3 Y, 2 Z}, 
+	row{4 X, 3 Y, 3 Z}, 
+	row{4 X, 3 Y, 4 Z}, 
+	row{4 X, 3 Y, 5 Z}, 
+	row{4 X, 4 Y, 1 Z}, 
+	row{4 X, 4 Y, 2 Z}, 
+	row{4 X, 4 Y, 3 Z}, 
+	row{4 X, 4 Y, 4 Z}, 
+	row{4 X, 4 Y, 5 Z}, 
+	row{4 X, 5 Y, 1 Z}, 
+	row{4 X, 5 Y, 2 Z}, 
+	row{4 X, 5 Y, 3 Z}, 
+	row{4 X, 5 Y, 4 Z}, 
+	row{4 X, 5 Y, 5 Z}
+}', 'ScanTable');
+CheckRestrictionCount('A where X >= 2 and X <= 4', 75, 'ScanTable');
+TestSearchable('A where X >= 2 and X <= 4', 'A where X >= 2 and X <= 4');
+
+//select A where X = 1 and Y = 2 and Z > 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 2 and Z > 3', 'table { row { 1 X, 2 Y, 4 Z }, row { 1 X, 2 Y, 5 Z } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 2 and Z > 3', 'table { row { 1 X, 2 Y, 4 Z }, row { 1 X, 2 Y, 5 Z } }');
+
+//select A where X = 2 and Y = 1 and Z >= 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 2 and Y = 1 and Z >= 3', 'table { row { 2 X, 1 Y, 3 Z }, row { 2, 1, 4 }, row { 2, 1, 5 } }', 'ScanTable');
+TestSearchable('A where X = 2 and Y = 1 and Z >= 3', 'table { row { 2 X, 1 Y, 3 Z }, row { 2, 1, 4 }, row { 2, 1, 5 } }');
+
+//select A where X = 2 and Y = 2 and Z < 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 2 and Y = 2 and Z < 3', 'table { row { 2 X, 2 Y, 1 Z }, row { 2, 2, 2 } }', 'ScanTable');
+TestSearchable('A where X = 2 and Y = 2 and Z < 3', 'table { row { 2 X, 2 Y, 1 Z }, row { 2, 2, 2 } }');
+
+//select A where X = 1 and Y = 1 and Z <= 3; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z <= 3', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 1 and Z <= 3', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 } }');
+
+//select A where X = 1 and Y = 1 and Z > 2 and Z < 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z > 2 and Z < 4', 'table { row { 1 X, 1 Y, 3 Z } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 1 and Z > 2 and Z < 4', 'table { row { 1 X, 1 Y, 3 Z } }');
+
+//select A where X = 1 and Y = 1 and Z > 2 and Z <= 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z > 2 and Z <= 4', 'table { row { 1 X, 1 Y, 3 Z }, row { 1, 1, 4 } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 1 and Z > 2 and Z <= 4', 'table { row { 1 X, 1 Y, 3 Z }, row { 1, 1, 4 } }');
+
+//select A where X = 1 and Y = 1 and Z >= 2 and Z < 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z >= 2 and Z < 4', 'table { row { 1 X, 1 Y, 2 Z }, row { 1, 1, 3 } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 1 and Z >= 2 and Z < 4', 'table { row { 1 X, 1 Y, 2 Z }, row { 1, 1, 3 } }');
+
+//select A where X = 1 and Y = 1 and Z >= 2 and Z <= 4; // should use a scan on key { x, y, z }
+TestRestriction('A where X = 1 and Y = 1 and Z >= 2 and Z <= 4', 'table { row { 1 X, 1 Y, 2 Z }, row { 1, 1, 3 }, row { 1, 1, 4 } }', 'ScanTable');
+TestSearchable('A where X = 1 and Y = 1 and Z >= 2 and Z <= 4', 'table { row { 1 X, 1 Y, 2 Z }, row { 1, 1, 3 }, row { 1, 1, 4 } }');
+
+//select A where X > 4 and Y > 4 and Z > 3; // should use a standard filter table
+TestRestriction('A where X > 4 and Y > 4 and Z > 3', 'table { row { 5 X, 5 Y, 4 Z }, row { 5, 5, 5 } }', 'FilterTable');
+TestNavigable('A where X > 4 and Y > 4 and Z > 3', 'table { row { 5 X, 5 Y, 4 Z }, row { 5, 5, 5 } }');
+
+// Adorn
+//select A where X = 1 and Y = 1 adorn { X tags { Frontend.Title = "Blah" } };
+TestNavigable('A where X = 1 and Y = 1 adorn { X tags { Frontend.Title = "Blah" } }', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Project
+//select A over { X };
+TestNavigable('A over { X }', 'table { row { 1 X }, row { 2 }, row { 3 }, row { 4 }, row { 5 } }');
+
+// Aggregate
+//select A group by { X } add { Count(Y) CountY };
+TestNavigable('A group by { X } add { Count(Y) CountY }', 'table { row { 1 X, 25 CountY }, row { 2, 25 }, row { 3, 25 }, row { 4, 25 }, row { 5, 25 } }');
+
+// Order
+//select A where X = 1 and Y = 1 order by { X, Y, Z };
+TestSearchable('A where X = 1 and Y = 1 order by { X, Y, Z }', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Copy
+//select A where X = 1 and Y = 1 order by { X, Y, Z } type static;
+TestSearchable('A where X = 1 and Y = 1 order by { X, Y, Z } type static', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Browse
+//select A where X = 1 and Y = 1 browse by { X, Y, Z };
+TestSearchable('A where X = 1 and Y = 1 browse by { X, Y, Z }', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Quota
+//select A return 5 by { X, Y, Z };
+TestNavigable('A return 5 by { X, Y, Z }', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Explode
+create table Node { ID : Integer, key { ID } };
+create table Link { Node_ID : Integer, Parent_Node_ID : Integer, key { Node_ID } };
+insert table { row { 1 ID }, row { 2 }, row { 3 }, row { 4 }, row { 5 } } into Node;
+insert table { row { 5 Node_ID, 4 Parent_Node_ID }, row { 4, 3 }, row { 3, 2 }, row { 2, 1 } } into Link;
+//select Link explode by Parent_Node_ID = parent Node_ID where Parent_Node_ID = 1;
+TestNavigable('Link explode by Parent_Node_ID = parent Node_ID where Parent_Node_ID = 1', 'table { row { 2 Node_ID, 1 Parent_Node_ID, 1 sequence }, row { 3, 2, 2 }, row { 4, 3, 3 }, row { 5, 4, 4 } }');
+
+drop table Link;
+drop table Node;
+
+// Extend
+//select A where X = 1 and Y = 1 add { X + Y + Z W };
+TestNavigable('A where X = 1 and Y = 1 add { X + Y + Z W }', 'table { row { 1 X, 1 Y, 1 Z, 3 W }, row { 1, 1, 2, 4 }, row { 1, 1, 3, 5 }, row { 1, 1, 4, 6 }, row { 1, 1, 5, 7 } }');
+
+// Redefine
+//select A where X = 1 and Y = 1 redefine { Z := X + Y };
+TestNavigable('A where X = 1 and Y = 1 redefine { Z := X + Y }', 'table { row { 1 X, 1 Y, 2 Z } }');
+
+// Rename
+//select A where X = 1 and Y = 1 rename B;
+TestNavigable('A where X = 1 and Y = 1 rename B', 'table { row { 1 B.X, 1 B.Y, 1 B.Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+
+// Union
+// need to implement a merge union
+//select A union B;
+if ((A union B) <> A) or ((A union B) <> B) then
+	raise Error('A union B failed.');
+TestBackwardsNavigable('A union B', 'B union A');
+
+// Difference
+//select A minus B;
+if exists (A minus B) then
+	raise Error('A minus B failed.');
+//select A minus (B where X <> 1 or Y <> 1);
+TestBackwardsNavigable('A minus (B where X <> 1 or Y <> 1)', 'table { row { 1 X, 1 Y, 1 Z }, row { 1, 1, 2 }, row { 1, 1, 3 }, row { 1, 1, 4 }, row { 1, 1, 5 } }');
+	
+// need to implement a merge difference
+
+drop table A;
+drop table B;
+
+// Join
+create table R { ID : String, Name : String, key { ID } };
+create table S { ID : String, R_ID : String, Name : String, key { ID } };
+create table T { S_ID : String, Name : String, key { S_ID } };
+
+insert table { row { '001' ID, 'Albert' Name } } into R;
+insert table { row { '002' ID, 'Mary' Name } } into R;
+insert table { row { '003' ID, 'Jane' Name } } into R;
+insert table { row { '004' ID, 'Joe' Name } } into R;
+
+insert table { row { '001' ID, '001' R_ID, 'John' Name } } into S;
+insert table { row { '002' ID, '001' R_ID, 'Jacob' Name } } into S;
+insert table { row { '003' ID, '001' R_ID, 'Jingle' Name } } into S;
+insert table { row { '004' ID, '001' R_ID, 'Heimer' Name } } into S;
+insert table { row { '005' ID, '002' R_ID, 'John' Name } } into S;
+insert table { row { '006' ID, '002' R_ID, 'Jacob' Name } } into S;
+insert table { row { '007' ID, '003' R_ID, 'Jingle' Name } } into S;
+insert table { row { '008' ID, '003' R_ID, 'Heimer' Name } } into S;
+
+insert table { row { '001' S_ID, 'John' Name } } into T;
+insert table { row { '002' S_ID, 'Jacob' Name } } into T;
+insert table { row { '003' S_ID, 'Jingle' Name } } into T;
+insert table { row { '004' S_ID, 'Heimer' Name } } into T;
+
+// TimesTable
+//select (R rename A) times (R rename B);
+if ((R rename A) times (R rename B)) <>
+	table
+	{
+		row { '001' A.ID, 'Albert' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '004' B.ID, 'Joe' B.Name }
+	} then
+	raise Error('Times failed');
+
+CheckJoinAlgorithm('(R rename A) times (R rename B)', 'TimesTable');
+TestBackwardsNavigable('(R rename A) times (R rename B)', "table
+	{
+		row { '001' A.ID, 'Albert' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '001' A.ID, 'Albert' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '002' A.ID, 'Mary' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '003' A.ID, 'Jane' A.Name, '004' B.ID, 'Joe' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '001' B.ID, 'Albert' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '002' B.ID, 'Mary' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '003' B.ID, 'Jane' B.Name },
+		row { '004' A.ID, 'Joe' A.Name, '004' B.ID, 'Joe' B.Name }
+	}");
+	
+// UniqueMergeJoinTable
+// One to One join, both inputs ordered by join keys
+//select (S rename S) join (T rename T) by S.ID = T.S_ID;
+CheckJoinAlgorithm('(S rename S) join (T rename T) by S.ID = T.S_ID', 'UniqueMergeJoinTable'); // TODO: Fix this its using a RightUniqueSearchedJoinTable
+TestBackwardsNavigable('(S rename S) join (T rename T) by S.ID = T.S_ID', "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, T.S_ID : System.String, T.Name : System.String }
+{
+	row{'001' S.ID, '001' S.R_ID, 'John' S.Name, '001' T.S_ID, 'John' T.Name}, 
+	row{'002' S.ID, '001' S.R_ID, 'Jacob' S.Name, '002' T.S_ID, 'Jacob' T.Name}, 
+	row{'003' S.ID, '001' S.R_ID, 'Jingle' S.Name, '003' T.S_ID, 'Jingle' T.Name}, 
+	row{'004' S.ID, '001' S.R_ID, 'Heimer' S.Name, '004' T.S_ID, 'Heimer' T.Name}
+}");
+
+//select (S rename S where ID > '001') join (T rename T where S_ID > '002') by S.ID = T.S_ID;
+CheckJoinAlgorithm("(S rename S where ID > '001') join (T rename T where S_ID > '002') by S.ID = T.S_ID", 'UniqueMergeJoinTable');
+TestBackwardsNavigable("(S rename S where ID > '001') join (T rename T where S_ID > '002') by S.ID = T.S_ID", "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, T.S_ID : System.String, T.Name : System.String }
+{
+	row{'003' S.ID, '001' S.R_ID, 'Jingle' S.Name, '003' T.S_ID, 'Jingle' T.Name}, 
+	row{'004' S.ID, '001' S.R_ID, 'Heimer' S.Name, '004' T.S_ID, 'Heimer' T.Name}
+}");
+
+//select (S rename S where ID > '002') join (T rename T where S_ID > '001') by S.ID = T.S_ID;
+CheckJoinAlgorithm("(S rename S where ID > '002') join (T rename T where S_ID > '001') by S.ID = T.S_ID", 'UniqueMergeJoinTable');
+TestBackwardsNavigable("(S rename S where ID > '002') join (T rename T where S_ID > '001') by S.ID = T.S_ID", "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, T.S_ID : System.String, T.Name : System.String }
+{
+	row{'003' S.ID, '001' S.R_ID, 'Jingle' S.Name, '003' T.S_ID, 'Jingle' T.Name}, 
+	row{'004' S.ID, '001' S.R_ID, 'Heimer' S.Name, '004' T.S_ID, 'Heimer' T.Name}
+}");
+
+// LeftUniqueMergeJoinTable
+// One to One or Many join, both inputs ordered by join keys
+//select (R rename A) join (S where R_ID > '001' rename B) by A.ID = B.R_ID;
+CheckJoinAlgorithm("(R rename A) join (S where R_ID > '001' rename B) by A.ID = B.R_ID", 'LeftUniqueMergeJoinTable');
+TestBackwardsNavigable("(R rename A) join (S where R_ID > '001' rename B) by A.ID = B.R_ID", "table of { A.ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'002' A.ID, 'Mary' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'002' A.ID, 'Mary' A.Name, '006' B.ID, '002' B.R_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, 'Jane' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'003' A.ID, 'Jane' A.Name, '008' B.ID, '003' B.R_ID, 'Heimer' B.Name}
+}");
+
+// RightUniqueMergeJoinTable
+// One or Many to One join, both inputs ordered by join keys
+//select (S where R_ID > '001' rename A) join (R rename B) by A.R_ID = B.ID;
+CheckJoinAlgorithm("(S where R_ID > '001' rename A) join (R rename B) by A.R_ID = B.ID", 'RightUniqueMergeJoinTable');
+TestBackwardsNavigable("(S where R_ID > '001' rename A) join (R rename B) by A.R_ID = B.ID", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.Name : System.String }
+{
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '002' B.ID, 'Mary' B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, '002' B.ID, 'Mary' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, 'Jane' B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, '003' B.ID, 'Jane' B.Name}
+}");
+
+// LeftUniqueSearchedJoinTable
+// One to One or Many join, left input ordered by join key
+//select (R rename A) join (S rename B) by A.ID = B.R_ID;
+CheckJoinAlgorithm("(R rename A) join (S rename B) by A.ID = B.R_ID", 'LeftUniqueSearchedJoinTable');
+TestBackwardsNavigable("(R rename A) join (S rename B) by A.ID = B.R_ID", "table of { A.ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, 'Albert' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'001' A.ID, 'Albert' A.Name, '002' B.ID, '001' B.R_ID, 'Jacob' B.Name}, 
+	row{'001' A.ID, 'Albert' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'001' A.ID, 'Albert' A.Name, '004' B.ID, '001' B.R_ID, 'Heimer' B.Name}, 
+	row{'002' A.ID, 'Mary' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'002' A.ID, 'Mary' A.Name, '006' B.ID, '002' B.R_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, 'Jane' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'003' A.ID, 'Jane' A.Name, '008' B.ID, '003' B.R_ID, 'Heimer' B.Name}
+}");
+
+// NonUniqueLeftSearchedJoinTable
+// Many to One or Many join, left input ordered by join key
+//select (S where Name > 'Jacob' rename A) join (S rename B) by A.Name = B.Name;
+CheckJoinAlgorithm("(S where Name > 'Jacob' rename A) join (S rename B) by A.Name = B.Name", 'NonUniqueLeftSearchedJoinTable');
+TestBackwardsNavigable("(S where Name > 'Jacob' rename A) join (S rename B) by A.Name = B.Name", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}
+} order by { B.ID, B.R_ID }");
+
+// RightUniqueSearchedJoinTable
+// One or Many to One join, right input ordered by join key
+//select (S rename A) join (R rename B) by A.R_ID = B.ID;
+CheckJoinAlgorithm("(S rename A) join (R rename B) by A.R_ID = B.ID", 'RightUniqueSearchedJoinTable');
+TestBackwardsNavigable("(S rename A) join (R rename B) by A.R_ID = B.ID", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.ID, 'Albert' B.Name}, 
+	row{'002' A.ID, '001' A.R_ID, 'Jacob' A.Name, '001' B.ID, 'Albert' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '001' B.ID, 'Albert' B.Name}, 
+	row{'004' A.ID, '001' A.R_ID, 'Heimer' A.Name, '001' B.ID, 'Albert' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '002' B.ID, 'Mary' B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, '002' B.ID, 'Mary' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, 'Jane' B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, '003' B.ID, 'Jane' B.Name}
+}");
+
+// NonUniqueRightSearchedJoinTable
+// One or Many to Many join, right input ordered by join key
+//select (S rename A) join (S where Name > 'Jacob' rename B) by A.Name = B.Name;
+CheckJoinAlgorithm("(S rename A) join (S where Name > 'Jacob' rename B) by A.Name = B.Name", 'NonUniqueRightSearchedJoinTable');
+TestBackwardsNavigable("(S rename A) join (S where Name > 'Jacob' rename B) by A.Name = B.Name", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}
+}");
+
+// LeftUniqueNestedLoopJoinTable
+// One to One or Many join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// RightUniqueNestedLoopJoinTable
+// One or Many to One join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// NonUniqueNestedLoopJoinTable
+// Many to Many join, neither input ordered
+// NOTE: node level optimizations will not select this algorithm
+
+// MergeLeftJoinTable
+// One to One left join, both inputs ordered by join keys
+//select (S rename A) left join (T rename B) by A.ID = B.S_ID;
+CheckJoinAlgorithm("(S rename A) left join (T rename B) by A.ID = B.S_ID", 'MergeLeftJoinTable');
+TestBackwardsNavigable("(S rename A) left join (T rename B) by A.ID = B.S_ID", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.S_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.S_ID, 'John' B.Name}, 
+	row{'002' A.ID, '001' A.R_ID, 'Jacob' A.Name, '002' B.S_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.S_ID, 'Jingle' B.Name}, 
+	row{'004' A.ID, '001' A.R_ID, 'Heimer' A.Name, '004' B.S_ID, 'Heimer' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}
+}");
+
+//select (S rename A where A.ID > '001') left join (T rename B) by A.ID = B.S_ID;
+CheckJoinAlgorithm("(S rename A where A.ID > '001') left join (T rename B) by A.ID = B.S_ID", 'MergeLeftJoinTable');
+TestBackwardsNavigable("(S rename A where A.ID > '001') left join (T rename B) by A.ID = B.S_ID", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.S_ID : System.String, B.Name : System.String }
+{
+	row{'002' A.ID, '001' A.R_ID, 'Jacob' A.Name, '002' B.S_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.S_ID, 'Jingle' B.Name}, 
+	row{'004' A.ID, '001' A.R_ID, 'Heimer' A.Name, '004' B.S_ID, 'Heimer' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}
+}");
+
+//select (S rename A) left join (T rename B where S_ID > '001') by A.ID = B.S_ID;
+CheckJoinAlgorithm("(S rename A) left join (T rename B where S_ID > '001') by A.ID = B.S_ID", 'MergeLeftJoinTable');
+TestBackwardsNavigable("(S rename A) left join (T rename B where S_ID > '001') by A.ID = B.S_ID", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.S_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'002' A.ID, '001' A.R_ID, 'Jacob' A.Name, '002' B.S_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.S_ID, 'Jingle' B.Name}, 
+	row{'004' A.ID, '001' A.R_ID, 'Heimer' A.Name, '004' B.S_ID, 'Heimer' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, (nil as System.String) B.S_ID, (nil as System.String) B.Name}
+}");
+
+// One to Many left join, both inputs ordered by join keys
+//select (R rename R) left join (S rename S where R_ID > '001') by R.ID = S.R_ID;
+CheckJoinAlgorithm("(R rename R) left join (S rename S where R_ID > '001') by R.ID = S.R_ID", 'MergeLeftJoinTable');
+TestBackwardsNavigable("(R rename R) left join (S rename S where R_ID > '001') by R.ID = S.R_ID", "table of { R.ID : System.String, R.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{'001' R.ID, 'Albert' R.Name, (nil as System.String) S.ID, (nil as System.String) S.R_ID, (nil as System.String) S.Name}, 
+	row{'002' R.ID, 'Mary' R.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{'002' R.ID, 'Mary' R.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}, 
+	row{'004' R.ID, 'Joe' R.Name, (nil as System.String) S.ID, (nil as System.String) S.R_ID, (nil as System.String) S.Name}
+}");
+
+// Many to One left join, both inputs ordered by join keys
+//select (S rename S where R_ID > '001') left join (R rename R where ID > '002') by S.R_ID = R.ID;
+CheckJoinAlgorithm("(S rename S where R_ID > '001') left join (R rename R where ID > '002') by S.R_ID = R.ID", 'MergeLeftJoinTable');
+TestBackwardsNavigable("(S rename S where R_ID > '001') left join (R rename R where ID > '002') by S.R_ID = R.ID", "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, R.ID : System.String, R.Name : System.String }
+{
+	row{'005' S.ID, '002' S.R_ID, 'John' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'006' S.ID, '002' S.R_ID, 'Jacob' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'007' S.ID, '003' S.R_ID, 'Jingle' S.Name, '003' R.ID, 'Jane' R.Name}, 
+	row{'008' S.ID, '003' S.R_ID, 'Heimer' S.Name, '003' R.ID, 'Jane' R.Name}
+}");
+
+// RightUniqueSearchedLeftJoinTable
+// One or Many to One left join, right input ordered by join keys
+//select (S rename S) left join (R rename R where ID > '001') by S.R_ID = R.ID;
+CheckJoinAlgorithm("(S rename S) left join (R rename R where ID > '001') by S.R_ID = R.ID", 'RightUniqueSearchedLeftJoinTable');
+TestBackwardsNavigable("(S rename S) left join (R rename R where ID > '001') by S.R_ID = R.ID", "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, R.ID : System.String, R.Name : System.String }
+{
+	row{'001' S.ID, '001' S.R_ID, 'John' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'002' S.ID, '001' S.R_ID, 'Jacob' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'003' S.ID, '001' S.R_ID, 'Jingle' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'004' S.ID, '001' S.R_ID, 'Heimer' S.Name, (nil as System.String) R.ID, (nil as System.String) R.Name}, 
+	row{'005' S.ID, '002' S.R_ID, 'John' S.Name, '002' R.ID, 'Mary' R.Name}, 
+	row{'006' S.ID, '002' S.R_ID, 'Jacob' S.Name, '002' R.ID, 'Mary' R.Name}, 
+	row{'007' S.ID, '003' S.R_ID, 'Jingle' S.Name, '003' R.ID, 'Jane' R.Name}, 
+	row{'008' S.ID, '003' S.R_ID, 'Heimer' S.Name, '003' R.ID, 'Jane' R.Name}
+}");
+
+// NonUniqueSearchedLeftJoinTable
+// One or Many to Many left join, right input ordered by join keys
+//select (S rename A) left join (S where Name > 'Jacob' rename B) by A.Name = B.Name;
+CheckJoinAlgorithm("(S rename A) left join (S where Name > 'Jacob' rename B) by A.Name = B.Name", 'NonUniqueSearchedLeftJoinTable');
+TestBackwardsNavigable("(S rename A) left join (S where Name > 'Jacob' rename B) by A.Name = B.Name", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'002' A.ID, '001' A.R_ID, 'Jacob' A.Name, (nil as System.String) B.ID, (nil as System.String) B.R_ID, (nil as System.String) B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'004' A.ID, '001' A.R_ID, 'Heimer' A.Name, (nil as System.String) B.ID, (nil as System.String) B.R_ID, (nil as System.String) B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'006' A.ID, '002' A.R_ID, 'Jacob' A.Name, (nil as System.String) B.ID, (nil as System.String) B.R_ID, (nil as System.String) B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'008' A.ID, '003' A.R_ID, 'Heimer' A.Name, (nil as System.String) B.ID, (nil as System.String) B.R_ID, (nil as System.String) B.Name}
+}");
+
+// RightUniqueNestedLoopLeftJoinTable
+// One or Many to One left join, neither input ordered
+// NOTE: Node level optimizations will not select this algorithm
+
+// NonUniqueNestedLoopLeftJoinTable
+// One or Many to Many left join, neither input ordered
+// NOTE: Node level optimizations will not select this algorithm
+
+// MergeRightJoinTable
+// One to One right join, both inputs ordered by join keys
+//select (T rename T) right join (S rename S) by T.S_ID = S.ID;
+CheckJoinAlgorithm("(T rename T) right join (S rename S) by T.S_ID = S.ID", 'MergeRightJoinTable');
+TestBackwardsNavigable("(T rename T) right join (S rename S) by T.S_ID = S.ID", "table of { T.S_ID : System.String, T.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{'001' T.S_ID, 'John' T.Name, '001' S.ID, '001' S.R_ID, 'John' S.Name}, 
+	row{'002' T.S_ID, 'Jacob' T.Name, '002' S.ID, '001' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' T.S_ID, 'Jingle' T.Name, '003' S.ID, '001' S.R_ID, 'Jingle' S.Name}, 
+	row{'004' T.S_ID, 'Heimer' T.Name, '004' S.ID, '001' S.R_ID, 'Heimer' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}
+} order by { S.ID }");
+
+//select (T rename T) right join (S rename S where ID > '001') by T.S_ID = S.ID;
+CheckJoinAlgorithm("(T rename T) right join (S rename S where ID > '001') by T.S_ID = S.ID", 'MergeRightJoinTable');
+TestBackwardsNavigable("(T rename T) right join (S rename S where ID > '001') by T.S_ID = S.ID", "table of { T.S_ID : System.String, T.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{'002' T.S_ID, 'Jacob' T.Name, '002' S.ID, '001' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' T.S_ID, 'Jingle' T.Name, '003' S.ID, '001' S.R_ID, 'Jingle' S.Name}, 
+	row{'004' T.S_ID, 'Heimer' T.Name, '004' S.ID, '001' S.R_ID, 'Heimer' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}
+} order by { S.ID }");
+
+//select (T rename T where S_ID > '001') right join (S rename S) by T.S_ID = S.ID;
+CheckJoinAlgorithm("(T rename T where S_ID > '001') right join (S rename S) by T.S_ID = S.ID", 'MergeRightJoinTable');
+TestBackwardsNavigable("(T rename T where S_ID > '001') right join (S rename S) by T.S_ID = S.ID", "table of { T.S_ID : System.String, T.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '001' S.ID, '001' S.R_ID, 'John' S.Name}, 
+	row{'002' T.S_ID, 'Jacob' T.Name, '002' S.ID, '001' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' T.S_ID, 'Jingle' T.Name, '003' S.ID, '001' S.R_ID, 'Jingle' S.Name}, 
+	row{'004' T.S_ID, 'Heimer' T.Name, '004' S.ID, '001' S.R_ID, 'Heimer' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{(nil as System.String) T.S_ID, (nil as System.String) T.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}
+} order by { S.ID }");
+
+// One to Many right join, both inputs ordered by join keys
+//select (S rename S where R_ID > '001') right join (R rename R) by R.ID = S.R_ID;
+CheckJoinAlgorithm("(S rename S where R_ID > '001') right join (R rename R) by R.ID = S.R_ID", 'MergeRightJoinTable');
+TestBackwardsNavigable("(S rename S where R_ID > '001') right join (R rename R) by R.ID = S.R_ID", "table of { S.ID : System.String, S.R_ID : System.String, S.Name : System.String, R.ID : System.String, R.Name : System.String }
+{
+	row{(nil as System.String) S.ID, (nil as System.String) S.R_ID, (nil as System.String) S.Name, '001' R.ID, 'Albert' R.Name}, 
+	row{'005' S.ID, '002' S.R_ID, 'John' S.Name, '002' R.ID, 'Mary' R.Name}, 
+	row{'006' S.ID, '002' S.R_ID, 'Jacob' S.Name, '002' R.ID, 'Mary' R.Name}, 
+	row{'007' S.ID, '003' S.R_ID, 'Jingle' S.Name, '003' R.ID, 'Jane' R.Name}, 
+	row{'008' S.ID, '003' S.R_ID, 'Heimer' S.Name, '003' R.ID, 'Jane' R.Name}, 
+	row{(nil as System.String) S.ID, (nil as System.String) S.R_ID, (nil as System.String) S.Name, '004' R.ID, 'Joe' R.Name}
+} order by { R.ID }");
+
+// Many to One right join, both inputs ordered by join keys
+//select (R rename R where ID > '002') right join (S rename S where R_ID > '001') by R.ID = S.R_ID;
+CheckJoinAlgorithm("(R rename R where ID > '002') right join (S rename S where R_ID > '001') by R.ID = S.R_ID", 'MergeRightJoinTable');
+TestBackwardsNavigable("(R rename R where ID > '002') right join (S rename S where R_ID > '001') by R.ID = S.R_ID", "table of { R.ID : System.String, R.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}
+}");
+
+// LeftUniqueSearchedRightJoinTable
+// One to One or Many right join, left input ordered by join keys
+//select (R rename R where ID > '001') right join (S rename S) by S.R_ID = R.ID;
+CheckJoinAlgorithm("(R rename R where ID > '001') right join (S rename S) by S.R_ID = R.ID", 'LeftUniqueSearchedRightJoinTable');
+TestBackwardsNavigable("(R rename R where ID > '001') right join (S rename S) by S.R_ID = R.ID", "table of { R.ID : System.String, R.Name : System.String, S.ID : System.String, S.R_ID : System.String, S.Name : System.String }
+{
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '001' S.ID, '001' S.R_ID, 'John' S.Name}, 
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '002' S.ID, '001' S.R_ID, 'Jacob' S.Name}, 
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '003' S.ID, '001' S.R_ID, 'Jingle' S.Name}, 
+	row{(nil as System.String) R.ID, (nil as System.String) R.Name, '004' S.ID, '001' S.R_ID, 'Heimer' S.Name}, 
+	row{'002' R.ID, 'Mary' R.Name, '005' S.ID, '002' S.R_ID, 'John' S.Name}, 
+	row{'002' R.ID, 'Mary' R.Name, '006' S.ID, '002' S.R_ID, 'Jacob' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '007' S.ID, '003' S.R_ID, 'Jingle' S.Name}, 
+	row{'003' R.ID, 'Jane' R.Name, '008' S.ID, '003' S.R_ID, 'Heimer' S.Name}
+}");
+
+// NonUniqueSearchedRightJoinTable
+// Many to One or Many right join, left input ordered by join keys
+//select (S where Name > 'Jacob' rename A) right join (S rename B) by A.Name = B.Name;
+CheckJoinAlgorithm("(S where Name > 'Jacob' rename A) right join (S rename B) by A.Name = B.Name", 'NonUniqueSearchedRightJoinTable');
+TestBackwardsNavigable("(S where Name > 'Jacob' rename A) right join (S rename B) by A.Name = B.Name", "table of { A.ID : System.String, A.R_ID : System.String, A.Name : System.String, B.ID : System.String, B.R_ID : System.String, B.Name : System.String }
+{
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '001' B.ID, '001' B.R_ID, 'John' B.Name}, 
+	row{(nil as System.String) A.ID, (nil as System.String) A.R_ID, (nil as System.String) A.Name, '002' B.ID, '001' B.R_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '003' B.ID, '001' B.R_ID, 'Jingle' B.Name}, 
+	row{(nil as System.String) A.ID, (nil as System.String) A.R_ID, (nil as System.String) A.Name, '004' B.ID, '001' B.R_ID, 'Heimer' B.Name}, 
+	row{'001' A.ID, '001' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{'005' A.ID, '002' A.R_ID, 'John' A.Name, '005' B.ID, '002' B.R_ID, 'John' B.Name}, 
+	row{(nil as System.String) A.ID, (nil as System.String) A.R_ID, (nil as System.String) A.Name, '006' B.ID, '002' B.R_ID, 'Jacob' B.Name}, 
+	row{'003' A.ID, '001' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{'007' A.ID, '003' A.R_ID, 'Jingle' A.Name, '007' B.ID, '003' B.R_ID, 'Jingle' B.Name}, 
+	row{(nil as System.String) A.ID, (nil as System.String) A.R_ID, (nil as System.String) A.Name, '008' B.ID, '003' B.R_ID, 'Heimer' B.Name}
+} order by { B.ID }");
+
+// LeftUniqueNestedLoopRightJoinTable
+// One to One or Many right join, neither input ordered
+// NOTE: Node level optimization will not select this algorithm
+
+// NonUniqueNestedLoopRightJoinTable
+// Many to One or Many right join, neither input ordered
+// NOTE: Node level optimization will not select this algorithm
+
+// TODO: Table Comparison Operators
+
+// TODO: In Operator
+
+// TODO: Update Statements
+
+drop table T;
+drop table S;
+drop table R;
+
+create table TestScan
+{
+	X : Integer,
+	Y : Integer,
+	key { X },
+	order { Y }
+};
+
+insert 
+	table 
+	{ 
+		row { 1 X, 3 Y }, 
+		row { 2 X, 5 Y }, 
+		row { 3 X, 7 Y } 
+	} 
+	into TestScan;
+  
+// Test Single Conditions
+
+// Test key 2
+TestRestriction("TestScan where Y = 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test key 3
+TestRestriction("TestScan where Y = 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test key 4
+TestRestriction("TestScan where Y = 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test key 5
+TestRestriction("TestScan where Y = 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test key 6
+TestRestriction("TestScan where Y = 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test key 7
+TestRestriction("TestScan where Y = 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test key 8
+TestRestriction("TestScan where Y = 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Double Conditions
+
+// Test Key Pair 1, 1
+TestRestriction("TestScan where Y between 1 and 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 1", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 1, 2
+TestRestriction("TestScan where Y between 1 and 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 1, 3
+TestRestriction("TestScan where Y between 1 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 1, 4
+TestRestriction("TestScan where Y between 1 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test Key Pair 1, 5
+TestRestriction("TestScan where Y between 1 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test Key Pair 1, 6
+TestRestriction("TestScan where Y between 1 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 1, 7
+TestRestriction("TestScan where Y between 1 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 1, 8
+TestRestriction("TestScan where Y between 1 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 1, 9
+TestRestriction("TestScan where Y between 1 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 1 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 1 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 2, 9
+TestRestriction("TestScan where Y between 2 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 3, 9
+TestRestriction("TestScan where Y between 3 and 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 9", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 4, 9
+TestRestriction("TestScan where Y between 4 and 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 5, 9
+TestRestriction("TestScan where Y between 5 and 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 9", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 6, 9
+TestRestriction("TestScan where Y between 6 and 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 7, 9
+TestRestriction("TestScan where Y between 7 and 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 9", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 8, 9
+TestRestriction("TestScan where Y between 8 and 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 9, 9
+TestRestriction("TestScan where Y between 9 and 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 9 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 9 and Y <= 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 9 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 9 and Y < 9", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 2, 2
+TestRestriction("TestScan where Y between 2 and 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 2", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 2, 3
+TestRestriction("TestScan where Y between 2 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 2, 4
+TestRestriction("TestScan where Y between 2 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test Key Pair 2, 5
+TestRestriction("TestScan where Y between 2 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+
+// Test Key Pair 2, 6
+TestRestriction("TestScan where Y between 2 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 2, 7
+TestRestriction("TestScan where Y between 2 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 2, 8
+TestRestriction("TestScan where Y between 2 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 2 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 2 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 3, 8
+TestRestriction("TestScan where Y between 3 and 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 8", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 4, 8
+TestRestriction("TestScan where Y between 4 and 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 5, 8
+TestRestriction("TestScan where Y between 5 and 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 8", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 6, 8
+TestRestriction("TestScan where Y between 6 and 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+
+// Test Key Pair 7, 8
+TestRestriction("TestScan where Y between 7 and 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 8", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 8, 8
+TestRestriction("TestScan where Y between 8 and 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y <= 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 8 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 8 and Y < 8", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 3, 3
+TestRestriction("TestScan where Y between 3 and 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 3", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 3", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 3, 4
+TestRestriction("TestScan where Y between 3 and 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 4", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 3, 5
+TestRestriction("TestScan where Y between 3 and 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 5", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 3, 6
+TestRestriction("TestScan where Y between 3 and 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 6", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 3, 7
+TestRestriction("TestScan where Y between 3 and 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 3 and Y < 7", "table of { X : Integer, Y : Integer } { row { 1 X, 3 Y }, row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 3 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 4, 7
+TestRestriction("TestScan where Y between 4 and 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 5, 7
+TestRestriction("TestScan where Y between 5 and 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y }, row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 7", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 6, 7
+TestRestriction("TestScan where Y between 6 and 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 7, 7
+TestRestriction("TestScan where Y between 7 and 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y <= 7", "table of { X : Integer, Y : Integer } { row { 3 X, 7 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y <= 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 7 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 7 and Y < 7", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 4, 4
+TestRestriction("TestScan where Y between 4 and 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 4", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 4, 5
+TestRestriction("TestScan where Y between 4 and 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 4, 6
+TestRestriction("TestScan where Y between 4 and 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 4 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 4 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+
+// Test Key Pair 5, 6
+TestRestriction("TestScan where Y between 5 and 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 6", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 6, 6
+TestRestriction("TestScan where Y between 6 and 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y <= 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 6 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 6 and Y < 6", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+// Test Key Pair 5, 5
+TestRestriction("TestScan where Y between 5 and 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y <= 5", "table of { X : Integer, Y : Integer } { row { 2 X, 5 Y } }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y <= 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y >= 5 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+TestRestriction("TestScan where Y > 5 and Y < 5", "table of { X : Integer, Y : Integer } { }", "ScanTable");
+
+drop table TestScan;
+
+// Scan through a rename operator
+
+SafeDrop('TestScan');
+create table TestScan { X : Integer, Y : Integer };
+
+for LX : Integer := 1 to 2 do
+	for LY : Integer := 1 to 2 do
+		insert table { row { LX X, LY Y } } into TestScan;
+		
+if Count(TestScan where X = 1) <> 2 then
+	raise Error('Pure TestScan failed');
+	
+if Count(TestScan rename { X X1 } where X1 = 1) <> 2 then
+	raise Error('TestScan through rename failed');
+	
+SafeDrop('TestScan');

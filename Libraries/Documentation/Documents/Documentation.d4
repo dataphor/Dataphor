@@ -1,0 +1,67 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//************************************************
+
+insert table
+{
+	row { "Summary" Name, "Introductory paragraph(s)" Description },
+	row { "Remarks", "Description of object" },
+	row { "Example", "Example of use of object" },
+	row { "See Also", "Links to other help or similar objects" }
+} into TextClass;
+
+insert table
+{
+ row { "Aggregate" Name, "Aggregate operator" Description },
+ row { "Arithmetic", "Arithmetic object"},
+ row { "Bitwise", "Bitwise operator"},
+ row { "Catalog", "Catalog object"},
+ row { "Comparison", "Comparison operator"},
+ row { "Conversion", "Conversion object"},
+ row { "Cursor", "Cursor object"},
+ row { "Date-Time", "Date, Time, DateTime, TimeSpan object"},
+ row { "Dynamic-Execution", "Dynamic-Execution operator"},
+ row { "Extractor", "Extractor object"},
+ row { "Frontend", "Frontend object"},
+ row { "Generator", "Generator object"},
+ row { "GUID", "GUID object"},
+ row { "Library", "Library object"},
+ row { "List", "List object"},
+ row { "Logical", "Logical object"},
+ row { "Management", "Management object"},
+ row { "Math", "Math operator, e.g. Abs, Sin"},
+ row { "Membership", "Membership object"},
+ row { "Missing-Information", "Missing-Information object, e.g. nil, IfNil, IsSpecial"},
+ row { "Security", "Security object"},
+ row { "String", "String object"},
+ row { "System", "System object"},
+ row { "Table", "Table object"},
+ row { "Transaction", "Transaction object"},
+ row { "Upgrade", "Upgrade object"}
+} into Category;
+
+insert table
+{
+ row { "Category" Name, "Category of object" Description },
+ row { "Type" Name, "Object is a Scalar type" Description },
+ row { "Special" Name, "Object is a Special" Description },
+ row { "TypeConstrain" Name, "Object is a TypeConstrain" Description },
+ row { "TypeDefault" Name, "Object is a TypeDefault" Description },
+ row { "Representation" Name, "Object is a Representation" Description },
+ row { "Property" Name, "Object is a Property" Description },
+ row { "TableVar" Name, "Object is a TableVar" Description },
+ row { "Column" Name, "Object is a Column" Description },
+ row { "ColumnDefault" Name, "Object is a ColumnDefault" Description },
+ row { "ColumnConstraint" Name, "Object is a ColumnConstraint" Description },
+ row { "Key" Name, "Object is a Key" Description },
+ row { "Other" Name, "Object is a Other" Description },
+ row { "Operator" Name, "Object is a Operator" Description },
+ row { "Overload" Name, "Object is a Overload" Description },
+ row { "Operand" Name, "Object is a Operand" Description },
+ row { "Reference" Name, "Object is a Reference" Description },
+ row { "Constraint" Name, "Object is a Constraint" Description },
+ row { "Document" Name, "Object is a Document" Description }
+} into ObjectType;

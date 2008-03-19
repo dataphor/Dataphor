@@ -1,0 +1,18 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+insert
+	table of { ID : System.Name, Description : System.String, StartDocument : System.String }
+	{
+		row{"SampleDemo" ID, 'Sample Application' Description, '.Frontend.Form(''Sample.Demo'', ''MainForm'')' StartDocument}
+	}
+	into Applications;
+
+insert
+	table of { Application_ID : System.Name, Library_Name : System.Name }
+	{
+		row{"SampleDemo" Application_ID, System.Name('Sample.Demo') Library_Name}
+	}
+	into ApplicationLibraries;

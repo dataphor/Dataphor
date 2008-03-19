@@ -1,0 +1,138 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// register the documentation operator
+create operator DocOperator ( const ATemplate: String, const ATitle: String, const AOutput: String, const AObjects: cursor(table {Name: System.Name}) ) class "DocOperator";
+// register document library operator
+create operator DocLibrary ( const ALibraryName: String, const AXMLTemplate: String, const AExtDocPath: String, const AOutputPath: String, const ATraceOn: String ) class "DocLibrary";
+
+//****************************************
+
+create device DocumentationDevice
+	reconciliation { mode = { none }, master = device }
+	class "MSSQLDevice"
+		attributes
+		{
+			"ServerName" = ".",
+			"DatabaseName" = "Documentation",
+			"UserID" = "sa"
+			//"IsCaseSensitive" = "true"
+		};
+
+CreateRole("Documenter");
+CreateRole("Reviewer");
+
+create type DocumentationName like String
+{
+	constraint LengthValid Length(value) <= 80
+} tags { Storage.Length = "80", Frontend.Width = "30" };
+
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 200
+} tags { Storage.Length = "200", Frontend.Width = "30" };
+
+//************************************************
+
+create table ObjectType in DocumentationDevice
+{
+	Name : DocumentationName,
+	Description : Description,
+	TableName : Name {nil},
+	key { Name }
+};
+grant usage on ObjectType to role Documenter;
+
+//************************************************
+
+create table Category in DocumentationDevice
+{
+	Name : DocumentationName,  // e.g. Aggregate, Date-Time, Math
+	Description : Description,
+	key { Name }
+};
+grant usage on Category to role Documenter;
+
+//************************************************
+
+create table TextClass in DocumentationDevice
+{
+	Name : DocumentationName, // e.g. Summary, Remarks, Example, See Also
+	Description : Description,
+	key { Name }
+};
+grant usage on TextClass to role Documenter;
+
+//************************************************
+
+//drop view CatalogObjectBrowse;
+//drop table CatalogObjectText;
+//drop table CatalogObject;
+
+create table CatalogObject in DocumentationDevice
+{
+	Qualified_Name : Name,
+	ObjectType_Name : DocumentationName,
+	Title : SQLText,
+	Category_Name : DocumentationName { nil },
+	ShouldDoc : Boolean,
+	Reason : Description { nil },
+	Note : Description { nil },
+	key { Qualified_Name, ObjectType_Name },
+	reference CatalogObject_ObjectType
+	 { ObjectType_Name } references ObjectType { Name }
+	 update cascade,
+	reference CatalogObject_Category
+	 { Category_Name } references Category { Name }
+	 update cascade
+};
+grant usage on CatalogObject to role Documenter;
+
+//************************************************
+
+create table CatalogObjectText in DocumentationDevice
+{
+	Qualified_Name : Name,
+	ObjectType_Name : DocumentationName,
+	TextClass_Name : DocumentationName tags { Frontend.TextBox.Height = "2" },
+	ProposedText : SQLText { nil }
+	 tags
+	 {
+	  Frontend.TextBox.Height = "10",
+	  Frontend.TextBox.Width = "40",
+	  Frontend.TextBox.MaxLength = "0"
+	 },
+	ProposedOn : DateTime { nil } tags { Frontend.FlowBreak = "true" },
+	ProposedBy : UserID { nil },
+	ApprovedText : SQLText { nil }
+	 tags
+	 {
+	  Frontend.TextBox.Height = "10",
+	  Frontend.TextBox.Width = "40",
+	  Frontend.TextBox.MaxLength = "0"
+	 },
+	ApprovedOn : DateTime { nil } tags { Frontend.FlowBreak = "true" },
+	ApprovedBy : UserID { nil },
+	Note : Description { nil },
+	key { Qualified_Name, ObjectType_Name, TextClass_Name },
+	reference CatalogObjectText_CatalogObject
+	 { Qualified_Name, ObjectType_Name }
+	 references CatalogObject { Qualified_Name, ObjectType_Name },
+	reference CatalogObjectText_TextClass
+	 { TextClass_Name } references TextClass { Name }
+	 update cascade
+};
+grant usage on CatalogObjectText to role Documenter;
+
+//************************************************
+
+alter device DocumentationDevice
+	alter reconciliation { mode = { none } };
+	
+//************************************************
+
+create view CatalogObjectBrowse
+	CatalogObject left join CatalogObjectText;
+

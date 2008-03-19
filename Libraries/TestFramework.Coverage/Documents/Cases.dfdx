@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('TestFramework.Coverage.Base.Cases', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <checkboxcolumn bop:name="MainGridColumnMain.Enabled" readonly="False" />
+            <textcolumn bop:name="MainGridColumnMain.CreatedByUser_ID" bop:default-width="True" />
+         </grid>
+      </row>
+   </column>
+</interface>
+</document>
+</dilx>

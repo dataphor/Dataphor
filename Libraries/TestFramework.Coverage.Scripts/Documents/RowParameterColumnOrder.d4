@@ -1,0 +1,71 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator Test(const ARow : row { ID : String, Name : String }) : String
+begin
+	result := ID from ARow;
+end;
+
+if Test(row { "Carlos" Name, "CAR" ID }) = "Carlos" then
+	raise Error("Row parameter passing respects column order.");
+
+drop operator Test(row { Name : String, ID : String });
+
+create operator Test(const ATable : table { ID : String, Name : String}) : String
+begin
+	result := ID from row from ATable;
+end;
+
+if Test(table { row { "Carlos" Name, "CAR" ID } }) = "Carlos" then
+	raise Error("Table parameter passing respects column order.");
+	
+drop operator Test(table { Name : String, ID : String });
+
+begin
+	var LRow : row { ID : String, Name : String } := row { 'Carlos' Name, 'CAR' ID };
+	if (ID from LRow) <> 'CAR' then
+		raise Error("Row assignment respects column order.");
+	if (LRow <> row { 'Carlos' Name, 'CAR' ID }) then
+		raise Error("Row comparison respects column order.");
+end;
+
+begin
+	var LTable : table { ID : String, Name : String } := table { row { 'Carlos' Name, 'CAR' ID } };
+	if (ID from row from LTable) <> 'CAR' then
+		raise Error("Table assignment respects column order.");
+	if (LTable <> table { row { 'Carlos' Name, 'CAR' ID } }) then
+		raise Error("Table comparison respects column order.");
+end;
+
+create table Test { ID : String, Name : String, key { ID } };
+
+insert table { row { 'Carlos' Name, 'CAR' ID } } into Test;
+
+if (ID from row from Test) <> 'CAR' then
+	raise Error("Insert statement respects column order.");
+	
+delete Test;
+	
+create table TestAudit { ID : String, Name : String, key { ID } };
+
+create operator Test_Insert(var ARow : row { Name : String, ID : String }, var APerformUpdate : Boolean)
+begin
+	insert table { ARow } into TestAudit;
+end;
+
+attach operator Test_Insert to Test on { before insert };
+
+insert table { row { 'CAR' ID, 'Carlos' Name } } into Test;
+
+if (ID from row from TestAudit) <> 'CAR' then
+	raise Error("Event handler invocation respects column order.");
+
+detach operator Test_Insert from Test on { before insert };
+
+drop operator Test_Insert(var typeof(row from Test), var Boolean);
+
+drop table TestAudit;
+
+drop table Test;

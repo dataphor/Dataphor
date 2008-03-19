@@ -1,0 +1,129 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Reporting Views
+
+//* View: SalesReport
+create view SalesReport
+	(InvoiceItem rename II)
+		join (Invoice rename I) by I.ID = II.Invoice_ID
+		join (SaleOrder rename S) by I.ID = S.ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		join (Contact rename E) by S.Customer_ID = E.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (Users rename U) by I.User_ID = U.ID
+		over { I.ID, I.Date, I.Status_ID, I.Location_ID, L.Name, I.User_ID, U.Name, S.Customer_ID, E.Name, II.Number, II.ItemType_ID, IT.Description, II.Quantity, II.Amount }
+		add { II.Quantity * II.Amount ItemAmount };
+
+//* View: PurchasingReport
+create view PurchasingReport
+	(InvoiceItem rename II)
+		join (Invoice rename I) by I.ID = II.Invoice_ID
+		join (PurchaseOrder rename P) by I.ID = P.ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		join (Contact rename E) by P.Vendor_ID = E.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (Users rename U) by I.User_ID = U.ID
+		over { I.ID, I.Date, I.Status_ID, I.Location_ID, L.Name, I.User_ID, U.Name, P.Vendor_ID, E.Name, II.Number, II.ItemType_ID, IT.Description, II.Quantity, II.Amount }
+		add { II.Quantity * II.Amount ItemAmount };
+
+//* View: ToOrderReport
+create view ToOrderReport
+	(LocationItemsToOrder rename ITO)
+		join (Location rename L) by ITO.Location_ID = L.ID
+		join (ItemType rename IT) by ITO.ItemType_ID = IT.ID
+		over { ITO.Location_ID, L.Name, ITO.ItemType_ID, IT.Description, ITO.ToOrder };
+		
+//* View: InventoryReport
+create view InventoryReport
+	(LocationItem rename I)
+		join (Location rename L) by I.Location_ID = L.ID
+		join (ItemType rename IT) by I.ItemType_ID = IT.ID
+		over { I.Location_ID, L.Name, I.ItemType_ID, IT.Description, I.Par, I.OnHand, I.OnOrder, I.OnPurchase };
+		
+//* View: ProfitabilityReport
+create view ProfitabilityReport
+	(InvoiceItem rename II) 
+		join (Invoice rename I) by II.Invoice_ID = I.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		over { I.Location_ID, L.Name, II.ItemType_ID, IT.Description }
+		add
+		{
+			Sum
+			(
+				LineAmount from
+				(
+					(InvoiceItem rename SII)
+						join (Invoice rename SI) by SII.Invoice_ID = SI.ID
+						join (SaleOrder rename SS) by SS.ID = SI.ID
+						where SI.Location_ID = I.Location_ID and SII.ItemType_ID = II.ItemType_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) TotalSold,
+			Sum
+			(
+				LineAmount from
+				(
+					(InvoiceItem rename SII)
+						join (Invoice rename SI) by SII.Invoice_ID = SI.ID
+						join (PurchaseOrder rename SP) by SP.ID = SI.ID
+						where SI.Location_ID = I.Location_ID and SII.ItemType_ID = II.ItemType_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) TotalPurchased
+		}
+		add { TotalSold - TotalPurchased TotalProfitability };
+		
+//* View: UserReport
+create view UserReport
+	Users;
+
+//* View: CustomerReport
+create view CustomerReport
+	(Customer rename C)
+		join (Contact rename E) by C.ID = E.ID
+		join (ContactPhone rename EP) by E.ID = EP.Contact_ID and E.Primary_PhoneType_ID = EP.PhoneType_ID
+		join (ContactAddress rename EA) by E.ID = EA.Contact_ID and C.Billing_Address_Number = EA.Number
+		over { C.ID, E.Name, EP.Phone, EA.Street, EA.City, EA.State_ID, EA.ZipCode }
+		add 
+		{ 
+			Count(SaleOrder where Customer_ID = C.ID) OrderCount,
+			Sum
+			(
+				LineAmount from 
+				(
+					(InvoiceItem rename II) 
+						join (Invoice rename I) by II.Invoice_ID = I.ID 
+						join (SaleOrder rename S) by S.ID = I.ID 
+						where S.Customer_ID = C.ID
+						add { Quantity * Amount LineAmount }
+				)
+			) OrderAmount 
+		};
+
+//* View: VendorReport
+create view VendorReport
+	(Vendor rename V)
+		join (Contact rename E) by V.ID = E.ID
+		join (ContactPhone rename EP) by E.ID = EP.Contact_ID and E.Primary_PhoneType_ID = EP.PhoneType_ID
+		join (ContactAddress rename EA) by E.ID = EA.Contact_ID and V.Primary_Address_Number = EA.Number
+		over { V.ID, E.Name, EP.Phone, EA.Street, EA.City, EA.State_ID, EA.ZipCode }
+		add 
+		{ 
+			Count(PurchaseOrder where Vendor_ID = V.ID) OrderCount,
+			Sum
+			(
+				LineAmount from 
+				(
+					(InvoiceItem rename II) 
+						join (Invoice rename I) by II.Invoice_ID = I.ID 
+						join (PurchaseOrder rename P) by P.ID = I.ID 
+						where P.Vendor_ID = V.ID
+						add { Quantity * Amount LineAmount }
+				)
+			) OrderAmount 
+		};
+

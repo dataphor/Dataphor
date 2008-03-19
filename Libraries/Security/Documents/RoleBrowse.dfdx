@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.Role', 'Browse', '', '', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" useapplicationtransactions="False" />
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="RightsTrigger" action="RoleRights" />
+         </column>
+      </row>
+   </column>
+   <showformaction ibop:order="12" bop:name="RoleRights" hint="Set the rights for this role." text="&amp;Rights..." document="Form('Security', 'RoleRightBrowse')" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.Name" sourcelink.masterkeynames="Main.Name" sourcelinktype="Detail" />
+</interface>
+</document>
+</dilx>

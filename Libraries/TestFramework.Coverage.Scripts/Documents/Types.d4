@@ -1,0 +1,98 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Types
+// create type
+create type TestType like Integer;
+
+drop type TestType;
+
+create type TestType { representation TestType { Value : Integer } };
+
+drop type TestType;
+
+create type TestType like Integer { constraint IsPositive value >= 0 };
+
+drop type TestType;
+
+create type TestType like Integer { default 0 };
+
+drop type TestType;
+
+create type TestType like Integer { special Unknown 0 };
+
+drop type TestType;
+
+create type TestType
+{
+	representation TestType { Value : Integer },
+	constraint IsPositive value.Value >= 0,
+	default TestType(0),
+	special Unknown TestType(0)
+};
+
+create conversion Integer to TestType using TestType;
+
+drop conversion Integer to TestType;
+
+alter type TestType alter tags { create Frontend.Width = "5" };
+
+alter type TestType
+{
+	// create constraint
+	create constraint IsByte value.Value <= 255
+};
+
+alter type TestType
+{
+	// alter constraint
+	alter constraint IsByte alter tags { create DAE.Message = "Value must be less than or equal to 255." }
+};
+
+alter type TestType
+{
+	// drop constraint
+	drop constraint IsPositive
+};
+
+alter type TestType
+{
+	// alter default
+	alter default TestType(-1)
+};
+
+alter type TestType
+{
+	// drop default
+	drop default  // null reference exception
+};
+
+alter type TestType
+{
+	create default TestType(-1)
+};
+
+alter type TestType
+{
+	// create special
+	create special Maximum TestType(255)
+};
+
+alter type TestType
+{
+	// alter special
+	alter special Maximum TestType(254)
+};
+
+alter type TestType
+{
+	// drop special
+	drop special Maximum
+};
+
+// drop type
+drop type TestType;
+

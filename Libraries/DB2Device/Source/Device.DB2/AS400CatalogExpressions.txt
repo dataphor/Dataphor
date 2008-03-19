@@ -1,0 +1,64 @@
+/* Enter one or more SQL statements separated by semicolons */
+create view WEBDEV.DAE_TABLES as
+select
+	C.TABLE_SCHEMA as "TableSchema",
+	C.TABLE_NAME as "TableName",
+	C.COLUMN_NAME as "ColumnName",
+	C.ORDINAL_POSITION as "OrdinalPosition",
+	case when T.TABLE_TEXT is null then T.TABLE_NAME else T.TABLE_TEXT end as "ColumnTitle",
+	case when C.COLUMN_TEXT is null then C.COLUMN_NAME else C.COLUMN_TEXT end as "ColumnTitle",
+	C.DATA_TYPE as "DomainName",
+	C.LENGTH as "Length",
+	case when C.IS_NULLABLE = 'Y' then 1 else 0 end as "IsNullable",
+	case when C.DATA_TYPE in ('BLOB', 'CLOB') then 1 else 0 end as "IsDeferred"
+from QSYS2.SYSTABLES as T 
+	join QSYS2.SYSCOLUMNS as C 
+		on T.TABLE_SCHEMA = C.TABLE_SCHEMA 
+			and T.TABLE_NAME = C.TABLE_NAME
+where T.TABLE_TYPE in ('T', 'P');
+
+--select * from WEBDEV.DAE_TABLES where "TableSchema" = {0} {1} order by "TableSchema", "TableName", "OrdinalPosition";
+
+create view WEBDEV.DAE_KEYS as
+select
+	K.TABLE_SCHEMA as "TableSchema",
+	K.TABLE_NAME as "TableName",
+	K.CONSTRAINT_NAME as "IndexName",
+	C.COLUMN_NAME as "ColumnName",
+	C.ORDINAL_POSITION as "OrdinalPosition",
+	1 as "IsUnique",
+	0 as "IsDescending"
+from QSYS2.SYSTABLES T
+	join QSYS2.SYSCST K 
+		on T.TABLE_SCHEMA = K.TABLE_SCHEMA
+			and T.TABLE_NAME = K.TABLE_NAME
+	join QSYS2.SYSKEYCST C 
+		on K.CONSTRAINT_SCHEMA = C.CONSTRAINT_SCHEMA
+			and K.CONSTRAINT_NAME = C.CONSTRAINT_NAME
+where T.TABLE_TYPE in ('T', 'P')
+	and K.CONSTRAINT_TYPE = 'PRIMARY KEY';
+
+create view WEBDEV.DAE_INDEXES as
+select 
+	I.TABLE_SCHEMA as "TableSchema",
+	I.TABLE_NAME as "TableName",
+	I.INDEX_NAME as "IndexName",
+	K.COLUMN_NAME as "ColumnName",
+	K.ORDINAL_POSITION as "OrdinalPosition",
+	case when I.IS_UNIQUE = 'U' then 1 else 0 end as "IsUnique",
+	case when K.ORDERING = 'A' then 0 else 1 end as "IsDescending"
+from QSYS2.SYSTABLES T
+	join QSYS2.SYSINDEXES I
+		on T.TABLE_SCHEMA = I.TABLE_SCHEMA
+			and T.TABLE_NAME = I.TABLE_NAME
+	join QSYS2.SYSKEYS K
+		on I.INDEX_SCHEMA = K.INDEX_SCHEMA
+			and I.INDEX_NAME = K.INDEX_NAME
+where T.TABLE_TYPE in ('T', 'P');
+
+/*
+select * from WEBDEV.DAE_KEYS where "TableSchema" = {0} {1}
+union
+select * from WEBDEV.DAE_INDEXES where "TableSchema" = {0} {1}
+order by "TableSchema", "TableName", "OrdinalPosition";
+*/

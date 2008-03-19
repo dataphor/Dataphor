@@ -1,0 +1,191 @@
+﻿//	© Copyright 2000-2008 Alphora
+//	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+//
+//	Issue Tracker Database
+//
+// This script creates a simple Issue Tracker database.  Many of
+// the database objects have metadata tags for the frontend.
+//
+//
+
+/* ShortID Domain */
+create type ShortID like String
+{
+	constraint ShortID.Size Length(value) <= 3
+		static tags { DAE.SimpleMessage = "Must be between 1 and 3 characters" },
+	special Unknown ""
+}
+	tags { Frontend.Title = "ID", Frontend.Width = "4", Frontend.Hint = "Three Character Short Identifier" };
+
+
+/* Product Table */
+create table Product
+{
+	ID: ShortID
+		tags { Frontend.Title = "Product ID" },
+	Name: String
+		tags { Frontend.Width = "30", Frontend.Hint = "The name of the product" },
+	key {ID}
+};
+
+Product := table {
+	row { "DAE" ID, "Dataphor Data Access Engine" Name },
+	row { "DFE", "Dataphor FrontEnd" }
+};
+
+/* Department Table */
+create table Department
+{
+	ID: ShortID
+		tags { Frontend.Title = "Department ID" },
+	Name: String
+		tags { Frontend.Width = "25", Frontend.Hint = "The name of the department" },
+	key {ID}
+};
+
+Department := table
+{
+	row { "MAN" ID, "Management" Name },
+	row { "DEV", "Development" },
+	row { "SAL", "Sales" },
+	row { "SUP", "Support" }
+};
+
+/* Employee Table */
+create table Employee
+{
+	ID: ShortID
+		tags { Frontend.Title = "Employee ID" },
+	Department_ID: ShortID
+		tags { Frontend.Title = "Department ID" },
+	Name: String
+		tags { Frontend.Width = "30", Frontend.IsDisplayKey = "true", Frontend.Hint = "The name of the Employee" },
+	key{ID},
+	reference Employee_Department {Department_ID} references Department{ID}
+};
+
+Employee := table
+{
+	row { "CEO" ID, "MAN" Department_ID, "Joe Smith" Name },
+	row { "DS", "DEV", "David Smith" },
+	row { "DT", "DEV", "Dave Thomas" },
+	row { "JM", "DEV", "Joe Mango" },
+	row { "KA", "SAL", "Kevin Anderson" }
+};
+
+
+
+
+/* State Table - Represents the state's of an issue */
+create table State
+{
+	ID: ShortID
+		tags { Frontend.Title = "State ID" },
+	Description: String
+		tags { Frontend.Width = "20" },
+	key {ID}
+};
+
+State := table
+{
+	row { "NEW" ID, "New" Description },
+	row { "REP", "Reproduced" },
+	row { "RES", "Resolved" },
+	row { "INA", "Inactive" },
+	row { "TBT", "To Be Tested" },
+	row { "WAI", "Waiting on Something" }
+};
+
+
+
+
+/* ID Domain */
+create type ID like Integer
+{
+	special Unknown ID(-1)
+}
+	tags { Frontend.Width = "10", Frontend.Title = "ID" };
+
+/* Issue Table */
+create table Issue
+{
+	ID: ID
+		{ default GetNextGenerator("IssueID") }
+		tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true", Frontend.Title = "Issue ID", Frontend.Hint = "Issue Identification #" },
+	Product_ID: ShortID
+		tags { Frontend.LineBreak = "false", Frontend.Hint = "Identifier of the product involved", Frontend.Title = "Product ID" },		
+	Version: String
+		{ default "" }
+		tags { Frontend.Width = "11", Frontend.LineBreak = "false", Frontend.Hint = "The version of the product", DAE.StaticByteSize = "11"},
+	Priority: Integer
+		{ default 0 }
+		tags { Frontend.Title = "Priority", Frontend.Hint = "Numeric priority (0 = Highest)" },
+	Description: String
+		tags { Frontend.Width = "50", Frontend.TextBox.Height = "5", Frontend.IsDisplayKey = "true", Frontend.Hint = "Complete description of the problem", DAE.StaticByteSize="100"},
+	ReproductionSteps: String
+		{ default "" }
+		tags { Frontend.Width = "50", Frontend.TextBox.Height = "7", Frontend.Break = "true", Frontend.Title = "Steps To Reproduce", Frontend.Hint = "Steps necessary to reproduce the issue", DAE.StaticByteSize="150" },
+	key {ID},
+	reference Issue_Product {Product_ID} references Product {ID} delete set {ShortIDUnknown()},
+	order {Product_ID, Version, Priority},
+	order {Description, Priority}
+}
+	static tags { Catalog.Comment = "Bug, Problem or other Issue"}
+	tags { Frontend.Add.Query = "NewIssue" };
+
+
+/* Action Table */
+create table Action
+{
+	Issue_ID: ID
+		tags { Frontend.Title = "Issue ID", Frontend.Hint = "Issue Identification #" },
+	ID: ID
+		{ default GetNextGenerator("ActionID") }
+		tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true", Frontend.Title = "Action ID", Frontend.Hint = "Action Identification #" },
+	DateTime: DateTime
+		{ default DateTime() }
+		tags { Frontend.Title = "Date/Time", Frontend.Hint = "Date/time the action occured" },
+	State_ID: ShortID
+		tags { Frontend.Title = "New State", Frontend.Hint = "The state of the issue after this action" },
+	AssigneeEmployee_ID: ShortID
+		tags { Frontend.Title = "New Assignee", Frontend.Hint = "The Employee assigned to this issue after this action" },
+	Notes: String
+		{ default "" }
+		tags { Frontend.Width = "50", Frontend.TextBox.Height = "5", Frontend.Hint = "Notes about the action taken", DAE.StaticByteSize="150" },
+	key {Issue_ID, ID},
+	reference Action_Issue {Issue_ID} references Issue {ID} delete cascade
+		tags { Frontend.Embedded = "true", Frontend.Add.Detail.Embedded = "false" },
+	reference Issue_State {State_ID} references State {ID},
+	reference Issue_Assignee_Employee {AssigneeEmployee_ID} references Employee {ID} delete set {ShortIDUnknown()}
+};
+
+
+/* ActionDetail Table */
+create table ActionDetail
+{
+	Issue_ID: ID
+		tags { Frontend.Title = "Issue ID", Frontend.Hint = "Issue Identification #" },
+	Action_ID: ID
+		tags { Frontend.Title = "Action ID", Frontend.Hint = "Action Identification #" },
+	SoftwareEnvironment: String
+		{ default "" }
+		tags { Frontend.Title = "Software Environment" },
+	HardwareEnvironment: String
+		{ default "" }
+		tags { Frontend.Title = "Hardware Environment" },
+	key {Issue_ID, Action_ID},
+	reference ActionDetail_Action {Issue_ID, Action_ID} references Action {Issue_ID, ID}
+		tags { Frontend.Exposed = "true" }
+}
+	tags { Frontend.Title = "Action Detail" };
+
+
+/* NewIssue View */
+create view NewIssue
+	Issue join (Action rename { ID Action_ID, Issue_ID ID });
+
+/* IssueDetail View */
+create view IssueDetail
+	(Issue rename Issue) 
+		join (Action rename Action) by (Action.Issue_ID = Issue.ID)
+		where Action.DateTime = (Action where Issue_ID = Issue.ID group add {Max(DateTime) MaxDateTime})[].MaxDateTime;

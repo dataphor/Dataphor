@@ -1,0 +1,16 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table SaleItem
+{
+	ID : Integer { default GetNextGenerator("SaleItem.ID") }
+		tags { Frontend.Visible = "false" },
+	Sale_ID : Integer tags { Frontend.Width = "8" },
+	Description : StrLth50,
+	Cost : Money,
+	reference SaleItem_Sale { Sale_ID } references Sale {ID}
+		tags {Frontend.Detail.Embedded = "True"},
+	key{ID}
+};

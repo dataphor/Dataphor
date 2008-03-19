@@ -1,0 +1,153 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//regular documentation
+//  note: if the output directory c:\docbuild\Alphora\DocLibrary may be changed for supporting different machines
+DocLibrary
+(
+	"SQLDeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\SQLDeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"SecurityLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\SecurityLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"SystemLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\SystemLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"FrontendReference",
+	"C:\src\Alphora\Docs\Docs2.0\FrontendReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"GeneralLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\GeneralLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"SystemInternetLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\SystemInternetLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"ConnectionLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\ConnectionLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"ADOConnectionLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\ADOConnectionLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"ODBCConnectionLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\ODBCConnectionLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"MSOracleConnectionLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\MSOracleConnectionLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+
+DocLibrary
+(
+	"SimpleDeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\SimpleDeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"MSSQLDeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\MSSQLDeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"OracleDeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\OracleDeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+
+DocLibrary
+(
+	"DB2DeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\DB2DeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+DocLibrary
+(
+	"SASDeviceReference",
+	"C:\src\Alphora\Docs\Docs2.0\SASDeviceReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);
+
+
+DocLibrary
+(
+	"SystemIntegrationLibraryReference",
+	"C:\src\Alphora\Docs\Docs2.0\SystemIntegrationLibraryReference.xml",
+	"C:\src\Alphora\Docs\DocBookManuals\OperatorDocs",
+	"c:\docbuild\Alphora\DocLibrary",
+	"off"
+);

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Sale', 'Add')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+   <source bop:name="Main" openstate="Insert" onrowchange="SetBalanceVisibilityScript" />
+   <column bop:name="RootEditColumn">
+      <column bop:name="Element1">
+         <group bop:name="Main.Account_ID.Sample.Rental.Sale_AccountGroup">
+            <column bop:name="Element2">
+               <column ibop:order="0" bop:name="AccountColumn">
+                  <row ibop:order="0" bop:name="AccountRow">
+                     <quicklookup ibop:order="0" bop:name="MainColumnSample.Rental.Sale_Account_Main.Account_ID_Lookup">
+                        <numerictextbox bop:name="MainColumnSample.Rental.Sale_Account_Main.Account_ID" nilifblank="True" />
+                     </quicklookup>
+                     <textbox ibop:order="1" bop:name="MainColumnAccount.Name" />
+                  </row>
+                  <row ibop:order="1" bop:name="BalanceRow" visible="False">
+                     <numerictextbox ibop:order="0" bop:name="MainColumnAccount.Balance" maxwidth="20" nilifblank="True" />
+                     <trigger ibop:order="1" bop:name="AddBalanceTrigger" action="PayFeesOperatorScript" />
+                  </row>
+               </column>
+            </column>
+         </group>
+         <datetimebox bop:name="MainColumnMain.PurchasedOn" nilifblank="True" bop:default-width="True" />
+      </column>
+      <notebook bop:name="MainEmbeddedDetailsNotebook" activepage="Sample.Rental.SaleItem_SaleFrame">
+         <notebookframepage bop:name="Sample.Rental.SaleItem_SaleFrame" document="Form('Sample.Rental', 'SaleItemFrame')" />
+      </notebook>
+   </column>
+   <datascriptaction ibop:order="7" bop:name="PayFeesOperatorScript" image="Image(&quot;Frontend&quot;,&quot;Warning&quot;)" text="Add Balance as Sale Item" afterexecute="BalanceChargedScript" enlistwith="Main" script="PayFees(Main.ID, Account.ID, Account.Balance);">
+      <dataargument ibop:order="0" bop:name="PayFeesData" columns="Main.ID, Account.ID, Account.Balance" source="Main" />
+   </datascriptaction>
+   <scriptaction ibop:order="8" bop:name="SetBalanceVisibilityScript" script="if (Main.Enabled&#xD;&#xA;    &amp;&amp; !Main.DataView.IsEmpty()&#xD;&#xA;    &amp;&amp; Main.DataView[&quot;Account.Balance&quot;].HasValue()&#xD;&#xA;    &amp;&amp; (Main.DataView[&quot;Account.Balance&quot;].AsDecimal != 0))&#xD;&#xA; {&#xD;&#xA;  BalanceRow.Visible = true;&#xD;&#xA; }&#xD;&#xA; else&#xD;&#xA; {&#xD;&#xA;  BalanceRow.Visible = false;&#xD;&#xA; }" />
+   <scriptaction ibop:order="9" bop:name="BalanceChargedScript" script="MainColumnSample_Rental_Sale_Account_Main_Account_ID_Lookup.ReadOnly = true;&#xD;&#xA;MainColumnSample_Rental_Sale_Account_Main_Account_ID.ReadOnly = true;&#xD;&#xA;BalanceRow.Visible = false;&#xD;&#xA;Sample_Rental_SaleItem_SaleFrame.FrameInterfaceNode.MainSource.Refresh();" />
+</interface>
+</document>
+</dilx>

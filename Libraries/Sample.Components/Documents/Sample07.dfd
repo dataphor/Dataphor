@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample07">
+  <source expression="Country;&#xD;&#xA;// order by { Name };" beginscript="SafeDrop('Country');&#xD;&#xA;&#xD;&#xA;create session table Country&#xD;&#xA;{ &#xD;&#xA;	ID : String&#xD;&#xA;		tags { Storage.Length = '2', Frontend.Width = '3', Frontend.ReadOnly = 'true' },&#xD;&#xA;	Name : String&#xD;&#xA;	 tags { Frontend.Width = '20', Frontend.Preview.Include = 'true' },&#xD;&#xA;	Population : Integer,&#xD;&#xA;	Area : Integer,&#xD;&#xA;	Continent : String,&#xD;&#xA;	Coordinate : String,&#xD;&#xA;	key { Name },&#xD;&#xA;	key { ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;ExecuteScript('Sample.Components', 'Country');" endscript="SafeDrop('Country');" bop:name="Countries" />
+  <editfilteraction source="Countries" afterexecute="RefreshFilter&amp;Counter" text="Edit Countries.Filter" bop:name="EditFilterAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.ID" sourcelink.source="Countries" sourcelinkrefresh="False" document="Derive('Country', 'View', 'ID', 'Main.ID', false)" bop:name="View" />
+  <source expression="TableDee add&#xD;&#xA;{&#xD;&#xA; &quot;matches&quot; SearchType tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; nil as String Name tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; nil as String Continent tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; nil as Integer Population tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; &quot;&gt;&quot; PopulationTest tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; nil as Integer Area tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; &quot;&gt;&quot; AreaTest tags { DAE.IsComputed = &quot;false&quot; }&#xD;&#xA;};&#xD;&#xA;" onrowchange="SetFilter" openstate="Edit" bop:name="FilterSource" />
+  <blockaction text="Set Filter" bop:name="SetFilter">
+    <scriptaction script="string LFilter = &quot;&quot;;&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;Name&quot;].HasValue())&#xD;&#xA;  LFilter = &quot;(Upper(Name) &quot;&#xD;&#xA;    + FilterSource[&quot;SearchType&quot;].AsString&#xD;&#xA;    + &quot; Upper(\'&quot;&#xD;&#xA;    + FilterSource[&quot;Name&quot;].AsString&#xD;&#xA;    + &quot;\'))&quot;;&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;Continent&quot;].HasValue())&#xD;&#xA;{&#xD;&#xA;  if(LFilter != &quot;&quot;)&#xD;&#xA;  {&#xD;&#xA;    LFilter += &quot; and &quot;;&#xD;&#xA;  }&#xD;&#xA;  LFilter += &quot;(Upper(Continent) &quot;&#xD;&#xA;    + FilterSource[&quot;SearchType&quot;].AsString&#xD;&#xA;    + &quot; Upper(\'&quot;&#xD;&#xA;    + FilterSource[&quot;Continent&quot;].AsString&#xD;&#xA;    + &quot;\'))&quot;;&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;Population&quot;].HasValue())&#xD;&#xA;{&#xD;&#xA;  if(LFilter != &quot;&quot;)&#xD;&#xA;  {&#xD;&#xA;    LFilter += &quot; and &quot;;&#xD;&#xA;  }&#xD;&#xA;  LFilter += &quot;(Population &quot;&#xD;&#xA;    + FilterSource[&quot;PopulationTest&quot;].AsString&#xD;&#xA;    + &quot; &quot;&#xD;&#xA;    + FilterSource[&quot;Population&quot;].AsString&#xD;&#xA;    + &quot;)&quot;;&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;Area&quot;].HasValue())&#xD;&#xA;{&#xD;&#xA;  if(LFilter != &quot;&quot;)&#xD;&#xA;  {&#xD;&#xA;    LFilter += &quot; and &quot;;&#xD;&#xA;  }&#xD;&#xA;  LFilter += &quot;(Area &quot;&#xD;&#xA;    + FilterSource[&quot;AreaTest&quot;].AsString&#xD;&#xA;    + &quot; &quot;&#xD;&#xA;    + FilterSource[&quot;Area&quot;].AsString&#xD;&#xA;    + &quot;)&quot;;&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;Countries.Filter = LFilter;&#xD;&#xA;" bop:name="SetMainFilter" />
+    <callaction action="RefreshFilter&amp;Counter" bop:name="CallRefreshFilter&amp;Counter" />
+  </blockaction>
+  <blockaction text="Clear Filter" bop:name="ClearFilter">
+    <scriptaction script="Countries.Filter = &quot;&quot;;" bop:name="ClearMainFilter" />
+    <scriptaction script="if(Countries.Filter == &quot;&quot;)&#xD;&#xA;{&#xD;&#xA;  SetClearFilterTrigger.Action = SetFilter;&#xD;&#xA;  RowCountSource.Expression = &quot;TableDee add { Count(Country) RowCount };&quot;;&#xD;&#xA;}&#xD;&#xA;else&#xD;&#xA;{&#xD;&#xA;  SetClearFilterTrigger.Action = ClearFilter;&#xD;&#xA;  RowCountSource.Expression&#xD;&#xA;    = &quot;TableDee add { Count(Country where (&quot; + Countries.Filter + &quot;)) RowCount };&quot;;&#xD;&#xA;}&#xD;&#xA;FilterStaticText.Text = Countries.Filter;" bop:name="RefreshFilter&amp;Counter" />
+  </blockaction>
+  <source expression="TableDee add { Count(Country) RowCount };" bop:name="RowCountSource" />
+  <sourceaction action="Refresh" source="RowCountSource" bop:name="RefreshRowCount" />
+  <row bop:name="MainRow">
+    <column bop:name="Column1">
+      <group title="Sample07" bop:name="Sample07Group">
+        <column bop:name="Column2">
+          <row bop:name="Row2">
+            <search source="Countries" bop:name="Search1">
+              <searchcolumn columnname="ID" width="25" bop:name="SearchColumn2" />
+              <searchcolumn columnname="Name" width="25" bop:name="SearchColumn1" />
+            </search>
+            <textbox maxlength="10" maxwidth="10" verticalalignment="Middle" columnname="RowCount" title="Row Count" source="RowCountSource" readonly="True" tabstop="False" marginleft="50" marginright="5" margintop="0" bop:name="RowCountTextBox" />
+          </row>
+          <grid rowcount="8" ondoubleclick="View" source="Countries" bop:name="CountriesGrid">
+            <textcolumn columnname="ID" width="4" bop:name="IDTextColumn" />
+            <textcolumn columnname="Name" width="20" bop:name="NameTextColumn" />
+            <textcolumn columnname="Continent" bop:name="ContinentTextColumn" />
+            <textcolumn columnname="Population" bop:name="PopulationTextColumn" />
+            <textcolumn columnname="Area" bop:name="AreaTextColumn" />
+          </grid>
+          <group title="Filter" bop:name="FilterGroup">
+            <column bop:name="Column3">
+              <row bop:name="Row3">
+                <trigger verticalalignment="Middle" action="SetFilter" marginleft="5" marginright="20" bop:name="SetClearFilterTrigger" />
+                <choice columns="2" items="matches=matches, like=like" autoupdate="True" columnname="SearchType" title="Search Type" source="FilterSource" marginleft="5" marginright="5" margintop="0" bop:name="SearchTypeChoice" />
+                <trigger verticalalignment="Middle" action="EditFilterAction" marginleft="20" bop:name="EditFilterTrigger" />
+              </row>
+              <row bop:name="Row1">
+                <textbox nilifblank="True" columnname="Name" source="FilterSource" marginleft="5" bop:name="NameTextBox" />
+                <textbox nilifblank="True" columnname="Continent" source="FilterSource" bop:name="ContinentTextBox" />
+                <choice items="&lt;=&lt;, &gt;=&gt;" autoupdate="True" columnname="PopulationTest" title="PT" source="FilterSource" bop:name="PopulationTestChoice" />
+                <numerictextbox minimumvalue="0" nilifblank="True" columnname="Population" source="FilterSource" bop:name="NumericTextBox1" />
+                <choice items="&lt;=&lt;, &gt;=&gt;" autoupdate="True" columnname="PopulationTest" title="AT" source="FilterSource" bop:name="AreaTestChoice" />
+                <numerictextbox minimumvalue="0" nilifblank="True" columnname="Area" source="FilterSource" bop:name="NumericTextBox2" />
+              </row>
+              <group title="Current Filter" bop:name="FilterTextGroup">
+                <statictext bop:name="FilterStaticText" />
+              </group>
+            </column>
+          </group>
+        </column>
+      </group>
+    </column>
+    <frame document="Form('Sample.Components','Sample07Docs');" bop:name="Frame1" />
+  </row>
+</interface>

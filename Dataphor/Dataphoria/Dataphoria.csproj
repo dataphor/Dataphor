@@ -1,0 +1,460 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AF54209E-0687-4C10-9784-487B1006E0BD}</ProjectGuid>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>Dataphoria.ico</ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Dataphoria</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Alphora.Dataphor.Dataphoria</RootNamespace>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <StartupObject>Alphora.Dataphor.Dataphoria.Dataphoria</StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <SccAuxPath>
+    </SccAuxPath>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ManifestCertificateThumbprint>BAB73A918AEDFF9C1D1884B99CFF2A38162A40A8</ManifestCertificateThumbprint>
+    <ManifestKeyFile>Dataphoria_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>true</GenerateManifests>
+    <SignManifests>true</SignManifests>
+    <PublishUrl>\\ibas\Dataphoria\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ProductName>Dataphor Dataphoria</ProductName>
+    <PublisherName>Alphora</PublisherName>
+    <AutorunEnabled>true</AutorunEnabled>
+    <ApplicationVersion>2.1.0.%2a</ApplicationVersion>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\debug\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>SIGNASSEMBLIES</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
+    <OutputPath>bin\debug\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE;SIGNASSEMBLIES</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.TextEditor, Version=2.1.0.2429, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Frontend.Client.Windows\ICSharpCode.TextEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="syncfusion.core, Version=4.102.0.62, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.grid.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.grid.base.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.shared.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.shared.base.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.shared.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.shared.windows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.tools.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.tools.base.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.tools.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>.\syncfusion.tools.windows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Design">
+      <Name>System.Design</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Drawing.Design">
+      <Name>System.Drawing.Design</Name>
+    </Reference>
+    <Reference Include="System.Runtime.Remoting">
+      <Name>System.Runtime.Remoting</Name>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap">
+      <Name>System.Runtime.Serialization.Formatters.Soap</Name>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Name>Base</Name>
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\BOP\BOP.csproj">
+      <Name>BOP</Name>
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
+      <Name>DAE.Client.Controls</Name>
+      <Project>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE.Client.Provider\DAE.Client.Provider.csproj">
+      <Name>DAE.Client.Provider</Name>
+      <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
+      <Name>DAE.Client</Name>
+      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE\DAE.csproj">
+      <Name>DAE</Name>
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client.Windows\Frontend.Client.Windows.csproj">
+      <Name>Frontend.Client.Windows</Name>
+      <Project>{E7152100-FDC7-4BF1-957C-75051BF7D8E8}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
+      <Name>Frontend.Client</Name>
+      <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>True</Private>
+    </ProjectReference>
+    <Reference Include="Syncfusion.Core">
+      <Name>Syncfusion.Core</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Analyzer\Analyzer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Analyzer\AnalyzerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Analyzer\PlanNodes.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BaseForms.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BaseTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Dataphoria.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataphoriaException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Designers\DesignBuffer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Designers\Designer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Designers\DesignService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DocumentExpressionForm.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\CustomFormDesigner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\DesignerTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\DropHightlightDrawFilter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\FormDesigner.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NativeMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ApplicationNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ConstraintNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ViewNode.cs" />
+    <Compile Include="ObjectTree\DataTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\DeviceNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\DocumentNode.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\LibraryNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\Node.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\OperatorNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ReferenceNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\RoleNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ScalarTypeNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\ServerNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\TableNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\UserNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Services\PropertyTextEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Strings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TextEditor\D4Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TextEditor\ResultPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TextEditor\TextEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UIEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UnsafeNativeMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Visual\DesignerBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\DesignerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\Element.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Visual\GridSurface.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\SingleElementSurface.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\Surface.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\TabbedBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\Table.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visual\TreeSurface.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="AboutForm.resx">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Analyzer\Analyzer.resx">
+      <DependentUpon>Analyzer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BaseForms.resx">
+      <DependentUpon>BaseForms.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dataphoria.resx">
+      <DependentUpon>Dataphoria.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataphoriaException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDesigner\CustomFormDesigner.resx">
+      <DependentUpon>CustomFormDesigner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDesigner\DesignerTree.resx">
+      <DependentUpon>DesignerTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDesigner\FormDesigner.resx">
+      <DependentUpon>FormDesigner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\Customize.bmp" />
+    <EmbeddedResource Include="Images\Edit.bmp" />
+    <EmbeddedResource Include="Images\EditCopy.bmp" />
+    <EmbeddedResource Include="Images\Rider.gif" />
+    <EmbeddedResource Include="licenses.licx" />
+    <EmbeddedResource Include="Strings.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TextEditor\D4Editor.resx">
+      <DependentUpon>D4Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TextEditor\ResultPanel.resx">
+      <DependentUpon>ResultPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TextEditor\TextEditor.resx">
+      <DependentUpon>TextEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Dataphoria_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{CF845C55-C321-4742-B673-E6212D061ED9}" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dataphoria.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SchemaDesigner\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

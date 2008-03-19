@@ -1,0 +1,33 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table MovieActor
+{
+	Movie_ID : Integer tags { Frontend.Visible = "false" },
+	Actor_ID : Integer tags { Frontend.Visible = "false" },
+	key { Movie_ID, Actor_ID },
+	reference MovieActor_Movie { Movie_ID }
+		references Movie { ID },
+	reference MovieActor_Actor { Actor_ID }
+		references Actor { ID }
+			tags { Frontend.Detail.Embedded = "true" }
+} tags { Frontend.Title = "Movie Actor" };
+
+MovieActor := table
+{
+	row { 1 Actor_ID, 1 Movie_ID },
+	row { 2, 1 },
+	row { 3, 1 },
+	row { 4, 1 },
+	row { 5, 1 },
+	row { 6, 1 },
+	row { 7, 5 },
+	row { 8, 5 },
+	row { 9, 5 },
+	row { 10,5 },
+	row { 10,9 },
+	row { 11,10 },
+	row { 12,8 }
+};

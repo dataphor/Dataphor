@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="124107">
+		<value>Unable to rename node.  A node with that name already exists.</value>
+	</data>
+	<data name="124109">
+		<value>The name is an invalid identifier or a reserved word.</value>
+	</data>
+	<data name="124110">
+		<value>Unable to register Window Message ({0}).</value>
+	</data>
+	<data name="124111">
+		<value>Document type ({0}) is not defined, or there is no default designer specified for it.</value>
+	</data>
+	<data name="124112">
+		<value>There are no designers associated with document type ({0}).</value>
+	</data>
+	<data name="124113">
+		<value>The form designer does not support multiple document ancestors.</value>
+	</data>
+	<data name="124114">
+		<value>Live edits are only allowed for expressions that load documents.</value>
+	</data>
+	<data name="124115">
+		<value>Invalid XML document: {0}</value>
+	</data>
+	<data name="124116">
+		<value>Document type ({0}) cannot be edited using a live designer.</value>
+	</data>
+	<data name="124117">
+		<value>Unable to open help file ({0}).  It may have not been installed.</value>
+	</data>
+	<data name="124118">
+		<value>'{0}' is already being designed.</value>
+	</data>
+	<data name="124120">
+		<value>Only one designer is allowed to be open on a form.</value>
+	</data>
+</root>

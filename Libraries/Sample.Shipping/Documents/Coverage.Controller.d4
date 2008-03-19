@@ -1,0 +1,25 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+StartTest();
+
+select exists(TestActive);
+
+StopTest();
+
+select TestProcessEvent;
+
+select ServerSettings
+
+select Count(Customer)
+select Count(Invoice)
+select Count(InvoiceItem)
+
+SetMaxConcurrentProcesses(5);
+SetMaxConcurrentProcesses(200);
+
+select Sessions;
+select Processes
+select Count(Processes where IsRunning)

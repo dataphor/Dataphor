@@ -1,0 +1,170 @@
+/*
+	Sorts Coverage
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+create type ProperName like String;
+
+create sort ProperName using CompareText(left.value, right.value);
+
+create table ProperNames
+{
+	ID : Integer,
+	ProperName : ProperName,
+	key { ID },
+	order { ProperName }
+};
+
+alter sort ProperName using CompareText(left.value, right.value);
+
+//select table { row { 'a' Name }, row { 'A' } };
+
+ProperNames :=
+	table
+	{
+		row { 1 ID, 'a' ProperName },
+		row { 2 ID, 'A' ProperName },
+		row { 3 ID, 'b' ProperName },
+		row { 4 ID, 'B' ProperName },
+		row { 5 ID, 'c' ProperName },
+		row { 6 ID, 'C' ProperName },
+		row { 7 ID, 'd' ProperName },
+		row { 8 ID, 'D' ProperName }
+	};
+	
+//select ProperNames order by { ProperName };
+
+// Cursor
+begin
+	var LIndex : Integer := 1;
+	var LCursor : cursor(typeof(ProperNames)) := cursor(ProperNames order by { ProperName, ID });
+	try
+		while (LCursor.Next()) do
+		begin
+			if LCursor.Select().ID <> LIndex then
+				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+			LIndex := LIndex + 1;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+//select ProperNames order by { ProperName sort CompareText(left.value, right.value), ID };
+
+// Cursor
+begin
+	var LIndex : Integer := 1;
+	var LCursor : cursor(typeof(ProperNames)) := cursor(ProperNames order by { ProperName sort CompareText(left.value, right.value), ID });
+	try
+		while (LCursor.Next()) do
+		begin
+			if LCursor.Select().ID <> LIndex then
+				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+			LIndex := LIndex + 1;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+drop table ProperNames;
+
+create table ProperNames
+{
+	ID : Integer,
+	ProperName : String,
+	key { ID },
+	order { ProperName sort CompareText(left.value, right.value) }
+};
+
+ProperNames :=
+	table
+	{
+		row { 1 ID, 'a' ProperName },
+		row { 2 ID, 'A' ProperName },
+		row { 3 ID, 'b' ProperName },
+		row { 4 ID, 'B' ProperName },
+		row { 5 ID, 'c' ProperName },
+		row { 6 ID, 'C' ProperName },
+		row { 7 ID, 'd' ProperName },
+		row { 8 ID, 'D' ProperName }
+	};
+
+// Cursor
+begin
+	var LIndex : Integer := 1;
+	var LCursor : cursor(typeof(ProperNames)) := cursor(ProperNames order by { ProperName sort CompareText(left.value, right.value), ID });
+	try
+		while (LCursor.Next()) do
+		begin
+			if LCursor.Select().ID <> LIndex then
+				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+			LIndex := LIndex + 1;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+drop table ProperNames;
+
+create table ProperNames
+{
+	ID : Integer,
+	ProperName : String,
+	key { ID }
+};
+
+ProperNames :=
+	table
+	{
+		row { 1 ID, 'a' ProperName },
+		row { 2 ID, 'A' ProperName },
+		row { 3 ID, 'b' ProperName },
+		row { 4 ID, 'B' ProperName },
+		row { 5 ID, 'c' ProperName },
+		row { 6 ID, 'C' ProperName },
+		row { 7 ID, 'd' ProperName },
+		row { 8 ID, 'D' ProperName }
+	};
+
+// Cursor (order)
+begin
+	var LIndex : Integer := 1;
+	var LCursor : cursor(typeof(ProperNames)) := cursor(ProperNames order by { ProperName });
+	try
+		while (LCursor.Next()) do
+		begin
+			if LCursor.Select().ID <> LIndex then
+				raise Error("ProperNames order by { ProperName } returned in invalid order.");
+			LIndex := LIndex + 1;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Cursor (browse)
+begin
+	var LIndex : Integer := 1;
+	var LCursor : cursor(typeof(ProperNames)) := cursor(ProperNames browse by { ProperName });
+	try
+		while (LCursor.Next()) do
+		begin
+			if LCursor.Select().ID <> LIndex then
+				raise Error("ProperNames browse by { ProperName } returned in invalid order.");
+			LIndex := LIndex + 1;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+drop table ProperNames;
+
+drop sort ProperName;
+
+drop type ProperName;
+

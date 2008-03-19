@@ -1,0 +1,54 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Types
+	// Defaults
+	// Constraints
+	// Specials
+	// Sorts
+	// Conversions
+
+create type SimpleType like String;
+
+create type SimpleDefault like String { default "" };
+
+create type SimpleConstraint like String { constraint Valid value.Length() < 5 };
+
+create table DefaultHelper { ID : Integer, key { } };
+
+create type TableDefault like Integer { default ID from row from DefaultHelper };
+
+create table GeneratorTable { NextKey : Integer, key { } };
+
+create operator GetNextKey() : Integer
+begin
+	update GeneratorTable set { NextKey := NextKey + 1 };
+	result := (NextKey from row from GeneratorTable) - 1;
+end;
+
+create type SequenceDefault like Integer { default GetNextKey() };
+
+create type SpecialType like String { special Unknown "" };
+
+create type SortType like String;
+
+create sort SortType using CompareText(left.value, right.value);
+
+create type ConversionType { representation ConversionType { Value : String } };
+
+create conversion ConversionType to String using ConversionType.ReadValue;
+create conversion String to ConversionType using ConversionType;
+
+create type TagType
+{
+	representation TagType
+	{
+		Value : String static tags { DAE.Test = "Test" } tags { Frontend.Title = "Tag Type" }
+	} static tags { DAE.Test = "Test" } tags { Frontend.Title = "Tag Type" },
+	default TagType("") static tags { DAE.Test = "Test" } tags { Frontend.Title = "Default" },
+	constraint Valid Length(value.Value) < 50 static tags { DAE.SimpleMessage = "Length must be less than 50" } tags { Frontend.Title = "Length Constraint" },
+	special DontCare TagType("") static tags { DAE.Test = "Test" } tags { Frontend.Title = "Don't Care" }
+} static tags { DAE.StaticByteSize = "20" } tags { Frontend.Title = "Tag Type" };
+

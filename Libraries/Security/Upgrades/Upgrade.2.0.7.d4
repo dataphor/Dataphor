@@ -1,0 +1,33 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+detach Security.AddGroupDeviceUserBase_Insert from Security.AddGroupDeviceUserBase on {before insert};
+drop reference Security.AddGroupDeviceUser_DevicesView;
+drop view Security.AddGroupDeviceUser;
+drop view Security.AddGroupDeviceUserBase;
+
+create view AddGroupDeviceUserBase
+	GroupDeviceUser
+		add
+		{
+			"" Password tags { DAE.IsComputed = "false", Frontend.TextBox.IsPassword = "true" },
+			"" ConfirmPassword tags { DAE.IsComputed = "false", Frontend.Title = "Confirm Password", Frontend.TextBox.IsPassword = "true" }
+		}
+		adorn
+		{
+			drop reference GroupDeviceUsers_Devices
+		};
+	
+attach operator AddGroupDeviceUserBase_Insert to AddGroupDeviceUserBase on { before insert };
+
+create view AddGroupDeviceUser
+	AddGroupDeviceUserBase
+	{
+		constraint PasswordValid Password = ConfirmPassword 
+			static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	};
+	
+grant usage on AddGroupDeviceUser to role SecurityUser;
+

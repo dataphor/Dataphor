@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Confirm Unregister Library Without Reconciliation" mainsource="Main">
+  <source bop:name="Main" expression="(&#xD;&#xA;	System.LoadedLibraries&#xD;&#xA;		rename Main&#xD;&#xA;)&#xD;&#xA;	browse by {Main.Name asc}&#xD;&#xA;capabilities {navigable, backwardsnavigable, bookmarkable, searchable}&#xD;&#xA;isolation browse&#xD;&#xA;type dynamic" isreadonly="True" />
+  <source bop:name="Dependencies" expression="DependentLibraries(ALibraryName)&#xD;&#xA;	group by { Library_Name } add { Max(Level) Level }&#xD;&#xA;	order by { Level desc }&#xD;&#xA;" useapplicationtransactions="False" isreadonly="True">
+    <dataargument source="Main" columns="ALibraryName=Main.Name" bop:name="DataArgument" />
+  </source>
+  <row bop:name="RootDeleteRow">
+    <staticimage imagewidth="32" imageheight="32" image="Image('Frontend', 'Image.Warning')" bop:name="DeleteImage" />
+    <column bop:name="Column">
+      <statictext text="Unregistering this library without reconciliation will drop all schema objects in this library without performing the corresponding drops in mapped devices." bop:name="StaticText" />
+      <group title="Press Accept to unload the following library and all of its dependents:" bop:name="DeleteGroup">
+        <column bop:name="Element1">
+          <textbox width="80" columnname="Main.Name" title="Name" source="Main" readonly="True" bop:name="MainColumnMain.Name" />
+          <statictext text="Dependents" bop:name="StaticText1" />
+          <grid rowcount="5" source="Dependencies" bop:name="Grid">
+            <textcolumn columnname="Library_Name" title="Dependent Library Name" width="60" bop:name="LibraryNameColumn" />
+          </grid>
+        </column>
+      </group>
+    </column>
+  </row>
+</interface>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('UserDeviceUser', 'Browse', 'Main.ID', 'Main.User_ID', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" detailkeynames="Main.User_ID" masterkeynames="Main.ID" useapplicationtransactions="False" />
+   <showformaction ibop:order="1" bop:name="Delete" />
+   <showformaction ibop:order="2" bop:name="View" />
+   <sourceaction ibop:order="3" bop:name="MoveFirst" />
+   <sourceaction ibop:order="4" bop:name="MovePrior" />
+   <sourceaction ibop:order="5" bop:name="MoveNext" />
+   <sourceaction ibop:order="6" bop:name="MoveLast" />
+   <sourceaction ibop:order="7" bop:name="Refresh" />
+   <menu ibop:order="8" bop:name="NavigationMenu" />
+   <column ibop:order="9" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <textcolumn bop:name="MainGridColumnMain.UserID" bop:default-hint="True" />
+            <textcolumn bop:name="MainGridColumnMain.ConnectionParameters" bop:default-hint="True" />
+         </grid>
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="SetPasswordTrigger" action="SetPassword" />
+         </column>
+      </row>
+   </column>
+   <showformaction ibop:order="10" bop:name="Edit" document="Derive('UserDeviceUser', 'Edit', 'Main.Device_Name;Main.User_ID', 'Main.Device_Name;Main.User_ID', false)" />
+   <showformaction ibop:order="11" bop:name="SetPassword" hint="Set the password for the current device user." text="Set Password..." mode="Edit" document="Derive('SetUserDeviceUserPassword', 'Add', 'Main.Device_Name;Main.User_ID', 'Main.Device_Name;Main.User_ID', false)" sourcelinkrefresh="False" sourcelink.source="Main" sourcelink.detailkeynames="Main.Device_Name, Main.User_ID" sourcelink.masterkeynames="Main.Device_Name, Main.User_ID" sourcelinktype="Detail" />
+   <showformaction ibop:order="12" bop:name="Add" document="Derive('AddUserDeviceUser', 'Add', 'Main.ID', 'Main.User_ID', true)" sourcelink.detailkeynames="Main.User_ID" sourcelink.masterkeynames="Main.ID" />
+</interface>
+</document>
+</dilx>

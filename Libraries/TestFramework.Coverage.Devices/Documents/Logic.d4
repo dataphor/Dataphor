@@ -1,0 +1,278 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+// this throws an error (Functionally) that represents (more or less) the Script that is run.
+// No added scripts are present, it just gets the data from the table
+create operator ThrowExecuteString(AName : String, ASequence : Integer)
+begin
+	var endl : String := Unicode({13, 10});
+	var LRow : typeof(row from DeviceCase) := row from DeviceCase where Name = AName and Sequence = ASequence;
+	raise Error
+	(
+		endl + endl + (Table from LRow).Replace("&", "Create") + endl + endl +
+		(InsertTableStatement from LRow) + endl + endl +
+		(BeforeScript from LRow) + endl +
+		(Script from LRow) + endl +
+		(AfterScript from LRow) + endl + endl +
+		(DropStatement from LRow) + endl +
+		"// " + (Table from LRow).Replace("&", "Drop") + endl + endl
+	);
+end;
+
+//* Operator: PrepareApplicableDeviceCases
+SafeDrop('PrepareApplicableDeviceCases(Name)');
+create operator PrepareApplicableDeviceCases(ADeviceName : Name)
+begin
+	delete ApplicableDeviceCases;
+   insert 
+	(
+		(ScalarTypes where IsSystem(Name) over { Name } )
+	   	join
+			(
+				DeviceScalarTypes
+					where (Device_Name = ADeviceName)
+					over { ScalarType_Name, Device_Name }
+					rename { ScalarType_Name Name } 
+			)
+			join
+				(DeviceCase where Enabled = true)
+			over { ID, Device_Name, Type } 
+			rename { Device_Name DeviceName }
+	   )
+		union
+		(
+			(
+				(
+					( 
+						DeviceOperators
+						   where (Device_Name = ADeviceName)	
+							over { Operator_Name, Device_Name } 
+							rename { Operator_Name Name } 
+					)
+			      join 
+			       	(Operators over { Name, OperatorName } )
+				)
+				join 
+					(IdealDeviceOperators where IsSupported over { OperatorName } )
+			)
+			join
+			   (DeviceCase where (Enabled = true))
+			over { ID, Device_Name, Type } rename { Device_Name DeviceName }
+	) into ApplicableDeviceCases;	
+end;
+
+//* Operator: CheckDeviceItemFromTable(Integer)
+SafeDrop('CheckDeviceItemFromTable(Integer, String)');
+create operator CheckDeviceItemFromTable(AID : Integer, ADeviceType : String)
+begin
+	var LAtLeastOnce := false;
+	var LDeviceCaseCursor := cursor(DeviceCase where AID = ID capabilities { searchable, navigable });
+	try                  
+		while (LDeviceCaseCursor.Next()) do
+		begin		
+			// check the value to inform that we've been here
+			LAtLeastOnce := true;
+
+			var LCaseRow := LDeviceCaseCursor.Select();
+			var LTrimmedTable := SubString(LCaseRow.Table, 1, Length(LCaseRow.Table) - 1);
+
+			begin
+				if LCaseRow.Table[0] = "&" then
+					Execute("Create" + LTrimmedTable)
+				else
+					Execute(LCaseRow.Table);
+				try
+					try
+						Execute
+						(
+							IfNil(DeviceCaseData[LCaseRow.ID, ADeviceType].InsertTableStatement, LCaseRow.InsertTableStatement)
+						);
+						if (LCaseRow.Type = "Operator") then
+							CheckSupported(GetDefaultDeviceName(), LCaseRow.Script);
+						Execute((LCaseRow { BeforeScript + Script + AfterScript Script }).Script);
+					commit;
+				finally 
+					if LCaseRow.Table[0] = "&" then
+						Execute("Drop" + LTrimmedTable);
+					Execute(LCaseRow.DropStatement);
+				end;
+			end;
+		end;
+
+		if not LAtLeastOnce then
+		  raise Error('LAtLeastOnce is False');
+		  //raise Error(Type from LDeviceCaseCursor.Select() + " '" + Name from LDeviceCaseCursor.Select() + "' doesn't have a device coverage written for it.");
+	finally
+		LDeviceCaseCursor.Close();
+	end;
+end;
+
+//*
+SafeDrop('GetDeviceType(Name)');
+create operator GetDeviceType(ADeviceName : Name) : String
+begin
+	result := (Objects return 1)[ADeviceName by { Name }].Type;
+end;
+
+//*
+SafeDrop('TestDevice(Name, Integer)');
+create operator TestDevice(ADeviceName : Name, AID : Integer)
+begin
+	if IsNil(AID) then
+		PrepareApplicableDeviceCases(ADeviceName);
+	
+	if not exists (Devices over { Name } where Name = ADeviceName) then
+		raise Error("Device '" + ADeviceName + "' doesn't exist. Ensure the device name has been fully qualified.");
+	
+	var LOldDevice : Name := GetDefaultDeviceName();
+	try
+		SetDefaultDeviceName(ADeviceName);
+		var LCurrentDevice : Name := GetDefaultDeviceName();
+		var LCurrentDeviceType := GetDeviceType(ADeviceName);
+		var LStatus : RunStatus := "Succeeded";
+
+		// ApplicableDeviceCases is view with { ID, DeviceName, Type }
+		var LCursor : cursor(typeof(ApplicableDeviceCases)); 
+      LCursor := cursor(ApplicableDeviceCases where (ID = IfNil(AID, ID )) browse by { ID } );
+      
+		try 
+		begin
+		  	while LCursor.Next() do
+			begin
+				var LCaseRow := LCursor.Select();
+      		try
+					 var LType := LCaseRow.Type;	
+				   
+					if (LType = "Operator" or LType = "Type") then
+						CheckDeviceItemFromTable(LCaseRow.ID, LCurrentDeviceType)						
+					else
+						raise Error("Invalid Device Check Type: " + LCaseRow.Type);
+
+					try
+					 	delete DeviceCaseResults where ((DeviceCase_ID = LCaseRow.ID) and (DeviceName = LCaseRow.DeviceName));
+					 	insert table
+						{ 
+							row 
+							{ 
+								LCaseRow.ID DeviceCase_ID,
+								LCurrentDevice DeviceName,
+								"Succeeded" Status,
+								"Succeeded" Results 
+							} 
+						} into DeviceCaseResults;
+					commit;
+				except
+					on E : Error do
+					begin 
+						try
+						 	delete DeviceCaseResults where ((DeviceCase_ID = LCaseRow.ID) and (DeviceName = LCaseRow.DeviceName));
+							insert table 
+							{ 
+								row 
+								{ 
+									LCaseRow.ID DeviceCase_ID,
+									LCurrentDevice DeviceName,
+									"Failed" Status,
+									GetErrorDescription(E) Results 
+								} 
+							} into DeviceCaseResults;
+						commit;
+													
+					  	LStatus := "Failed";
+					end; 
+				end;
+			end;  
+		end;
+		finally
+			LCursor.Close();
+		end;
+		
+		// this throw is to notify the caller that this operator had some problems.
+		// take note that if this operator will be run on its own, then the throw will (at least according to documentation) rollback the entire operation.
+		if LStatus = "Failed" then
+		begin
+			//raise Error("One or more case items failed.");
+		end;
+
+	finally
+		SetDefaultDeviceName(LOldDevice); // fix the default device;
+	end;	
+end;
+//*
+
+//Used by the RunCurrentCaseItem to rebuild the test tables after changes have been made before running the test.
+//drop operator RefreshDeviceCase();
+create operator ReloadDeviceCase()
+begin
+  Execute('delete DeviceCase');
+  ExecuteScript("Coverage.Devices", "InsertDeviceCase");
+end;
+
+
+/////////////////////////////MigrationFunction////////////////////////Adam
+////drop operator MigrateDeviceScriptsToDeviceCase();
+//create operator MigrateDeviceScriptsToDeviceCase()
+//begin
+//
+//      EnsureGenerators();
+//      
+//   	var LCursor : cursor(typeof(DeviceScripts));
+//		LCursor := cursor(DeviceScripts);
+//		var LEnabled : Boolean;
+//		var LName : Name;
+//		
+//		try
+//			begin
+//			  	
+//			  	while LCursor.Next() do
+//			  	  			  			  
+//				begin
+//				   
+//				   LName := Name from LCursor.Select();
+//				   if LName[0] = 'Z' then
+//			  	     begin
+//			  	       LEnabled := false;
+//			  	       LName := SubString(Name from LCursor.Select(), 1, Length(Name from LCursor.Select()) - 1);
+//			  	     end;
+//			  	     
+//					try
+//					   insert 
+//					       table 
+//					       { 
+//					          row
+//					          {
+//					             GetNextGenerator('DeviceCase.ID') ID,
+//					             LName Name,
+//					             NameID from LCursor.Select() Sequence,
+//					             Type from LCursor.Select() Type,
+//					             LEnabled Enabled,
+//					             "" Description,
+//					             Table from LCursor.Select() Table,
+//					             InsertTableStatement from LCursor.Select() InsertTableStatement,
+//					             BeforeScript from LCursor.Select() BeforeScript,
+//					             Script from LCursor.Select() Script,
+//					             AfterScript from LCursor.Select() AfterScript,
+//					             DropStatement from LCursor.Select() DropStatement,
+//					             "Adam Stevenson" User_ID,
+//					             DateTime() DateTimeCreated					             
+//					          }
+//					       } 
+//					       into DeviceCase;
+//
+//					except
+//						on E : Error do
+//						begin 
+//						   raise E;
+//						end;
+//					end; 
+//			   end;
+//			end;
+//		finally
+//			LCursor.Close();
+//		end;	
+//end;
+//
+///////////////////////////////////////////////////////////////////

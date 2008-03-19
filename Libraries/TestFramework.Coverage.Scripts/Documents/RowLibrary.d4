@@ -1,0 +1,123 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Row Variables
+begin
+  var LRow1 : row{ID : Integer, Name : String};
+  var LRow2 : row{ID : Integer, Name : String};
+  var LRow3 : row{Name : String, Phone : Integer};
+  LRow1 := row{5 ID, "Blah" Name};
+  if not(LRow1 = row{5 ID, "Blah" Name}) then
+	raise Error("Row assignment or row equal operator failed");
+	
+  LRow2 := LRow1;
+  if not(LRow2 = LRow1) then
+	raise Error("Row assignment or row not equal operator failed");
+	
+  if LRow1.ID <> 5 then
+	raise Error("Row column extractor failed");
+	
+  if LRow2.Name <> "Blah" then
+    raise Error("Row column extractor failed");
+    
+  if row { 5 id } = row { 6 id } then
+    raise Error("Row equal failed");
+
+  if row { 5 id } <> row { 5 id } then
+    raise Error("Row not equal failed");
+    
+  if (row { 5 id, 'Blah' name } over { id }) <> row { 5 id } then
+    raise Error("Row over failed");
+    
+  if (row { 5 id, 'Blah' name } remove { name }) <> row { 5 id } then
+    raise Error("Row remove failed");
+    
+  if (row { 5 id } rename { id name }) <> row { 5 name } then
+    raise Error("Row rename failed");
+    
+  if (row { 5 id } add { 'Blah' name }) <> row { 5 id, 'Blah' name } then
+    raise Error("Row extend failed");
+    
+  if (row { 5 id } redefine { id := 6 }) <> row { 6 id } then
+    raise Error("Row redefine failed");
+    
+  LRow1 := row { 5 ID, 'Blah' Name };
+  update LRow1 set { ID := 6 };
+  if LRow1.ID <> 6 then
+    raise Error("Row update failed");
+    
+  LRow3 := row { 'Bob' Name, 5556678 Phone };
+  LRow1 := row { 6 ID, 'Bob' Name };
+  var LRow4 : typeof (LRow1 join LRow3) := LRow1 join LRow3;
+  if LRow4.Name <> 'Bob' then
+   	raise Error("Row join failed");
+end;
+
+// row-valued return values
+create operator test() : row {item: String, item2: String} begin
+	result := row {"Some Item" item, "Another" item2};
+end;
+
+var thing : row {item: String, item2: String} := test();
+if test() <> row { "Some Item" item, "Another" item2 } then
+	raise Error("Row-valued operator failed.");
+
+drop operator test();
+
+// rows with qualified names
+begin
+	var LRow : row { A.ID : Integer, A.Name : String } := row { 1 A.ID, 'Joe' A.Name };
+	if LRow.A.ID <> 1 then
+		raise Error("Column extractor with qualified names failed");
+		
+	if LRow.A.ID <> 1 then
+		raise Error("Column extractor with qualified names and qualified reference failed");
+end;
+
+// Column extractor as the result of an operator
+create operator TestRowResult() : DateTime
+begin
+	var LRow : row { Value : DateTime } := row { DateTime() Value };
+	result := LRow.Value;
+end;
+
+select table { row { TestRowResult() Value } };
+
+drop operator TestRowResult();
+
+// column extractor...
+begin
+	var LRow := row { 5 ID };
+	LRow.ID := 10;
+	if LRow.ID <> 10 then
+		raise Error('Column assignment failed');
+end;
+
+//* specified row selectors
+begin
+	var LRow := row of { ID : Integer, Name : String } { };
+	if not(LRow.ID.IsNil()) or not(LRow.Name.IsNil()) then
+		raise Error("Empty row selector not empty");
+end;
+
+//* empty row in an operator
+create operator TestRowResult() : row { ID : Integer, Name : String }
+begin
+	result := row of typeof(result) { };
+end;
+
+if not(TestRowResult().ID.IsNil()) then
+	raise Error("Empty row-valued operator not empty");
+	
+// Full row rename
+create operator TestFullRowRename(const AID : Integer)
+begin
+	var LObject := Objects[AID];
+	var LObjectRow := LObject rename LObject;
+end;
+
+TestFullRowRename(1);
+
+drop operator TestFullRowRename(Integer);

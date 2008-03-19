@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<SyntaxDefinition name = "Result" extensions = "*">
+	
+	<Environment> 
+		<Default      color = "Black" bgcolor="#ECE9D8"/>
+		<Selection    color = "SystemColors.HighlightText" bgcolor = "SystemColors.Highlight"/>
+		<CaretMarker  color = "Yellow"/>
+		<FoldLine     color = "#808080" bgcolor="Black"/>
+		<FoldMarker   color = "#808080" bgcolor="SystemColors.Control"/>
+	</Environment>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "Black"/>
+	<RuleSets>
+		<RuleSet ignorecase = "false">
+			<Delimiters> 	</Delimiters>
+		</RuleSet>
+	</RuleSets>
+	
+</SyntaxDefinition>

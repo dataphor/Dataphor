@@ -1,0 +1,127 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Vendor Tables
+*/
+
+//* Table: Vendor
+// Contact [ID] is a vendor with primary address [Primary_Address_Number] 
+// and shipping rate [ShippingRate].
+create table Vendor
+{
+	ID : ContactID,
+	Primary_Address_Number : Integer 
+		tags { Frontend.Title = "Primary Address", Frontend.Plural.Visible = "false" },
+	ShippingRate : ShippingRate,
+	key { ID }
+}
+	static tags
+	{
+		Frontend.Title = "Vendor",
+		Frontend.Plural.Title = "Vendors"
+	};
+grant usage on Vendor to role InventoryClerk;
+
+create reference Vendor_Contact Vendor { ID } references Contact { ID } tags { Frontend.Include = "false" };
+
+create reference Vendor_ContactAddress Vendor { ID, Primary_Address_Number } 
+	references ContactAddress { Contact_ID, Number } 
+	tags 
+	{ 
+		Frontend.Title = "Primary Address",
+		Frontend.Group.Title = "Primary",
+		Frontend.Plural.Embedded = "false"
+	};
+
+//* View: VendorDetail
+SafeDrop('VendorDetail');
+create view VendorDetail
+	Contact join Vendor
+		{
+			ID, 
+			Name, 
+			NameSince, 
+			NameBy, 
+			Primary_PhoneType_ID, 
+			ShippingRate, 
+			Primary_Address_Number
+		}
+		adorn
+		{
+			ID tags { Frontend.Group = "Vendor" },
+			Name tags { Frontend.Group = "Vendor" },
+			Primary_PhoneType_ID tags { Frontend.Group = "Vendor" },
+			alter reference Contact_ContactPhone alter tags { create Frontend.Group = "Vendor" },
+			ShippingRate tags { Frontend.Group = "Vendor" }
+		}
+	static tags
+	{
+		Frontend.Group.Vendor.FlowBreak = "true",
+		Frontend.Title = "Vendor",
+		Frontend.Plural.Title = "Vendors"
+	};
+grant usage on Vendor to role InventoryClerk;
+	
+//* Table: VendorItemType
+// Vendor [Vendor_ID] is able to supply item [ItemType_ID] for [Cost].	
+create table VendorItemType
+{
+	Vendor_ID : ContactID,
+	ItemType_ID : ItemTypeID,
+	Cost : Money,
+	key { Vendor_ID, ItemType_ID }
+}
+	static tags
+	{
+		Frontend.Title = "Supply",
+		Frontend.Plural.Title = "Supplies",
+		Frontend.Grid.RowCount = "5"
+	};
+grant usage on VendorItemType to role InventoryClerk;
+	
+create reference VendorItemType_Vendor 
+	VendorItemType { Vendor_ID } 
+	references Vendor { ID } 
+	tags { Frontend.Detail.Embedded = "true" };
+
+create reference VendorItemType_ItemType 
+	VendorItemType { ItemType_ID } 
+	references ItemType { ID } 
+	tags { Frotnend.Detail.Title = "Suppliers" };
+	
+//* View: UnsuppliedItemTypes
+create view UnsuppliedItemTypes
+	ItemType where not (ID in (VendorItemType over { ItemType_ID }))
+	static tags
+	{
+		Frontend.Title = "Unsupplied Item Types"
+	};
+grant { Select } on UnsuppliedItemTypes to role InventoryClerk;
+
+//* View: SupplyingVendors
+create view SupplyingVendors
+	VendorItemType 
+		join (Vendor rename { ID Vendor_ID })
+		join (ContactAddress { Contact_ID Vendor_ID, Number Primary_Address_Number, ZipCode Source_ZipCode })
+		join (ZipCode { ZipCode Source_ZipCode, Coordinate Source_Coordinate })
+		join LocationItemsToOrder
+		join (Location { ID Location_ID, ZipCode Target_ZipCode })
+		join (ZipCode { ZipCode Target_ZipCode, Coordinate Target_Coordinate })
+		add { Distance(Source_Coordinate, Target_Coordinate) Shipping_Distance }
+		add { ShippingRate * Shipping_Distance Shipping_Cost }
+		add { (Cost * ToOrder) + Shipping_Cost Total_Cost }
+		over { Vendor_ID, Location_ID, ItemType_ID, ToOrder, Cost, Shipping_Cost, Total_Cost }
+	{
+		order { Vendor_ID, Location_ID, ItemType_ID, Total_Cost desc }
+	}
+	static tags
+	{
+		Frontend.Title = "Supplying Vendor",
+		Frontend.Plural.Title = "Supplying Vendors"
+	};
+grant { Select } on SupplyingVendors to role InventoryClerk;	
+

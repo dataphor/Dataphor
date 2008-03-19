@@ -1,0 +1,60 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+// The person [Person_ID] was at the address of [Street], [City], [State_ID],
+//  [Zip] between the date/times of [From] and [To]
+create table PersonAddressDuring
+{
+	Person_ID : ContactID
+		tags { Frontend.Title = "Person ID" },
+	FromDate : DateTime
+		tags { Frontend.FlowBreak = "true" },
+	ToDate : DateTime,
+	Street : Description
+		tags { Frontend.Group = "Address" },
+	City : Description
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State_ID : StateID
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	Zip : Zip
+		tags { Frontend.Group = "Address" },
+	Country_Code : CountryCode
+		tags { Frontend.Group = "Address" },
+	key { Person_ID, FromDate },
+	reference PersonAddressDuring_Person { Person_ID } references Person { ID } delete cascade,
+	reference PersonAddressDuring_Country { Country_Code } references Country { Code }
+}
+	tags 
+	{ 
+		Frontend.Title = "Address History" ,
+		Frontend.Group.Main.State_ID.IBAS.Contact.PersonAddressDuring_StateGroup.FlowBreak = "true"
+	};
+
+//*
+create operator PersonAddress_Update(const AOld : typeof(PersonAddress[]), var ANew : typeof(PersonAddress[]), var APerformUpdate : Boolean)
+begin
+	if (AOld remove { Since }) <> (ANew remove { Since }) then
+	begin
+		var LNow : DateTime := DateTime();
+		
+		insert
+			table { AOld rename { Since FromDate } add { LNow ToDate } }
+			into PersonAddressDuring;
+		
+		update ANew set { Since := LNow };
+	end;
+end;
+attach operator PersonAddress_Update to PersonAddress on { before update };
+
+//*
+create operator PersonAddress_Delete(const AOld : typeof(PersonAddress[]))
+begin
+	insert
+		table { AOld rename { Since FromDate } add { DateTime() ToDate } }
+		into PersonAddressDuring;
+end;
+attach operator PersonAddress_Delete to PersonAddress on { after delete };
+

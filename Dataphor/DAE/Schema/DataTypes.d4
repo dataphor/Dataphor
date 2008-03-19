@@ -1,0 +1,541 @@
+/*
+	System Catalog Registration Script - Data Types
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+// The native data types must be run in separate batches because the bootstrap will not function within the plan catalog.
+
+// Create the generic scalar. -- Compiler will bootstrap this as the generic scalar.
+create type Scalar;
+
+// System.Boolean -- Compiler will bootstrap this as the boolean type.
+create type Boolean
+{
+	representation Boolean 
+	{ 
+		Value : Boolean
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+}
+	class "System.BooleanConveyor"
+	static tags { Catalog.Comment = "System Boolean" };
+	
+create operator IsSpecial(const AValue : Scalar) : Boolean class "System.ScalarIsSpecialNode";
+create operator IsSpecial(const AValue : Boolean) : Boolean class "System.ScalarIsSpecialNode";
+
+// System.Decimal -- Compiler will bootstrap this as the decimal type.
+create type Decimal
+{
+	representation Decimal
+	{
+		Value : Decimal
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+} 
+	class "System.DecimalConveyor"
+	static tags { Catalog.Comment = "System Binary Coded Decimal" }; 
+
+// System.Long -- Compiler will bootstrap this as the long type.
+create type Long
+{
+	representation Long
+	{
+		Value : Long
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+} 
+	class "System.Int64Conveyor"
+	static tags { Catalog.Comment = "System Signed 64-bit Integer" }; 
+
+// System.Integer -- Compiler will bootstrap this as the integer type.
+create type Integer
+{
+	representation Integer
+	{
+		Value : Integer
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+} 
+	class "System.Int32Conveyor"
+	static tags { Catalog.Comment = "System Signed 32-bit Integer" }; 
+
+// System.Short -- Compiler will bootstrap this as the short type.
+create type Short
+{
+	representation Short
+	{
+		Value : Short
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+} 
+	class "System.Int16Conveyor"
+	static tags { Catalog.Comment = "System Signed 16-bit Integer" };
+
+// System.Byte -- Compiler will bootstrap this as the byte type.
+create type Byte
+{
+	representation Byte
+	{
+		Value : Byte
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode"
+} 
+	class "System.ByteConveyor"
+	static tags { Catalog.Comment = "System Unsigned 8-bit Integer" }; 
+
+// System.String -- Compiler will bootstrap this as the string type.
+create type String
+{
+	representation String
+	{
+		Value : String
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode", 
+	representation Unicode
+	{
+		Unicode : list(System.Integer)
+			read class "System.SystemStringReadUnicodeNode"
+			write class "System.SystemStringWriteUnicodeNode"
+	} class "System.SystemStringUnicodeNode", 
+	representation UTF8
+	{
+		UTF8 : list(System.Byte)
+			read class "System.SystemStringReadUTF8Node"
+			write class "System.SystemStringWriteUTF8Node"
+	} class "System.SystemStringUTF8Node", 
+	representation ASCII
+	{
+		ASCII : list(System.Byte)
+			read class "System.SystemStringReadASCIINode"
+			write class "System.SystemStringWriteASCIINode"
+	} class "System.SystemStringASCIINode"
+} 
+	class "System.StringConveyor"
+	static tags { Catalog.Comment = "System String", Storage.Length = "20" };
+
+// System.Boolean.AsString representation
+alter type Boolean
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.BooleanAsStringReadAccessorNode"
+			write class "System.BooleanAsStringWriteAccessorNode"
+	} class "System.BooleanAsStringSelectorNode",
+	create representation AsDisplayString
+	{
+		AsDisplayString : String
+			read class "System.BooleanAsDisplayStringReadAccessorNode"
+			write class "System.BooleanAsDisplayStringWriteAccessorNode"
+	} class "System.BooleanAsDisplayStringSelectorNode"
+}
+	alter tags 
+	{ 
+		create static DAE.AsString = "AsString", 
+		create static DAE.AsDisplayString = "AsDisplayString"
+	};
+	
+// System.Byte.AsString representation
+alter type Byte
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.ByteAsStringReadAccessorNode"
+			write class "System.ByteAsStringWriteAccessorNode"
+	} class "System.ByteAsStringSelectorNode"
+}
+	alter tags { create static DAE.AsString = "AsString" };
+
+// System.Short.AsString representation
+alter type Short
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.ShortAsStringReadAccessorNode"
+			write class "System.ShortAsStringWriteAccessorNode"
+	} class "System.ShortAsStringSelectorNode"
+}
+	alter tags { create static DAE.AsString = "AsString" };
+
+// System.Integer.AsString representation
+alter type Integer
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.IntegerAsStringReadAccessorNode"
+			write class "System.IntegerAsStringWriteAccessorNode"
+	} class "System.IntegerAsStringSelectorNode"
+}
+	alter tags { create static DAE.AsString = "AsString" };
+
+// System.Long.AsString representation
+alter type Long
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.LongAsStringReadAccessorNode"
+			write class "System.LongAsStringWriteAccessorNode"
+	} class "System.LongAsStringSelectorNode"
+}
+	alter tags { create static DAE.AsString = "AsString" };
+
+// System.Decimal.AsString representation
+alter type Decimal
+{
+	create representation AsString
+	{
+		AsString : String
+			read class "System.DecimalAsStringReadAccessorNode"
+			write class "System.DecimalAsStringWriteAccessorNode"
+	} class "System.DecimalAsStringSelectorNode"
+}
+	alter tags { create static DAE.AsString = "AsString" };
+
+// System.TimeSpan
+create type TimeSpan
+{
+	representation Ticks
+	{
+		Ticks : Long
+			read class "System.SystemTimeSpanTicksReadTicksNode"
+			write class "System.SystemTimeSpanTicksWriteTicksNode"
+	} class "System.SystemTimeSpanTicksSelectorNode", 
+	representation Milliseconds
+	{
+		Milliseconds : Decimal
+			read class "System.SystemTimeSpanMillisecondsReadMillisecondsNode"
+			write class "System.SystemTimeSpanMillisecondsWriteMillisecondsNode"
+	} class "System.SystemTimeSpanMillisecondsSelectorNode", 
+	representation Seconds
+	{
+		Seconds : Decimal
+			read class "System.SystemTimeSpanSecondsReadSecondsNode"
+			write class "System.SystemTimeSpanSecondsWriteSecondsNode"
+	} class "System.SystemTimeSpanSecondsSelectorNode", 
+	representation Minutes
+	{
+		Minutes : Decimal
+			read class "System.SystemTimeSpanMinutesReadMinutesNode"
+			write class "System.SystemTimeSpanMinutesWriteMinutesNode"
+	} class "System.SystemTimeSpanMinutesSelectorNode", 
+	representation Hours
+	{
+		Hours : Decimal
+			read class "System.SystemTimeSpanHoursReadHoursNode"
+			write class "System.SystemTimeSpanHoursWriteHoursNode"
+	} class "System.SystemTimeSpanHoursSelectorNode", 
+	representation Days
+	{
+		Days : Decimal
+			read class "System.SystemTimeSpanDaysReadDaysNode"
+			write class "System.SystemTimeSpanDaysWriteDaysNode"
+	} class "System.SystemTimeSpanDaysSelectorNode", 
+	representation TimeSpan
+	{
+		Day : Integer
+			read class "System.SystemTimeSpanTimeSpanReadDayNode"
+			write class "System.SystemTimeSpanTimeSpanWriteDayNode", 
+		Hour : Integer
+			read class "System.SystemTimeSpanTimeSpanReadHourNode"
+			write class "System.SystemTimeSpanTimeSpanWriteHourNode", 
+		Minute : Integer
+			read class "System.SystemTimeSpanTimeSpanReadMinuteNode"
+			write class "System.SystemTimeSpanTimeSpanWriteMinuteNode", 
+		Second : Integer
+			read class "System.SystemTimeSpanTimeSpanReadSecondNode"
+			write class "System.SystemTimeSpanTimeSpanWriteSecondNode", 
+		Millisecond : Decimal
+			read class "System.SystemTimeSpanTimeSpanReadMillisecondNode"
+			write class "System.SystemTimeSpanTimeSpanWriteMillisecondNode"
+	} class "System.SystemTimeSpanTimeSpanMillisecondsSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.TimeSpanAsStringReadAccessorNode"
+			write class "System.TimeSpanAsStringWriteAccessorNode"
+	} class "System.TimeSpanAsStringSelectorNode"
+} 
+	class "System.TimeSpanConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Time Span", 
+		DAE.AsString = "AsString"
+	};
+
+// System.DateTime
+create type DateTime
+{
+	representation Ticks
+	{
+		Ticks : Long
+			read class "System.SystemDateTimeTicksReadTicksNode"
+			write class "System.SystemDateTimeTicksWriteTicksNode"
+	} class "System.SystemDateTimeTicksSelectorNode", 
+	representation DateTime
+	{
+		Year : Integer
+			read class "System.SystemDateTimeDateTimeReadYearNode"
+			write class "System.SystemDateTimeDateTimeWriteYearNode", 
+		Month : Integer
+			read class "System.SystemDateTimeDateTimeReadMonthNode"
+			write class "System.SystemDateTimeDateTimeWriteMonthNode", 
+		Day : Integer
+			read class "System.SystemDateTimeDateTimeReadDayNode"
+			write class "System.SystemDateTimeDateTimeWriteDayNode", 
+		Hour : Integer
+			read class "System.SystemDateTimeDateTimeReadHourNode"
+			write class "System.SystemDateTimeDateTimeWriteHourNode", 
+		Minute : Integer
+			read class "System.SystemDateTimeDateTimeReadMinuteNode"
+			write class "System.SystemDateTimeDateTimeWriteMinuteNode", 
+		Second : Integer
+			read class "System.SystemDateTimeDateTimeReadSecondNode"
+			write class "System.SystemDateTimeDateTimeWriteSecondNode"
+	} class "System.SystemDateTimeDateTimeSecondsSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.DateTimeAsStringReadAccessorNode"
+			write class "System.DateTimeAsStringWriteAccessorNode"
+	} class "System.DateTimeAsStringSelectorNode"
+} 
+	class "System.DateTimeConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Date Time", 
+		DAE.AsString = "AsString" 
+	};
+	
+create type Date
+{
+	representation Ticks
+	{
+		Ticks : Long
+			read class "System.SystemDateTicksReadTicksNode"
+			write class "System.SystemDateTicksWriteTicksNode"
+	} class "System.SystemDateTicksSelectorNode", 
+	representation Date
+	{
+		Year : Integer
+			read class "System.SystemDateTimeDateTimeReadYearNode"
+			write class "System.SystemDateTimeDateTimeWriteYearNode", 
+		Month : Integer
+			read class "System.SystemDateTimeDateTimeReadMonthNode"
+			write class "System.SystemDateTimeDateTimeWriteMonthNode", 
+		Day : Integer
+			read class "System.SystemDateTimeDateTimeReadDayNode"
+			write class "System.SystemDateTimeDateTimeWriteDayNode"
+	} class "System.SystemDateTimeDateTimeDaysSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.DateAsStringReadAccessorNode"
+			write class "System.DateAsStringWriteAccessorNode"
+	} class "System.DateAsStringSelectorNode"
+}
+	class "System.DateTimeConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Date", 
+		DAE.AsString = "AsString",
+		dynamic Frontend.Width = "11",
+		dynamic Frontend.DateTimeBox.MaxWidth = "11"
+	};
+	
+create type Time
+{
+	representation Ticks
+	{
+		Ticks : Long
+			read class "System.SystemTimeTicksReadTicksNode"
+			write class "System.SystemTimeTicksWriteTicksNode"
+	} class "System.SystemTimeTicksSelectorNode", 
+	representation Time
+	{
+		Hour : Integer
+			read class "System.SystemTimeTimeReadHourNode"
+			write class "System.SystemTimeTimeWriteHourNode", 
+		Minute : Integer
+			read class "System.SystemTimeTimeReadMinuteNode"
+			write class "System.SystemTimeTimeWriteMinuteNode", 
+		Second : Integer
+			read class "System.SystemTimeTimeReadSecondNode"
+			write class "System.SystemTimeTimeWriteSecondNode"
+	} class "System.SystemTimeTimeSecondsSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.TimeAsStringReadAccessorNode"
+			write class "System.TimeAsStringWriteAccessorNode"
+	} class "System.TimeAsStringSelectorNode"
+}
+	class "System.DateTimeConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Time", 
+		DAE.AsString = "AsString",
+		dynamic Frontend.ElementType = "TextBox",
+		dynamic Frontend.Width = "10",
+		dynamic Frontend.TextBox.MaxWidth = "10"
+	};
+
+// System.Money
+create type Money
+{
+	representation Money
+	{
+		Value : Decimal
+			read class "System.ScalarReadAccessorNode"
+			write class "System.ScalarWriteAccessorNode"
+	} class "System.ScalarSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.MoneyAsStringReadAccessorNode"
+			write class "System.MoneyAsStringWriteAccessorNode"
+	} class "System.MoneyAsStringSelectorNode",
+	representation AsDisplayString
+	{
+		AsDisplayString : String
+			read class "System.MoneyAsDisplayStringReadAccessorNode"
+			write class "System.MoneyAsStringWriteAccessorNode"
+	} class "System.MoneyAsStringSelectorNode"
+} 
+	class "System.DecimalConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Money", 
+		DAE.AsString = "AsString",
+		DAE.AsDisplayString = "AsDisplayString",
+		dynamic Frontend.Width = "10",
+		dynamic Frontend.NumericTextBox.MaxWidth = "10"
+	}; 
+
+// System.Guid
+create type Guid
+{
+	representation Guid
+	{
+		Value : String
+			read class "System.SystemGuidReadAccessorNode"
+			write class "System.SystemGuidWriteAccessorNode"
+	} class "System.SystemGuidSelectorNode",
+	representation AsString
+	{
+		AsString : String
+			read class "System.GuidAsStringReadAccessorNode"
+			write class "System.GuidAsStringWriteAccessorNode"
+	} class "System.GuidAsStringSelectorNode"
+} 
+	class "System.GuidConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Globally Unique Identifier", 
+		DAE.AsString = "AsString",
+		dynamic Frontend.Width = "36",
+		dynamic Frontend.TextBox.Width = "40"
+	}; 
+
+// System.Binary
+create type Binary
+{
+	representation Binary
+	{
+		Value : String
+			read class "System.SystemBinaryReadAccessorNode"
+			write class "System.SystemBinaryWriteAccessorNode"
+	} class "System.SystemBinarySelectorNode",
+	representation AsDisplayString
+	{
+		AsDisplayString : String
+			read class "System.BinaryAsDisplayStringReadAccessorNode"
+			write class "System.BinaryAsDisplayStringWriteAccessorNode"
+	} class "System.BinaryAsDisplayStringSelectorNode"
+} 
+	class "System.BinaryConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Binary", 
+		DAE.AsDisplayString = "AsDisplayString",
+		dynamic Frontend.ElementType = "File"
+	}; 
+	
+// System.Graphic
+create type Graphic
+{
+	representation Graphic
+	{
+		Value : String
+			read class "System.SystemBinaryReadAccessorNode"
+			write class "System.SystemBinaryWriteAccessorNode"
+	} class "System.SystemBinarySelectorNode",
+	representation AsDisplayString
+	{
+		AsDisplayString : String
+			read class "System.GraphicAsDisplayStringReadAccessorNode"
+			write class "System.GraphicAsDisplayStringWriteAccessorNode"
+	} class "System.GraphicAsDisplayStringSelectorNode"
+}
+	class "System.BinaryConveyor"
+	static tags 
+	{ 
+		Catalog.Comment = "System Graphic", 
+		DAE.AsDisplayString = "AsDisplayString",
+		dynamic Frontend.ElementType = "Image",
+		dynamic Frontend.Grid.ElementType = "ImageColumn"
+	}; 
+
+// System.Error
+create type Error
+{
+	representation Error 
+	{ 
+		Severity : String
+			read class "System.SystemErrorReadSeverityNode"
+			write class "System.SystemErrorWriteSeverityNode",
+		Code : Integer
+			read class "System.SystemErrorReadCodeNode"
+			write class "System.SystemErrorWriteCodeNode",
+		Message : String 
+			read class "System.SystemErrorReadMessageNode"
+			write class "System.SystemErrorWriteMessageNode",
+		InnerError : Error
+			read class "System.SystemErrorReadInnerErrorNode"
+			write class "System.SystemErrorWriteInnerErrorNode"
+	} class "System.SystemErrorSelectorNode"
+}
+	class "System.ObjectConveyor"
+	static tags { Catalog.Comment = "System Error" };
+	
+create type Name
+{
+	representation Name
+	{
+		Value : String
+			read class "System.SystemNameReadAccessorNode"
+			write class "System.SystemNameWriteAccessorNode"
+	} class "System.SystemNameSelectorNode"
+} 
+	class "System.StringConveyor" 
+	tags { dynamic Frontend.Width = "50" }
+	static tags { Catalog.Comment = "System Catalog Name", DAE.AsString = "Name", Storage.Length = "200" };
+
+create conversion System.String to System.Name using System.Name narrowing;
+create conversion System.Name to System.String using System.Name.ReadValue widening;
+
+create operator ObjectExists(const ASpecifier : String) : Boolean class "System.ObjectExistsNode" static tags { DAE.IsRemotable = "false" };
+create operator ObjectExists(const AName : Name) : Boolean class "System.ObjectExistsNode" static tags { DAE.IsRemotable = "false" };
+create operator Execute(const AScript : String) class "System.SystemExecuteNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+create operator iRetrieve() : table class "System.BaseTableVarNode" static tags { DAE.IsBuiltin = "True" };

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="106100" xml:space="preserve">
+    <value>Unsupported interface.</value>
+  </data>
+  <data name="106101" xml:space="preserve">
+    <value>Internal Error: Invalid server context.</value>
+  </data>
+  <data name="106102" xml:space="preserve">
+    <value>Server must be "{0}" to perform this operation.</value>
+  </data>
+  <data name="106103" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="106104" xml:space="preserve">
+    <value>Unable to add server to server factory.</value>
+  </data>
+  <data name="106105" xml:space="preserve">
+    <value>Server instance name required.</value>
+  </data>
+  <data name="106106" xml:space="preserve">
+    <value>Session information required.</value>
+  </data>
+  <data name="106107" xml:space="preserve">
+    <value>Cannot login as system user.</value>
+  </data>
+  <data name="106108" xml:space="preserve">
+    <value>Cannot drop the system or admin users.</value>
+  </data>
+  <data name="106109" xml:space="preserve">
+    <value>User "{0}" has open sessions and cannot be dropped.</value>
+  </data>
+  <data name="106110" xml:space="preserve">
+    <value>Invalid password.</value>
+  </data>
+  <data name="106111" xml:space="preserve">
+    <value>An exception occurred during startup of device "{0}".</value>
+  </data>
+  <data name="106112" xml:space="preserve">
+    <value>An exception occurred during shutdown of device "{0}".</value>
+  </data>
+  <data name="106113" xml:space="preserve">
+    <value>An exception occurred during startup reconciliation of device "{0}".</value>
+  </data>
+  <data name="106114" xml:space="preserve">
+    <value>Server Plan Exception.</value>
+  </data>
+  <data name="106115" xml:space="preserve">
+    <value>Server Session Exception.</value>
+  </data>
+  <data name="106116" xml:space="preserve">
+    <value>Transaction already in progress for this process.</value>
+  </data>
+  <data name="106117" xml:space="preserve">
+    <value>No transaction in progress for this process.</value>
+  </data>
+  <data name="106118" xml:space="preserve">
+    <value>Transaction cannot be started with active device sessions on this process.</value>
+  </data>
+  <data name="106119" xml:space="preserve">
+    <value>Microsoft Distributed Transaction Coordinator support is only available on Windows 2000 or later.</value>
+  </data>
+  <data name="106120" xml:space="preserve">
+    <value>No remote session open for server link "{0}".</value>
+  </data>
+  <data name="106121" xml:space="preserve">
+    <value>Cursor "{0}" must be open to perform this operation.</value>
+  </data>
+  <data name="106122" xml:space="preserve">
+    <value>Cursor "{0}" must be closed to perform this operation.</value>
+  </data>
+  <data name="106123" xml:space="preserve">
+    <value>"{0}" not supported by this cursor.</value>
+  </data>
+  <data name="106124" xml:space="preserve">
+    <value>Server Cursor Exception.</value>
+  </data>
+  <data name="106125" xml:space="preserve">
+    <value>Cannot perform this operation while the DAE server service is started.</value>
+  </data>
+  <data name="106126" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="106129" xml:space="preserve">
+    <value>Server child object container.</value>
+  </data>
+  <data name="106130" xml:space="preserve">
+    <value>Object "{0}" not found.</value>
+  </data>
+  <data name="106131" xml:space="preserve">
+    <value>Server session container.</value>
+  </data>
+  <data name="106132" xml:space="preserve">
+    <value>Server plan container.</value>
+  </data>
+  <data name="106133" xml:space="preserve">
+    <value>Server process container.</value>
+  </data>
+  <data name="106134" xml:space="preserve">
+    <value>Server script container.</value>
+  </data>
+  <data name="106135" xml:space="preserve">
+    <value>Server batch container.</value>
+  </data>
+  <data name="106136" xml:space="preserve">
+    <value>Server cursor container.</value>
+  </data>
+  <data name="106140" xml:space="preserve">
+    <value>Asynchronous message processing not supported by the CLI at this time.</value>
+  </data>
+  <data name="106141" xml:space="preserve">
+    <value>Invalid local server context.</value>
+  </data>
+  <data name="106142" xml:space="preserve">
+    <value>Process is already executing plan "{0}".</value>
+  </data>
+  <data name="106143" xml:space="preserve">
+    <value>Plan "{0}" is not executing on this process.</value>
+  </data>
+  <data name="106144" xml:space="preserve">
+    <value>Server Process Exception.</value>
+  </data>
+  <data name="106145" xml:space="preserve">
+    <value>Underlying row could not be located.</value>
+  </data>
+  <data name="106146" xml:space="preserve">
+    <value>Exceptions occurred during rollback: {0}.</value>
+  </data>
+  <data name="106147" xml:space="preserve">
+    <value>Exceptions occurred during commit.</value>
+  </data>
+  <data name="106148" xml:space="preserve">
+    <value>Bookmark "{0}" is invalid.</value>
+  </data>
+  <data name="106149" xml:space="preserve">
+    <value>Register class name not found in assembly "{0}".</value>
+  </data>
+  <data name="106150" xml:space="preserve">
+    <value>Class alias "{0}" not found.</value>
+  </data>
+  <data name="106151" xml:space="preserve">
+    <value>Class "{0}" does not contain a property named "{1}".</value>
+  </data>
+  <data name="106152" xml:space="preserve">
+    <value>File "{0}" containing registered assemblies does not exist.</value>
+  </data>
+  <data name="106153" xml:space="preserve">
+    <value>Process is not currently executing a plan. Compile-time state is not available.</value>
+  </data>
+  <data name="106154" xml:space="preserve">
+    <value>Exceptions occurred while attempting to load class "{0}".</value>
+  </data>
+  <data name="106155" xml:space="preserve">
+    <value>User "{0}" is not authorized to perform this operation.</value>
+  </data>
+  <data name="106156" xml:space="preserve">
+    <value>Group "{0}" is not authorized to perform this operation.</value>
+  </data>
+  <data name="106157" xml:space="preserve">
+    <value>User "{0}" does not have access to right "{1}".</value>
+  </data>
+  <data name="106158" xml:space="preserve">
+    <value>System Group cannot be dropped.</value>
+  </data>
+  <data name="106159" xml:space="preserve">
+    <value>Admin Group cannot be dropped.</value>
+  </data>
+  <data name="106160" xml:space="preserve">
+    <value>User Group cannot be dropped.</value>
+  </data>
+  <data name="106161" xml:space="preserve">
+    <value>Group "{0}" has child Groups and cannot be dropped.</value>
+  </data>
+  <data name="106162" xml:space="preserve">
+    <value>Group "{0}" has users and cannot be dropped.</value>
+  </data>
+  <data name="106163" xml:space="preserve">
+    <value>Right "{0}" is a generated right and cannot be altered or dropped.</value>
+  </data>
+  <data name="106164" xml:space="preserve">
+    <value>User "{0}" has owned rights and cannot be dropped.</value>
+  </data>
+  <data name="106165" xml:space="preserve">
+    <value>User "{0}" has owned objects and cannot be dropped.</value>
+  </data>
+  <data name="106166" xml:space="preserve">
+    <value>Circular Group assignment between Group "{0}" and Group "{1}".</value>
+  </data>
+  <data name="106167" xml:space="preserve">
+    <value>Process request timed out because the server is too busy.</value>
+  </data>
+  <data name="106168" xml:space="preserve">
+    <value>Process did not respond to the terminate request within the termination timeout.</value>
+  </data>
+  <data name="106169" xml:space="preserve">
+    <value>Role "{0}" has users assigned and cannot be dropped.</value>
+  </data>
+  <data name="106170" xml:space="preserve">
+    <value>Role "{0}" has groups assigned and cannot be dropped.</value>
+  </data>
+  <data name="106171" xml:space="preserve">
+    <value>Returning a value of type "{0}" through the CLI is unimplemented.</value>
+  </data>
+  <data name="106172" xml:space="preserve">
+    <value>This beta version of Dataphor has expired.</value>
+  </data>
+  <data name="106173" xml:space="preserve">
+    <value>Unable to establish a connection with server "{0}".</value>
+  </data>
+  <data name="106174" xml:space="preserve">
+    <value>Unable to execute the plan because it was not successfully compiled.
+{0}</value>
+  </data>
+  <data name="106175" xml:space="preserve">
+    <value>Unable to compile the script because it was not successfully parsed.
+{0}</value>
+  </data>
+  <data name="106176" xml:space="preserve">
+    <value>Process ({0}) not found.</value>
+  </data>
+  <data name="106177" xml:space="preserve">
+    <value>Execution did not complete with the specified timeout.</value>
+  </data>
+  <data name="106178" xml:space="preserve">
+    <value>A cursor is already open on this plan.</value>
+  </data>
+  <data name="106179" xml:space="preserve">
+    <value>Session ({0}) not found.</value>
+  </data>
+  <data name="106180" xml:space="preserve">
+    <value>Remote server has been unexpectedly terminated.</value>
+  </data>
+  <data name="106181" xml:space="preserve">
+    <value>Server connection container.</value>
+  </data>
+  <data name="106182" xml:space="preserve">
+    <value>Timed out waiting for the client-side catalog cache lock.</value>
+  </data>
+  <data name="106183" xml:space="preserve">
+    <value>Internal cache serialization error: Expected client cache time stamp ({0}), Actual: ({1}).</value>
+  </data>
+  <data name="106184" xml:space="preserve">
+    <value>Cache serialization timeout.</value>
+  </data>
+  <data name="106185" xml:space="preserve">
+    <value>Errors occurred while deserializing client cache time stamp ({0}).</value>
+  </data>
+  <data name="106186" xml:space="preserve">
+    <value>Process Aborted.</value>
+  </data>
+  <data name="106187" xml:space="preserve">
+    <value>Check table for table "{0}" could not be created.</value>
+  </data>
+</root>

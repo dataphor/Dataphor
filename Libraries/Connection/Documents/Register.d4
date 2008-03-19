@@ -1,0 +1,13 @@
+/*
+	Connection Library
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+//*
+// Operator: ClearAllPools
+// Calls the ClearAllPools() static method of the System.Data.SqlClient.SqlConnection class,
+// clearing all connections from the pool. Any connections from the pool that are active are
+// marked to be discarded when closed rather than returned to the pool.
+// See the SqlClient documentation for more information.
+create operator ClearAllPools() class "Connection.ClearAllPoolsNode" static tags { DAE.IsFunctional = "false", DAE.IsRemotable = "false" };

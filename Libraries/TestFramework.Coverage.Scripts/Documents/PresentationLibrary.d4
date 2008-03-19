@@ -1,0 +1,69 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Presentation Selectors
+if Count(presentation{}) <> 0 then
+	raise Error("Count of empty presentation not equal to 0");
+	
+if Count(presentation{entry{}}) <> 1 then
+	raise Error("Count of empty presentation with one entry not equal to 1");
+	
+// presentation Variables
+begin
+  var Lpresentation : presentation{id : Integer} := presentation{entry{5 id}};
+
+  if not((entry from Lpresentation) = entry{5 id}) then
+    raise Error("entry extraction failed");
+
+  if ((id from entry from Lpresentation) <> 5) then
+    raise Error("Column extraction failed");
+    
+  Lpresentation := presentation{entry{6 id}};
+  if not((entry from Lpresentation) = entry{6 id}) then
+    raise Error("presentation assignment failed");
+    
+  delete Lpresentation;
+  
+  if (Count(Lpresentation) <> 0) then
+    raise Error("presentation variable delete failed");
+  
+  insert presentation{entry{7 id}} into Lpresentation;
+  
+  if not((entry from Lpresentation) = entry{7 id}) then
+    raise Error("presentation variable insert failed");
+    
+  update Lpresentation set {id := 8};
+  
+  if not((entry from Lpresentation) = entry{8 id}) then
+    raise Error("presentation variable update failed");
+    
+  var Lpresentation1 : presentation { id : Integer } := presentation { entry { 1 id }, entry { 2 id } };
+  var Lpresentation2 : presentation { id : Integer } := presentation { entry { 1 id } };
+  
+  if Lpresentation1 = Lpresentation2 then
+	raise Error("presentation equal failed");
+	
+  if Lpresentation1 < Lpresentation2 then
+	raise Error("presentation proper subset failed");
+	
+  if Lpresentation2 > Lpresentation1 then
+    raise Error("presentation proper superset failed");
+	
+  insert presentation { entry { 2 id } } into Lpresentation2;
+  
+  if Lpresentation1 <> Lpresentation2 then
+	raise Error("presentation not equal failed");
+	
+  if not(Lpresentation1 >= Lpresentation2) then
+	raise Error("presentation superset failed");
+	
+  if not(Lpresentation2 <= Lpresentation1) then
+    raise Error("presentation subset failed");
+end;
+
+// presentation Selector without entrys
+begin
+	var Lpresentation : presentation { ID : Integer } := presentation of { ID : Integer } { };
+end;

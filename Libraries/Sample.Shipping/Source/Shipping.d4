@@ -1,0 +1,1039 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Shipping Sample Database
+//ClearCatalog();
+
+SetDefaultNameSpace(Name(""));
+
+/*
+** Memory Device
+create device Shipping
+	class "System.MemoryDevice";
+*/
+	
+/*
+** MSSQL Device
+*/
+create device Shipping
+	reconciliation { mode = { command }, master = device }
+	class "MSSQLDevice.MSSQLDevice"
+		attributes
+		{
+			"ServerName" = "SARLACC\SARLACC",
+			"DatabaseName" = "Shipping"
+		};
+
+CreateDeviceUser("Admin", Name("Shipping"), "sa", "");
+CreateDeviceUser("System", Name("Shipping"), "sa", "");
+
+SetDefaultNameSpace(Name("Shipping"));
+SetDefaultDeviceName(Name("Shipping"));
+
+EnsureGenerators();
+
+create type EntityID like Integer 
+	tags { Frontend.Title = "Entity #", Frontend.Width = "10" };
+
+create type InvoiceID like Integer 
+	tags { Frontend.Title = "Invoice #", Frontend.Width = "10" };
+
+create type ProperName like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+	tags { Frontend.Width = "30" }
+	static tags { DAE.StaticByteSize = "104", Storage.Length = "50" };
+
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 50
+}
+	tags { Frontend.Width = "30" }
+	static tags { DAE.StaticByteSize = "104", Storage.Length = "50" };
+
+create type LocationID like String
+{
+	constraint LocationIDValid Length(value) between 1 and 5
+}
+	tags { Frontend.Title = "Location #", Frontend.Width = "7" }
+	static tags { DAE.StaticByteSize = "14", Storage.Length = "5" };
+	
+create type PhoneTypeID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "ID", Frontend.Width = "5" }
+	static tags { DAE.StaticByteSize = "10", Storage.Length = "3" };
+	
+create type ItemTypeID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "ID", Frontend.Width = "5" }
+	static tags { DAE.StaticByteSize = "10", Storage.Length = "3" };
+	
+create type InvoiceStatusID like String
+{
+	constraint LengthValid Length(value) <= 3
+}
+	tags { Frontend.Title = "ID", Frontend.Width = "5" }
+	static tags { DAE.StaticByteSize = "10", Storage.Length = "3" };
+	
+create type Phone like String
+{
+	constraint LengthValid (Length(value) <= 20)
+}
+	tags { Frontend.Title = "Phone #", Frontend.Width = "15" }
+	static tags { DAE.StaticByteSize = "44", Storage.Length = "20" };
+
+create type StateID like String
+{
+	constraint StateIDValid (Length(value) = 2)
+}
+	tags { Frontend.Title = "State", Frontend.Width = "4" }
+	static tags { DAE.StaticByteSize = "8", Storage.Length = "2"};
+
+create type Zip like String
+{
+	constraint LengthValid (Length(value) <= 10)
+}
+	tags { Frontend.Width = "10" }
+	static tags { DAE.StaticByteSize = "24", Storage.Length = "10" };
+
+create type Notes like String
+	tags { Frontend.TextBox.Height = "5" }
+	static tags { DAE.StaticByteSize = "164", Storage.Length = "unlimited" };
+	
+create type Degree
+{
+	representation Degree
+	{
+		DegreesPart : Integer
+			read class "Shipping.DegreesPartReadAccessor"
+			write class "Shipping.DegreesPartWriteAccessor",
+		MinutesPart : Integer
+			read class "Shipping.MinutesPartReadAccessor"
+			write class "Shipping.MinutesPartWriteAccessor",
+		SecondsPart : Decimal
+			read class "Shipping.SecondsPartReadAccessor"
+			write class "Shipping.SecondsPartWriteAccessor"
+	} class "Shipping.DegreeSelector",
+
+	representation Degrees
+	{
+		Degrees : Decimal
+			read class "Shipping.DegreesReadAccessor"
+			write class "Shipping.DegreesWriteAccessor"
+	} class "Shipping.DegreesSelector"
+
+} class "Shipping.DegreeConveyor";
+	
+create operator .iCompare(const ADegree1 : Degree, const ADegree2 : Degree) : Integer
+	class "System.DecimalCompareNode";
+
+create type Coordinate
+{
+	representation Coordinate
+	{
+		Latitude : Degree
+			read class "Shipping.LatitudeReadAccessor" 
+			write class "Shipping.LatitudeWriteAccessor",
+		Longitude : Degree
+			read class "Shipping.LongitudeReadAccessor"
+			write class "Shipping.LongitudeWriteAccessor"
+	} class "Shipping.CoordinateSelector"
+
+} class "Shipping.CoordinateConveyor"
+	tags { DAE.StaticByteSize = "32", Storage.Length = "45" };
+
+create operator .iCompare(const ACoordinate1 : Coordinate, const ACoordinate2 : Coordinate) : Integer
+	class "Shipping.CoordinateCompare";
+
+create type Distance
+{
+	representation Miles
+	{
+		Miles : Decimal
+			read class "Shipping.MilesReadAccessor"
+			write class "Shipping.MilesWriteAccessor"
+	} class "Shipping.MilesSelector",
+	
+	representation Kilometers
+	{
+		Kilometers : Decimal
+			read class "Shipping.KilometersReadAccessor"
+			write class "Shipping.KilometersWriteAccessor"
+	} class "Shipping.KilometersSelector"
+} class "Shipping.DistanceConveyor";
+
+create operator .iCompare(const ADistance1 : Distance, const ADistance2 : Distance) : Integer
+	class "System.DecimalCompareNode";
+
+create operator Distance(const AFromCoordinate : Coordinate, const AToCoordinate : Coordinate) : Distance
+	class "Shipping.DistanceNode";
+
+/*
+** Unused
+create type Percent is { Alpha }
+{
+	representation Percent
+	{
+		Percent : Decimal
+			read class "Shipping.PercentReadAccessor"
+			write class "Shipping.PercentWriteAccessor"
+	} class "Shipping.PercentSelector"
+} class "Shipping.PercentConveyor";
+
+create operator .iCompare(const APercent1 : Percent, const APercent2 : Percent) : Integer
+	class "System.DecimalCompareNode";
+
+create operator Percent(const AQuotient : Decimal, const ADivisor : Decimal) : Percent
+	class "Shipping.PercentNode";
+
+create operator .iMultiplication(const AValue : Decimal, const APercent : Percent) : Decimal
+	class "Shipping.DecimalPercentMultiplicationNode";
+
+create operator .iMultiplication(const APercent : Percent, const AValue : Decimal) : Decimal
+	class "Shipping.PercentDecimalMultiplicationNode";
+*/
+	
+create type ShippingRate
+{
+	representation DollarsPerMile
+	{
+		Rate : Money
+			read class "Shipping.RateReadAccessor"
+			write class "Shipping.RateWriteAccessor"
+	} class "Shipping.DollarsPerMileSelector"
+} class "Shipping.ShippingRateConveyor";
+
+create operator .iCompare(const ARate1 : ShippingRate, const ARate2 : ShippingRate) : Integer
+	class "System.DecimalCompareNode";
+	
+create operator .iMultiplication(const ADistance : Distance, const ARate : ShippingRate) : Money
+begin
+	result := ADistance.Miles * ARate.Rate;
+end;
+	
+create operator .iMultiplication(const ARate : ShippingRate, const ADistance : Distance) : Money
+begin
+	result := ADistance.Miles * ARate.Rate;
+end;
+
+/*
+** MSSQL Device Domain Mappings
+*/
+alter device Shipping
+{
+	create type EntityID,
+	create type InvoiceID,
+	create type UserID,
+	create type ProperName,
+	create type Notes,
+	create type Description,
+	create type PhoneTypeID,
+	create type ItemTypeID,
+	create type LocationID,
+	create type InvoiceStatusID,
+	create type Phone,
+	create type StateID,
+	create type Zip,
+	create type Degree class "SQLDevice.SQLDecimal",
+	create type Coordinate class "Shipping.SQLCoordinate",
+	create type Distance class "SQLDevice.SQLDecimal",
+	create type ShippingRate class "SQLDevice.SQLDecimal",
+	create operator .iCompare(const Degree, const Degree) class "SQLDevice.SQLCompare",
+	create operator Degree(const Integer, const Integer, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree" },
+	create operator Degree.ReadDegreesPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadDegreesPart" },
+	create operator Degree.WriteDegreesPart(const Degree, const Integer) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_WriteDegreesPart" },
+	create operator Degree.ReadMinutesPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadMinutesPart" },
+	create operator Degree.WriteMinutesPart(const Degree, const Integer) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_DegreeWriteMinutesPart" },
+	create operator Degree.ReadSecondsPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadSecondsPart" },
+	create operator Degree.WriteSecondsPart(const Degree, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_WriteSecondsPart" },
+	create operator .iCompare(const Coordinate, const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_Compare" },
+	create operator Coordinate(const Degree, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate" },
+	create operator Coordinate.ReadLatitude(const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_ReadLatitude" },
+	create operator Coordinate.WriteLatitude(const Coordinate, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_WriteLatitude" },
+	create operator Coordinate.ReadLongitude(const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_ReadLongitude" },
+	create operator Coordinate.WriteLongitude(const Coordinate, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_WriteLongitude" },
+	create operator .iCompare(const Distance, const Distance) class "SQLDevice.SQLCompare",
+	create operator Distance.Kilometers(const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_Kilometers" },
+	create operator Distance.ReadKilometers(const Distance) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_ReadKilometers" },
+	create operator Distance.WriteKilometers(const Distance, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_WriteKilometers" },
+	create operator Distance.Miles(const Decimal) class "SQLDevice.SQLScalarSelector",
+	create operator Distance.ReadMiles(const Distance) class "SQLDevice.SQLScalarReadAccessor",
+	create operator Distance.WriteMiles(const Distance, const Decimal) class "SQLDevice.SQLScalarWriteAccessor",
+	create operator Distance(const Coordinate, const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance" },
+	create operator .iCompare(const ShippingRate, const ShippingRate) class "SQLDevice.SQLCompare",
+	create operator ShippingRate.DollarsPerMile(const Money) class "SQLDevice.SQLScalarSelector",
+	create operator ShippingRate.ReadRate(const ShippingRate) class "SQLDevice.SQLScalarReadAccessor",
+	create operator ShippingRate.WriteRate(const ShippingRate, const Money) class "SQLDevice.SQLScalarWriteAccessor",
+	create operator .iMultiplication(const Distance, const ShippingRate) class "SQLDevice.SQLMultiplication",
+	create operator .iMultiplication(const ShippingRate, const Distance) class "SQLDevice.SQLMultiplication"
+};
+
+create table State
+{
+	ID : StateID,
+	Name : Description,
+	key { ID }
+};
+
+State :=
+	table
+	{
+		row { StateID("AL") ID, Description("ALABAMA") Name },
+		row { StateID("AK") ID, Description("ALASKA") Name },
+		row { StateID("AS") ID, Description("AMERICAN SAMOA") Name },
+		row { StateID("AZ") ID, Description("ARIZONA") Name },
+		row { StateID("AR") ID, Description("ARKANSAS") Name },
+		row { StateID("CA") ID, Description("CALIFORNIA") Name },
+		row { StateID("CO") ID, Description("COLORADO") Name },
+		row { StateID("CT") ID, Description("CONNECTICUT") Name },
+		row { StateID("DE") ID, Description("DELAWARE") Name },
+		row { StateID("DC") ID, Description("DISTRICT OF COLUMBIA") Name },
+		row { StateID("FM") ID, Description("FEDERATED STATES OF MICRONESIA") Name },
+		row { StateID("FL") ID, Description("FLORIDA") Name },
+		row { StateID("GA") ID, Description("GEORGIA") Name },
+		row { StateID("GU") ID, Description("GUAM") Name },
+		row { StateID("HI") ID, Description("HAWAII") Name },
+		row { StateID("ID") ID, Description("IDAHO") Name },
+		row { StateID("IL") ID, Description("ILLINOIS") Name },
+		row { StateID("IN") ID, Description("INDIANA") Name },
+		row { StateID("IA") ID, Description("IOWA") Name },
+		row { StateID("KS") ID, Description("KANSAS") Name },
+		row { StateID("KY") ID, Description("KENTUCKY") Name },
+		row { StateID("LA") ID, Description("LOUISIANA") Name },
+		row { StateID("ME") ID, Description("MAINE") Name },
+		row { StateID("MH") ID, Description("MARSHALL ISLANDS") Name },
+		row { StateID("MD") ID, Description("MARYLAND") Name },
+		row { StateID("MA") ID, Description("MASSACHUSETTS") Name },
+		row { StateID("MI") ID, Description("MICHIGAN") Name },
+		row { StateID("MN") ID, Description("MINNESOTA") Name },
+		row { StateID("MS") ID, Description("MISSISSIPPI") Name },
+		row { StateID("MO") ID, Description("MISSOURI") Name },
+		row { StateID("MT") ID, Description("MONTANA") Name },
+		row { StateID("NE") ID, Description("NEBRASKA") Name },
+		row { StateID("NV") ID, Description("NEVADA") Name },
+		row { StateID("NH") ID, Description("NEW HAMPSHIRE") Name },
+		row { StateID("NJ") ID, Description("NEW JERSEY") Name },
+		row { StateID("NM") ID, Description("NEW MEXICO") Name },
+		row { StateID("NY") ID, Description("NEW YORK") Name },
+		row { StateID("NC") ID, Description("NORTH CAROLINA") Name },
+		row { StateID("ND") ID, Description("NORTH DAKOTA") Name },
+		row { StateID("MP") ID, Description("NORTHERN MARIANA ISLANDS") Name },
+		row { StateID("OH") ID, Description("OHIO") Name },
+		row { StateID("OK") ID, Description("OKLAHOMA") Name },
+		row { StateID("OR") ID, Description("OREGON") Name },
+		row { StateID("PW") ID, Description("PALAU") Name },
+		row { StateID("PA") ID, Description("PENNSYLVANIA") Name },
+		row { StateID("PR") ID, Description("PUERTO RICO") Name },
+		row { StateID("RI") ID, Description("RHODE ISLAND") Name },
+		row { StateID("SC") ID, Description("SOUTH CAROLINA") Name },
+		row { StateID("SD") ID, Description("SOUTH DAKOTA") Name },
+		row { StateID("TN") ID, Description("TENNESSEE") Name },
+		row { StateID("TX") ID, Description("TEXAS") Name },
+		row { StateID("UT") ID, Description("UTAH") Name },
+		row { StateID("VT") ID, Description("VERMONT") Name },
+		row { StateID("VI") ID, Description("VIRGIN ISLANDS") Name },
+		row { StateID("VA") ID, Description("VIRGINIA") Name },
+		row { StateID("WA") ID, Description("WASHINGTON") Name },
+		row { StateID("WV") ID, Description("WEST VIRGINIA") Name },
+		row { StateID("WI") ID, Description("WISCONSIN") Name },
+		row { StateID("WY") ID, Description("WYOMING") Name }
+	};
+
+create table ZipCode
+{
+	Zip : Zip tags { Frontend.Preview.Include = "true" },
+	City : Description,
+	State_ID : StateID,
+	Location : Coordinate { default Coordinate(Degree(0, 0, 0d), Degree(0, 0, 0d)) },
+	key { Zip }
+};
+
+create reference ZipCode_State ZipCode { State_ID } references State { ID } tags { Frontend.Embedded = "false" };
+
+ZipCode := 
+	table 
+	{
+		row { Zip("84058") Zip, Description("Orem") City, StateID("UT") State_ID, Coordinate(Degrees(10), Degrees(10)) Location },
+		row { Zip("84604") Zip, Description("Orem") City, StateID("UT") State_ID, Coordinate(Degrees(10), Degrees(10)) Location },
+		row { Zip("84062") Zip, Description("Orem") City, StateID("UT") State_ID, Coordinate(Degrees(10), Degrees(10)) Location }
+	};
+
+/*
+-- SQL Statement to populate Shipping_Zip table from the zips data file;
+delete from zips where col002 = 32350 and col001 = 13
+delete from zips where col002 = 63673 and Col001 = 29
+delete from zips where col002 = 42223 and col001 = 47
+
+insert into Shipping_ZipCode(Zip, City, State_ID, Location)
+select Col002, Col004, Col003, dbo.Shipping_Coordinate(Col005, Col006)
+from Zips
+*/
+
+create table Location
+{
+	ID : LocationID,
+	Name : ProperName tags { Frontend.Preview.Include = "true" },
+	Phone : Phone,
+	Street : Description tags { Frontend.Group = "Address" },
+	City : Description tags { Frontend.Group = "Address", Frontend.LineBreak = "false" },
+	State_ID : StateID tags { Frontend.Group = "Address", Frontend.LineBreak = "false" },
+	Zip : Zip tags { Frontend.Group = "Address" },
+	key { ID }
+};
+
+create reference Location_State Location { State_ID } references State { ID } tags { Frontend.Embedded = "false" };
+create reference Location_ZipCode Location { Zip } references ZipCode { Zip } tags { Frontend.Embedded = "false" };
+
+Location :=
+	table
+	{
+		row { LocationID("01001") ID, ProperName("Location 01001") Name, Phone("123-1234") Phone, Description("41 N State") Street, Description("Orem") City, StateID("UT") State_ID, Zip("84058") Zip },
+		row { LocationID("01002") ID, ProperName("Location 01002") Name, Phone("123-1235") Phone, Description("878 N 800 E") Street, Description("Orem") City, StateID("UT") State_ID, Zip("84058") Zip },
+		row { LocationID("01003") ID, ProperName("Location 01003") Name, Phone("123-1236") Phone, Description("31 Eagle Way") Street, Description("Provo") City, StateID("UT") State_ID, Zip("84604") Zip },
+		row { LocationID("01004") ID, ProperName("Location 01001") Name, Phone("123-1237") Phone, Description("432 E 790 S") Street, Description("Pleasant Grove") City, StateID("UT") State_ID, Zip("84062") Zip }
+	};
+
+create table Entity
+{
+	ID : EntityID { default EntityID(GetNextGenerator("Shipping.Entity.ID")) } tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true" },
+	Name : ProperName tags { Frontend.Preview.Include = "true" },
+	Primary_PhoneType_ID : PhoneTypeID tags { Frontend.Title = "Primary Phone Type" },
+	key { ID }
+};
+
+create table EntityNotes
+{
+	Entity_ID : EntityID,
+	Notes : Notes,
+	key { Entity_ID }
+};
+
+create reference EntityNotes_Entity EntityNotes { Entity_ID } references Entity { ID } tags { Frontend.Embedded = "true" };
+
+create table PhoneType
+{
+	ID : PhoneTypeID,
+	Description : Description,
+	key { ID }
+};
+
+PhoneType :=
+	table
+	{
+		row { PhoneTypeID("HOM") ID, Description("Home Phone") Description },
+		row { PhoneTypeID("WOR") ID, Description("Work Phone") Description },
+		row { PhoneTypeID("MOB") ID, Description("Mobile Phone") Description },
+		row { PhoneTypeID("PAG") ID, Description("Pager") Description },
+		row { PhoneTypeID("FAX") ID, Description("Fax Machine") Description },
+		row { PhoneTypeID("DAT") ID, Description("Modem Line") Description }
+	};
+
+create table EntityPhone
+{
+	Entity_ID : EntityID,
+	PhoneType_ID : PhoneTypeID,
+	Phone : Phone,
+	key { Entity_ID, PhoneType_ID }
+};
+
+create reference EntityPhone_Entity EntityPhone { Entity_ID } references Entity { ID };
+create reference EntityPhone_PhoneType EntityPhone { PhoneType_ID } references PhoneType { ID };
+create reference Entity_EntityPhone Entity { ID, Primary_PhoneType_ID } references EntityPhone { Entity_ID, PhoneType_ID };
+
+create table EntityAddress
+{
+	Entity_ID : EntityID,
+	Number : Integer,
+	Street : Description tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	City : Description tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.LineBreak = "false" },
+	State_ID : StateID tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.LineBreak = "false" },
+	Zip : Zip tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	key { Entity_ID, Number }
+};
+
+create reference EntityAddress_Entity EntityAddress { Entity_ID } references Entity { ID };
+create reference EntityAddress_State EntityAddress { State_ID } references State { ID } tags { Frontend.Embedded = "false" };
+create reference EntityAddress_ZipCode EntityAddress { Zip } references ZipCode { Zip } tags { Frontend.Embedded = "false" };
+
+create table Customer
+{
+	Entity_ID : EntityID,
+	Shipping_Address_Number : Integer tags { Frontend.Title = "Shipping Address", Frontend.Preview.Include = "false" },
+	Billing_Address_Number : Integer tags { Frontend.Title = "Billing Address", Frontend.Preview.Include = "false" },
+	key { Entity_ID }
+};
+
+create reference Customer_Entity Customer { Entity_ID } references Entity { ID };
+create reference Customer_Shipping_CustomerAddress Customer { Entity_ID, Shipping_Address_Number } references EntityAddress { Entity_ID, Number } tags { Frontend.Title = "Shipping" };
+create reference Customer_Billing_CustomerAddress Customer { Entity_ID, Billing_Address_Number } references EntityAddress { Entity_ID, Number } tags { Frontend.Title = "Billing" };
+
+create table CustomerPicture
+{
+	Customer_ID : EntityID,
+	Picture : Image,
+	key { Customer_ID }
+};
+
+create reference CustomerPicture_Customer CustomerPicture { Customer_ID } references Customer { Entity_ID } tags { Frontend.Embedded = "true" };
+
+create table Vendor
+{
+	Entity_ID : EntityID,
+	Primary_Address_Number : Integer tags { Frontend.Title = "Primary Address", Frontend.Preview.Include = "false" },
+	ShippingRate : ShippingRate tags { Frontend.Preview.Include = "false" },
+	key { Entity_ID }
+};
+
+create reference Vendor_Entity Vendor { Entity_ID } references Entity { ID };
+create reference Vendor_EntityAddress Vendor { Entity_ID, Primary_Address_Number } references EntityAddress { Entity_ID, Number } tags { Frontend.Title = "Primary" };
+
+create table ItemType
+{
+	ID : ItemTypeID,
+	Description : Description,
+	key { ID }
+};
+
+create table Item
+{
+	Location_ID : LocationID,
+	ItemType_ID : ItemTypeID,
+	Par : Decimal { default 0, constraint ParValid value >= 0 },
+	OnHand : Decimal { default 0, constraint OnHandValid value >= 0 } tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity on hand" },
+	OnOrder : Decimal { default 0, constraint OnOrderValid value >= 0 } tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity currently on order for customers" },
+	OnPurchase : Decimal { default 0, constraint OnPurchaseValid value >= 0 } tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity currently being purchased from vendors" },
+	key { Location_ID, ItemType_ID }
+};
+
+create reference Item_Location Item { Location_ID } references Location { ID };
+create reference Item_ItemType Item { ItemType_ID } references ItemType { ID };
+
+create view ItemsUnderPar
+	Item where (OnHand + OnPurchase) < Par;
+	
+create view ItemsToOrder
+	Item 
+		add { OnHand + OnPurchase ProjectedOnHand }
+		add 
+		{ 
+			(if ProjectedOnHand < OnOrder then OnOrder - ProjectedOnHand else 0d) RequiredOnHand,
+			(if ProjectedOnHand < Par then Par - ProjectedOnHand else 0d) SuggestedOnHand
+		}
+		add { RequiredOnHand + SuggestedOnHand ToOrder }
+		where ToOrder > 0
+		over { Location_ID, ItemType_ID, ToOrder };
+		
+create view LocationsNeedingItems
+	ItemsToOrder over { Location_ID };
+	
+create table VendorItemType
+{
+	Vendor_ID : EntityID,
+	ItemType_ID : ItemTypeID,
+	Cost : Money,
+	key { Vendor_ID, ItemType_ID }
+};
+
+create reference VendorItemType_Vendor VendorItemType { Vendor_ID } references Vendor { Entity_ID } tags { Frontend.Detail.Embedded = "true" };
+create reference VendorItemType_ItemType VendorItemType { ItemType_ID } references ItemType { ID };
+
+create view UnsuppliedItems
+	ItemType where not (ID in (VendorItemType over { ItemType_ID }));
+
+create view SupplyingVendors
+	VendorItemType 
+		join (Vendor rename { Entity_ID Vendor_ID })
+		join (EntityAddress over { Entity_ID, Number, Zip } rename { Entity_ID Vendor_ID, Number Primary_Address_Number, Zip Source_Zip })
+		join (ZipCode over { Zip, Location } rename { Zip Source_Zip, Location Source_Location })
+		join ItemsToOrder
+		join (Location over { ID, Zip } rename { ID Location_ID, Zip Target_Zip })
+		join (ZipCode over { Zip, Location } rename { Zip Target_Zip, Location Target_Location})
+		add { Distance(Source_Location, Target_Location) Shipping_Distance }
+		add { ShippingRate * Shipping_Distance Shipping_Cost }
+		add { (Cost * ToOrder) + Shipping_Cost Total_Cost }
+		over { Vendor_ID, Location_ID, ItemType_ID, ToOrder, Cost, Shipping_Cost, Total_Cost }
+	{
+		order { Vendor_ID, Location_ID, ItemType_ID, Total_Cost desc }
+	};
+	
+create table InvoiceStatus
+{
+	ID : InvoiceStatusID,
+	Description : Description,
+	key { ID }
+};
+
+InvoiceStatus := 
+	table 
+	{
+		row { InvoiceStatusID("NEW") ID, Description("New Invoice") Description },
+		row { InvoiceStatusID("PRO") ID, Description("Processed Invoice") Description },
+		row { InvoiceStatusID("COM") ID, Description("Completed Invoice") Description }
+	};
+
+create table Invoice
+{
+	ID : InvoiceID { default InvoiceID(GetNextGenerator("Shipping.Invoice.ID")) } tags { Frontend.ReadOnly = "true" },
+	Location_ID : LocationID,
+	User_ID : UserID { default System.UserID() } tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true" },
+	Date : DateTime { default Date() },
+	InvoiceStatus_ID : InvoiceStatusID { default InvoiceStatusID("NEW") } tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true" },
+	key { ID }
+};
+
+create reference Invoice_Location Invoice { Location_ID } references Location { ID };
+create reference Invoice_InvoiceStatus Invoice { InvoiceStatus_ID } references InvoiceStatus { ID };
+create reference Invoice_User Invoice { User_ID } references Users { ID };
+
+create table SaleOrder
+{
+	Invoice_ID : InvoiceID,
+	Customer_ID : EntityID,
+	key { Invoice_ID }
+};
+
+create reference SaleOrder_Invoice SaleOrder { Invoice_ID } references Invoice { ID };
+create reference SaleOrder_Customer SaleOrder { Customer_ID } references Customer { Entity_ID };
+
+create table PurchaseOrder
+{
+	Invoice_ID : InvoiceID,
+	Vendor_ID : EntityID,
+	key { Invoice_ID }
+};
+
+create reference PurchaseOrder_Invoice PurchaseOrder { Invoice_ID } references Invoice { ID };
+create reference PurchaseOrder_Vendor PurchaseOrder { Vendor_ID } references Vendor { Entity_ID };
+
+// an Invoice is either a SaleOrder or a PurchaseOrder, but not both
+create constraint InvoiceExclusive
+	not exists ((Invoice rename I) join (SaleOrder rename S) by S.Invoice_ID = I.ID join (PurchaseOrder rename P) by P.Invoice_ID = I.ID);
+
+// all Invoices are SaleOrders or PurhcaseOrders	
+create constraint InvoiceValid
+	not exists (Invoice where not (ID in ((SaleOrder over { Invoice_ID } union (PurchaseOrder over { Invoice_ID })) rename { Invoice_ID ID })));
+	// equivalent formulation not likely to perform well due to lack of support for difference operator in some SQL-based systems
+	// not exists (Invoice over { ID } minus (SaleOrder over { Invoice_ID } union PurchaseOrder over { Invoice_ID } rename { Invoice_ID ID });
+
+create table InvoiceItem
+{
+	Invoice_ID : InvoiceID,
+	Number : Integer tags { Frontend.Visible = "false", Frontend.Browse.Visible = "true" },
+	ItemType_ID : ItemTypeID,
+	Quantity : Decimal,
+	Amount : Money,
+	key { Invoice_ID, Number }
+};
+
+create reference InvoiceItem_Invoice InvoiceItem { Invoice_ID } references Invoice { ID } tags { Frontend.Detail.Embedded = "true" };
+create reference InvoiceItem_ItemType InvoiceItem { ItemType_ID } references ItemType { ID };
+
+create constraint ItemsSupplied
+	not exists (InvoiceItem where not (ItemType_ID in (VendorItemType over { ItemType_ID })));
+	// InvoiceItem over { ItemType_ID } = VendorItemType over { ItemType_ID };
+
+create table InvoiceItemNumbers
+{
+	Invoice_ID : InvoiceID,
+	NextNumber : Integer,
+	key { Invoice_ID }
+};
+
+create operator GetNextInvoiceItemNumber(const AInvoiceID : InvoiceID) : Integer
+begin
+	if not exists (InvoiceItemNumbers where Invoice_ID = AInvoiceID) then
+		insert table { row { AInvoiceID Invoice_ID, 2 NextNumber } } into InvoiceItemNumbers
+	else
+		update InvoiceItemNumbers set { NextNumber := NextNumber + 1 } where Invoice_ID = AInvoiceID;
+	result := (NextNumber from (row from (InvoiceItemNumbers where Invoice_ID = AInvoiceID))) - 1;
+end;
+
+create operator InvoiceItemChangeInvoiceID(var ARow : entry { Invoice_ID : InvoiceID, Number : Integer, ItemType_ID : ItemTypeID, Amount : Money, Quantity : Decimal }) : Boolean
+begin
+	ARow := 
+		entry
+		{ 
+			(Invoice_ID from ARow) Invoice_ID, 
+			(GetNextInvoiceItemNumber(Invoice_ID from ARow)) Number,
+			(ItemType_ID from ARow) ItemType_ID, 
+			(Amount from ARow) Amount, 
+			(Quantity from ARow) Quantity 
+		};
+	result := true;
+end;
+
+attach operator InvoiceItemChangeInvoiceID to Invoice_ID in InvoiceItem on { change };
+
+// Invoice Processed -> 
+//		if IsPurchase
+//			Add Quantity to OnPurchase for each ItemType
+//		else
+//			Add Quantity to OnOrder for each ItemType
+//
+// Invoice Completed ->
+//		if IsPurchase
+//			Subtract Quantity from OnPurchase for each ItemType
+//			Add Quantity to OnHand for each ItemType
+//		else
+//			Subtract Quantity from OnOrder for each ItemType
+//			Subtract Quantity from OnHand for each ItemType
+
+// A sale order cannot be completed if OnHand < Quantity for each ItemType
+
+create operator UpdateInvoice
+(
+	AOldRow : row { ID : InvoiceID, Location_ID : LocationID, User_ID : UserID, Date : DateTime, InvoiceStatus_ID : InvoiceStatusID },
+	ANewRow : row { ID : InvoiceID, Location_ID : LocationID, User_ID : UserID, Date : DateTime, InvoiceStatus_ID : InvoiceStatusID }
+)
+begin
+	if ((InvoiceStatus_ID from AOldRow) <> (InvoiceStatus_ID from ANewRow)) then
+	begin
+		var LRow : row { Location_ID : LocationID, ItemType_ID : ItemTypeID, Quantity : Decimal };
+		var LIsPurchase : Boolean := exists (PurchaseOrder where Invoice_ID = (ID from ANewRow));
+		var LIsComplete : Boolean;
+		if ((InvoiceStatus_ID from AOldRow) = "NEW") and ((InvoiceStatus_ID from ANewRow) = "PRO") then
+			LIsComplete := false
+		else if ((InvoiceStatus_ID from AOldRow) = "PRO") and ((InvoiceStatus_ID from ANewRow) = "COM") then
+			LIsComplete := true
+		else
+			raise Error("Invoice status can only be changed from New to Processed or from Processed to Completed.");
+		
+		var LCursor : cursor(table { Location_ID : LocationID, ItemType_ID : ItemTypeID, Quantity : Decimal }) :=
+			cursor((Invoice where ID = (ID from ANewRow)) join (InvoiceItem rename { Invoice_ID ID }) over { Location_ID, ItemType_ID, Quantity });
+		var LQuantity : Decimal;
+		try
+			while (LCursor.Next()) do
+			begin
+				LRow := LCursor.Select();
+				LQuantity := (Quantity from LRow);
+				//LQuantity := if LIsPurchase then (Quantity from LRow) else -(Quantity from LRow);
+				if LIsComplete then
+				begin
+					if exists (Item where Location_ID = (Location_ID from LRow) and ItemType_ID = (ItemType_ID from LRow)) then
+					begin
+						update Item
+							set
+							{
+								OnPurchase := OnPurchase - if LIsPurchase then LQuantity else 0d,
+								OnOrder := OnOrder - if not LIsPurchase then LQuantity else 0d,
+								OnHand := OnHand + if LIsPurchase then LQuantity else -LQuantity
+							}
+							where Location_ID = (Location_ID from LRow)
+								and ItemType_ID = (ItemType_ID from LRow);
+					end
+					else
+					begin
+						insert 
+							table 
+							{ 
+								row 
+								{ 
+									(Location_ID from LRow) Location_ID, 
+									(ItemType_ID from LRow) ItemType_ID, 
+									(if LIsPurchase then -LQuantity else 0d) OnPurchase,
+									(if LIsPurchase then 0d else -LQuantity) OnOrder,
+									(if LIsPurchase then LQuantity else -LQuantity) OnHand
+								} 
+							}
+							into Item;
+					end;
+				end
+				else
+				begin
+					if exists (Item where Location_ID = (Location_ID from LRow) and ItemType_ID = (ItemType_ID from LRow)) then
+					begin
+						update Item 
+							set 
+							{ 
+								OnOrder := OnOrder + if LIsPurchase then 0d else LQuantity,
+								OnPurchase := OnPurchase + if LIsPurchase then LQuantity else 0d
+							}
+							where Location_ID = (Location_ID from LRow)
+								and ItemType_ID = (ItemType_ID from LRow);
+					end
+					else
+					begin
+						insert 
+							table 
+							{ 
+								row 
+								{ 
+									(Location_ID from LRow) Location_ID, 
+									(ItemType_ID from LRow) ItemType_ID, 
+									(if LIsPurchase then 0d else LQuantity) OnOrder,
+									(if LIsPurchase then LQuantity else 0d) OnPurchase
+								}
+							} 
+							into Item;
+					end;
+				end;
+			end;
+		finally
+			LCursor.Close();
+		end;
+	end;
+end;
+
+attach operator UpdateInvoice to Invoice on { after update };
+
+create table BidItem
+{
+	Location_ID : LocationID,
+	ItemType_ID : ItemTypeID,
+	Vendor_ID : EntityID,
+	Quantity : Decimal,
+	key { Location_ID, ItemType_ID }
+}
+	tags { Frontend.UseApplicationTransactions = "false" };
+	
+create reference BidItem_SupplyingVendors BidItem { Location_ID, ItemType_ID, Vendor_ID } references SupplyingVendors { Location_ID, ItemType_ID, Vendor_ID };
+
+create operator CreateBidItems(const ALocationID : LocationID)
+begin
+	delete BidItem where Location_ID = ALocationID;
+	insert
+		ItemsToOrder
+			where Location_ID = ALocationID
+			rename { Location_ID ToOrder_Location_ID, ItemType_ID ToOrder_ItemType_ID }
+			where exists (VendorItemType where ItemType_ID = ToOrder_ItemType_ID)
+			add { (Vendor_ID from row from (SupplyingVendors where Location_ID = ToOrder_Location_ID and ItemType_ID = ToOrder_ItemType_ID return 1 by { Total_Cost desc, Vendor_ID })) Vendor_ID }
+			join (Vendor rename { Entity_ID Vendor_ID } over { Vendor_ID, ShippingRate })
+			rename { ToOrder_Location_ID Location_ID, ToOrder_ItemType_ID ItemType_ID }
+			join VendorItemType
+			over { Location_ID, ItemType_ID, Vendor_ID, ToOrder }
+			rename { ToOrder Quantity }
+		into BidItem;
+end;
+
+create view Bids
+	BidItem over { Location_ID, Vendor_ID };
+	
+create operator ProcessInvoice(const AInvoiceID : InvoiceID)
+begin
+	update Invoice set { InvoiceStatus_ID := InvoiceStatusID("PRO") } where ID = AInvoiceID;
+end;
+
+create operator CompleteInvoice(const AInvoiceID : InvoiceID)
+begin
+	update Invoice set { InvoiceStatus_ID := InvoiceStatusID("COM") } where ID = AInvoiceID;
+end;
+
+create operator CreatePurchaseOrder(const ALocationID : LocationID, const AVendorID : EntityID)
+begin
+	// insert the invoice
+	var LInvoiceID : InvoiceID := InvoiceID(GetNextGenerator("Shipping.Invoice.ID"));
+	insert table { row { LInvoiceID ID, ALocationID Location_ID } } into Invoice;
+	
+	// insert the purchase order
+	insert table { row { LInvoiceID Invoice_ID, AVendorID Vendor_ID } } into PurchaseOrder;
+	
+	// insert the invoice items
+	var LItems : cursor(table { ItemType_ID : ItemTypeID, Quantity : Decimal, Cost : Money }) := cursor((BidItem join VendorItemType) where Location_ID = ALocationID and Vendor_ID = AVendorID over { ItemType_ID, Quantity, Cost });
+	try
+		var LRow : row { ItemType_ID : ItemTypeID, Quantity : Decimal, Cost : Money };
+		while (LItems.Next()) do
+		begin
+			LRow := LItems.Select();
+			insert 
+				table 
+				{ 
+					row 
+					{ 
+						LInvoiceID Invoice_ID, 
+						GetNextInvoiceItemNumber(LInvoiceID) Number, 
+						(ItemType_ID from LRow) ItemType_ID, 
+						(Quantity from LRow) Quantity, 
+						(Cost from LRow) Amount 
+					} 
+				}
+				into InvoiceItem;
+		end;
+	finally
+		LItems.Close();
+	end;
+	
+	ProcessInvoice(LInvoiceID);
+end;
+
+create operator CreatePurchaseOrders(const ALocationID : LocationID)
+begin
+	var LInvoices : cursor(table { Vendor_ID : EntityID }) := cursor(Bids where Location_ID = ALocationID over { Vendor_ID });
+	try
+		var LRow : row { Vendor_ID : EntityID };
+		while (LInvoices.Next()) do
+		begin
+			LRow := LInvoices.Select();
+			CreatePurchaseOrder(ALocationID, (Vendor_ID from LRow));
+		end;
+	finally
+		LInvoices.Close();
+	end;
+	delete BidItem where Location_ID = ALocationID;
+end;
+
+create view SaleOrdersToProcess
+	(Invoice where InvoiceStatus_ID = InvoiceStatusID("NEW"))
+		join (SaleOrder rename { Invoice_ID ID });
+		
+create view SaleOrdersToShip
+	(Invoice where InvoiceStatus_ID = InvoiceStatusID("PRO"))
+		join SaleOrder by Invoice_ID = ID
+		where not exists
+		(
+			InvoiceItem where Invoice_ID = ID
+				join (Item rename { ItemType_ID Item_ItemType_ID, Location_ID Item_Location_ID } where Item_Location_ID = Location_ID) by ItemType_ID = Item_ItemType_ID 
+				where Quantity > OnHand
+		);
+		
+/*
+// Natural joins force nesting too deep for MSSQL to handle !!!! ARGGHHH
+create view SaleOrdersToShip
+	(Invoice where InvoiceStatus_ID = InvoiceStatusID("PRO")) 
+		join (SaleOrder rename { Invoice_ID ID })
+		where not exists 
+		(
+			InvoiceItem where Invoice_ID = ID
+				join (Item rename { Location_ID Item_Location_ID } where Item_Location_ID = Location_ID) 
+				where Quantity > OnHand
+		);
+*/
+		
+create view PurchaseOrdersToProcess
+	(Invoice where InvoiceStatus_ID = InvoiceStatusID("NEW"))
+		join (PurchaseOrder rename { Invoice_ID ID });
+
+create view PurchaseOrdersToReceive
+	(Invoice where InvoiceStatus_ID = InvoiceStatusID("PRO")) 
+		join (PurchaseOrder rename { Invoice_ID ID });
+		
+// Reporting Views
+
+// Sales Report
+create view SalesReport
+	(InvoiceItem rename II)
+		join (Invoice rename I) by I.ID = II.Invoice_ID
+		join (SaleOrder rename S) by I.ID = S.Invoice_ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		join (Entity rename E) by S.Customer_ID = E.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (Users rename U) by I.User_ID = U.ID
+		over { I.ID, I.Date, I.InvoiceStatus_ID, I.Location_ID, L.Name, I.User_ID, U.Name, S.Customer_ID, E.Name, II.Number, II.ItemType_ID, IT.Description, II.Quantity, II.Amount }
+		add { II.Quantity * II.Amount ItemAmount };
+
+// Purchasing Report
+create view PurchasingReport
+	(InvoiceItem rename II)
+		join (Invoice rename I) by I.ID = II.Invoice_ID
+		join (PurchaseOrder rename P) by I.ID = P.Invoice_ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		join (Entity rename E) by P.Vendor_ID = E.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (Users rename U) by I.User_ID = U.ID
+		over { I.ID, I.Date, I.InvoiceStatus_ID, I.Location_ID, L.Name, I.User_ID, U.Name, P.Vendor_ID, E.Name, II.Number, II.ItemType_ID, IT.Description, II.Quantity, II.Amount }
+		add { II.Quantity * II.Amount ItemAmount };
+
+// ToOrder Report	
+create view ToOrderReport
+	(ItemsToOrder rename ITO)
+		join (Location rename L) by ITO.Location_ID = L.ID
+		join (ItemType rename IT) by ITO.ItemType_ID = IT.ID
+		over { ITO.Location_ID, L.Name, ITO.ItemType_ID, IT.Description, ITO.ToOrder };
+		
+// Inventory Report
+create view InventoryReport
+	(Item rename I)
+		join (Location rename L) by I.Location_ID = L.ID
+		join (ItemType rename IT) by I.ItemType_ID = IT.ID
+		over { I.Location_ID, L.Name, I.ItemType_ID, IT.Description, I.Par, I.OnHand, I.OnOrder, I.OnPurchase };
+		
+// Profitability Report
+create view ProfitabilityReport
+	(InvoiceItem rename II) 
+		join (Invoice rename I) by II.Invoice_ID = I.ID
+		join (Location rename L) by I.Location_ID = L.ID
+		join (ItemType rename IT) by II.ItemType_ID = IT.ID
+		over { I.Location_ID, L.Name, II.ItemType_ID, IT.Description }
+		add
+		{
+			Sum
+			(
+				LineAmount from
+				(
+					(InvoiceItem rename SII)
+						join (Invoice rename SI) by SII.Invoice_ID = SI.ID
+						join (SaleOrder rename SS) by SS.Invoice_ID = SI.ID
+						where SI.Location_ID = I.Location_ID and SII.ItemType_ID = II.ItemType_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) TotalSold,
+			Sum
+			(
+				LineAmount from
+				(
+					(InvoiceItem rename SII)
+						join (Invoice rename SI) by SII.Invoice_ID = SI.ID
+						join (PurchaseOrder rename SP) by SP.Invoice_ID = SI.ID
+						where SI.Location_ID = I.Location_ID and SII.ItemType_ID = II.ItemType_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) TotalPurchased
+		}
+		add { TotalSold - TotalPurchased TotalProfitability };
+		
+// User Report
+create view UserReport
+	Users;
+
+// Customer Report
+create view CustomerReport
+	(Customer rename C)
+		join (Entity rename E) by C.Entity_ID = E.ID
+		join (EntityPhone rename EP) by E.ID = EP.Entity_ID and E.Primary_PhoneType_ID = EP.PhoneType_ID
+		join (EntityAddress rename EA) by E.ID = EA.Entity_ID and C.Billing_Address_Number = EA.Number
+		over { C.Entity_ID, E.Name, EP.Phone, EA.Street, EA.City, EA.State_ID, EA.Zip }
+		add 
+		{ 
+			Count(SaleOrder where Customer_ID = C.Entity_ID) OrderCount,
+			Sum
+			(
+				LineAmount from 
+				(
+					(InvoiceItem rename II) 
+						join (Invoice rename I) by II.Invoice_ID = I.ID 
+						join (SaleOrder rename S) by S.Invoice_ID = I.ID 
+						where S.Customer_ID = C.Entity_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) OrderAmount 
+		};
+
+// Vendor Report
+create view VendorReport
+	(Vendor rename V)
+		join (Entity rename E) by V.Entity_ID = E.ID
+		join (EntityPhone rename EP) by E.ID = EP.Entity_ID and E.Primary_PhoneType_ID = EP.PhoneType_ID
+		join (EntityAddress rename EA) by E.ID = EA.Entity_ID and V.Primary_Address_Number = EA.Number
+		over { V.Entity_ID, E.Name, EP.Phone, EA.Street, EA.City, EA.State_ID, EA.Zip }
+		add 
+		{ 
+			Count(PurchaseOrder where Vendor_ID = V.Entity_ID) OrderCount,
+			Sum
+			(
+				LineAmount from 
+				(
+					(InvoiceItem rename II) 
+						join (Invoice rename I) by II.Invoice_ID = I.ID 
+						join (PurchaseOrder rename P) by P.Invoice_ID = I.ID 
+						where P.Vendor_ID = V.Entity_ID
+						add { Quantity * Amount LineAmount }
+				)
+			) OrderAmount 
+		};
+

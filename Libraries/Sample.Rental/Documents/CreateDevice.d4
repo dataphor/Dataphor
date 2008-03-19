@@ -1,0 +1,43 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Create a storage device in memory
+// NOTE: This is NOT a persistent device.
+// All data will be lost when Dataphor is shut down.
+
+/*
+create device RentalDevice
+  class "System.MemoryDevice";
+*/  
+
+/*
+insert table
+{
+ row
+ {
+  "Sample.Rental" Library_Name,
+  "MSSQLDevice" Required_Library_Name,
+  VersionNumberUndefined() Required_Library_Version
+ }
+} into LibraryRequisites;
+
+create device RentalDevice
+	reconciliation { mode = { command }, master = device }
+	class "MSSQLDevice"
+		attributes
+		{
+			"ServerName" = ".",
+			"DatabaseName" = "Rental"
+		};
+
+CreateDeviceUser("Admin", "RentalDevice", "sa", "");
+CreateDeviceUser("System", "RentalDevice", "sa", "");
+*/
+
+create device RentalDevice
+	reconciliation { mode = { Command }, master = device }
+	class "SimpleDevice";
+
+SetDefaultDeviceName("RentalDevice");

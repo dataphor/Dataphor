@@ -1,0 +1,78 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Administrative Role
+//
+// User Maintenance
+// User Reports
+
+// Add a user
+create operator AddUser()
+begin
+	var LName : String := RandomName(8);
+	CreateUser(LName, RandomName(5) + " " + RandomName(10), "");
+	if exists (Devices where Name = Name("Shipping"))
+		CreateDeviceUser(LName, Name("Shipping"), "sa", "");
+end;
+
+// Edit an existing user
+create operator EditUser()
+begin
+	var LCursor : cursor(table { ID : String }) := cursor(Users over { ID } where not(ID in { "Admin", "System" }));
+	try
+		for LIndex : Integer := 0 to Random(Count(Users where not(ID in { "Admin", "System" }))) + 1 do
+			LCursor.Next();
+		if not(LCursor.EOF()) then
+			SetUserName(ID from LCursor.Select(), RandomName(5) + " " + RandomName(10));
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator DeleteUser()
+begin
+	var LCursor : cursor(table { ID : String }) := cursor(Users over { ID } where not(ID in { "Admin", "System" }));
+	try
+		for LIndex : Integer := 0 to Random(Count(Users where not(ID in { "Admin", "System" }))) do
+			LCursor.Next();
+		if not(LCursor.EOF()) then
+			try
+				DropUser(ID from LCursor.Select());
+			except
+			end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RunUserReport()
+begin
+	var LCursor : cursor(table { ID : String, Name : String }) := cursor(Users);
+	try
+		while LCursor.Next() do
+			LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RunAdministrator()
+begin
+	while exists(TestActive) do
+	begin
+		if Count(Users) < 100 then
+			for LIndex : Integer := 1 to Random(2, 5) do
+				AddUser();
+			
+		for LIndex : Integer := 1 to Random(1, 5) do
+			EditUser();
+			
+		for LIndex : Integer := 1 to Random(3) do
+			DeleteUser();
+
+		for LIndex : Integer := 1 to Random(2) do		
+			RunUserReport();
+	end;
+end;

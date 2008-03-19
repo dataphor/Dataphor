@@ -1,0 +1,106 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Management Role
+//
+// Location Maintenance
+// Profitability Report
+// Sales Report
+// Purchasing Report
+// ToOrder Report
+
+create operator AddLocation()
+begin
+	var LLocationID : LocationID := RandomLocationID();
+	var LStateID : StateID := RandomState();
+	var LZipCode : Zip := RandomZipCode();
+	if not exists (Location where ID = LLocationID) then
+	begin
+		try
+			insert 
+				table 
+				{ 
+					row 
+					{ 
+						LLocationID ID, 
+						RandomProperName() Name, 
+						RandomPhone() Phone, 
+						RandomStreet() Street, 
+						RandomCity() City, 
+						LStateID State_ID, 
+						LZipCode Zip 
+					} 
+				}
+				into Location;
+		commit;
+	end;
+end;
+
+create operator EditLocation()
+begin
+	var LCursor : cursor(table { ID : LocationID }) := cursor(Location over { ID } isolation browse);
+	try
+		for LIndex : Integer := 0 to Random(Count(Location)) do
+			LCursor.Next();
+		case Random(6)
+			when 0 then try update Location set { Name := RandomProperName() } where ID = ID from LCursor.Select(); commit;
+			when 1 then try update Location set { Phone := RandomPhone() } where ID = ID from LCursor.Select(); commit;
+			when 2 then try update Location set { Street := RandomStreet() } where ID = ID from LCursor.Select(); commit;
+			when 3 then try update Location set { City := RandomCity() } where ID = ID from LCursor.Select(); commit;
+			when 4 then 
+			begin
+				var LStateID : StateID := RandomState();
+				try 
+					update Location set { State_ID := LStateID } where ID = ID from LCursor.Select(); 
+				commit;
+			end;
+			when 5 then 
+			begin
+				var LZipCode : Zip := RandomZipCode();
+				try 
+					update Location set { Zip := LZipCode } where ID = ID from LCursor.Select(); 
+				commit;
+			end;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if not exists (TestRole where Name = "Management") then
+	insert table { row { "Management" Name } } into TestRole;
+	
+create operator RunManagement()
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Management");
+	try
+		while exists(TestActive) do
+		begin
+			try
+				case Random(7)
+					when 0 then
+						if Count(Location) < 50 then
+							AddLocation();
+					when 1 then EditLocation();
+					when 2 then RunReport("Location");
+					when 3 then RunReport("ProfitabilityReport");
+					when 4 then RunReport("SalesReport");
+					when 5 then RunReport("PurchasingReport");
+					when 6 then RunReport("ToOrderReport");
+				end;
+			except
+				on E : Error do
+					LogError(E);
+			end;
+			Sleep(Random(1000, 5000));
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;

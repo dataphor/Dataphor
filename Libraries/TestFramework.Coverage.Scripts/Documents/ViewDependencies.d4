@@ -1,0 +1,61 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create session view TableVarList
+	TableVars over { Name } redefine { Name := Name.Value }
+	adorn { Name tags { Frontend.Width = '50' } }
+	tags { Frontend.Title = 'Tables', Frontend.Elaborate = "false" };
+
+create session table FormLauncher
+{
+	Query : String,
+	PageType : String { default "Browse" } tags { Frontend.Title = "Page Type" },
+	MasterKeyNames : String { default "" } tags { Frontend.Title = "Master Key Names", Frontend.Hint = "Master key names as a semi-colon delimited list of column names." },
+	DetailKeyNames : String { default "" } tags { Frontend.Title = "Detail Key Names", Frontend.Hint = "Detail key names as a semi-colon delimited list of column names." },
+	Elaborate : Boolean { default true },
+	key { Query, PageType, MasterKeyNames, DetailKeyNames, Elaborate },
+	reference FormLauncher_TableVars { Query } references TableVarList { Name } tags { Frontend.Lookup.Title = 'Query' } static tags { Storage.Enforced = "false" },
+	reference FormLauncher_PageTypes { PageType } references Frontend.PageTypes { ID } tags { Frontend.Lookup.Title = 'Page Type' }
+};
+
+create session view FormLauncherView
+	FormLauncher add { "Derive('" + Query.Replace("'", "''") + "', '" + PageType + "', '" + MasterKeyNames + "', '" + DetailKeyNames + "', " + Elaborate.ToString() + ")" DocumentExpression }
+		adorn { DocumentExpression tags { Frontend.Title = 'Document Expression' } };
+
+drop view FormLauncherView;
+drop table FormLauncher;
+drop view TableVarList;
+
+select SessionCatalogObjects;
+select SessionID();
+select ObjectDependencies where Dependent_Object_ID = ObjectID(CatalogObject_Name from (row from SessionCatalogObjects where Session_ID = SessionID() and Name = 'General.FormLauncherView')) add { ObjectName(Object_ID) ObjectName };
+
+select SessionCatalogObjects where Session_ID = SessionID() and Name = Name('General.FormLauncherView');
+
+create view TableVarList
+	TableVars over { Name } redefine { Name := Name.Value }
+	adorn { Name tags { Frontend.Width = '50' } }
+	tags { Frontend.Title = 'Tables', Frontend.Elaborate = "false" };
+
+create table FormLauncher
+{
+	Query : String,
+	PageType : String { default "Browse" } tags { Frontend.Title = "Page Type" },
+	MasterKeyNames : String { default "" } tags { Frontend.Title = "Master Key Names", Frontend.Hint = "Master key names as a semi-colon delimited list of column names." },
+	DetailKeyNames : String { default "" } tags { Frontend.Title = "Detail Key Names", Frontend.Hint = "Detail key names as a semi-colon delimited list of column names." },
+	Elaborate : Boolean { default true },
+	key { Query, PageType, MasterKeyNames, DetailKeyNames, Elaborate },
+	reference FormLauncher_TableVars { Query } references TableVarList { Name } tags { Frontend.Lookup.Title = 'Query' } static tags { Storage.Enforced = "false" },
+	reference FormLauncher_PageTypes { PageType } references Frontend.PageTypes { ID } tags { Frontend.Lookup.Title = 'Page Type' }
+};
+
+create view FormLauncherView
+	FormLauncher add { "Derive('" + Query.Replace("'", "''") + "', '" + PageType + "', '" + MasterKeyNames + "', '" + DetailKeyNames + "', " + Elaborate.ToString() + ")" DocumentExpression }
+		adorn { DocumentExpression tags { Frontend.Title = 'Document Expression' } };
+		
+drop view FormLauncherView;
+drop table FormLauncher;
+drop view TableVarList;
+

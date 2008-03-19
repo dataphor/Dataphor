@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="SystemObjectMaps">
+		<value>
+begin
+	var LIsCaseSensitive : Boolean := {1};
+
+	if LIsCaseSensitive then	
+	begin
+		alter device {0}
+		{{
+			create operator iCompare(const System.String, const System.String) class "SQLDevice.SQLCompare", 
+			create operator iEqual(const System.String, const System.String) class "SQLDevice.SQLEqual", 
+			create operator iNotEqual(const System.String, const System.String) class "SQLDevice.SQLNotEqual", 
+			create operator iLess(const System.String, const System.String) class "SQLDevice.SQLLess", 
+			create operator iInclusiveLess(const System.String, const System.String) class "SQLDevice.SQLInclusiveLess", 
+			create operator iInclusiveGreater(const System.String, const System.String) class "SQLDevice.SQLInclusiveGreater", 
+			create operator iGreater(const System.String, const System.String) class "SQLDevice.SQLGreater", 
+			create operator iLike(const System.String, const System.String) class "SQLDevice.SQLLike", 
+			create operator System.Min(const System.String) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+			create operator System.Max(const System.String) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}
+		}};
+	end
+	else
+	begin
+		alter device {0}
+		{{
+			create operator iCompare(const System.IString, const System.IString) class "SQLDevice.SQLCompare", 
+			create operator iEqual(const System.IString, const System.IString) class "SQLDevice.SQLEqual", 
+			create operator iNotEqual(const System.IString, const System.IString) class "SQLDevice.SQLNotEqual", 
+			create operator iLess(const System.IString, const System.IString) class "SQLDevice.SQLLess", 
+			create operator iInclusiveLess(const System.IString, const System.IString) class "SQLDevice.SQLInclusiveLess", 
+			create operator iInclusiveGreater(const System.IString, const System.IString) class "SQLDevice.SQLInclusiveGreater", 
+			create operator iGreater(const System.IString, const System.IString) class "SQLDevice.SQLGreater", 
+			create operator iLike(const System.IString, const System.IString) class "SQLDevice.SQLLike", 
+			create operator System.Min(const System.IString) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+			create operator System.Max(const System.IString) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}
+		}}; 
+	end;
+
+	alter device {0}
+	{{
+		create operator iCompare(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Decimal, const System.Decimal) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Money, const System.Money) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Guid, const System.Guid) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Boolean, const System.Boolean) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Long, const System.Long) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Byte, const System.Byte) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Short, const System.Short) class "SQLDevice.SQLCompare", 
+		create operator iCompare(const System.Integer, const System.Integer) class "SQLDevice.SQLCompare", 
+		create operator iEqual(const System.Boolean, const System.Boolean) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Short, const System.Short) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Decimal, const System.Decimal) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Integer, const System.Integer) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Byte, const System.Byte) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Long, const System.Long) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Money, const System.Money) class "SQLDevice.SQLEqual", 
+		create operator iEqual(const System.Guid, const System.Guid) class "SQLDevice.SQLEqual", 
+		create operator iNotEqual(const System.Long, const System.Long) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Byte, const System.Byte) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Guid, const System.Guid) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Short, const System.Short) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Boolean, const System.Boolean) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Decimal, const System.Decimal) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Integer, const System.Integer) class "SQLDevice.SQLNotEqual", 
+		create operator iNotEqual(const System.Money, const System.Money) class "SQLDevice.SQLNotEqual", 
+		create operator iLess(const System.Integer, const System.Integer) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Long, const System.Long) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Guid, const System.Guid) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Boolean, const System.Boolean) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Money, const System.Money) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Decimal, const System.Decimal) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Short, const System.Short) class "SQLDevice.SQLLess", 
+		create operator iLess(const System.Byte, const System.Byte) class "SQLDevice.SQLLess", 
+		create operator iInclusiveLess(const System.Decimal, const System.Decimal) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Byte, const System.Byte) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Long, const System.Long) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Boolean, const System.Boolean) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Guid, const System.Guid) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Short, const System.Short) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Money, const System.Money) class "SQLDevice.SQLInclusiveLess", 
+		create operator iInclusiveLess(const System.Integer, const System.Integer) class "SQLDevice.SQLInclusiveLess"
+		create operator iInclusiveGreater(const System.Short, const System.Short) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Byte, const System.Byte) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Integer, const System.Integer) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Decimal, const System.Decimal) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Long, const System.Long) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Boolean, const System.Boolean) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Money, const System.Money) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iInclusiveGreater(const System.Guid, const System.Guid) class "SQLDevice.SQLInclusiveGreater", 
+		create operator iGreater(const System.Byte, const System.Byte) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Money, const System.Money) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Boolean, const System.Boolean) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Long, const System.Long) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Integer, const System.Integer) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Guid, const System.Guid) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Decimal, const System.Decimal) class "SQLDevice.SQLGreater", 
+		create operator iGreater(const System.Short, const System.Short) class "SQLDevice.SQLGreater", 
+
+		create operator iAddition(const System.Decimal, const System.Decimal) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.Byte, const System.Byte) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.Long, const System.Long) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.Money, const System.Money) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.Integer, const System.Integer) class "SQLDevice.SQLAddition", 
+		create operator iAddition(const System.Short, const System.Short) class "SQLDevice.SQLAddition", 
+		create operator iSubtraction(const System.Long, const System.Long) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.Short, const System.Short) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.Byte, const System.Byte) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.Integer, const System.Integer) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.Decimal, const System.Decimal) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.Money, const System.Money) class "SQLDevice.SQLSubtraction", 
+		create operator iSubtraction(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLSubtraction", 
+		create operator iMultiplication(const System.Integer, const System.TimeSpan) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.TimeSpan, const System.Integer) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Decimal, const System.Money) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Long, const System.Long) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Money, const System.Decimal) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Money, const System.Integer) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Byte, const System.Byte) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Integer, const System.Money) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Decimal, const System.Decimal) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Integer, const System.Integer) class "SQLDevice.SQLMultiplication", 
+		create operator iMultiplication(const System.Short, const System.Short) class "SQLDevice.SQLMultiplication", 
+		create operator iDivision(const System.Money, const System.Integer) class "SQLDevice.SQLDivision", 
+		create operator iDivision(const System.Decimal, const System.Decimal) class "SQLDevice.SQLDivision", 
+		create operator iDivision(const System.Byte, const System.Byte) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDivision(const System.TimeSpan, const System.TimeSpan) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDivision(const System.Long, const System.Long) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDivision(const System.Integer, const System.Integer) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDivision(const System.Money, const System.Decimal) class "SQLDevice.SQLDivision", 
+		create operator iDivision(const System.Short, const System.Short) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDivision(const System.TimeSpan, const System.Integer) class "SQLDevice.SQLIntegerDivision", 
+		create operator iDiv(const System.Decimal, const System.Decimal) class "SQLDevice.SQLDiv", 
+		create operator iDiv(const System.Integer, const System.Integer) class "SQLDevice.SQLDivision", 
+		create operator iDiv(const System.Long, const System.Long) class "SQLDevice.SQLDivision", 
+		create operator iDiv(const System.Short, const System.Short) class "SQLDevice.SQLDivision", 
+		create operator iDiv(const System.Byte, const System.Byte) class "SQLDevice.SQLDivision", 
+		create operator iMod(const System.Long, const System.Long) class "SQLDevice.SQLMod", 
+		create operator iMod(const System.Byte, const System.Byte) class "SQLDevice.SQLMod", 
+		create operator iMod(const System.Integer, const System.Integer) class "SQLDevice.SQLMod", 
+		create operator iMod(const System.Short, const System.Short) class "SQLDevice.SQLMod", 
+		create operator iNegate(const System.Short) class "SQLDevice.SQLNegate", 
+		create operator iNegate(const System.Long) class "SQLDevice.SQLNegate", 
+		create operator iNegate(const System.Integer) class "SQLDevice.SQLNegate", 
+
+		create operator iAnd(const System.Boolean, const System.Boolean) class "SQLDevice.SQLAnd", 
+		create operator iOr(const System.Boolean, const System.Boolean) class "SQLDevice.SQLOr", 
+		create operator iXor(const System.Boolean, const System.Boolean) class "SQLDevice.SQLXor", 
+		create operator iNot(const System.Boolean) class "SQLDevice.SQLNot", 
+
+		create operator iIn(const System.Scalar, const list(System.Alpha)) class "SQLDevice.SQLIn", 
+		create operator iIn(const System.Scalar, const table) class "SQLDevice.SQLIn", 
+		create operator iIn(const System.Scalar, const presentation) class "SQLDevice.SQLIn", 
+		create operator iExists(table) class "SQLDevice.SQLExists", 
+		create operator iExists(presentation) class "SQLDevice.SQLExists", 
+
+		create operator iBitwiseAnd(const System.Integer, const System.Integer) class "SQLDevice.SQLBitwiseAnd", 
+		create operator iBitwiseAnd(const System.Long, const System.Long) class "SQLDevice.SQLBitwiseAnd", 
+		create operator iBitwiseAnd(const System.Byte, const System.Byte) class "SQLDevice.SQLBitwiseAnd", 
+		create operator iBitwiseAnd(const System.Short, const System.Short) class "SQLDevice.SQLBitwiseAnd", 
+		create operator iBitwiseOr(const System.Short, const System.Short) class "SQLDevice.SQLBitwiseOr", 
+		create operator iBitwiseOr(const System.Byte, const System.Byte) class "SQLDevice.SQLBitwiseOr", 
+		create operator iBitwiseOr(const System.Long, const System.Long) class "SQLDevice.SQLBitwiseOr", 
+		create operator iBitwiseOr(const System.Integer, const System.Integer) class "SQLDevice.SQLBitwiseOr", 
+		create operator iBitwiseXor(const System.Short, const System.Short) class "SQLDevice.SQLBitwiseXor", 
+		create operator iBitwiseXor(const System.Long, const System.Long) class "SQLDevice.SQLBitwiseXor", 
+		create operator iBitwiseXor(const System.Byte, const System.Byte) class "SQLDevice.SQLBitwiseXor", 
+		create operator iBitwiseXor(const System.Integer, const System.Integer) class "SQLDevice.SQLBitwiseXor", 
+		create operator iBitwiseNot(const System.Long) class "SQLDevice.SQLBitwiseNot", 
+		create operator iBitwiseNot(const System.Byte) class "SQLDevice.SQLBitwiseNot", 
+		create operator iBitwiseNot(const System.Integer) class "SQLDevice.SQLBitwiseNot", 
+		create operator iBitwiseNot(const System.Short) class "SQLDevice.SQLBitwiseNot", 
+		create operator iShiftLeft(const System.Long, const System.Integer) class "SQLDevice.SQLLeftShift", 
+		create operator iShiftLeft(const System.Integer, const System.Integer) class "SQLDevice.SQLLeftShift", 
+		create operator iShiftLeft(const System.Byte, const System.Integer) class "SQLDevice.SQLLeftShift", 
+		create operator iShiftLeft(const System.Short, const System.Integer) class "SQLDevice.SQLLeftShift", 
+		create operator iShiftRight(const System.Byte, const System.Integer) class "SQLDevice.SQLRightShift", 
+		create operator iShiftRight(const System.Short, const System.Integer) class "SQLDevice.SQLRightShift", 
+		create operator iShiftRight(const System.Long, const System.Integer) class "SQLDevice.SQLRightShift", 
+		create operator iShiftRight(const System.Integer, const System.Integer) class "SQLDevice.SQLRightShift", 
+
+		create operator System.TimeSpan(const System.Integer) class "SQLDevice.SQLTimeSpan1Operand", 
+		create operator System.TimeSpan(const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpan2Operands", 
+		create operator System.TimeSpan(const System.Integer, const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpan3Operands", 
+		create operator System.TimeSpan(const System.Integer, const System.Integer, const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpan4Operands", 
+		create operator System.TimeSpan(const System.Integer, const System.Integer, const System.Integer, const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpan5Operands", 
+		create operator System.TimeSpan.Time(const System.Integer) class "SQLDevice.SQLTimeSpanTime1Operand", 
+		create operator System.TimeSpan.Time(const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpanTime2Operands", 
+		create operator System.TimeSpan.Time(const System.Integer, const System.Integer, const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpanTime4Operands", 
+		create operator System.TimeSpan.Time(const System.Integer, const System.Integer, const System.Integer) class "SQLDevice.SQLTimeSpanTime3Operands", 
+		create operator System.TimeSpan.Days(const System.Decimal) class "SQLDevice.SQLTimeSpanDays", 
+		create operator System.TimeSpan.ReadDays(const System.TimeSpan) class "SQLDevice.SQLTimeSpanReadDays", 
+		create operator System.TimeSpan.WriteDays(const System.TimeSpan, const System.Decimal) class "SQLDevice.SQLTimeSpanWriteDays", 
+		create operator System.TimeSpan.Hours(const System.Decimal) class "SQLDevice.SQLTimeSpanHours", 
+		create operator System.TimeSpan.ReadHours(const System.TimeSpan) class "SQLDevice.SQLTimeSpanReadHours", 
+		create operator System.TimeSpan.WriteHours(const System.TimeSpan, const System.Decimal) class "SQLDevice.SQLTimeSpanWriteHours", 
+		create operator System.TimeSpan.Minutes(const System.Decimal) class "SQLDevice.SQLTimeSpanMinutes", 
+		create operator System.TimeSpan.ReadMinutes(const System.TimeSpan) class "SQLDevice.SQLTimeSpanReadMinutes", 
+		create operator System.TimeSpan.WriteMinutes(const System.TimeSpan, const System.Decimal) class "SQLDevice.SQLTimeSpanWriteMinutes", 
+		create operator System.TimeSpan.Seconds(const System.Decimal) class "SQLDevice.SQLTimeSpanSeconds", 
+		create operator System.TimeSpan.ReadSeconds(const System.TimeSpan) class "SQLDevice.SQLTimeSpanReadSeconds", 
+		create operator System.TimeSpan.WriteSeconds(const System.TimeSpan, const System.Decimal) class "SQLDevice.SQLTimeSpanWriteSeconds", 
+		create operator System.TimeSpan.Milliseconds(const System.Decimal) class "SQLDevice.SQLTimeSpanMilliseconds", 
+		create operator System.TimeSpan.ReadMilliseconds(const System.TimeSpan) class "SQLDevice.SQLTimeSpanReadMilliseconds", 
+		create operator System.TimeSpan.WriteMilliseconds(const System.TimeSpan, const System.Decimal) class "SQLDevice.SQLTimeSpanWriteMilliseconds", 
+		create operator System.TimeSpan.Ticks(const System.Long) class "SQLDevice.SQLScalarSelector", 
+		create operator System.TimeSpan.ReadTicks(const System.TimeSpan) class "SQLDevice.SQLScalarReadAccessor", 
+		create operator System.TimeSpan.WriteTicks(const System.TimeSpan, const System.Long) class "SQLDevice.SQLScalarWriteAccessor", 
+		create operator System.AddTicks(const System.TimeSpan, const System.Long) class "SQLDevice.SQLTimeSpanAddTicks", 
+		create operator System.Duration(const System.TimeSpan) class "SQLDevice.SQLCallOperator" attributes {{ "OperatorName" = "Abs" }}, 
+
+		create operator System.IsNil(const System.Alpha) class "SQLDevice.SQLIsNull", 
+		create operator System.IfNil(const System.Alpha, const System.Alpha) class "SQLDevice.SQLIfNull", 
+
+		create operator System.Count() class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Count" }}, 
+		create operator System.Count(const System.Scalar) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Count" }}, 
+		create operator System.Min(const System.Integer) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+		create operator System.Min(const System.Decimal) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+		create operator System.Min(const System.Money) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+		create operator System.Min(const System.TimeSpan) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Min" }}, 
+		create operator System.Max(const System.Integer) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}, 
+		create operator System.Max(const System.Decimal) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}, 
+		create operator System.Max(const System.Money) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}, 
+		create operator System.Max(const System.TimeSpan) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Max" }}, 
+		create operator System.Sum(const System.Integer) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Sum" }}, 
+		create operator System.Sum(const System.Decimal) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Sum" }}, 
+		create operator System.Sum(const System.Money) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Sum" }}, 
+		create operator System.Sum(const System.TimeSpan) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Sum" }}, 
+		create operator System.Avg(const System.Integer) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }}, 
+		create operator System.Avg(const System.Decimal) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }}, 
+		create operator System.Avg(const System.Money) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }}, 
+		create operator System.Avg(const System.TimeSpan) class "SQLDevice.SQLAggregateOperator" attributes {{ "OperatorName" = "Avg" }} 
+	}};
+end;
+		</value>
+	</data>
+</root>

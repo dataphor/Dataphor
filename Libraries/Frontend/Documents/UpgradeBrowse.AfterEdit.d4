@@ -1,0 +1,11 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// After Edit
+
+begin
+	var LRow := row from .Frontend.UpgradeBrowse.EditUpgrade;
+	System.SaveUpgrade(Library_Name from LRow, Version from LRow, Script from LRow);
+end;

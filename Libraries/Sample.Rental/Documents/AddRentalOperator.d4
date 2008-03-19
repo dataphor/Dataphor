@@ -1,0 +1,16 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator AddRental(ARow : typeof(RentedVideo[]))
+begin
+ update Video 
+  set 
+  {
+   TimesRented := TimesRented + 1
+  }
+  where ID = ARow.Video_ID;
+end;
+
+attach operator AddRental to RentedVideo on { after insert };

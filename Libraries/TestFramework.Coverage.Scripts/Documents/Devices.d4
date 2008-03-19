@@ -1,0 +1,46 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Devices
+// create device
+create device TestDevice class "System.MemoryDevice";
+create device TestDevice2
+	// reconciliation settings
+	reconciliation { mode = { command }, master = device }
+	class "System.MemoryDevice";
+create device TestDevice3
+	reconciliation { mode = { none }, master = server }
+	class "System.MemoryDevice";
+create device TestDevice4
+	reconciliation { mode = { automatic }, master = both }
+	class "System.MemoryDevice";
+create device TestDevice5
+	reconciliation { mode = { startup }, master = device }
+	class "System.MemoryDevice";
+	
+// alter device
+alter device TestDevice;
+
+alter device TestDevice
+	// alter reconciliation settings
+	alter reconciliation
+	{
+		mode = { command }
+	};
+
+alter device TestDevice
+	alter reconciliation
+	{
+		master = both
+	};
+	
+// drop device
+drop device TestDevice;
+drop device TestDevice2;
+drop device TestDevice3;
+drop device TestDevice4;
+drop device TestDevice5;
+

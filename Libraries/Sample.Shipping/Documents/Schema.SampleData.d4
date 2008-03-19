@@ -1,0 +1,143 @@
+/*
+	Shipping Sample Application
+	Sample Data Script
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+insert
+	table of { ZipCode : Sample.Shipping.Zip, City : Sample.Shipping.Description, State_ID : Sample.Shipping.StateID, Coordinate : Coordinate }
+	{
+		row{('01012') ZipCode, ('CHESTERFIELD') City, ('MA') State_ID, Coordinate.AsString('72 49'' 59.91/42 22'' 54.01') Coordinate}, 
+		row{('70112') ZipCode, ('NEW ORLEANS') City, ('LA') State_ID, Coordinate.AsString('90 4'' 31.08/29 57'' 37.74') Coordinate}, 
+		row{('80202') ZipCode, ('DENVER') City, ('CO') State_ID, Coordinate.AsString('104 59'' 40.53/39 44'' 56.79') Coordinate}, 
+		row{('84003') ZipCode, ('AMERICAN FORK') City, ('UT') State_ID, Coordinate.AsString('111 47'' 38.79/40 23'' 34.02') Coordinate}, 
+		row{('84017') ZipCode, ('COALVILLE') City, ('UT') State_ID, Coordinate.AsString('111 24'' 25.59/40 55'' 27.79') Coordinate}, 
+		row{('84054') ZipCode, ('NORTH SALT LAKE') City, ('UT') State_ID, Coordinate.AsString('111 54'' 14.82/40 50'' 38.63') Coordinate}, 
+		row{('84057') ZipCode, ('OREM') City, ('UT') State_ID, Coordinate.AsString('111 41'' 43.05/40 18'' 48.27') Coordinate}, 
+		row{('84058') ZipCode, ('VINEYARD') City, ('UT') State_ID, Coordinate.AsString('111 41'' 39.48/40 16'' 50.74') Coordinate}, 
+		row{('84062') ZipCode, ('PLEASANT GROVE') City, ('UT') State_ID, Coordinate.AsString('111 43'' 59.82/40 22'' 19.15') Coordinate}, 
+		row{('84116') ZipCode, ('SALT LAKE CITY') City, ('UT') State_ID, Coordinate.AsString('111 55'' 44.59/40 47'' 8.51') Coordinate}, 
+		row{('84604') ZipCode, ('PROVO') City, ('UT') State_ID, Coordinate.AsString('111 39'' 17.66/40 15'' 38.45') Coordinate}, 
+		row{('87111') ZipCode, ('ALBUQUERQUE') City, ('NM') State_ID, Coordinate.AsString('106 31'' 19.79/35 8'' 5.01') Coordinate}
+	}
+	into ZipCode adorn with { PropagateInsert = "Ensure" };
+	
+Location :=
+	table
+	{
+		row { LocationID("01001") ID, ProperName("Location 01001") Name, Phone("123-1234") Phone, Description("41 N State") Street, Description("Orem") City, StateID("UT") State_ID, Zip("84058") ZipCode },
+		row { LocationID("01002") ID, ProperName("Location 01002") Name, Phone("123-1235") Phone, Description("878 N 800 E") Street, Description("Orem") City, StateID("UT") State_ID, Zip("84058") ZipCode },
+		row { LocationID("01003") ID, ProperName("Location 01003") Name, Phone("123-1236") Phone, Description("31 Eagle Way") Street, Description("Provo") City, StateID("UT") State_ID, Zip("84604") ZipCode },
+		row { LocationID("01004") ID, ProperName("Location 01004") Name, Phone("123-1237") Phone, Description("432 E 790 S") Street, Description("Pleasant Grove") City, StateID("UT") State_ID, Zip("84062") ZipCode }
+	};
+
+ItemType :=
+	table
+	{
+		row { '001' ID, 'Potato Chips' Description },
+		row { '002', 'Breakfast Cereal' },
+		row { '003', 'Dried Pears' },
+		row { '004', 'Instant Oatmeal' }
+	};
+
+LocationItem :=
+	table
+	{
+		row { '01001' Location_ID, '001' ItemType_ID, $2.20 Price, 12 Par },
+		row { '01001', '002', $4.54, 10 },
+		row { '01002', '001', $2.12, 15 },
+		row { '01002', '002', $4.98, 13 },
+		row { '01002', '003', $3.36, 17 },
+		row { '01003', '002', $4.20, 16 },
+		row { '01003', '003', $3.15, 8 },
+		row { '01003', '004', $2.95, 23 },
+		row { '01004', '003', $3.76, 16 },
+		row { '01004', '004', $2.15, 11 }
+	};
+	
+insert
+	table
+	{
+		row { GetNextGenerator('Shipping.Contact.ID') ID, "KC Foods" Name, "MOB" Primary_PhoneType_ID, '123-1234' Phone, DollarsPerMile($0.43) ShippingRate, 1 Primary_Address_Number, '12 Lexington Way' Street, 'Chesterfield' City, 'MA' State_ID, '01012' ZipCode },
+		row { GetNextGenerator('Shipping.Contact.ID') ID, "Hijinks Emporium" Name, "FAX" Primary_PhoneType_ID, '555-1212' Phone, DollarsPerMile($0.25) ShippingRate, 1 Primary_Address_Number, '1476 Juan Tabo' Street, 'Albuquerque' City, 'NM' State_ID, '87111' ZipCode },
+		row { GetNextGenerator('Shipping.Contact.ID') ID, "Ralph's Wholesale" Name, "MOB" Primary_PhoneType_ID, '877-9908' Phone, DollarsPerMile($0.32) ShippingRate, 1 Primary_Address_Number, '156 N State St' Street, 'Denver' City, 'CO' State_ID, '80202' ZipCode },
+		row { GetNextGenerator('Shipping.Contact.ID') ID, "Thriftways" Name, "FAX" Primary_PhoneType_ID, '813-9988' Phone, DollarsPerMile($0.15) ShippingRate, 1 Primary_Address_Number, '8897 Bourbon St' Street, 'New Orleans' City, 'LA' State_ID, '70112' ZipCode }
+	}
+	into
+		VendorDetail over { ID, Name, Primary_PhoneType_ID, ShippingRate, Primary_Address_Number }
+			join (ContactPhone { Contact_ID ID, PhoneType_ID Primary_PhoneType_ID, Phone })
+			join (ContactAddress { Contact_ID ID, Number Primary_Address_Number, Street, City, State_ID, ZipCode });
+			
+insert
+	table of { Vendor_ID : ContactID, ItemType_ID : ItemTypeID, Cost : System.Money }
+	{
+		row { 1 Vendor_ID, '002' ItemType_ID, $3.12 Cost}, 
+		row { 1 Vendor_ID, '003' ItemType_ID, $4.75 Cost}, 
+		row { 2 Vendor_ID, '001' ItemType_ID, $4.28 Cost}, 
+		row { 2 Vendor_ID, '002' ItemType_ID, $2.73 Cost}, 
+		row { 3 Vendor_ID, '003' ItemType_ID, $2.69 Cost}, 
+		row { 3 Vendor_ID, '004' ItemType_ID, $2.93 Cost}, 
+		row { 4 Vendor_ID, '001' ItemType_ID, $3.30 Cost}, 
+		row { 4 Vendor_ID, '004' ItemType_ID, $4.65 Cost}
+	}
+	into VendorItemType;
+
+insert
+	table
+	{
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Quickie Mart" Name, "WOR" Primary_PhoneType_ID, '319-9989' Phone, 
+			1 Shipping_Address_Number, '24 N State' Street, 'Orem' City, 'UT' State_ID, '84057' ZipCode,
+			1 Billing_Address_Number
+		},
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Super Store" Name, "WOR" Primary_PhoneType_ID, '126-6654' Phone, 
+			1 Shipping_Address_Number, '1265 N 2400 E' Street, 'American Fork' City, 'UT' State_ID, '84003' ZipCode,
+			1 Billing_Address_Number
+		},
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Emergency Essentials" Name, "FAX" Primary_PhoneType_ID, '334-6574' Phone, 
+			1 Shipping_Address_Number, '465 S 1200 W' Street, 'Clearfield' City, 'UT' State_ID, '84017' ZipCode,
+			1 Billing_Address_Number
+		},
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Food Masters" Name, "MOB" Primary_PhoneType_ID, '877-9988' Phone, 
+			1 Shipping_Address_Number, '126 N University' Street, 'Salt Lake City' City, 'UT' State_ID, '84054' ZipCode,
+			1 Billing_Address_Number
+		},
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Unequalled Anywhere" Name, "WOR" Primary_PhoneType_ID, '133-0098' Phone, 
+			1 Shipping_Address_Number, '126 N University' Street, 'Salt Lake City' City, 'UT' State_ID, '84116' ZipCode,
+			1 Billing_Address_Number
+		}
+	}
+	into
+		CustomerDetail over { ID, Name, Primary_PhoneType_ID, Shipping_Address_Number, Billing_Address_Number }
+			join (ContactPhone { Contact_ID ID, PhoneType_ID Primary_PhoneType_ID, Phone })
+			join (ContactAddress { Contact_ID ID, Number Shipping_Address_Number, Street, City, State_ID, ZipCode });
+
+insert
+	table
+	{
+		row 
+		{ 
+			GetNextGenerator('Shipping.Contact.ID') ID, "Universe of Discourse" Name, "FAX" Primary_PhoneType_ID, '123-0122' Phone, 
+			1 Shipping_Address_Number, '48 S 200 W' Shipping_Street, 'Pleasant Grove' Shipping_City, 'UT' Shipping_State_ID, '84062' Shipping_ZipCode,
+			2 Billing_Address_Number, '12 E 500 S' Billing_Street, 'Orem' Billing_City, 'UT' Billing_State_ID, '84057' Billing_ZipCode
+		}
+	}
+	into
+		CustomerDetail over { ID, Name, Primary_PhoneType_ID, Shipping_Address_Number, Billing_Address_Number }
+			join (ContactPhone { Contact_ID ID, PhoneType_ID Primary_PhoneType_ID, Phone })
+			join (ContactAddress { Contact_ID ID, Number Shipping_Address_Number, Street Shipping_Street, City Shipping_City, State_ID Shipping_State_ID, ZipCode Shipping_ZipCode })
+			join (ContactAddress { Contact_ID ID, Number Billing_Address_Number, Street Billing_Street, City Billing_City, State_ID Billing_State_ID, ZipCode Billing_ZipCode });
+
+EnsureCurrentLocationTable();
+insert table { row { "01001" Location_ID } } into CurrentLocation;
+

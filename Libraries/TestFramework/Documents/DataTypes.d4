@@ -1,0 +1,26 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create type D4Expression like String
+{
+	constraint LengthValid Length(value) <= 8000
+}	tags 
+	{ 
+		Frontend.Width = "30", 
+		Frontend.TextBox.MaxLength = "8000",
+		Frontend.TextBox.MaxWidth = "50", 
+		Frontend.TextBox.Height = "10"		
+	};
+	
+create type Description like String
+{
+	constraint LengthValid Length(value) <= 50
+}	tags { Frontend.Width = "30", Frontend.TextBox.MaxLength = "50" };	
+	
+create type ShortID like String
+{
+	constraint LengthValid Length(value) <= 3
+}	tags { Frontend.Width = "3", Frontend.TextBox.MaxLength = "3" };
+	

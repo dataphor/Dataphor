@@ -1,0 +1,93 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Byte Operators
+begin
+  var LByte1: Byte, LByte2: Byte;
+
+  LByte1 := ToByte(5);
+  if LByte1 <> ToByte(5) then
+    raise Error("Byte assignment from literal failed");
+
+  LByte2 := LByte1;
+  if not(LByte1 = LByte2) then
+    raise Error("Byte assignment from variable failed");
+
+  LByte2 := ToByte(10);
+  if (LByte1 = ToByte(10)) then
+    raise Error("Byte assignment is not by value");
+
+  LByte1 := LByte1 + ToByte(5);
+  if LByte1 <> ToByte(10) then
+    raise Error("Byte addition failed");
+
+  LByte1 := LByte1 - ToByte(5);
+  if LByte1 <> ToByte(5) then
+    raise Error("Byte subtraction failed");
+
+  LByte1 := LByte1 * ToByte(10);
+  if LByte1 <> ToByte(50) then
+    raise Error("Byte multiplication failed");
+
+  LByte1 := LByte1 div ToByte(10);
+  if LByte1 <> ToByte(5) then
+    raise Error("Byte div failed");
+    
+  if LByte1 / ToByte(2) <> 2.5 then
+	raise Error("Byte division failed");
+    
+  if LByte1 mod ToByte(2) <> ToByte(1) then
+	raise Error("Byte mod failed");
+    
+  LByte1 := ToByte(5);
+  LByte2 := ToByte(10);
+  if LByte1 > LByte2 then
+    raise Error("Byte greater than failed");
+  
+  if LByte1 >= LByte2 then
+    raise Error("Byte inclusive greater than failed, arguments unequal");
+
+  if LByte2 < LByte1 then
+    raise Error("Byte less than failed");
+
+  if LByte2 <= LByte1 then
+    raise Error("Byte inclusive less than failed, arguments unequal");
+
+  LByte1 := ToByte(10);
+  if not(LByte1 >= LByte2) then
+    raise Error("Byte inclusive greater than failed, arguments equal");
+
+  if not(LByte1 <= LByte2) then
+    raise Error("Byte inclusive less than failed, arguments equal");
+    
+  if (LByte1 ?= LByte2) <> 0 then
+    raise Error("Byte compare failed, arguments equal");
+    
+  LByte1 := ToByte(0);
+  LByte2 := ToByte(0);
+  
+  if (~LByte1 <> ToByte(0xFF)) then
+    raise Error("Bitwise not failed");
+  
+  if (LByte1 & LByte2) <> ToByte(0) then
+    raise Error("Bitwise and failed, arguments equal");
+    
+  if (LByte1 | LByte2) <> ToByte(0) then
+    raise Error("Bitwise or failed, arguments equal");
+    
+  if (LByte1 ^ LByte2) <> ToByte(0) then
+    raise Error("Bitwise xor failed, arguments equal");
+
+  LByte2 := ToByte(1);
+  if (LByte1 & LByte2) <> ToByte(0) then
+    raise Error("Bitwise and failed, arguments unequal");
+    
+  if (LByte1 | LByte2) <> ToByte(1) then
+    raise Error("Bitwise or failed, arguments unequal");
+    
+  if (LByte1 ^ LByte2) <> ToByte(1) then
+    raise Error("Bitwise xor failed, arguments unequal");
+end;
+

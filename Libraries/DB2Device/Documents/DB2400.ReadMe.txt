@@ -1,0 +1,162 @@
+Creation Script for a DB2/400 device:
+
+DB2/400 Isolation Levels:
+  Commit Immediate (*NONE) - Chaos
+  Read Committed (*CS) - Cursor Stability
+  Read Uncommitted (*CHG) - Browse
+  Repeatable Read (*ALL) - Isolated
+
+  Note that Repeatable Read isolation level is not supported 
+  by the DB2/400 systems we have encountered, even though the
+  documentation for these systems claims that they do.
+
+  In addition, the DB2/400 systems allow journaling to be 
+  turned off for tables.  If journaling is not used, then 
+  only the Commit Immediate isolation level is allowed.  
+  In this case, turn transaction support off for the device 
+  with the UseTransactions attribute.
+
+create device DB2400TestDevice
+  reconciliation { mode = { command }, master = device }
+  class "DB2Device"
+    attributes
+    {
+      "Product" = "iSeries",
+      "DataSource" = "PGAS400",
+      "Schema" = "ALPHORA",
+      "UseTransactions" = "false"
+    };
+
+CreateDeviceUser('Admin', 'DB2400TestDevice', 'userid', 'password');
+CreateDeviceUser('System', 'DB2400TestDevice', 'userid', 'password');
+
+EnsureDeviceStarted('DB2400TestDevice');
+
+Isolation Level: AS400 will not support the "Serializable 
+  (what is called Isolated in Dataphor)" isolation level. 
+  Isolation level for the session must be set to 'Cursor 
+  Stability'.  Default Isolation Level can be set by running 
+  the following script within your session:
+
+      SetDefaultIsolationLevel('CursorStability')
+
+  Isolation Level is a member of the Sessions table.
+
+Attributes:
+
+  "Product" should be set equal to "iSeries" to indicate 
+   that this is an AS400 DB2/400 system.
+		Setting Product = "iSeries" does the following by default:
+			UseStatementTerminator = false;
+			SupportsNestedFrom = false;
+			SupportsSubSelectInSelectClause = false;
+			IsOrderByInContext = false;
+			UseValuesClauseInInsert = false;
+
+  "DataSource" is the IP address of the machine that the library 
+  	 you are trying to connect to is located on.
+
+  "Schema" is the name of the Library on the AS400 machine 
+    that you will be working in with the device.
+
+  "UseStatementTerminator" this must be and is set to false if Product = "iSeries". 
+	 DB2400 does not expect the statement terminator (;)
+    and will fail if this attribute is set to true.
+
+  "IsOrderByInContext" must be set false also.  This is 
+    because the order by clause is interpreted in terms of 
+    the result column names, not the names of the range 
+    variables within the query expression. In other words:
+
+      select T1.ID as ID from Employee as T1 order by ID 
+        T1.ID is an unknown identifier in the order by 
+        clause, but ID is fine.
+
+  "UseTransactions" - false if journaling is not turned for 
+    tables in the target system.
+
+  "SupportsNestedFrom" - default is false.
+
+  "SupportsSubSelectInSelectClause" - default is false.
+ 
+  "UseValuesClauseInInsert" - Defaults to false 
+    when Product = iSeries. DB2/400 does not allow typed 
+    parameter markers in values clauses.  We original 
+    removed the functionality from the insert statement, 
+    but now replaced it for consistency, and use the 
+    UseValuesClauseInInsert switch instead. This is because 
+    we have to be able to take advantage of the parameter 
+    markers capability to force a cast client side in order 
+    to use strings to pass values across the CLI, but 
+    convert those strings to different types on the target 
+    system. This is to work around an issue with passing 
+    decimals through the CLI.
+
+  "DateFormat" - Default is "MM/dd/yyyy"
+
+  "TimeFormat" - Default is "HH:mi:ss"
+
+  "DateTimeFormat" - Default is "yyyy-mm-dd HH24:mi:ss"
+
+Common CLI Errors:
+
+  OdbcException: ERROR [HY009] [IBM][Client Access Express 
+    ODBC Driver (32-bit)]Invalid argument value.
+    This error is often the result of 
+    Isolation Level = "Isolated", which DB2/400 does not 
+    support. Setting Isolation Level = "CursorStability" 
+    should resolve this issue.
+
+  OdbcException: ERROR [HY000] [IBM][Client Access Express 
+    ODBC Driver (32-bit)][DB2/400 SQL]SQL7008 - <Table> in 
+    <Library> not valid for operation.
+    This error usually indicates that journaling is not 
+    turned on for this table in the target system.  The 
+    solution is to turn transaction support off for the 
+    device with the UseTransactions attribute as 
+    illustrated in the example above.  Refer to the DB2/400 
+    Isolation Levels discussion above for more on Isolation 
+    levels and how they effect Journaling.
+    
+  iDB2ConversionException: A conversion error occurred.
+  	 This problem was encountered when using a string type 
+  	 and entering a value with length greater than 20 character.
+  	 This occurs even if the string column is tagged with a 
+  	 Storage.Length greater than 20. The solution is to create 
+  	 your own type with the appropriate length. 
+
+
+
+Unsupported Operators:
+
+	Bitwise operators - AS400 does not have any of them therefore we 
+	cannot implement them. 
+	These operators	are:
+		iBitwiseAnd, iBitwiseNot, iBitwiseOr, iBitwiseXOr.
+	
+	isDigit, isLetter - There are no corresponding operators	in AS400 nor 
+	is there an operator that returns the ASCII code of a character and so
+	we cannot implement these. 
+	
+	Replace - AS400 does not have a repace function and iteration is not 
+	possible within an expression so we cannot implement the Replace operator.
+	
+	NameFromGuid - This operator requires the Replace function or some form 
+	of it. This operator can be implemented using a series of nested substrings
+	this in not an	ideal implementation and we have chosen not to support it. 
+	
+	ToDate(String), ToDateTime(String), ToTime(String) - AS400 DateTime type
+	selectors all take strings as arguments. These strings must must be a 
+	valid datetime string format.	However if they are not a valid format AS400
+	does not throw an error, it merely returns the zero date (0001-01-01 0:00:00)
+	as the result. Therefore a call to any one of these operators when given an
+	invalid string format could introduce bad data without the user ever knowing
+	that such an error had occured. We view this behavior as being unacceptable
+	and chose not to support these operators.
+	
+	ToVersionNumberString - Not supported because AS400 does not have a replace
+	fuction. It is possible to implement this operator using nested substrings 
+	but this implementation is not a clean one and we have chosen not to 
+	support it rather than use this implementation.
+	
+	

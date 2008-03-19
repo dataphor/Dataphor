@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroductionRow">
+          <statictext text="This sample illustrates the use of the DataScriptAction, the DataArgument, the Text, and StaticText components.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   SourceAction&#xD;&#xA;   DataScriptAction&#xD;&#xA;   DataArgument&#xD;&#xA;   StaticText&#xD;&#xA;   Text&#xD;&#xA;" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="SourceAction" bop:name="SourceActionPage">
+        <row bop:name="SourceActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="SourceActionImage" />
+          <statictext text="A SourceAction allows manipulation of the data source.  Available actions are First, Prior, Next, Last, Refresh, Insert, Append, Edit, Delete, Post, Cancel, RequestSave, Validate, Close, and Open.&#xD;&#xA;&#xD;&#xA;In this sample five SourceAction components are used.  Four are used to navigate using the First, Last, Previous, and Next actions.   The fifth is used to refresh the Countries source after external changes have been made using DataScriptAction components.&#xD;&#xA;" width="50" margintop="10" bop:name="SourceActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="DataScriptAction" bop:name="DataScriptActionPage">
+        <row bop:name="DataScriptActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="DataScriptActionImage" />
+          <statictext text="A DataScriptAction allows a D4 script to be executed in the context of the Dataphor Server.  It is used to effect changes in the database or the data.&#xD;&#xA;&#xD;&#xA;In this sample two DataScriptAction components are used:&#xD;&#xA;   The RestoreAllCountries DataScriptAction replaces all the data in the Country table using an ExecuteScript() operator.&#xD;&#xA;   The RemoveSelectedContinent DataScriptAction deletes the rows from the database where the Continent is the same as the continent from the row selected in the grid.  The DataArgument is used to provide the current value of the Continent column from selected row.&#xD;&#xA;" width="50" margintop="10" bop:name="DataScriptActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="DataArgument" bop:name="DataArgumentPage">
+        <row bop:name="DataArgumentRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;DataArgument&quot;)" bop:name="DataArgumentImage" />
+          <statictext text="A DataArgument allows the values of one or more columns from the currently selected row of a source to be passed to another source or to a DataScriptAction.&#xD;&#xA;&#xD;&#xA;In this sample two DataArugment components are used:&#xD;&#xA;&#xD;&#xA;ContinentCountDataArgument provides the value of the Continent column from the Countries source to the ContinentCountSource.  The Columns property value is &#xD;&#xA;     SelectedContinent=Continent&#xD;&#xA;This means that the value from the Countries column named Continent will be accessible as &#xD;&#xA;&#xD;&#xA;RemoveContinentDataArgument does the same thing for RemoveSelectedContinent DataArgument.&#xD;&#xA;" width="50" margintop="10" bop:name="DataArgumentText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="StaticText" bop:name="StaticTextPage">
+        <row bop:name="StaticTextRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;StaticText&quot;)" bop:name="StaticTextImage" />
+          <statictext text="The StaticText control provides the capability to display text on the form.&#xD;&#xA;&#xD;&#xA;In this sample the StaticText.Text property is modified by the UpdateCountryCountText ScriptAction.  A StaticText control is also used to display the text you are reading now.&#xD;&#xA;" width="50" margintop="10" bop:name="StaticTextText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Text" bop:name="TextPage">
+        <row bop:name="TextRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Text&quot;)" bop:name="TextImage" />
+          <statictext text="The Text control is a data aware component.  It provides the capability to display text on the form from a column.  It is a read-only control so data modification is not possible using a Text control.&#xD;&#xA;&#xD;&#xA;In this sample the Text control is used to display the value from the ContinentCountSource ContinentCountText column.&#xD;&#xA;" width="50" margintop="10" bop:name="TextText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

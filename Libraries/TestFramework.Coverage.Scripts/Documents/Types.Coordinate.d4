@@ -1,0 +1,169 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator ParseDegrees(const AString : String, var ADegrees : Integer, var AMinutes : Integer, var ASeconds : Decimal)
+begin
+	var LSpaceIndex := AString.IndexOf(" ");
+	var LSingleQuoteIndex := AString.IndexOf("'");
+	AMinutes := 0;
+	ASeconds := 0;
+	if (LSpaceIndex < 0) or (LSingleQuoteIndex < 0) then
+		ADegrees := AString.ToInteger()
+	else
+	begin
+		if LSingleQuoteIndex < LSpaceIndex then
+			ADegrees := AString.ToInteger()
+		else
+		begin
+			ADegrees := AString.SubString(0, LSpaceIndex).ToInteger();
+			AMinutes := AString.SubString(LSpaceIndex + 1, LSingleQuoteIndex - (LSpaceIndex + 1)).ToInteger();
+			var LDoubleQuoteIndex := AString.IndexOf('"');
+			if (LDoubleQuoteIndex >= 0) and (LDoubleQuoteIndex > LSingleQuoteIndex) then
+				ASeconds := AString.SubString(LSingleQuoteIndex + 1, LDoubleQuoteIndex - (LSingleQuoteIndex + 1)).ToDecimal();
+		end;
+	end;
+end;
+
+create operator DegreesToString(const ADegrees : Integer, const AMinutes : Integer, const ASeconds : Decimal) : String
+begin
+	result := ADegrees.ToString() + " " + AMinutes.ToString() + "' " + ASeconds.ToString() + '"';
+end;
+
+// Lat/Long type
+create type Degrees
+{
+	representation Degrees
+	{
+		Degrees : Integer,
+		Minutes : Integer,
+		Seconds : Decimal
+	},
+	representation AsString
+	{
+		AsString : String
+			read DegreesToString(value.Degrees, value.Minutes, value.Seconds)
+			write
+			begin
+				var LDegrees : Integer;
+				var LMinutes : Integer;
+				var LSeconds : Decimal;
+				ParseDegrees(AsString, var LDegrees, var LMinutes, var LSeconds);
+				result := Degrees(LDegrees, LMinutes, LSeconds);
+			end
+	}
+		selector
+		begin
+			var LDegrees : Integer;
+			var LMinutes : Integer;
+			var LSeconds : Decimal;
+			ParseDegrees(AsString, var LDegrees, var LMinutes, var LSeconds);
+			result := Degrees(LDegrees, LMinutes, LSeconds);
+		end
+};
+
+if Degrees(10, 5, 12.4).AsString <> "10 5' 12.4""" then
+	raise Error('Degrees selector failed');
+		
+if not(Degrees.AsString("10 5' 12.4""") = Degrees(10, 5, 12.4)) then
+	raise Error("Degrees.AsString selector failed");
+	
+begin
+	var LDegrees := Degrees(10, 5, 12.4);
+	if LDegrees.Degrees <> 10 then
+		raise Error("Degrees.ReadDegrees failed");
+		
+	if LDegrees.Minutes <> 5 then
+		raise Error("Degrees.ReadMinutes failed");
+	
+	if LDegrees.Seconds <> 12.4 then
+		raise Error("Degrees.ReadSeconds failed");
+		
+	LDegrees.Degrees := 12;
+	if LDegrees.Degrees <> 12 then
+		raise Error("Degrees.WriteDegrees failed");
+		
+	LDegrees.Minutes := 12;
+	if LDegrees.Minutes <> 12 then
+		raise Error("Degrees.WriteMinutes failed");
+		
+	LDegrees.Seconds := 12.5;
+	if LDegrees.Seconds <> 12.5 then
+		raise Error("Degrees.WriteSeconds failed");
+		
+	LDegrees.AsString := "10 5' 12.4""";
+	if LDegrees.AsString <> "10 5' 12.4""" then
+		raise Error("Degrees.WriteAsString failed");
+end;
+
+create table TestDegrees in Temp { ID : Integer, Degrees : Degrees, key { ID } };
+
+create type Coordinate
+{
+	representation Coordinate
+	{
+		Latitude : Degrees,
+		Longitude : Degrees
+	},
+	representation AsString
+	{
+		AsString : String
+			read value.Latitude.AsString + "/" + value.Longitude.AsString
+			write 
+				Coordinate
+				(
+					Degrees.AsString(AsString.SubString(0, AsString.IndexOf("/"))), 
+					Degrees.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+				)
+	}
+		selector
+			Coordinate
+			(
+				Degrees.AsString(AsString.SubString(0, AsString.IndexOf("/"))),
+				Degrees.AsString(AsString.SubString(AsString.IndexOf("/") + 1))
+			)
+};
+
+if Coordinate(Degrees(12, 23, 34), Degrees(12, 23, 34)).AsString <> "12 23' 34""/12 23' 34""" then
+	raise Error("Coordinate selector failed");
+	
+if Coordinate.AsString("12 23' 34""/12 23' 34""") <> Coordinate(Degrees(12, 23, 34), Degrees(12, 23, 34)) then
+	raise Error("Coordinate.AsString selector failed");
+	
+begin
+	var LCoordinate := Coordinate(Degrees(12, 23, 34), Degrees(12, 23, 34));
+	
+	if LCoordinate.Latitude <> Degrees(12, 23, 34) then
+		raise Error("Coordinate.ReadLatitude failed");
+		
+	if LCoordinate.Longitude <> Degrees(12, 23, 34) then
+		raise Error("Coordinate.ReadLongitude failed");
+		
+	LCoordinate.Latitude := Degrees(15, 25, 35);
+	if LCoordinate.Latitude <> Degrees(15, 25, 35) then
+		raise Error("Coordinate.WriteLatitude failed");
+		
+	LCoordinate.Longitude := Degrees(14, 24, 34);
+	if LCoordinate.Longitude <> Degrees(14, 24, 34) then
+		raise Error("Coordinate.WriteLongitude failed");
+		
+	LCoordinate.Latitude.Degrees := 20;
+	if LCoordinate.Latitude.Degrees <> 20 then
+		raise Error("Multi-level property write failed");
+		
+	LCoordinate.AsString := "12 23' 34""/45 56' 67""";
+	if LCoordinate.AsString <> "12 23' 34""/45 56' 67""" then
+		raise Error("Coordinate.WriteAsString failed");
+end;
+
+// TODO: Like types based on these types
+
+create table Zips in Temp { ZipCode : String, Coordinate : Coordinate, key { ZipCode } };
+
+drop table TestDegrees;
+drop table Zips;
+drop type Coordinate;
+drop type Degrees;
+drop operator DegreesToString(Integer, Integer, Decimal);
+drop operator ParseDegrees(String, var Integer, var Integer, var Decimal);

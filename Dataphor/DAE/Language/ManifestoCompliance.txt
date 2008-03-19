@@ -1,0 +1,78 @@
+Documentation of Compliance with The Third Manifesto:
+
+Items of non-compliance:
+
+RM Prescription 3c:
+	No distinction is made between read only and update operators by the compiler.
+	No restriction is made on update operators not returning a result.
+	We see no reason to make an arbitrary distinction in this regard, as we can
+	detect when side-affects occur, so we are able to prevent the execution
+	of non-functional operators in functional contexts.
+	
+RM Prescription 6, 7, 9, 10:
+	Our tuple and relation type generators and values only allow scalar type attributes.
+	
+RM Prescription 21, specifically multiple assignments:
+	We are still in the analysis phase on this one.
+	
+RM Prescription 25:
+	We do not at this time support updates to the system catalog relvars, DDL statements must be used to effect the changes.
+	
+RM Prescription 26:
+	We do not feel we can make a statement of compliance on this prescription, because we are probably biased.
+
+RM Proscription 6:
+	As long as the argument that some of our constructs are merely declarative meta data is accepted, we are in full compliance.
+	There is certainly a need for a layer which ties the physical to the logical in some manner, we have opted to represent this layer
+	as meta data attached to logical definitions.  They mean nothing in the logical model, and are therefore separate from it.  
+	
+	For example:
+	
+		create domain ID
+		{
+			representation ID
+			{
+				Value : String
+					read class "Alphora.Dataphor.IDValueReadNode"
+					write class "Alphora.Dataphor.IDValueWriteNode"
+			} class "Alphora.Dataphor.IDSelectorNode"
+		} tags {StaticByteSize = "10"};
+		
+		The StaticByteSize tag indicates to the storage layer that up to 10 bytes of storage be colocated with the row.
+		The class constructs indicate which host language type is used to implement the selector and accessor operators for the domain.
+		
+OO Prescription 2:
+	We support type inheritance to define types, and obtain compile time substitutability.
+	We do not at this time support run time substitutability, nor S or G by C.
+		
+OO Prescriptions 4 and 5:
+	Transaction support in the current version is limited to the supporting storage engine.  
+	In the next version we will implement full transaction support as prescribed by the Manifesto.
+		
+RM Very Strong Suggestion 2:
+	We support declarative referential integrity in the form of a Reference, which is defined as follows:
+	
+		create table A {ID : ID, Name : string, key {ID}};
+		create table B {ID : ID, A_ID : ID, key {ID}, reference B_A {A_ID} references A {ID}};
+		
+		The execution of these statements will produce a constraint equivalent to the following database level constraint:
+		
+			constraint B_A IsSpecial(A_ID) or exists (A where ID = A_ID);
+		
+		Where IsSpecial is an operator created by the system during the definition of the type on which A.ID is defined which returns true if the argument is equal to any special value defined on that domain.
+		
+		We included this concept because a true foreign key is a subset of this behavior, and we have found this behavior to be useful in the past.
+		
+RM Very Strong Suggestion 4:
+	We do not support transition constraints at this time, however, we have plans to include such support in some future version.
+	
+RM Very Strong Suggestion 6:
+	We have an operator we have called EXPLODE which provides a solution to the classic bill of materials problem, however we do not include explicit support for the generalized transitive closure operator, nor for generalized concatenate and aggregate operations, although such support could be added by an end user through RM Very Strong Suggestion 7.
+	
+OO Very Strong Suggestion 1:
+	See the remarks for OO Prescription 2 above.
+	
+OO Very Strong Suggestion 3:
+	We do not yet support the ARRAY and SET type generators, although an astute user could provide such support.
+	
+

@@ -1,0 +1,51 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Usage of Graphic data type
+
+drop operator Frontend.GetWindowsSettings(const System.Guid);
+drop operator Frontend.Image(const System.Name, const System.Name);
+
+create operator Image(const ALibraryName : Name, const AName : Name) : Graphic
+	class "Frontend.ImageNode" static tags { DAE.IsRemotable = "false" };
+grant usage on Image(Name, Name) to role User;
+	
+create operator GetWindowsSettings(const AApplicationID : Guid) 
+	: 
+	row 
+	{ 
+		IconImage : Graphic, 
+		Theme : String, 
+		DocumentCacheSize : Integer, 
+		ImageCacheSize : Integer, 
+		HelpDocument : String 
+	}
+begin
+	result := row { nil IconImage, nil Theme, nil DocumentCacheSize, nil ImageCacheSize, nil HelpDocument };
+	if exists (WindowsClientApplications where Application_ID = AApplicationID) then
+	begin
+		var LRow := row from (WindowsClientApplications where Application_ID = AApplicationID);
+
+		// Image
+		var LImageExpression := DefaultIconImage from LRow;
+		if LImageExpression <> "" then
+			update result set { IconImage := Evaluate(LImageExpression) as Graphic };
+			
+		// Theme
+		var LThemeExpression := ThemeDocument from LRow;
+		if LThemeExpression <> "" then
+			update result set { Theme := Evaluate(LThemeExpression) as String };
+		
+		// DocumentCacheSize & ImageCacheSize
+		update result 
+			set 
+			{ 
+				DocumentCacheSize := (DocumentCacheSize from LRow), 
+				ImageCacheSize := (ImageCacheSize from LRow), 
+				HelpDocument := (HelpDocument from LRow) 
+			};
+	end;
+end;
+grant usage on GetWindowsSettings(Guid) to role User;

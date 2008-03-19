@@ -1,0 +1,13 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+DropListTable({"Integer"}, "One");
+DropListTable({"Integer"}, "Two");
+drop reference Atomicity_One_Two;
+DropListTable({"Integer"}, "OneReferences");
+DropListTable({"Integer"}, "TwoReferenced");
+drop view TestView;
+DropListTable({"Integer"}, "OneView");
+DropListTable({"Integer"}, "TwoView");

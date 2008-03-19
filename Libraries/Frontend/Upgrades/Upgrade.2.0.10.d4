@@ -1,0 +1,14 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator Applications_ID_Change(const AOldRow : typeof(row from Applications), var ANewRow : typeof(row from Applications)) : Boolean
+begin
+	result := false;
+	update ApplicationLibraries where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update ClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+	update WindowsClientApplications where Application_ID = AOldRow.ID set { Application_ID := ANewRow.ID };
+end;
+attach operator Applications_ID_Change to ID in Applications on change;
+

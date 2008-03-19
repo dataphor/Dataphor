@@ -1,0 +1,774 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Alphora.Dataphor.DAE</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\bin\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;DISABLE_PERFORMANCE_COUNTERS</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\bin\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>SIGNASSEMBLIES;USENATIVE;NATIVEROW;USEOBJECTVALIDATE;NILPROPOGATION;DISABLE_PERFORMANCE_COUNTERS</DefineConstants>
+    <DocumentationFile>DAE.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
+    <OutputPath>bin\debug\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;USENATIVE;SIGNASSEMBLIES;NILPROPOGATION</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Design">
+      <Name>System.Design</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.EnterpriseServices">
+      <Name>System.EnterpriseServices</Name>
+    </Reference>
+    <Reference Include="System.Runtime.Remoting">
+      <Name>System.Runtime.Remoting</Name>
+    </Reference>
+    <Reference Include="System.ServiceProcess">
+      <Name>System.ServiceProcess</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Name>Base</Name>
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\BOP\BOP.csproj">
+      <Name>BOP</Name>
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CLI.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Connection\ConnectionException.cs" />
+    <Compile Include="Connection\DotNetConnection.cs" />
+    <Compile Include="Connection\MSSQLConnection.cs" />
+    <Compile Include="Connection\SQLCEConnection.cs" />
+    <Compile Include="Connection\SQLConnection.cs" />
+    <Compile Include="Connection\SQLTypes.cs" />
+    <Compile Include="DAEException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.ApplicationTransaction\ApplicationTransactionException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.Catalog\CatalogDevice.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.Catalog\CatalogException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.Catalog\CatalogStore.cs" />
+    <Compile Include="Device.Catalog\SimpleSQLStore.cs" />
+    <Compile Include="Device.Memory\MemoryDevice.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device.Memory\MemoryDeviceException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Device\DeviceException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\Compiler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\CompilerException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\D4Emitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\Instructions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\Keywords.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\Language.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\MetaData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.D4\Parser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.RealSQL\RealSQLCompiler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.RealSQL\RealSQLInstructions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.RealSQL\RealSQLKeywords.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.RealSQL\RealSQLParser.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.SQL\Emitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.SQL\Keywords.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language.SQL\Language.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\Emitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\Language.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\LanguageException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\Lexer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\LexerException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\Modifiers.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\ParserException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Language\SyntaxException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Register.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\AdornTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\AggregateTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\CursorValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\DataValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\DifferenceTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ExplodeTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ExtendTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\IndexException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\JoinTables.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ListValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\LocalTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\NativeRowIndex.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\NativeTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\Operation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\OperatorValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\OrderTables.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ProjectTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\QuotaTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RedefineTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RenameTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RestrictTables.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RowManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RowTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RowTreeScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\RowValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ScalarManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ScalarValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\ScanException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\SystemTableValues.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\TableValue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\UnionTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Data\VersionNumber.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\AdornNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\AggregateNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\AggregateNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ArithmeticNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\BinaryNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\BitwiseNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\BooleanNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\CatalogNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ComparisonNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ConversionNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\CursorNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\DateTimeNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\DDLNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\DifferenceNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ExplodeNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ExtendNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ExtractionNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ImperativeNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\InNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\InstructionNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\JoinNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\LibraryNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ListNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\MathNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\NativeAccessorNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\OrderNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\PlanNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\ProjectNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\QuotaNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\RedefineNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\RenameNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\RestrictNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\RowComparisonNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\RowNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\SecurityNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\StringNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\SystemNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\TableComparisonNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\TableNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\TableNodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime.Instructions\UnionNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime\Context.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime\DataVar.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime\LockManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime\RuntimeException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Runtime\Semaphore.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Assembly.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Catalog.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Column.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Comparer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Constraint.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\CursorType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\DataType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Default.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Device.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\EventHandlers.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\GenericType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Library.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\ListType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Operator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Reference.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\RowType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\ScalarType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Schema.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\SchemaException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Security.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\ServerLink.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\Signature.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\TableType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Schema\TableVar.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\LocalServer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\MemberLastDesigner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\Server.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\ServerException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\ServerFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\ServerService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Server\SignalPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Server\TraceCodes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SessionInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\Database.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\DataFile.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\FastFile.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\FileGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\Page.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\PageBuffer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\PageCache.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\ProperFraction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\ResourceManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\StorageException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\Transaction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\TransactionLog.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Storage\Utilities.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\Conveyor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\ConveyorException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\CopyOnWriteStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\CoverStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\FileStreamProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\LocalStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\LocalStreamManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\ManagedStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\MemoryStreamProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\RemoteStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\ServerStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\ServerStreamManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\StreamManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Streams\StreamsException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Strings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="Connection\ConnectionException.resx">
+      <DependentUpon>ConnectionException.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Device.ApplicationTransaction\ApplicationTransactionException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Device.Catalog\CatalogException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Device.Memory\MemoryDeviceException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Device\DeviceException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language.D4\CompilerException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\LanguageException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\LexerException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\ParserException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Language\SyntaxException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Runtime.Data\IndexException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Runtime.Data\ScanException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Runtime\RuntimeException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Schema\DataTypes.d4" />
+    <EmbeddedResource Include="Schema\SchemaException.resx">
+      <LastGenOutput>SchemaException.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Schema\SystemCatalog.d4" />
+    <EmbeddedResource Include="Server\ServerException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Server\ServerService.bmp" />
+    <EmbeddedResource Include="Storage\StorageException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Streams\ConveyorException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Streams\StreamsException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Content Include="Language.D4\BNF.txt" />
+    <Content Include="Language.RealSQL\BNF.txt" />
+    <Content Include="Language.SQL\BNF.txt" />
+    <Content Include="Language.SQL\BNFDifferences.txt" />
+    <Content Include="Language\BNF.txt" />
+    <Content Include="Language\ManifestoCompliance.txt" />
+    <Content Include="V1Changes.txt" />
+    <Content Include="V2Changes.txt" />
+    <EmbeddedResource Include="Schema\SystemStoreCatalog.sql" />
+    <None Include="Schema\SQLDeviceMappings.d4" />
+    <None Include="Storage\AllocationManager.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\AVLTree.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\LockManager.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\PagedStream.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\Semaphore.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\Stream.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="Storage\StreamDirectory.cs">
+      <SubType>Code</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

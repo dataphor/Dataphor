@@ -1,0 +1,129 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/* XML Support */
+
+create type XMLDocumentID like Guid
+	tags { Frontend.Title = "Document ID" };
+grant usage on XMLDocumentID to role User;
+
+create type XMLElementID like Guid
+	tags { Frontend.Title = "Element ID" };
+grant usage on XMLElementID to role User;
+
+create type XMLContentType like Byte
+{
+	constraint ValidValues (value = Byte(0) or value = Byte(1)) tags { DAE.SimpleMessage = "Content Type must be 0 (Text) or 1 (CData)" }//,
+//	representation AsDisplayString
+//	{
+//		AsDisplayString : String
+//			read if value.AsDisplayString = 0 then "Text" else "CData"
+//			write case AsDisplayString.Lower() when "text" then XMLContentType(0) when "cdata" then XMLContentType(1) else XMLContentType(2) end
+//	}
+//		selector case AsDisplayString.Lower() when "text" then XMLContentType(0) when "cdata" then XMLContentType(1) else XMLContentType(2) end
+}
+	tags { Frontend.Title = "Content Type" };// , static DAE.AsDisplayString = "AsDisplayString" };
+grant usage on XMLContentType to role User;
+	
+//* There is an XML document ([ID]) with root element [Root_Element_ID]
+create table XMLDocument
+{
+	ID : XMLDocumentID { default NewGuid() }
+		tags { Frontend.ReadOnly = "true" },
+	Root_Element_ID : XMLElementID,
+	key { ID }
+};
+grant usage on XMLDocument to role User;
+
+//* There is an XML element ([ID]) within document [Document_ID] named [Name] in
+//  namespace alias [NamespaceAlias] and content [Content]
+create table XMLElement
+{
+	ID : XMLElementID { default NewGuid() }
+		tags { Frontend.ReadOnly = "true" },
+	Document_ID : XMLDocumentID,
+	NamespaceAlias : Name { default "" },
+	Name : Name,
+	key { ID },
+	reference XMLElement_XMLDocument { Document_ID } references XMLDocument { ID } delete cascade,
+	order { Name, ID },
+	order { NamespaceAlias, Name, ID }
+};
+grant usage on XMLElement to role User;
+
+//*
+create reference XMLDocument_XMLElement XMLDocument { Root_Element_ID } references XMLElement { ID } delete cascade;
+
+//* There is XML content [Content] at position [Sequence] within element [Element_ID]
+create table XMLContent
+{
+	Element_ID : XMLElementID,
+	Sequence : Integer,
+	Type : XMLContentType,
+	Content : String { default "" },
+	key { Element_ID, Sequence },
+	reference XMLContent_XMLElement { Element_ID } references XMLElement { ID } delete cascade
+};
+grant usage on XMLContent to role User;
+
+//* XML element [Element_ID] is the [Sequence] child of element [Parent_Element_ID], having [Offset] 
+//  place within the parent's content.
+create table XMLElementParent
+{
+	Element_ID : XMLElementID,
+	Parent_Element_ID : XMLElementID,
+	Sequence : Integer,
+	key { Element_ID },
+	key { Parent_Element_ID, Sequence },
+	reference XMLElementParent_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	reference XMLElementParent_Parent_XMLElement { Parent_Element_ID } references XMLElement { ID } delete cascade,
+	order { Parent_Element_ID, Element_ID }
+};
+grant usage on XMLElementParent to role User;
+
+//* XML element [Element_ID] has an attribute named [NamespaceAlias]:[Name] with value [Value]
+create table XMLAttribute
+{
+	Element_ID : XMLElementID,
+	NamespaceAlias : Name { default "" },
+	Name : Name,
+	Value : String,
+	key { Element_ID, NamespaceAlias, Name },
+	reference XMLAttribute_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	order { NamespaceAlias, Name, Element_ID }
+};
+grant usage on XMLAttribute to role User;
+
+//* XML element [Element_ID] defines namespace alias [NamespaceAlias] for [URI]
+create table XMLNamespaceAlias
+{
+	Element_ID : XMLElementID,
+	NamespaceAlias : Name,
+	URI : String,
+	key { Element_ID, NamespaceAlias },
+	reference XMLNamespaceAlias_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	order { NamespaceAlias, Element_ID }
+};
+grant usage on XMLNamespaceAlias to role User;
+
+//* XML Element [Element_ID] has a default namespace of [URI]
+create table XMLDefaultNamespace
+{
+	Element_ID : XMLElementID,
+	URI : String,
+	key { Element_ID },
+	reference XMLDefaultNamespace_XMLElement { Element_ID } references XMLElement { ID } delete cascade
+};
+grant usage on XMLDefaultNamespace to role User;
+
+//* Loads an XML document from a string into the XML tables and returns the document ID
+create operator LoadXML(ADocument : String) : XMLDocumentID
+	class "LoadXMLNode";
+grant usage on LoadXML(String) to role User;
+
+//* Saves an XML document from the XML tables to a returned string
+create operator SaveXML(ADocumentID : XMLDocumentID) : String
+	class "SaveXMLNode";
+grant usage on SaveXML(XMLDocumentID) to role User;

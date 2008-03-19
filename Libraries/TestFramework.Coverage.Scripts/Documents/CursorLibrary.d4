@@ -1,0 +1,190 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 List Library Coverage Script
+
+//////select Operators where Name.Value.ToIString() like '%cursor%'i add { OperatorName.Value + Signature FullName } over { FullName };
+
+//cursor selector
+//System.Close(cursor)                            
+
+// Navigable
+//System.Select(cursor)                           
+//System.BOF(cursor)                              
+//System.EOF(cursor)                              
+//System.Next(cursor)                             
+//System.Last(cursor)                             
+//System.Reset(cursor)                            
+
+// BackwardsNavigable
+//System.First(cursor)                            
+//System.Prior(cursor)                            
+
+// Bookmarkable
+//System.GetBookmark(cursor)                      
+//System.GotoBookmark(cursor, row)                
+//System.CompareBookmarks(cursor, row, row)       
+
+// Searchable
+//System.GetKey(cursor)                           
+//System.FindKey(cursor, row)                     
+//System.FindNearest(cursor, row)                 
+//System.Refresh(cursor)                          
+//System.Refresh(cursor, row)                     
+
+// Updateable
+//System.Insert(cursor, row)                      
+//System.Update(cursor, row)                      
+//System.Delete(cursor)                           
+
+// Proposable
+//System.Change(cursor, var row)                  
+//System.Change(cursor, var row, System.String)   
+//System.Default(cursor, var row)                 
+//System.Default(cursor, var row, System.String)  
+//System.Validate(cursor, var row)                
+//System.Validate(cursor, var row, System.String) 
+
+
+//* Navigable
+select StreamCount();
+begin
+	var LCursor : cursor(typeof(TableVars)) := cursor(TableVars);
+	try
+		var LTableVarName : Name;
+
+		if not LCursor.BOF() then
+			raise Error("Cursor.BOF() failed.");
+
+		while LCursor.Next() do
+			LTableVarName := LCursor.Select().Name;
+			
+		if not LCursor.EOF() then
+			raise Error("Cursor.EOF() failed.");
+			
+		LCursor.Reset();
+		if not LCursor.BOF() then
+			raise Error("Cursor.Reset() failed.");
+		
+		LCursor.Last();
+		if not LCursor.EOF() then
+			raise Error("Cursor.Last() failed");
+	finally
+		LCursor.Close();
+	end;
+end;
+select StreamCount();
+
+//* BackwardsNavigable
+begin
+	var LCursor : cursor(typeof(TableVars)) := cursor(TableVars capabilities { Navigable, BackwardsNavigable });
+	try
+		var LTableVarName : Name;
+		
+		LCursor.Last();
+		while LCursor.Prior() do
+			LTableVarName := LCursor.Select().Name;
+			
+		if not LCursor.BOF() then
+			raise Error("Cursor.BOF() failed.");
+			
+		LCursor.Last();
+		
+		LCursor.First();
+		if not LCursor.BOF() then
+			raise Error("Cursor.First() failed.");
+
+	finally
+		LCursor.Close();
+	end;
+end;
+
+//* Searchable
+begin
+	var LCursor : cursor(typeof(TableVars)) := cursor(TableVars order by { Name } capabilities { Navigable, BackwardsNavigable, Searchable });
+	try
+		var LKey : typeof(TableVars[]);
+		
+		while LCursor.Next() do
+			LKey := LCursor.Select(); // TODO: This should be GetKey, but there is a problem with cursor type specifiers
+			
+		if not(LCursor.FindKey(LKey)) then
+			raise Error("Cursor.FindKey() failed.");
+			
+		LCursor.FindNearest(LKey);
+		if (LCursor.Select().Name) <> (LKey.Name) then
+			raise Error("Cursor.FindNearest() failed.");
+			
+		LCursor.System.Refresh(LKey);
+		if (LCursor.Select().Name) <> (LKey.Name) then
+			raise Error("Cursor.Refresh() failed.");
+		
+	finally
+		LCursor.Close();
+	end;
+end;
+
+//* Bookmarkable
+begin
+	var LCursor : cursor(typeof(TableVars)) := cursor(TableVars order by { Name } capabilities { Navigable, BackwardsNavigable, Bookmarkable });
+	try
+		var 
+			LBookmark1 : row,
+			LBookmark2 : row,
+			LName1 : Name;
+		
+		while LCursor.Next() do
+			if LBookmark1.IsNil() then
+			begin
+				LBookmark1 := LCursor.GetBookmark();
+				LName1 := Name from LCursor.Select();
+			end
+			else
+				LBookmark2 := LCursor.GetBookmark();
+						
+		if LCursor.CompareBookmarks(LBookmark1, LBookmark2) > 0 then
+			raise Error("CompareBookmarks() failed.");
+			
+		LCursor.GotoBookmark(LBookmark1);
+		if (Name from LCursor.Select()) <> LName1 then
+			raise Error("GotoBookmark() failed.");
+			
+	finally
+		LCursor.Close();
+	end;
+end;
+
+// Schema for use with the Updateable and Proposable coverage
+create table TestCursors { ID : Integer, Name : String, key { ID } };
+
+// Updateable
+begin
+	var LCursor : cursor(typeof(TestCursors)) := 
+		cursor
+		(
+			TestCursors order by { ID } 
+				capabilities { Navigable, BackwardsNavigable, Searchable, Updateable } 
+				isolation browse 
+				type dynamic
+		);
+	try
+		LCursor.Insert(row { 1 ID, 'John' Name });
+		if (ID from LCursor.Select()) <> 1 then
+			raise Error("Cursor.Insert() failed.");
+			
+		LCursor.Update(row { 1 ID, 'Joe' Name });
+		if (Name from LCursor.Select()) <> 'Joe' then
+			raise Error("Cursor.Update() failed.");
+			
+		LCursor.System.Delete();
+		if not(LCursor.BOF() and LCursor.EOF()) then
+			raise Error("Cursor.Delete() failed.");
+	finally
+		LCursor.Close();
+	end;
+end;
+
+drop table TestCursors;
+
+// Proposable cursor calls are tested in the EventHandlers coverage script

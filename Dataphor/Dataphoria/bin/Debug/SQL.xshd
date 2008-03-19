@@ -1,0 +1,432 @@
+<?xml version="1.0"?>
+<!-- syntaxdefinition for SQL 2003 -->
+<SyntaxDefinition name = "SQL" extensions = "*">
+	
+	<Properties>
+		<Property name="LineComment" value="--"/>
+	</Properties>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "Black"/>
+	<RuleSets>
+		<RuleSet ignorecase="true" noescapesequences="true">
+		  	<Delimiters>&lt;&gt;,(){}[]-+*%/="'!:@</Delimiters>
+
+			<Span name = "LINECOMMENT" rule = "CommentSet" bold = "false" italic = "true" color = "Green" stopateol = "true">
+			   <Begin>--</Begin>
+			</Span>
+
+			<Span name = "BLOCKCOMMENT" rule = "CommentSet" bold = "false" italic = "true" color = "Green" stopateol = "false">
+				<Begin>/*</Begin>
+				<End>*/</End>
+			</Span>
+
+			<Span name = "QUOTEDIDENTIFIER" bold = "false" italic = "false" color = "Black" stopateol = "true">
+				<Begin>"</Begin>
+				<End>"</End>
+			</Span>
+
+			<Span name = "STRING" bold = "false" italic = "false" color = "Navy" stopateol = "true">
+				<Begin>&apos;</Begin>
+				<End>&apos;</End>
+			</Span>
+
+			<KeyWords name = "Keywords" bold="false" italic="false" color="Blue">
+				<Key word="ABORT" />
+				<Key word="ACTIVATION" />
+				<Key word="ADD" />
+				<Key word="ALL" />
+				<Key word="ALLOW_DUP_ROW" />
+				<Key word="ALTER" />
+				<Key word="AND" />
+				<Key word="ANSI_PERMISSIONS" />
+				<Key word="ANSINULL" />
+				<Key word="ANY" />
+				<Key word="ARITH_OVERFLOW" />
+				<Key word="ARITHABORT" />
+				<Key word="ARITHIGNORE" />
+				<Key word="AS" />
+				<Key word="ASC" />
+				<Key word="ASCINSERTS" />
+				<Key word="AT" />
+				<Key word="AUTHORIZATION" />
+				<Key word="BEGIN" />
+				<Key word="BETWEEN" />
+				<Key word="BLOCKSIZE" />
+				<Key word="BREAK" />
+				<Key word="BROWSE" />
+				<Key word="BY" />
+				<Key word="BYTES" />
+				<Key word="CAPACITY" />
+				<Key word="CASCADE" />
+				<Key word="CASE" />
+				<Key word="CHAINED" />
+				<Key word="CHAR_CONVERT" />
+				<Key word="CHARACTERS" />
+				<Key word="CHARS" />
+				<Key word="CHARSET" />
+				<Key word="CHECK" />
+				<Key word="CHECKALLOC" />
+				<Key word="CHECKCATALOG" />
+				<Key word="CHECKDB" />
+				<Key word="CHECKPOINT" />
+				<Key word="CHECKSTORAGE" />
+				<Key word="CHECKTABLE" />
+				<Key word="CIS_RPC_HANDLING" />
+				<Key word="CLEANUP" />
+				<Key word="CLIENT" />
+				<Key word="CLOSE" />
+				<Key word="CLUSTERED" />
+				<Key word="CNTRLTYPE" />
+				<Key word="COALESCE" />
+				<Key word="COMMIT" />
+				<Key word="COMMITED" />
+				<Key word="COMPUTE" />
+				<Key word="CONNECT" />
+				<Key word="CONSTRAINT" />
+				<Key word="CONSUMERS" />
+				<Key word="CONTIGUOS" />
+				<Key word="CONTINUE" />
+				<Key word="COUNT" />
+				<Key word="CPUAFFINITY" />
+				<Key word="CREATE" />
+				<Key word="CURRENT" />
+				<Key word="CURSOR" />
+				<Key word="DATABASE" />
+				<Key word="DATABASE_DEVICE" />
+				<Key word="DATEFORMAT" />
+				<Key word="DATEFIRST" />
+				<Key word="DBCC" />
+				<Key word="DBREPAIR" />
+				<Key word="DEALLOCATE" />
+				<Key word="DECLARE" />
+				<Key word="DEFAULT" />
+				<Key word="DELAY" />
+				<Key word="DELETE" />
+				<Key word="DENSITY" />
+				<Key word="DESC" />
+				<Key word="DEVIOCHAR" />
+				<Key word="DISCONNECT" />
+				<Key word="DISK" />
+				<Key word="DISMOUNT" />
+				<Key word="DISTINCT" />
+				<Key word="DOAMPG" />
+				<Key word="DONEINPROC" />
+				<Key word="DROP" />
+				<Key word="DROPDB" />
+				<Key word="DUMP" />
+				<Key word="DUMPVOLUME" />
+				<Key word="ELSE" />
+				<Key word="END" />
+				<Key word="ENDTRAN" />
+				<Key word="ERROR" />
+				<Key word="ERRORDATA" />
+				<Key word="ERROEEXIT" />
+				<Key word="ESCAPE" />
+				<Key word="EXCLUSIVE" />
+				<Key word="EXEC" />
+				<Key word="EXECUTE" />
+				<Key word="EXISTING" />
+				<Key word="EXISTS" />
+				<Key word="EXTERNAL" />
+				<Key word="FAST" />
+				<Key word="FETCH" />
+				<Key word="FILE" />
+				<Key word="FILLFACTOR" />
+				<Key word="FIPSFLAGGER" />
+				<Key word="FIX" />
+				<Key word="FIX_TEXT" />
+				<Key word="FLUSHMESSAGE" />
+				<Key word="FOR" />
+				<Key word="FOREIGN" />
+				<Key word="FROM" />
+				<Key word="FULL" />
+				<Key word="GO" />
+				<Key word="GOTO" />
+				<Key word="GRANT" />
+				<Key word="GROUP" />
+				<Key word="HAVING" />
+				<Key word="HEADERONLY" />
+				<Key word="HOLDLOCK" />
+				<Key word="IDENTITY" />
+				<Key word="IDENTITY_INSERT" />
+				<Key word="IF" />
+				<Key word="IGNORE_DUP_KEY" />
+				<Key word="IGNORE_DUP_ROW" />
+				<Key word="IN" />
+				<Key word="INDEX" />
+				<Key word="INDEXALLOC" />
+				<Key word="INIT" />
+				<Key word="INSERT" />
+				<Key word="INTO" />
+				<Key word="IO" />
+				<Key word="IOAMPG" />
+				<Key word="ISOLATION" />
+				<Key word="KEY" />
+				<Key word="KILL" />
+				<Key word="LANGUAGE" />
+				<Key word="LASTCHANCE" />
+				<Key word="LEVEL" />
+				<Key word="LIKE" />
+				<Key word="LISTONLY" />
+				<Key word="LOAD" />
+				<Key word="LOG" />
+				<Key word="LOGFULL" />
+				<Key word="LOGIN_NAME" />
+				<Key word="LRU" />
+				<Key word="MAX_ROWS_PER_PAGE" />
+				<Key word="MAXWRITEDES" />
+				<Key word="MEMBERSHIP" />
+				<Key word="MIRROR" />
+				<Key word="MIRROREXIT" />
+				<Key word="MODE" />
+				<Key word="MRU" />
+				<Key word="NAME" />
+				<Key word="NO_ERROR" />
+				<Key word="NO_LOG" />
+				<Key word="NOCOUNT" />
+				<Key word="NODISMOUNT" />
+				<Key word="NOEXEC" />
+				<Key word="NOFIX" />
+				<Key word="NOHOLDLOCK" />
+				<Key word="NOINIT" />
+				<Key word="NONCLUSTERED" />
+				<Key word="NOSERIAL" />
+				<Key word="NOT" />
+				<Key word="NOTIFY" />
+				<Key word="NOUNLOAD" />
+				<Key word="NOWAIT" />
+				<Key word="NULL" />
+				<Key word="NULLIF" />
+				<Key word="NUMERIC_TRUNCATION" />
+				<Key word="OF" />
+				<Key word="OFF" />
+				<Key word="OFFSETS" />
+				<Key word="ON" />
+				<Key word="ONLINE" />
+				<Key word="ONLY" />
+				<Key word="OPEN" />
+				<Key word="OPTIMIZED" />
+				<Key word="OPTION" />
+				<Key word="OPER_ROLE" />
+				<Key word="OPERATOR_CONSOLE" />
+				<Key word="OR" />
+				<Key word="ORDER" />
+				<Key word="OUTPUT" />
+				<Key word="OVERRIDE" />
+				<Key word="PARALLEL" />
+				<Key word="PARALLEL_DEGREE" />
+				<Key word="PARAM" />
+				<Key word="PARSEONLY" />
+				<Key word="PARTITION" />
+				<Key word="PASSWD" />
+				<Key word="PHYSNAME" />
+				<Key word="PREFETCH" />
+				<Key word="PREPARE" />
+				<Key word="PRIMARY" />
+				<Key word="PRINT" />
+				<Key word="PRIVILEGES" />
+				<Key word="PROC" />
+				<Key word="PROCEDURE" />
+				<Key word="PROCESS_LIMIT_ACTION" />
+				<Key word="PROCESSEXIT" />
+				<Key word="PROCID" />
+				<Key word="PROXY" />
+				<Key word="PUBLIC" />
+				<Key word="QUIET" />
+				<Key word="QUOTED_IDENTIFIER" />
+				<Key word="RAISEERROR" />
+				<Key word="READ" />
+				<Key word="READTEXT" />
+				<Key word="RECOMPILE" />
+				<Key word="RECONFIGURE" />
+				<Key word="REFERENCES" />
+				<Key word="REINDEX" />
+				<Key word="REMIRROR" />
+				<Key word="REMOVE" />
+				<Key word="RESERVE" />
+				<Key word="REPLACE" />
+				<Key word="RETAIN" />
+				<Key word="RETAINDAYS" />
+				<Key word="RETURN" />
+				<Key word="REVOKE" />
+				<Key word="ROLE" />
+				<Key word="ROLLBACK" />
+				<Key word="ROW_AGGREGATE" />
+				<Key word="ROWCOUNT" />
+				<Key word="ROWS" />
+				<Key word="RULE" />
+				<Key word="SA_ROLE" />
+				<Key word="SAVE" />
+				<Key word="SCAN_PARALLEL_DEGREE" />
+				<Key word="SCHEMA" />
+				<Key word="SECONDARY" />
+				<Key word="SELECT" />
+				<Key word="SELF_RECURSION" />
+				<Key word="SERIAL" />
+				<Key word="SERIALIZABLE" />
+				<Key word="SESSION" />
+				<Key word="SET" />
+				<Key word="SETUSER" />
+				<Key word="SHARED" />
+				<Key word="SHOWPLAN" />
+				<Key word="SUTDOWN" />
+				<Key word="SIDE" />
+				<Key word="SIZE" />
+				<Key word="SKIP_NCINDEX" />
+				<Key word="SORT_RESOURCES" />
+				<Key word="SORTED_DATA" />
+				<Key word="SSO_ROLE" />
+				<Key word="STATEMENT" />
+				<Key word="STATISTICS" />
+				<Key word="STRING_RTRUNCATION" />
+				<Key word="STRIPE" />
+				<Key word="SUBQUERYCACHE" />
+				<Key word="TABLE" />
+				<Key word="TABLEALLOC" />
+				<Key word="TEXTSIZE" />
+				<Key word="THEN" />
+				<Key word="TIME" />
+				<Key word="TO" />
+				<Key word="TRACEOFF" />
+				<Key word="TRACEON" />
+				<Key word="TRAN" />
+				<Key word="TRANSACTION" />
+				<Key word="TRANSACTIONAL_RPC" />
+				<Key word="TRUNCATE" />
+				<Key word="TRUNCATE_ONLY" />
+				<Key word="TRIGGER" />
+				<Key word="TUNE" />
+				<Key word="UNCOMMITED" />
+				<Key word="UNION" />
+				<Key word="UNIQUE" />
+				<Key word="UNLOAD" />
+				<Key word="UNMIRROR" />
+				<Key word="UNSUSPEND" />
+				<Key word="UNTIL_TIME" />
+				<Key word="UPDATE" />
+				<Key word="USE" />
+				<Key word="USER" />
+				<Key word="USING" />
+				<Key word="VALUES" />
+				<Key word="VDEVNO" />
+				<Key word="VIEW" />
+				<Key word="VSTART" />
+				<Key word="WAIT" />
+				<Key word="WAITFOR" />
+				<Key word="WARNING" />
+				<Key word="WHEN" />
+				<Key word="WHERE" />
+				<Key word="WHILE" />
+				<Key word="WITH" />
+				<Key word="WORK" />
+				<Key word="WRITES" />
+				<Key word="WRITETEXT" />
+			</KeyWords>
+			
+			<KeyWords name = "Functions" bold="false" italic="false" color="Maroon">
+				<Key word="ABS" />
+				<Key word="ACOS" />
+				<Key word="ASCII" />
+				<Key word="ASIN" />
+				<Key word="ATAN" />
+				<Key word="ATN2" />
+				<Key word="AVG" />
+				<Key word="CEILING" />
+				<Key word="CHAR" />
+				<Key word="CHARINDEX" />
+				<Key word="COL_LENGTH" />
+				<Key word="COL_NAME" />
+				<Key word="CONVERT" />
+				<Key word="COS" />
+				<Key word="COT" />
+				<Key word="COUNT" />
+				<Key word="CURUNRESERVEDPGS" />
+				<Key word="DATA_PGS" />
+				<Key word="DATALENGTH" />
+				<Key word="DATEADD" />
+				<Key word="DATEDIFF" />
+				<Key word="DATENAME" />
+				<Key word="DATEPART" />
+				<Key word="DB_ID" />
+				<Key word="DN_NAME" />
+				<Key word="DEGREES" />
+				<Key word="DIFERRENCE" />
+				<Key word="EXP" />
+				<Key word="FLOOR" />
+				<Key word="GETDATE" />
+				<Key word="HEXTOINT" />
+				<Key word="HOST_ID" />
+				<Key word="HOST_NAME" />
+				<Key word="INDEX_COL" />
+				<Key word="INTTOHEX" />
+				<Key word="IS_SEC_SERVICE_ON" />
+				<Key word="ISNULL" />
+				<Key word="LCT_ADMIN" />
+				<Key word="LOG" />
+				<Key word="LOG10" />
+				<Key word="LOWER" />
+				<Key word="LTRIM" />
+				<Key word="MAX" />
+				<Key word="MIN" />
+				<Key word="MUT_EXCL_ROLES" />
+				<Key word="OBJECT_ID" />
+				<Key word="OBJECT_NAME" />
+				<Key word="PATINDEX" />
+				<Key word="PI" />
+				<Key word="POWER" />
+				<Key word="PROC_ROLE" />
+				<Key word="PTN_DATA_PGS" />
+				<Key word="RADIANS" />
+				<Key word="RAND" />
+				<Key word="REPLICATE" />
+				<Key word="RESERVED_PGS" />
+				<Key word="REVERSE" />
+				<Key word="RIGHT" />
+				<Key word="ROLE_CONTAIN" />
+				<Key word="ROLE_ID" />
+				<Key word="ROLE_NAME" />
+				<Key word="ROUND" />
+				<Key word="ROWCNT" />
+				<Key word="RTRIM" />
+				<Key word="SHOW_ROLE" />
+				<Key word="SHOW_SEC_SERVICES" />
+				<Key word="SIGN" />
+				<Key word="SOUNDEX" />
+				<Key word="SPACE" />
+				<Key word="SQRT" />
+				<Key word="STR" />
+				<Key word="STUFF" />
+				<Key word="SUBSTRING" />
+				<Key word="SUM" />
+				<Key word="SUSER_ID" />
+				<Key word="SUSER_NAME" />
+				<Key word="TAN" />
+				<Key word="TEXTPTR" />
+				<Key word="TEXTVALID" />
+				<Key word="TSEQUAL" />
+				<Key word="UPPER" />
+				<Key word="USED_PGS" />
+				<Key word="USER" />
+				<Key word="USER_ID" />
+				<Key word="USER_NAME" />
+				<Key word="VALID_NAME" />
+				<Key word="VALID_USER" />
+			</KeyWords>		
+
+		</RuleSet>
+
+
+		<RuleSet name = "CommentSet" ignorecase = "true">
+		  	<Delimiters>&lt;&gt;,(){}[]-+*%/="'!:@</Delimiters>
+			<KeyWords name = "ErrorWords" bold="true" italic="true" color="Red">
+				<Key word = "TODO" />
+				<Key word = "FIXME" />
+	 	 	</KeyWords>
+			<KeyWords name = "WarningWords" bold="true" italic="true" color="#EEE0E000">
+				<Key word = "HACK" />
+				<Key word = "UNDONE" />
+	 	 	</KeyWords>
+		</RuleSet>
+	</RuleSets>
+	
+</SyntaxDefinition>

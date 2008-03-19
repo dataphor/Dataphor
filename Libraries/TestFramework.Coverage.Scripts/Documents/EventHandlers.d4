@@ -1,0 +1,797 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+create table TestTable2 { ID : Integer };
+
+// Event Handlers
+create operator EventOperator(var ARow : typeof(TestTable2[]), const AName : String)
+begin
+end;
+
+// attach
+attach operator EventOperator to TestTable2 on { change };
+// detach
+detach operator EventOperator from TestTable2 on { change };
+
+drop operator EventOperator(var typeof(TestTable2[]), String);
+
+drop table TestTable2;
+
+// Test Drop scripting
+create table Test { ID : Integer, Name : String, key { ID } };
+
+create operator Test_Insert(var ARow : typeof(Test[]), var APerformUpdate : Boolean)
+begin
+end;
+
+attach operator Test_Insert to Test on { before insert };
+
+Execute(ScriptDrop('Test_Insert(var typeof(Test[]), var Boolean)'));
+
+drop table Test;
+
+// Must be able to drop a table with event handlers attached
+create table Test { ID : Integer };
+
+create operator Test_ID_Validate(var ARow : typeof(Test[])) : Boolean
+begin
+	result := false;
+end;
+
+attach operator Test_ID_Validate to ID in Test on { validate };
+
+create operator Test_Insert(var ARow : typeof(Test[]), var APerformUpdate : Boolean)
+begin
+end;
+
+attach operator Test_Insert to Test on { before insert };
+
+drop table Test;
+
+drop operator Test_Insert(var row { ID : Integer }, var Boolean);
+
+drop operator Test_ID_Validate(var row { ID : Integer });
+
+// Triggers and Generators
+
+EnsureGenerators();
+
+create table Test
+{
+	ID : Integer { default GetNextGenerator("Test_ID") }, 
+	Name : String, 
+	key { ID } 
+};
+
+create type Operation 
+{ 
+	representation Operation { Value : String }, 
+	constraint OperationValues value.Value in {"Insert", "Update", "Delete"} 
+};
+
+create table AuditTest
+{
+	ID : Integer { default GetNextGenerator("AuditTest_ID") }, 
+	Operation : Operation, 
+	OperationTime : DateTime, 
+	Test_ID : Integer, 
+	Test_Name : String, 
+	key { ID } 
+};
+
+create operator Test_Insert(ARow : row { ID : Integer, Name : String })
+begin
+	insert 
+		table 
+		{ 
+			row 
+			{ 
+				Operation("Insert") Operation, 
+				DateTime() OperationTime, 
+				ARow.ID Test_ID, 
+				ARow.Name Test_Name 
+			} 
+		}
+		into AuditTest;
+end;
+
+create operator Test_Update(AOldRow : row { ID : Integer, Name : String }, ANewRow : row { ID : Integer, Name : String })
+begin
+	insert 
+		table 
+		{ 
+			row 
+			{ 
+				Operation("Update") Operation, 
+				DateTime() OperationTime, 
+				ANewRow.ID Test_ID,
+				ANewRow.Name Test_Name
+			}
+		}
+		into AuditTest;
+end;
+
+create operator Test_Delete(ARow : row { ID : Integer, Name : String })
+begin
+	insert 
+		table 
+		{ 
+			row 
+			{ 
+				Operation("Delete") Operation, 
+				DateTime() OperationTime, 
+				ARow.ID Test_ID, 
+				ARow.Name Test_Name 
+			} 
+		}
+		into AuditTest;
+end;
+
+attach operator Test_Insert to Test on { after insert };
+attach operator Test_Update to Test on { after update };
+attach operator Test_Delete to Test on { after delete };
+
+try
+	insert table { row { "Test" Name } } into Test;
+commit;
+
+if not(exists(AuditTest where Test_Name = "Test")) then
+	raise Error("Insert Handler failed");
+
+try
+	update Test set { Name := "TestHandler" };
+commit;
+
+if not(exists(AuditTest where Test_Name = "TestHandler")) then
+	raise Error("Update Handler failed");
+
+try
+	delete Test;
+commit;
+
+if not(exists(AuditTest where Test_Name = "TestHandler" and Operation = Operation("Delete"))) then
+	raise Error("Delete Handler failed");
+
+detach operator Test_Delete from Test on { after delete };
+detach operator Test_Update from Test on { after update };
+detach operator Test_Insert from Test on { after insert };
+
+drop operator Test_Delete(typeof(Test[]));
+drop operator Test_Update(typeof(Test[]), typeof(Test[]));
+drop operator Test_Insert(typeof(Test[]));
+
+drop table Test;
+drop table AuditTest;
+//drop operator GetNextGenerator(String);
+//drop table Generators;
+drop type Operation;
+
+// All types of event handlers
+create type TestType like String;
+
+create operator TestType_Default(var AValue : TestType) : Boolean
+begin
+	result := true;
+	AValue := "abc";
+end;
+
+attach operator TestType_Default to TestType on { default };
+
+create operator TestType_Change(var AValue : TestType) : Boolean
+begin
+	result := true;
+	AValue := "ABCDE";
+end;
+
+attach operator TestType_Change to TestType on { change };
+
+create operator TestType_Validate(var AValue : TestType) : Boolean
+begin
+	result := false;
+	if AValue.Value.Length() > 5 then
+		raise Error("Invalid TestType value");
+		
+	if (AValue <> AValue.Value.Upper()) then
+	begin
+		AValue := AValue.Value.Upper(); 
+		result := true;
+	end;
+end;
+
+attach operator TestType_Validate to TestType on { validate };
+
+begin
+	var LValue : TestType;
+	if (LValue <> "ABC") then
+		raise Error("Default handler failed.");
+	LValue := "abb";
+	if (LValue <> "ABB") then
+		raise Error("Validate handler failed.");
+end;
+
+create table TestTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String { default "" }, // before and after insert handlers
+	TestUpdateValue : String { default "" }, // before and after update handlers
+	TestDeleteValue : String { default "" }, // before and after delete handlers
+	key { ID }
+};
+
+create table TestBeforeInsertTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create table TestAfterInsertTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create table TestBeforeUpdateTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create table TestAfterUpdateTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create table TestBeforeDeleteTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create table TestAfterDeleteTable
+{
+	ID : Integer,
+	TestType : TestType, // Type level default, validate and change handlers
+	TestString : String, // column level default, validate and change handlers
+	TestValue : String, // table level default, validate and change handlers
+	TestInsertValue : String, // before and after insert handlers
+	TestUpdateValue : String, // before and after update handlers
+	TestDeleteValue : String, // before and after delete handlers
+	key { ID }
+};
+
+create operator TestTable_TestString_Default(var AValue : String) : Boolean
+begin
+	result := true;
+	AValue := "abc";
+end;
+
+attach operator TestTable_TestString_Default to TestString in TestTable on { default };
+
+create operator TestTable_TestString_Change(var ARow : typeof(TestTable[])) : Boolean
+begin
+	result := false;
+	if ARow.TestString.IsNil() or (ARow.TestString <> "ABCDE") then
+	begin
+		result := true;
+		update ARow set { TestString := "ABCDE" };
+	end;
+end;
+
+attach operator TestTable_TestString_Change to TestString in TestTable on { change };
+
+create operator TestTable_TestString_Validate(var ARow : typeof(TestTable[])) : Boolean
+begin
+	result := false;
+	if ARow.TestString.IsNil() or (ARow.TestString.Length() > 5) then
+		raise Error("Invalid TestType value");
+	if not(ARow.TestString.IsNil()) and (ARow.TestString.Upper() <> ARow.TestString) then
+	begin
+		result := true;
+		update ARow set { TestString := TestString.Upper() };
+	end;
+end;
+
+attach operator TestTable_TestString_Validate to TestString in TestTable on { validate };
+
+create operator TestTable_Default(var ARow : typeof(TestTable[]), const AColumnName : String) : Boolean
+begin
+	result := false;
+	if (AColumnName = "") or (AColumnName = "TestValue") then
+	begin
+		result := true;
+		update ARow set { TestValue := "abc" };
+	end;
+end;
+
+attach operator TestTable_Default to TestTable on { default };
+
+create operator TestTable_Change(var ARow : typeof(TestTable[]), const AColumnName : String) : Boolean
+begin
+	result := false;
+	if (AColumnName = "") or (AColumnName = "TestValue") then
+	begin
+		if ARow.TestValue.IsNil() or (ARow.TestValue <> "ABCDE") then
+		begin
+			result := true;
+			update ARow set { TestValue := "ABCDE" };
+		end;
+	end;
+end;
+
+attach operator TestTable_Change to TestTable on { change };
+
+create operator TestTable_Validate(var ARow : typeof(TestTable[]), const AColumnName : String) : Boolean
+begin
+	if not(ARow.TestValue.IsNil()) and (ARow.TestValue.Length() > 5) then
+		raise Error("Invalid TestValue value");
+	result := false;
+	if (AColumnName = "") or (AColumnName = "TestValue") then
+	begin
+		if not(ARow.TestValue.IsNil()) and (ARow.TestValue.Upper() <> ARow.TestValue) then
+		begin
+			result := true;
+			update ARow set { TestValue := TestValue.Upper() };
+		end;
+	end;
+end;
+
+attach operator TestTable_Validate to TestTable on { validate };
+
+create operator TestTable_BeforeInsert(var ARow : typeof(TestTable[]), var APerformUpdate : Boolean) : Boolean
+begin
+	if ARow.TestInsertValue = "ABC" then
+	begin
+		APerformUpdate := false;
+		insert table { ARow } into TestBeforeInsertTable;
+	end
+	else
+		update ARow set { TestInsertValue := "ABCDE" };
+	result := true;
+end;
+
+attach operator TestTable_BeforeInsert to TestTable on { before insert };
+
+create operator TestTable_AfterInsert(const ARow : typeof(TestTable[]))
+begin
+	insert table { ARow } into TestAfterInsertTable;
+end;
+
+attach operator TestTable_AfterInsert to TestTable on { after insert };
+
+create operator TestTable_BeforeUpdate(const AOldRow : typeof(TestTable[]), var ANewRow : typeof(TestTable[]), var APerformUpdate : Boolean) : Boolean
+begin
+	if AOldRow.TestUpdateValue <> ANewRow.TestUpdateValue then
+	begin
+		if ANewRow.TestUpdateValue = "ABC" then
+		begin
+			APerformUpdate := false;
+			insert table { ANewRow } into TestBeforeUpdateTable;
+		end
+		else
+			update ANewRow set { TestUpdateValue := "ABCDE" };
+		result := true;
+	end
+	else
+		result := false;
+end;
+
+attach operator TestTable_BeforeUpdate to TestTable on { before update };
+
+create operator TestTable_AfterUpdate(const AOldRow : typeof(TestTable[]), const ANewRow : typeof(TestTable[]))
+begin
+	if AOldRow.TestUpdateValue <> ANewRow.TestUpdateValue then
+		insert table { ANewRow } into TestAfterUpdateTable;
+end;
+
+attach operator TestTable_AfterUpdate to TestTable on { after update };
+
+create operator TestTable_BeforeDelete(const ARow : typeof(TestTable[]), var APerformUpdate : Boolean)
+begin
+	if ARow.TestDeleteValue = "ABC" then
+	begin
+		APerformUpdate := false;
+		insert table { ARow } into TestBeforeDeleteTable;
+	end;
+end;
+
+attach operator TestTable_BeforeDelete to TestTable on { before delete };
+
+create operator TestTable_AfterDelete(const ARow : typeof(TestTable[]))
+begin
+	insert table { ARow } into TestAfterDeleteTable;
+end;
+
+attach operator TestTable_AfterDelete to TestTable on { after delete };
+
+// This statement should insert the row { 1 ID, "ABCDE" TestType, "ABCDE" TestString, "ABC" TestValue, "ABCDE" TestInsertValue, "" TestUpdateValue, "" TestDeleteValue }
+try
+	insert table { row { 1 ID, "ABC" TestValue } } into TestTable;
+commit;
+
+// TODO: Because of what appears to be a change in default processing logic, this statement actually inserts ABC for TestType and TestString.
+// The reason for this is that the base table default does not fire the change processing for defaults that are set if the logic is not called
+// with the descending flag set. Not sure why this is the case, but it is definitely not the kind of thing I can just change. - BTR 6/21/2006
+
+if TestTable[1] <> row { 1 ID, "ABC" TestType, "ABC" TestString, "ABC" TestValue, "ABCDE" TestInsertValue, "" TestUpdateValue, "" TestDeleteValue } then
+	raise Error("TestTable default handlers failed.");
+	
+if not exists (TestAfterInsertTable where ID = 1) then
+	raise Error("TestTable after insert handler failed.");
+	
+// This statement should insert the row { 1 ID, "ABCDE" TestType, "ABCDE" TestString, "ABCDE" TestValue, "ABC" TestInsertValue, "" TestUpdateValue, "" TestDeleteValue } into the TestBeforeInsertTable
+try
+	insert table { row { 2 ID, "ABC" TestValue, "ABC" TestInsertValue } } into TestTable;
+commit;
+
+if exists (TestTable where ID = 2) then
+	raise Error("TestTable Before Insert instead of handler failed.");
+	
+if not exists (TestBeforeInsertTable where ID = 2) then
+	raise Error("TestTable Before Insert handler failed.");
+
+// This statement should not update the value of the TestUpdateValue column in TestTable, but should insert the proposed new row into TestBeforeUpdateTable
+try
+	update TestTable set { TestUpdateValue := "ABC" } where ID = 1;
+commit;
+
+if TestTable[1].TestUpdateValue <> "" then
+	raise Error("TestTable before update handler failed.");
+
+if not exists (TestBeforeUpdateTable where ID = 1) then
+	raise Error("TestTable before update handlers failed.");
+	
+// This statement should update the value of TestUpdateValue to "ABCDE" because of the handler
+try
+	update TestTable set { TestUpdateValue := "ABCD" } where ID = 1;
+commit;
+
+if TestTable[1].TestUpdateValue <> "ABCDE" then
+	raise Error("TestTable before update handlers failed.");
+	
+if not exists (TestAfterUpdateTable where ID = 1) then
+	raise Error("TestTable after update handlers failed.");
+	
+// This statement should not delete the TestTable row
+try
+	update TestTable set { TestDeleteValue := "ABC" } where ID = 1;
+	delete TestTable where ID = 1;
+commit;
+
+if not exists (TestBeforeDeleteTable where ID = 1) then
+	raise Error("TestTable before delete handlers failed.");
+	
+if not exists (TestTable where ID = 1) then
+	raise Error("TestTable before delete instead of handlers failed.");
+
+try
+	update TestTable set { TestDeleteValue := "ABCDE" } where ID = 1;
+	delete TestTable where ID = 1;
+commit;
+
+if not exists (TestAfterDeleteTable where ID = 1) then
+	raise Error("TestTable after delete handlers failed.");
+
+if exists (TestTable where ID = 1) then
+	raise Error("TestTable after delete handlers failed.");
+
+// Default / Validate / Change
+begin
+	var LCursor : cursor(typeof(TestTable)) := cursor(TestTable capabilities { updateable });
+	try
+		var LRow : typeof(TestTable[]) :=
+			row
+			{
+				nil as Integer ID,
+				nil as String TestType,
+				nil as String TestString,
+				nil as String TestValue,
+				nil as String TestInsertValue,
+				nil as String TestUpdateValue,
+				nil as String TestDeleteValue
+			};
+			
+		if not(LCursor.Default(var LRow)) then
+			raise Error("Cursor.Default() failed.");
+			
+		// TestType should be "ABCDE"
+		if (LRow.TestType) <> "ABCDE" then
+			raise Error("Cursor.Default() for TestType failed.");
+			
+		// TestString should be "ABCDE"
+		if (LRow.TestString) <> "ABCDE" then
+			raise Error("Cursor.Default() for TestString failed.");
+			
+		// TestValue should be "ABC"
+		if (LRow.TestValue) <> "ABC" then
+			raise Error("Cursor.Default() for TestValue failed.");
+			
+		update LRow set { TestType := "ABCDEF" };
+		
+		var LErrorHit : Boolean := false;
+		try
+			LCursor.Validate(LRow, var LRow);
+		except
+			LErrorHit := true;
+		end;
+		
+		if not(LErrorHit) then
+			raise Error("Cursor.Validate() failed for TestType.");
+			
+		update LRow set { TestType := "ABCDE", TestString := "ABCDEF" };
+		try
+			LCursor.Validate(LRow, var LRow);
+		except
+			LErrorHit := true;
+		end;
+		
+		if not(LErrorHit) then
+			raise Error("Cursor.Validate() failed for TestString.");
+			
+		update LRow set { TestString := "ABCDE", TestValue := "ABCDEF" };
+		try
+			LCursor.Validate(LRow, var LRow);
+		except
+			LErrorHit := true;
+		end;
+		
+		if not(LErrorHit) then
+			raise Error("Cursor.Validate() failed for TestValue.");
+			
+		update LRow set { TestValue := "ABCDE" };
+
+		update LRow set { TestType := 'abc', TestString := 'abc', TestValue := 'abc' };			
+		if not(LCursor.Validate(LRow, var LRow)) then
+			raise Error("Cursor.Validate() failed.");
+
+		if (LRow.TestType) <> "ABC" then
+			//raise Error((LRow.TestType).Value);
+			raise Error("Cursor.Validate() failed to set TestType.");
+		
+		if (LRow.TestString) <> "ABC" then
+			raise Error("Cursor.Validate() failed to set TestString.");
+		
+		if (LRow.TestValue) <> "ABC" then
+			raise Error("Cursor.Validate() failed to set TestValue.");
+
+		update LRow set { TestType := 'abc', TestString := 'abc', TestValue := 'abc' };
+		if not(LCursor.Change(LRow, var LRow)) then
+			raise Error("Cursor.Change() failed.");
+
+		if (LRow.TestType) <> "ABCDE" then
+			raise Error("Cursor.Change() failed to set TestType.");
+		
+		if (LRow.TestString) <> "ABCDE" then
+			raise Error("Cursor.Change() failed to set TestString.");
+		
+		if (LRow.TestValue) <> "ABCDE" then
+			raise Error("Cursor.Change() failed to set TestValue.");
+
+	finally
+		LCursor.Close();
+	end;
+end;
+
+detach operator TestTable_TestString_Default from TestString in TestTable on { default };
+drop operator TestTable_TestString_Default(var String);
+
+detach operator TestTable_TestString_Change from TestString in TestTable on { change };
+drop operator TestTable_TestString_Change(var typeof(TestTable[]));
+
+detach operator TestTable_TestString_Validate from TestString in TestTable on { validate };
+drop operator TestTable_TestString_Validate(var typeof(TestTable[]));
+
+detach operator TestTable_Default from TestTable on { default };
+drop operator TestTable_Default(var typeof(TestTable[]), String);
+
+detach operator TestTable_Change from TestTable on { change };
+drop operator TestTable_Change(var typeof(TestTable[]), String);
+
+detach operator TestTable_Validate from TestTable on { validate };
+drop operator TestTable_Validate(var typeof(TestTable[]), String);
+
+detach operator TestTable_BeforeInsert from TestTable on { before insert };
+drop operator TestTable_BeforeInsert(var typeof(TestTable[]), var Boolean);
+
+detach operator TestTable_AfterInsert from TestTable on { after insert };
+drop operator TestTable_AfterInsert(typeof(TestTable[]));
+
+detach operator TestTable_BeforeUpdate from TestTable on { before update };
+drop operator TestTable_BeforeUpdate(typeof(TestTable[]), var typeof(TestTable[]), var Boolean);
+
+detach operator TestTable_AfterUpdate from TestTable on { after update };
+drop operator TestTable_AfterUpdate(typeof(TestTable[]), typeof(TestTable[]));
+
+detach operator TestTable_BeforeDelete from TestTable on { before delete };
+drop operator TestTable_BeforeDelete(typeof(TestTable[]), var Boolean);
+
+detach operator TestTable_AfterDelete from TestTable on { after delete };
+drop operator TestTable_AfterDelete(typeof(TestTable[]));
+
+drop table TestTable;
+drop table TestBeforeInsertTable;
+drop table TestAfterInsertTable;
+drop table TestBeforeUpdateTable;
+drop table TestAfterUpdateTable;
+drop table TestBeforeDeleteTable;
+drop table TestAfterDeleteTable;
+
+detach operator TestType_Default from TestType on { default };
+drop operator TestType_Default(var TestType);
+
+detach operator TestType_Change from TestType on { change };
+drop operator TestType_Change(var TestType);
+
+detach operator TestType_Validate from TestType on { validate };
+drop operator TestType_Validate(var TestType);
+
+drop type TestType;
+
+// Deferred event handlers
+create table Invoice { ID : Integer, Name : String, key { ID } };
+
+create table InvoiceDetail { Invoice_ID : Integer, Sequence : Integer, Amount : Money, key { Invoice_ID, Sequence } };
+
+create reference InvoiceDetail_Invoice InvoiceDetail { Invoice_ID } references Invoice { ID };
+
+create operator Invoice_AfterInsert(const ARow : typeof(Invoice[]))
+begin
+	if Sum(Amount from (InvoiceDetail where Invoice_ID = ARow.ID)) = $0 then
+		raise Error("Invoice details do not balance for invoice " + ARow.ID.ToString());
+end;
+
+attach operator Invoice_AfterInsert to Invoice on { after insert };
+
+try
+	insert table { row { 1 ID, 'New Invoice' Name } } into Invoice;
+	insert table { row { 1 Invoice_ID, 1 Sequence, $12 Amount } } into InvoiceDetail;
+commit;
+
+detach operator Invoice_AfterInsert from Invoice on { after insert };
+
+drop operator Invoice_AfterInsert(typeof(Invoice[]));
+
+drop table InvoiceDetail;
+drop table Invoice;
+
+// Event handler firing sequence
+create table TestFiringSequence { ID : Integer, Name : String, key { ID } };
+
+create table TestFiringSequenceAudit { ID : Integer, Sequence : Integer, Name : String, key { ID, Sequence } };
+
+create operator TestFiringSequence_AfterInsert_1(const ARow : typeof(TestFiringSequence[]))
+begin
+	insert table { ARow } add { 1 Sequence } into TestFiringSequenceAudit;
+end;
+
+create operator TestFiringSequence_AfterInsert_2(const ARow : typeof(TestFiringSequence[]))
+begin
+	if not exists (TestFiringSequenceAudit where ID = (ARow.ID) and Sequence = 1) then
+		raise Error("Firing sequence failed");
+	insert table { ARow } add { 2 Sequence } into TestFiringSequenceAudit;
+end;
+
+attach operator TestFiringSequence_AfterInsert_2 to TestFiringSequence on { after insert };
+
+attach operator TestFiringSequence_AfterInsert_1 to TestFiringSequence on { after insert } before { TestFiringSequence_AfterInsert_2 };
+
+insert table { row { 1 ID, "Test" Name } } into TestFiringSequence;
+
+detach operator TestFiringSequence_AfterInsert_2 from TestFiringSequence on { after insert };
+
+detach operator TestFiringSequence_AfterInsert_1 from TestFiringSequence on { after insert };
+
+attach operator TestFiringSequence_AfterInsert_2 to TestFiringSequence on { after insert };
+
+attach operator TestFiringSequence_AfterInsert_1 to TestFiringSequence on { after insert };
+
+invoke TestFiringSequence_AfterInsert_1 on TestFiringSequence on { after insert } before { TestFiringSequence_AfterInsert_2 };
+
+insert table { row { 2 ID, "Test" Name } } into TestFiringSequence;
+
+detach operator TestFiringSequence_AfterInsert_2 from TestFiringSequence on { after insert };
+
+detach operator TestFiringSequence_AfterInsert_1 from TestFiringSequence on { after insert };
+
+drop operator TestFiringSequence_AfterInsert_2(typeof(TestFiringSequence[]));
+
+drop operator TestFiringSequence_AfterInsert_1(typeof(TestFiringSequence[]));
+
+drop table TestFiringSequenceAudit;
+
+drop table TestFiringSequence;
+
+//* Scalar type change handler with operator named the same as the scalar type
+SafeDrop('TestString');
+
+create type TestString like String;
+create operator TestString(const AOld : TestString, var ANew : TestString) : Boolean
+begin
+  ANew := "Change";
+  result := true;
+end;
+attach TestString to TestString on change;
+
+create table TestTestString { ID : Integer, TestString : TestString, key { ID } };
+
+begin
+	var LCursor := cursor(TestTestString);
+	try
+		var LRow := row { 1 ID, TestString("OLD") TestString };
+		LCursor.Change(LRow, var LRow, 'TestString');
+		if LRow.TestString <> 'Change' then
+			raise Error('Change handler attached to operator with the same name as the type did not fire');
+	finally
+		LCursor.Close();
+	end;
+end;
+
+SafeDrop('TestString');
+
+//* Event handlers on session-specific tables
+create session table TestDefault { ID : Integer, Name : String, key { ID } };
+
+create session operator TestDefault_ID_Default(var AValue : Integer) : Boolean
+begin
+	result := true;
+	AValue := 5;
+end;
+
+attach operator TestDefault_ID_Default to ID in TestDefault on default;
+
+create session operator TestDefault_Default(var ARow : typeof(TestDefault[]), const AColumnName : String) : Boolean
+begin
+	result := false;
+	if (AColumnName = "") or (AColumnName = "Name") then
+	begin
+		if (ARow.Name.IsNil()) then
+		begin
+			ARow.Name := "Default Name";
+			result := true;
+		end;
+	end;
+end;
+
+attach operator TestDefault_Default to TestDefault on default;
+
+detach operator TestDefault_Default from TestDefault on default;
+drop operator TestDefault_Default(var typeof(TestDefault[]), String);
+detach operator TestDefault_ID_Default from ID in TestDefault on default;
+drop operator TestDefault_ID_Default(var Integer);
+drop table TestDefault;

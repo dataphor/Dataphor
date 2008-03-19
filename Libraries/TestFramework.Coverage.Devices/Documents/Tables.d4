@@ -1,0 +1,96 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create view DeviceInstances 
+	Devices over { Name, ReconciliationMaster, ReconciliationMode };
+
+create table IdealDeviceOperators
+{
+   Name : Name,
+  	OperatorName : Name,
+	IsSupported : Boolean,
+	Reason : SQLText,
+	key { Name }
+};
+
+create table DeviceCase
+{
+   ID : Integer {default GetNextGenerator("DeviceCase.ID")} tags { Frontend.Width = "6" },
+ 	// the name of the item to be checked.
+	Name : Name,
+	// a number unique to this item. Used for the key in addition to Name
+	Sequence : Integer tags { Frontend.Width = "4" },
+	// the type of object that this script will test.
+   Type : String tags { Frontend.Width = "10" },
+   Enabled : Boolean { default true } tags { Frontend.Grid.ElementType = "CheckBoxColumn" },
+	Description :  SQLText { nil } tags { Frontend.TextBox.Height = "7" },
+	// this is run before even checking supported.
+	// if preceeded with an ampersand '&', then "Create" is prepended to the script before execution before the tests
+	// and "Drop" is prepended to the script before execution after the tests.
+	// This portion will not be run after the tests if the ampersand is not present.
+	Table : Script tags { Frontend.Width = "30" },
+	// this script is run before the tests, specifically used to insert test data into the tables.
+	InsertTableStatement : Script,
+	// Script is checked to see if that statement is supported on the default device
+	// before script, script and after script are concatenated together and executed together as the test case(s)
+	BeforeScript : Script { default "" } tags { Frontend.Width = "15" },
+	Script : Script,
+	AfterScript : Script { default "" },	
+	// this statement (and prepended Table if '&' is present there) is run in a finally block after tests are executed
+	DropStatement : Script tags { Frontend.Width = "50" },
+	User_ID : String { default "" } tags { Frontend.Length = "30" },
+	DateTimeCreated : DateTime { default DateTime() },	
+	
+	key { ID }
+};
+
+SafeDrop('Coverage.Devices.DeviceCaseData');
+create table DeviceCaseData 
+{
+	DeviceCase_ID : Integer,
+	DeviceType : String,
+	InsertTableStatement : Script, 
+	
+	key { DeviceCase_ID, DeviceType }//,
+	//reference DeviceCaseData_DeviceCase { DeviceCase_ID } references DeviceCase { ID }
+};
+	
+create table ApplicableDeviceCases
+{
+	ID : Integer tags { Frontend.Width = "6" },
+	DeviceName : Name tags { Fontend.Width = "35" },
+	Type : String,
+	key { ID, DeviceName }
+};
+
+SafeDrop('DeviceCaseResults');
+create table DeviceCaseResults
+{
+   DeviceCase_ID : Integer tags { Frontend.Width = "5" },
+   DeviceName : Name,
+   Status : RunStatus tags { Frontend.Width = "10" },
+   Results : SQLText tags { Frontend.TextBox.Height = "7", Frontend.Width = "40" },
+   DateTime : DateTime { default DateTime() },
+   UserID : String { default UserID() } tags { Storage.Length = "50" },
+   key { DeviceCase_ID, DeviceName },
+   reference DeviceCaseResults_DeviceCase { DeviceCase_ID } references DeviceCase { ID } 
+};
+
+//drop view DeviceCaseResultsExtended;
+create view DeviceCaseResultsExtended
+	(ApplicableDeviceCases join DeviceCase)
+	   over { ID, DeviceName, Type, Name }
+	   rename Cases
+	   left join (DeviceCaseResults rename Results) by Cases.ID = Results.DeviceCase_ID and Cases.DeviceName = Results.DeviceName
+	adorn 
+	{
+		DeviceCase_ID tags { Frontend.Visible = "false" },
+		Results.DeviceName tags { Frontend.Visible = "false" },
+		Cases.ID tags { Frontend.Width = "6"},
+		Cases.DeviceName tags { Frontend.Width = "35" },
+		order { Cases.Name }
+	};
+	
+	

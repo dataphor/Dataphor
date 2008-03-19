@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Frontend.Derive('Sample.Shipping.InvoiceItem', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <Grid bop:name="Grid">
+            <TextColumn bop:name="MainGridColumnMain.Invoice_ID" bop:default-width="True" />
+         </Grid>
+         <column bop:name="GridBar">
+            <trigger bop:name="AddTrigger" visible="False" />
+         </column>
+      </row>
+   </column>
+</interface>
+</document>
+</dilx>

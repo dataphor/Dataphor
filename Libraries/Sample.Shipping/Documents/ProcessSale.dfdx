@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Frontend.Derive('Sample.Shipping.SaleOrdersToProcess', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="ProcessSaleTrigger" action="ProcessSale" />
+         </column>
+      </row>
+   </column>
+   <scriptaction ibop:order="16" bop:name="ProcessSale" text="Process Sale" afterexecute="Refresh" script="Host.Session.ExecuteScript&#xD;&#xA;(&#xD;&#xA;	String.Format&#xD;&#xA;	(&#xD;&#xA;		&quot;ProcessInvoice({0});&quot;, &#xD;&#xA;		Main[&quot;Main.ID&quot;].AsString&#xD;&#xA;	)&#xD;&#xA;);" />
+</interface>
+</document>
+</dilx>

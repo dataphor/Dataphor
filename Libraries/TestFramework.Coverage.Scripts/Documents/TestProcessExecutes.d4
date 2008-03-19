@@ -1,0 +1,45 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+if Count(Sessions where User_ID <> "System") <> 1 then 
+	raise Error("Must be single session to successfully run these tests");
+
+// test Start and Stop Process;
+begin
+	var LBeginCount : Integer := Count(Processes);
+	var LPID : Integer := StartProcess();
+	var LThrew : Boolean := false;
+	if LBeginCount + 1 <> Count(Processes) then raise Error("StartProcess() didn't start the correct number of processes.");
+	if not exists (Processes where LPID = ID) then raise Error("Process returned from StartProcess() doesn't Exist.");
+	StopProcess(LPID);
+	if LBeginCount <> Count(Processes) then raise Error("StopProcess() didn't stop the correct number of processes.");
+	if exists (Processes where LPID = ID) then raise Error("Process stopped by StopProcess(Integer) still exists.");
+	try
+		StopProcess(LPID);
+	except
+		LThrew := true;
+	end;
+	if not LThrew then raise Error("StopProcess on a nonexistant process didn't throw.");
+end;
+
+begin
+	var LPID : Integer := StartProcess();
+	var LThrew := false;
+	try
+		ExecuteWithTimeout(LPID,'Sleep(100);',1000);
+	except
+		LThrew := true;
+	end;
+	LPID := StartProcess();
+	if LThrew then raise Error("ExecuteWithTimeOut threw before its timout period had expired.");	
+	try
+		ExecuteWithTimeout(LPID,'Sleep(1000);',100);
+	except
+		LThrew := true;
+	end;
+	if not LThrew then raise Error("ExecuteWithTimeOut didn't throw when its timout period had expired.");
+
+	LThrew := false;
+end;

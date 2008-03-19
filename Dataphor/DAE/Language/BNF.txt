@@ -1,0 +1,57 @@
+Lexer BNF ->
+
+	The non terminals <letter>, <digit>, <hexdigit> and <character> have the obvious interpretations.
+
+	<script> ::=
+		<commented script>{<commented script>}
+		
+	<commented script> ::=
+		{<comment>}{<symbol> | <literal>}{<comment>}
+
+	<symbol> ::=
+		<identifier> | <operator>
+
+	<identifier> ::=
+		_ | <letter> {_ | <letter> | <digit>}
+
+	<operator> ::=
+		* | / | + | - | = | "<>" | "<" | ">" | "<=" | ">=" |
+		. | , | "(" | ")" | "[" | "]" | "{" | "}" | ~ |
+		^ | & | "|" | "<<" | ">>" | ** | ; | : | := | ?=
+
+	<literal> ::=
+		<integer> |
+		<float> |
+		<decimal> |
+		<numeric> |
+		<money> |
+		<string> |
+		true |
+		false |
+		nil
+
+	<integer> ::=
+		<digit>{<digit>} | 0x<hexdigit>{<hexdigit>}
+
+	<float> ::=
+		<numeric>f
+
+	<decimal> ::=
+		<numeric>[d]
+
+	<numeric> ::=
+		<digit>{<digit>}[.{<digit>}][(e|E)[+|-]{<digit>}]
+		
+	<money> ::=
+		$<digit>{<digit>}[.{<digit>}]
+
+	<string> ::=
+		""{<character>}"" | '{<character>}'
+		
+	<comment> ::=
+		// <comment text> |
+		/* <comment text> */
+		
+	<comment text> ::=
+		{<comment>}{<character>}{<comment>}
+

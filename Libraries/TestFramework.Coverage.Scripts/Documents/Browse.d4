@@ -1,0 +1,105 @@
+/*
+	Browse coverage
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+create table Test { ID : Integer, Name : String, key { ID }, order { Name } };
+
+Test :=
+	table
+	{
+		row { 1 ID, 'Alpha' Name },
+		row { 2, 'Beta' },
+		row { 3, 'Gamma' },
+		row { 4, 'Delta' },
+		row { 5, 'Kappa' },
+		row { 6, 'Lambda' },
+		row { 7, 'Epsilon' },
+		row { 8, 'Zeta' },
+		row { 9, 'Theta' },
+		row { 10, 'Chi' },
+		row { 11, 'Phi' },
+		row { 12, 'Tau' }
+	};
+
+begin
+	var LCursor : cursor(typeof(Test)) := cursor(Test browse by { ID });
+	try
+		LCursor.Next();
+		if (ID from LCursor.Select()) <> 1 then
+			raise Error("Next failed");
+			
+		LCursor.Next();
+		if (ID from LCursor.Select()) <> 2 then
+			raise Error("Second Next failed");
+			
+		LCursor.Prior();
+		if (ID from LCursor.Select()) <> 1 then
+			raise Error("Prior failed.");
+			
+		LCursor.First();
+		if not(LCursor.BOF()) then
+			raise Error("BOF failed.");
+			
+		LCursor.Last();
+		if not(LCursor.EOF()) then
+			raise Error("EOF failed");
+			
+		LCursor.Prior();
+		if (ID from LCursor.Select()) <> 12 then
+			raise Error("Prior failed");
+			
+		LCursor.Prior();
+		if (ID from LCursor.Select()) <> 11 then
+			raise Error("Second Prior failed");
+			
+		LCursor.FindKey(row { 5 ID });
+		if (ID from LCursor.Select()) <> 5 then
+			raise Error("FindKey failed");
+			
+		LCursor.Prior();
+		if (ID from LCursor.Select()) <> 4 then
+			raise Error("Prior after FindKey failed");
+			
+		LCursor.Next();
+		if (ID from LCursor.Select()) <> 5 then
+			raise Error("Next after Prior failed");
+			
+		LCursor.FindKey(row { 5 ID });
+		if (ID from LCursor.Select()) <> 5 then
+			raise Error("FindKey failed");
+		
+		LCursor.Next();
+		if (ID from LCursor.Select()) <> 6 then
+			raise Error("Next after FindKey failed");
+			
+		LCursor.Prior();
+		if (ID from LCursor.Select()) <> 5 then
+			raise Error("Prior after Next failed");
+	finally
+		LCursor.Close();
+	end;
+end;
+
+begin
+	var LCurrent : Integer := 0;
+	var LSaveName : String;
+	var LCursor : cursor(typeof(Test)) := cursor(Test browse by { ID } capabilities { navigable, backwardsnavigable, searchable, updateable });
+	try
+		while LCursor.Next() do
+		begin
+			LCurrent := LCurrent + 1;
+			if (ID from LCursor.Select()) <> LCurrent then
+				raise Error("Cursor browsing out of order.");
+			LSaveName := Name from LCursor.Select();
+			LCursor.Update(row { "" Name });
+			LCursor.Update(row { LSaveName Name });
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+drop table Test;
+

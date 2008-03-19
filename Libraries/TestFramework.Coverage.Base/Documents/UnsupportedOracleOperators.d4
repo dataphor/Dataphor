@@ -1,0 +1,38 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+select Count(IdealDeviceOperators)
+
+EnsureDeviceStarted('TestOracle.OracleTestDevice')
+select Count(DeviceOperators where Device_Name = 'TestOracle.OracleTestDevice')
+
+SetLibrary('Coverage')
+alter device CoverageDevice { create type Name };
+alter device CoverageDevice { create operator iCompare(Name, Name) class "SQLDevice.SQLCompare" };
+create table UnsupportedOracleOperators in CoverageDevice from 
+select
+Count
+(
+((IdealDeviceOperators where IdealDevice over { OperatorName } redefine { OperatorName := Name(OperatorName) } join (Operators rename { Name Operator_Name})) over { Operator_Name }
+	minus 
+	(((DeviceOperators where Device_Name = 'TestOracle.OracleTestDevice' ) join (Operators rename { Name Operator_Name })) over { Operator_Name }))
+	where not(Operator_Name like '%list%') 
+	where not(Operator_Name like '%cursor%') 
+	where not(Operator_Name like '%Binary%') 
+	where not(Operator_Name like '%Diagnostics%')
+	where not(Operator_Name like '%FileReference%')
+	where not(Operator_Name like '%LibraryReference%')
+	where not(Operator_Name like '%LibraryDescriptor%')
+	where not(Operator_Name like '%iBrowse%')
+	where not(Operator_Name like '%iCopy%')
+	where not(Operator_Name like '%row%')
+	where not(Operator_Name like '%table%')
+)
+	
+select UnsupportedOracleOperators	
+	
+
+	
+select IdealDeviceOperators where IdealDevice

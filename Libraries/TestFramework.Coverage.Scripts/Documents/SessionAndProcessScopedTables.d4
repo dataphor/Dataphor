@@ -1,0 +1,67 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Session-Scoped table variables
+// This needs to run on it's own process in order to allow each batch to be run in it's own transaction
+begin
+	var LProcess := StartProcess();
+	try
+		Execute
+		(
+			LProcess,
+			"
+				CreateUser('TestUser', 'Test User', 'TestUser');
+				create table TestSession in Temp { ID : Integer, key { ID } } static tags { Storage.Scope = ""Session"" };
+				grant usage on TestSession to user 'TestUser';
+				
+				insert row { 1 ID } into TestSession;
+				if not exists (TestSession) then
+					raise Error('Session-Scoped variable not visible in the same session');
+			"
+		);
+					
+		ExecuteAs("if exists (TestSession) then raise Error('Session-Scoped variable visible in a different session');", "TestUser", "TestUser");
+	
+		Execute
+		(
+			LProcess,
+			"
+				drop table TestSession;
+				DropUser('TestUser');
+			"
+		);
+	finally
+		StopProcess(LProcess);
+	end;
+end;
+
+//* Process-Scoped table variables
+begin
+	var LProcess := StartProcess();
+	try
+		Execute
+		(
+			LProcess, 
+			"
+				create table TestProcess in Temp { ID : Integer, key { ID } } static tags { Storage.Scope = ""Process"" };
+				insert row { 1 ID } into TestProcess;
+				if not exists (TestProcess) then
+					raise Error('Process-Scoped table variable not visible in the same process');
+			"
+		);
+
+		var LProcess2 := StartProcess();
+		try
+			Execute(LProcess2, "if exists (TestProcess) then raise Error('Process-Scoped variable visible in a different process');");
+		finally
+			StopProcess(LProcess2);
+		end;
+
+		Execute(LProcess, "drop table TestProcess;");
+	finally
+		StopProcess(LProcess);
+	end;
+end;
+

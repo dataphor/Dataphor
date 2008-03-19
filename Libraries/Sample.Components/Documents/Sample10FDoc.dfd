@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <statictext text="This text is from a document that is displayed in a Frame control." bop:name="StaticText1" />
+</interface>

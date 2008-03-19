@@ -1,0 +1,83 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Views
+	// create view
+create table TestTable5 { ID : Integer, order { ID } };
+	// key
+create table TestTable6 { ID : Integer, Name : String, key { ID } };
+
+create view TestView TestTable6;
+
+create view TestView2 TestTable6
+	// order
+	{
+		order
+		{
+			ID asc
+		}
+	};
+
+create view TestView3 TestTable6
+	// key
+	{
+		key {	Name }
+	};
+
+create view TestView4 TestTable6
+	// reference
+	{
+		reference TestReference { ID } references TestTable5 { ID }
+	};
+	
+create view TestView5 TestTable6
+{
+	constraint IsValid ID > 5
+};
+
+// alter view
+alter view TestView;
+alter view TestView3
+{
+	// create order
+	create order { ID asc }
+};
+alter view TestView3
+{
+	// alter order
+	alter order { ID asc }
+};	
+alter view TestView3
+{
+	// drop order
+	drop order { ID }
+};
+alter view TestView3
+{
+	alter key { Name }
+	// alter key
+};
+alter view TestView3
+{
+	// drop key
+	drop key { Name }	
+};
+
+alter view TestView3
+{
+	// create key
+	create key { Name }
+};
+
+// drop view
+drop view TestView;
+drop view TestView2;
+drop view TestView3;
+drop view TestView4;
+drop view TestView5;
+drop table TestTable6;
+drop table TestTable5;
+

@@ -1,0 +1,360 @@
+// Dataphor Automation Coverage Script
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Data Manipulation Patterns provide the basis for user interface automation in the
+// Dataphor toolset.  By recognizing and formalizing these patterns, the toolset is
+// capable of dynamically producing intuitive user interfaces based on data model 
+// definition.  All patterns are built from the four types of references, (Parent, 
+// Extension, Lookup, and Detail), and are essentially just different combinations 
+// of these basic building blocks.  Following is a partial list of some common data 
+// manipulation patterns currently automated by Dataphor.  This is certainly not an 
+// exhaustive list, and new patterns will continually be incorporated into the toolset.  
+// In theory, any combination of these patterns will be correctly automated by Dataphor, 
+// however, the requirements of specific applications may dictate specialized handling 
+// in some cases.
+
+SetDefaultDeviceName('System.Temp');
+
+//* Parent / Extension
+// This pattern is defined by a reference between two tables where the columns involved
+// form some unique set of attributes in both the source and target tables.
+
+create table Entity
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table EntityExtension
+{
+    Entity_ID : String,
+    Address : String,
+    key { Entity_ID },
+    reference EntityExtension_Entity { Entity_ID } references Entity { ID }
+};
+
+//* Lookup / Detail
+// This pattern is defined by a reference between two tables where the columns involved
+// form some unique set of attributes in the target table, but not in the source table.
+
+create table ItemType
+{
+    ID : String,
+    Description : String,
+    key { ID }
+};
+
+create table Item
+{
+    ID : String,
+    ItemType_ID : String,
+    Quantity : Integer,
+    key { ID },
+    reference Item_ItemType { ItemType_ID } references ItemType { ID }
+};
+
+//* Recursive
+// This pattern is a special case of the Lookup / Detail pattern where the source and 
+// target tables involved in the reference are the same.
+
+create table SecurityGroup
+{
+	ID : String,
+	Name : String,
+	Parent_ID : String { nil },
+	key { ID },
+	reference SecurityGroup_SecurityGroup { Parent_ID } references SecurityGroup { ID }
+};
+
+//* Generalized Recursive (Tree)
+// This pattern is a generalization of the Recursive pattern in which the parent reference
+// is moved to an extension table.
+
+create table GroupNode
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table GroupBranch
+{
+    GroupNode_ID : String,
+    Parent_GroupNode_ID : String,
+    key { GroupNode_ID },
+    reference GroupBranch_GroupNode { GroupNode_ID } references GroupNode { ID },
+    reference GroupBranch_Parent_GroupNode { Parent_GroupNode_ID } references GroupNode { ID }
+};
+
+//* Association
+// This pattern is the classic many-to-many association.  It is built from a concatenation
+// of multiple Lookup / Detail patterns, but is so common as to merit specialized handling.
+
+create table User
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table Location
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table UserLocation
+{
+    User_ID : String,
+    Location_ID : String,
+    key { User_ID, Location_ID },
+    reference UserLocation_User { User_ID } references User { ID },
+    reference UserLocation_Location { Location_ID } references Location { ID }
+};
+
+//* Specialized Association (Network)
+// This pattern is a specialization of the Association pattern in which the target tables
+// of the lookup references are the same.
+
+create table Node
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table Link
+{
+    Parent_Node_ID : String,
+    Child_Node_ID : String,
+    key { Parent_Node_ID, Child_Node_ID },
+    reference Link_Parent_Node { Parent_Node_ID } references Node { ID },
+    reference Link_Child_Node { Child_Node_ID } references Node { ID }
+};
+
+//* Detail Lookup
+// This pattern is a special case of the Lookup / Detail pattern in which the
+// target of one reference is the source of the other and vice versa.
+
+create table Customer
+{
+    ID : String,
+    Name : String,
+    Phone : String,
+    key { ID }
+};
+
+create table CustomerPhone
+{
+    Customer_ID : String,
+    Phone : String,
+    key { Customer_ID, Phone },
+    reference CustomerPhone_Customer { Customer_ID } references Customer { ID }
+};
+
+create reference Customer_CustomerPhone Customer { ID, Phone } references CustomerPhone { Customer_ID, Phone };
+
+//* Generalized Detail Lookup
+// This pattern is defined by Association between Lookup / Detail references to the same target.
+
+create table Assembly
+{
+    ID : String,
+    Name : String,
+    key { ID }
+};
+
+create table AssemblyStep
+{
+    Assembly_ID : String,
+    Number : Integer,
+    Instructions : String,
+    key { Assembly_ID, Number },
+    reference AssemblyStep_Assembly { Assembly_ID } references Assembly { ID }
+};
+
+create table AssemblyPart
+{
+    Assembly_ID : String,
+    PartNumber : Integer,
+    key { Assembly_ID, PartNumber },
+    reference AssemblyPart_Assembly { Assembly_ID } references Assembly { ID }
+};
+
+create table AssemblyStepPart
+{
+    Assembly_ID : String,
+    Number : Integer,
+    PartNumber : Integer,
+    key { Assembly_ID, Number, PartNumber },
+    reference AssemblyStepPart_AssemblyStep { Assembly_ID, Number } references AssemblyStep { Assembly_ID, Number },
+    reference AssemblyStepPart_AssemblyPart { Assembly_ID, PartNumber } references AssemblyPart { Assembly_ID, PartNumber }
+};
+
+//*
+
+drop table EntityExtension;
+drop table Entity;
+
+drop table Item;
+drop table ItemType;
+
+drop table SecurityGroup;
+
+drop table GroupBranch;
+drop table GroupNode;
+
+drop table UserLocation;
+drop table Location;
+drop table User;
+
+drop table Link;
+drop table Node;
+
+drop reference Customer_CustomerPhone;
+drop table CustomerPhone;
+drop table Customer;
+
+drop table AssemblyStepPart;
+drop table AssemblyPart;
+drop table AssemblyStep;
+drop table Assembly;
+
+create table Organization
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table Location
+{
+	ID : Integer,
+	Organization_ID : Integer,
+	Name : String,
+	key { ID },
+	reference Location_Organization { Organization_ID } references Organization { ID }
+};
+
+create table Person
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table OrganizationPerson
+{
+	Organization_ID : Integer,
+	Person_ID : Integer,
+	key { Organization_ID, Person_ID },
+	reference OrganizationPerson_Organization { Organization_ID } references Organization { ID },
+	reference OrganizationPerson_Person { Person_ID } references Person { ID }
+};
+
+create table OrganizationPersonLocation
+{
+	Organization_ID : Integer,
+	Person_ID : Integer,
+	Location_ID : Integer,
+	key { Organization_ID, Person_ID },
+	reference OrganizationPersonLocation_OrganizationPerson { Organization_ID, Person_ID } references OrganizationPerson { Organization_ID, Person_ID },
+	reference OrganizationPersonLocation_Location { Location_ID, Organization_ID } references Location { ID, Organization_ID }
+};
+
+drop table OrganizationPersonLocation;
+drop table OrganizationPerson;
+drop table Person;
+drop table Location;
+drop table Organization;
+
+create table Assembly
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table AssemblyStep
+{
+	ID : Integer,
+	Assembly_ID : Integer,
+	Name : String,
+	key { ID },
+	reference AssemblyStep_Assembly { Assembly_ID } references Assembly { ID }
+		tags { Frontend.Detail.Embedded = "true" }
+};
+
+create table AssemblyPart
+{
+	ID : Integer,
+	Assembly_ID : Integer,
+	Name : String,
+	key { ID },
+	reference AssemblyPart_Assembly { Assembly_ID } references Assembly { ID }
+		tags { Frontend.Detail.Embedded = "true" }
+};
+
+create table AssemblyStepPart
+{
+	Step_ID : Integer,
+	Part_ID : Integer,
+	key { Step_ID, Part_ID }
+};
+
+create view AssemblyStepPartDetail
+	AssemblyStepPart left lookup (AssemblyStep over { ID, Assembly_ID } rename { ID Step_ID });
+	
+create reference AssemblyStepPartDetail_AssemblyStep
+	AssemblyStepPartDetail { Step_ID, Assembly_ID } references AssemblyStep { ID, Assembly_ID }
+		tags { Frontend.Detail.Embedded = "true" };
+	
+create reference AssemblyStepPartDetail_AssemblyPart
+	AssemblyStepPartDetail { Part_ID, Assembly_ID } references AssemblyPart { ID, Assembly_ID };
+	
+drop reference AssemblyStepPartDetail_AssemblyPart;
+drop reference AssemblyStepPartDetail_AssemblyStep;
+drop view AssemblyStepPartDetail;
+drop table AssemblyStepPart;
+drop table AssemblyPart;
+drop table AssemblyStep;
+drop table Assembly;
+
+create table Product
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+create table ProductVersion
+{
+	Product_ID : Integer,
+	Version : VersionNumber,
+	key { Product_ID, Version },
+	reference ProductVersion_Product { Product_ID } references Product { ID }
+};
+
+create table ProductBuild
+{
+	Product_ID : Integer,
+	Version : VersionNumber,
+	key { Product_ID, Version },
+	reference ProductBuild_ProductVersion { Product_ID, Version } references ProductVersion { Product_ID, Version }
+};
+
+create table ProductRelease
+{
+	Product_ID : Integer,
+	Version : VersionNumber,
+	key { Product_ID, Version },
+	reference ProductRelease_ProductBuild { Product_ID, Version } references ProductBuild { Product_ID, Version }
+};
+
+drop table ProductRelease;
+drop table ProductBuild;
+drop table ProductVersion;
+drop table Product;

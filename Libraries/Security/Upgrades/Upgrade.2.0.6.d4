@@ -1,0 +1,9 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+drop reference UserDeviceUser_DevicesView;	
+create reference UserDeviceUser_DevicesView UserDeviceUser { Device_Name } references DevicesView { Name }
+	tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Device", Frontend.Detail.Visible = "false" };
+

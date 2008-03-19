@@ -1,0 +1,97 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Long Operators
+begin
+  var LLong1: Long, LLong2: Long;
+
+  LLong1 := ToLong(5);
+  if LLong1 <> ToLong(5) then
+    raise Error("Long assignment from literal failed");
+
+  LLong2 := LLong1;
+  if not(LLong1 = LLong2) then
+    raise Error("Long assignment from variable failed");
+
+  LLong2 := ToLong(10);
+  if (LLong1 = ToLong(10)) then
+    raise Error("Long assignment is not by value");
+
+  LLong1 := LLong1 + ToLong(5);
+  if LLong1 <> ToLong(10) then
+    raise Error("Long addition failed");
+
+  LLong1 := LLong1 - ToLong(5);
+  if LLong1 <> ToLong(5) then
+    raise Error("Long subtraction failed");
+
+  LLong1 := LLong1 * ToLong(10);
+  if LLong1 <> ToLong(50) then
+    raise Error("Long multiplication failed");
+
+  LLong1 := LLong1 div ToLong(10);
+  if LLong1 <> ToLong(5) then
+    raise Error("Long div failed");
+    
+  if LLong1 / ToLong(2) <> 2.5 then
+	raise Error("Long division failed");
+    
+  if LLong1 mod ToLong(2) <> ToLong(1) then
+	raise Error("Long mod failed");
+    
+  LLong1 := ToLong(5);
+  LLong1 := -(LLong1);
+  if (LLong1 <> ToLong(-5)) then
+    raise Error("Long negation failed");
+
+  LLong1 := ToLong(5);
+  LLong2 := ToLong(10);
+  if LLong1 > LLong2 then
+    raise Error("Long greater than failed");
+  
+  if LLong1 >= LLong2 then
+    raise Error("Long inclusive greater than failed, arguments unequal");
+
+  if LLong2 < LLong1 then
+    raise Error("Long less than failed");
+
+  if LLong2 <= LLong1 then
+    raise Error("Long inclusive less than failed, arguments unequal");
+
+  LLong1 := ToLong(10);
+  if not(LLong1 >= LLong2) then
+    raise Error("Long inclusive greater than failed, arguments equal");
+
+  if not(LLong1 <= LLong2) then
+    raise Error("Long inclusive less than failed, arguments equal");
+    
+  if (LLong1 ?= LLong2) <> 0 then
+    raise Error("Long compare failed, arguments equal");
+    
+  LLong1 := ToLong(0);
+  LLong2 := ToLong(0);
+  
+  if (~LLong1 <> ToLong(-1)) then
+    raise Error("Bitwise not failed");
+  
+  if (LLong1 & LLong2) <> ToLong(0) then
+    raise Error("Bitwise and failed, arguments equal");
+    
+  if (LLong1 | LLong2) <> ToLong(0) then
+    raise Error("Bitwise or failed, arguments equal");
+    
+  if (LLong1 ^ LLong2) <> ToLong(0) then
+    raise Error("Bitwise xor failed, arguments equal");
+
+  LLong2 := ToLong(1);
+  if (LLong1 & LLong2) <> ToLong(0) then
+    raise Error("Bitwise and failed, arguments unequal");
+    
+  if (LLong1 | LLong2) <> ToLong(1) then
+    raise Error("Bitwise or failed, arguments unequal");
+    
+  if (LLong1 ^ LLong2) <> ToLong(1) then
+    raise Error("Bitwise xor failed, arguments unequal");
+end;

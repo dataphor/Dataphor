@@ -1,0 +1,49 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Video
+{
+	ID : Integer { default GetNextGenerator("Video.ID") }
+	   tags { Frontend.Width = "8" },
+	Movie_ID : Integer tags { Frontend.Visible = "false" },
+	AquiredOn : Date { default Date() }
+		tags
+		{
+		 Frontend.Preview.Visible = "false",
+		 Frontend.Width = "12"
+		},
+	TimesRented : Integer { default 0 }
+		tags
+		{
+		 Frontend.Preview.Visible = "false",
+		 Frontend.Width = "12"
+		},
+	reference Video_Movie { Movie_ID } references Movie { ID },
+	key{ID}
+};
+
+Video := table
+{	
+	row {GetNextGenerator("Video.ID") ID, 1 Movie_ID},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},	
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 3},
+	row {GetNextGenerator("Video.ID"), 3},
+	row {GetNextGenerator("Video.ID"), 4},
+	row {GetNextGenerator("Video.ID"), 4},
+	row {GetNextGenerator("Video.ID"), 5},
+	row {GetNextGenerator("Video.ID"), 6},
+	row {GetNextGenerator("Video.ID"), 6},
+	row {GetNextGenerator("Video.ID"), 7},
+	row {GetNextGenerator("Video.ID"), 8},
+	row {GetNextGenerator("Video.ID"), 9},
+	row {GetNextGenerator("Video.ID"), 10}
+};

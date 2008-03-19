@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample09">
+  <source expression="TableDee&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		&quot;Triangle&quot; Shape tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		true CalculateArea tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		true CalculatePerimeter tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		1.0 SideA tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		1.0 SideB tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		1.0 SideC tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA;		1.0 Diameter tags { DAE.IsComputed = &quot;false&quot; }&#xD;&#xA;	}&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		(SideA + SideB + SideC) TrianglePerimeter,&#xD;&#xA;		(Diameter * 3.1415962) CirclePerimeter,&#xD;&#xA;		(((Diameter / 2) ** 2) * 3.1415962) CircleArea&#xD;&#xA;	}&#xD;&#xA;	add&#xD;&#xA;	{&#xD;&#xA;		if&#xD;&#xA;			(SideA + SideB &gt; SideC) and (SideA + SideC &gt; SideB) and (SideB + SideC &gt; SideA)&#xD;&#xA;		then&#xD;&#xA;			(&#xD;&#xA;				(&#xD;&#xA;					TrianglePerimeter/2&#xD;&#xA;					* (TrianglePerimeter/2 - SideA)&#xD;&#xA;					* (TrianglePerimeter/2 - SideB)&#xD;&#xA;					* (TrianglePerimeter/2 - SideC)&#xD;&#xA;				)&#xD;&#xA;				** 0.5&#xD;&#xA;			)&#xD;&#xA;		else&#xD;&#xA;			nil&#xD;&#xA;		TriangleArea&#xD;&#xA;	};&#xD;&#xA;" onrowchange="ShowHideControls" openstate="Edit" bop:name="Source1" />
+  <scriptaction script="TriangleGroup.Visible = (Source1[&quot;Shape&quot;].AsString == &quot;Triangle&quot;);&#xD;&#xA;CircleGroup.Visible = (Source1[&quot;Shape&quot;].AsString == &quot;Circle&quot;);&#xD;&#xA;TrianglePerimeterTextBox.Visible = Source1[&quot;CalculatePerimeter&quot;].AsBoolean;&#xD;&#xA;CirclePerimeterTextBox.Visible = Source1[&quot;CalculatePerimeter&quot;].AsBoolean;&#xD;&#xA;TriangleAreaTextBox.Visible = Source1[&quot;CalculateArea&quot;].AsBoolean;&#xD;&#xA;CircleAreaTextBox.Visible = Source1[&quot;CalculateArea&quot;].AsBoolean;&#xD;&#xA;" bop:name="ShowHideControls" />
+  <row bop:name="MainRow">
+    <column bop:name="Column1">
+      <group title="Sample09" bop:name="Sample09Group">
+        <column bop:name="Column2">
+          <statictext text="Area/Perimeter of a triangle or circle." bop:name="StaticText1" />
+          <choice items="Triangle=Triangle,&#xD;&#xA;Circle=Circle" autoupdate="True" columnname="Shape" title="Calculate for a:" source="Source1" bop:name="Choice1" />
+          <group title="Information Wanted" bop:name="WantedGroup">
+            <column bop:name="Column3">
+              <checkbox columnname="CalculateArea" title="Area" source="Source1" bop:name="CheckBox1" />
+              <checkbox columnname="CalculatePerimeter" title="Perimeter" source="Source1" bop:name="CheckBox2" />
+            </column>
+          </group>
+          <group title="Triangle" bop:name="TriangleGroup">
+            <column bop:name="TriangleColumn">
+              <row bop:name="SidesInformationRow">
+                <numerictextbox minimumvalue="0" columnname="SideA" source="Source1" bop:name="NumericTextBox1" />
+                <numerictextbox minimumvalue="0" columnname="SideB" source="Source1" bop:name="NumericTextBox2" />
+                <numerictextbox minimumvalue="0" columnname="SideC" source="Source1" bop:name="NumericTextBox3" />
+              </row>
+              <row bop:name="TriangleAnswerRow">
+                <textbox columnname="TrianglePerimeter" title="Perimeter" source="Source1" readonly="True" bop:name="TrianglePerimeterTextBox" />
+                <textbox columnname="TriangleArea" title="Area" source="Source1" readonly="True" bop:name="TriangleAreaTextBox" />
+              </row>
+            </column>
+          </group>
+          <group title="Circle" visible="False" bop:name="CircleGroup">
+            <column bop:name="CircleColumn">
+              <row bop:name="CircleInformationRow">
+                <numerictextbox minimumvalue="0" columnname="Diameter" source="Source1" bop:name="DiameterNumericTextBox" />
+              </row>
+              <row bop:name="CircleAnswerRow">
+                <textbox columnname="CirclePerimeter" title="Perimeter" source="Source1" readonly="True" bop:name="CirclePerimeterTextBox" />
+                <textbox columnname="CircleArea" title="Area" source="Source1" readonly="True" bop:name="CircleAreaTextBox" />
+              </row>
+            </column>
+          </group>
+        </column>
+      </group>
+    </column>
+    <frame document="Form('Sample.Components', 'Sample09Docs')" bop:name="Frame1" />
+  </row>
+</interface>

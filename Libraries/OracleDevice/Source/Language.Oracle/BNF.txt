@@ -1,0 +1,104 @@
+/* Oracle SQL BNF */
+
+<statement> ::=
+	<select statement> |
+	<insert statement> |
+	<update statement> |
+	<delete statement> |
+	<create statement> |
+	<alter statement> |
+	<drop statement>
+
+<select statement> ::=
+	<query expression>
+	<order by clause>
+	
+<order by clause> ::=
+	order by <order column expression commalist>
+	
+<order column expression> ::=
+	<column identifier> [asc | desc]
+	
+<query expression> ::=
+	<select expression> [<table operator expression>]
+	
+<table operator expression> ::=
+	((union [all | distinct]) | intersect | minus) <select expression>
+	
+<select expression> ::=
+	select <column expression commalist>
+		<from clause>
+		[<where clause>]
+		[<group by clause>]
+		[<having clause>]
+		
+<from clause> ::=
+	from <table expression commalist>
+	
+<where clause> ::=
+	where <conditional expression>
+	
+<group by clause> ::=
+	group by <expression commalist>
+	
+<having clause> ::=
+	having <conditional expression>
+	
+<table expression> ::=
+	(<table identifier> | "("<query expression>")") [<table identifier>]
+	
+<insert statement> ::=
+	insert into <table identifier>"("<column identifier commalist>")"
+		(<values clause> | <query expression>)
+		
+<values clause>
+	values"("<expression commalist>")"
+		
+<update statement> ::=
+	update <table identifier> 
+			set <update column expression commalist>
+		[<from clause>]
+		[<where clause>]
+
+<delete statement> ::=
+	delete <table identifier>
+		[<from clause>]
+		[<where clause>]
+
+<create statement> ::=
+	<create table statement> |
+	<create index statement>
+	
+<create table statement> ::=
+	create table <table name>
+	"("
+		<column definition commalist>
+	")"
+	
+<column definition> ::=
+	<column name> <domain name> [[not] null]
+							   
+<create index statement> ::=
+	create [unique] [clustered | nonclustered] index <index name> on <table name>(<index column definition commalist>)
+	
+<index column definition> ::=
+	<column name> [asc | desc]
+	
+<alter statement> ::=
+	<alter table statement>
+	
+<alter table statement> ::=
+	alter table <table name> (add <column definition commalist> | drop <drop column definition commalist>
+	
+<drop column definition> ::=
+	column <column name>
+
+<drop statement> ::=
+	<drop table statement> |
+	<drop index statement>
+	
+<drop table statement> ::=
+	drop table <table name>
+	
+<drop index statement> ::=
+	drop index <table name>.<index name>

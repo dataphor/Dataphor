@@ -1,0 +1,293 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0D97E6A8-0AFC-4D80-9B5B-8D0DB2887C4C}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Alphora.Dataphor.Frontend.Client.Web</AssemblyName>
+    <AssemblyOriginatorKeyFile>Alphora.snk</AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Flow</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Alphora.Dataphor.Frontend.Client.Web</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>FrontendClientWeb.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
+    <OutputPath>bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Alphora.Dataphor">
+      <Name>Alphora.Dataphor</Name>
+      <HintPath>..\bin\Alphora.Dataphor.dll</HintPath>
+    </Reference>
+    <Reference Include="Alphora.Dataphor.BOP">
+      <Name>Alphora.Dataphor.BOP</Name>
+      <HintPath>..\bin\Alphora.Dataphor.BOP.dll</HintPath>
+    </Reference>
+    <Reference Include="Alphora.Dataphor.DAE">
+      <Name>Alphora.Dataphor.DAE</Name>
+      <HintPath>..\bin\Alphora.Dataphor.DAE.dll</HintPath>
+    </Reference>
+    <Reference Include="Alphora.Dataphor.DAE.Client">
+      <Name>Alphora.Dataphor.DAE.Client</Name>
+      <HintPath>..\bin\Alphora.Dataphor.DAE.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Alphora.Dataphor.Frontend.Client">
+      <Name>Alphora.Dataphor.Frontend.Client</Name>
+      <HintPath>..\bin\Alphora.Dataphor.Frontend.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Web">
+      <Name>System.Web</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Applications.aspx">
+      <SubType>Form</SubType>
+    </Content>
+    <Content Include="Connect.aspx">
+      <SubType>Form</SubType>
+    </Content>
+    <Content Include="Default.aspx" />
+    <Content Include="Default.js" />
+    <Content Include="EditAlias.aspx">
+      <SubType>Form</SubType>
+    </Content>
+    <Content Include="Global.asax">
+      <SubType>Component</SubType>
+    </Content>
+    <Content Include="images\cal.gif" />
+    <Content Include="images\collapse.png" />
+    <Content Include="images\DataphorFrontendLogo.gif" />
+    <Content Include="images\DataphorLogo.gif" />
+    <Content Include="images\downarrow.gif" />
+    <Content Include="images\expand.png" />
+    <Content Include="images\false.gif" />
+    <Content Include="images\falsereadonly.gif" />
+    <Content Include="images\first.png" />
+    <Content Include="images\formwarning.png" />
+    <Content Include="images\help.gif" />
+    <Content Include="images\last.png" />
+    <Content Include="images\lookup.png" />
+    <Content Include="images\move.png" />
+    <Content Include="images\pagedown.png" />
+    <Content Include="images\pageup.png" />
+    <Content Include="images\pixel.gif" />
+    <Content Include="images\place.png" />
+    <Content Include="images\searcharrow.gif" />
+    <Content Include="images\submenu.png" />
+    <Content Include="images\true.gif" />
+    <Content Include="images\truereadonly.gif" />
+    <Content Include="images\uparrow.gif" />
+    <Content Include="images\updateform.png" />
+    <Content Include="style.css" />
+    <Content Include="ViewImage.aspx" />
+    <Content Include="Web.config" />
+    <Compile Include="Applications.aspx.cs">
+      <DependentUpon>Applications.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Connect.aspx.cs">
+      <DependentUpon>Connect.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EditAlias.aspx.cs">
+      <DependentUpon>EditAlias.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Container.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Control.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\DataElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Element.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Form.cs">
+      <SubType>Actions</SubType>
+    </Compile>
+    <Compile Include="Nodes\Frame.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Grid.cs">
+      <SubType>Actions</SubType>
+    </Compile>
+    <Compile Include="Nodes\Interface.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Lookup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Menu.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Node.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Notebook.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Search.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Session.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\StaticElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Nodes\Tree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Strings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewImage.aspx.cs">
+      <DependentUpon>ViewImage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="WebClientException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="WebInterfaces.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="Applications.aspx.resx">
+      <DependentUpon>Applications.aspx.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Connect.aspx.resx">
+      <DependentUpon>Connect.aspx.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Default.aspx.resx">
+      <DependentUpon>Default.aspx.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditAlias.aspx.resx">
+      <DependentUpon>EditAlias.aspx.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Global.asax.resx">
+      <DependentUpon>Global.asax.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <DependentUpon>Strings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewImage.aspx.resx">
+      <DependentUpon>ViewImage.aspx.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WebClientException.resx">
+      <DependentUpon>WebClientException.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

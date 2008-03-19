@@ -1,0 +1,29 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Parser/Emitter Coverage
+
+//select Documents where Library_Name = 'Coverage' and Type_ID = 'd4' add { 'TestParserEmitter(Load("' + Library_Name + '", "' + Name + '"));' Command } over { Command };
+
+create table TestDocuments from Documents over { Library_Name, Name } where false;
+
+begin
+	var LRow : typeof(row from Documents);
+	var LCursor : cursor(typeof(Documents)) := cursor(Documents where Library_Name = 'Coverage' and Type_ID = 'd4');
+	try
+		while LCursor.Next() do
+		begin
+			LRow := LCursor.Select();
+			TestParserEmitter(Load(Library_Name from LRow, Name from LRow));
+			insert table { LRow over { Library_Name, Name } } into TestDocuments;
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if exists (TestDocuments minus (Documents over { Library_Name, Name })) then
+	raise Error("not all documents were tested.");
+	
+drop table TestDocuments;

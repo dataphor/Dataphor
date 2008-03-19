@@ -1,0 +1,42 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+EnsureGenerators();
+
+create table Cases
+{
+   ID : Integer { default GetNextGenerator('Cases.ID') } tags { Frontend.ReadOnly = 'true', Frontend.Width = "6" },
+	Sequence : Integer { default GetNextGenerator("Cases.Sequence") } tags { Frontend.ReadOnly = "true", Frontend.Visible = "false" },
+	Description : SQLText { default "" } tags { Frontend.TextBox.Height = "7" },
+	Enabled : Boolean { default true } tags { Frontend.Grid.ElementType = "CheckBoxColumn" },
+	Command : SQLText,
+	CreatedByUser_ID : UserID { default UserID() } tags { Frontend.ReadOnly = "true" },
+	DateTimeCreated : DateTime { default DateTime() },
+	key { ID } static tags { Storage.Enforced = "true" }
+};
+
+//drop table CaseResults;
+create table CaseResults
+{
+   Case_ID : Integer,
+   User_ID : UserID { default UserID() } tags { Frontend.ReadOnly = "true" },
+   DateTime : DateTime,
+   Status : RunStatus,
+   Results : SQLText tags { Frontend.TextBox.Height = "7" },
+   key { Case_ID },
+   reference CaseResults_Cases { Case_ID } references Cases { ID }
+};
+
+create view CaseResultsExtended
+	Cases
+		left join (CaseResults) by ID = Case_ID 
+		over { ID, Case_ID, Description, Command, Status, Results, User_ID, DateTime }
+		adorn 
+		{ 
+			Case_ID tags { Frontend.Visible = "false" },
+			Description tags { Frontend.Width = "35" },
+			Status tags { Frontend.Width = "10" },
+			Results tags { Frontend.Width = "35" }
+		};

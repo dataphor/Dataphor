@@ -1,0 +1,66 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+CreateLibrary(LibraryDescriptor('TestSerialization'));
+insert table { row { 'TestSerialization' Library_Name, 'System' Required_Library_Name } } into LibraryRequisites;
+RegisterLibrary('TestSerialization');
+SetLibrary('TestSerialization');
+
+// Types
+ExecuteScript("Coverage.Scripts", "SerializationTypes");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+select ScriptLibrary('TestSerialization') // Why does this script the creation of a representation of MSSQLBinary?
+select ScriptDropLibrary('TestSerialization')
+select Objects where Library_Name = 'TestSerialization' { Description }
+
+// TODO: Ensure that Library_Name is set for all persistent objects
+
+// Operators
+ExecuteScript("Coverage.Scripts", "SerializationOperators");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// Aggregate Operators
+ExecuteScript("Coverage.Scripts", "SerializationAggregateOperators");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// Devices
+ExecuteScript("Coverage.Scripts", "SerializationDevices");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// Tables
+ExecuteScript("Coverage.Scripts", "SerializationTables");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// Views
+ExecuteScript("Coverage.Scripts", "SerializationViews");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// References
+ExecuteScript("Coverage.Scripts", "SerializationReferences");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// Constraints
+ExecuteScript("Coverage.Scripts", "SerializationConstraints");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+// EventHandlers
+ExecuteScript("Coverage.Scripts", "SerializationEventHandlers");
+TestSerializer('TestSerialization');
+Execute(ScriptDropLibrary('TestSerialization'));
+
+UnregisterLibrary('TestSerialization');
+DropLibrary('TestSerialization');
+SetLibrary('Coverage.Base');
+

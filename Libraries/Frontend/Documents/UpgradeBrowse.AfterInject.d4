@@ -1,0 +1,11 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// After Inject
+
+begin
+	var LRow := row from .Frontend.UpgradeBrowse.InjectUpgrade;
+	System.InjectUpgrade(Library_Name from LRow, Script from LRow);
+end;

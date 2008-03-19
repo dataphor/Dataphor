@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample illustrates two ways to link to a URL or address.&#xD;&#xA;&#xD;&#xA;The ShowLinkAction and the HtmlBox link to an address such as a URL of a web page or the path to a local or network folder.  The ShowLinkAction calls up a separate browser while the HtmlBox displays the contents of the location in the control on the Dataphor form.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   ShowLinkAction&#xD;&#xA;   HtmlBox" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="ShowLinkAction" bop:name="ShowLinkActionPage">
+        <row bop:name="ShowLinkActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="ShowLinkActionImage" />
+          <statictext text="A ShowLinkAction will open a separate browser and connect to the URL specified.&#xD;&#xA;&#xD;&#xA;In this sample the ShowLinkAction defaults to http://www.alphora.com.  When the Execute button (trigger) is clicked the ShowLinkAction is executed.  The BeforeExecute property is set to SetShowLinkActionURLPropertyAction. That action uses the current value in the ShowLinkActionURL column in Source1 to update the URL property of the ShowLinkAction.  This is done before the external browser is opened." width="50" margintop="10" bop:name="ShowLinkActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="HtmlBox" bop:name="HtmlBoxPage">
+        <row bop:name="HtmlBoxRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;HtmlBox&quot;)" bop:name="HtmlBoxImage" />
+          <statictext text="The HtmlBox shows the URL link in the control on the form.&#xD;&#xA;&#xD;&#xA;In this sample the HtmlBox defaults to http://www.alphora.com.  When the Refresh button (trigger) is clicked the SetHtmlBoxURLPropertyAction is executed.  This action uses the current value in the HtmlBoxURL column in Source1 to update the URL property of the HtmlBox.  This causes the HtmlBox to refresh with the new URL." width="50" margintop="10" bop:name="HtmlBoxText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

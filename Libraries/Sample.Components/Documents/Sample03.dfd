@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample03">
+  <source expression="Autos" beginscript="create session table Autos&#xD;&#xA;{&#xD;&#xA;	ID : Short,&#xD;&#xA;	Make : String,&#xD;&#xA;	Logo : Graphic,&#xD;&#xA;	Owned : Boolean { nil },&#xD;&#xA;	key { ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;Autos := table&#xD;&#xA;{&#xD;&#xA;	row { Short(1) ID, &quot;Chevy&quot; Make, Image('Sample.Components','Sample03Cv') Logo, Boolean(nil) Owned },&#xD;&#xA;	row { Short(2) ID, &quot;Chrysler&quot;, Image('Sample.Components','Sample03Cr'), Boolean(nil) },&#xD;&#xA;	row { Short(3) ID, &quot;Ford&quot;, Image('Sample.Components','Sample03F'), Boolean(nil) },&#xD;&#xA;	row { Short(4) ID, &quot;Honda&quot;, Image('Sample.Components','Sample03H'), Boolean(nil) },&#xD;&#xA;	row { Short(5) ID, &quot;Mazda&quot;, Image('Sample.Components','Sample03M'), Boolean(nil) },&#xD;&#xA;	row { Short(6) ID, &quot;Toyota&quot;, Image('Sample.Components','Sample03T'), Boolean(nil) },&#xD;&#xA;	key { ID }&#xD;&#xA;};&#xD;&#xA;" endscript="drop table Autos;" bop:name="Brands" />
+  <scriptaction script="switch (Brands.DataView.Fields[&quot;Make&quot;].AsString)&#xD;&#xA;{&#xD;&#xA;	case &quot;Chevy&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Chevrolet Motor Company incorporated November 1911.&quot;;&#xD;&#xA;		break;&#xD;&#xA;	case &quot;Ford&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Ford Motor Company started business June 16, 1903.&quot;;&#xD;&#xA;		break;&#xD;&#xA;	case &quot;Chrysler&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Chrysler Company incorporated June 26, 1925.&quot;;&#xD;&#xA;		break;&#xD;&#xA;	case &quot;Mazda&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Motorized vehicles were produced by Mazda as early as 1931.&quot;;&#xD;&#xA;		break;&#xD;&#xA;	case &quot;Toyota&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Toyota started out as Toyoda but was changed for luck. Toyota is considered luckier because eight is a lucky number and it takes eight strokes to write Toyota in the Katakana Japanese language.&quot;;&#xD;&#xA;		break;&#xD;&#xA;	case &quot;Honda&quot;:&#xD;&#xA;		HistoryText.Text = &quot;Honda produced the first car in 1963.&quot;;&#xD;&#xA;		break;&#xD;&#xA;};" text="Show" bop:name="HistoryScript" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.ID" sourcelink.source="Brands" document="Derive('Autos', 'View', 'ID', 'Main.ID')" bop:name="ShowLogoAction" />
+  <row bop:name="MainRow">
+    <group title="Sample03" bop:name="SampleGroup">
+      <column bop:name="SampleColumn">
+        <grid rowcount="7" ondoubleclick="ShowLogoAction" source="Brands" bop:name="VehiclesGrid">
+          <sequencecolumn image="Image('Sample.Components','Sample03Seq');" script="// script to move a row up or down to a new position&#xD;&#xA;try&#xD;&#xA;			// set up the loop parameters&#xD;&#xA;	var LChangeIDBy : Short;		// add one or subtract 1 from each ID&#xD;&#xA;	var LToID : Short;				// final ID of moved row&#xD;&#xA;	var LBetweenLow : Short;&#xD;&#xA;	var LBetweenHigh : Short;&#xD;&#xA;	if AFromRow.ID &gt; AToRow.ID then&#xD;&#xA;		begin								// moving a row up&#xD;&#xA;			LChangeIDBy := +1;		// slide other rows down&#xD;&#xA;			LToID := AToRow.ID + ToShort(not(AAbove));	// calculate new ID of from row&#xD;&#xA;			LBetweenLow := LToID;&#xD;&#xA;			LBetweenHigh := AFromRow.ID;&#xD;&#xA;		end&#xD;&#xA;	else&#xD;&#xA;		begin								// moving a row down&#xD;&#xA;			LChangeIDBy := -1;		// slide other rows up&#xD;&#xA;			LToID := AToRow.ID - ToShort(AAbove);	// calculate new ID of from row&#xD;&#xA;			LBetweenLow := AFromRow.ID;&#xD;&#xA;			LBetweenHigh := LToID;&#xD;&#xA;		end;&#xD;&#xA;	if AFromRow.ID &lt;&gt; LToID then	// is row really moving?&#xD;&#xA;		update &#xD;&#xA;			Autos&#xD;&#xA;			set { ID := if ID = AFromRow.ID then LToID else ID + LChangeIDBy }&#xD;&#xA;			where ID between LBetweenLow and LBetweenHigh;&#xD;&#xA;commit;&#xD;&#xA;" title="Drag 'n Drop" bop:name="DNDSeqCol" />
+          <textcolumn columnname="Make" width="8" bop:name="MakeTextColumn" />
+          <imagecolumn maxrowheight="20" columnname="Logo" width="15" bop:name="LogoImageColumn" />
+          <checkboxcolumn readonly="False" columnname="Owned" title="Owned" width="7" bop:name="OwnedCBCol" />
+          <triggercolumn action="HistoryScript" title="History" width="6" bop:name="HistoryTrigCol" />
+        </grid>
+        <group title="History" tabstop="False" margintop="0" bop:name="HistoryGroup">
+          <statictext marginbottom="0" bop:name="HistoryText" />
+        </group>
+        <row bop:name="Row1">
+          <image imageheight="40" stretchstyle="StretchRatio" columnname="Logo" source="Brands" bop:name="Image1" />
+          <staticimage image="Image('Sample.Components','Sample03Car')" bop:name="StaticImage1" />
+        </row>
+      </column>
+    </group>
+    <frame document="Form('Sample.Components','Sample03Docs');" bop:name="DocsFrame" />
+  </row>
+</interface>

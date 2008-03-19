@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Confirm Drop" mainsource="Main">
+  <source expression="TableDee" bop:name="Main" />
+  <source enabled="False" usebrowse="False" isreadonly="True" bop:name="Dependents" />
+  <sourceaction action="First" source="Dependents" text="&amp;First" image="Image('Frontend', 'Image.First')" bop:name="MoveFirst" />
+  <sourceaction action="Prior" source="Dependents" text="&amp;Prior" image="Image('Frontend', 'Image.Prior')" bop:name="MovePrior" />
+  <sourceaction action="Next" source="Dependents" text="&amp;Next" image="Image('Frontend', 'Image.Next')" bop:name="MoveNext" />
+  <sourceaction action="Last" source="Dependents" text="&amp;Last" image="Image('Frontend', 'Image.Last')" bop:name="MoveLast" />
+  <sourceaction action="Refresh" source="Dependents" text="&amp;Refresh" image="Image('Frontend', 'Image.Refresh')" bop:name="Refresh" />
+  <menu text="&amp;Navigation" bop:name="NavigationMenu">
+    <menu action="MoveFirst" bop:name="MoveFirstMenu" />
+    <menu action="MovePrior" bop:name="MovePriorMenu" />
+    <menu action="MoveNext" bop:name="MoveNextMenu" />
+    <menu action="MoveLast" bop:name="MoveLastMenu" />
+    <menu text="-" bop:name="NavSepMenu1" />
+    <menu action="Refresh" bop:name="RefreshMenu" />
+  </menu>
+  <row bop:name="RootRow">
+    <staticimage imagewidth="32" imageheight="32" image="Image('Frontend', 'Image.Warning')" bop:name="StaticImage" />
+    <group title="Delete the object and all of the following dependents?" bop:name="Group">
+      <column bop:name="RootBrowseColumn">
+        <row bop:name="GridRow">
+          <grid source="Dependents" hint="Objects that depend on this object" bop:name="Grid">
+            <textcolumn columnname="Description" title="Description" width="60" bop:name="MainGridColumnMain.Description" />
+            <textcolumn columnname="Level" title="Level" width="7" bop:name="MainGridColumnMain.Level" />
+            <textcolumn columnname="Sequence" title="Sequence" width="12" bop:name="MainGridColumnMain.Sequence" />
+          </grid>
+        </row>
+      </column>
+    </group>
+  </row>
+</interface>

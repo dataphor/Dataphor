@@ -1,0 +1,3 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="System.Temp" assembliesasstring="" librariesasstring="" settings="" name="TestFramework.Coverage.Scripts" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="System" version="*" />
+</library>

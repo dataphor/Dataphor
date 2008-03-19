@@ -1,0 +1,105 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Implicit conversions coverage
+
+create type ID { representation ID { Value : System.String } };
+
+create conversion ID to String using ID.ReadValue;
+create conversion String to ID using ID;
+
+create table Test { ID : ID, key { ID } };
+insert table { row { "001" ID } } into Test;
+
+create type ShortID { representation ShortID { Value : System.String }, constraint LengthValid Length(value.Value) <= 3 };
+
+create conversion ShortID to String using ShortID.ReadValue;
+create conversion String to ShortID using ShortID;
+
+create table TestShortID { ID : ShortID, key { ID } };
+insert table { row { "001" ID } } into TestShortID;
+
+begin
+	var B : Byte := ToByte(5);
+	var L : Long := B;
+	if L <> B then
+		raise Error("Scalar equal with implicit conversions failed.");
+		
+	if B <> L then
+		raise Error("Scalar equal with implicit conversions failed.");
+end;
+
+drop table TestShortID;
+drop conversion ShortID to String;
+drop conversion String to ShortID;
+drop type ShortID;
+
+drop table Test;
+drop conversion String to ID;
+drop conversion ID to String;
+drop type ID;
+
+// implicit conversions in row values
+begin
+	var ALeftRow : row { ID : Long } := row { 5 ID };
+	var ARightRow : row { ID : Byte } := row { ToByte(5) ID };
+	if ALeftRow <> ARightRow then
+		raise Error("Row equal with implicit conversions failed.");
+		
+	if ARightRow <> ALeftRow then
+		raise Error("Row equal with implicit conversions failed.");
+end;
+
+// implicit conversions in table values
+begin
+	var ALeftTable : table { ID : Long } := table { row { 5 ID } };
+	var ARightTable : table { ID : Byte } := table { row { ToByte(5) ID } };
+	
+	if ALeftTable <> ARightTable then
+		raise Error("Table equal with implicit conversions failed.");
+		
+	if ARightTable <> ALeftTable then
+		raise Error("Table equal with implicit conversions failed.");
+end;
+
+// implicit conversions in list values
+/*
+// TODO: Need a list conversion operator
+begin
+	var ALeftList : list(Long) := {1, 2, 3};
+	var ARightList : list(Byte) := {ToByte(1), ToByte(2), ToByte(3)};
+	
+	if ALeftList <> ARightList then
+		raise Error("List equal with implicit conversions failed.");
+		
+	if ARightList <> ALeftList then
+		raise Error("List equal with implicit conversions failed.");
+end;
+*/
+
+// Transitive implicit conversions
+create type ShortID like String
+{
+	constraint IsValid Length(value) <= 3
+};
+
+create type PhoneTypeID like ShortID;
+
+begin
+	var LPhoneTypeID : PhoneTypeID := 'HOM';
+	if LPhoneTypeID <> 'HOM' then
+		raise Error("PhoneTypeID selector failed.");
+end;
+
+drop type PhoneTypeID;
+drop type ShortID;
+
+// implicit conversion in table selectors
+select table { row { 3000000000 LongValue }, row { 0 LongValue } };
+
+// implicit conversion in union operators
+select table { row { ToLong(1) Value } } union table { row { ToShort(1) Value } };
+
+// implicit conversion in difference operators
+select table { row { ToLong(1) Value } } minus table { row { ToShort(1) Value } };

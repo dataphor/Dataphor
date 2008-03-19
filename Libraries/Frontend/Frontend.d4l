@@ -1,0 +1,4 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.16.0" defaultdevicename="" assembliesasstring="" librariesasstring="" settings="" name="Frontend" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <files.filereference filename="Alphora.Dataphor.Frontend.Server.dll" isassembly="True" />
+    <libraries.libraryreference name="SimpleDevice" version="*" />
+</library>

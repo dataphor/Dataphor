@@ -1,0 +1,246 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator SendEmail
+(
+	const ASMTPServer: System.String,
+	const AFromEmailAddress: System.String,
+	const AToEmailAddress: System.String,
+	const ASubject: System.String,
+	const AMessage: System.String
+)
+	class "System.Internet.SendEmailNode" static tags {DAE.IsRemotable = "False"};
+grant usage on SendEmail(String, String, String, String, String) to role User;
+
+create operator SendEmail
+(
+	const ASMTPServer: System.String,
+	const AFromEmailAddress: System.String,
+	const AToEmailAddress: System.String,
+	const ASubject: System.String,
+	const AMessage: System.String,
+	const AIsBodyHtml: System.Boolean
+)
+	class "System.Internet.SendEmailNode" static tags {DAE.IsRemotable = "False"};
+grant usage on SendEmail(String, String, String, String, String, Boolean) to role User;
+
+create operator SendEmail
+(
+	const ASMTPServer: System.String,
+	const AFromEmailAddress: System.String,
+	const AToEmailAddress: System.String,
+	const ASubject: System.String,
+	const AMessage: System.String,
+	const AHtmlAlternateView: System.String
+)
+	class "System.Internet.SendEmailNode" static tags {DAE.IsRemotable = "False"};
+grant usage on SendEmail(String, String, String, String, String, String) to role User;
+
+
+create operator HTMLAttributeEncode(const AValue : String) : String
+	class "System.Internet.HTMLAttributeEncodeNode" static tags {DAE.IsRemotable = "True"};
+grant usage on HTMLAttributeEncode(String) to role User;
+
+create operator HTMLEncode(const AValue : String) : String
+	class "System.Internet.HTMLEncodeNode" static tags {DAE.IsRemotable = "True"};
+grant usage on HTMLEncode(String) to role User;
+
+create operator HTMLDecode(const AValue : String) : String
+	class "System.Internet.HTMLDecodeNode" static tags {DAE.IsRemotable = "True"};
+grant usage on HTMLDecode(String) to role User;
+
+create operator URLEncode(const AValue : String) : String
+	class "System.Internet.URLEncodeNode" static tags {DAE.IsRemotable = "True"};
+grant usage on URLEncode(String) to role User;
+
+create operator URLDecode(const AValue : String) : String
+	class "System.Internet.URLDecodeNode" static tags {DAE.IsRemotable = "True"};
+grant usage on URLDecode(String) to role User;
+
+/* HTTP Post Support */
+
+create operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
+	class "System.Internet.PostHTTPNode" static tags { DAE.IsRemotable = "False"};
+grant usage on PostHTTP(String, table { FieldName : String, Value : String }) to role User;
+	
+/* XML Support */
+
+create type XMLDocumentID like Guid
+	tags { Frontend.Title = "Document ID" };
+grant usage on XMLDocumentID to role User;
+
+create type XMLElementID like Guid
+	tags { Frontend.Title = "Element ID" };
+grant usage on XMLElementID to role User;
+
+create type XMLContentType like Byte
+{
+	constraint ValidValues (value = Byte(0) or value = Byte(1)) tags { DAE.SimpleMessage = "Content Type must be 0 (Text) or 1 (CData)" }//,
+//	representation AsDisplayString
+//	{
+//		AsDisplayString : String
+//			read if value.AsDisplayString = 0 then "Text" else "CData"
+//			write case AsDisplayString.Lower() when "text" then XMLContentType(0) when "cdata" then XMLContentType(1) else XMLContentType(2) end
+//	}
+//		selector case AsDisplayString.Lower() when "text" then XMLContentType(0) when "cdata" then XMLContentType(1) else XMLContentType(2) end
+}
+	tags { Frontend.Title = "Content Type" };// , static DAE.AsDisplayString = "AsDisplayString" };
+grant usage on XMLContentType to role User;
+	
+//* There is an XML document ([ID]) with root element [Root_Element_ID]
+create table XMLDocument
+{
+	ID : XMLDocumentID { default NewGuid() }
+		tags { Frontend.ReadOnly = "true" },
+	Root_Element_ID : XMLElementID,
+	key { ID }
+};
+grant usage on XMLDocument to role User;
+
+//* There is an XML element ([ID]) within document [Document_ID] named [Name] in
+//  namespace alias [NamespaceAlias] and content [Content]
+create table XMLElement
+{
+	ID : XMLElementID { default NewGuid() }
+		tags { Frontend.ReadOnly = "true" },
+	Document_ID : XMLDocumentID,
+	NamespaceAlias : String { default "" },
+	Name : String,
+	key { ID },
+	reference XMLElement_XMLDocument { Document_ID } references XMLDocument { ID } delete cascade,
+	order { Name, ID },
+	order { NamespaceAlias, Name, ID }
+};
+grant usage on XMLElement to role User;
+
+//*
+create reference XMLDocument_XMLElement XMLDocument { Root_Element_ID } references XMLElement { ID } delete cascade;
+
+//* There is XML content [Content] at position [Sequence] within element [Element_ID]
+create table XMLContent
+{
+	Element_ID : XMLElementID,
+	Sequence : Integer,
+	Type : XMLContentType,
+	Content : String { default "" },
+	key { Element_ID, Sequence },
+	reference XMLContent_XMLElement { Element_ID } references XMLElement { ID } delete cascade
+};
+grant usage on XMLContent to role User;
+
+//* XML element [Element_ID] is the [Sequence] child of element [Parent_Element_ID], having [Offset] 
+//  place within the parent's content.
+create table XMLElementParent
+{
+	Element_ID : XMLElementID,
+	Parent_Element_ID : XMLElementID,
+	Sequence : Integer,
+	key { Element_ID },
+	key { Parent_Element_ID, Sequence },
+	reference XMLElementParent_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	reference XMLElementParent_Parent_XMLElement { Parent_Element_ID } references XMLElement { ID } delete cascade,
+	order { Parent_Element_ID, Element_ID }
+};
+grant usage on XMLElementParent to role User;
+
+//* XML element [Element_ID] has an attribute named [NamespaceAlias]:[Name] with value [Value]
+create table XMLAttribute
+{
+	Element_ID : XMLElementID,
+	NamespaceAlias : String { default "" },
+	Name : String,
+	Value : String,
+	key { Element_ID, NamespaceAlias, Name },
+	reference XMLAttribute_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	order { NamespaceAlias, Name, Element_ID }
+};
+grant usage on XMLAttribute to role User;
+
+//* XML element [Element_ID] defines namespace alias [NamespaceAlias] for [URI]
+create table XMLNamespaceAlias
+{
+	Element_ID : XMLElementID,
+	NamespaceAlias : String,
+	URI : String,
+	key { Element_ID, NamespaceAlias },
+	reference XMLNamespaceAlias_XMLElement { Element_ID } references XMLElement { ID } delete cascade,
+	order { NamespaceAlias, Element_ID }
+};
+grant usage on XMLNamespaceAlias to role User;
+
+//* XML Element [Element_ID] has a default namespace of [URI]
+create table XMLDefaultNamespace
+{
+	Element_ID : XMLElementID,
+	URI : String,
+	key { Element_ID },
+	reference XMLDefaultNamespace_XMLElement { Element_ID } references XMLElement { ID } delete cascade
+};
+grant usage on XMLDefaultNamespace to role User;
+
+//* Loads an XML document from a string into the XML tables and returns the document ID
+create operator LoadXML(ADocument : String) : XMLDocumentID
+	class "LoadXMLNode";
+grant usage on LoadXML(String) to role User;
+
+//* Saves an XML document from the XML tables to a returned string
+create operator SaveXML(ADocumentID : XMLDocumentID) : String
+	class "SaveXMLNode";
+grant usage on SaveXML(XMLDocumentID) to role User;
+
+//* Operator: FTPDownloadBinary
+create operator FTPDownloadBinary(AURL : String) : Binary class "System.Internet.FTPDownloadBinaryNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPDownloadBinary(AURL : String, AUser : String, APassword : String) : Binary class "System.Internet.FTPDownloadBinaryNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPDownloadBinary(String) to role User;
+grant usage on FTPDownloadBinary(String, String, String) to role User;
+
+//* Operator: FTPDownloadText
+create operator FTPDownloadText(AURL : String) : String class "Internet.FTPDownloadTextNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPDownloadText(AURL : String, AUser : String, APassword : String) : String class "Internet.FTPDownloadTextNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPDownloadText(String) to role User;
+grant usage on FTPDownloadText(String, String, String) to role User;
+
+//* Operator: FTPUploadBinary
+create operator FTPUploadBinary(AURL : String, AData : Binary) class "Internet.FTPUploadNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPUploadBinary(AURL : String, AData : Binary, AUser : String, APassword : String) class "Internet.FTPUploadNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPUploadBinary(String, Binary) to role User;
+grant usage on FTPUploadBinary(String, Binary, String, String) to role User;
+
+//* Operator: FTPUploadText
+create operator FTPUploadText(AURL : String, AData : String) class "Internet.FTPUploadNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPUploadText(AURL : String, AData : String, AUser : String, APassword : String) class "Internet.FTPUploadNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPUploadText(String, String) to role User;
+grant usage on FTPUploadText(String, String, String, String) to role User;
+	
+//* Operator: FTPList
+create operator FTPList(AURL : String) : table { Name : String } class "Internet.FTPListNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPList(AURL : String, AUser : String, APassword : String) : table { Name : String } class "Internet.FTPListNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPList(String) to role User;
+grant usage on FTPList(String, String, String) to role User;
+
+//* Operator: FTPRename
+create operator FTPRename(AURL : String, ANewName : String) class "Internet.FTPRenameNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPRename(AURL : String, ANewName : String, AUser : String, APassword : String) class "Internet.FTPRenameNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPRename(String, String) to role User;
+grant usage on FTPRename(String, String, String, String) to role User;
+
+//* Operator: FTPDeleteFile
+create operator FTPDeleteFile(AURL : String) class "Internet.FTPDeleteFileNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPDeleteFile(AURL : String, AUser : String, APassword : String) class "Internet.FTPDeleteFileNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPDeleteFile(String) to role User;
+grant usage on FTPDeleteFile(String, String, String) to role User;
+
+//* Operator: FTPMakeDirectory
+create operator FTPMakeDirectory(AURL : String) class "Internet.FTPMakeDirectoryNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPMakeDirectory(AURL : String, AUser : String, APassword : String) class "Internet.FTPMakeDirectoryNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPMakeDirectory(String) to role User;
+grant usage on FTPMakeDirectory(String, String, String) to role User;
+
+//* Operator: FTPRemoveDirectory
+create operator FTPRemoveDirectory(AURL : String) class "Internet.FTPRemoveDirectoryNode" static tags { DAE.IsRemotable = "False"};
+create operator FTPRemoveDirectory(AURL : String, AUser : String, APassword : String) class "Internet.FTPRemoveDirectoryNode" static tags { DAE.IsRemotable = "False"};
+grant usage on FTPRemoveDirectory(String) to role User;
+grant usage on FTPRemoveDirectory(String, String, String) to role User;
+

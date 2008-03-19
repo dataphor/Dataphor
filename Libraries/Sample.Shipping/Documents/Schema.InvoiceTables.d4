@@ -1,0 +1,320 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Invoice Tables
+*/
+
+//* Table: InvoiceStatus
+// Invoice status [ID] is described by [Description].
+create table InvoiceStatus
+{
+	ID : InvoiceStatusID,
+	Description : Description,
+	key { ID }
+};
+grant { Select } on InvoiceStatus to role ShippingUser;
+
+InvoiceStatus := 
+	table 
+	{
+		row { InvoiceStatusID("NEW") ID, Description("New Invoice") Description },
+		row { InvoiceStatusID("PRO") ID, Description("Processed Invoice") Description },
+		row { InvoiceStatusID("COM") ID, Description("Completed Invoice") Description }
+	};
+
+//* Table: Invoice
+// Invoice [ID] was placed at [Location_ID] by [User_ID] on [Date], and has status [Status_ID].
+create table Invoice
+{
+	ID : InvoiceID { default InvoiceID(GetNextGenerator("Shipping.Invoice.ID")) } 
+		tags { Frontend.ReadOnly = "true" },
+	Location_ID : LocationID,
+	User_ID : UserID { default System.UserID() } 
+		tags { Frontend.Add.Visible = "false", Frontend.Edit.Visible = "false" },
+	Date : Date { default Date() }
+		tags { Frontend.Add.Visible = "false", Frontend.Edit.Visible = "false" },
+	Status_ID : InvoiceStatusID { default InvoiceStatusID("NEW") }
+		tags { Frontend.Add.Visible = "false", Frontend.Edit.Visible = "false" },
+	key { ID }
+};
+
+create reference Invoice_Location Invoice { Location_ID } references Location { ID }
+	tags { Frontend.Include = "false"  };
+create reference Invoice_InvoiceStatus 
+	Invoice { Status_ID } references InvoiceStatus { ID } tags { Frontend.Embedded = "false" };
+create reference Invoice_User 
+	Invoice { User_ID } references Users { ID } tags { Frontend.Embedded = "false" };
+
+alter table Invoice
+{
+	create transition constraint StatusValid
+		on update 
+			(old.Status_ID = new.Status_ID) or
+			((old.Status_ID = "NEW") and (new.Status_ID = "PRO")) or
+			((old.Status_ID = "PRO") and (new.Status_ID = "COM"))
+		tags
+		{
+			DAE.SimpleMessage = 
+				"Invoice status can only be changed from New to Processed, or from Processed to Completed."
+		},
+
+	create transition constraint LocationValid
+		on update
+			(old.Location_ID = new.Location_ID) or
+			(new.Status_ID = "NEW")
+		tags
+		{
+			DAE.SimpleMessage =
+				"Invoice location cannot be changed for a processed or completed invoice."
+		}
+};
+
+//* Invoice [ID] is a sale order for customer [Customer_ID].
+create table SaleOrder
+{
+	ID : InvoiceID,
+	Customer_ID : ContactID,
+	key { ID }
+};
+
+create reference SaleOrder_Invoice SaleOrder { ID } references Invoice { ID };
+create reference SaleOrder_Customer SaleOrder { Customer_ID } references Customer { ID } tags { Frontend.Include = "false" };
+
+//* Invoice [ID] is a purchase order for vendor [Vendor_ID]
+create table PurchaseOrder
+{
+	ID : InvoiceID,
+	Vendor_ID : ContactID,
+	key { ID }
+};
+
+create reference PurchaseOrder_Invoice PurchaseOrder { ID } references Invoice { ID };
+create reference PurchaseOrder_Vendor PurchaseOrder { Vendor_ID } references Vendor { ID };
+
+//* Constraint: InvoiceExclusive
+// An invoice cannot be both a sale order and a purchase order.
+// Catalog formulation:
+// create constraint InvoiceExclusive
+//		not exists ((SaleOrder over { ID }) join (PurchaseOrder over { ID }));
+
+alter table SaleOrder
+{
+	create transition constraint InvoiceExclusive
+		on insert not exists (PurchaseOrder where ID = new.ID)
+		on update (old.ID = new.ID) or not exists (PurchaseOrder where ID = new.ID)
+};
+
+alter table PurchaseOrder
+{
+	create transition constraint InvoiceExclusive
+		on insert not exists (SaleOrder where ID = new.ID)
+		on update (old.ID = new.ID) or not exists (SaleOrder where ID = new.ID)
+};
+
+//* Constraint: InvoiceValid
+// An invoice must be either a sale order or a purchase order.
+// Catalog formulation:
+//	create constraint InvoiceValid
+// 	not exists (Invoice over { ID } minus (SaleOrder over { ID } union PurchaseOrder over { ID });
+	
+alter table Invoice
+{
+	create transition constraint InvoiceValid
+		on insert exists (SaleOrder where ID = new.ID) or exists (PurchaseOrder where ID = new.ID)
+		on update (old.ID = new.ID) or exists (SaleOrder where ID = new.ID) or exists (PurchaseOrder where ID = new.ID)
+};
+
+alter table SaleOrder
+{
+	create transition constraint InvoiceValid
+		on update (old.ID = new.ID) or not exists (Invoice where ID = old.ID) or exists (PurchaseOrder where ID = old.ID)
+		on delete not exists (Invoice where ID = old.ID) or exists (PurchaseOrder where ID = old.ID)
+};
+
+alter table PurchaseOrder
+{
+	create transition constraint InvoiceValid
+		on update (old.ID = new.ID) or not exists (Invoice where ID = old.ID) or exists (SaleOrder where ID = old.ID)
+		on delete not exists (Invoice where ID = old.ID) or exists (SaleOrder where ID = old.ID)
+};
+
+//* Table: InvoiceItem
+// Invoice [Invoice_ID] has a line item [Number] for inventory item type [ItemType_ID]
+create table InvoiceItem
+{
+	Invoice_ID : InvoiceID,
+	Number : Integer,
+	ItemType_ID : ItemTypeID,
+	Quantity : Decimal,
+	Amount : Money,
+	key { Invoice_ID, Number }
+};
+
+create reference InvoiceItem_Invoice 
+	InvoiceItem { Invoice_ID } references Invoice { ID } tags { Frontend.Detail.Embedded = "true" };
+	
+create reference InvoiceItem_ItemType 
+	InvoiceItem { ItemType_ID } references ItemType { ID } tags { Frontend.Include = "false" };
+	
+alter table InvoiceItem
+{
+	create transition constraint InvoiceValid
+		on insert not exists (Invoice where ID = new.Invoice_ID and Status_ID <> "NEW")
+		on update not exists (Invoice where ID = new.Invoice_ID and Status_ID <> "NEW")
+		on delete not exists (Invoice where ID = old.Invoice_ID and Status_ID <> "NEW")
+	tags
+	{
+		DAE.SimpleMessage =
+			"Invoice items cannot be modified once an invoice has been processed."
+	}
+};
+
+//* Constraint: ItemsSupplied
+// All item types processed on an invoice must be supplied by some vendor.
+
+alter table InvoiceItem
+{
+	create constraint ItemsSupplied
+		exists (VendorItemType rename VIT where VIT.ItemType_ID = .ItemType_ID)
+	tags
+	{
+		DAE.Message =
+			"'Item type ' + ItemType_ID + ' is not supplied by any vendor.'"
+	}
+};
+
+//* Table: InvoiceItemNumbers
+// The next line item number for invoice [Invoice_ID] is [NextNumber]
+create table InvoiceItemNumbers
+{
+	Invoice_ID : InvoiceID,
+	NextNumber : Integer,
+	key { Invoice_ID }
+};
+
+//* Operator: GetNextInvoiceItemNumber(InvoiceID) : Integer
+SafeDrop('GetNextInvoiceItemNumber(InvoiceID)');
+create operator GetNextInvoiceItemNumber(const AInvoiceID : InvoiceID) : Integer
+begin
+	update InvoiceItemNumbers set { NextNumber := NextNumber + 1 } where Invoice_ID = AInvoiceID;
+	if not exists (InvoiceItemNumbers where Invoice_ID = AInvoiceID) then
+		insert table { row { AInvoiceID Invoice_ID, 2 NextNumber } } into InvoiceItemNumbers;
+	result := InvoiceItemNumbers[AInvoiceID].NextNumber - 1;
+end;
+
+//* Operator: InvoiceItemChangeInvoiceID(var typeof(InvoiceItem[])) : Boolean
+create operator InvoiceItemChangeInvoiceID(var ARow : typeof(InvoiceItem[])) : Boolean
+begin
+	if IsNil(ARow.Number) and not(IsNil(ARow.Invoice_ID)) then
+	begin
+		update ARow set { Number := GetNextInvoiceItemNumber(ARow.Invoice_ID) };
+		result := true;
+	end
+	else
+		result := false;
+end;
+attach operator InvoiceItemChangeInvoiceID to Invoice_ID in InvoiceItem on change;
+
+//* Operator: InvoiceItemChangeItemTypeID(var typeof(InvoiceItem[])) : Boolean
+SafeDrop('InvoiceItemChangeItemTypeID(var typeof(InvoiceItem[]))');
+create operator InvoiceItemChangeItemTypeID(var ARow : typeof(InvoiceItem[])) : Boolean
+begin
+	if not(IsNil(ARow.ItemType_ID)) then
+	begin
+		update ARow set { Amount := LocationItem[CurrentLocationID(), ARow.ItemType_ID].Price };
+		result := true;
+	end
+	else
+		result := false;
+end;
+attach operator InvoiceItemChangeItemTypeID to ItemType_ID in InvoiceItem on change;
+
+//* View: SaleOrderEntry
+// Sale order entry
+SafeDrop('SaleOrderEntry');
+create view SaleOrderEntry
+	Invoice join SaleOrder
+		adorn
+		{
+			Location_ID { default CurrentLocationID() } 
+				tags { Frontend.Add.Visible = "false", Frontend.Edit.Visible = "false" },
+			Customer_ID tags { Frontend.Title = "Customer #" },
+			drop reference Invoice_InvoiceStatus,
+			drop reference Invoice_User,
+			drop reference SaleOrder_Customer,
+			drop reference PurchaseOrder_Invoice,
+			drop reference InvoiceItem_Invoice
+		}
+	tags
+	{
+		Frontend.Title = "Sale Order"
+	};
+grant usage on SaleOrderEntry to role CustomerService;
+		
+create reference SaleOrderEntry_CustomerDetail
+	SaleOrderEntry { Customer_ID }
+		references CustomerDetail { ID };
+		
+//* View: SaleOrderItem
+// Sale order line item entry
+SafeDrop('SaleOrderItem');
+create view SaleOrderItem
+	InvoiceItem 
+		add { Quantity * Amount LineTotal }
+		adorn 
+		{ 
+			Number tags { Frontend.ReadOnly = "true" },
+			Quantity tags { Frontend.FlowBreak = "true" },
+			Amount tags { Frontend.FlowBreak = "true" },
+			LineTotal tags { Frontend.Title = "Line Total" },
+			drop reference InvoiceItem_ItemType 
+		}
+	tags
+	{
+		Frontend.Title = "Order Item",
+		Frontend.Plural.Title = "Order Items"
+	};
+grant usage on SaleOrderItem to role CustomerService;
+		
+create reference SaleOrderItem_SaleOrder
+	SaleOrderItem { Invoice_ID } references SaleOrder { ID }
+	tags
+	{
+		Frontend.Detail.Embedded = "true"
+	};
+	
+// The LocationItemType table is indirectly dependent upon the CurrentLocation table being there
+// because of the CurrentLocationID() call. EnsureCurrentLocationTable() creates that session
+// table if it does not exist. 
+EnsureCurrentLocationTable();
+	
+//* View: LocationItemType
+// Sale order line item type lookup
+SafeDrop('LocationItemType');
+create view LocationItemType
+	LocationItem 
+		where Location_ID = CurrentLocationID()
+		over { ItemType_ID }
+		rename { ItemType_ID ID }
+		join ItemType
+		adorn
+		{
+			Description tags { Frontend.Preview.Include = "true" }
+		}
+	tags
+	{
+		Frontend.Title = "Item Type",
+		Frontend.Plural.Title = "Item Types"
+	};
+grant { Select } on LocationItemType to role CustomerService;
+
+create reference SaleOrderItem_ItemType
+	SaleOrderItem { ItemType_ID } references LocationItemType { ID };
+	
+
+	
+

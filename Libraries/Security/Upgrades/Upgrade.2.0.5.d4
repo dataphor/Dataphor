@@ -1,0 +1,14 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+drop reference AddUser_Group;
+create reference AddUser_Group AddUser { Group_Name } 
+	references Group { Name } 
+	tags 
+	{ 
+		Storage.Enforced = "true", 
+		Frontend.Detail.Visible = "false", 
+		Frontend.Lookup.Title = "Group" 
+	};

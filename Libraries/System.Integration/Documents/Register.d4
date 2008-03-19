@@ -1,0 +1,132 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Dataphor 
+	System.Integration Library
+
+	Copy/Insert Operators ->
+	
+		Performs a batch copy operation from the source expression to the target expression.
+
+		Copy and Insert both:
+		-Return a string with a line for every row that raises an error during the copy
+		-Raise an error if a compiler error occurs (runtime errors will be logged and returned)
+		
+		Copy:
+		-Inserts into target if the specified key does not exist in the target expression
+		-If a key is not specified (blank), then a key is choosen from the target expression
+		-The target is updated if not AInsertOnly and the specified key does exist but the comparable columns differ
+		-If AInsertOnly then does nothing if the target row exists and the comparable columns match
+		-Only columns that are not in the specified key are updated
+		-Uses a separate browse isolated process for the source query, and another process 
+		 for the target and performs a transaction for each target execution
+*/
+
+//* Operator: Copy(table, table, String, Boolean)
+create operator Copy(ASource : table, ATarget : table, AKeyColumnNames : String, AInsertsOnly : Boolean) : String
+	class "System.Integration.CopyTablesNode" static tags { DAE.IsRemotable = "False" };
+grant usage on Copy(table, table, String, Boolean) to role User;
+
+//* Operator: Copy(table, table, String)
+create operator Copy(ASource : table, ATarget : table, AKeyColumnNames : String) : String
+	class "System.Integration.CopyTablesNode" static tags { DAE.IsRemotable = "False" };
+grant usage on Copy(table, table, String) to role User;
+
+//* Operator: Copy(table, table)
+create operator Copy(ASource : table, ATarget : table) : String
+	class "System.Integration.CopyTablesNode" static tags { DAE.IsRemotable = "False" };
+grant usage on Copy(table, table) to role User;
+
+//* Operator: Insert(table, table, String, Boolean)
+create operator Insert(ASource : table, ATarget : table) : String
+	class "System.Integration.InsertNode" static tags { DAE.IsRemotable = "False" };
+grant usage on Insert(table, table) to role User;
+
+// BEGIN DEPRECATED
+
+//* Operator: Copy(String, String, String, Boolean)
+create operator Copy(ASourceExpression : String, ATargetExpression : String, AKeyColumnNames : String, AInsertsOnly : Boolean) : String
+	class "System.Integration.CopyNode" static tags { DAE.IsRemotable = "False", DAE.IsDeprecated = "True" };
+grant usage on Copy(String, String, String, Boolean) to role User;
+
+//* Operator: Copy(String, String, String)
+// Invokes Copy with AInsertsOnly defaulted to false
+create operator Copy(ASourceExpression : String, ATargetExpression : String, AKeyColumnNames : String) : String
+begin
+	result := Copy(ASourceExpression, ATargetExpression, AKeyColumnNames, false);
+end
+	static tags { DAE.IsDeprecated = "True" };
+grant usage on Copy(String, String, String) to role User;
+
+// END DEPRECATED
+
+//* Operator: CopyTables(String, String, String)
+// Creates (if they do not exists) all tables of the source library in the target library and 
+//  copies the data into them.
+SafeDrop('CopyTables(String, String, String)');
+create operator CopyTables(ASourceLibrary : String, ATargetLibrary : String, ATableName : String) : String
+begin
+	var LCurrentLibrary := LibraryName();
+	SetLibrary(ATargetLibrary);
+	try
+		result := '';
+		var LNames := 
+			cursor 
+			(
+				BaseTableVars over { Name } where (LibraryName(Name) = ASourceLibrary) and (Name.SubString(Name.IndexOf('.') + 1) = IfNil(ATableName, Name.SubString(Name.IndexOf('.') + 1))) over { Name } 
+					add 
+					{ 
+						Name.SubString(Name.IndexOf('.') + 1) TargetName,
+						(Objects where Type = 'Key' and Catalog_Object_ID = .ID return 1)[].Name KeyName,
+						"," Comma
+						
+					}
+			);
+		try
+			var LRow : typeof(LNames.Select());
+			var LKeyColumns : String;
+			while LNames.Next() do
+			begin
+				LRow := LNames.Select();
+			
+				result := result + Unicode({ 13, 10 }) + '---- ' + LRow.Name + ' -> ' + LRow.TargetName + ' ----' + Unicode({ 13, 10 });
+				try
+					try
+						// Ensure that the target table exists
+						if not ObjectExists(ATargetLibrary + '.' + LRow.TargetName) then
+							Execute('create table ' + LRow.TargetName + ' from .' + LRow.Name + ' where false');
+					commit;
+					
+					LKeyColumns := LRow.KeyName.SubString(LRow.KeyName.IndexOf("{") + 1);
+					LKeyColumns := Trim(LKeyColumns.SubString(1, LKeyColumns.IndexOf("}") - 1));
+					
+					// Copy the data to the target table
+					result := result + Copy(LRow.Name, LRow.TargetName, LKeyColumns); + Unicode({ 13, 10 });
+				except 
+					on LError : Error do
+					begin
+						if result.Length() < 100000 then
+							result := result + LError.Message + Unicode({ 13, 10 });
+					end;
+				end;
+			end;
+		finally
+			LNames.Close();
+		end;
+	finally
+		SetLibrary(LCurrentLibrary);
+	end;
+end;
+
+
+//* Operator: CopyTables(String, String)
+// Creates (if they do not exists) all tables of the source library in the target library and 
+// copies the data into them.
+SafeDrop('CopyTables(String, String)');
+create operator CopyTables(ASourceLibrary : String, ATargetLibrary : String) : String
+begin
+	result := CopyTables(ASourceLibrary, ATargetLibrary, nil as String);
+end;

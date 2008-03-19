@@ -1,0 +1,30 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+drop view SetPassword;
+detach operator SetPasswordBase_Insert from SetPasswordBase on { before insert };
+drop operator SetPasswordBase_Insert(var typeof(row from SetPasswordBase), var Boolean);
+
+create operator SetPasswordBase_Update(const AOldRow : typeof(row from SetPasswordBase), var ANewRow : typeof(row from SetPasswordBase), var APerformUpdate : Boolean) : Boolean
+begin
+	result := false;
+	APerformUpdate := false;
+	SetPassword(ID from ANewRow, Password from ANewRow);
+end;
+
+attach operator SetPasswordBase_Update to SetPasswordBase on { before update };
+
+create view SetPassword
+	SetPasswordBase
+	{
+		constraint PasswordValid Password = ConfirmPassword static tags { DAE.SimpleMessage = "Password and Confirm Password must match." }
+	}
+	tags
+	{
+		Frontend.Title = "Set Password"
+	};
+	
+grant usage on SetPassword to role SecurityUser;
+

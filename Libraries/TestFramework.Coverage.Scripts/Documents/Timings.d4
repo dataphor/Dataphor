@@ -1,0 +1,53 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//create operator BenchmarkExecute(const AString : String) : TimeSpan class "System.SystemBenchmarkExecuteNode";
+
+// insert of 1000 rows
+select BenchmarkExecute("
+create table T { ID : Integer };
+for LIndex : Integer := 1 to 10000 do
+	insert table { row { LIndex ID } } into T;
+");
+
+// update of 1000 rows
+select BenchmarkExecute("
+update T set { ID := ID + 10000 };
+");
+
+// delete of 1000 rows
+select BenchmarkExecute("
+while exists (T) do
+	delete T return 1 by { ID };
+	
+drop table T;
+");
+
+// 1000 add operations
+select BenchmarkExecute("
+begin
+	var LX : Integer := 0;
+	for LIndex : Integer := 1 to 100000 do
+		LX := LX + 1;
+end;
+");
+
+/*
+Before native values processing results:
+823mil 255100nan 
+1sec 159mil 452100nan 
+1sec 410mil 60400nan 
+6mil 99600nan 
+
+After native values processing (10000 rows)
+4sec 972mil 104500nan 
+9sec 586mil 441500nan 
+8sec 153mil 789000nan 
+
+4sec 429mil 898400nan 
+8sec 158mil 883600nan 
+7sec 665mil 472500nan 
+649mil 115400nan 
+*/

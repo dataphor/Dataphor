@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="ResMimeType">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="Version">
+        <value>1.0.0.0</value>
+    </resheader>
+    <resheader name="Reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="Writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="122100">
+        <value>Can not convert {0} to {1}.</value>
+    </data>
+    <data name="122101">
+        <value>Column ({0}) not found.</value>
+    </data>
+    <data name="122102">
+        <value>IncrementalControls can only contain IIncremental controls.</value>
+    </data>
+    <data name="122103">
+        <value>IncrementalColumns can only contain IncrementalSearchColumns.</value>
+    </data>
+    <data name="122104">
+        <value>View not in insert or edit mode.</value>
+    </data>
+    <data name="122105">
+        <value>{0}: Invalid Column Data Type.</value>
+    </data>
+    <data name="122106">
+        <value>View not active.</value>
+    </data>
+    <data name="122107">
+        <value>ScrollInterval must be greater than 0.</value>
+    </data>
+    <data name="122108">
+        <value>GridColumns can only contain GridColumn objects.</value>
+    </data>
+    <data name="122109">
+        <value>Invalid range, start index must be less than stop index.</value>
+    </data>
+    <data name="122110">
+        <value>Can not modify the ColumnName proerty of a default grid column.</value>
+    </data>
+    <data name="122111">
+        <value>Error binding data. Column name ({0}) not found.</value>
+    </data>
+    <data name="122112">
+        <value>Data link not active for column({0}).</value>
+    </data>
+    <data name="122113">
+        <value>Error Column not visible in grid client area.</value>
+    </data>
+    <data name="122114">
+        <value>Error Row index out of range.</value>
+    </data>
+    <data name="122115">
+        <value>Grid is read-only.</value>
+    </data>
+    <data name="122116">
+        <value>ParentKey columns cannot equal key columns.</value>
+    </data>
+    <data name="122117">
+        <value>Key columns cannot equal parent key columns.</value>
+    </data>
+    <data name="122118">
+        <value>Minimum row height must be greater than 0.</value>
+    </data>
+    <data name="122119">
+        <value>Minimum row height cannot exceed maximum row height.</value>
+    </data>
+    <data name="122120">
+        <value>Maximum row height must be greater than minimum row height.</value>
+    </data>
+    <data name="122121">
+        <value>Only GridRow objects allowed in GridRows.</value>
+    </data>
+    <data name="122122">
+        <value>Minimum width cannot exceed maximum width.</value>
+    </data>
+    <data name="122123">
+        <value>Maximum width cannot be less than minimum width.</value>
+    </data>
+    <data name="122124">
+        <value>TreeView expressions incorrectly setup.  Infinite looping parent which is not part of root nodes.</value>
+    </data>
+    <data name="122125">
+        <value>TreeView expressions incorrectly setup.  Child or parent expression contains nodes which do not link to root expression nodes.</value>
+    </data>
+    <data name="122126"><value>Notebook may not contain '{0}' controls as children, only NotebookPage controls are allowed.</value></data>
+    <data name="122127"><value>Invalid tab alignment ({0}), only top and bottom are supported.</value></data>
+	<data name="122128"><value>Length of content ({0}) exceeds configured maximum ({1}).</value></data>
+</root>

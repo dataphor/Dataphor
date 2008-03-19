@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="CFrameDefaultMenuText">
+		<value>Frame</value>
+	</data>
+	<data name="CDefaultNotebookPageTitle">
+		<value>No Title</value>
+	</data>
+	<data name="CAdvancedButton">
+		<value>&amp;Advanced &gt;&gt;</value>
+	</data>
+	<data name="CBasicButton">
+		<value>&amp;Basic &lt;&lt;</value>
+	</data>
+	<data name="CFormLoadWarningsCaption">
+		<value>Form Load Warnings</value>
+	</data>
+	<data name="CDefaultTitle">
+		<value>Dataphor Frontend Web Client</value>
+	</data>
+	<data name="EmptyTitle">
+		<value>&lt;No Title&gt;</value>
+	</data>
+	<data name="UpdateButtonAlt">
+		<value>Update Form</value>
+	</data>
+	<data name="RenderErrorIntro">
+		<value>The following error occurred while rendering the form:</value>
+	</data>
+	<data name="FormLoadWarningsButtonAlt">
+		<value>Errors occurred while loading form.  Click to see the errors.</value>
+	</data>
+	<data name="FormMenuItemText">
+		<value>Form</value>
+	</data>
+	<data name="AcceptText">
+		<value>Accept</value>
+	</data>
+	<data name="RejectText">
+		<value>Reject</value>
+	</data>
+	<data name="CloseText">
+		<value>Close</value>
+	</data>
+	<data name="AcceptHint">
+		<value>Accept this form (with any changes)</value>
+	</data>
+	<data name="RejectHint">
+		<value>Reject this form (and any changes)</value>
+	</data>
+	<data name="CloseHint">
+		<value>Close this form</value>
+	</data>
+	<data name="DateTimeAlt">
+		<value>Press to choose a date from a calendar.</value>
+	</data>
+	<data name="SetImageFormTitle">
+		<value>Set Image {0}</value>
+	</data>
+	<data name="UploadButton">
+		<value>Upload</value>
+	</data>
+	<data name="FrameDefaultMenuText">
+		<value>Frame</value>
+	</data>
+	<data name="SearchCaption">
+		<value>Search</value>
+	</data>
+	<data name="FindButtonText">
+		<value>Find</value>
+	</data>
+	<data name="EditFilterFormTitle">
+		<value>Edit Filter</value>
+	</data>
+	<data name="FilterExpression">
+		<value>Filter Expression</value>
+	</data>
+	<data name="UntitledPage">
+		<value>Page</value>
+	</data>
+	<data name="NoValue">
+		<value>&lt;no value&gt;</value>
+	</data>
+	<data name="ConfirmAliasDeleteMessage">
+		<value>Are you sure you want to delete this alias?</value>
+	</data>
+	<data name="DeleteButtonText">
+		<value>Delete</value>
+	</data>
+	<data name="LookupButtonAlt">
+		<value>Press to lookup a value for this field.</value>
+	</data>
+	<data name="ErrorDetailsButtonText">
+		<value>Details &gt;&gt;</value>
+	</data>
+	<data name="ImageUpload">
+		<value>Specify an image to upload</value>
+	</data>
+</root>

@@ -1,0 +1,34 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+detach Security.UserRole_Update from Security.UserRole on {before update};
+detach Security.UserRole_Delete from Security.UserRole on {before delete};
+detach Security.UserRole_Insert from Security.UserRole on {before insert};
+drop view Security.UserRole;
+
+create view UserRole
+	UserRoles
+		adorn
+		{
+			Role_Name tags { Frontend.Title = "Role Name", Frontend.Width = "50" },
+			drop reference UserRoles_Roles
+		}
+	{
+		reference UserRole_Role { Role_Name } references Role { Name }
+			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Role", Frontend.Detail.Visible = "false" }
+	}
+	tags 
+	{ 
+		Frontend.Title = "Role",
+		Frontend.UseList = "false", 
+		Frontend.UseApplicationTransactions = "false" 
+	};
+	
+grant usage on UserRole to role SecurityUser;
+
+attach operator UserRole_Insert to UserRole on { before insert };
+attach operator UserRole_Update to UserRole on { before update };
+attach operator UserRole_Delete to UserRole on { before delete };
+

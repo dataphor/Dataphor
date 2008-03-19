@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('MovieActor', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <column bop:name="RootBrowseColumn">
+      <group ibop:order="2" bop:name="FilterGroup" title="Filter">
+         <row ibop:order="0" bop:name="FilterRow">
+            <trigger ibop:order="0" bop:name="FilterTrigger" action="SetMainFilter" />
+            <textbox ibop:order="1" bop:name="MovieFilterTextBox" source="FilterSource" title="Part of Movie Name" columnname="MovieName" maxwidth="20" width="20" nilifblank="True" />
+            <textbox ibop:order="2" bop:name="ActorFilterTextBox" source="FilterSource" title="Part of Actor Name" columnname="ActorName" maxwidth="20" width="20" nilifblank="True" />
+         </row>
+      </group>
+   </column>
+   <source ibop:order="15" bop:name="FilterSource" onrowchange="SetMainFilter" expression="select TableDee add&#xD;&#xA;{&#xD;&#xA; nil as String MovieName tags { DAE.IsComputed = &quot;false&quot; },&#xD;&#xA; nil as String ActorName tags { DAE.IsComputed = &quot;false&quot; }&#xD;&#xA;};" />
+   <scriptaction ibop:order="16" bop:name="SetMainFilter" text="Set Filter" script="string LFilter = &quot;&quot;;&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;MovieName&quot;].HasValue())&#xD;&#xA;  LFilter = &quot;(Lower(Movie.Name) matches Lower(\'&quot;&#xD;&#xA;    + FilterSource[&quot;MovieName&quot;].AsString&#xD;&#xA;    + &quot;\'))&quot;;&#xD;&#xA;&#xD;&#xA;if(FilterSource[&quot;ActorName&quot;].HasValue())&#xD;&#xA;{&#xD;&#xA;  if(LFilter != &quot;&quot;)&#xD;&#xA;  {&#xD;&#xA;    LFilter += &quot; and &quot;;&#xD;&#xA;  }&#xD;&#xA;  LFilter += &quot;(Lower(Actor.Name) matches Lower(\'&quot;&#xD;&#xA;    + FilterSource[&quot;ActorName&quot;].AsString&#xD;&#xA;    + &quot;\'))&quot;;&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;Main.Filter = LFilter;&#xD;&#xA;&#xD;&#xA;if(LFilter == &quot;&quot;)&#xD;&#xA;  FilterTrigger.Action = SetMainFilter;&#xD;&#xA;else&#xD;&#xA;  FilterTrigger.Action = ClearMainFilter;" />
+   <scriptaction ibop:order="17" bop:name="ClearMainFilter" text="Clear Filter" script="FilterTrigger.Action = SetMainFilter;&#xD;&#xA;&#xD;&#xA;Main.Filter = &quot;&quot;;" />
+</interface>
+</document>
+</dilx>

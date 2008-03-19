@@ -1,0 +1,88 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Inventory Tables
+*/
+
+//* Table: ItemType
+// The organization sells items of type [ID] described by [Description].
+create table ItemType
+{
+	ID : ItemTypeID,
+	Description : Description tags { Frontend.Preview.Include = "true" },
+	key { ID }
+}
+	static tags
+	{
+		Frontend.Title = "Item Type",
+		Frontend.Plural.Title = "Item Types"
+	};
+grant usage on ItemType to role InventoryClerk;
+	
+//* Table: LocationItem
+// Location [Location_ID] has inventory of type [ItemType_ID], 
+// selling for price [Price], par [Par], currently on hand [OnHand], 
+// currently on order [OnOrder] and currently on purchase [OnPurchase].
+create table LocationItem
+{
+	Location_ID : LocationID,
+	ItemType_ID : ItemTypeID,
+	Price : Money,
+	Par : Decimal { default 0, constraint ParValid value >= 0 },
+	OnHand : Decimal { default 0, constraint OnHandValid value >= 0 } 
+		tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity on hand" },
+	OnOrder : Decimal { default 0, constraint OnOrderValid value >= 0 } 
+		tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity currently on order for customers" },
+	OnPurchase : Decimal { default 0, constraint OnPurchaseValid value >= 0 } 
+		tags { Frontend.ReadOnly = "true", Frontend.Hint = "Quantity currently being purchased from vendors" },
+	key { Location_ID, ItemType_ID }
+}
+	static tags
+	{
+		Frontend.Title = "Inventory"
+	};
+grant usage on LocationItem to role InventoryClerk;
+	
+create reference LocationItem_Location LocationItem { Location_ID } references Location { ID };
+create reference LocationItem_ItemType LocationItem { ItemType_ID } references ItemType { ID }
+	tags { Frontend.Detail.Embedded = "true" };
+
+//* View: LocationItemsUnderPar
+create view LocationItemsUnderPar
+	LocationItem where (OnHand + OnPurchase) < Par
+	tags
+	{
+		Frontend.Title = "Inventory Under Par"
+	};
+grant { Select } on LocationItemsUnderPar to role InventoryClerk;
+	
+//* View: LocationItemsToOrder
+create view LocationItemsToOrder
+	LocationItem 
+		add { OnHand + OnPurchase ProjectedOnHand }
+		add 
+		{ 
+			(if ProjectedOnHand < OnOrder then OnOrder - ProjectedOnHand else 0d) RequiredOnHand,
+			(if ProjectedOnHand < Par then Par - ProjectedOnHand else 0d) SuggestedOnHand
+		}
+		add { RequiredOnHand + SuggestedOnHand ToOrder }
+		where ToOrder > 0
+		over { Location_ID, ItemType_ID, ToOrder }
+	tags
+	{
+		Frontend.Title = "Inventory To Order"
+	};
+grant { Select } on LocationItemsToOrder to role InventoryClerk;	
+
+//* View: LocationsNeedingItems		
+create view LocationsNeedingItems
+	LocationItemsToOrder over { Location_ID }
+	tags
+	{
+		Frontend.Title = "Locations Needing Inventory"
+	};
+grant { Select } on LocationsNeedingItems to role InventoryClerk;

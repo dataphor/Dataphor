@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="ResMimeType">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="Version">
+        <value>1.0.0.0</value>
+    </resheader>
+    <resheader name="Reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="Writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="126100">
+        <value>Source expression type cannot be determined.</value>
+    </data>
+    <data name="126101">
+        <value>Unimplemented: MSSQLAggregate.Translate.</value>
+    </data>
+    <data name="126102">
+        <value>Unimplemented: MSSQLJoin.Translate for natural joins.</value>
+    </data>
+    <data name="126103">
+        <value>Data type "{0}" cannot be imported.</value>
+    </data>
+    <data name="126107">
+        <value>Unable to open deferred read stream for column "{0}".</value>
+    </data>
+    <data name="126108">
+        <value>Column map not found for index (0).</value>
+    </data>
+    <data name="126110">
+        <value>Catalog reconciliation not supported for device "{0}".</value>
+    </data>
+    <data name="126111">
+        <value>No current join context.</value>
+    </data>
+    <data name="126112">
+        <value>Connection not found.</value>
+    </data>
+    <data name="126113">
+        <value>"{0} value ({1}) is out of range for this device."</value>
+    </data>
+    <data name="126114">
+        <value>No current Query context.</value>
+    </data>
+    <data name="126115">
+        <value>SQL device expected.</value>
+    </data>
+    <data name="126116">
+        <value>An error occoured while trying to read device table list.  The DeviceTablesExpression attribute of the device may be incorrect.</value>
+    </data>
+    <data name="126117">
+        <value>An error occoured while trying to read device index list.  The DeviceIndexesExpression attribute of the device may be incorrect.</value>
+    </data>
+    <data name="126118"><value>An error occurred while trying to read device foreign key list.  The DeviceForeignKeysExpression attribute of the device may be incorrect.</value></data>
+    <data name="126119"><value>Argument "{0}" must be evaluated at compile-time.  Use a literal expression as the argument, or use a dynamic execution operator to perform the operation.</value></data>
+    <data name="126120"><value>Device "{0}" is already executing the connection statement for this process.</value></data>
+    <data name="126121"><value>Deferred access columns cannot be retrieved in this context.</value></data>
+    <data name="126122"><value>Unable to retrieve result set description from target system.</value></data>
+	<data name="126123"><value>The query is supported by device "{0}", which is not an SQL device.</value></data>
+	<data name="126124"><value>The query is supported by device "{0}", not the given device "{1}".</value></data>
+	<data name="126125"><value>The query is not supported by any device.</value></data>
+</root>

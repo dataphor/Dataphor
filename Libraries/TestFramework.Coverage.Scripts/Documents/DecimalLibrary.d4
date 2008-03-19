@@ -1,0 +1,96 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Decimal Operators
+begin
+  var LDecimal1: Decimal, LDecimal2: Decimal;
+
+  LDecimal1 := 5d;
+  if LDecimal1 <> 5d then
+    raise Error("Decimal assignment from literal failed");
+
+  LDecimal2 := LDecimal1;
+  if not(LDecimal1 = LDecimal2) then
+    raise Error("Decimal assignment from variable failed");
+
+  LDecimal2 := 10d;
+  if (LDecimal1 = 10d) then
+    raise Error("Decimal assignment is not by value");
+
+  LDecimal1 := LDecimal1 + 5d;
+  if LDecimal1 <> 10d then
+    raise Error("Decimal addition failed");
+
+  LDecimal1 := LDecimal1 - 5d;
+  if LDecimal1 <> 5d then
+    raise Error("Decimal subtraction failed");
+
+  LDecimal1 := LDecimal1 * 10d;
+  if LDecimal1 <> 50d then
+    raise Error("Decimal multiplication failed");
+
+  LDecimal1 := LDecimal1 / 10d;
+  if LDecimal1 <> 5d then
+    raise Error("Decimal division failed");
+    
+  if 5d div 2d <> 2d then
+	raise Error("Decimal div failed");
+	
+  if 5d mod 2d <> 1d then
+	raise Error("Decimal mod failed");
+    
+  LDecimal1 := LDecimal1 ** 2d;
+  if LDecimal1 <> 25d then
+    raise Error("Decimal exponentiation failed");
+    
+  LDecimal1 := 5d;
+  LDecimal1 := -(LDecimal1);
+  if (LDecimal1 <> -5d) then
+    raise Error("Decimal negation failed");
+
+  LDecimal1 := 5d;
+  LDecimal2 := 10d;
+  if LDecimal1 > LDecimal2 then
+    raise Error("Decimal greater than failed");
+  
+  if LDecimal1 >= LDecimal2 then
+    raise Error("Decimal inclusive greater than failed, arguments unequal");
+
+  if LDecimal2 < LDecimal1 then
+    raise Error("Decimal less than failed");
+
+  if LDecimal2 <= LDecimal1 then
+    raise Error("Decimal inclusive less than failed, arguments unequal");
+
+  LDecimal1 := 10d;
+  if not(LDecimal1 >= LDecimal2) then
+    raise Error("Decimal inclusive greater than failed, arguments equal");
+
+  if not(LDecimal1 <= LDecimal2) then
+    raise Error("Decimal inclusive less than failed, arguments equal");
+    
+  if (LDecimal1 ?= LDecimal2) <> 0 then
+    raise Error("Decimal compare failed, arguments equal");
+    
+   LDecimal1 := 10.5d;
+   if LDecimal1.Floor() <> 10d then
+     raise Error("Decimal Floor failed");
+     
+   if LDecimal1.Ceiling() <> 11d then
+     raise Error("Decimal Ceiling failed");
+     
+   if LDecimal1.Round(0) <> 11d then
+     raise Error("Decimal round failed");
+     
+   if LDecimal1.Truncate() <> 10d then
+     raise Error("Decimal truncate failed");
+     
+   if LDecimal1.Frac() <> 0.5d then
+     raise Error("Decimal Frac failed");
+     
+   if LDecimal1.Abs() <> 10.5d then
+     raise Error("Decimal Abs failed");
+end;
+

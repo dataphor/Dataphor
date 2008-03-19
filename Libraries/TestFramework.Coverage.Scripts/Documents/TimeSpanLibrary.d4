@@ -1,0 +1,360 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+
+create table TimeSpanTest
+{
+	ID: Integer,
+	TestTimeSpan: TimeSpan,
+	key{ID}
+};
+
+// TimeSpan operators
+begin
+	var LTimeSpan: TimeSpan;
+	var LString: String;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Selectors                                                 //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	
+	// TimeSpan(Days : Integer) : TimeSpan
+	LTimeSpan := TimeSpan(90);
+	if LTimeSpan.Days <> 90.0 or LTimeSpan.Day <> 90 then
+		raise Error("TimeSpan(Days) selector Error");
+		
+	// TimeSpan(Days : Integer, Hours : Integer) : TimeSpan
+	// (90 days + 12 hours = 2172 hours)
+	LTimeSpan := TimeSpan(90, 12);
+	if LTimeSpan.Hours <> 2172.0 or LTimeSpan.Hour <> 12 then
+		raise Error("TimeSpan(Days, Hours) selector Error");
+		
+	// TimeSpan(Days : Integer, Hours : Integer, Minutes : Integer) : TimeSpan
+	// (90 days + 12 hours + 30 Minutes = 130,350 Minutes)
+	LTimeSpan := TimeSpan(90, 12, 30);
+	if LTimeSpan.Minutes <> 130350.0 or LTimeSpan.Minute <> 30 then
+		raise Error("TimeSpan(Days, Hours, Minutes) selector Error");
+		
+	// TimeSpan(Days : Integer, Hours : Integer, Minutes : Integer, Seconds : Integer) : TimeSpan
+	// (90 days + 12 hours + 30 Minutes + 45 seconds = 7,821,045 seconds)
+	LTimeSpan := TimeSpan(90, 12, 30, 45);
+	if LTimeSpan.Seconds <> 7821045.0 or LTimeSpan.Second <> 45 then
+		raise Error("TimeSpan(Days, Hours, Minutes, Seconds) selector Error");
+		
+	// TimeSpan(Days : Integer, Hours : Integer, Minutes : Integer, Seconds : Integer, Milliseconds : Decimal) : TimeSpan
+	// (90 days + 12 hours + 30 Minutes + 45 seconds + 100 ms = 7,821,045,100 milliseconds)
+	LTimeSpan := TimeSpan(90, 12, 30, 45, 100.5);
+	if LTimeSpan.Milliseconds <> 7821045100.5 or LTimeSpan.Millisecond <> 100.5 then
+		raise Error("TimeSpan(Days, Hours, Minutes, Seconds, Milliseconds) selector Error");
+		
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Accessors										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// Ticks
+	LTimeSpan.Ticks := ToLong(100);
+	if LTimeSpan.Ticks <> ToLong(100) then
+		raise Error("TimeSpan.Ticks assignment Error");
+
+	// Milliseconds		
+	LTimeSpan.Milliseconds := 100.56;
+	if LTimeSpan.Milliseconds <> 100.56 then
+		raise Error("TimeSpan.Milliseconds assignment Error");		
+	LTimeSpan.Millisecond := 135.24;
+	if LTimeSpan.Millisecond <> 135.24 then
+		raise Error("TimeSpan.Millisecond assignment Error");
+	
+	// Seconds		
+	LTimeSpan.Seconds := 100.00;
+	if LTimeSpan.Seconds <> 100.00 then
+		raise Error("TimeSpan.Seconds assignment Error");		
+	LTimeSpan.Second := 45;
+	if LTimeSpan.Second <> 45 then
+		raise Error("TimeSpan.Second assignment Error");		
+		
+	// Minutes		
+	LTimeSpan.Minutes := 100.00;
+	if LTimeSpan.Minutes <> 100.00 then
+		raise Error("TimeSpan.Minutes assignment Error");		
+	LTimeSpan.Minute := 30;
+	if LTimeSpan.Minute <> 30 then
+		raise Error("TimeSpan.Minute assignment Error");
+		
+	// Hours		
+	LTimeSpan.Hours := 100.00;
+	if LTimeSpan.Hours <> 100.00 then
+		raise Error("TimeSpan.Hours assignment Error");		
+	LTimeSpan.Hour := 23;
+	if LTimeSpan.Hour <> 23 then
+		raise Error("TimeSpan.Hour assignment Error");
+		
+	// Days		
+	LTimeSpan.Days := 100.00;
+	if LTimeSpan.Days <> 100.00 then
+		raise Error("TimeSpan.Days assignment Error");		
+	LTimeSpan.Day := 100;
+	if LTimeSpan.Day <> 100 then
+		raise Error("TimeSpan.Day assignment Error");
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Conversions										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// TimeSpan->String
+	LTimeSpan := TimeSpan(100, 20, 30, 40, 500);
+	LString := LTimeSpan.ToString();
+	if TimeSpan(100, 20, 30, 40, 500).ToString() <> "14wks 2days 20hrs 30min 40sec 500mil " then
+		raise Error("TimeSpan.ToString() Error." + TimeSpan(100, 20, 30, 40, 500).ToString());
+		
+	// String->TimeSpan	
+	LString := "7wks 1days 10hrs 20min 55sec 600mil ";
+	LTimeSpan := ToTimeSpan(LString);
+	if LTimeSpan.Milliseconds <> 4357255600.0 then
+		raise Error("ToTimeSpan(System.String) Error.");
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Arithmetic										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	var LTimeSpan1: TimeSpan;
+	var LTimeSpan2: TimeSpan;
+	var LTimeSpan3: TimeSpan;
+
+	// -(TimeSpan)
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2 := -(LTimeSpan1);
+	if LTimeSpan2.Ticks <> ToLong(-100) then
+		raise Error("-(TimeSpan) Error.");
+		
+	// TimeSpan - TimeSpan
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(90);
+	LTimeSpan3 := LTimeSpan1 - LTimeSpan2;
+	if LTimeSpan3.Ticks <> ToLong(10) then
+		raise Error("TimeSpan - TimeSpan Error.");
+
+	// TimeSpan + TimeSpan		
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(100);
+	LTimeSpan3 := LTimeSpan1 + LTimeSpan2;
+	if LTimeSpan3.Ticks <> ToLong(200) then
+		raise Error("TimeSpan + TimeSpan Error.");
+
+	// TimeSpan / TimeSpan
+	LTimeSpan1.Ticks := ToLong(1000);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 / LTimeSpan2 <> 10.0 then
+		raise Error("TimeSpan / TimeSpan Error.");
+	
+	// TimeSpan / Integer
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2 := LTimeSpan1 / 5;
+	if LTimeSpan2.Ticks <> ToLong(20) then
+		raise Error("TimeSpan / Integer Error.");
+		
+  
+	//  TimeSpan / Decimal
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2 := LTimeSpan1 / 2.5;
+	if LTimeSpan2.Ticks <> ToLong(40) then
+		raise Error("TimeSpan / Decimal Error.");
+		
+
+	// TimeSpan * Integer
+	LTimeSpan1.Ticks := ToLong(10);
+	LTimeSpan2 := LTimeSpan1 * 10;
+	if LTimeSpan2.Ticks <> ToLong(100) then
+		raise Error("TimeSpan * Integer Error.");
+		
+	// Integer * TimeSpan
+	LTimeSpan1.Ticks := ToLong(10);		
+	LTimeSpan2 := 10 * LTimeSpan1;
+	if LTimeSpan2.Ticks <> ToLong(100) then
+		raise Error("Integer * TimeSpan Error.");
+
+	// TimeSpan * Decimal
+	LTimeSpan1.Ticks := ToLong(10);
+	LTimeSpan2 := LTimeSpan1 * 10.5;
+	if LTimeSpan2.Ticks <> ToLong(105) then
+		raise Error("TimeSpan * Decimal Error.");
+		
+	// Decimal * TimeSpan
+	LTimeSpan1.Ticks := ToLong(10);		
+	LTimeSpan2 := 10.5 * LTimeSpan1;
+	if LTimeSpan2.Ticks <> ToLong(105) then
+		raise Error("Decimal * TimeSpan Error.");
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Comparison										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// TimeSpan = TimeSpan
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 = LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan = TimeSpan Error.");
+	end;
+
+	// TimeSpan <> TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(99);
+	if LTimeSpan1 <> LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan <> TimeSpan Error.");
+	end;
+	
+	// TimeSpan > TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(99);
+	if LTimeSpan1 > LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan > TimeSpan Error.");
+	end;
+	
+	// TimeSpan >= TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(99);
+	if LTimeSpan1 >= LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan >= TimeSpan Error.");
+	end;
+	
+	// TimeSpan >= TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 >= LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan >= TimeSpan Error.");
+	end;
+	
+	// TimeSpan < TimeSpan	
+	LTimeSpan1.Ticks := ToLong(99);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 < LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan < TimeSpan Error.");
+	end;
+	
+	// TimeSpan <= TimeSpan	
+	LTimeSpan1.Ticks := ToLong(99);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 <= LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan <= TimeSpan Error.");
+	end;
+	
+	// TimeSpan <= TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(100);
+	if LTimeSpan1 <= LTimeSpan2 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan <= TimeSpan Error.");
+	end;
+	
+	// TimeSpan ?= TimeSpan	
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := ToLong(100);
+	if (LTimeSpan1 ?= LTimeSpan2) = 0 then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan ?= TimeSpan Error.");
+	end;
+	
+	// TimeSpan Negate
+	LTimeSpan1.Ticks := ToLong(100);
+	LTimeSpan2.Ticks := -LTimeSpan1.Ticks;
+	if LTimeSpan2.Ticks = ToLong(-100) then
+	begin
+	end
+	else
+	begin
+		raise Error("TimeSpan Negate Error.");
+	end;
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Manipulation									   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	LTimeSpan.Days := 10.5;
+	if LTimeSpan.Days <> 10.5 then
+		raise Error("TimeSpan.Days := Error");		
+
+	LTimeSpan.Hours := 10.5;
+	if LTimeSpan.Hours <> 10.5 then
+		raise Error("TimeSpan.Hours := Error");		
+		
+	LTimeSpan.Milliseconds := 10.5;
+	if LTimeSpan.Milliseconds <> 10.5 then
+		raise Error("TimeSpan.Milliseconds := Error");		
+		
+	LTimeSpan.Minutes := 10.5;
+	if LTimeSpan.Minutes <> 10.5 then
+		raise Error("TimeSpan.Minutes := Error");	
+		
+	LTimeSpan.Seconds := 10.5;
+	if LTimeSpan.Seconds <> 10.5 then
+		raise Error("TimeSpan.Seconds := Error");
+		
+	
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Aggregation										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	
+	LTimeSpan.Ticks := ToLong(100);
+	insert table{row{1 ID, LTimeSpan TestTimeSpan}} into TimeSpanTest;
+	LTimeSpan.Ticks := ToLong(200);
+	insert table{row{2 ID, LTimeSpan TestTimeSpan}} into TimeSpanTest;
+	LTimeSpan.Ticks := ToLong(300);
+	insert table{row{3 ID, LTimeSpan TestTimeSpan}} into TimeSpanTest;
+	LTimeSpan.Ticks := ToLong(400);
+	insert table{row{4 ID, LTimeSpan TestTimeSpan}} into TimeSpanTest;
+	
+	// Sum
+	var LSum: System.TimeSpan := (TimeSpanTest group add {Sum(TestTimeSpan) TimeSpanSum})[].TimeSpanSum;
+	if LSum.Ticks <> ToLong(1000) then
+		raise Error("TimeSpan Sum Error.");
+		
+	// Min
+	var LMin: System.TimeSpan := (TimeSpanTest group add {Min(TestTimeSpan) TimeSpanMin})[].TimeSpanMin;
+	if LMin.Ticks <> ToLong(100) then
+		raise Error("TimeSpan Min Error.");
+	
+	// Max
+	var LMax: System.TimeSpan := (TimeSpanTest group add {Max(TestTimeSpan) TimeSpanMax})[].TimeSpanMax;
+	if LMax.Ticks <> ToLong(400) then
+		raise Error("TimeSpan Max Error.");
+	
+	// Avg
+	var LAvg: System.TimeSpan := (TimeSpanTest group add {Avg(TestTimeSpan) TimeSpanAvg})[].TimeSpanAvg;
+	if LAvg.Ticks <> ToLong(250) then
+		raise Error("TimeSpan Avg Error.");
+end;
+
+drop table TimeSpanTest;
+

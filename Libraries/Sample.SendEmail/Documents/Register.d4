@@ -1,0 +1,61 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Register the required library
+RegisterLibrary('System.Internet');
+
+//* Table: EmailSettings
+create table EmailSettings
+{
+	SmtpServer : String,
+	DefaultFromAddress : String,
+	key { }
+};
+
+//* Table: SentEmail
+//  At [DateTime], the message [Message] with subject [Subject] was sent to [To] by [From]
+create table SentEmail
+{
+	DateTime : DateTime { default DateTime() }
+		tags { Frontend.Visible = "false" },
+	From : String { default EmailSettings[].DefaultFromAddress },
+	To : String,
+	Subject : String
+		tags { Frontend.Width = "60" },
+	Message : String
+		tags { Frontend.TextBox.Height = "7" },
+	key { DateTime } 	// Don't try to send more than one email per second with this design  :-)
+}
+	static tags { Frontend.Add.Source.OpenState = "Insert" };
+
+//* Operators: SendEmail
+// Sends an email from a SentEmail row (for attachment to SentEmail)
+create operator SendEmail(ARow : typeof(SentEmail[]))
+begin
+	if not exists (EmailSettings) then
+		raise Error("You must configure the email settings in the EmailSettings table");
+	SendEmail(EmailSettings[].SmtpServer, ARow.From, ARow.To, ARow.Subject, ARow.Message);
+end;
+
+//*
+attach SendEmail to SentEmail on after insert;
+
+//*
+// select ScriptApplication('SendEmail')
+if not exists (Applications where ID = "SendEmail") then
+begin
+	insert
+		table
+		{
+			row { System.Name("SendEmail") ID, "Send An Email" Description, ".Frontend.Derive('Sample.SendEmail.SentEmail', 'Add')" StartDocument }
+		}
+		into Applications;
+	insert
+		table
+		{
+			row { System.Name("SendEmail") Application_ID, System.Name("Sample.SendEmail") Library_Name }
+		}
+		into ApplicationLibraries;
+end;

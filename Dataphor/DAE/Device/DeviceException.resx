@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="114100">
+		<value>Unsupported translation "{0}".</value>
+	</data>
+	<data name="114102">
+		<value>There is already a transaction in progress for this device.</value>
+	</data>
+	<data name="114103">
+		<value>There is no transaction in progress for this device.</value>
+	</data>
+	<data name="114105">
+		<value>Memory device only supports expressions.</value>
+	</data>
+	<data name="114106">
+		<value>Row could not be located.</value>
+	</data>
+	<data name="114110">
+		<value>Device "{0}" cannot perform requested operation "{1}".</value>
+	</data>
+	<data name="114111"><value>Connection failure with device ""{0}"". All active transactions have been rolled back.</value></data>
+	<data name="114112"><value>Transaction failure on device ""{0}"". All active transactions have been rolled back.</value></data>
+	<data name="114113"><value>Maximum physical row count ({0}) exceeded for table "{1}" in device "{2}"; to enable unlimited rows (with possible performance implications) use: alter device {2} alter class {{ alter "MaxRowCount" = "-1" }};</value></data>
+</root>

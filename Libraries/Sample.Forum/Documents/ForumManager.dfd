@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" iconimage="Image('Sample.Forum', 'Alphora')" text="Forum Threads">
+  <exposed action="RefreshAction" bop:name="Exposed" />
+  <column bop:name="Column">
+    <statictext text="Forum Threads:" bop:name="StaticText" />
+    <row bop:name="Row">
+      <column bop:name="Column2">
+        <trigger action="AddPostShowFormAction" text="Post Topic" bop:name="PostTrigger" />
+        <trigger action="ReplyShowFormAction" text="Reply" bop:name="ReplyTrigger" />
+      </column>
+      <tree columnname="Main.Topic" rootexpression="Post join GetForumID join ( Post over { ID } minus ( Reply over { Post_ID } rename { Post_ID ID } )) rename Main" childexpression="Post join GetForumID join ( Reply where Parent_Post_ID = ACurrentMain.ID over { Post_ID } rename { Post_ID ID } ) rename Main" parentexpression="Post join GetForumID join ( Reply where Post_ID = ACurrentMain.ID over { Parent_Post_ID } rename { Parent_Post_ID ID } ) rename Main" source="Source" bop:name="ThreadTree" />
+      <column bop:name="Column1">
+        <textbox width="40" columnname="Main.Topic" title="Topic" source="Source" readonly="True" bop:name="TopicTextBox" />
+        <textbox height="5" width="40" columnname="Main.Body" title="Body" source="Source" readonly="True" bop:name="BodyTextBox" />
+        <row bop:name="Row1">
+          <textbox width="15" columnname="Main.Member_ID" title="Member" source="Source" readonly="True" bop:name="MemberTextBox" />
+          <textbox width="15" columnname="Main.CreationDate" title="Creation Date" source="Source" readonly="True" bop:name="CreationDateTextBox" />
+        </row>
+      </column>
+    </row>
+  </column>
+  <source expression="Post rename Main" bop:name="Source" />
+  <showformaction onformclose="RefreshAction" document="Derive('Post adorn { Forum_ID { default GetForumID[].Forum_ID } }', 'Add', 'Forum_ID', 'Forum_ID')" mode="Insert" image="Image('Frontend', 'Image.Add')" bop:name="AddPostShowFormAction" />
+  <sourceaction action="Refresh" source="Source" text="Refresh" image="Image('Frontend', 'Image.Refresh')" bop:name="RefreshAction" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Forum_ID;Main.ID" sourcelink.detailkeynames="Main.Forum_ID;Main.Parent_Post_ID" sourcelink.source="Source" document="Derive('Post join ( Reply rename { Post_ID ID } ) ', 'Add', 'Forum_ID;ID', 'Main.Forum_ID;Main.Parent_Post_ID')" mode="Insert" bop:name="ReplyShowFormAction" />
+</interface>

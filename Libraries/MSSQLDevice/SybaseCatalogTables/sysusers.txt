@@ -1,0 +1,11 @@
+suid;uid;gid;name;environ
+-2;16391;16391;ha_role;[NULL]
+-2;16390;16390;dtm_tm_role;[NULL]
+-2;16389;16389;replication_role;[NULL]
+-2;16388;16388;navigator_role;[NULL]
+-2;16387;16387;sybase_ts_role;[NULL]
+-2;16386;16386;oper_role;[NULL]
+-2;16385;16385;sso_role;[NULL]
+-2;16384;16384;sa_role;[NULL]
+-2;0;0;public;[NULL]
+3;1;0;dbo;[NULL]

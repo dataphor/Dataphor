@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.UserRights', 'Browse', 'Main.ID', 'Main.User_ID', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" isreadonly="True" expression="(&#xD;&#xA;	(&#xD;&#xA;		Security.User&#xD;&#xA;			rename Main&#xD;&#xA;	)&#xD;&#xA;)&#xD;&#xA;capabilities {navigable, backwardsnavigable, bookmarkable, searchable, updateable}&#xD;&#xA;isolation browse&#xD;&#xA;type dynamic" />
+   <showformaction bop:name="Edit" beforeexecute="BeforeEdit" document="Derive('EditUserRights', 'Edit', 'Main.User_ID;Main.Right_Name', 'Main.User_ID;Main.Right_Name', false)" onformclose="AfterEdit" sourcelink.source="UserRights" />
+   <column bop:name="RootBrowseColumn">
+      <Search bop:name="MainSearch" source="UserRights" />
+      <row bop:name="GridRow">
+         <Grid bop:name="Grid" source="UserRights" />
+         <column bop:name="GridBar">
+            <trigger bop:name="AddTrigger" visible="False" />
+            <trigger bop:name="DeleteTrigger" visible="False" />
+            <trigger bop:name="ViewTrigger" visible="False" />
+         </column>
+      </row>
+   </column>
+   <datascriptaction ibop:order="12" bop:name="BeforeEdit" script="// BeforeEdit&#xD;&#xA;create session table EditUserRights in System.Temp&#xD;&#xA;{&#xD;&#xA;	User_ID : System.UserID,&#xD;&#xA;	Right_Name : System.Name,&#xD;&#xA;	HasAssignment : System.Boolean,&#xD;&#xA;	Granted : System.Boolean static tags { Storage.IsNullable = &quot;true&quot; },&#xD;&#xA;	key { User_ID, Right_Name }&#xD;&#xA;} tags { Frontend.Title = &quot;User Right&quot;, Frontend.UseApplicationTransactions = &quot;false&quot; };&#xD;&#xA;&#xD;&#xA;insert &#xD;&#xA;	(Users where ID = AUserID over { ID } rename { ID User_ID })&#xD;&#xA;		join (Rights where Name = ARightName over { Name } rename { Name Right_Name })&#xD;&#xA;		left join (UserRightAssignments where User_ID = AUserID and Right_Name = ARightName) include rowexists HasAssignment	&#xD;&#xA;	into EditUserRights;&#xD;&#xA;&#xD;&#xA;attach operator UserRights_Update to EditUserRights on { before update };&#xD;&#xA;">
+      <dataargument ibop:order="0" bop:name="BeforeEditArgument" columns="AUserID=Main.User_ID;ARightName=Main.Right_Name" source="UserRights" />
+   </datascriptaction>
+   <datascriptaction ibop:order="13" bop:name="AfterEdit" script="// AfterEdit&#xA;detach operator UserRights_Update from EditUserRights on { before update };&#xA;drop table EditUserRights;&#xA;" />
+   <source ibop:order="14" bop:name="UserRights" isreadonly="True" useapplicationtransactions="False" expression="Rights &#xD;&#xA;	over { Name } &#xD;&#xA;	rename { Name Right_Name }&#xD;&#xA;	add { AUserID User_ID, UserHasRight(AUserID, Right_Name) HasRight }&#xD;&#xA;	left join (UserRightAssignments where User_ID = AUserID) &#xD;&#xA;		include rowexists HasAssignment &#xD;&#xA;	rename Main&#xD;&#xA;&#xD;&#xA;">
+      <dataargument ibop:order="0" bop:name="UserRightsArgument" columns="AUserID=Main.ID" source="Main" />
+   </source>
+</interface>
+</document>
+</dilx>

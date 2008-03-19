@@ -1,0 +1,41 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table Test { ID : Integer, Name : String, key { ID } };
+create table TestDetail { Test_ID : Integer, ID : Integer, Name : String, key { Test_ID, ID } };
+create reference TestDetail_Test TestDetail { Test_ID } references Test { ID };
+
+create operator Test() : Boolean
+begin
+	result := exists (Test);
+end;
+
+insert table { row { 1 ID, 'Joe' Name } } into Test;
+insert table { row { 1 Test_ID, 1 ID, 'Johnson' Name } } into TestDetail;
+
+create session table Test { ID : Integer, Name : String, key { ID } };
+create session table TestDetail { Test_ID : Integer, ID : Integer, Name : String, key { Test_ID, ID } };
+create session reference TestDetail_Test TestDetail { Test_ID } references Test { ID };
+
+if exists (Test) then
+	raise Error("Session variable resolved incorrectly");
+	
+create session operator Test() : Boolean
+begin
+	result := exists (Test);
+end;
+
+if Test() then
+	raise Error("Session operator resolved incorrectly");
+	
+drop operator Test();
+drop table TestDetail;
+drop table Test;
+
+drop operator Test();
+drop table TestDetail;
+drop table Test;
+
+

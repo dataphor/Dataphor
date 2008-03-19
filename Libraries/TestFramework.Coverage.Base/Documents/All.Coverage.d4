@@ -1,0 +1,86 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+ExecuteScript("Coverage.Scripts", "DAE"); // TODO: Rewrite for native values processing
+ExecuteScript("Coverage.Scripts", "Exceptions"); // TODO: Rewrite for native values processing
+ExecuteScript("Coverage.Scripts", "ParserEmitter"); // verified BTR 7/11/2006 // TODO: Fix this
+ExecuteScript("Coverage.Scripts", "Lexer"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LanguageConstructs"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "NilLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "BooleanLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "ByteLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "ShortLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "IntegerLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LongLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "DecimalLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "MoneyLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "GuidLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "StringLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "TimeSpanLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "DateTimeLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "DateLibrary"); // Verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "TimeLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "MathLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "ListLibrary"); // Verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "CursorLibrary"); // Verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "DynamicEvaluation"); // Verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Browse"); // Verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Types"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Operators"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Aggregates"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "AggregateOperators"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "MinMaxOperators"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "ImplicitConversions"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "RowLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "RowParameterColumnOrder"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Tables"); // verified BTR 3/5/2007 // TODO: Columns in a memory device cannot be altered or dropped.
+ExecuteScript("Coverage.Scripts", "SessionTables"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "TableLibrary"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "SessionAndProcessScopedTables"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "TableCallsWithStackReferences"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Views"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "References"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Constraints"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Devices"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "EventHandlers"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Exists"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "DML"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Cursors"); // verified BTR 3/5/2007
+begin
+	// This script must not be executed within a transaction because it executes some statements on a separate process, causing a block with itself.
+	while TransactionCount() > 0 do RollbackTransaction();
+	ExecuteScript("Coverage.Scripts", "SecurityLibrary"); // verified BTR 3/5/2007
+end;
+ExecuteScript("Coverage.Scripts", "ViewUpdatability"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Explode"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Sorts"); // verified BTR 3/5/2007 // TODO: Known issue with non-unique orders in the memory device?
+ExecuteScript("Coverage.Scripts", "TransitionConstraints"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "SystemCatalog"); // verified BTR 3/5/2007 // TODO: TestNavigable fails after reset with a cursor on TableVars, also, the ObjectDependencies explosion runs, but I didn't wait for it to complete
+ExecuteScript("Coverage.Scripts", "Serialization"); // verified BTR 10/05/2004 // TODO: This coverage fails because the ScriptLibrary operator needs to be revisited
+ExecuteScript("Coverage.Scripts", "ApplicationTransactions"); // verified BTR 3/5/2007 // TODO: Doesn't work through ExecuteScript
+ExecuteScript("Coverage.Scripts", "CreateTableFrom"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "Conversions"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "VersionNumber"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LibraryTypes"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LibraryCoverage"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LibraryRename"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LibraryDependencies"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "LibraryFilesCoverage"); // TODO: Build this coverage
+ExecuteScript("Coverage.Scripts", "DerivationMaps"); // no longer required (deprecated feature) BTR 6/6/2004
+ExecuteScript("Coverage.Scripts", "MaximumRowCount"); // verified BTR 6/9/2003 // TODO: Doesn't run 1/17/2004
+ExecuteScript("Coverage.Scripts", "StreamAllocation"); // TODO: Doesn't run 1/17/2004
+ExecuteScript("Coverage.Scripts", "ScalarAllocation"); // TODO: Build this coverage
+ExecuteScript("Coverage.Scripts", "RowAllocation"); // TODO: Build this coverage
+ExecuteScript("Coverage.Scripts", "LockAllocation"); // TODO: Build this coverage
+ExecuteScript("Coverage.Scripts", "TestProject"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "KeyAffectingUpdate"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "RowInsert"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "NodeOptimization"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "SemiTables"); // verified BTR 3/5/2007 // TODO: Ambiguous column names with common columns???
+ExecuteScript("Coverage.Scripts", "ScanTable"); // TODO: Needs to be rewritten (still uses old style type specifier in table selector expressions)
+ExecuteScript("Coverage.Scripts", "SpecifyClause"); // verified BTR 3/5/2007
+ExecuteScript("Coverage.Scripts", "TableIndexer"); // TODO: Build this coverage
+
+

@@ -1,0 +1,61 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Operator: ImportZipCodes()
+create operator ImportZipCodes()
+begin
+	var LZipcodes := LoadDocument('Sample.Shipping', 'zips');
+	var LPos := 0;
+	var LLength := LZipcodes.Length();
+	var LCurrentChar := "";
+	var LCurrentToken := "";
+	var LCurrentField := 1;
+	var LZipcode : Zip;
+	var LStateID : StateID;
+	var LCity : Description;
+	var LLatitude : Decimal;
+	var LLongitude : Decimal;
+	while LPos < LLength do
+	begin
+		LCurrentChar := LZipcodes[LPos];
+		case LCurrentChar
+			when """" then ; // ignore quote character
+			
+			when "," then
+			begin
+				case LCurrentField
+					when 2 then LZipcode := LCurrentToken;
+					when 3 then LStateID := LCurrentToken;
+					when 4 then LCity := LCurrentToken;
+					when 5 then LLatitude := LCurrentToken.ToDecimal();
+					when 6 then LLongitude := LCurrentToken.ToDecimal();
+				end;
+				
+				LCurrentToken := "";
+				LCurrentField := LCurrentField + 1;
+			end;
+			
+			when ASCII({ToByte(10)}) then
+			begin
+				if not exists (ZipCode where ZipCode = LZipcode) then
+					insert table { row { LZipcode ZipCode, LCity City, LStateID State_ID, Coordinate(Degrees(LLatitude), Degrees(LLongitude)) Coordinate } }
+						into ZipCode;
+				
+				LCurrentToken := "";
+				LCurrentField := 1;
+			end;
+			
+			else LCurrentToken := LCurrentToken + LCurrentChar;
+		end;
+		LPos := LPos + 1;
+	end;
+end;
+
+//* This usually takes about six minutes to run...
+//ImportZipCodes();
+//select Count(ZipCode);
+
+		
+

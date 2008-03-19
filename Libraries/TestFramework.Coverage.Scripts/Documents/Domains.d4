@@ -1,0 +1,98 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Domains
+// create domain
+create domain TestDomain like Integer;
+
+drop domain TestDomain;
+
+create domain TestDomain { representation TestDomain { Value : Integer } };
+
+drop domain TestDomain;
+
+create domain TestDomain like Integer { constraint IsPositive value >= 0 };
+
+drop domain TestDomain;
+
+create domain TestDomain like Integer { default 0 };
+
+drop domain TestDomain;
+
+create domain TestDomain like Integer { special Unknown 0 };
+
+drop domain TestDomain;
+
+create domain TestDomain
+{
+	representation TestDomain { Value : Integer },
+	constraint IsPositive value.Value >= 0,
+	default TestDomain(0),
+	special Unknown TestDomain(0)
+};
+
+create conversion Integer to TestDomain using TestDomain;
+
+drop conversion Integer to TestDomain;
+
+alter domain TestDomain alter tags { create Frontend.Width = "5" };
+
+alter domain TestDomain
+{
+	// create constraint
+	create constraint IsByte value.Value <= 255
+};
+
+alter domain TestDomain
+{
+	// alter constraint
+	alter constraint IsByte alter tags { create DAE.SimpleMessage = "Value must be less than or equal to 255." }
+};
+
+alter domain TestDomain
+{
+	// drop constraint
+	drop constraint IsPositive
+};
+
+alter domain TestDomain
+{
+	// alter default
+	alter default TestDomain(-1)
+};
+
+alter domain TestDomain
+{
+	// drop default
+	drop default  // null reference exception
+};
+
+alter domain TestDomain
+{
+	create default TestDomain(-1)
+};
+
+alter domain TestDomain
+{
+	// create special
+	create special Maximum TestDomain(255)
+};
+
+alter domain TestDomain
+{
+	// alter special
+	alter special Maximum TestDomain(254)
+};
+
+alter domain TestDomain
+{
+	// drop special
+	drop special Maximum
+};
+
+// drop domain
+drop domain TestDomain;
+

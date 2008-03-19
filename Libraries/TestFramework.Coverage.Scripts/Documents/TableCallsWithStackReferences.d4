@@ -1,0 +1,30 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// TODO: This is a known issue. Table-Valued parameters cannot be passed by reference
+// because the evaluation context is different than the compilation context.
+
+create table TestTable { Name : String };
+
+insert table { row { 'John' Name }, row { 'Jacob' Name }, row { 'Jingleheimer' Name }, row { 'Schmitt' Name } } into TestTable;
+
+create operator TestTableCall(const ATable : table { Name : String }) : Boolean
+begin
+	result := exists(ATable);
+end;
+
+begin
+	var AValue : String := 'John';
+	
+	if not(TestTableCall(TestTable where Name = 'John')) then
+		raise Error('Bad pass 1');
+	
+	if not(TestTableCall(TestTable where Name = AValue)) then
+		raise Error('Bad pass 2');
+end;
+
+drop operator TestTableCall(const table { Name : String });
+
+drop table TestTable;

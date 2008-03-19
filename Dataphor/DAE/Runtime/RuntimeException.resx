@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="104100" xml:space="preserve">
+    <value>Unable to obtain the requested lock on catalog object "{0}".</value>
+  </data>
+  <data name="104101" xml:space="preserve">
+    <value>Only the system administrator can perform this task.</value>
+  </data>
+  <data name="104102" xml:space="preserve">
+    <value>Only the system user can perform this task.</value>
+  </data>
+  <data name="104103" xml:space="preserve">
+    <value>Stack empty.</value>
+  </data>
+  <data name="104104" xml:space="preserve">
+    <value>Stack index out of range ({0}).</value>
+  </data>
+  <data name="104105" xml:space="preserve">
+    <value>A parameter named "{0}" was not found.</value>
+  </data>
+  <data name="104106" xml:space="preserve">
+    <value>Parameter stack empty.</value>
+  </data>
+  <data name="104107" xml:space="preserve">
+    <value>Semaphore cannot be released because it has not been acquired.</value>
+  </data>
+  <data name="104108" xml:space="preserve">
+    <value>Semaphore cannot be requested in "{0}" mode.</value>
+  </data>
+  <data name="104109" xml:space="preserve">
+    <value>Cursor "{0}" not found.</value>
+  </data>
+  <data name="104110" xml:space="preserve">
+    <value>Unable to construct index key.</value>
+  </data>
+  <data name="104111" xml:space="preserve">
+    <value>Internal Error: Native table value for table variable "{0}" not found.</value>
+  </data>
+  <data name="104112" xml:space="preserve">
+    <value>Current list size exceeds new setting for maximum number of cursors.</value>
+  </data>
+  <data name="104113" xml:space="preserve">
+    <value>New value violates minimum table count for a browse node.</value>
+  </data>
+  <data name="104114" xml:space="preserve">
+    <value>Browse table "{0}" has no top table available.</value>
+  </data>
+  <data name="104115" xml:space="preserve">
+    <value>Search argument must be a subset of the order columns.</value>
+  </data>
+  <data name="104116" xml:space="preserve">
+    <value>Internal Error: AggregateTable.TargetScan does not contain newly inserted row.</value>
+  </data>
+  <data name="104117" xml:space="preserve">
+    <value>Unimplemented: OrderNode.SequenceColumn.</value>
+  </data>
+  <data name="104118" xml:space="preserve">
+    <value>BrowseTable.InternalRowCount() unimplemented.</value>
+  </data>
+  <data name="104119" xml:space="preserve">
+    <value>Internal Error: ExplodeTable.InternalNext: Could not locate newly inserted row.</value>
+  </data>
+  <data name="104120" xml:space="preserve">
+    <value>Internal Error: Newly inserted row not found in UnionTable.InternalNext().</value>
+  </data>
+  <data name="104121" xml:space="preserve">
+    <value>Table "{0}" must be open to perform this operation.</value>
+  </data>
+  <data name="104122" xml:space="preserve">
+    <value>Table "{0}" must be closed to perform this operation.</value>
+  </data>
+  <data name="104123" xml:space="preserve">
+    <value>Table is not backwards navigable.</value>
+  </data>
+  <data name="104124" xml:space="preserve">
+    <value>Table is not bookmarkable.</value>
+  </data>
+  <data name="104125" xml:space="preserve">
+    <value>Table is not searchable.</value>
+  </data>
+  <data name="104126" xml:space="preserve">
+    <value>Table is not countable.</value>
+  </data>
+  <data name="104127" xml:space="preserve">
+    <value>Table has no current row to perform this operation.</value>
+  </data>
+  <data name="104128" xml:space="preserve">
+    <value>Table is not updateable.</value>
+  </data>
+  <data name="104129" xml:space="preserve">
+    <value>Table is not truncateable.</value>
+  </data>
+  <data name="104130" xml:space="preserve">
+    <value>Table node required to create a Table cursor.</value>
+  </data>
+  <data name="104131" xml:space="preserve">
+    <value>"{0}" not supported.</value>
+  </data>
+  <data name="104132" xml:space="preserve">
+    <value>Minimum string value cannot be determined for an empty set.</value>
+  </data>
+  <data name="104133" xml:space="preserve">
+    <value>Maximum string value cannot be determined for an empty set.</value>
+  </data>
+  <data name="104134" xml:space="preserve">
+    <value>Internal Error: HeapReferenceNode should never be executed.</value>
+  </data>
+  <data name="104135" xml:space="preserve">
+    <value>Internal Error: CatalogReferenceNode should never be executed.</value>
+  </data>
+  <data name="104136" xml:space="preserve">
+    <value>Internal Error: PropertyReferenceNode should never be executed.</value>
+  </data>
+  <data name="104137" xml:space="preserve">
+    <value>Device "{0}" does not support retrieval for the table variable "{1}".</value>
+  </data>
+  <data name="104138" xml:space="preserve">
+    <value>Statement extraction not supported for plan node "{0}".</value>
+  </data>
+  <data name="104139" xml:space="preserve">
+    <value>Instruction execution not supported for plan node "{0}".</value>
+  </data>
+  <data name="104140" xml:space="preserve">
+    <value>Row value cannot be extracted from an empty table.</value>
+  </data>
+  <data name="104141" xml:space="preserve">
+    <value>Column value cannot be extracted from an empty table.</value>
+  </data>
+  <data name="104142" xml:space="preserve">
+    <value>Column value cannot be extracted from an empty presentation.</value>
+  </data>
+  <data name="104143" xml:space="preserve">
+    <value>The new row does not meet the specified filter criteria.</value>
+  </data>
+  <data name="104144" xml:space="preserve">
+    <value>Unable to resolve aggregate operator reference "{0}".</value>
+  </data>
+  <data name="104145" xml:space="preserve">
+    <value>Internal Error: Browse variant not found: Origin index: ({0}), Forward: ({1}), Inclusive: ({2}).</value>
+  </data>
+  <data name="104146" xml:space="preserve">
+    <value>New row violates difference predicate.</value>
+  </data>
+  <data name="104147" xml:space="preserve">
+    <value>New row violates join predicate.</value>
+  </data>
+  <data name="104148" xml:space="preserve">
+    <value>Table expressions contain common column names and cannot be used in a times expression.</value>
+  </data>
+  <data name="104149" xml:space="preserve">
+    <value>Table value expected.</value>
+  </data>
+  <data name="104150" xml:space="preserve">
+    <value>Violation of catalog constraint "{0}".</value>
+  </data>
+  <data name="104151" xml:space="preserve">
+    <value>Violation of insert transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104152" xml:space="preserve">
+    <value>Violation of update transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104153" xml:space="preserve">
+    <value>Violation of delete transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104154" xml:space="preserve">
+    <value>Violation of row constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104155" xml:space="preserve">
+    <value>Violation of constraint "{0}" defined on scalar type "{1}".</value>
+  </data>
+  <data name="104156" xml:space="preserve">
+    <value>Value required for column "{0}".</value>
+  </data>
+  <data name="104157" xml:space="preserve">
+    <value>Optimistic concurrency check failed.  Row could not be located for concurrency check.</value>
+  </data>
+  <data name="104158" xml:space="preserve">
+    <value>Unable to perform insert.</value>
+  </data>
+  <data name="104159" xml:space="preserve">
+    <value>Unable to perform update.</value>
+  </data>
+  <data name="104160" xml:space="preserve">
+    <value>Unable to perform delete.</value>
+  </data>
+  <data name="104161" xml:space="preserve">
+    <value>Table node internal execute cannot be invoked.</value>
+  </data>
+  <data name="104162" xml:space="preserve">
+    <value>Device name expected in Reconcile operator.</value>
+  </data>
+  <data name="104163" xml:space="preserve">
+    <value>DDL node cannot be cloned.</value>
+  </data>
+  <data name="104164" xml:space="preserve">
+    <value>Constraint "{0}" cannot be created because data exists which violates the constraint.</value>
+  </data>
+  <data name="104165" xml:space="preserve">
+    <value>Reference "{0}" cannot be created because rows exist which violate the constraint.</value>
+  </data>
+  <data name="104166" xml:space="preserve">
+    <value>{0} cannot be created in this release.</value>
+  </data>
+  <data name="104167" xml:space="preserve">
+    <value>{0} cannot be altered in this release.</value>
+  </data>
+  <data name="104168" xml:space="preserve">
+    <value>{0} cannot be dropped in this release.</value>
+  </data>
+  <data name="104169" xml:space="preserve">
+    <value>Column "{0}" in table "{1}" already has a default defined."</value>
+  </data>
+  <data name="104170" xml:space="preserve">
+    <value>Column "{0}" in table "{1}" does not have a default defined.</value>
+  </data>
+  <data name="104171" xml:space="preserve">
+    <value>Invalid alter statement.</value>
+  </data>
+  <data name="104172" xml:space="preserve">
+    <value>Object "{0}" is not a table variable.</value>
+  </data>
+  <data name="104173" xml:space="preserve">
+    <value>Object "{0}" is not a table.</value>
+  </data>
+  <data name="104174" xml:space="preserve">
+    <value>Object "{0}" is not a view.</value>
+  </data>
+  <data name="104175" xml:space="preserve">
+    <value>Object "{0}" is not a scalar type.</value>
+  </data>
+  <data name="104176" xml:space="preserve">
+    <value>Object "{0}" is not an aggregate operator.</value>
+  </data>
+  <data name="104177" xml:space="preserve">
+    <value>Object "{0}" is not a constraint.</value>
+  </data>
+  <data name="104178" xml:space="preserve">
+    <value>Object "{0}" is not a reference.</value>
+  </data>
+  <data name="104179" xml:space="preserve">
+    <value>Object "{0}" is not a server link.</value>
+  </data>
+  <data name="104180" xml:space="preserve">
+    <value>Object "{0}" is not a device.</value>
+  </data>
+  <data name="104182" xml:space="preserve">
+    <value>Object "{0}" is a system object and cannot be dropped.</value>
+  </data>
+  <data name="104183" xml:space="preserve">
+    <value>Device "{0}" is in use and cannot be dropped.</value>
+  </data>
+  <data name="104184" xml:space="preserve">
+    <value>Statement extraction not supported for values of type "{0}".</value>
+  </data>
+  <data name="104185" xml:space="preserve">
+    <value>Internal: DerivedTableVarNode source must be a TableNode descendent.</value>
+  </data>
+  <data name="104186" xml:space="preserve">
+    <value>Internal Error: Unknown table variable class.</value>
+  </data>
+  <data name="104187" xml:space="preserve">
+    <value>Set is not ordered.</value>
+  </data>
+  <data name="104188" xml:space="preserve">
+    <value>Set should be BOF.</value>
+  </data>
+  <data name="104190" xml:space="preserve">
+    <value>No value available.</value>
+  </data>
+  <data name="104191" xml:space="preserve">
+    <value>Violation of constraint "{0}".</value>
+  </data>
+  <data name="104192" xml:space="preserve">
+    <value>Generators table must be of type "table { ID : string, NextKey : integer, key { ID } }".</value>
+  </data>
+  <data name="104193" xml:space="preserve">
+    <value>Table "{0}" is functioning as the generators table and cannot be dropped.</value>
+  </data>
+  <data name="104194" xml:space="preserve">
+    <value>Internal Error: "{0}".</value>
+  </data>
+  <data name="104195" xml:space="preserve">
+    <value>Cannot cast a value of type "{0}" to type "{1}".</value>
+  </data>
+  <data name="104196" xml:space="preserve">
+    <value>Optimistic concurrency check failed.  Row has been updated by another user.</value>
+  </data>
+  <data name="104197" xml:space="preserve">
+    <value>Rows being joined have common columns, and do not have common values for those columns.</value>
+  </data>
+  <data name="104198" xml:space="preserve">
+    <value>Cursor value cannot be copied.</value>
+  </data>
+  <data name="104200" xml:space="preserve">
+    <value>Maximum row count exceeded in row manager.</value>
+  </data>
+  <data name="104201" xml:space="preserve">
+    <value>Maximum scalar count exceeded in scalar manager.</value>
+  </data>
+  <data name="104202" xml:space="preserve">
+    <value>Timed out waiting for semaphore.</value>
+  </data>
+  <data name="104203" xml:space="preserve">
+    <value>Timed out waiting for {0} lock on "{1}" in resource manager ({2}).</value>
+  </data>
+  <data name="104204" xml:space="preserve">
+    <value>Maximum lock count exceeded in lock manager.</value>
+  </data>
+  <data name="104205" xml:space="preserve">
+    <value>Version number components must be greater than or equal to -1.</value>
+  </data>
+  <data name="104206" xml:space="preserve">
+    <value>Version number components must be defined in order (major, minor, revision, build).</value>
+  </data>
+  <data name="104207" xml:space="preserve">
+    <value>Violation of column constraint "{0}" on column "{1}" of table "{2}"."</value>
+  </data>
+  <data name="104208" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate constraint "{0}" defined on scalar type "{1}".</value>
+  </data>
+  <data name="104209" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate constraint "{0}" defined on column "{1}" in table "{2}".</value>
+  </data>
+  <data name="104210" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate row constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104211" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate insert transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104212" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate update transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104213" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate delete transition for constraint "{0}" defined on table "{1}".</value>
+  </data>
+  <data name="104214" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate catalog constraint "{0}".</value>
+  </data>
+  <data name="104215" xml:space="preserve">
+    <value>Exceptions occurred while attempting to validate constraint "{0}".</value>
+  </data>
+  <data name="104216" xml:space="preserve">
+    <value>Maximum stack depth ({0}) has been exceeded.</value>
+  </data>
+  <data name="104217" xml:space="preserve">
+    <value>Exceptions occurred while attempting to run the registration script for library "{0}".</value>
+  </data>
+  <data name="104218" xml:space="preserve">
+    <value>Exceptions occurred while attempting to rollback library registration for library "{0}": {1}</value>
+  </data>
+  <data name="104219" xml:space="preserve">
+    <value>Column "{0}" in table "{1}" cannot be marked non-nil because rows exist which have no values for this column.</value>
+  </data>
+  <data name="104220" xml:space="preserve">
+    <value>Invalid value type "{0}".</value>
+  </data>
+  <data name="104221" xml:space="preserve">
+    <value>Unable to convert a value of type "{0}" to a value of type "{1}".</value>
+  </data>
+  <data name="104222" xml:space="preserve">
+    <value>Unable to provide stream access for a value of type "{0}".</value>
+  </data>
+  <data name="104223" xml:space="preserve">
+    <value>Unable to provide cursor access for a value of type "{0}".</value>
+  </data>
+  <data name="104224" xml:space="preserve">
+    <value>Internal Error: Unprepared call of method WriteToPhysical.</value>
+  </data>
+  <data name="104225" xml:space="preserve">
+    <value>Representation "{0}" of scalar type "{1}" is read only.</value>
+  </data>
+  <data name="104226" xml:space="preserve">
+    <value>Scalar type "{0}" already has a default defined."</value>
+  </data>
+  <data name="104227" xml:space="preserve">
+    <value>Scalar type "{0}" does not have a default defined.</value>
+  </data>
+  <data name="104228" xml:space="preserve">
+    <value>No supporting device for modification of the expression "{0}".</value>
+  </data>
+  <data name="104229" xml:space="preserve">
+    <value>Runtime error: {0}</value>
+  </data>
+  <data name="104230" xml:space="preserve">
+    <value>A nil was encountered where a value was expected.</value>
+  </data>
+  <data name="104231" xml:space="preserve">
+    <value>A value was encountered where a nil was expected.</value>
+  </data>
+  <data name="104232" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="104233" xml:space="preserve">
+    <value>Stated characteristics ({0}) do not match actual characteristics ({1}).</value>
+  </data>
+  <data name="104234" xml:space="preserve">
+    <value>New row violates quota predicate.</value>
+  </data>
+  <data name="104235" xml:space="preserve">
+    <value>New row violates having predicate.</value>
+  </data>
+  <data name="104236" xml:space="preserve">
+    <value>New row violates without predicate.</value>
+  </data>
+  <data name="104237" xml:space="preserve">
+    <value>Invalid length argument provided.  The length cannot be a negative value.</value>
+  </data>
+  <data name="104238" xml:space="preserve">
+    <value>Maximum call depth ({0}) has been exceeded.</value>
+  </data>
+</root>

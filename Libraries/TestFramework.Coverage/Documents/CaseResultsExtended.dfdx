@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('TestFramework.Coverage.Base.CaseResultsExtended', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <scriptaction ibop:order="10" bop:name="PreRunCaseAction" script="using (Alphora.Dataphor.Frontend.Client.Windows.StatusForm LStatusForm = new &#xD;&#xA;Alphora.Dataphor.Frontend.Client.Windows.StatusForm(&quot;Running Case&quot;))&#xD;&#xA;&#xD;&#xA;{&#xD;&#xA;&#xD;&#xA;      RunCaseAction.Execute();&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA; " language="CSharp" />
+   <datascriptaction ibop:order="11" bop:name="RunCaseAction" afterexecute="Refresh" script="TestFramework.Coverage.Base.RunCoverage(Main.ID);">
+      <dataargument ibop:order="0" bop:name="RunCaseActionArguments" columns="Main.ID" source="Main" />
+   </datascriptaction>
+   <scriptaction ibop:order="12" bop:name="PreRunAllAction" script="using (Alphora.Dataphor.Frontend.Client.Windows.StatusForm LStatusForm = new &#xD;&#xA;Alphora.Dataphor.Frontend.Client.Windows.StatusForm(&quot;Running Coverage&quot;))&#xD;&#xA;&#xD;&#xA;{&#xD;&#xA;&#xD;&#xA;      RunAllAction.Execute();&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA; " language="CSharp" />
+   <datascriptaction ibop:order="13" bop:name="RunAllAction" afterexecute="Refresh" script="TestFramework.Coverage.Base.RunCoverage(nil);" />
+   <showformaction ibop:order="14" bop:name="ShowCasesEditFormAction" mode="Edit" document="Form('TestFramework.Coverage', 'Cases')" sourcelink.source="Main" sourcelink.detailkeynames="Main.ID" sourcelink.masterkeynames="Main.ID" sourcelinktype="Detail" />
+   <menu ibop:order="15" bop:name="NavigationMenu" />
+   <column ibop:order="16" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <grid bop:name="Grid">
+            <textcolumn ibop:order="2" bop:name="MainGridColumnMain.Status" />
+            <textcolumn ibop:order="3" bop:name="MainGridColumnMain.Results" />
+            <textcolumn ibop:order="4" bop:name="MainGridColumnMain.User_ID" bop:default-width="True" />
+            <textcolumn ibop:order="5" bop:name="MainGridColumnMain.DateTime" />
+            <textcolumn ibop:order="6" bop:name="MainGridColumnMain.Command" />
+         </grid>
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="RunCaseTrigger" margintop="25" text="Run Case" imageheight="13" imagewidth="11" action="RunCaseAction" />
+            <trigger ibop:order="5" bop:name="RunCoverageTrigger" text="Run All" imageheight="13" imagewidth="11" action="PreRunAllAction" />
+            <trigger ibop:order="6" bop:name="EditCaseTrigger" text="Edit Case" imageheight="13" imagewidth="11" action="ShowCasesEditFormAction" />
+         </column>
+      </row>
+   </column>
+</interface>
+</document>
+</dilx>

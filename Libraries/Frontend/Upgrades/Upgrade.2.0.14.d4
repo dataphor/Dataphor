@@ -1,0 +1,32 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Operator: LoadIfNecessary
+SafeDrop('LoadIfNecessary(String, Integer)');
+create operator LoadIfNecessary(ADocument : String, ACRC32 : Integer) : row { CRCMatches : Boolean, Value : Scalar, ActualCRC32 : Integer }
+begin
+	var LData := 
+		(
+			Evaluate(ADocument) 
+				with
+				{
+					IsFunctional = "false",
+					IsDeterministic = "false",
+					IsRepeatable = "false"
+				}
+		) as Scalar;
+	if not IsNil(LData) then
+	begin
+		var LCRC32 := GetCRC32(LData);
+		if LCRC32 = ACRC32 then
+			result := row { true CRCMatches, nil Value, LCRC32 ActualCRC32 }
+		else
+			result := row { false CRCMatches, LData Value, LCRC32 ActualCRC32 };
+	end
+	else
+		result := row { false CRCMatches, LData Value, 0 ActualCRC32 };
+end;
+grant usage on LoadIfNecessary(String, Integer) to role User;
+

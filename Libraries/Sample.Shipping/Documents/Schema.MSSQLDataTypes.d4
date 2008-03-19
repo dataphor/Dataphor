@@ -1,0 +1,57 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+** MSSQL Device Domain Mappings
+*/
+
+alter device Shipping
+{
+	create type ContactID,
+	create type InvoiceID,
+	create type ProperName,
+	create type Notes,
+	create type Description,
+	create type PhoneTypeID,
+	create type ItemTypeID,
+	create type LocationID,
+	create type InvoiceStatusID,
+	create type Phone,
+	create type StateID,
+	create type Zip,
+	create type Degree class "SQLDevice.SQLDecimal",
+	create type Coordinate class "Shipping.SQLCoordinate",
+	create type Distance class "SQLDevice.SQLDecimal",
+	create type ShippingRate class "SQLDevice.SQLDecimal",
+	create operator iCompare(const Degree, const Degree) class "SQLDevice.SQLCompare",
+	create operator Degree(const Integer, const Integer, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree" },
+	create operator Degree.ReadDegreesPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadDegreesPart" },
+	create operator Degree.WriteDegreesPart(const Degree, const Integer) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_WriteDegreesPart" },
+	create operator Degree.ReadMinutesPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadMinutesPart" },
+	create operator Degree.WriteMinutesPart(const Degree, const Integer) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_DegreeWriteMinutesPart" },
+	create operator Degree.ReadSecondsPart(const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_ReadSecondsPart" },
+	create operator Degree.WriteSecondsPart(const Degree, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Degree_WriteSecondsPart" },
+	create operator iCompare(const Coordinate, const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_Compare" },
+	create operator Coordinate(const Degree, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate" },
+	create operator Coordinate.ReadLatitude(const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_ReadLatitude" },
+	create operator Coordinate.WriteLatitude(const Coordinate, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_WriteLatitude" },
+	create operator Coordinate.ReadLongitude(const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_ReadLongitude" },
+	create operator Coordinate.WriteLongitude(const Coordinate, const Degree) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Coordinate_WriteLongitude" },
+	create operator iCompare(const Distance, const Distance) class "SQLDevice.SQLCompare",
+	create operator Distance.Kilometers(const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_Kilometers" },
+	create operator Distance.ReadKilometers(const Distance) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_ReadKilometers" },
+	create operator Distance.WriteKilometers(const Distance, const Decimal) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance_WriteKilometers" },
+	create operator Distance.Miles(const Decimal) class "SQLDevice.SQLScalarSelector",
+	create operator Distance.ReadMiles(const Distance) class "SQLDevice.SQLScalarReadAccessor",
+	create operator Distance.WriteMiles(const Distance, const Decimal) class "SQLDevice.SQLScalarWriteAccessor",
+	create operator Distance(const Coordinate, const Coordinate) class "SQLDevice.SQLCallOperator" attributes { "OperatorName" = "dbo.Shipping_Distance" },
+	create operator iCompare(const ShippingRate, const ShippingRate) class "SQLDevice.SQLCompare",
+	create operator ShippingRate.DollarsPerMile(const Money) class "SQLDevice.SQLScalarSelector",
+	create operator ShippingRate.ReadRate(const ShippingRate) class "SQLDevice.SQLScalarReadAccessor",
+	create operator ShippingRate.WriteRate(const ShippingRate, const Money) class "SQLDevice.SQLScalarWriteAccessor",
+	create operator iMultiplication(const Distance, const ShippingRate) class "SQLDevice.SQLMultiplication",
+	create operator iMultiplication(const ShippingRate, const Distance) class "SQLDevice.SQLMultiplication"
+};
+

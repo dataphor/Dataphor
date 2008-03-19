@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample01">
+  <source expression="Vehicles order by { Description }" beginscript="create session table Vehicles&#xD;&#xA;{&#xD;&#xA;	ID : Byte { default GetNextGenerator(&quot;STH.ID&quot;) }&#xD;&#xA;	 tags { Frontend.Width = &quot;5&quot;, Frontend.ReadOnly = &quot;true&quot; },&#xD;&#xA;	Description : String&#xD;&#xA;	 tags { Frontend.Width = &quot;20&quot;, Frontend.Preview.Include = &quot;true&quot; },&#xD;&#xA;	key { ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;Vehicles := table&#xD;&#xA; {&#xD;&#xA;	row { 2 ID, &quot;Chevy&quot; Description },&#xD;&#xA;	row { 3, &quot;Avalanche&quot; },&#xD;&#xA;	row { 4, &quot;1500&quot; },&#xD;&#xA;	row { 5, &quot;2500&quot; },&#xD;&#xA;	row { 6, &quot;Blazer&quot; },&#xD;&#xA;	row { 7, &quot;2 Door&quot; },&#xD;&#xA;	row { 8, &quot;Equinox&quot; },&#xD;&#xA;	row { 9, &quot;LS&quot; },&#xD;&#xA;	row { 10, &quot;LT&quot; },&#xD;&#xA;	row { 11, &quot;Suburban&quot; },&#xD;&#xA;	row { 12, &quot;Half Ton&quot; },&#xD;&#xA;	row { 13, &quot;Three Quarter Ton&quot; },&#xD;&#xA;	row { 14, &quot;Tahoe&quot; },&#xD;&#xA;	row { 15, &quot;LS&quot; },&#xD;&#xA;	row { 16, &quot;Z71&quot; },&#xD;&#xA;	row { 17, &quot;LT&quot; },&#xD;&#xA;	row { 18, &quot;TrailBlazer&quot; },&#xD;&#xA;	row { 19, &quot;5 Passenger&quot; },&#xD;&#xA;	row { 20, &quot;7 Passenger EXT&quot; },&#xD;&#xA;	row { 21, &quot;Ford&quot; },&#xD;&#xA;	row { 22, &quot;Escape&quot; },&#xD;&#xA;	row { 23, &quot;XLS&quot; },&#xD;&#xA;	row { 24, &quot;XLT&quot; },&#xD;&#xA;	row { 25, &quot;Limited&quot; },&#xD;&#xA;	row { 26, &quot;Excursion&quot; },&#xD;&#xA;	row { 27, &quot;XLS&quot; },&#xD;&#xA;	row { 28, &quot;XLT&quot; },&#xD;&#xA;	row { 29, &quot;Eddie Bauer&quot; },&#xD;&#xA;	row { 30, &quot;Limited&quot; },&#xD;&#xA;	row { 31, &quot;Expedition&quot; },&#xD;&#xA;	row { 32, &quot;XLS&quot; },&#xD;&#xA;	row { 33, &quot;XLT&quot; },&#xD;&#xA;	row { 34, &quot;NBX&quot; },&#xD;&#xA;	row { 35, &quot;Eddie Bauer&quot; },&#xD;&#xA;	row { 36, &quot;Explorer&quot; },&#xD;&#xA;	row { 37, &quot;XLS&quot; },&#xD;&#xA;	row { 38, &quot;XLT&quot; },&#xD;&#xA;	row { 39, &quot;NBX&quot; },&#xD;&#xA;	row { 40, &quot;Eddie Bauer&quot; },&#xD;&#xA;	row { 41, &quot;Limited&quot; },&#xD;&#xA;	row { 42, &quot;Explorer Sport Trac&quot; },&#xD;&#xA;	row { 43, &quot;XLS&quot; },&#xD;&#xA;	row { 44, &quot;XLT&quot; },&#xD;&#xA;	row { 45, &quot;XLT Premium&quot; },&#xD;&#xA;	row { 46, &quot;Adrenalin&quot; }&#xD;&#xA; };" endscript="drop table Vehicles;" bop:name="Source1" />
+  <source expression="TableDee add { String(nil) FindValue tags { DAE.IsComputed = 'false' } };" openstate="Edit" bop:name="Temp" />
+  <blockaction text="Exec&amp;ute" bop:name="FindVehicleBlockAction">
+    <setpropertyaction node="FindVehicleAction" membername="Value" source="Temp" columnname="FindValue" bop:name="SetFindActionValueProperty" />
+    <findaction columnname="Description" source="Source1" bop:name="FindVehicleAction" />
+  </blockaction>
+  <row bop:name="RootRow">
+    <group title="Sample01" bop:name="Sample01Group">
+      <column bop:name="SampleColumn">
+        <group title="Find a &amp;Vehicle" bop:name="FindGroup">
+          <row bop:name="Row2">
+            <textbox nilifblank="True" width="14" maxwidth="15" columnname="FindValue" title="Vehicle to Find" source="Temp" hint="Enter a description to find." helpstring="Enter the Description value you would like to find. Then press the Execute button." bop:name="EntryTextBox" />
+            <trigger verticalalignment="Middle" action="FindVehicleBlockAction" bop:name="ExecuteTrigger" />
+          </row>
+        </group>
+        <grid source="Source1" readonly="True" bop:name="Grid1">
+          <textcolumn columnname="Description" width="18" bop:name="DescriptionTextColumn" />
+        </grid>
+      </column>
+    </group>
+    <frame document="Form('Sample.Components','Sample01Docs')" bop:name="Docs" />
+  </row>
+</interface>

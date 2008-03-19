@@ -1,0 +1,8 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+create type Script like SQLText tags { Frontend.Width = "150", Frontend.TextBox.Height = "7" };
+create type LongString like System.String static tags { Storage.Length = "50" };

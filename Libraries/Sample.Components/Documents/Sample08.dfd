@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample08" onafteractivate="RefreshAll" onbeforedeactivate="DisableContinentCountSource">
+  <scriptaction script="ContinentCountSource.Enabled = false;" bop:name="DisableContinentCountSource" />
+  <sourceaction action="First" source="Countries" text="First Row" bop:name="FirstCountry" />
+  <sourceaction action="Last" source="Countries" text="LastRow" bop:name="LastCountry" />
+  <sourceaction action="Prior" source="Countries" text="Previous Row" bop:name="PreviousCountry" />
+  <sourceaction action="Next" source="Countries" text="Next Row" bop:name="NextCountry" />
+  <source expression="Country order by { Name };" beginscript="SafeDrop('Country');&#xD;&#xA;&#xD;&#xA;create session table Country&#xD;&#xA;{ &#xD;&#xA;	ID : String&#xD;&#xA;		tags { Storage.Length = '2', Frontend.Width = '3', Frontend.ReadOnly = 'true' },&#xD;&#xA;	Name : String&#xD;&#xA;	 tags { Frontend.Width = '20', Frontend.Preview.Include = 'true' },&#xD;&#xA;	Population : Integer,&#xD;&#xA;	Area : Integer,&#xD;&#xA;	Continent : String,&#xD;&#xA;	Coordinate : String,&#xD;&#xA;	key { ID }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;ExecuteScript('Sample.Components', 'Country');" endscript="SafeDrop('Country');&#xD;&#xA;" bop:name="Countries" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="ID" sourcelink.detailkeynames="Main.ID" sourcelink.source="Countries" sourcelinkrefresh="False" document="Derive('Country', 'View', 'ID', 'Main.ID', false)" bop:name="View" />
+  <source expression="TableDee&#xD;&#xA;	add { Count(Country where Continent = SelectedContinent) ContinentCount }&#xD;&#xA;	add &#xD;&#xA;		{&#xD;&#xA;			(&#xD;&#xA;				&quot;The Continent of &quot; &#xD;&#xA;				+ SelectedContinent&#xD;&#xA;				+ &quot; has &quot;&#xD;&#xA;				+ ContinentCount.AsString&#xD;&#xA;				+ &quot; Countries&quot;&#xD;&#xA;			) ContinentCountText&#xD;&#xA;		};" bop:name="ContinentCountSource">
+    <dataargument source="Countries" columns="SelectedContinent=Continent" bop:name="ContinentCountDataArgument" />
+  </source>
+  <datascriptaction script="ExecuteScript('Country');" afterexecute="RefreshAll" text="Restore all Countries" bop:name="RestoreAllCountries" />
+  <datascriptaction script="delete Country where Continent = SelectedContinent;" afterexecute="RefreshAll" text="Remove countries in selected Continent" bop:name="RemoveSelectedContinent">
+    <dataargument source="Countries" columns="SelectedContinent=Continent" bop:name="RemoveContinentDataArgument" />
+  </datascriptaction>
+  <blockaction bop:name="RefreshAll">
+    <sourceaction action="Refresh" source="Countries" bop:name="RefreshCountries" />
+    <scriptaction script="CountryCountStaticText.Text =&#xD;&#xA;	&quot;There are &quot;&#xD;&#xA;	+ Host.Session.Evaluate(&quot;Count(Country)&quot;).AsString&#xD;&#xA;	+ &quot; countries listed.&quot;;&#xD;&#xA;" bop:name="UpdateCountryCountText" />
+  </blockaction>
+  <exposed action="RestoreAllCountries" bop:name="RestoreAllCountriesExposed" />
+  <row bop:name="MainRow">
+    <column bop:name="Column1">
+      <row margintop="10" bop:name="Row2">
+        <trigger verticalalignment="Middle" action="FirstCountry" marginleft="2" bop:name="FirstRowTrigger1" />
+        <trigger verticalalignment="Middle" action="PreviousCountry" marginleft="5" bop:name="PreviousRowTrigger1" />
+        <trigger verticalalignment="Middle" action="NextCountry" marginleft="5" bop:name="NextRowTrigger1" />
+        <trigger verticalalignment="Middle" action="LastCountry" marginleft="5" bop:name="LastRowTrigger1" />
+      </row>
+      <group title="Sample08" bop:name="Sample08Group">
+        <column bop:name="Column2">
+          <grid rowcount="8" ondoubleclick="View" source="Countries" bop:name="CountriesGrid">
+            <textcolumn columnname="Name" width="20" bop:name="NameTextColumn" />
+            <textcolumn columnname="Continent" width="20" bop:name="ContinentTextColumn" />
+          </grid>
+        </column>
+      </group>
+      <group bop:name="ContinentGroup">
+        <column bop:name="Column3">
+          <statictext text="There are 262 countries listed." bop:name="CountryCountStaticText" />
+          <text titlealignment="None" columnname="ContinentCountText" source="ContinentCountSource" bop:name="ContinentCountText" />
+          <trigger verticalalignment="Middle" action="RemoveSelectedContinent" marginleft="5" marginright="5" marginbottom="2" bop:name="RemoveSelectedContinentTrigger1" />
+        </column>
+      </group>
+    </column>
+    <frame document="Form('Sample.Components', 'Sample08Docs')" bop:name="Frame1" />
+  </row>
+</interface>

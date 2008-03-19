@@ -1,0 +1,123 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+SafeDrop('T');
+create table T { X : Integer, Y : Integer, key { X } };
+
+for LIndex : Integer := 1 to 10 do
+	insert table { row { LIndex X, LIndex Y } } into T;
+	
+update T set { X := X + 1 };	
+
+if T <> table { row { 2 X, 1 Y }, row { 3, 2 }, row { 4, 3 }, row { 5, 4 }, row { 6, 5 }, row { 7, 6 }, row { 8, 7 }, row { 9, 8 }, row { 10, 9 }, row { 11, 10 } } then
+	raise Error('Update failed');
+	
+update T set { X := X + 1 } where X > 5;
+
+if T <> table { row { 2 X, 1 Y }, row { 3, 2 }, row { 4, 3 }, row { 5, 4 }, row { 7, 5 }, row { 8, 6 }, row { 9, 7 }, row { 10, 8 }, row { 11, 9 }, row { 12, 10 } } then
+	raise Error('Restricted update failed');
+
+update T set { Y := Y + 1 };
+
+if T <> table { row { 2 X, 2 Y }, row { 3, 3 }, row { 4, 4 }, row { 5, 5 }, row { 7, 6 }, row { 8, 7 }, row { 9, 8 }, row { 10, 9 }, row { 11, 10 }, row { 12, 11 } } then
+	raise Error('Update to Y failed');
+
+update T set { Y := Y + 1 } where Y > 5;
+
+if T <> table { row { 2 X, 2 Y }, row { 3, 3 }, row { 4, 4 }, row { 5, 5 }, row { 7, 7 }, row { 8, 8 }, row { 9, 9 }, row { 10, 10 }, row { 11, 11 }, row { 12, 12 } } then
+	raise Error('Restricted Update to Y failed');
+
+drop table T;
+
+//*
+create table T { X : Integer, Y : Integer, Logo : Graphic, key { X } };
+
+for LIndex : Integer := 1 to 10 do
+	insert table { row { LIndex X, LIndex Y, Image("Frontend", "Image.Add") Logo } } into T;
+	
+update T set { X := X + 1 };
+
+if (T over { X, Y }) <> table { row { 2 X, 1 Y }, row { 3, 2 }, row { 4, 3 }, row { 5, 4 }, row { 6, 5 }, row { 7, 6 }, row { 8, 7 }, row { 9, 8 }, row { 10, 9 }, row { 11, 10 } } then
+	raise Error('Update failed');
+	
+update T set { X := X + 1 } where X > 5;
+
+if (T over { X, Y }) <> table { row { 2 X, 1 Y }, row { 3, 2 }, row { 4, 3 }, row { 5, 4 }, row { 7, 5 }, row { 8, 6 }, row { 9, 7 }, row { 10, 8 }, row { 11, 9 }, row { 12, 10 } } then
+	raise Error('Restricted update failed');
+
+update T set { Y := Y + 1 };
+
+if (T over { X, Y }) <> table { row { 2 X, 2 Y }, row { 3, 3 }, row { 4, 4 }, row { 5, 5 }, row { 7, 6 }, row { 8, 7 }, row { 9, 8 }, row { 10, 9 }, row { 11, 10 }, row { 12, 11 } } then
+	raise Error('Update to Y failed');
+
+update T set { Y := Y + 1 } where Y > 5;
+
+if (T over { X, Y }) <> table { row { 2 X, 2 Y }, row { 3, 3 }, row { 4, 4 }, row { 5, 5 }, row { 7, 7 }, row { 8, 8 }, row { 9, 9 }, row { 10, 10 }, row { 11, 11 }, row { 12, 12 } } then
+	raise Error('Restricted Update to Y failed');
+
+drop table T;
+
+//*
+SafeDrop('V');
+create table V
+{
+  ID : Integer,
+  PID : Integer,
+  key { ID },
+  key { PID }
+};
+insert row { 1 ID, 1 PID } into V;
+
+SafeDrop('VON');
+create table VON { ID : Integer };
+create reference VON_V VON { ID } references V { ID } delete cascade;
+insert row { 1 ID } into VON;
+
+SafeDrop('P');
+create table P
+{
+  ID : Integer,
+  C : String,
+  key { ID },
+  key { C }
+};
+insert row { 2 ID, "P2" C } into P;
+
+// 1, as expected
+if VON <> table { row { 1 ID } } then
+	raise Error('VON invalid');
+
+// 1, as expected
+update V set { PID := 2 } where ID = 1;
+if VON <> table { row { 1 ID } } then
+	raise Error('VON invalid');
+
+update V set { PID := P["P2"].ID } where ID = 1;
+if VON <> table { row { 1 ID } } then
+	raise Error('VON invalid');
+
+SafeDrop('P');
+SafeDrop('VON');
+SafeDrop('V');
+
+
+//*
+SafeDrop('T1');
+SafeDrop('T2');
+create table T1 { ID : Integer, key { ID } };
+create table T2 { ID : Integer, key { ID } };
+create reference T2_T1 T2 { ID } references T1 { ID } update cascade delete cascade;
+
+insert row { 1 ID } into T1;
+insert row { 1 ID } into T2;
+
+update T1 set { ID := ID + 1 };
+
+if T2 <> table { row { 2 ID } } then
+	raise Error('T2 row deleted');
+
+SafeDrop('T1');
+SafeDrop('T2');

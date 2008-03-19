@@ -1,0 +1,1 @@
+jstatus;jid;jname;jbinary

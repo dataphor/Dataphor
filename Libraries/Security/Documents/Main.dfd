@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <showformaction document="Derive('ChangePassword', 'Edit')" mode="Edit" text="Change Password..." bop:name="ChangePassword" />
+  <showformaction document="Form('.Security', 'UserBrowse')" text="Manage Users..." bop:name="SecurityUsers" />
+  <showformaction document="Form('Security', 'RoleBrowse')" text="Manage Roles..." bop:name="SecurityRoles" />
+  <menu text="Administrative" bop:name="AdministrativeMenu">
+    <menu action="SecurityUsers" bop:name="SecurityUserMenu" />
+    <menu action="SecurityRoles" bop:name="SecurityRolesMenu" />
+    <menu action="ChangePassword" bop:name="ChangePasswordMenu" />
+  </menu>
+</interface>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample illustrates one use of a grid and the available grid columns.&#xD;&#xA;&#xD;&#xA;Using the Drag 'n Drop column, you can drag rows up or down the grid to resequence them.  Try it, rearrange the brands into the order you like best.&#xD;&#xA;&#xD;&#xA;Click on the I've owned one! check boxes to show which brands you have owned.&#xD;&#xA;&#xD;&#xA;Click on the Show button to read a little bit of history about the auto maker.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of these components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   Grid                                           Image&#xD;&#xA;   CheckBoxColumn                     StaticImage&#xD;&#xA;   ImageColumn&#xD;&#xA;   SequenceColumn&#xD;&#xA;   TextColumn&#xD;&#xA;   TriggerColumn" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Grid" bop:name="GridPage">
+        <row bop:name="GridRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Grid&quot;)" bop:name="GridImage" />
+          <statictext text="A Grid is a data-bound control used to display a tabular grid of data values from the data source. A Grid is used as the parent node for grid column nodes: i.e. CheckBoxColumn, ImageColumn, SequenceColumn, and TextColumn.&#xD;&#xA;&#xD;&#xA;The GridColumn is attached to a source.  Each grid column is then attached to a column from the source identified in the GridColumn.&#xD;&#xA;&#xD;&#xA;If a row on the grid is double clicked and the OnDoubleClick property of the Grid is set to [None] then the action selected in the OnDefault property of the FormInterface (root node) is executed.  If no action is chosen in that property then the form is closed.  If the form was a detail, the selected detail is passed back to the master.&#xD;&#xA;&#xD;&#xA;In this sample the Grid is used to display the data from Source1 and the OnDoubleClick property is set to ShowFormAction1.&#xD;&#xA;" width="50" margintop="10" bop:name="GridText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="SequenceColumn" bop:name="SequencePage">
+        <row bop:name="SequenceRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;GridColumn&quot;)" bop:name="SequenceImage" />
+          <statictext text="The SequenceColumn is a data-bound control that allows a row to be dragged and dropped within the grid.&#xD;&#xA;&#xD;&#xA;The D4 script in the Script property is executed when the row is dropped.&#xD;&#xA;&#xD;&#xA;Available arguments inside the script are:&#xD;&#xA;&#xD;&#xA;   AFromRow.XXX where XXX is the name of any column in the source.  Used to access the value of the specified column in the row being dragged and dropped.&#xD;&#xA;&#xD;&#xA;  AAbove is a Boolean.&#xD;&#xA;      If true, AToRow.XXX refers to the row above the position the From row was dropped.&#xD;&#xA;      If false AToRow.XXX refers to the row below the position the From row was dropped.&#xD;&#xA;&#xD;&#xA;   AToRow.XXX where XXX is the name of any column in the source.  Used to access the value of the specified column in the row above or below (see AAbove) the position the from row was dropped." width="50" margintop="10" bop:name="SequenceText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Te&amp;xtColumn" bop:name="TextColumnPage">
+        <row bop:name="TextColumnRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;GridColumn&quot;)" bop:name="TextColumnImage" />
+          <statictext text="A TextColumn is a grid column containing data bound text for use in a Grid.&#xD;&#xA;&#xD;&#xA;In this sample the TextColumn is used to display the value of the Make column from the Source1 source." width="50" margintop="10" bop:name="TextColumnText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="ImageColumn" bop:name="ImageColumnPage">
+        <row bop:name="ImageColumnRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;GridColumn&quot;)" bop:name="ImageColumnImage" />
+          <statictext text="The ImageColumn is a data-bound control used to display the image stored in column of type Graphic in the current row." width="50" margintop="10" bop:name="ImageColumnText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="CheckBoxColumn" bop:name="CheckBoxColumnPage">
+        <row bop:name="CheckBoxColumnRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;GridColumn&quot;)" bop:name="CheckBoxColumnImage" />
+          <statictext text="The CheckBoxColumn is a data-bound control that allows a Boolean value column to be displayed. The value can also be edited using the grid if the ReadOnly property of the CheckBoxColumn is set to false.&#xD;&#xA;&#xD;&#xA;In this sample the CheckBoxColumn is used to view and modify the Owned column of the source." width="50" margintop="10" bop:name="CheckBoxColumnText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="TriggerColumn" bop:name="TriggerColumnPage">
+        <row bop:name="TriggerColumnRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;GridColumn&quot;)" bop:name="TriggerColumnImage" />
+          <statictext text="The TriggerColumn is a control used to execute an action.&#xD;&#xA;&#xD;&#xA;When this column is included in the grid, each row will have a trigger included in the row. The triggers on all the rows are associated with the same action but by placing it on each row a single click selects the row and executes the action.&#xD;&#xA;&#xD;&#xA;In this sample the TriggerColumn is used to execute the HistoryAction." width="50" margintop="10" bop:name="TriggerColumnText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Image" bop:name="ImagePage">
+        <row bop:name="ImageRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Image&quot;)" bop:name="ImageImage" />
+          <statictext text="The Image is a data aware control used to display an image from a column of the current row of a source.&#xD;&#xA;&#xD;&#xA;In this sample the Image is attached to the Logo column of the Brands source." width="50" margintop="10" bop:name="ImageText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="StaticImage" bop:name="StaticImagePage">
+        <row bop:name="StaticImageRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;StaticImage&quot;)" bop:name="StaticImageImage" />
+          <statictext text="The StaticImage is a control used to display an image located in the library.&#xD;&#xA;&#xD;&#xA;In this sample the StaticImage is used to display an image of a car.  The image file is in the Documents folders of Sample.Components." width="50" margintop="10" bop:name="StaticImageText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

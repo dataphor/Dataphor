@@ -1,0 +1,568 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Min Coverage
+
+// Byte
+begin
+	var A : Byte;
+	var B : Byte;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Byte, Byte) with nil arguments failed');
+	B := 1;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Byte, Byte) with first argument nil failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Byte, Byte) with second argument nil failed');
+	A := 2;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Byte, Byte) failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Byte, Byte) failed');
+end;
+	
+// Short
+begin
+	var A : Short;
+	var B : Short;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Short, Short) with nil arguments failed');
+	B := 1;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Short, Short) with first argument nil failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Short, Short) with second argument nil failed');
+	A := 2;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Short, Short) failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Short, Short) failed');
+end;
+	
+// Integer
+begin
+	var A : Integer;
+	var B : Integer;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Integer, Integer) with nil arguments failed');
+	B := 1;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Integer, Integer) with first argument nil failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Integer, Integer) with second argument nil failed');
+	A := 2;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Integer, Integer) failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Integer, Integer) failed');
+end;
+	
+// Long
+begin
+	var A : Long;
+	var B : Long;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Long, Long) with nil arguments failed');
+	B := 1;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Long, Long) with first argument nil failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Long, Long) with second argument nil failed');
+	A := 2;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Long, Long) failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Long, Long) failed');
+end;
+	
+// Decimal
+begin
+	var A : Decimal;
+	var B : Decimal;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Decimal, Decimal) with nil arguments failed');
+	B := 1;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Decimal, Decimal) with first argument nil failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Decimal, Decimal) with second argument nil failed');
+	A := 2;
+	if Min(A, B) <> 1 then
+		raise Error('Min(Decimal, Decimal) failed');
+	if Min(B, A) <> 1 then
+		raise Error('Min(Decimal, Decimal) failed');
+end;
+	
+// Money
+begin
+	var A : Money;
+	var B : Money;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Money, Money) with nil arguments failed');
+	B := $1;
+	if Min(A, B) <> $1 then
+		raise Error('Min(Money, Money) with first argument nil failed');
+	if Min(B, A) <> $1 then
+		raise Error('Min(Money, Money) with second argument nil failed');
+	A := $2;
+	if Min(A, B) <> $1 then
+		raise Error('Min(Money, Money) failed');
+	if Min(B, A) <> $1 then
+		raise Error('Min(Money, Money) failed');
+end;
+	
+// TimeSpan
+begin
+	var A : TimeSpan;
+	var B : TimeSpan;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(TimeSpan, TimeSpan) with nil arguments failed');
+	B := Days(1);
+	if Min(A, B) <> Days(1) then
+		raise Error('Min(TimeSpan, TimeSpan) with first argument nil failed');
+	if Min(B, A) <> Days(1) then
+		raise Error('Min(TimeSpan, TimeSpan) with second argument nil failed');
+	A := Days(2);
+	if Min(A, B) <> Days(1) then
+		raise Error('Min(TimeSpan, TimeSpan) failed');
+	if Min(B, A) <> Days(1) then
+		raise Error('Min(TimeSpan, TimeSpan) failed');
+end;
+	
+// DateTime
+begin
+	var A : DateTime;
+	var B : DateTime;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(DateTime, DateTime) with nil arguments failed');
+	B := DateTime(2007, 1, 1);
+	if Min(A, B) <> DateTime(2007, 1, 1) then
+		raise Error('Min(DateTime, DateTime) with first argument nil failed');
+	if Min(B, A) <> DateTime(2007, 1, 1) then
+		raise Error('Min(DateTime, DateTime) with second argument nil failed');
+	A := DateTime(2007, 1, 2);
+	if Min(A, B) <> DateTime(2007, 1, 1) then
+		raise Error('Min(DateTime, DateTime) failed');
+	if Min(B, A) <> DateTime(2007, 1, 1) then
+		raise Error('Min(DateTime, DateTime) failed');
+end;
+	
+// Date
+begin
+	var A : Date;
+	var B : Date;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Date, Date) with nil arguments failed');
+	B := Date(2007, 1, 1);
+	if Min(A, B) <> Date(2007, 1, 1) then
+		raise Error('Min(Date, Date) with first argument nil failed');
+	if Min(B, A) <> Date(2007, 1, 1) then
+		raise Error('Min(Date, Date) with second argument nil failed');
+	A := Date(2007, 1, 2);
+	if Min(A, B) <> Date(2007, 1, 1) then
+		raise Error('Min(Date, Date) failed');
+	if Min(B, A) <> Date(2007, 1, 1) then
+		raise Error('Min(Date, Date) failed');
+end;
+	
+// Time
+begin
+	var A : Time;
+	var B : Time;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(Time, Time) with nil arguments failed');
+	B := Time(1, 0, 0);
+	if Min(A, B) <> Time(1, 0, 0) then
+		raise Error('Min(Time, Time) with first argument nil failed');
+	if Min(B, A) <> Time(1, 0, 0) then
+		raise Error('Min(Time, Time) with second argument nil failed');
+	A := Time(1, 1, 0);
+	if Min(A, B) <> Time(1, 0, 0) then
+		raise Error('Min(Time, Time) failed');
+	if Min(B, A) <> Time(1, 0, 0) then
+		raise Error('Min(Time, Time) failed');
+end;
+
+// VersionNumber
+begin
+	var A : VersionNumber;
+	var B : VersionNumber;
+	if not(Min(A, B).IsNil()) then
+		raise Error('Min(VersionNumber, VersionNumber) with nil arguments failed');
+	B := VersionNumber(1, 0, 0);
+	if Min(A, B) <> VersionNumber(1, 0, 0) then
+		raise Error('Min(VersionNumber, VersionNumber) with first argument nil failed');
+	if Min(B, A) <> VersionNumber(1, 0, 0) then
+		raise Error('Min(VersionNumber, VersionNumber) with second argument nil failed');
+	A := VersionNumber(1, 1, 0);
+	if Min(A, B) <> VersionNumber(1, 0, 0) then
+		raise Error('Min(VersionNumber, VersionNumber) failed');
+	if Min(B, A) <> VersionNumber(1, 0, 0) then
+		raise Error('Min(VersionNumber, VersionNumber) failed');
+end;
+
+//* Max Coverage
+
+// Byte
+begin
+	var A : Byte;
+	var B : Byte;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Byte, Byte) with nil arguments failed');
+	B := 1;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Byte, Byte) with first argument nil failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Byte, Byte) with second argument nil failed');
+	A := 0;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Byte, Byte) failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Byte, Byte) failed');
+end;
+	
+// Short
+begin
+	var A : Short;
+	var B : Short;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Short, Short) with nil arguments failed');
+	B := 1;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Short, Short) with first argument nil failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Short, Short) with second argument nil failed');
+	A := 0;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Short, Short) failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Short, Short) failed');
+end;
+	
+// Integer
+begin
+	var A : Integer;
+	var B : Integer;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Integer, Integer) with nil arguments failed');
+	B := 1;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Integer, Integer) with first argument nil failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Integer, Integer) with second argument nil failed');
+	A := 0;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Integer, Integer) failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Integer, Integer) failed');
+end;
+	
+// Long
+begin
+	var A : Long;
+	var B : Long;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Long, Long) with nil arguments failed');
+	B := 1;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Long, Long) with first argument nil failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Long, Long) with second argument nil failed');
+	A := 0;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Long, Long) failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Long, Long) failed');
+end;
+	
+// Decimal
+begin
+	var A : Decimal;
+	var B : Decimal;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Decimal, Decimal) with nil arguments failed');
+	B := 1;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Decimal, Decimal) with first argument nil failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Decimal, Decimal) with second argument nil failed');
+	A := 0;
+	if Max(A, B) <> 1 then
+		raise Error('Max(Decimal, Decimal) failed');
+	if Max(B, A) <> 1 then
+		raise Error('Max(Decimal, Decimal) failed');
+end;
+	
+// Money
+begin
+	var A : Money;
+	var B : Money;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Money, Money) with nil arguments failed');
+	B := $1;
+	if Max(A, B) <> $1 then
+		raise Error('Max(Money, Money) with first argument nil failed');
+	if Max(B, A) <> $1 then
+		raise Error('Max(Money, Money) with second argument nil failed');
+	A := $0;
+	if Max(A, B) <> $1 then
+		raise Error('Max(Money, Money) failed');
+	if Max(B, A) <> $1 then
+		raise Error('Max(Money, Money) failed');
+end;
+	
+// TimeSpan
+begin
+	var A : TimeSpan;
+	var B : TimeSpan;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(TimeSpan, TimeSpan) with nil arguments failed');
+	B := Days(1);
+	if Max(A, B) <> Days(1) then
+		raise Error('Max(TimeSpan, TimeSpan) with first argument nil failed');
+	if Max(B, A) <> Days(1) then
+		raise Error('Max(TimeSpan, TimeSpan) with second argument nil failed');
+	A := Days(0);
+	if Max(A, B) <> Days(1) then
+		raise Error('Max(TimeSpan, TimeSpan) failed');
+	if Max(B, A) <> Days(1) then
+		raise Error('Max(TimeSpan, TimeSpan) failed');
+end;
+	
+// DateTime
+begin
+	var A : DateTime;
+	var B : DateTime;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(DateTime, DateTime) with nil arguments failed');
+	B := DateTime(2007, 1, 1);
+	if Max(A, B) <> DateTime(2007, 1, 1) then
+		raise Error('Max(DateTime, DateTime) with first argument nil failed');
+	if Max(B, A) <> DateTime(2007, 1, 1) then
+		raise Error('Max(DateTime, DateTime) with second argument nil failed');
+	A := DateTime(2006, 12, 31);
+	if Max(A, B) <> DateTime(2007, 1, 1) then
+		raise Error('Max(DateTime, DateTime) failed');
+	if Max(B, A) <> DateTime(2007, 1, 1) then
+		raise Error('Max(DateTime, DateTime) failed');
+end;
+	
+// Date
+begin
+	var A : Date;
+	var B : Date;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Date, Date) with nil arguments failed');
+	B := Date(2007, 1, 1);
+	if Max(A, B) <> Date(2007, 1, 1) then
+		raise Error('Max(Date, Date) with first argument nil failed');
+	if Max(B, A) <> Date(2007, 1, 1) then
+		raise Error('Max(Date, Date) with second argument nil failed');
+	A := Date(2006, 12, 31);
+	if Max(A, B) <> Date(2007, 1, 1) then
+		raise Error('Max(Date, Date) failed');
+	if Max(B, A) <> Date(2007, 1, 1) then
+		raise Error('Max(Date, Date) failed');
+end;
+	
+// Time
+begin
+	var A : Time;
+	var B : Time;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(Time, Time) with nil arguments failed');
+	B := Time(1, 0, 0);
+	if Max(A, B) <> Time(1, 0, 0) then
+		raise Error('Max(Time, Time) with first argument nil failed');
+	if Max(B, A) <> Time(1, 0, 0) then
+		raise Error('Max(Time, Time) with second argument nil failed');
+	A := Time(0, 0, 0);
+	if Max(A, B) <> Time(1, 0, 0) then
+		raise Error('Max(Time, Time) failed');
+	if Max(B, A) <> Time(1, 0, 0) then
+		raise Error('Max(Time, Time) failed');
+end;
+
+// VersionNumber
+begin
+	var A : VersionNumber;
+	var B : VersionNumber;
+	if not(Max(A, B).IsNil()) then
+		raise Error('Max(VersionNumber, VersionNumber) with nil arguments failed');
+	B := VersionNumber(1, 0, 0);
+	if Max(A, B) <> VersionNumber(1, 0, 0) then
+		raise Error('Max(VersionNumber, VersionNumber) with first argument nil failed');
+	if Max(B, A) <> VersionNumber(1, 0, 0) then
+		raise Error('Max(VersionNumber, VersionNumber) with second argument nil failed');
+	A := VersionNumber(0, 0, 0);
+	if Max(A, B) <> VersionNumber(1, 0, 0) then
+		raise Error('Max(VersionNumber, VersionNumber) failed');
+	if Max(B, A) <> VersionNumber(1, 0, 0) then
+		raise Error('Max(VersionNumber, VersionNumber) failed');
+end;
+
+//* Mapped into a device
+create table TestMinMax
+{
+	Case : Integer,
+	ByteA : Byte nil,
+	ByteB : Byte nil,
+	ByteC : Byte nil,
+	ByteD : Byte nil,
+	ShortA : Short nil,
+	ShortB : Short nil,
+	ShortC : Short nil,
+	ShortD : Short nil,
+	IntegerA : Integer nil,
+	IntegerB : Integer nil,
+	IntegerC : Integer nil,
+	IntegerD : Integer nil,
+	LongA : Long nil,
+	LongB : Long nil,
+	LongC : Long nil,
+	LongD : Long nil,
+	DecimalA : Decimal nil,
+	DecimalB : Decimal nil,
+	DecimalC : Decimal nil,
+	DecimalD : Decimal nil,
+	MoneyA : Money nil,
+	MoneyB : Money nil,
+	MoneyC : Money nil,
+	MoneyD : Money nil,
+	DateTimeA : DateTime nil,
+	DateTimeB : DateTime nil,
+	DateTimeC : DateTime nil,
+	DateTimeD : DateTime nil,
+	DateA : Date nil,
+	DateB : Date nil,
+	DateC : Date nil,
+	DateD : Date nil,
+	TimeA : Time nil,
+	TimeB : Time nil,
+	TimeC : Time nil,
+	TimeD : Time nil,
+	TimeSpanA : TimeSpan nil,
+	TimeSpanB : TimeSpan nil,
+	TimeSpanC : TimeSpan nil,
+	TimeSpanD : TimeSpan nil,
+	VersionNumberA : VersionNumber nil,
+	VersionNumberB : VersionNumber nil,
+	VersionNumberC : VersionNumber nil,
+	VersionNumberD : VersionNumber nil,
+	key { Case }
+};
+
+insert
+	table
+	{
+		row 
+		{ 
+			1 Case, // Both arguments nil
+			nil as Byte ByteA, nil as Byte ByteB, nil as Byte ByteC, nil as Byte ByteD,
+			nil as Short ShortA, nil as Short ShortB, nil as Short ShortC, nil as Short ShortD, 
+			nil as Integer IntegerA, nil as Integer IntegerB, nil as Integer IntegerC, nil as Integer IntegerD, 
+			nil as Long LongA, nil as Long LongB, nil as Long LongC, nil as Long LongD,
+			nil as Decimal DecimalA, nil as Decimal DecimalB, nil as Decimal DecimalC, nil as Decimal DecimalD,
+			nil as Money MoneyA, nil as Money MoneyB, nil as Money MoneyC, nil as Money MoneyD,
+			nil as DateTime DateTimeA, nil as DateTime DateTimeB, nil as DateTime DateTimeC, nil as DateTime DateTimeD,
+			nil as Date DateA, nil as Date DateB, nil as Date DateC, nil as Date DateD,
+			nil as Time TimeA, nil as Time TimeB, nil as Time TimeC, nil as Time TimeD,
+			nil as TimeSpan TimeSpanA, nil as TimeSpan TimeSpanB, nil as TimeSpan TimeSpanC, nil as TimeSpan TimeSpanD,
+			nil as VersionNumber VersionNumberA, nil as VersionNumber VersionNumberB, nil as VersionNumber VersionNumberC, nil as VersionNumber VersionNumberD
+		},
+		row 
+		{ 
+			2 Case, // left argument nil
+			nil as Byte ByteA, 1 ByteB, 1 ByteC, 1 ByteD, 
+			nil as Short ShortA, 1 ShortB, 1 ShortC, 1 ShortD,
+			nil as Integer IntegerA, 1 IntegerB, 1 IntegerC, 1 IntegerD,
+			nil as Long LongA, 1 LongB, 1 LongC, 1 LongD,
+			nil as Decimal DecimalA, 1.0 DecimalB, 1.0 DecimalC, 1.0 DecimalD, 
+			nil as Money MoneyA, $1 MoneyB, $1 MoneyC, $1 MoneyD,
+			nil as DateTime DateTimeA, DateTime(2007, 1, 1, 8, 0, 0) DateTimeB, DateTime(2007, 1, 1, 8, 0, 0) DateTimeC, DateTime(2007, 1, 1, 8, 0, 0) DateTimeD,
+			nil as Date DateA, Date(2007, 1, 1) DateB, Date(2007, 1, 1) DateC, Date(2007, 1, 1) DateD,
+			nil as Time TimeA, Time(8, 0, 0) TimeB, Time(8, 0, 0) TimeC, Time(8, 0, 0) TimeD,
+			nil as TimeSpan TimeSpanA, Days(1) TimeSpanB, Days(1) TimeSpanC, Days(1) TimeSpanD,
+			nil as VersionNumber VersionNumberA, VersionNumber(1, 0) VersionNumberB, VersionNumber(1, 0) VersionNumberC, VersionNumber(1, 0) VersionNumberD
+		},
+		row 
+		{ 
+			3 Case, // right argument nil
+			1 ByteA, nil as Byte ByteB, 1 ByteC, 1 ByteD, 
+			1 ShortA, nil as Short ShortB, 1 ShortC, 1 ShortD,
+			1 IntegerA, nil as Integer IntegerB, 1 IntegerC, 1 IntegerD,
+			1 LongA, nil as Long LongB, 1 LongC, 1 LongD,
+			1.0 DecimalA, nil as Decimal DecimalB, 1.0 DecimalC, 1.0 DecimalD, 
+			$1 MoneyA, nil as Money MoneyB, $1 MoneyC, $1 MoneyD,
+			DateTime(2007, 1, 1, 8, 0, 0) DateTimeA, nil as DateTime DateTimeB, DateTime(2007, 1, 1, 8, 0, 0) DateTimeC, DateTime(2007, 1, 1, 8, 0, 0) DateTimeD,
+			Date(2007, 1, 1) DateA, nil as Date DateB, Date(2007, 1, 1) DateC, Date(2007, 1, 1) DateD,
+			Time(8, 0, 0) TimeA, nil as Time TimeB, Time(8, 0, 0) TimeC, Time(8, 0, 0) TimeD,
+			Days(1) TimeSpanA, nil as TimeSpan TimeSpanB, Days(1) TimeSpanC, Days(1) TimeSpanD,
+			VersionNumber(1, 0) VersionNumberA, nil as VersionNumber VersionNumberB, VersionNumber(1, 0) VersionNumberC, VersionNumber(1, 0) VersionNumberD
+		},
+		row 
+		{ 
+			4 Case, // left argument less
+			1 ByteA, 2 ByteB, 1 ByteC, 2 ByteD,
+			1 ShortA, 2 ShortB, 1 ShortC, 2 ShortD,
+			1 IntegerA, 2 IntegerB, 1 IntegerC, 2 IntegerD,
+			1 LongA, 2 LongB, 1 LongC, 2 LongD,
+			1.0 DecimalA, 2.0 DecimalB, 1.0 DecimalC, 2.0 DecimalD,
+			$1 MoneyA, $2 MoneyB, $1 MoneyC, $2 MoneyD,
+			DateTime(2007, 1, 1, 8, 0, 0) DateTimeA, DateTime(2007, 2, 1, 8, 0, 0) DateTimeB, DateTime(2007, 1, 1, 8, 0, 0) DateTimeC, DateTime(2007, 2, 1, 8, 0, 0) DateTimeD,
+			Date(2007, 1, 1) DateA, Date(2007, 1, 2) DateB, Date(2007, 1, 1) DateC, Date(2007, 1, 2) DateD,
+			Time(8, 0, 0) TimeA, Time(9, 0, 0) TimeB, Time(8, 0, 0) TimeC, Time(9, 0, 0) TimeD,
+			Days(1) TimeSpanA, Days(2) TimeSpanB, Days(1) TimeSpanC, Days(2) TimeSpanD,
+			VersionNumber(1, 0) VersionNumberA, VersionNumber(2, 0) VersionNumberB, VersionNumber(1, 0) VersionNumberC, VersionNumber(2, 0) VersionNumberD
+		},
+		row 
+		{ 
+			5 Case, // right argument less
+			2 ByteA, 1 ByteB, 1 ByteC, 2 ByteD,
+			2 ShortA, 1 ShortB, 1 ShortC, 2 ShortD,
+			2 IntegerA, 1 IntegerB, 1 IntegerC, 2 IntegerD,
+			2 LongA, 1 LongB, 1 LongC, 2 LongD,
+			2.0 DecimalA, 1.0 DecimalB, 1.0 DecimalC, 2.0 DecimalD,
+			$2 MoneyA, $1 MoneyB, $1 MoneyC, $2 MoneyD,
+			DateTime(2007, 2, 1, 8, 0, 0) DateTimeA, DateTime(2007, 1, 1, 8, 0, 0) DateTimeB, DateTime(2007, 1, 1, 8, 0, 0) DateTimeC, DateTime(2007, 2, 1, 8, 0, 0) DateTimeD,
+			Date(2007, 1, 2) DateA, Date(2007, 1, 1) DateB, Date(2007, 1, 1) DateC, Date(2007, 1, 2) DateD,
+			Time(9, 0, 0) TimeA, Time(8, 0, 0) TimeB, Time(8, 0, 0) TimeC, Time(9, 0, 0) TimeD,
+			Days(2) TimeSpanA, Days(1) TimeSpanB, Days(1) TimeSpanC, Days(2) TimeSpanD,
+			VersionNumber(2, 0) VersionNumberA, VersionNumber(1, 0) VersionNumberB, VersionNumber(1, 0) VersionNumberC, VersionNumber(2, 0) VersionNumberD
+		}
+	}
+	into TestMinMax;
+	
+if
+	(
+		TestMinMax
+		{
+			ByteA, ByteB, Min(ByteA, ByteB) MinByte, ByteC, Max(ByteA, ByteB) MaxByte, ByteD,
+			ShortA, ShortB, Min(ShortA, ShortB) MinShort, ShortC, Max(ShortA, ShortB) MaxShort, ShortD,
+			IntegerA, IntegerB, Min(IntegerA, IntegerB) MinInteger, IntegerC, Max(IntegerA, IntegerB) MaxInteger, IntegerD,
+			LongA, LongB, Min(LongA, LongB) MinLong, LongC, Max(LongA, LongB) MaxLong, LongD,
+			DecimalA, DecimalB, Min(DecimalA, DecimalB) MinDecimal, DecimalC, Max(DecimalA, DecimalB) MaxDecimal, DecimalD,
+			MoneyA, MoneyB, Min(MoneyA, MoneyB) MinMoney, MoneyC, Max(MoneyA, MoneyB) MaxMoney, MoneyD,
+			DateTimeA, DateTimeB, Min(DateTimeA, DateTimeB) MinDateTime, DateTimeC, Max(DateTimeA, DateTimeB) MaxDateTime, DateTimeD,
+			DateA, DateB, Min(DateA, DateB) MinDate, DateC, Max(DateA, DateB) MaxDate, DateD,
+			TimeA, TimeB, Min(TimeA, TimeB) MinTime, TimeC, Max(TimeA, TimeB) MaxTime, TimeD,
+			TimeSpanA, TimeSpanB, Min(TimeSpanA, TimeSpanB) MinTimeSpan, TimeSpanC, Max(TimeSpanA, TimeSpanB) MaxTimeSpan, TimeSpanD,
+			VersionNumberA, VersionNumberB, Min(VersionNumberA, VersionNumberB) MinVersionNumber, VersionNumberC, Max(VersionNumberA, VersionNumberB) MaxVersionNumber, VersionNumberD
+		}
+	)
+<> 
+	table of { ByteA : System.Byte, ByteB : System.Byte, MinByte : System.Byte, ByteC : System.Byte, MaxByte : System.Byte, ByteD : System.Byte, ShortA : System.Short, ShortB : System.Short, MinShort : System.Short, ShortC : System.Short, MaxShort : System.Short, ShortD : System.Short, IntegerA : System.Integer, IntegerB : System.Integer, MinInteger : System.Integer, IntegerC : System.Integer, MaxInteger : System.Integer, IntegerD : System.Integer, LongA : System.Long, LongB : System.Long, MinLong : System.Long, LongC : System.Long, MaxLong : System.Long, LongD : System.Long, DecimalA : System.Decimal, DecimalB : System.Decimal, MinDecimal : System.Decimal, DecimalC : System.Decimal, MaxDecimal : System.Decimal, DecimalD : System.Decimal, MoneyA : System.Money, MoneyB : System.Money, MinMoney : System.Money, MoneyC : System.Money, MaxMoney : System.Money, MoneyD : System.Money, DateTimeA : System.DateTime, DateTimeB : System.DateTime, MinDateTime : System.DateTime, DateTimeC : System.DateTime, MaxDateTime : System.DateTime, DateTimeD : System.DateTime, DateA : System.Date, DateB : System.Date, MinDate : System.Date, DateC : System.Date, MaxDate : System.Date, DateD : System.Date, TimeA : System.Time, TimeB : System.Time, MinTime : System.Time, TimeC : System.Time, MaxTime : System.Time, TimeD : System.Time, TimeSpanA : System.TimeSpan, TimeSpanB : System.TimeSpan, MinTimeSpan : System.TimeSpan, TimeSpanC : System.TimeSpan, MaxTimeSpan : System.TimeSpan, TimeSpanD : System.TimeSpan, VersionNumberA : System.VersionNumber, VersionNumberB : System.VersionNumber, MinVersionNumber : System.VersionNumber, VersionNumberC : System.VersionNumber, MaxVersionNumber : System.VersionNumber, VersionNumberD : System.VersionNumber }
+	{
+		row { (nil as System.Byte) ByteA, (nil as System.Byte) ByteB, (nil as System.Byte) MinByte, (nil as System.Byte) ByteC, (nil as System.Byte) MaxByte, (nil as System.Byte) ByteD, (nil as System.Short) ShortA, (nil as System.Short) ShortB, (nil as System.Short) MinShort, (nil as System.Short) ShortC, (nil as System.Short) MaxShort, (nil as System.Short) ShortD, (nil as System.Integer) IntegerA, (nil as System.Integer) IntegerB, (nil as System.Integer) MinInteger, (nil as System.Integer) IntegerC, (nil as System.Integer) MaxInteger, (nil as System.Integer) IntegerD, (nil as System.Long) LongA, (nil as System.Long) LongB, (nil as System.Long) MinLong, (nil as System.Long) LongC, (nil as System.Long) MaxLong, (nil as System.Long) LongD, (nil as System.Decimal) DecimalA, (nil as System.Decimal) DecimalB, (nil as System.Decimal) MinDecimal, (nil as System.Decimal) DecimalC, (nil as System.Decimal) MaxDecimal, (nil as System.Decimal) DecimalD, (nil as System.Money) MoneyA, (nil as System.Money) MoneyB, (nil as System.Money) MinMoney, (nil as System.Money) MoneyC, (nil as System.Money) MaxMoney, (nil as System.Money) MoneyD, (nil as System.DateTime) DateTimeA, (nil as System.DateTime) DateTimeB, (nil as System.DateTime) MinDateTime, (nil as System.DateTime) DateTimeC, (nil as System.DateTime) MaxDateTime, (nil as System.DateTime) DateTimeD, (nil as System.Date) DateA, (nil as System.Date) DateB, (nil as System.Date) MinDate, (nil as System.Date) DateC, (nil as System.Date) MaxDate, (nil as System.Date) DateD, (nil as System.Time) TimeA, (nil as System.Time) TimeB, (nil as System.Time) MinTime, (nil as System.Time) TimeC, (nil as System.Time) MaxTime, (nil as System.Time) TimeD, (nil as System.TimeSpan) TimeSpanA, (nil as System.TimeSpan) TimeSpanB, (nil as System.TimeSpan) MinTimeSpan, (nil as System.TimeSpan) TimeSpanC, (nil as System.TimeSpan) MaxTimeSpan, (nil as System.TimeSpan) TimeSpanD, (nil as System.VersionNumber) VersionNumberA, (nil as System.VersionNumber) VersionNumberB, (nil as System.VersionNumber) MinVersionNumber, (nil as System.VersionNumber) VersionNumberC, (nil as System.VersionNumber) MaxVersionNumber, (nil as System.VersionNumber) VersionNumberD }, 
+		row { (nil as System.Byte) ByteA, 1 ByteB, 1 MinByte, 1 ByteC, 1 MaxByte, 1 ByteD, (nil as System.Short) ShortA, 1 ShortB, 1 MinShort, 1 ShortC, 1 MaxShort, 1 ShortD, (nil as System.Integer) IntegerA, 1 IntegerB, 1 MinInteger, 1 IntegerC, 1 MaxInteger, 1 IntegerD, (nil as System.Long) LongA, 1 LongB, 1 MinLong, 1 LongC, 1 MaxLong, 1 LongD, (nil as System.Decimal) DecimalA, 1.00000000d DecimalB, 1.00000000d MinDecimal, 1.00000000d DecimalC, 1.00000000d MaxDecimal, 1.00000000d DecimalD, (nil as System.Money) MoneyA, $1.0000 MoneyB, $1.0000 MinMoney, $1.0000 MoneyC, $1.0000 MaxMoney, $1.0000 MoneyD, (nil as System.DateTime) DateTimeA, System.DateTime.Ticks(633032352000000000) DateTimeB, System.DateTime.Ticks(633032352000000000) MinDateTime, System.DateTime.Ticks(633032352000000000) DateTimeC, System.DateTime.Ticks(633032352000000000) MaxDateTime, System.DateTime.Ticks(633032352000000000) DateTimeD, (nil as System.Date) DateA, System.Date.Ticks(633032064000000000) DateB, System.Date.Ticks(633032064000000000) MinDate, System.Date.Ticks(633032064000000000) DateC, System.Date.Ticks(633032064000000000) MaxDate, System.Date.Ticks(633032064000000000) DateD, (nil as System.Time) TimeA, System.Time.Ticks(288000000000) TimeB, System.Time.Ticks(288000000000) MinTime, System.Time.Ticks(288000000000) TimeC, System.Time.Ticks(288000000000) MaxTime, System.Time.Ticks(288000000000) TimeD, (nil as System.TimeSpan) TimeSpanA, System.TimeSpan.Ticks(864000000000) TimeSpanB, System.TimeSpan.Ticks(864000000000) MinTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanC, System.TimeSpan.Ticks(864000000000) MaxTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanD, (nil as System.VersionNumber) VersionNumberA, System.VersionNumber(1, 0, -1, -1) VersionNumberB, System.VersionNumber(1, 0, -1, -1) MinVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberC, System.VersionNumber(1, 0, -1, -1) MaxVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberD }, 
+		row { 1 ByteA, (nil as System.Byte) ByteB, 1 MinByte, 1 ByteC, 1 MaxByte, 1 ByteD, 1 ShortA, (nil as System.Short) ShortB, 1 MinShort, 1 ShortC, 1 MaxShort, 1 ShortD, 1 IntegerA, (nil as System.Integer) IntegerB, 1 MinInteger, 1 IntegerC, 1 MaxInteger, 1 IntegerD, 1 LongA, (nil as System.Long) LongB, 1 MinLong, 1 LongC, 1 MaxLong, 1 LongD, 1.00000000d DecimalA, (nil as System.Decimal) DecimalB, 1.00000000d MinDecimal, 1.00000000d DecimalC, 1.00000000d MaxDecimal, 1.00000000d DecimalD, $1.0000 MoneyA, (nil as System.Money) MoneyB, $1.0000 MinMoney, $1.0000 MoneyC, $1.0000 MaxMoney, $1.0000 MoneyD, System.DateTime.Ticks(633032352000000000) DateTimeA, (nil as System.DateTime) DateTimeB, System.DateTime.Ticks(633032352000000000) MinDateTime, System.DateTime.Ticks(633032352000000000) DateTimeC, System.DateTime.Ticks(633032352000000000) MaxDateTime, System.DateTime.Ticks(633032352000000000) DateTimeD, System.Date.Ticks(633032064000000000) DateA, (nil as System.Date) DateB, System.Date.Ticks(633032064000000000) MinDate, System.Date.Ticks(633032064000000000) DateC, System.Date.Ticks(633032064000000000) MaxDate, System.Date.Ticks(633032064000000000) DateD, System.Time.Ticks(288000000000) TimeA, (nil as System.Time) TimeB, System.Time.Ticks(288000000000) MinTime, System.Time.Ticks(288000000000) TimeC, System.Time.Ticks(288000000000) MaxTime, System.Time.Ticks(288000000000) TimeD, System.TimeSpan.Ticks(864000000000) TimeSpanA, (nil as System.TimeSpan) TimeSpanB, System.TimeSpan.Ticks(864000000000) MinTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanC, System.TimeSpan.Ticks(864000000000) MaxTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanD, System.VersionNumber(1, 0, -1, -1) VersionNumberA, (nil as System.VersionNumber) VersionNumberB, System.VersionNumber(1, 0, -1, -1) MinVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberC, System.VersionNumber(1, 0, -1, -1) MaxVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberD }, 
+		row { 1 ByteA, 2 ByteB, 1 MinByte, 1 ByteC, 2 MaxByte, 2 ByteD, 1 ShortA, 2 ShortB, 1 MinShort, 1 ShortC, 2 MaxShort, 2 ShortD, 1 IntegerA, 2 IntegerB, 1 MinInteger, 1 IntegerC, 2 MaxInteger, 2 IntegerD, 1 LongA, 2 LongB, 1 MinLong, 1 LongC, 2 MaxLong, 2 LongD, 1.00000000d DecimalA, 2.00000000d DecimalB, 1.00000000d MinDecimal, 1.00000000d DecimalC, 2.00000000d MaxDecimal, 2.00000000d DecimalD, $1.0000 MoneyA, $2.0000 MoneyB, $1.0000 MinMoney, $1.0000 MoneyC, $2.0000 MaxMoney, $2.0000 MoneyD, System.DateTime.Ticks(633032352000000000) DateTimeA, System.DateTime.Ticks(633059136000000000) DateTimeB, System.DateTime.Ticks(633032352000000000) MinDateTime, System.DateTime.Ticks(633032352000000000) DateTimeC, System.DateTime.Ticks(633059136000000000) MaxDateTime, System.DateTime.Ticks(633059136000000000) DateTimeD, System.Date.Ticks(633032064000000000) DateA, System.Date.Ticks(633032928000000000) DateB, System.Date.Ticks(633032064000000000) MinDate, System.Date.Ticks(633032064000000000) DateC, System.Date.Ticks(633032928000000000) MaxDate, System.Date.Ticks(633032928000000000) DateD, System.Time.Ticks(288000000000) TimeA, System.Time.Ticks(324000000000) TimeB, System.Time.Ticks(288000000000) MinTime, System.Time.Ticks(288000000000) TimeC, System.Time.Ticks(324000000000) MaxTime, System.Time.Ticks(324000000000) TimeD, System.TimeSpan.Ticks(864000000000) TimeSpanA, System.TimeSpan.Ticks(1728000000000) TimeSpanB, System.TimeSpan.Ticks(864000000000) MinTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanC, System.TimeSpan.Ticks(1728000000000) MaxTimeSpan, System.TimeSpan.Ticks(1728000000000) TimeSpanD, System.VersionNumber(1, 0, -1, -1) VersionNumberA, System.VersionNumber(2, 0, -1, -1) VersionNumberB, System.VersionNumber(1, 0, -1, -1) MinVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberC, System.VersionNumber(2, 0, -1, -1) MaxVersionNumber, System.VersionNumber(2, 0, -1, -1) VersionNumberD }, 
+		row { 2 ByteA, 1 ByteB, 1 MinByte, 1 ByteC, 2 MaxByte, 2 ByteD, 2 ShortA, 1 ShortB, 1 MinShort, 1 ShortC, 2 MaxShort, 2 ShortD, 2 IntegerA, 1 IntegerB, 1 MinInteger, 1 IntegerC, 2 MaxInteger, 2 IntegerD, 2 LongA, 1 LongB, 1 MinLong, 1 LongC, 2 MaxLong, 2 LongD, 2.00000000d DecimalA, 1.00000000d DecimalB, 1.00000000d MinDecimal, 1.00000000d DecimalC, 2.00000000d MaxDecimal, 2.00000000d DecimalD, $2.0000 MoneyA, $1.0000 MoneyB, $1.0000 MinMoney, $1.0000 MoneyC, $2.0000 MaxMoney, $2.0000 MoneyD, System.DateTime.Ticks(633059136000000000) DateTimeA, System.DateTime.Ticks(633032352000000000) DateTimeB, System.DateTime.Ticks(633032352000000000) MinDateTime, System.DateTime.Ticks(633032352000000000) DateTimeC, System.DateTime.Ticks(633059136000000000) MaxDateTime, System.DateTime.Ticks(633059136000000000) DateTimeD, System.Date.Ticks(633032928000000000) DateA, System.Date.Ticks(633032064000000000) DateB, System.Date.Ticks(633032064000000000) MinDate, System.Date.Ticks(633032064000000000) DateC, System.Date.Ticks(633032928000000000) MaxDate, System.Date.Ticks(633032928000000000) DateD, System.Time.Ticks(324000000000) TimeA, System.Time.Ticks(288000000000) TimeB, System.Time.Ticks(288000000000) MinTime, System.Time.Ticks(288000000000) TimeC, System.Time.Ticks(324000000000) MaxTime, System.Time.Ticks(324000000000) TimeD, System.TimeSpan.Ticks(1728000000000) TimeSpanA, System.TimeSpan.Ticks(864000000000) TimeSpanB, System.TimeSpan.Ticks(864000000000) MinTimeSpan, System.TimeSpan.Ticks(864000000000) TimeSpanC, System.TimeSpan.Ticks(1728000000000) MaxTimeSpan, System.TimeSpan.Ticks(1728000000000) TimeSpanD, System.VersionNumber(2, 0, -1, -1) VersionNumberA, System.VersionNumber(1, 0, -1, -1) VersionNumberB, System.VersionNumber(1, 0, -1, -1) MinVersionNumber, System.VersionNumber(1, 0, -1, -1) VersionNumberC, System.VersionNumber(2, 0, -1, -1) MaxVersionNumber, System.VersionNumber(2, 0, -1, -1) VersionNumberD }, 
+		key { .ByteA, .ByteB, .MinByte, .ByteC, .MaxByte, .ByteD, .ShortA, .ShortB, .MinShort, .ShortC, .MaxShort, .ShortD, .IntegerA, .IntegerB, .MinInteger, .IntegerC, .MaxInteger, .IntegerD, .LongA, .LongB, .MinLong, .LongC, .MaxLong, .LongD, .DecimalA, .DecimalB, .MinDecimal, .DecimalC, .MaxDecimal, .DecimalD, .MoneyA, .MoneyB, .MinMoney, .MoneyC, .MaxMoney, .MoneyD, .DateTimeA, .DateTimeB, .MinDateTime, .DateTimeC, .MaxDateTime, .DateTimeD, .DateA, .DateB, .MinDate, .DateC, .MaxDate, .DateD, .TimeA, .TimeB, .MinTime, .TimeC, .MaxTime, .TimeD, .TimeSpanA, .TimeSpanB, .MinTimeSpan, .TimeSpanC, .MaxTimeSpan, .TimeSpanD, .VersionNumberA, .VersionNumberB, .MinVersionNumber, .VersionNumberC, .MaxVersionNumber, .VersionNumberD }
+	}
+then
+	raise Error('Min or Max in table failed');	
+
+drop table TestMinMax;

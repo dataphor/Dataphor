@@ -1,0 +1,63 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create operator InchesToString(const AInches : Decimal) : String
+begin
+	result := AInches.ToString() + '"';
+end;
+
+create operator StringToInches(const AString : String) : Decimal
+begin
+	result := AString.SubString(0, AString.IndexOf('"')).ToDecimal();
+end;
+
+create type Length
+{
+	representation Inches { Inches : Decimal }, // The compiler will use this representation to construct the physical representation
+	representation Feet { Feet : Decimal read value.Inches / 12 write Inches(Feet * 12) } selector Inches(Feet * 12),
+	representation Centimeters { Centimeters : Decimal read value.Inches * 2.54 write Inches(Centimeters / 2.54) } selector Inches(Centimeters / 2.54),
+	representation AsString { AsString : String read InchesToString(value.Inches) write Inches(StringToInches(AsString)) } selector Inches(StringToInches(AsString))
+		// The AsString representation will be used by the Frontend to display Length values and to allow the user to enter length values
+};
+
+create operator iAddition(const ALeftValue : Length, const ARightValue : Length) : Length
+begin
+	result := Inches(ALeftValue.Inches + ARightValue.Inches);
+end;
+
+create operator iSubtraction(const ALeftValue : Length, const ARightValue : Length) : Length
+begin
+	result := Inches(ALeftValue.Inches - ARightValue.Inches);
+end;
+
+create operator iMultiplication(const ALeftValue : Length, const ARightValue : Decimal) : Length
+begin
+	result := Inches(ALeftValue.Inches * ARightValue);
+end;
+
+create operator iMultiplication(const ALeftValue : Decimal, const ARightValue : Length) : Length
+begin
+	result := Inches(ALeftValue * ARightValue.Inches);
+end;
+
+create operator iDivision(const ALeftValue : Length, const ARightValue : Decimal) : Length
+begin
+	result := Inches(ALeftValue.Inches / ARightValue);
+end;
+
+select Inches(24);
+select Feet(2);
+select Centimeters(60.96);
+select Length.AsString('24"');
+
+drop operator iDivision(Length, Decimal);
+drop operator iMultiplication(Decimal, Length);
+drop operator iMultiplication(Length, Decimal);
+drop operator iSubtraction(Length, Length);
+drop operator iAddition(Length, Length);
+drop type Length;
+drop operator StringToInches(String);
+drop operator InchesToString(Decimal);
+

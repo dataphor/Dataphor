@@ -1,0 +1,245 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Date tests
+
+
+create table DateTest
+{
+	ID: Integer,
+	TestDate: Date,
+	key{ID}
+};
+
+
+begin
+	var LDate: Date;
+	var LString: String;
+
+	// Selectors
+	LDate := Date(1974, 10, 20);
+	if (LDate <> Date(1974, 10, 20)) then
+		raise Error("Date(Years, Months, Days) selector failed.");
+		
+	// Accessors
+	if LDate.Year <> 1974 then
+		raise Error("Date read years part failed.");
+		
+	LDate.Year := 2000;
+	if LDate.Year <> 2000 then
+		raise Error("Date write years part failed.");
+		
+	if LDate.Month <> 10 then
+		raise Error("Date read months part failed.");
+		
+	LDate.Month := 12;
+	if LDate.Month <> 12 then
+		raise Error("Date write months part failed.");
+
+	if LDate.Day <> 20 then
+		raise Error("Date read Days part failed.");
+		
+	LDate.Day := 15;
+	if LDate.Day <> 15 then
+		raise Error("Date write Days part failed.");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Conversions										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	LDate := Date(2001, 12, 25);
+	LString := LDate.ToString();
+	if LString <> "12/25/2001" then
+		raise Error("Date.ToString() Error." + " " + LString);
+	
+	// String->Date
+	LString := "12/25/2001";
+	if LDate <> ToDate(LString) then
+		raise Error("ToDate(System.String) Error.");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Comparison										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	var LDate1: Date;
+	var LDate2: Date;
+	
+	// Equals
+	LDate1 := Date(2000, 12, 25);
+	LDate2 := Date(2000, 12, 25);
+	if LDate1 = LDate2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date = Date Error.");
+	end;
+	
+	// Not Equal
+	LDate2 := Date(2000, 12, 26);
+	if LDate1 <> LDate2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date <> Date Error.");
+	end;
+	
+	// less than, exclusive
+	if LDate1 < LDate2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date < Date Error.");
+	end;
+	
+	// less than, inclusive
+	if LDate1 <= LDate2 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date <= Date Error.");
+	end;
+	
+	// greater than, exclusive
+	if LDate2 > LDate1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date > Date Error.");
+	end;
+	
+	// greater than, inclusive
+	if LDate2 >= LDate1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date >= Date Error.");
+	end;
+	
+	// icompare
+	if (LDate2 ?= LDate1) = 1 then
+	begin
+	end
+	else
+	begin
+		raise Error("Date ?= Date Error.");
+	end;
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Misc											   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// operator was removed because it is redundant
+	//if DayOfMonth(LDate1) <> 25 then
+	//	raise Error("DayOfMonth(Date) Error.");
+
+	if DayOfWeek(LDate1) <> 1 then
+		raise Error("DayOfWeek(Date) Error.");
+		
+	if DayOfYear(LDate1) <> 360 then
+		raise Error("DayOfYear(Date) Error.");
+		
+	if DaysInMonth(LDate1.Year, LDate1.Month) <> 31 then
+		raise Error("DaysInMonth(Year, Month) Error.");
+		
+	if IsLeapYear(LDate1.Year) = false then
+		raise Error("IsLeapYear(Date) Error.");	
+		
+	LDate1 := Date(2002, 4, 15);
+	LDate1 := LDate1.AddMonths(2);
+	if (LDate1.Month <> 6) then
+	  raise Error("AddMonths failed");
+	  
+	LDate1 := LDate1.AddYears(1);
+	if (LDate1.Year <> 2003) then
+	  raise Error("AddYears failed");
+	  
+	LDate1 := Date(1,1,1);
+	var LTimeSpan1 : TimeSpan;
+	var LDateTime1 : DateTime;
+	LTimeSpan1 := TimeSpan(2);
+	LDateTime1 := LDate1 + LTimeSpan1;
+	if (LDateTime1.Day <> 3) then
+	  raise Error("iAddition (Date + TimeSpan) failed");
+	
+
+	LDate1 := Date(1,1,2);
+	LDate2 := Date(1,1,1);
+	LTimeSpan1 := LDate1 - LDate2;
+	if (LTimeSpan1.Days <> 1) then
+	  raise Error("iSubtract(Date, Date) Failed.");
+	
+	var LTimeSpan2 : TimeSpan;
+	LDate1 := Date(2001,11,17);
+	LTimeSpan1 := TimeSpan(1, 2, 15, 37);
+	LDateTime1 := ToDateTime(LDate1) - LTimeSpan1;
+	if (LDateTime1.ToString() <> "11/15/2001 9:44:23 PM") then
+	  raise Error("iSubtract(DateTime, TimeSpan) Failed.");
+	  
+	LDate1 := Date(2001, 11, 17);
+	LTimeSpan1 := TimeSpan(1, 2, 15, 37);
+	LDate1 := LDate1 - LTimeSpan1;
+	if (LDate1.ToString() <> "11/15/2001") then
+		raise Error("iSubtract(Date, TimeSpan) Failed.");
+	  
+	insert table{row{1 ID, Date(1, 1, 1) TestDate}} into DateTest;
+	insert table{row{2 ID, Date(1, 1, 2) TestDate}} into DateTest;
+	insert table{row{3 ID, Date(1, 1, 3) TestDate}} into DateTest;
+	insert table{row{4 ID, Date(1, 1, 4) TestDate}} into DateTest;
+
+	// Min
+	if Min(TestDate from DateTest) <> Date(1, 1, 1) then
+		raise Error("Date Min Error.");
+	
+	// Max
+	if Max(TestDate from DateTest) <> Date(1, 1, 4) then
+		raise Error("Date Max Error.");
+end;
+
+drop table DateTest;
+
+//* MonthsBetween
+begin
+	var LStartDate := Date(2007, 1, 1);
+	var LEndDate := Date(2007, 1, 1);
+	if MonthsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('MonthsBetween the same date failed');
+		
+	LEndDate := LEndDate.AddMonths(12);
+	if MonthsBetween(LStartDate, LEndDate) <> 12 then
+		raise Error('MonthsBetween one year failed');
+		
+	LEndDate := LEndDate.AddMonths(-2);
+	if MonthsBetween(LStartDate, LEndDate) <> 10 then
+		raise Error('MonthsBetween 10 months failed');
+		
+	LEndDate := LEndDate.AddMonths(-12);
+	if MonthsBetween(LStartDate, LEndDate) <> -2 then
+		raise Error('MonthsBetween -2 months failed');
+end;
+
+//* YearsBetween
+begin
+	var LStartDate := Date(2007, 1, 1);
+	var LEndDate := Date(2007, 1, 1);
+	if YearsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('YearsBetween the same date failed');
+		
+	LEndDate := LEndDate.AddMonths(12);
+	if YearsBetween(LStartDate, LEndDate) <> 1 then
+		raise Error('YearsBetween one year failed');
+		
+	LEndDate := LEndDate.AddMonths(-2);
+	if YearsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('YearsBetween 10 months failed');
+		
+	LEndDate := LEndDate.AddMonths(-24);
+	if YearsBetween(LStartDate, LEndDate) <> -2 then
+		raise Error('YearsBetween -2 years failed');
+end;
+

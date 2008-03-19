@@ -1,0 +1,23 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+insert
+	table
+	{
+		row { System.Name("Sample02") ID, "Sample02" Description, ".Frontend.Form('Sample.Components', 'Sample02')" StartDocument }
+	}
+	into Applications;
+insert
+	table
+	{
+		row { System.Name("Sample02") Application_ID, System.Name("Sample.Components") Library_Name }
+	}
+	into ApplicationLibraries;
+insert
+	table
+	{
+		row { System.Name("Sample02") Application_ID, "" ThemeDocument, "" DefaultIconImage, 800 DocumentCacheSize, 60 ImageCacheSize, "LoadBinary('Sample.Components', 'Sample02Help')" HelpDocument }
+	}
+	into WindowsClientApplications;

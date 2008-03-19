@@ -1,0 +1,170 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Semijoin (having) and Semiminus (without) operators
+
+SafeDrop('Employee');
+create table Employee { ID : Integer, Name : String, key { ID } };
+
+SafeDrop('EmployeeAddress');
+create table EmployeeAddress { Employee_ID : Integer, Street : String, City : String, State : String, Zip : String, key { Employee_ID } };
+
+SafeDrop('EmployeePhone');
+create table EmployeePhone { Employee_ID : Integer, Phone : String, key { Employee_ID, Phone } };
+
+SafeDrop('EmployeeEmail');
+create table EmployeeEmail { Employee_ID : Integer, Email : String, key { Employee_ID, Email } };
+
+insert row { 1 ID, "Joe" Name } into Employee;
+insert row { 2 ID, "Jeff" Name } into Employee;
+insert row { 3 ID, "John" Name } into Employee;
+
+insert row { 2 Employee_ID, "123 Noname Ave" Street, "Brooklyn" City, "NY" State, "23412" Zip } into EmployeeAddress;
+insert row { 4 Employee_ID, "255 N 322 E" Street, "Orem" City, "UT" State, "84057" Zip } into EmployeeAddress;
+
+insert row { 2 Employee_ID, "123-1234" Phone } into EmployeePhone;
+insert row { 4 Employee_ID, "123-1235" Phone } into EmployeePhone;
+
+insert row { 2 Employee_ID, "email@email.com" Email } into EmployeeEmail;
+insert row { 4 Employee_ID, "junkmail@spam.com" Email } into EmployeeEmail;
+
+//* Having
+// Natural one-to-one having
+RunNavigableTest('select Employee having (EmployeeAddress rename { Employee_ID ID });');
+
+// Natural one-to-many having
+RunNavigableTest('select Employee having (EmployeePhone rename { Employee_ID ID });');
+
+// Natural many-to-one having
+RunNavigableTest('select EmployeePhone having (Employee rename { ID Employee_ID });');
+
+// Natural many-to-many having
+RunNavigableTest('select EmployeePhone having (EmployeeEmail);');
+
+// Conditioned one-to-one having
+RunNavigableTest('select Employee having EmployeeAddress by ID = Employee_ID;');
+
+// Conditioned one-to-many having
+RunNavigableTest('select Employee having EmployeePhone by ID = Employee_ID;');
+
+// Conditioned many-to-one having
+RunNavigableTest('select EmployeePhone having Employee by Employee_ID = ID;');
+
+// Conditioned many-to-many having
+RunNavigableTest('select EmployeePhone having EmployeeEmail by left.Employee_ID = right.Employee_ID;');
+
+//* Without
+// Natural one-to-one without
+RunNavigableTest('select Employee without (EmployeeAddress rename { Employee_ID ID });');
+
+// Natural one-to-many without
+RunNavigableTest('select Employee without (EmployeePhone rename { Employee_ID ID });');
+
+// Natural many-to-one without
+RunNavigableTest('select EmployeePhone without (Employee rename { ID Employee_ID });');
+
+// Natural many-to-many without
+RunNavigableTest('select EmployeePhone without EmployeeEmail;');
+
+// Conditioned one-to-one without
+RunNavigableTest('select Employee without EmployeeAddress by ID = Employee_ID;');
+
+// Conditioned one-to-many without
+RunNavigableTest('select Employee without EmployeePhone by ID = Employee_ID;');
+
+// Conditioned many-to-one without
+RunNavigableTest('select EmployeePhone without Employee by Employee_ID = ID;');
+
+// Conditioned many-to-many without
+RunNavigableTest('select EmployeePhone without EmployeeEmail by left.Employee_ID = right.Employee_ID;');
+
+//* Boundary
+// Natural having, all common columns, non-empty inputs
+if (Employee having Employee) <> Employee then
+	raise Error('Natural having, all common columns, non-empty inputs failed');
+
+// Natural having, all common columns, non-empty left, empty right
+if (Employee having (Employee where false)) <> (Employee where false) then
+	raise Error('Natural having, all common columns, non-empty left, empty right failed');
+	
+// Natural having, all common columns, empty left, non-empty right
+if ((Employee where false) having Employee) <> (Employee where false) then
+	raise Error('Natural having, all common columns, empty left, non-empty right failed');
+	
+// Natural having, all common columns, empty inputs
+if ((Employee where false) having (Employee where false)) <> (Employee where false) then
+	raise Error('Natural having, all common columns, empty inputs failed');
+
+// Natural having, no common columns, non-empty inputs
+if ((Employee rename A) having (Employee rename B)) <> (Employee rename A) then
+	raise Error('Natural having, no common columns, non-empty inputs failed');
+
+// Natural having, no common columns, non-empty left, empty right
+if ((Employee rename A) having (Employee rename B where false)) <> (Employee rename A where false) then
+	raise Error('Natural having, no common columns, non-empty left, empty right failed');
+	
+// Natural having, no common columns, empty left, non-empty right
+if ((Employee rename A where false) having (Employee rename B)) <> (Employee rename A where false) then
+	raise Error('Natural having, no common columns, empty left, non-empty right failed');
+	
+// Natural having, no common columns, empty inputs
+if ((Employee rename A where false) having (Employee rename B where false)) <> (Employee rename A where false) then
+	raise Error('Natural having, no common columns, empty inputs failed');
+
+// Natural without, all common columns, non-empty inputs
+if (Employee without Employee) <> (Employee where false) then
+	raise Error('Natural without, all common columns, non-empty inputs failed');
+
+// Natural without, all common columns, non-empty left, empty right
+if (Employee without (Employee where false)) <> Employee then
+	raise Error('Natural without, all common columns, non-empty left, empty right failed');
+	
+// Natural without, all common columns, empty left, non-empty right
+if ((Employee where false) without Employee) <> (Employee where false) then
+	raise Error('Natural without, all common columns, empty left, non-empty right failed');
+
+// Natural without, all common columns, empty inputs
+if ((Employee where false) without (Employee where false)) <> (Employee where false) then
+	raise Error('Natural without, all common columns, empty inputs failed');
+
+// Natural without, no common columns, non-empty inputs
+if ((Employee rename A) without (Employee rename B)) <> (Employee rename A where false) then
+	raise Error('Natural without, no common columns, non-empty inputs failed');
+
+// Natural without, no common columns, non-empty left, empty right
+if ((Employee rename A) without (Employee rename B where false)) <> (Employee rename A) then
+	raise Error('Natural without, no common columns, non-empty left, empty right failed');
+	
+// Natural without, no common columns, empty left, non-empty right
+if ((Employee rename A where false) without (Employee rename B)) <> (Employee rename A where false) then
+	raise Error('Natural without, no common columns, empty left, non-empty right failed');
+
+// Natural without, no common columns, empty inputs
+if ((Employee rename A where false) without (Employee rename B where false)) <> (Employee rename A where false) then
+	raise Error('Natural without, no common columns, empty inputs failed');
+	
+//* Serialization
+// Natural having
+TestViewSerialization('Employee having (EmployeeAddress rename { Employee_ID ID })');
+
+// Conditioned having
+TestViewSerialization('Employee having EmployeeAddress by ID = Employee_ID');
+
+// Conditioned having w/ common column names
+TestViewSerialization('EmployeeEmail having EmployeePhone by left.Employee_ID = right.Employee_ID');
+
+// Natural without
+TestViewSerialization('Employee without (EmployeeAddress rename { Employee_ID ID })');
+
+// Conditioned without
+TestViewSerialization('Employee without EmployeeAddress by ID = Employee_ID');
+
+// Conditioned without w/ common column names
+TestViewSerialization('EmployeeEmail without EmployeePhone by left.Employee_ID = right.Employee_ID');
+
+drop table EmployeeEmail;
+drop table EmployeePhone;
+drop table EmployeeAddress;
+drop table Employee;

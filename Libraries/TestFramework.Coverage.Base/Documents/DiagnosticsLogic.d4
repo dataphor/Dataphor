@@ -1,0 +1,199 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Dataphor Server Diagnostics Utilities
+
+create operator TestCatalog() class "Alphora.Dataphor.DAE.Diagnostics.TestCatalogNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestStreams() class "Alphora.Dataphor.DAE.Diagnostics.TestStreamsNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestRowManager() class "Alphora.Dataphor.DAE.Diagnostics.TestRowManagerNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestScalarManager() class "Alphora.Dataphor.DAE.Diagnostics.TestScalarManagerNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestConveyors() class "Alphora.Dataphor.DAE.Diagnostics.TestConveyorsNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestSemaphore() class "Alphora.Dataphor.DAE.Diagnostics.TestSemaphoreNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestStreamManager() class "Alphora.Dataphor.DAE.Diagnostics.TestStreamManagerNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestRowValues() class "Alphora.Dataphor.DAE.Diagnostics.TestRowValuesNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestOverflow() class "Alphora.Dataphor.DAE.Diagnostics.TestOverflowNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestExceptions(const AAssemblyFileName : String, const AExceptionClassName : String) class "Alphora.Dataphor.DAE.Diagnostics.TestExceptionsNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestIndex() class "Alphora.Dataphor.DAE.Diagnostics.TestIndexNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestIndex(const AFanout : Integer, const ACapacity : Integer, const ARowCount : Integer, const ATestOverflow : Boolean) class "Alphora.Dataphor.DAE.Diagnostics.TestIndexNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestTableBuffer() class "Alphora.Dataphor.DAE.Diagnostics.TestTableBufferNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator TestTableBuffer(const AFanout : Integer, const ACapacity : Integer, const ARowCount : Integer, const ATestOverflow : Boolean) class "Alphora.Dataphor.DAE.Diagnostics.TestIndexNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestBrowse() class "Alphora.Dataphor.DAE.Diagnostics.TestBrowseNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestNavigable(const AExpression : String, const AExpectedExpression : String) class "Alphora.Dataphor.DAE.Diagnostics.TestNavigableNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestBackwardsNavigable(const AExpression : String, const AExpectedExpression : String) class "Alphora.Dataphor.DAE.Diagnostics.TestBackwardsNavigableNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestSearchable(const AExpression : String, const AExpectedExpression : String) class "Alphora.Dataphor.DAE.Diagnostics.TestSearchableNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestParserEmitter(const AScript : String) class "Alphora.Dataphor.DAE.Diagnostics.TestParserEmitterNode,Alphora.Dataphor.DAE.Diagnostics";
+//create operator CanonicalForm(const AScript : String) : String class "Alphora.Dataphor.DAE.Diagnostics.CanonicalFormNode,Alphora.Dataphor.DAE.Diagnostics";
+
+create operator RunNavigableTest(const AExpression : String) : String
+begin
+	Execute('TestNavigable("' + AExpression + '", "' + ScriptData(AExpression).Replace('"', '""') + '");');
+end;
+
+create operator CheckRestrictionAlgorithm(const AExpression : String, const AExpectedRestrictionAlgorithm : String)
+begin
+	if GetRestrictionAlgorithm(AExpression) <> AExpectedRestrictionAlgorithm then
+		raise Error('Expression ' + AExpression + ' is not using expected restriction algorithm ' + AExpectedRestrictionAlgorithm);
+end;
+
+create operator CheckJoinAlgorithm(const AExpression : String, const AExpectedJoinAlgorithm : String)
+begin
+	if GetJoinAlgorithm(AExpression) <> AExpectedJoinAlgorithm then
+		raise Error('Expression ' + AExpression + ' is not using expected join algorithm ' + AExpectedJoinAlgorithm);
+end;
+
+create operator TestRestriction(const AExpression : String, const AExpectedExpression : String, const AExpectedRestrictionAlgorithm : String)
+begin
+	CheckRestrictionAlgorithm(AExpression, AExpectedRestrictionAlgorithm);
+	TestNavigable(AExpression, AExpectedExpression);
+end;
+
+create operator CheckSupported(const ADeviceName : Name, const AStatement : String)
+begin
+	if not(IsSupported(ADeviceName, AStatement)) then
+		raise Error('Device ' + ADeviceName + ' did not support the following statement: ' + AStatement);
+end;
+
+create operator CheckCount(const AExpression : String, const ACount : Integer)
+begin
+	Execute("if Count(" + AExpression + ") <> " + ACount.ToString() + " then raise Error('" + AExpression + " failed.');");
+end;
+
+create operator CheckRestrictionCount(const AExpression : String, const ACount : Integer, const AExpectedRestrictionAlgorithm : String)
+begin
+	CheckCount(AExpression, ACount);
+	CheckRestrictionAlgorithm(AExpression, AExpectedRestrictionAlgorithm);
+end;
+
+//* Operator: TestViewSerialization
+SafeDrop('TestViewSerialization(String)');
+create operator TestViewSerialization(const AExpression : String)
+begin
+	try
+		var LData := ScriptData(AExpression);
+		Execute('create view TestSerializationView ' + AExpression);
+		var LScript := Script('TestSerializationView');
+		SafeDrop('TestSerializationView');
+		Execute(LScript);
+		if (Evaluate('TestSerializationView <> ' + LData) as Boolean) then
+			raise Error('TestViewSerialization failed for expression: ' + AExpression);
+	finally
+		SafeDrop('TestSerializationView');
+	end;
+end;
+
+create operator RandomName() : System.String
+begin
+	var LASCII : list(Byte) := list(Byte){};
+	LASCII.Add((Random(26) + 65));
+	for LIndex : Integer := 1 to Random(7, 15) do
+		LASCII.Add(Random(26) + 97);
+	LASCII.Add(','.ASCII[0]);
+	LASCII.Add(' '.ASCII[0]);
+	LASCII.Add(Random(26) + 65);
+	for LIndex : Integer := 1 to Random(5, 10) do
+		LASCII.Add(Random(26) + 97);
+	result := String.ASCII(LASCII);
+end;
+
+create operator RandomPhone() : System.String
+begin
+	var LASCII : list(Byte) := list(Byte){};
+	LASCII.Add('('.ASCII[0]);
+	for LIndex : Integer := 1 to 3 do
+		LASCII.Add(Random(10) + 48);
+	LASCII.Add(')'.ASCII[0]);
+	for LIndex : Integer := 1 to 3 do
+		LASCII.Add(Random(10) + 48);
+	LASCII.Add('-'.ASCII[0]);
+	for LIndex : Integer := 1 to 4 do
+		LASCII.Add(Random(10) + 48);
+	result := String.ASCII(LASCII);
+end;
+
+
+create operator CheckUserRight(const AUserID : UserID, const ARightName : Name)
+begin
+	if not(UserHasRight(AUserID, ARightName)) then
+		raise Error('User ' + AUserID + ' does not have right ' + ARightName);
+end;
+
+create operator CheckUserRightDenied(const AUserID : UserID, const ARightName : Name)
+begin
+	if UserHasRight(AUserID, ARightName) then
+		raise Error('User ' + AUserID + ' has right ' + ARightName);
+end;
+
+/*
+create operator CheckGroupRight(const AGroupName : GroupName, const ARightName : Name)
+begin
+	if not(GroupHasRight(AGroupName, ARightName)) then
+		raise Error('Group ' + AGroupName + ' does not have right ' + ARightName);
+end;
+
+create operator CheckGroupRightDenied(const AGroupName : GroupName, const ARightName : Name)
+begin
+	if GroupHasRight(AGroupName, ARightName) then
+		raise Error('Group ' + AGroupName + ' has right ' + ARightName);
+end;
+*/
+
+create operator CheckRoleRight(const ARoleName : Name, const ARightName : Name)
+begin
+	if not(RoleHasRight(ARoleName, ARightName)) then
+		raise Error('Role ' + ARoleName + ' does not have right ' + ARightName);
+end;
+
+create operator CheckRoleRightDenied(const ARoleName : Name, const ARightName : Name)
+begin
+	if RoleHasRight(ARoleName, ARightName) then
+		raise Error('Role ' + ARoleName + ' has right ' + ARightName);
+end;
+
+create operator NegativeTest(const AStatement : String, const AMessage : String)
+begin
+	var LErrorHit : Boolean := false;
+	try
+		try
+			Execute(AStatement);
+		commit;
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error(AMessage);
+end;
+
+create operator NegativeTestAs(const AStatement : String, const AMessage : String, const AUserID : UserID, const APassword : String)
+begin
+	var LErrorHit : Boolean := false;
+	try
+		ExecuteAs(AStatement, AUserID, APassword);
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error(AMessage);
+end;
+
+create operator TestSerializer(const ALibraryName : Name)
+begin
+	var LCreateScript : String := ScriptLibrary(ALibraryName);
+	Execute(ScriptDropLibrary(ALibraryName));
+	Execute(LCreateScript);
+	LCreateScript := ScriptLibrary(ALibraryName);
+	Execute(ScriptDropLibrary(ALibraryName));
+	Execute(LCreateScript);
+	//var LPostCreateScript : String := ScriptLibrary(ALibraryName);
+	//if (LCreateScript <> LPostCreateScript) then
+	//	raise Error('Serialization test failed for library ' + ALibraryName);
+end;
+
+create operator TestStreamCount(const AStatement : String)
+begin
+	var LStreamCount : Integer := StreamCount();
+	Execute(AStatement);
+	if LStreamCount <> StreamCount() then
+		raise Error("Stream count after execute is different than stream count before execute.");
+end;

@@ -1,0 +1,298 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Common Operators used by coverage roles for the Shipping Application
+
+create table TestActive in Temp { };
+
+create operator StartTest()
+begin
+	insert table { row { } } into TestActive;
+end;
+
+create operator StopTest()
+begin
+	delete TestActive;
+end;
+
+create table TestRole
+{
+	Name : String,
+	key { Name }
+};
+
+create table TestTask
+{
+	ID : String,
+	Role_Name : String,
+	Command : String,
+	key { ID },
+	reference TestTask_Role { Role_Name } references TestRole { Name }
+};
+
+create table TestProcess
+{
+	ProcessID : Integer,
+	Role_Name : String,
+	key { ProcessID },
+	reference TestProcess_Role { Role_Name } references TestRole { Name }
+};
+
+create table TestEventType
+{
+	ID : String,
+	Description : String,
+	key { ID }
+};
+
+TestEventType :=
+	table
+	{
+		row { "SC" ID, "Start Command" Description },
+		row { "EC" ID, "End Command" Description },
+		row { "ER" ID, "Error" Description }
+	};
+	
+create table TestProcessEvent
+{
+	ID : Guid { default NewGuid() },
+	ProcessID : Integer,
+	EventType_ID : String,
+	DateTime : DateTime { default DateTime() },
+	Description : SQLText,
+	key { ID },
+	reference TestProcessEvent_EventType { EventType_ID } references TestEventType { ID }
+};
+
+create operator ResetTest()
+begin
+	delete TestProcessEvent;
+	delete TestProcess;
+end;
+
+create operator LogError(const AError : Error)
+begin
+	insert table { row { ProcessID() ProcessID, "ER" EventType_ID, AError.GetErrorDescription() Description } } into TestProcessEvent;
+end;
+
+create operator LogError(const AError : String)
+begin
+	insert table { row { ProcessID() ProcessID, "ER" EventType_ID, AError Description } } into TestProcessEvent;
+end;
+
+create operator StartTestProcess(const ARole : String)
+begin
+	insert table { row { ProcessID() ProcessID, ARole Role_Name } } into TestProcess;
+end;
+
+create operator StopTestProcess()
+begin
+	delete TestProcess where ProcessID = ProcessID();
+end;
+
+create operator RunTask(const ATaskID : String)
+begin
+	try
+		Execute(Command from row from (TestTask where ID = ATaskID));
+	except
+		on E : Error do
+			insert table { row { ProcessID() ProcessID, "ER" EventType_ID, E.Message Description } } into TestProcessEvent;
+	end;
+end;
+
+create operator RunRole(const ARoleName : String)
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Management");
+	try
+		var LCursor : cursor(table { ID : String }) := cursor(TestTask where Role_Name = ARoleName over { ID } isolation browse);
+		try
+			while exists(TestActive) do
+			begin
+				LCursor.First();
+				for LIndex : Integer := 0 to Random(Count(TestTask where Role_Name = ARoleName)) do
+					LCursor.Next();
+				RunTask(ID from LCursor.Select());
+			end;
+			Sleep(Random(1000, 5000));
+		finally
+			LCursor.Close();
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;
+
+create operator RandomName(const ALength : Integer) : String
+begin
+	var LList : list(Integer) := list(Integer){};
+	LList.Add(Random(26) + 65);
+	for LIndex : Integer := 0 to ALength - 2 do
+		LList.Add(Random(26) + 97);
+	result := Unicode(LList);
+end;
+
+create operator RandomState() : StateID
+begin
+	var LCursor : cursor(table { ID : StateID, Name : Description }) := cursor(State browse by { ID } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomName(2).Upper() ID });
+		if LCursor.BOF() then
+			LCursor.Next();
+		if LCursor.EOF() then
+			LCursor.Prior();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomZip() : Zip
+begin
+	var LZip : String := "";
+	for LIndex : Integer := 1 to 5 do
+		LZip := LZip + Random(10).ToString();
+	result := Zip(LZip);
+end;
+
+create operator RandomCoordinate() : Coordinate
+begin
+	result := Coordinate(Degree(Random(25, 75), Random(60), Random(60) + Random()), Degree(Random(50, 175), Random(60), Random(60) + Random()));
+end;
+
+create operator AddZip(const AZip : Zip)
+begin
+	if not exists (ZipCode where ZipCode = AZip) then
+		try
+			insert 
+				table 
+				{ 
+					row 
+					{ 
+						AZip ZipCode, 
+						Description(RandomName(Random(5, 15))) City, 
+						RandomState() State_ID, 
+						RandomCoordinate() Coordinate
+					} 
+				}
+				into ZipCode;
+		commit;
+end;
+
+create operator RandomZipCode() : Zip
+begin
+	var LCursor : cursor(typeof(ZipCode)) := cursor(ZipCode browse by { ZipCode } isolation browse);
+	try
+		result := RandomZip();
+		LCursor.FindNearest(row { result ZipCode });
+		if LCursor.BOF() or LCursor.EOF() or (Random(10) = 0) then
+			AddZip(result)
+		else
+			result := ZipCode from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomPhoneType() : PhoneTypeID
+begin
+	var LCursor : cursor(table { ID : PhoneTypeID }) := cursor(PhoneType over { ID } isolation browse);
+	try
+		for LIndex : Integer := 0 to Random(Count(PhoneType)) do
+			LCursor.Next();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomPhone() : Phone
+begin
+	var LPhone : String := "(";
+	for LIndex : Integer := 1 to 3 do
+		LPhone := LPhone + Random(10).ToString();
+	LPhone := LPhone + ")";
+	for LIndex : Integer := 1 to 3 do
+		LPhone := LPhone + Random(10).ToString();
+	LPhone := LPhone + "-";
+	for LIndex : Integer := 1 to 4 do
+		LPhone := LPhone + Random(10).ToString();
+	result := Phone(LPhone);
+end;
+
+create operator RandomProperName() : ProperName
+begin
+	result := ProperName(RandomName(Random(5, 12)));
+end;
+
+create operator RandomStreet() : Description
+begin
+	result := Description(RandomName(Random(6, 12)));
+end;
+
+create operator RandomCity() : Description
+begin
+	result := Description(RandomName(Random(5, 15)));
+end;
+
+create operator RandomNotes() : Notes
+begin
+	result := Notes(RandomName(Random(25, 75)));
+end;
+
+create operator RunReport(const AReport : String)
+begin
+	var LCursor : cursor := Open("cursor(" + AReport + " isolation browse)");
+	try
+		while LCursor.Next() do
+			LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomLocationID() : LocationID
+begin
+	result := LocationID(RandomZip().Value);
+end;
+
+create operator RandomLocation() : LocationID
+begin
+	var LCursor : cursor(typeof(Location)) := cursor(Location browse by { ID } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomLocationID() ID });
+		if (LCursor.BOF()) then
+			LCursor.Next();
+		if (LCursor.EOF()) then
+			LCursor.Prior();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator RandomItemTypeID() : ItemTypeID
+begin
+	result := ItemTypeID(Random(100, 1000).ToString());
+end;
+
+create operator RandomItemType() : ItemTypeID
+begin
+	var LCursor : cursor(typeof(ItemType)) := cursor(ItemType browse by { ID } isolation browse);
+	try
+		LCursor.FindNearest(row { RandomItemTypeID() ID });
+		if (LCursor.BOF()) then
+			LCursor.Next();
+		if (LCursor.EOF()) then
+			LCursor.Prior();
+		result := ID from LCursor.Select();
+	finally
+		LCursor.Close();
+	end;
+end;
+

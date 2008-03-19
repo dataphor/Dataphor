@@ -1,0 +1,7 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="TestingDevice" assembliesasstring="" librariesasstring="" settings="" name="TestFramework.Coverage.Devices" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <libraries.libraryreference name="MSOracleConnection" version="*" />
+    <libraries.libraryreference name="OracleConnection" version="*" />
+    <libraries.libraryreference name="OracleDevice" version="*" />
+    <libraries.libraryreference name="TestFramework" version="*" />
+    <libraries.libraryreference name="TestFramework.Coverage.Base" version="*" />
+</library>

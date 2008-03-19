@@ -1,0 +1,1928 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Manipulation Language Coverage Script
+
+// Storage device
+create device D4Demo class "System.MemoryDevice";
+
+// type ID
+create type ID like Integer;
+
+// type ShortID
+create type ShortID like String
+{
+    constraint ShortIDValue (Length(value.Value) = 3) and (Upper(value.Value) = value.Value),
+    special Unknown ShortID("999")
+} static tags { DAE.StaticByteSize = "10" };
+
+// Ensure ShortIDValue constraint is enforced
+begin
+    var LExceptionThrown : Boolean := false;
+    var LShortID : ShortID;
+    try
+        LShortID := ShortID("Blah");
+    except
+        LExceptionThrown := true;
+    end;
+    
+    if not(LExceptionThrown) then
+        raise Error("ShortIDValue constraint not enforced");
+    
+    LExceptionThrown := false;
+    try
+        LShortID := ShortID("abc");
+    except
+        LExceptionThrown := true;
+    end;
+
+    if not(LExceptionThrown) then
+        raise Error("ShortIDValue constraint not enforced");
+end;
+
+// Verify the existence of the Special operators
+if (ShortIDUnknown() <> ShortID("999")) then
+    raise Error("ShortIDUnknown operator failed");
+
+if not(IsSpecial(ShortID("999"))) then
+    raise Error("ShortID.IsSpecial operator failed");
+
+if not(IsUnknown(ShortID("999"))) then
+    raise Error("ShortID.IsUnknown operator failed");
+
+// type EntityName
+create type EntityName like String
+    static tags { Storage.Length = "100" };
+    
+// type State
+create type State like String
+{
+	constraint StateValue (Length(value.Value) = 2) and (Upper(value.Value) = value.Value)
+} static tags { Storage.Length = "8" };
+
+// type Zip
+create type Zip like String
+{
+	constraint ZipValue (Length(value.Value) >= 5) and (Length(value.Value) <= 10) and (Upper(value.Value) = value.Value)
+} static tags { Storage.Length = "24" };
+
+// type Phone
+create type Phone like String
+	static tags { Storage.Length = "44" };
+
+// table Entity
+create table Entity in D4Demo
+{
+	ID : ID,
+	Name : EntityName,
+	key { ID }
+};
+
+// Entity Data
+insert
+	table
+	{
+		row{ID(1) ID, EntityName("Luke Skywalker") Name},
+		row{ID(2), EntityName("Darth Vader")},
+		row{ID(3), EntityName("Princess Leia")},
+		row{ID(4), EntityName("Han Solo")},
+		row{ID(5), EntityName("Emperor Palpatine")},
+		row{ID(6), EntityName("Light Sabers Unlimited")},
+		row{ID(7), EntityName("Jabba's Used Speeder Emporium")},
+		row{ID(8), EntityName("The Dark Side Space Junk")},
+		row{ID(9), EntityName("Mitichlorion Metal")},
+		row{EntityName("Crazy Watto's Droid Parts") Name, ID(10) ID}
+	}
+	into Entity;
+
+// Verify the key constraint is enforced
+begin
+    var LErrorHit : Boolean := false;
+    try
+        insert table{row{ID(5) ID, EntityName("Duplicate Row") Name}} into Entity;
+    except
+        LErrorHit := true;
+    end;
+    if not(LErrorHit) then
+        raise Error("Entity key constraint not enforced");
+end;   
+
+// Verify that an incomplete row is rejected
+begin
+    var LErrorHit : Boolean := false;
+    try
+        insert table{row{ID(11) ID}} into Entity;
+    except
+        LErrorHit := true;
+    end;
+    if not (LErrorHit) then
+        raise Error("Entity Allowed an empty name value");
+end;
+	
+// table Client
+create table Client in D4Demo
+{
+    Entity_ID : ID,
+    FirstName : EntityName,
+    LastName : EntityName,
+    key {Entity_ID},
+    reference Client_Entity {Entity_ID} references Entity {ID}
+};
+
+// Client Data
+insert 
+    table
+    {
+        row{ID(1) Entity_ID, EntityName("Luke") FirstName, EntityName("Skywalker") LastName}, 
+        row{ID(2), EntityName("Anakin"), EntityName("Skywalker")}, 
+        row{ID(3), EntityName("Leia"), EntityName("Skywalker")}, 
+        row{ID(4), EntityName("Han"), EntityName("Solo")}, 
+        row{ID(5), EntityName("Emperor"), EntityName("Palpatine")}, 
+        row{ID(10), EntityName("Watto"), EntityName("Watto")}
+    } 
+    into Client;
+
+// Ensure that the Entity reference is enforced
+begin
+    var LErrorHit : Boolean := false;
+    try
+		try
+	        insert table{row{ID(11) Entity_ID, EntityName("Lando") FirstName, EntityName("Calrissian") LastName}} into Client;
+	    commit;
+    except
+        LErrorHit := true;
+    end;
+    if not(LErrorHit) then
+        raise Error("Client Allowed a non-existent entity reference");
+end;
+
+// table Vendor
+create table Vendor in D4Demo
+{
+    Entity_ID : ID,
+    HasContract : Boolean,
+    key {Entity_ID},
+    reference Vendor_Entity {Entity_ID} references Entity {ID}
+};
+
+// Vendor Data
+insert 
+    table
+    {
+        row{ID(6) Entity_ID, false HasContract}, 
+        row{ID(7), false}, 
+        row{ID(8), false}, 
+        row{ID(9), false}, 
+        row{ID(10), false}
+    } 
+    into Vendor;
+
+// table AddressType
+create table AddressType in D4Demo
+{
+    ID : ShortID,
+    Description : String,
+    key {ID},
+    constraint AddressTypeKnown not(IsSpecial(ID))
+};
+
+// AddressType
+insert 
+    table
+    {
+        row{ShortID("HOM") ID, "Home" Description}, 
+        row{ShortID("WRK"), "Work"}, 
+        row{ShortID("OFC"), "Office"}
+    } 
+    into AddressType;
+
+// Verify AddressTypeKnown constraint enforced
+begin
+    var LErrorHit : Boolean := false;
+    try
+        insert table{row{ShortID("999") ID, "Unknown" Description}} into AddressType;
+    except
+        LErrorHit := true;
+    end;
+    if not(LErrorHit) then
+        raise Error("AddressTypeKnown constraint not enforced");
+end;
+
+// PhoneType
+create table PhoneType in D4Demo
+{
+    ID : ShortID,
+    Description : String,
+    key {ID},
+    constraint PhoneTypeKnown not(IsSpecial(ID))
+};
+
+// PhoneType
+insert 
+    table
+    {
+        row{ShortID("HOM") ID, "Home" Description}, 
+        row{ShortID("MOB"), "Mobile"}, 
+        row{ShortID("WRK"), "Work"}, 
+        row{ShortID("PAG"), "Pager"}
+    } 
+    into PhoneType;
+
+// EntityAddress
+create table EntityAddress in D4Demo
+{
+    Entity_ID : ID,
+    Type_ID : ShortID,
+    Street : String,
+    City : String,
+    State : State,
+    Zip : Zip,
+    key {Entity_ID, Type_ID},
+    reference EntityAddress_Entity {Entity_ID} references Entity {ID} update cascade delete cascade,
+    reference EntityAddress_AddressType {Type_ID} references AddressType {ID} update cascade delete clear
+};
+
+// Verify EntityAddress reference constraints enforced properly
+insert table{row{ID(11) ID, EntityName("Boba Fett") Name}} into Entity;
+insert table{row{ID(11) Entity_ID, ShortID("HOM") Type_ID, "123 Spinning Ave" Street, "Dayton" City, State("OH") State, Zip("40411") Zip}} into EntityAddress;
+
+update AddressType set {ID := ShortID("HME")} where ID = "HOM";
+
+if (Type_ID from row from (EntityAddress where Entity_ID = 11)) <> "HME" then
+    raise Error("EntityAddress_AddressType update cascade failed");
+
+delete AddressType where ID = "HME";
+
+if (Type_ID from row from (EntityAddress where Entity_ID = 11)) <> ShortIDUnknown() then
+    raise Error("EntityAddress_AddressType delete clear failed");
+
+delete Entity where ID = 11;
+
+if (exists(EntityAddress where Entity_ID = 11)) then
+    raise Error("EntityAddress_Entity delete cascade failed");
+
+// EntityPhone
+create table EntityPhone in D4Demo
+{
+    Entity_ID : ID,
+    Type_ID : ShortID,
+    Phone : Phone,
+    key {Entity_ID, Type_ID},
+    reference EntityPhone_Entity {Entity_ID} references Entity {ID} update cascade delete cascade,
+    reference EntityPhone_PhoneType {Type_ID} references PhoneType {ID} update cascade delete set {ShortIDUnknown()}
+};
+
+// Verify EntityPhone_PhoneType reference constraint is enforced
+insert table{row{ID(1) Entity_ID, ShortID("HOM") Type_ID, Phone("100-1234") Phone}} into EntityPhone;
+
+delete PhoneType where ID = "HOM";
+
+if (Type_ID from row from (EntityPhone where Entity_ID = 1)) <> ShortIDUnknown() then
+    raise Error("EntityPhone_PhoneType delete set failed");
+
+// ItemType
+create table ItemType in D4Demo
+{
+    ID : ShortID,
+    Description : String { default "New ItemType" } static tags { Storage.Length = "28" },
+    PercentStocked : Decimal { default 0.0d },
+    key {ID}
+};
+
+// Verify the default worked for the Description column
+insert table{row{ShortID("000") ID}, row{ShortID("001")}, row{ShortID("002")}} into ItemType;
+
+if (Description from row from ItemType where ID = "000") <> "New ItemType" then
+    raise Error("Column default failed");
+
+delete ItemType;
+
+// ItemType data
+insert
+    table
+    {
+        row{ShortID("000") ID, "Light Sabers" Description, 10.0 PercentStocked},
+        row{ShortID("001"), "Jedi Light Saber", 25.5},
+        row{ShortID("002"), "Sith Light Saber", 54.5},
+        row{ShortID("100"), "Space Ships", 88.0},
+        row{ShortID("110"), "Large", 81.0},
+        row{ShortID("111"), "Corellian", 10.2},
+        row{ShortID("120"), "Medium", 25.0},
+        row{ShortID("121"), "Naboo Cruiser", 25.0},
+        row{ShortID("130"), "SmAll", 85.0},
+        row{ShortID("131"), "X-Wing Fighter", 15.0},
+        row{ShortID("132"), "Tie Fighter", 70.0},
+        row{ShortID("200"), "Blasters", 90.0},
+        row{ShortID("210"), "Rifles", 10.0},
+        row{ShortID("211"), "Storm Trooper Laser Rifle", 20.0},
+        row{ShortID("220"), "Sidearms", 30.0},
+        row{ShortID("221"), "Standard Issue Rebel Blaster", 40.0},
+        row{ShortID("300"), "Bantha Pudu", 100.0},
+        row{ShortID("400"), "Storm Trooper Suits", 45.0},
+        row{ShortID("500"), "Land Speeders", 25.0}
+    }
+    into ItemType;
+
+// ItemTypeParent
+create table ItemTypeParent in D4Demo
+{
+    ItemType_ID : ShortID,
+    Parent_ItemType_ID : ShortID,
+    key {ItemType_ID, Parent_ItemType_ID},
+    reference ItemTypeParent_ItemType {ItemType_ID} references ItemType {ID},
+    reference ItemTypeParent_Paremt_ItemType {Parent_ItemType_ID} references ItemType{ID}
+};
+
+// ItemTypeParent
+insert
+    table
+    {
+        row{ShortID("001") ItemType_ID, ShortID("000") Parent_ItemType_ID},
+        row{ShortID("002"), ShortID("000")},
+        row{ShortID("110"), ShortID("100")},
+        row{ShortID("111"), ShortID("110")},
+        row{ShortID("120"), ShortID("100")},
+        row{ShortID("121"), ShortID("120")},
+        row{ShortID("130"), ShortID("100")},
+        row{ShortID("131"), ShortID("130")},
+        row{ShortID("132"), ShortID("130")},
+        row{ShortID("210"), ShortID("200")},
+        row{ShortID("211"), ShortID("210")},
+        row{ShortID("220"), ShortID("200")},
+        row{ShortID("221"), ShortID("220")}
+    }
+    into ItemTypeParent;
+
+// Item
+create table Item in D4Demo
+{
+    ID : ID,
+    ItemType_ID : ShortID,
+    Quantity : Integer,
+    key {ID},
+    reference Item_ItemType {ItemType_ID} references ItemType {ID}
+};
+
+// Item - Data
+insert
+    table
+    {
+        row{ID(1) ID, ShortID("001") ItemType_ID, 5 Quantity},
+        row{ID(2), ShortID("002"), 10},
+        row{ID(3), ShortID("111"), 4},
+        row{ID(4), ShortID("121"), 2},
+        row{ID(5), ShortID("131"), 21},
+        row{ID(6), ShortID("132"), 15},
+        row{ID(7), ShortID("211"), 25},
+        row{ID(8), ShortID("221"), 145},
+        row{ID(9), ShortID("300"), 500},
+        row{ID(10), ShortID("400"), 24},
+        row{ID(11), ShortID("500"), 3}
+    }
+    into Item;
+
+// ItemTransaction
+create table ItemTransaction in D4Demo
+{
+    ID : ID,
+    Item_ID : ID,
+    DeltaQuantity : Integer,
+    UnitCost : Decimal,
+    key {ID},
+    reference ItemTransaction_Item {Item_ID} references Item {ID} update cascade delete cascade
+};
+
+// ItemTransaction
+insert
+    table
+    {
+        row{ID(1) ID, ID(1) Item_ID, 5 DeltaQuantity, 200d UnitCost},
+        row{ID(2), ID(2), 10, 200d},
+        row{ID(3), ID(3), 4, 100000d},
+        row{ID(4), ID(4), 2, 20000d},
+        row{ID(5), ID(5), 21, 1000d},
+        row{ID(6), ID(6), 15, 1000d},
+        row{ID(7), ID(7), 25, 100d},
+        row{ID(8), ID(8), 145, 50d},
+        row{ID(9), ID(9), 500, 0.50d},
+        row{ID(10), ID(10), 24, 200d},
+        row{ID(11), ID(11), 3, 500d}
+    }
+    into ItemTransaction;
+
+// relational operators
+    // select
+    select Entity; 
+
+	// project
+		// over eliMinates duplicates
+        if Count(Client over {LastName}) = Count(Client) then
+            raise Error("Projection does not eliMinate duplicates");
+			
+		// over {some columns}
+		if Count(Client over {Entity_ID}) <> Count(Client) then
+			raise Error("Count of clients not equal to Count of clients over key columns");
+			
+		// over {All columns}
+		if Count(Client over {Entity_ID, FirstName, LastName}) <> Count(Client) then
+			raise Error("Count of clients not equal to Count of clients over All columns");
+			
+		// over {no columns}
+		// TODO: Does not yet work for SQL Devices
+		if Count(Client over {}) <> 1 then
+			raise Error("Count of clients over no columns not equal to 1");
+	
+		// remove {some columns}
+		if Count(Client remove {FirstName, LastName}) <> Count(Client) then
+			raise Error("Count of clients preserving key columns not equal to the Count of clients");
+			
+		// remove {no columns}
+		if Count(Client remove {}) <> Count(Client) then
+			raise Error("Count of clients removing no columns not equal to the Count of clients");
+			
+		// remove {some columns}
+		if Count(Client remove {Entity_ID, FirstName}) = Count(Client) then
+			raise Error("Count of clients removing All but last name equal to Count of clients");
+			
+		// remove {All columns}
+		if Count(Client remove {Entity_ID, FirstName, LastName}) <> 1 then
+			raise Error("Count of clients removing All columns not equal to 1");
+			
+	// restrict
+		// no rows
+		if Count(Client where IsSpecial(Entity_ID)) <> 0 then
+			raise Error("Count of clients where Entity_ID = Special not equal to 0");
+			
+		// some rows
+		if Count(Client where Entity_ID = ID(1)) <> 1 then
+			raise Error("Count of clients where Entity_ID = ID(1) not equal to 1");
+			
+		// All rows
+		if Count(Client where not(IsSpecial(Entity_ID))) <> Count(Client) then
+			raise Error("Count of clients where Entity_ID <> Special not equal to Count of clients");
+			
+	// order
+		// by {some columns} same {some columns All asc}
+		//select Client order by {LastName};
+		//select Client order by {LastName asc};
+		TestSearchable("Client order by { LastName }", "Client order by { LastName asc }");
+		
+		//select Client;
+		TestSearchable("Client", "Client order by { Entity_ID }");
+		
+		// by {columns All asc}
+		//select Client order by {LastName asc, FirstName asc};
+		TestSearchable("Client order by { LastName asc, FirstName asc }", "Client order by { LastName asc, FirstName asc }");
+		
+		// by {columns All desc}
+		//select Client order by {LastName desc, FirstName desc};
+		TestSearchable("Client order by { LastName desc, FirstName desc }", "Client order by { LastName desc, FirstName desc }");
+		
+		// by {columns some asc}
+		//select Client order by {LastName asc, FirstName};
+		TestSearchable("Client order by {LastName asc, FirstName}", "Client order by {LastName asc, FirstName}");
+		
+	// browse
+		// by {some columns} same {some columns All asc}
+		//select Client browse by {LastName};
+		TestSearchable("Client browse by {LastName}", "Client browse by {LastName}");
+		
+		//select Client browse by {LastName asc};
+		TestSearchable("Client browse by {LastName asc}", "Client browse by {LastName asc}");
+		
+		// by {columns All asc}
+		//select Client browse by {LastName asc, FirstName asc};
+		TestSearchable("Client browse by {LastName asc, FirstName asc}", "Client browse by {LastName asc, FirstName asc}");
+		
+		// by {columns All desc}
+		//select Client browse by {LastName desc, FirstName desc};
+		TestSearchable("Client browse by {LastName desc, FirstName desc}", "Client browse by {LastName desc, FirstName desc}");
+		
+		// by {columns some asc}
+		//select Client browse by {LastName asc, FirstName};
+		TestSearchable("Client browse by {LastName asc, FirstName}", "Client browse by {LastName asc, FirstName}");
+		
+	// group
+		// Count {no columns} {no group specifier}
+		//select Client group add {Count() Count};
+		TestNavigable("Client group add {Count() Count}", "Client group add {Count() Count}");
+
+		//select Client rename Source over { } add { Count(Client where true) Count };
+		TestNavigable("Client rename Source over { } add { Count(Client where true) Count }", "Client rename Source over { } add { Count(Client where true) Count }");
+
+		// Count {no columns}
+		//select Client group add {Count(Entity_ID) Count};
+		TestNavigable("Client group add {Count(Entity_ID) Count}", "Client group add {Count(Entity_ID) Count}");
+		//select Client rename Source over { } add { Count(Entity_ID from (Client where true)) Count };
+		TestNavigable("Client rename Source over { } add { Count(Entity_ID from (Client where true)) Count }", "Client rename Source over { } add { Count(Entity_ID from (Client where true)) Count }");
+		
+		// Count {some columns}
+		//select Client group by {LastName} add {Count(Entity_ID) Count};
+		TestNavigable
+		(
+			"Client group by {LastName} add {Count(Entity_ID) Count}", 
+			"
+				table of { LastName : EntityName, Count : System.Integer }
+				{
+					row{EntityName('Palpatine') LastName, 1 Count}, 
+					row{EntityName('Skywalker') LastName, 3 Count}, 
+					row{EntityName('Solo') LastName, 1 Count}, 
+					row{EntityName('Watto') LastName, 1 Count}
+				}
+			"
+		);
+
+		//select Client rename Source over { LastName } add { Count(Entity_ID from Client where LastName = Source.LastName) Count };
+		TestNavigable
+		(
+			"Client rename Source over { LastName } add { Count(Entity_ID from Client where LastName = Source.LastName) Count }", 
+			"
+				table of { Source.LastName : EntityName, Count : System.Integer }
+				{
+					row{EntityName('Palpatine') Source.LastName, 1 Count}, 
+					row{EntityName('Skywalker') Source.LastName, 3 Count}, 
+					row{EntityName('Solo') Source.LastName, 1 Count}, 
+					row{EntityName('Watto') Source.LastName, 1 Count}
+				}
+			"
+		);
+		
+		// Count {All columns}
+		//select Client group by {Entity_ID} add {Count(Entity_ID) Count};
+		TestNavigable
+		(
+			"Client group by {Entity_ID} add {Count(Entity_ID) Count}", 
+			"
+				table of { Entity_ID : ID, Count : System.Integer }
+				{
+					row{ID(1) Entity_ID, 1 Count}, 
+					row{ID(2) Entity_ID, 1 Count}, 
+					row{ID(3) Entity_ID, 1 Count}, 
+					row{ID(4) Entity_ID, 1 Count}, 
+					row{ID(5) Entity_ID, 1 Count}, 
+					row{ID(10) Entity_ID, 1 Count}
+				}
+			"
+		);
+
+		//select Client rename Source over { Entity_ID } add { Count(Entity_ID from Client where Entity_ID = Source.Entity_ID) Count };
+		TestNavigable
+		(
+			"Client rename Source over { Entity_ID } add { Count(Entity_ID from Client where Entity_ID = Source.Entity_ID) Count }", 
+			"
+				table of { Source.Entity_ID : ID, Count : System.Integer }
+				{
+					row{ID(1) Source.Entity_ID, 1 Count}, 
+					row{ID(2) Source.Entity_ID, 1 Count}, 
+					row{ID(3) Source.Entity_ID, 1 Count}, 
+					row{ID(4) Source.Entity_ID, 1 Count}, 
+					row{ID(5) Source.Entity_ID, 1 Count}, 
+					row{ID(10) Source.Entity_ID, 1 Count}
+				}
+			"
+		);
+
+		// Count, empty set
+		if (Count from row from (Client where false group add { Count() Count })) <> 0 then
+			raise Error("Count() of empty set non-zero");
+		
+		// Sum, Min, Max, Avg Integers, {no columns}
+/*
+		select Item group 
+			add 
+			{
+				Sum(Quantity) SumQuantity, 
+				Min(Quantity) MinQuantity, 
+				Max(Quantity) MaxQuantity, 
+				Avg(Quantity) AvgQuantity
+			};
+select ScriptData("Item group 
+			add 
+			{
+				Sum(Quantity) SumQuantity, 
+				Min(Quantity) MinQuantity, 
+				Max(Quantity) MaxQuantity, 
+				Avg(Quantity) AvgQuantity
+			}");
+			
+		select Item rename Source over { }
+			add
+			{
+				Sum(Quantity from Item) SumQuantity,
+				Min(Quantity from Item) MinQuantity,
+				Max(Quantity from Item) MaxQuantity,
+				Avg(Quantity from Item) AvgQuantity
+			};
+			
+select ScriptData("Item rename Source over { }
+			add
+			{
+				Sum(Quantity from Item) SumQuantity,
+				Min(Quantity from Item) MinQuantity,
+				Max(Quantity from Item) MaxQuantity,
+				Avg(Quantity from Item) AvgQuantity
+			}");
+*/
+/*select Item group add//by { ItemType_ID } add 
+					{
+						Sum(Quantity) SumQuantity, 
+						Min(Quantity) MinQuantity, 
+						Max(Quantity) MaxQuantity, 
+						Avg(Quantity) AvgQuantity
+					}
+ERROR: Exceptions occurred while executing SQL command: "getcolumnvalue" occurs on Oracle 10g
+*/
+
+		TestNavigable
+		(
+			"
+				Item group
+					add 
+					{
+						Sum(Quantity) SumQuantity, 
+						Min(Quantity) MinQuantity, 
+						Max(Quantity) MaxQuantity, 
+						Avg(Quantity) AvgQuantity
+					}
+			",
+			"
+				table of { SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{754 SumQuantity, 2 MinQuantity, 500 MaxQuantity, 68.545454545454545454545454545d AvgQuantity}
+				}
+			"
+		);
+
+		TestNavigable
+		(
+			"
+				Item rename Source over { }
+					add
+					{
+						Sum(Quantity from Item) SumQuantity,
+						Min(Quantity from Item) MinQuantity,
+						Max(Quantity from Item) MaxQuantity,
+						Avg(Quantity from Item) AvgQuantity
+					}
+			",
+			"
+				table of { SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{754 SumQuantity, 2 MinQuantity, 500 MaxQuantity, 68.545454545454545454545454545d AvgQuantity}
+				}
+			"
+		);
+			
+		// Sum, Min, Max, Avg Integers, {some columns}
+/*	
+		select Item group by {ItemType_ID}
+			add 
+			{
+				Sum(Quantity) SumQuantity, 
+				Min(Quantity) MinQuantity, 
+				Max(Quantity) MaxQuantity, 
+				Avg(Quantity) AvgQuantity
+			};
+			
+		select ScriptData("Item group by {ItemType_ID}
+			add 
+			{
+				Sum(Quantity) SumQuantity, 
+				Min(Quantity) MinQuantity, 
+				Max(Quantity) MaxQuantity, 
+				Avg(Quantity) AvgQuantity
+			}");
+			
+		select Item rename Source over { ItemType_ID }
+			add
+			{
+				Sum(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) SumQuantity,
+				Min(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MinQuantity,
+				Max(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+				Avg(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) AvgQuantity
+			};
+			
+select ScriptData("				Item rename Source over { ItemType_ID }
+					add
+					{
+						Sum(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) SumQuantity,
+						Min(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MinQuantity,
+						Max(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+						Avg(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) AvgQuantity
+					}
+");
+
+*/
+		TestNavigable
+		(
+			"
+				Item group by {ItemType_ID}
+					add 
+					{
+						Sum(Quantity) SumQuantity, 
+						Min(Quantity) MinQuantity, 
+						Max(Quantity) MaxQuantity, 
+						Avg(Quantity) AvgQuantity
+					}
+			",
+			"
+				table of { ItemType_ID : ShortID, SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{ShortID('001') ItemType_ID, 5 SumQuantity, 5 MinQuantity, 5 MaxQuantity, 5d AvgQuantity}, 
+					row{ShortID('002') ItemType_ID, 10 SumQuantity, 10 MinQuantity, 10 MaxQuantity, 10d AvgQuantity}, 
+					row{ShortID('111') ItemType_ID, 4 SumQuantity, 4 MinQuantity, 4 MaxQuantity, 4d AvgQuantity}, 
+					row{ShortID('121') ItemType_ID, 2 SumQuantity, 2 MinQuantity, 2 MaxQuantity, 2d AvgQuantity}, 
+					row{ShortID('131') ItemType_ID, 21 SumQuantity, 21 MinQuantity, 21 MaxQuantity, 21d AvgQuantity}, 
+					row{ShortID('132') ItemType_ID, 15 SumQuantity, 15 MinQuantity, 15 MaxQuantity, 15d AvgQuantity}, 
+					row{ShortID('211') ItemType_ID, 25 SumQuantity, 25 MinQuantity, 25 MaxQuantity, 25d AvgQuantity}, 
+					row{ShortID('221') ItemType_ID, 145 SumQuantity, 145 MinQuantity, 145 MaxQuantity, 145d AvgQuantity}, 
+					row{ShortID('300') ItemType_ID, 500 SumQuantity, 500 MinQuantity, 500 MaxQuantity, 500d AvgQuantity}, 
+					row{ShortID('400') ItemType_ID, 24 SumQuantity, 24 MinQuantity, 24 MaxQuantity, 24d AvgQuantity}, 
+					row{ShortID('500') ItemType_ID, 3 SumQuantity, 3 MinQuantity, 3 MaxQuantity, 3d AvgQuantity}
+				}
+			"
+		);
+		
+		TestNavigable
+		(
+			"
+				Item rename Source over { ItemType_ID }
+					add
+					{
+						Sum(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) SumQuantity,
+						Min(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MinQuantity,
+						Max(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+						Avg(Quantity from (Item where ItemType_ID = Source.ItemType_ID)) AvgQuantity
+					}
+			",
+			"
+				table of { Source.ItemType_ID : ShortID, SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{ShortID('001') Source.ItemType_ID, 5 SumQuantity, 5 MinQuantity, 5 MaxQuantity, 5d AvgQuantity}, 
+					row{ShortID('002') Source.ItemType_ID, 10 SumQuantity, 10 MinQuantity, 10 MaxQuantity, 10d AvgQuantity}, 
+					row{ShortID('111') Source.ItemType_ID, 4 SumQuantity, 4 MinQuantity, 4 MaxQuantity, 4d AvgQuantity}, 
+					row{ShortID('121') Source.ItemType_ID, 2 SumQuantity, 2 MinQuantity, 2 MaxQuantity, 2d AvgQuantity}, 
+					row{ShortID('131') Source.ItemType_ID, 21 SumQuantity, 21 MinQuantity, 21 MaxQuantity, 21d AvgQuantity}, 
+					row{ShortID('132') Source.ItemType_ID, 15 SumQuantity, 15 MinQuantity, 15 MaxQuantity, 15d AvgQuantity}, 
+					row{ShortID('211') Source.ItemType_ID, 25 SumQuantity, 25 MinQuantity, 25 MaxQuantity, 25d AvgQuantity}, 
+					row{ShortID('221') Source.ItemType_ID, 145 SumQuantity, 145 MinQuantity, 145 MaxQuantity, 145d AvgQuantity}, 
+					row{ShortID('300') Source.ItemType_ID, 500 SumQuantity, 500 MinQuantity, 500 MaxQuantity, 500d AvgQuantity}, 
+					row{ShortID('400') Source.ItemType_ID, 24 SumQuantity, 24 MinQuantity, 24 MaxQuantity, 24d AvgQuantity}, 
+					row{ShortID('500') Source.ItemType_ID, 3 SumQuantity, 3 MinQuantity, 3 MaxQuantity, 3d AvgQuantity}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg Integers, {All columns}
+/*
+		select Item group by {ID, ItemType_ID}
+			add 
+			{
+				Sum(Quantity) SumQuantity, 
+				Min(Quantity) MinQuantity, 
+				Max(Quantity) MaxQuantity, 
+				Avg(Quantity) AvgQuantity
+			};
+select ScriptData("				
+				Item rename Source over { ID, ItemType_ID }
+					add
+					{
+						Sum(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) SumQuantity,
+						Min(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MinQuantity,
+						Max(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+						Avg(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) AvgQuantity
+					}
+");
+
+		select Item rename Source over { ID, ItemType_ID }
+			add
+			{
+				Sum(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) SumQuantity,
+				Min(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MinQuantity,
+				Max(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+				Avg(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) AvgQuantity
+			};
+*/
+		
+		TestNavigable
+		(
+			"
+				Item group by {ID, ItemType_ID}
+					add 
+					{
+						Sum(Quantity) SumQuantity, 
+						Min(Quantity) MinQuantity, 
+						Max(Quantity) MaxQuantity, 
+						Avg(Quantity) AvgQuantity
+					}
+			",
+			"
+				table of { ID : ID, ItemType_ID : ShortID, SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{ID(1) ID, ShortID('001') ItemType_ID, 5 SumQuantity, 5 MinQuantity, 5 MaxQuantity, 5d AvgQuantity}, 
+					row{ID(2) ID, ShortID('002') ItemType_ID, 10 SumQuantity, 10 MinQuantity, 10 MaxQuantity, 10d AvgQuantity}, 
+					row{ID(3) ID, ShortID('111') ItemType_ID, 4 SumQuantity, 4 MinQuantity, 4 MaxQuantity, 4d AvgQuantity}, 
+					row{ID(4) ID, ShortID('121') ItemType_ID, 2 SumQuantity, 2 MinQuantity, 2 MaxQuantity, 2d AvgQuantity}, 
+					row{ID(5) ID, ShortID('131') ItemType_ID, 21 SumQuantity, 21 MinQuantity, 21 MaxQuantity, 21d AvgQuantity}, 
+					row{ID(6) ID, ShortID('132') ItemType_ID, 15 SumQuantity, 15 MinQuantity, 15 MaxQuantity, 15d AvgQuantity}, 
+					row{ID(7) ID, ShortID('211') ItemType_ID, 25 SumQuantity, 25 MinQuantity, 25 MaxQuantity, 25d AvgQuantity}, 
+					row{ID(8) ID, ShortID('221') ItemType_ID, 145 SumQuantity, 145 MinQuantity, 145 MaxQuantity, 145d AvgQuantity}, 
+					row{ID(9) ID, ShortID('300') ItemType_ID, 500 SumQuantity, 500 MinQuantity, 500 MaxQuantity, 500d AvgQuantity}, 
+					row{ID(10) ID, ShortID('400') ItemType_ID, 24 SumQuantity, 24 MinQuantity, 24 MaxQuantity, 24d AvgQuantity}, 
+					row{ID(11) ID, ShortID('500') ItemType_ID, 3 SumQuantity, 3 MinQuantity, 3 MaxQuantity, 3d AvgQuantity}
+				}
+			"
+		);
+		
+		TestNavigable
+		(
+			"
+				Item rename Source over { ID, ItemType_ID }
+					add
+					{
+						Sum(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) SumQuantity,
+						Min(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MinQuantity,
+						Max(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) MaxQuantity,
+						Avg(Quantity from (Item where ID = Source.ID and ItemType_ID = Source.ItemType_ID)) AvgQuantity
+					}
+			",
+			"
+				table of { Source.ID : ID, Source.ItemType_ID : ShortID, SumQuantity : System.Integer, MinQuantity : System.Integer, MaxQuantity : System.Integer, AvgQuantity : System.Decimal }
+				{
+					row{ID(1) Source.ID, ShortID('001') Source.ItemType_ID, 5 SumQuantity, 5 MinQuantity, 5 MaxQuantity, 5d AvgQuantity}, 
+					row{ID(2) Source.ID, ShortID('002') Source.ItemType_ID, 10 SumQuantity, 10 MinQuantity, 10 MaxQuantity, 10d AvgQuantity}, 
+					row{ID(3) Source.ID, ShortID('111') Source.ItemType_ID, 4 SumQuantity, 4 MinQuantity, 4 MaxQuantity, 4d AvgQuantity}, 
+					row{ID(4) Source.ID, ShortID('121') Source.ItemType_ID, 2 SumQuantity, 2 MinQuantity, 2 MaxQuantity, 2d AvgQuantity}, 
+					row{ID(5) Source.ID, ShortID('131') Source.ItemType_ID, 21 SumQuantity, 21 MinQuantity, 21 MaxQuantity, 21d AvgQuantity}, 
+					row{ID(6) Source.ID, ShortID('132') Source.ItemType_ID, 15 SumQuantity, 15 MinQuantity, 15 MaxQuantity, 15d AvgQuantity}, 
+					row{ID(7) Source.ID, ShortID('211') Source.ItemType_ID, 25 SumQuantity, 25 MinQuantity, 25 MaxQuantity, 25d AvgQuantity}, 
+					row{ID(8) Source.ID, ShortID('221') Source.ItemType_ID, 145 SumQuantity, 145 MinQuantity, 145 MaxQuantity, 145d AvgQuantity}, 
+					row{ID(9) Source.ID, ShortID('300') Source.ItemType_ID, 500 SumQuantity, 500 MinQuantity, 500 MaxQuantity, 500d AvgQuantity}, 
+					row{ID(10) Source.ID, ShortID('400') Source.ItemType_ID, 24 SumQuantity, 24 MinQuantity, 24 MaxQuantity, 24d AvgQuantity}, 
+					row{ID(11) Source.ID, ShortID('500') Source.ItemType_ID, 3 SumQuantity, 3 MinQuantity, 3 MaxQuantity, 3d AvgQuantity}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg, integers, empty set
+		if (row from (Item where false group add { Sum(Quantity) SumQuantity, Min(Quantity) MinQuantity, Max(Quantity) MaxQuantity, Avg(Quantity) AvgQuantity })) <> row { nil SumQuantity, nil MinQuantity, nil MaxQuantity, nil AvgQuantity } then
+			raise Error("Integer Sum, Min, Max or Avg of empty set failed");
+		
+		// Sum, Min, Max, Avg float, {no columns}
+/*
+		select ItemType group 
+			add 
+			{
+				Sum(PercentStocked) SumPercentStocked, 
+				Min(PercentStocked) MinPercentStocked, 
+				Max(PercentStocked) MaxPercentStocked, 
+				Avg(PercentStocked) AvgPercentStocked
+			};
+			
+select ScriptData("
+				ItemType group 
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+");
+*/
+
+		TestNavigable
+		(
+			"
+				ItemType group 
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+			",
+			"
+				table of { SumPercentStocked : System.Decimal, MinPercentStocked : System.Decimal, MaxPercentStocked : System.Decimal, AvgPercentStocked : System.Decimal }
+				{
+					row{849.2d SumPercentStocked, 10.0d MinPercentStocked, 100.0d MaxPercentStocked, 44.694736842105263157894736842d AvgPercentStocked}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg float, {some columns}
+/*
+		select ItemType group by {Description}
+			add 
+			{
+				Sum(PercentStocked) SumPercentStocked, 
+				Min(PercentStocked) MinPercentStocked, 
+				Max(PercentStocked) MaxPercentStocked, 
+				Avg(PercentStocked) AvgPercentStocked
+			};
+			
+select ScriptData("
+				ItemType group by {Description}
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+");
+*/
+
+		TestNavigable
+		(
+			"
+				ItemType group by {Description}
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+			",
+			"
+				table of { Description : System.String, SumPercentStocked : System.Decimal, MinPercentStocked : System.Decimal, MaxPercentStocked : System.Decimal, AvgPercentStocked : System.Decimal }
+				{
+					row{'Bantha Pudu' Description, 100.0d SumPercentStocked, 100.0d MinPercentStocked, 100.0d MaxPercentStocked, 100.0d AvgPercentStocked}, 
+					row{'Blasters' Description, 90.0d SumPercentStocked, 90.0d MinPercentStocked, 90.0d MaxPercentStocked, 90.0d AvgPercentStocked}, 
+					row{'Corellian' Description, 10.2d SumPercentStocked, 10.2d MinPercentStocked, 10.2d MaxPercentStocked, 10.2d AvgPercentStocked}, 
+					row{'Jedi Light Saber' Description, 25.5d SumPercentStocked, 25.5d MinPercentStocked, 25.5d MaxPercentStocked, 25.5d AvgPercentStocked}, 
+					row{'Land Speeders' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}, 
+					row{'Large' Description, 81.0d SumPercentStocked, 81.0d MinPercentStocked, 81.0d MaxPercentStocked, 81.0d AvgPercentStocked}, 
+					row{'Light Sabers' Description, 10.0d SumPercentStocked, 10.0d MinPercentStocked, 10.0d MaxPercentStocked, 10.0d AvgPercentStocked}, 
+					row{'Medium' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}, 
+					row{'Naboo Cruiser' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}, 
+					row{'Rifles' Description, 10.0d SumPercentStocked, 10.0d MinPercentStocked, 10.0d MaxPercentStocked, 10.0d AvgPercentStocked}, 
+					row{'Sidearms' Description, 30.0d SumPercentStocked, 30.0d MinPercentStocked, 30.0d MaxPercentStocked, 30.0d AvgPercentStocked}, 
+					row{'Sith Light Saber' Description, 54.5d SumPercentStocked, 54.5d MinPercentStocked, 54.5d MaxPercentStocked, 54.5d AvgPercentStocked}, 
+					row{'SmAll' Description, 85.0d SumPercentStocked, 85.0d MinPercentStocked, 85.0d MaxPercentStocked, 85.0d AvgPercentStocked}, 
+					row{'Space Ships' Description, 88.0d SumPercentStocked, 88.0d MinPercentStocked, 88.0d MaxPercentStocked, 88.0d AvgPercentStocked}, 
+					row{'Standard Issue Rebel Blaster' Description, 40.0d SumPercentStocked, 40.0d MinPercentStocked, 40.0d MaxPercentStocked, 40.0d AvgPercentStocked}, 
+					row{'Storm Trooper Laser Rifle' Description, 20.0d SumPercentStocked, 20.0d MinPercentStocked, 20.0d MaxPercentStocked, 20.0d AvgPercentStocked}, 
+					row{'Storm Trooper Suits' Description, 45.0d SumPercentStocked, 45.0d MinPercentStocked, 45.0d MaxPercentStocked, 45.0d AvgPercentStocked}, 
+					row{'Tie Fighter' Description, 70.0d SumPercentStocked, 70.0d MinPercentStocked, 70.0d MaxPercentStocked, 70.0d AvgPercentStocked}, 
+					row{'X-Wing Fighter' Description, 15.0d SumPercentStocked, 15.0d MinPercentStocked, 15.0d MaxPercentStocked, 15.0d AvgPercentStocked}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg float, {All columns}
+/*
+		select ItemType group by {ID, Description}
+			add 
+			{
+				Sum(PercentStocked) SumPercentStocked, 
+				Min(PercentStocked) MinPercentStocked, 
+				Max(PercentStocked) MaxPercentStocked, 
+				Avg(PercentStocked) AvgPercentStocked
+			};
+			
+	select ScriptData("
+				ItemType group by {ID, Description}
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+	");
+*/
+
+		TestNavigable
+		(
+			"		
+				ItemType group by {ID, Description}
+					add 
+					{
+						Sum(PercentStocked) SumPercentStocked, 
+						Min(PercentStocked) MinPercentStocked, 
+						Max(PercentStocked) MaxPercentStocked, 
+						Avg(PercentStocked) AvgPercentStocked
+					}
+			",
+			"
+				table of { ID : ShortID, Description : System.String, SumPercentStocked : System.Decimal, MinPercentStocked : System.Decimal, MaxPercentStocked : System.Decimal, AvgPercentStocked : System.Decimal }
+				{
+					row{ShortID('000') ID, 'Light Sabers' Description, 10.0d SumPercentStocked, 10.0d MinPercentStocked, 10.0d MaxPercentStocked, 10.0d AvgPercentStocked}, 
+					row{ShortID('001') ID, 'Jedi Light Saber' Description, 25.5d SumPercentStocked, 25.5d MinPercentStocked, 25.5d MaxPercentStocked, 25.5d AvgPercentStocked}, 
+					row{ShortID('002') ID, 'Sith Light Saber' Description, 54.5d SumPercentStocked, 54.5d MinPercentStocked, 54.5d MaxPercentStocked, 54.5d AvgPercentStocked}, 
+					row{ShortID('100') ID, 'Space Ships' Description, 88.0d SumPercentStocked, 88.0d MinPercentStocked, 88.0d MaxPercentStocked, 88.0d AvgPercentStocked}, 
+					row{ShortID('110') ID, 'Large' Description, 81.0d SumPercentStocked, 81.0d MinPercentStocked, 81.0d MaxPercentStocked, 81.0d AvgPercentStocked}, 
+					row{ShortID('111') ID, 'Corellian' Description, 10.2d SumPercentStocked, 10.2d MinPercentStocked, 10.2d MaxPercentStocked, 10.2d AvgPercentStocked}, 
+					row{ShortID('120') ID, 'Medium' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}, 
+					row{ShortID('121') ID, 'Naboo Cruiser' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}, 
+					row{ShortID('130') ID, 'SmAll' Description, 85.0d SumPercentStocked, 85.0d MinPercentStocked, 85.0d MaxPercentStocked, 85.0d AvgPercentStocked}, 
+					row{ShortID('131') ID, 'X-Wing Fighter' Description, 15.0d SumPercentStocked, 15.0d MinPercentStocked, 15.0d MaxPercentStocked, 15.0d AvgPercentStocked}, 
+					row{ShortID('132') ID, 'Tie Fighter' Description, 70.0d SumPercentStocked, 70.0d MinPercentStocked, 70.0d MaxPercentStocked, 70.0d AvgPercentStocked}, 
+					row{ShortID('200') ID, 'Blasters' Description, 90.0d SumPercentStocked, 90.0d MinPercentStocked, 90.0d MaxPercentStocked, 90.0d AvgPercentStocked}, 
+					row{ShortID('210') ID, 'Rifles' Description, 10.0d SumPercentStocked, 10.0d MinPercentStocked, 10.0d MaxPercentStocked, 10.0d AvgPercentStocked}, 
+					row{ShortID('211') ID, 'Storm Trooper Laser Rifle' Description, 20.0d SumPercentStocked, 20.0d MinPercentStocked, 20.0d MaxPercentStocked, 20.0d AvgPercentStocked}, 
+					row{ShortID('220') ID, 'Sidearms' Description, 30.0d SumPercentStocked, 30.0d MinPercentStocked, 30.0d MaxPercentStocked, 30.0d AvgPercentStocked}, 
+					row{ShortID('221') ID, 'Standard Issue Rebel Blaster' Description, 40.0d SumPercentStocked, 40.0d MinPercentStocked, 40.0d MaxPercentStocked, 40.0d AvgPercentStocked}, 
+					row{ShortID('300') ID, 'Bantha Pudu' Description, 100.0d SumPercentStocked, 100.0d MinPercentStocked, 100.0d MaxPercentStocked, 100.0d AvgPercentStocked}, 
+					row{ShortID('400') ID, 'Storm Trooper Suits' Description, 45.0d SumPercentStocked, 45.0d MinPercentStocked, 45.0d MaxPercentStocked, 45.0d AvgPercentStocked}, 
+					row{ShortID('500') ID, 'Land Speeders' Description, 25.0d SumPercentStocked, 25.0d MinPercentStocked, 25.0d MaxPercentStocked, 25.0d AvgPercentStocked}
+				}
+			"
+		);
+
+		// Sum, Min, Max, Avg Decimal, {no columns}
+/*
+		select ItemTransaction group 
+			add 
+			{
+				Sum(UnitCost) SumUnitCost, 
+				Min(UnitCost) MinUnitCost, 
+				Max(UnitCost) MaxUnitCost, 
+				Avg(UnitCost) AvgUnitCost
+			};
+			
+	select ScriptData("
+				ItemTransaction group 
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+	");
+*/
+
+		TestNavigable
+		(
+			"
+				ItemTransaction group 
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+			",
+			"
+				table of { SumUnitCost : System.Decimal, MinUnitCost : System.Decimal, MaxUnitCost : System.Decimal, AvgUnitCost : System.Decimal }
+				{
+					row{123250.50d SumUnitCost, 0.50d MinUnitCost, 100000d MaxUnitCost, 11204.590909090909090909090909d AvgUnitCost}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg Decimal, {some columns}
+/*
+		select ItemTransaction group by {Item_ID}
+			add 
+			{
+				Sum(UnitCost) SumUnitCost, 
+				Min(UnitCost) MinUnitCost, 
+				Max(UnitCost) MaxUnitCost, 
+				Avg(UnitCost) AvgUnitCost
+			};
+			
+	select ScriptData("
+				ItemTransaction group by {Item_ID}
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+	");
+*/
+		
+		TestNavigable
+		(
+			"
+				ItemTransaction group by {Item_ID}
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+			",
+			"
+				table of { Item_ID : ID, SumUnitCost : System.Decimal, MinUnitCost : System.Decimal, MaxUnitCost : System.Decimal, AvgUnitCost : System.Decimal }
+				{
+					row{ID(1) Item_ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(2) Item_ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(3) Item_ID, 100000d SumUnitCost, 100000d MinUnitCost, 100000d MaxUnitCost, 100000d AvgUnitCost}, 
+					row{ID(4) Item_ID, 20000d SumUnitCost, 20000d MinUnitCost, 20000d MaxUnitCost, 20000d AvgUnitCost}, 
+					row{ID(5) Item_ID, 1000d SumUnitCost, 1000d MinUnitCost, 1000d MaxUnitCost, 1000d AvgUnitCost}, 
+					row{ID(6) Item_ID, 1000d SumUnitCost, 1000d MinUnitCost, 1000d MaxUnitCost, 1000d AvgUnitCost}, 
+					row{ID(7) Item_ID, 100d SumUnitCost, 100d MinUnitCost, 100d MaxUnitCost, 100d AvgUnitCost}, 
+					row{ID(8) Item_ID, 50d SumUnitCost, 50d MinUnitCost, 50d MaxUnitCost, 50d AvgUnitCost}, 
+					row{ID(9) Item_ID, 0.50d SumUnitCost, 0.50d MinUnitCost, 0.50d MaxUnitCost, 0.50d AvgUnitCost}, 
+					row{ID(10) Item_ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(11) Item_ID, 500d SumUnitCost, 500d MinUnitCost, 500d MaxUnitCost, 500d AvgUnitCost}
+				}
+			"
+		);
+		
+		// Sum, Min, Max, Avg Decimal, {All columns}
+/*
+		select ItemTransaction group by {ID}
+			add 
+			{
+				Sum(UnitCost) SumUnitCost, 
+				Min(UnitCost) MinUnitCost, 
+				Max(UnitCost) MaxUnitCost, 
+				Avg(UnitCost) AvgUnitCost
+			};
+			
+	select ScriptData("				ItemTransaction group by {ID}
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+");
+
+*/
+
+		TestNavigable
+		(
+			"
+				ItemTransaction group by {ID}
+					add 
+					{
+						Sum(UnitCost) SumUnitCost, 
+						Min(UnitCost) MinUnitCost, 
+						Max(UnitCost) MaxUnitCost, 
+						Avg(UnitCost) AvgUnitCost
+					}
+			",
+			"
+				table of { ID : ID, SumUnitCost : System.Decimal, MinUnitCost : System.Decimal, MaxUnitCost : System.Decimal, AvgUnitCost : System.Decimal }
+				{
+					row{ID(1) ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(2) ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(3) ID, 100000d SumUnitCost, 100000d MinUnitCost, 100000d MaxUnitCost, 100000d AvgUnitCost}, 
+					row{ID(4) ID, 20000d SumUnitCost, 20000d MinUnitCost, 20000d MaxUnitCost, 20000d AvgUnitCost}, 
+					row{ID(5) ID, 1000d SumUnitCost, 1000d MinUnitCost, 1000d MaxUnitCost, 1000d AvgUnitCost}, 
+					row{ID(6) ID, 1000d SumUnitCost, 1000d MinUnitCost, 1000d MaxUnitCost, 1000d AvgUnitCost}, 
+					row{ID(7) ID, 100d SumUnitCost, 100d MinUnitCost, 100d MaxUnitCost, 100d AvgUnitCost}, 
+					row{ID(8) ID, 50d SumUnitCost, 50d MinUnitCost, 50d MaxUnitCost, 50d AvgUnitCost}, 
+					row{ID(9) ID, 0.50d SumUnitCost, 0.50d MinUnitCost, 0.50d MaxUnitCost, 0.50d AvgUnitCost}, 
+					row{ID(10) ID, 200d SumUnitCost, 200d MinUnitCost, 200d MaxUnitCost, 200d AvgUnitCost}, 
+					row{ID(11) ID, 500d SumUnitCost, 500d MinUnitCost, 500d MaxUnitCost, 500d AvgUnitCost}
+				}
+			"
+		);
+
+		// Sum, Min, Max, Avg, Decimal, empty set
+		if 
+		(
+			ItemType where false group 
+				add 
+				{
+					Sum(PercentStocked) SumPercentStocked, 
+					Min(PercentStocked) MinPercentStocked, 
+					Max(PercentStocked) MaxPercentStocked,
+					Avg(PercentStocked) AvgPercentStocked
+				}
+		) <>
+			table { row { nil SumPercentStocked, nil MinPercentStocked, nil MaxPercentStocked, nil AvgPercentStocked }, key { } } then
+			raise Error("Sum, Min, Max, or Avg decimal on empty set failed");
+			
+		// Min, Max String {no columns}
+		//select Client redefine { LastName := LastName.Value } group add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value } group add {Min(LastName) MinName, Max(LastName) MaxName}");
+		TestNavigable
+		(
+			"Client redefine { LastName := LastName.Value } group add {Min(LastName) MinName, Max(LastName) MaxName}", 
+			"
+				table of { MinName : System.String, MaxName : System.String }
+				{
+					row{'Palpatine' MinName, 'Watto' MaxName}
+				}
+			"
+		);
+		
+		// Min, Max String {some columns}
+		//select Client redefine { LastName := LastName.Value } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName}");
+		TestNavigable
+		(
+			"Client redefine { LastName := LastName.Value } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName}", 
+			"
+				table of { LastName : System.String, MinName : System.String, MaxName : System.String }
+				{
+					row{'Palpatine' LastName, 'Palpatine' MinName, 'Palpatine' MaxName}, 
+					row{'Skywalker' LastName, 'Skywalker' MinName, 'Skywalker' MaxName}, 
+					row{'Solo' LastName, 'Solo' MinName, 'Solo' MaxName}, 
+					row{'Watto' LastName, 'Watto' MinName, 'Watto' MaxName}
+				}
+			"
+		);
+		
+		// Min, Max String {All columns}
+		//select Client redefine { LastName := LastName.Value } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName}");
+		TestNavigable
+		(
+			"Client redefine { LastName := LastName.Value } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName}", 
+			"
+				table of { Entity_ID : ID, MinName : System.String, MaxName : System.String }
+				{
+					row{ID(1) Entity_ID, 'Skywalker' MinName, 'Skywalker' MaxName}, 
+					row{ID(2) Entity_ID, 'Skywalker' MinName, 'Skywalker' MaxName}, 
+					row{ID(3) Entity_ID, 'Skywalker' MinName, 'Skywalker' MaxName}, 
+					row{ID(4) Entity_ID, 'Solo' MinName, 'Solo' MaxName}, 
+					row{ID(5) Entity_ID, 'Palpatine' MinName, 'Palpatine' MaxName}, 
+					row{ID(10) Entity_ID, 'Watto' MinName, 'Watto' MaxName}
+				}
+			"
+		);
+
+		if (Client where false group add { Min(LastName) MinName, Max(LastName) MaxName }) <> table { row { nil MinName, nil MaxName }, key { } } then
+			raise Error('Min or Max string of empty set failed');
+
+		// Min, Max IString {no columns}
+		//select Client redefine { LastName := LastName.Value.ToIString() } group add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value.ToIString() } group add {Min(LastName) MinName, Max(LastName) MaxName}");
+/*
+		TestNavigable("Client redefine { LastName := LastName.Value.ToIString() } group add {Min(LastName) MinName, Max(LastName) MaxName}", "table of { MinName : System.IString, MaxName : System.IString }
+			{
+				row{'Palpatine'i MinName, 'Watto'i MaxName}
+			}
+			");
+		
+		// Min, Max IString {some columns}
+		//select Client redefine { LastName := LastName.Value.ToIString() } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value.ToIString() } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName}");
+		TestNavigable("Client redefine { LastName := LastName.Value.ToIString() } group by {LastName} add {Min(LastName) MinName, Max(LastName) MaxName}", "table of { LastName : System.IString, MinName : System.IString, MaxName : System.IString }
+			{
+				row{'Palpatine'i LastName, 'Palpatine'i MinName, 'Palpatine'i MaxName}, 
+				row{'Skywalker'i LastName, 'Skywalker'i MinName, 'Skywalker'i MaxName}, 
+				row{'Solo'i LastName, 'Solo'i MinName, 'Solo'i MaxName}, 
+				row{'Watto'i LastName, 'Watto'i MinName, 'Watto'i MaxName}
+			}");
+		
+		// Min, Max IString {All columns}
+		//select Client redefine { LastName := LastName.Value.ToIString() } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName};
+		//select ScriptData("Client redefine { LastName := LastName.Value.ToIString() } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName}");
+		TestNavigable("Client redefine { LastName := LastName.Value.ToIString() } group by {Entity_ID} add {Min(LastName) MinName, Max(LastName) MaxName}", "table of { Entity_ID : Coverage.ID, MinName : System.IString, MaxName : System.IString }
+			{
+				row{Coverage.ID(1) Entity_ID, 'Skywalker'i MinName, 'Skywalker'i MaxName}, 
+				row{Coverage.ID(2) Entity_ID, 'Skywalker'i MinName, 'Skywalker'i MaxName}, 
+				row{Coverage.ID(3) Entity_ID, 'Skywalker'i MinName, 'Skywalker'i MaxName}, 
+				row{Coverage.ID(4) Entity_ID, 'Solo'i MinName, 'Solo'i MaxName}, 
+				row{Coverage.ID(5) Entity_ID, 'Palpatine'i MinName, 'Palpatine'i MaxName}, 
+				row{Coverage.ID(10) Entity_ID, 'Watto'i MinName, 'Watto'i MaxName}
+			}
+			");
+
+		// Min, Max, IString, empty set		
+		NegativeTest("if (MinName from row from (Client redefine { LastName := LastName.ToIString() } where false group add { Min(LastName) MinName })) <> '' then raise Error('Invalid min string');", "Minimum string of empty set succeeded");
+		NegativeTest("if (MaxName from row from (Client redefine { LastName := LastName.ToIString() } where false group add { Max(LastName) MaxName })) <> '' then raise Error('Invalid max string');", "Maximum string of empty set succeeded");
+*/		
+		// All, Any Boolean {no columns}
+		//select Vendor group add {All(HasContract) AllContract, Any(HasContract) AnyContract};
+		//select ScriptData("Vendor group add {All(HasContract) AllContract, Any(HasContract) AnyContract}");
+		TestNavigable
+		(
+			"Vendor group add {All(HasContract) AllContract, Any(HasContract) AnyContract}", 
+			"
+				table of { AllContract : System.Boolean, AnyContract : System.Boolean }
+				{
+					row{false AllContract, false AnyContract}
+				}
+			"
+		);
+		
+		// All, Any Boolean {some columns}
+		//select Vendor group by {HasContract} add {All(HasContract) AllContract, Any(HasContract) AnyContract};
+		//select ScriptData("Vendor group by {HasContract} add {All(HasContract) AllContract, Any(HasContract) AnyContract}");
+		TestNavigable
+		(
+			"Vendor group by {HasContract} add {All(HasContract) AllContract, Any(HasContract) AnyContract}", 
+			"
+				table of { HasContract : System.Boolean, AllContract : System.Boolean, AnyContract : System.Boolean }
+				{
+					row{false HasContract, false AllContract, false AnyContract}
+				}
+			"
+		);
+
+      // All, Any Boolean {All columns}
+		//select Vendor group by {Entity_ID} add {All(HasContract) AllContract, Any(HasContract) AnyContract};
+		//select ScriptData("Vendor group by {Entity_ID} add {All(HasContract) AllContract, Any(HasContract) AnyContract}");
+		TestNavigable
+		(
+			"Vendor group by {Entity_ID} add {All(HasContract) AllContract, Any(HasContract) AnyContract}", 
+			"
+				table of { Entity_ID : ID, AllContract : System.Boolean, AnyContract : System.Boolean }
+				{
+					row{ID(6) Entity_ID, false AllContract, false AnyContract}, 
+					row{ID(7) Entity_ID, false AllContract, false AnyContract}, 
+					row{ID(8) Entity_ID, false AllContract, false AnyContract}, 
+					row{ID(9) Entity_ID, false AllContract, false AnyContract}, 
+					row{ID(10) Entity_ID, false AllContract, false AnyContract}
+				}
+			"
+		);
+
+		// All, Any, Boolean, empty set
+		if (Vendor where false group add { All(HasContract) AllContract, Any(HasContract) AnyContract }) <> table { row { true AllContract, false AnyContract }, key { } } then
+			raise Error("All or Any boolean on empty set failed");
+
+	// extend
+		//select Client add {LastName.Value + ", " + FirstName.Value FullName};
+		//select ScriptData("Client add {LastName.Value + ', ' + FirstName.Value FullName}");
+		TestNavigable
+		(
+			"Client add {LastName.Value + ', ' + FirstName.Value FullName}", 
+			"
+				table of { Entity_ID : ID, FirstName : EntityName, LastName : EntityName, FullName : System.String }
+				{
+					row{ID(1) Entity_ID, EntityName('Luke') FirstName, EntityName('Skywalker') LastName, 'Skywalker, Luke' FullName}, 
+					row{ID(2) Entity_ID, EntityName('Anakin') FirstName, EntityName('Skywalker') LastName, 'Skywalker, Anakin' FullName}, 
+					row{ID(3) Entity_ID, EntityName('Leia') FirstName, EntityName('Skywalker') LastName, 'Skywalker, Leia' FullName}, 
+					row{ID(4) Entity_ID, EntityName('Han') FirstName, EntityName('Solo') LastName, 'Solo, Han' FullName}, 
+					row{ID(5) Entity_ID, EntityName('Emperor') FirstName, EntityName('Palpatine') LastName, 'Palpatine, Emperor' FullName}, 
+					row{ID(10) Entity_ID, EntityName('Watto') FirstName, EntityName('Watto') LastName, 'Watto, Watto' FullName}
+				}
+			"
+		);
+		
+		// extend with correlated subquery spanning aggregate invocation, no column
+		//select (Item rename I) add { Count(ItemTransaction where Item_ID = I.ID) Count };
+		//select ScriptData("(Item rename I) add { Count(ItemTransaction where Item_ID = I.ID) Count }");
+		TestNavigable
+		(
+			"(Item rename I) add { Count(ItemTransaction where Item_ID = I.ID) Count }", 
+			"
+				table of { I.ID : ID, I.ItemType_ID : ShortID, I.Quantity : System.Integer, Count : System.Integer }
+				{
+					row{ID(1) I.ID, ShortID('001') I.ItemType_ID, 5 I.Quantity, 1 Count}, 
+					row{ID(2) I.ID, ShortID('002') I.ItemType_ID, 10 I.Quantity, 1 Count}, 
+					row{ID(3) I.ID, ShortID('111') I.ItemType_ID, 4 I.Quantity, 1 Count}, 
+					row{ID(4) I.ID, ShortID('121') I.ItemType_ID, 2 I.Quantity, 1 Count}, 
+					row{ID(5) I.ID, ShortID('131') I.ItemType_ID, 21 I.Quantity, 1 Count}, 
+					row{ID(6) I.ID, ShortID('132') I.ItemType_ID, 15 I.Quantity, 1 Count}, 
+					row{ID(7) I.ID, ShortID('211') I.ItemType_ID, 25 I.Quantity, 1 Count}, 
+					row{ID(8) I.ID, ShortID('221') I.ItemType_ID, 145 I.Quantity, 1 Count}, 
+					row{ID(9) I.ID, ShortID('300') I.ItemType_ID, 500 I.Quantity, 1 Count}, 
+					row{ID(10) I.ID, ShortID('400') I.ItemType_ID, 24 I.Quantity, 1 Count}, 
+					row{ID(11) I.ID, ShortID('500') I.ItemType_ID, 3 I.Quantity, 1 Count}
+				}
+			"
+		);
+		
+		// extend with correlated subquery spanning aggregate invocation, column
+		//select (Item rename I) add { Max(UnitCost from (ItemTransaction where Item_ID = I.ID)) MaxUnitCost };
+		//select ScriptData("(Item rename I) add { Max(UnitCost from (ItemTransaction where Item_ID = I.ID)) MaxUnitCost }");
+		TestNavigable
+		(
+			"(Item rename I) add { Max(UnitCost from (ItemTransaction where Item_ID = I.ID)) MaxUnitCost }", 
+			"
+				table of { I.ID : ID, I.ItemType_ID : ShortID, I.Quantity : System.Integer, MaxUnitCost : System.Decimal }
+				{
+					row{ID(1) I.ID, ShortID('001') I.ItemType_ID, 5 I.Quantity, 200d MaxUnitCost}, 
+					row{ID(2) I.ID, ShortID('002') I.ItemType_ID, 10 I.Quantity, 200d MaxUnitCost}, 
+					row{ID(3) I.ID, ShortID('111') I.ItemType_ID, 4 I.Quantity, 100000d MaxUnitCost}, 
+					row{ID(4) I.ID, ShortID('121') I.ItemType_ID, 2 I.Quantity, 20000d MaxUnitCost}, 
+					row{ID(5) I.ID, ShortID('131') I.ItemType_ID, 21 I.Quantity, 1000d MaxUnitCost}, 
+					row{ID(6) I.ID, ShortID('132') I.ItemType_ID, 15 I.Quantity, 1000d MaxUnitCost}, 
+					row{ID(7) I.ID, ShortID('211') I.ItemType_ID, 25 I.Quantity, 100d MaxUnitCost}, 
+					row{ID(8) I.ID, ShortID('221') I.ItemType_ID, 145 I.Quantity, 50d MaxUnitCost}, 
+					row{ID(9) I.ID, ShortID('300') I.ItemType_ID, 500 I.Quantity, 0.50d MaxUnitCost}, 
+					row{ID(10) I.ID, ShortID('400') I.ItemType_ID, 24 I.Quantity, 200d MaxUnitCost}, 
+					row{ID(11) I.ID, ShortID('500') I.ItemType_ID, 3 I.Quantity, 500d MaxUnitCost}
+				}
+			"
+		);
+		
+	// rename
+		//select Client rename {Entity_ID IDNum, LastName Last_Name, FirstName First_Name};
+		//select ScriptData("Client rename {Entity_ID IDNum, LastName Last_Name, FirstName First_Name}");
+		TestNavigable
+		(
+			"Client rename {Entity_ID IDNum, LastName Last_Name, FirstName First_Name}", 
+			"
+				table of { IDNum : ID, First_Name : EntityName, Last_Name : EntityName }
+				{
+					row{ID(1) IDNum, EntityName('Luke') First_Name, EntityName('Skywalker') Last_Name}, 
+					row{ID(2) IDNum, EntityName('Anakin') First_Name, EntityName('Skywalker') Last_Name}, 
+					row{ID(3) IDNum, EntityName('Leia') First_Name, EntityName('Skywalker') Last_Name}, 
+					row{ID(4) IDNum, EntityName('Han') First_Name, EntityName('Solo') Last_Name}, 
+					row{ID(5) IDNum, EntityName('Emperor') First_Name, EntityName('Palpatine') Last_Name}, 
+					row{ID(10) IDNum, EntityName('Watto') First_Name, EntityName('Watto') Last_Name}
+				}
+			"
+		);
+		
+	// adorn
+		//select Client adorn { FirstName tags { Frontend.Title = "First Name" } };	
+		//select ScriptData("Client adorn { FirstName tags { Frontend.Title = 'First Name' } }");
+		TestNavigable
+		(
+			"Client adorn { FirstName tags { Frontend.Title = 'First Name' } }", 
+			"
+				table of { Entity_ID : ID, FirstName : EntityName, LastName : EntityName }
+				{
+					row{ID(1) Entity_ID, EntityName('Luke') FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(2) Entity_ID, EntityName('Anakin') FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(3) Entity_ID, EntityName('Leia') FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(4) Entity_ID, EntityName('Han') FirstName, EntityName('Solo') LastName}, 
+					row{ID(5) Entity_ID, EntityName('Emperor') FirstName, EntityName('Palpatine') LastName}, 
+					row{ID(10) Entity_ID, EntityName('Watto') FirstName, EntityName('Watto') LastName}
+				}
+			"
+		);
+
+	// redefine
+		//select Client redefine { FirstName := FirstName.Value + ' Jr.' };
+		//select ScriptData("Client redefine { FirstName := FirstName.Value + ' Jr.' }");
+		TestNavigable
+		(
+			"Client redefine { FirstName := FirstName.Value + ' Jr.' }", 
+			"
+				table of { Entity_ID : ID, FirstName : System.String, LastName : EntityName }
+				{
+					row{ID(1) Entity_ID, 'Luke Jr.' FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(2) Entity_ID, 'Anakin Jr.' FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(3) Entity_ID, 'Leia Jr.' FirstName, EntityName('Skywalker') LastName}, 
+					row{ID(4) Entity_ID, 'Han Jr.' FirstName, EntityName('Solo') LastName}, 
+					row{ID(5) Entity_ID, 'Emperor Jr.' FirstName, EntityName('Palpatine') LastName}, 
+					row{ID(10) Entity_ID, 'Watto Jr.' FirstName, EntityName('Watto') LastName}
+				}
+			"
+		);
+
+	// quota
+	if Count(Client) <> Count(Client return Count(Client) by {Entity_ID}) then
+		raise Error("Count of client not equal to Count of client quota");
+		
+	if Count(Client return 0 by {LastName}) <> 0 then
+		raise Error("Count of client quota not equal to 0");
+		
+	if Count(Client return 1 by {Entity_ID}) <> 1 then
+		raise Error("Count of client quota not equal to 1");
+
+	if Count(Client where LastName = "Skywalker" return 1 by {LastName}) <> 3 then
+		raise Error("Count of client quota by last name not equal to 3");
+
+	//select Client where LastName = 'Skywalker' return 1 by { LastName };
+	//select ScriptData("Client where LastName = 'Skywalker' return 1 by { LastName }");
+	TestNavigable
+	(
+		"Client where LastName = 'Skywalker' return 1 by { LastName }", 
+		"
+			table of { Entity_ID : ID, FirstName : EntityName, LastName : EntityName }
+			{
+				row{ID(1) Entity_ID, EntityName('Luke') FirstName, EntityName('Skywalker') LastName}, 
+				row{ID(2) Entity_ID, EntityName('Anakin') FirstName, EntityName('Skywalker') LastName}, 
+				row{ID(3) Entity_ID, EntityName('Leia') FirstName, EntityName('Skywalker') LastName}
+			}
+		"
+	);
+
+    // explode
+    // root condition false
+    //select ItemTypeParent explode by (Parent_ItemType_ID = parent ItemType_ID) where Parent_ItemType_ID = ShortID('600');
+    //select ScriptData("ItemTypeParent explode by (Parent_ItemType_ID = parent ItemType_ID) where Parent_ItemType_ID = ShortID('600')");
+    TestNavigable
+    (
+    	"ItemTypeParent explode by (Parent_ItemType_ID = parent ItemType_ID) where Parent_ItemType_ID = ShortID('600')", 
+    	"table of { ItemType_ID : ShortID, Parent_ItemType_ID : ShortID, sequence : System.Integer } { }"
+    );
+
+    // root condition true, explode condition false (this statement causes recursion
+    //select rights explode by (id = parent id) where parent_id = "3000";
+    
+    // root condition true, explode condition true
+    //select (ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID));
+    //select ScriptData("(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID))");
+    TestNavigable
+    (
+    	"(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID))", 
+    	"
+    		table of { Outer.ItemType_ID : ShortID, Outer.Parent_ItemType_ID : ShortID, sequence : System.Integer }
+			{
+				row{ShortID('001') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 sequence}, 
+				row{ShortID('002') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 2 sequence}, 
+				row{ShortID('110') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 3 sequence}, 
+				row{ShortID('111') Outer.ItemType_ID, ShortID('110') Outer.Parent_ItemType_ID, 4 sequence}, 
+				row{ShortID('120') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 5 sequence}, 
+				row{ShortID('121') Outer.ItemType_ID, ShortID('120') Outer.Parent_ItemType_ID, 6 sequence}, 
+				row{ShortID('130') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 7 sequence}, 
+				row{ShortID('131') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 8 sequence}, 
+				row{ShortID('132') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 9 sequence}, 
+				row{ShortID('210') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 10 sequence}, 
+				row{ShortID('211') Outer.ItemType_ID, ShortID('210') Outer.Parent_ItemType_ID, 11 sequence}, 
+				row{ShortID('220') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 12 sequence}, 
+				row{ShortID('221') Outer.ItemType_ID, ShortID('220') Outer.Parent_ItemType_ID, 13 sequence}
+			}
+		"
+	);
+
+    // include level
+    //select (ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level;
+    //select ScriptData("(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level");
+    TestNavigable
+    (
+    	"(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level", 
+    	"
+    		table of { Outer.ItemType_ID : ShortID, Outer.Parent_ItemType_ID : ShortID, level : System.Integer, sequence : System.Integer }
+			{
+				row{ShortID('001') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 level, 1 sequence}, 
+				row{ShortID('002') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 level, 2 sequence}, 
+				row{ShortID('110') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 3 sequence}, 
+				row{ShortID('111') Outer.ItemType_ID, ShortID('110') Outer.Parent_ItemType_ID, 2 level, 4 sequence}, 
+				row{ShortID('120') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 5 sequence}, 
+				row{ShortID('121') Outer.ItemType_ID, ShortID('120') Outer.Parent_ItemType_ID, 2 level, 6 sequence}, 
+				row{ShortID('130') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 7 sequence}, 
+				row{ShortID('131') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 2 level, 8 sequence}, 
+				row{ShortID('132') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 2 level, 9 sequence}, 
+				row{ShortID('210') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 1 level, 10 sequence}, 
+				row{ShortID('211') Outer.ItemType_ID, ShortID('210') Outer.Parent_ItemType_ID, 2 level, 11 sequence}, 
+				row{ShortID('220') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 1 level, 12 sequence}, 
+				row{ShortID('221') Outer.ItemType_ID, ShortID('220') Outer.Parent_ItemType_ID, 2 level, 13 sequence}
+			}
+		"
+	);
+    
+    // include sequence
+    //select (ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include sequence;
+    //select ScriptData("(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include sequence");
+    TestNavigable
+    (
+    	"(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include sequence", 
+    	"
+    		table of { Outer.ItemType_ID : ShortID, Outer.Parent_ItemType_ID : ShortID, sequence : System.Integer }
+			{
+				row{ShortID('001') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 sequence}, 
+				row{ShortID('002') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 2 sequence}, 
+				row{ShortID('110') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 3 sequence}, 
+				row{ShortID('111') Outer.ItemType_ID, ShortID('110') Outer.Parent_ItemType_ID, 4 sequence}, 
+				row{ShortID('120') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 5 sequence}, 
+				row{ShortID('121') Outer.ItemType_ID, ShortID('120') Outer.Parent_ItemType_ID, 6 sequence}, 
+				row{ShortID('130') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 7 sequence}, 
+				row{ShortID('131') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 8 sequence}, 
+				row{ShortID('132') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 9 sequence}, 
+				row{ShortID('210') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 10 sequence}, 
+				row{ShortID('211') Outer.ItemType_ID, ShortID('210') Outer.Parent_ItemType_ID, 11 sequence}, 
+				row{ShortID('220') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 12 sequence}, 
+				row{ShortID('221') Outer.ItemType_ID, ShortID('220') Outer.Parent_ItemType_ID, 13 sequence}
+			}
+		"
+	);
+    
+    // include level and sequence
+    //select (ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level include sequence;
+    //select ScriptData("(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level include sequence");
+    TestNavigable
+    (
+    	"(ItemTypeParent rename Outer) explode by (Outer.Parent_ItemType_ID = parent Outer.ItemType_ID) where not (exists (ItemTypeParent where ItemType_ID = Outer.Parent_ItemType_ID)) include level include sequence", 
+    	"
+    		table of { Outer.ItemType_ID : ShortID, Outer.Parent_ItemType_ID : ShortID, level : System.Integer, sequence : System.Integer }
+			{
+				row{ShortID('001') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 level, 1 sequence}, 
+				row{ShortID('002') Outer.ItemType_ID, ShortID('000') Outer.Parent_ItemType_ID, 1 level, 2 sequence}, 
+				row{ShortID('110') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 3 sequence}, 
+				row{ShortID('111') Outer.ItemType_ID, ShortID('110') Outer.Parent_ItemType_ID, 2 level, 4 sequence}, 
+				row{ShortID('120') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 5 sequence}, 
+				row{ShortID('121') Outer.ItemType_ID, ShortID('120') Outer.Parent_ItemType_ID, 2 level, 6 sequence}, 
+				row{ShortID('130') Outer.ItemType_ID, ShortID('100') Outer.Parent_ItemType_ID, 1 level, 7 sequence}, 
+				row{ShortID('131') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 2 level, 8 sequence}, 
+				row{ShortID('132') Outer.ItemType_ID, ShortID('130') Outer.Parent_ItemType_ID, 2 level, 9 sequence}, 
+				row{ShortID('210') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 1 level, 10 sequence}, 
+				row{ShortID('211') Outer.ItemType_ID, ShortID('210') Outer.Parent_ItemType_ID, 2 level, 11 sequence}, 
+				row{ShortID('220') Outer.ItemType_ID, ShortID('200') Outer.Parent_ItemType_ID, 1 level, 12 sequence}, 
+				row{ShortID('221') Outer.ItemType_ID, ShortID('220') Outer.Parent_ItemType_ID, 2 level, 13 sequence}
+			}
+		"
+	);
+
+	// union
+	if Count(Client union Client) <> Count(Client) then
+		raise Error("Union failed");
+			
+	// product
+	if Count((Client rename a1) times (Client rename a2)) <> (Count(Client) ** 2) then
+		raise Error("Product failed");
+		
+	// intersect
+	if Count(Client intersect Client) <> Count(Client) then
+		raise Error("Intersect failed");
+		
+	// difference
+	if Count(Client minus Client) <> 0 then
+		raise Error("Difference failed");
+		
+	// join
+		
+		// left side key
+		//select Entity rename E join (EntityPhone rename EP) by E.ID = EP.Entity_ID;
+		//select ScriptData("Entity rename E join (EntityPhone rename EP) by E.ID = EP.Entity_ID");
+		TestNavigable
+		(
+			"Entity rename E join (EntityPhone rename EP) by E.ID = EP.Entity_ID", 
+			"
+				table of { E.ID : ID, E.Name : EntityName, EP.Entity_ID : ID, EP.Type_ID : ShortID, EP.Phone : Phone }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) EP.Entity_ID, ShortID('999') EP.Type_ID, Phone('100-1234') EP.Phone}
+				}
+			"
+		);
+	
+		// right side key
+		//select Item rename I join (ItemType rename IT) by I.ItemType_ID = IT.ID;
+		//select ScriptData("Item rename I join (ItemType rename IT) by I.ItemType_ID = IT.ID");
+		TestNavigable
+		(
+			"Item rename I join (ItemType rename IT) by I.ItemType_ID = IT.ID", 
+			"
+				table of { I.ID : ID, I.ItemType_ID : ShortID, I.Quantity : System.Integer, IT.ID : ShortID, IT.Description : System.String, IT.PercentStocked : System.Decimal }
+				{
+					row{ID(1) I.ID, ShortID('001') I.ItemType_ID, 5 I.Quantity, ShortID('001') IT.ID, 'Jedi Light Saber' IT.Description, 25.5d IT.PercentStocked}, 
+					row{ID(2) I.ID, ShortID('002') I.ItemType_ID, 10 I.Quantity, ShortID('002') IT.ID, 'Sith Light Saber' IT.Description, 54.5d IT.PercentStocked}, 
+					row{ID(3) I.ID, ShortID('111') I.ItemType_ID, 4 I.Quantity, ShortID('111') IT.ID, 'Corellian' IT.Description, 10.2d IT.PercentStocked}, 
+					row{ID(4) I.ID, ShortID('121') I.ItemType_ID, 2 I.Quantity, ShortID('121') IT.ID, 'Naboo Cruiser' IT.Description, 25.0d IT.PercentStocked}, 
+					row{ID(5) I.ID, ShortID('131') I.ItemType_ID, 21 I.Quantity, ShortID('131') IT.ID, 'X-Wing Fighter' IT.Description, 15.0d IT.PercentStocked}, 
+					row{ID(6) I.ID, ShortID('132') I.ItemType_ID, 15 I.Quantity, ShortID('132') IT.ID, 'Tie Fighter' IT.Description, 70.0d IT.PercentStocked}, 
+					row{ID(7) I.ID, ShortID('211') I.ItemType_ID, 25 I.Quantity, ShortID('211') IT.ID, 'Storm Trooper Laser Rifle' IT.Description, 20.0d IT.PercentStocked}, 
+					row{ID(8) I.ID, ShortID('221') I.ItemType_ID, 145 I.Quantity, ShortID('221') IT.ID, 'Standard Issue Rebel Blaster' IT.Description, 40.0d IT.PercentStocked}, 
+					row{ID(9) I.ID, ShortID('300') I.ItemType_ID, 500 I.Quantity, ShortID('300') IT.ID, 'Bantha Pudu' IT.Description, 100.0d IT.PercentStocked}, 
+					row{ID(10) I.ID, ShortID('400') I.ItemType_ID, 24 I.Quantity, ShortID('400') IT.ID, 'Storm Trooper Suits' IT.Description, 45.0d IT.PercentStocked}, 
+					row{ID(11) I.ID, ShortID('500') I.ItemType_ID, 3 I.Quantity, ShortID('500') IT.ID, 'Land Speeders' IT.Description, 25.0d IT.PercentStocked}
+				}
+			"
+		);
+
+		// left and right side key
+      //select Entity rename E join (Client rename C) by E.ID = C.Entity_ID;
+      //select ScriptData("Entity rename E join (Client rename C) by E.ID = C.Entity_ID");
+      TestNavigable
+      (
+      	"Entity rename E join (Client rename C) by E.ID = C.Entity_ID", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, C.Entity_ID : ID, C.FirstName : EntityName, C.LastName : EntityName }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) C.Entity_ID, EntityName('Luke') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, ID(2) C.Entity_ID, EntityName('Anakin') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, ID(3) C.Entity_ID, EntityName('Leia') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, ID(4) C.Entity_ID, EntityName('Han') C.FirstName, EntityName('Solo') C.LastName}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, ID(5) C.Entity_ID, EntityName('Emperor') C.FirstName, EntityName('Palpatine') C.LastName}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, ID(10) C.Entity_ID, EntityName('Watto') C.FirstName, EntityName('Watto') C.LastName}
+				}
+			"
+		);
+		
+		// left and right side non-key
+      //select AddressType rename AT join (PhoneType rename PT) by AT.Description = PT.Description;
+      //select ScriptData("AddressType rename AT join (PhoneType rename PT) by AT.Description = PT.Description");
+      TestNavigable
+      (
+      	"AddressType rename AT join (PhoneType rename PT) by AT.Description = PT.Description", 
+      	"
+      		table of { AT.ID : ShortID, AT.Description : System.String, PT.ID : ShortID, PT.Description : System.String }
+				{
+					row{ShortID('WRK') AT.ID, 'Work' AT.Description, ShortID('WRK') PT.ID, 'Work' PT.Description}
+				}
+			"
+		);
+
+	// left join
+		// left side key
+      //select Entity rename E left join (EntityPhone rename EP) by E.ID = EP.Entity_ID;
+      //select ScriptData("Entity rename E left join (EntityPhone rename EP) by E.ID = EP.Entity_ID");
+      TestNavigable
+      (
+      	"Entity rename E left join (EntityPhone rename EP) by E.ID = EP.Entity_ID", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, EP.Entity_ID : ID, EP.Type_ID : ShortID, EP.Phone : Phone }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) EP.Entity_ID, ShortID('999') EP.Type_ID, Phone('100-1234') EP.Phone}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(6) E.ID, EntityName('Light Sabers Unlimited') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(7) E.ID, EntityName('Jabba''s Used Speeder Emporium') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(8) E.ID, EntityName('The Dark Side Space Junk') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(9) E.ID, EntityName('Mitichlorion Metal') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, (nil as ID) EP.Entity_ID, (nil as ShortID) EP.Type_ID, (nil as Phone) EP.Phone}
+				}
+			"
+		);
+		
+		// right side key
+      //select Item rename I left join (ItemType rename IT) by I.ItemType_ID = IT.ID;
+      //select ScriptData("Item rename I left join (ItemType rename IT) by I.ItemType_ID = IT.ID");
+      TestNavigable
+      (
+      	"Item rename I left join (ItemType rename IT) by I.ItemType_ID = IT.ID", 
+      	"
+      		table of { I.ID : ID, I.ItemType_ID : ShortID, I.Quantity : System.Integer, IT.ID : ShortID, IT.Description : System.String, IT.PercentStocked : System.Decimal }
+				{
+					row{ID(1) I.ID, ShortID('001') I.ItemType_ID, 5 I.Quantity, ShortID('001') IT.ID, 'Jedi Light Saber' IT.Description, 25.5d IT.PercentStocked}, 
+					row{ID(2) I.ID, ShortID('002') I.ItemType_ID, 10 I.Quantity, ShortID('002') IT.ID, 'Sith Light Saber' IT.Description, 54.5d IT.PercentStocked}, 
+					row{ID(3) I.ID, ShortID('111') I.ItemType_ID, 4 I.Quantity, ShortID('111') IT.ID, 'Corellian' IT.Description, 10.2d IT.PercentStocked}, 
+					row{ID(4) I.ID, ShortID('121') I.ItemType_ID, 2 I.Quantity, ShortID('121') IT.ID, 'Naboo Cruiser' IT.Description, 25.0d IT.PercentStocked}, 
+					row{ID(5) I.ID, ShortID('131') I.ItemType_ID, 21 I.Quantity, ShortID('131') IT.ID, 'X-Wing Fighter' IT.Description, 15.0d IT.PercentStocked}, 
+					row{ID(6) I.ID, ShortID('132') I.ItemType_ID, 15 I.Quantity, ShortID('132') IT.ID, 'Tie Fighter' IT.Description, 70.0d IT.PercentStocked}, 
+					row{ID(7) I.ID, ShortID('211') I.ItemType_ID, 25 I.Quantity, ShortID('211') IT.ID, 'Storm Trooper Laser Rifle' IT.Description, 20.0d IT.PercentStocked}, 
+					row{ID(8) I.ID, ShortID('221') I.ItemType_ID, 145 I.Quantity, ShortID('221') IT.ID, 'Standard Issue Rebel Blaster' IT.Description, 40.0d IT.PercentStocked}, 
+					row{ID(9) I.ID, ShortID('300') I.ItemType_ID, 500 I.Quantity, ShortID('300') IT.ID, 'Bantha Pudu' IT.Description, 100.0d IT.PercentStocked}, 
+					row{ID(10) I.ID, ShortID('400') I.ItemType_ID, 24 I.Quantity, ShortID('400') IT.ID, 'Storm Trooper Suits' IT.Description, 45.0d IT.PercentStocked}, 
+					row{ID(11) I.ID, ShortID('500') I.ItemType_ID, 3 I.Quantity, ShortID('500') IT.ID, 'Land Speeders' IT.Description, 25.0d IT.PercentStocked}
+				}
+			"
+		);
+
+		// left and right side key
+      //select Entity rename E left join (Client rename C) by E.ID = C.Entity_ID;
+      //select ScriptData("Entity rename E left join (Client rename C) by E.ID = C.Entity_ID");
+      TestNavigable
+      (
+      	"Entity rename E left join (Client rename C) by E.ID = C.Entity_ID", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, C.Entity_ID : ID, C.FirstName : EntityName, C.LastName : EntityName }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) C.Entity_ID, EntityName('Luke') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, ID(2) C.Entity_ID, EntityName('Anakin') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, ID(3) C.Entity_ID, EntityName('Leia') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, ID(4) C.Entity_ID, EntityName('Han') C.FirstName, EntityName('Solo') C.LastName}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, ID(5) C.Entity_ID, EntityName('Emperor') C.FirstName, EntityName('Palpatine') C.LastName}, 
+					row{ID(6) E.ID, EntityName('Light Sabers Unlimited') E.Name, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(7) E.ID, EntityName('Jabba''s Used Speeder Emporium') E.Name, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(8) E.ID, EntityName('The Dark Side Space Junk') E.Name, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(9) E.ID, EntityName('Mitichlorion Metal') E.Name, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, ID(10) C.Entity_ID, EntityName('Watto') C.FirstName, EntityName('Watto') C.LastName}
+				}
+			"
+		);
+		
+		// left and right side non-key
+      //select AddressType rename AT left join (PhoneType rename PT) by AT.Description = PT.Description;
+      //select ScriptData("AddressType rename AT left join (PhoneType rename PT) by AT.Description = PT.Description");
+      TestNavigable
+      (
+      	"AddressType rename AT left join (PhoneType rename PT) by AT.Description = PT.Description", 
+      	"
+      		table of { AT.ID : ShortID, AT.Description : System.String, PT.ID : ShortID, PT.Description : System.String }
+				{
+					row{ShortID('OFC') AT.ID, 'Office' AT.Description, (nil as ShortID) PT.ID, (nil as System.String) PT.Description}, 
+					row{ShortID('WRK') AT.ID, 'Work' AT.Description, ShortID('WRK') PT.ID, 'Work' PT.Description}
+				}
+			"
+		);
+		
+		// include rowexists
+      //select Entity rename E left join (Client rename C) by E.ID = C.Entity_ID include rowexists;
+      //select ScriptData("Entity rename E left join (Client rename C) by E.ID = C.Entity_ID include rowexists");
+      TestNavigable
+      (
+      	"Entity rename E left join (Client rename C) by E.ID = C.Entity_ID include rowexists", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, rowexists : System.Boolean, C.Entity_ID : ID, C.FirstName : EntityName, C.LastName : EntityName }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, true rowexists, ID(1) C.Entity_ID, EntityName('Luke') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, true rowexists, ID(2) C.Entity_ID, EntityName('Anakin') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, true rowexists, ID(3) C.Entity_ID, EntityName('Leia') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, true rowexists, ID(4) C.Entity_ID, EntityName('Han') C.FirstName, EntityName('Solo') C.LastName}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, true rowexists, ID(5) C.Entity_ID, EntityName('Emperor') C.FirstName, EntityName('Palpatine') C.LastName}, 
+					row{ID(6) E.ID, EntityName('Light Sabers Unlimited') E.Name, false rowexists, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(7) E.ID, EntityName('Jabba''s Used Speeder Emporium') E.Name, false rowexists, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(8) E.ID, EntityName('The Dark Side Space Junk') E.Name, false rowexists, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(9) E.ID, EntityName('Mitichlorion Metal') E.Name, false rowexists, (nil as ID) C.Entity_ID, (nil as EntityName) C.FirstName, (nil as EntityName) C.LastName}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, true rowexists, ID(10) C.Entity_ID, EntityName('Watto') C.FirstName, EntityName('Watto') C.LastName}
+				}
+			"
+		);
+		
+	// right join
+		// left side key
+      //select Entity rename E right join (EntityPhone rename EP) by E.ID = EP.Entity_ID;
+      //select ScriptData("Entity rename E right join (EntityPhone rename EP) by E.ID = EP.Entity_ID");
+      TestNavigable
+      (
+      	"Entity rename E right join (EntityPhone rename EP) by E.ID = EP.Entity_ID", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, EP.Entity_ID : ID, EP.Type_ID : ShortID, EP.Phone : Phone }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) EP.Entity_ID, ShortID('999') EP.Type_ID, Phone('100-1234') EP.Phone}
+				}
+			"
+		);
+		
+		// right side key
+      //select Item rename I right join (ItemType rename IT) by I.ItemType_ID = IT.ID;
+      //select ScriptData("Item rename I right join (ItemType rename IT) by I.ItemType_ID = IT.ID");
+      TestNavigable
+      (
+      	"Item rename I right join (ItemType rename IT) by I.ItemType_ID = IT.ID", 
+      	"
+      		table of { I.ID : ID, I.ItemType_ID : ShortID, I.Quantity : System.Integer, IT.ID : ShortID, IT.Description : System.String, IT.PercentStocked : System.Decimal }
+				{
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('000') IT.ID, 'Light Sabers' IT.Description, 10.0d IT.PercentStocked}, 
+					row{ID(1) I.ID, ShortID('001') I.ItemType_ID, 5 I.Quantity, ShortID('001') IT.ID, 'Jedi Light Saber' IT.Description, 25.5d IT.PercentStocked}, 
+					row{ID(2) I.ID, ShortID('002') I.ItemType_ID, 10 I.Quantity, ShortID('002') IT.ID, 'Sith Light Saber' IT.Description, 54.5d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('100') IT.ID, 'Space Ships' IT.Description, 88.0d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('110') IT.ID, 'Large' IT.Description, 81.0d IT.PercentStocked}, 
+					row{ID(3) I.ID, ShortID('111') I.ItemType_ID, 4 I.Quantity, ShortID('111') IT.ID, 'Corellian' IT.Description, 10.2d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('120') IT.ID, 'Medium' IT.Description, 25.0d IT.PercentStocked}, 
+					row{ID(4) I.ID, ShortID('121') I.ItemType_ID, 2 I.Quantity, ShortID('121') IT.ID, 'Naboo Cruiser' IT.Description, 25.0d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('130') IT.ID, 'SmAll' IT.Description, 85.0d IT.PercentStocked}, 
+					row{ID(5) I.ID, ShortID('131') I.ItemType_ID, 21 I.Quantity, ShortID('131') IT.ID, 'X-Wing Fighter' IT.Description, 15.0d IT.PercentStocked}, 
+					row{ID(6) I.ID, ShortID('132') I.ItemType_ID, 15 I.Quantity, ShortID('132') IT.ID, 'Tie Fighter' IT.Description, 70.0d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('200') IT.ID, 'Blasters' IT.Description, 90.0d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('210') IT.ID, 'Rifles' IT.Description, 10.0d IT.PercentStocked}, 
+					row{ID(7) I.ID, ShortID('211') I.ItemType_ID, 25 I.Quantity, ShortID('211') IT.ID, 'Storm Trooper Laser Rifle' IT.Description, 20.0d IT.PercentStocked}, 
+					row{(nil as ID) I.ID, (nil as ShortID) I.ItemType_ID, (nil as System.Integer) I.Quantity, ShortID('220') IT.ID, 'Sidearms' IT.Description, 30.0d IT.PercentStocked}, 
+					row{ID(8) I.ID, ShortID('221') I.ItemType_ID, 145 I.Quantity, ShortID('221') IT.ID, 'Standard Issue Rebel Blaster' IT.Description, 40.0d IT.PercentStocked}, 
+					row{ID(9) I.ID, ShortID('300') I.ItemType_ID, 500 I.Quantity, ShortID('300') IT.ID, 'Bantha Pudu' IT.Description, 100.0d IT.PercentStocked}, 
+					row{ID(10) I.ID, ShortID('400') I.ItemType_ID, 24 I.Quantity, ShortID('400') IT.ID, 'Storm Trooper Suits' IT.Description, 45.0d IT.PercentStocked}, 
+					row{ID(11) I.ID, ShortID('500') I.ItemType_ID, 3 I.Quantity, ShortID('500') IT.ID, 'Land Speeders' IT.Description, 25.0d IT.PercentStocked}
+				} order by { IT.ID }
+			"
+		);
+
+		// left and right side key
+      //select Entity rename E right join (Client rename C) by E.ID = C.Entity_ID;
+      //select ScriptData("Entity rename E right join (Client rename C) by E.ID = C.Entity_ID");
+      TestNavigable
+      (
+      	"Entity rename E right join (Client rename C) by E.ID = C.Entity_ID", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, C.Entity_ID : ID, C.FirstName : EntityName, C.LastName : EntityName }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, ID(1) C.Entity_ID, EntityName('Luke') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, ID(2) C.Entity_ID, EntityName('Anakin') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, ID(3) C.Entity_ID, EntityName('Leia') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, ID(4) C.Entity_ID, EntityName('Han') C.FirstName, EntityName('Solo') C.LastName}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, ID(5) C.Entity_ID, EntityName('Emperor') C.FirstName, EntityName('Palpatine') C.LastName}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, ID(10) C.Entity_ID, EntityName('Watto') C.FirstName, EntityName('Watto') C.LastName}
+				}
+			"
+		);
+		
+		// left and right side non-key
+      //select AddressType rename AT right join (PhoneType rename PT) by AT.Description = PT.Description;
+      //select ScriptData("AddressType rename AT right join (PhoneType rename PT) by AT.Description = PT.Description");
+      TestNavigable
+      (
+      	"AddressType rename AT right join (PhoneType rename PT) by AT.Description = PT.Description", 
+      	"
+      		table of { AT.ID : ShortID, AT.Description : System.String, PT.ID : ShortID, PT.Description : System.String }
+				{
+					row{ShortID('WRK') AT.ID, 'Work' AT.Description, ShortID('WRK') PT.ID, 'Work' PT.Description},
+					row{(nil as ShortID) AT.ID, (nil as System.String) AT.Description, ShortID('MOB') PT.ID, 'Mobile' PT.Description}, 
+					row{(nil as ShortID) AT.ID, (nil as System.String) AT.Description, ShortID('PAG') PT.ID, 'Pager' PT.Description}
+				}
+			"
+		);
+
+		// include rowexists
+      //select Entity rename E right join (Client rename C) by E.ID = C.Entity_ID include rowexists;
+      //select ScriptData("Entity rename E right join (Client rename C) by E.ID = C.Entity_ID include rowexists");
+      TestNavigable
+      (
+      	"Entity rename E right join (Client rename C) by E.ID = C.Entity_ID include rowexists", 
+      	"
+      		table of { E.ID : ID, E.Name : EntityName, rowexists : System.Boolean, C.Entity_ID : ID, C.FirstName : EntityName, C.LastName : EntityName }
+				{
+					row{ID(1) E.ID, EntityName('Luke Skywalker') E.Name, true rowexists, ID(1) C.Entity_ID, EntityName('Luke') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(2) E.ID, EntityName('Darth Vader') E.Name, true rowexists, ID(2) C.Entity_ID, EntityName('Anakin') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(3) E.ID, EntityName('Princess Leia') E.Name, true rowexists, ID(3) C.Entity_ID, EntityName('Leia') C.FirstName, EntityName('Skywalker') C.LastName}, 
+					row{ID(4) E.ID, EntityName('Han Solo') E.Name, true rowexists, ID(4) C.Entity_ID, EntityName('Han') C.FirstName, EntityName('Solo') C.LastName}, 
+					row{ID(5) E.ID, EntityName('Emperor Palpatine') E.Name, true rowexists, ID(5) C.Entity_ID, EntityName('Emperor') C.FirstName, EntityName('Palpatine') C.LastName}, 
+					row{ID(10) E.ID, EntityName('Crazy Watto''s Droid Parts') E.Name, true rowexists, ID(10) C.Entity_ID, EntityName('Watto') C.FirstName, EntityName('Watto') C.LastName}
+				}
+			"
+		);
+        
+drop table ItemTransaction;
+drop table Item;
+drop table ItemTypeParent;
+drop table ItemType;
+drop table EntityPhone;
+drop table EntityAddress;
+drop table PhoneType;
+drop table AddressType;
+drop table Vendor;
+drop table Client;
+drop table Entity;
+drop type Phone;
+drop type Zip;
+drop type State;
+drop type EntityName;
+drop type ShortID;
+drop type ID;
+drop device D4Demo;

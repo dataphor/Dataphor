@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Dataphor Coverage">
+  <row bop:name="MainRow">
+    <group title="All Coverage" bop:name="AllCoverageGroup">
+      <column bop:name="Column">
+        <trigger action="PreRunCoverageAction" imageheight="13" text="Run All Coverage" hint="Runs All Coverage" bop:name="RunAllCoverageTrigger" />
+        <trigger action="ShowCaseResultsExtendedFormAction" imagewidth="11" imageheight="13" text="Case &amp;Results" hint="View most recent case results." margintop="5" bop:name="ViewCaseResultsTrigger" />
+        <trigger action="ShowCasesEditFormAction" text="Edit &amp;Cases" margintop="5" bop:name="EditCasesTrigger" />
+      </column>
+    </group>
+    <group title="Device Coverage" marginleft="10" bop:name="DeviceCoverageGroup">
+      <column bop:name="DeviceCoverageColumn">
+        <trigger action="ShowChooseDeviceFormAction" imagewidth="11" imageheight="13" text="Test  Device     " hint="Test a specific device." bop:name="TestDeviceTrigger" />
+        <trigger action="ShowChooseDeviceFormAction" imagewidth="11" imageheight="13" text="Device Case Results" hint="View the most recent Device Case results." margintop="5" bop:name="ViewDeviceCaseResultsTrigger" />
+        <trigger action="ShowDeviceCaseEditFormAction" text="Edit Device Cases" margintop="5" bop:name="EditDeviceCaseTrigger" />
+      </column>
+    </group>
+  </row>
+  <scriptaction language="CSharp" script="using (Alphora.Dataphor.Frontend.Client.Windows.StatusForm LStatusForm = new &#xD;&#xA;Alphora.Dataphor.Frontend.Client.Windows.StatusForm(&quot;Running Coverage&quot;))&#xD;&#xA;&#xD;&#xA;{&#xD;&#xA;&#xD;&#xA;      RunCoverageAction.Execute();&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA; " bop:name="PreRunCoverageAction" />
+  <datascriptaction script="TestFramework.Coverage.Base.RunCoverage(nil);" afterexecute="ShowCaseResultsExtendedFormAction" bop:name="RunCoverageAction" />
+  <showformaction document="Form('TestFramework.Coverage', 'ChooseDeviceInstance')" bop:name="ShowChooseDeviceFormAction" />
+  <showformaction document="Form('TestFramework.Coverage', 'CaseResultsExtended')" bop:name="ShowCaseResultsExtendedFormAction" />
+  <showformaction document="Form('TestFramework.Coverage', 'DeviceCase')" bop:name="ShowDeviceCaseEditFormAction" />
+  <showformaction document="Form('TestFramework.Coverage', 'Cases')" bop:name="ShowCasesEditFormAction" />
+</interface>

@@ -1,0 +1,17 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+insert
+	table
+	{
+		row { System.Name("RunTest") ID, "RunTest" Description, ".Frontend.Form('Sample.Shipping', 'RunTest')" StartDocument }
+	}
+	into Applications;
+insert
+	table
+	{
+		row { System.Name("RunTest") Application_ID, System.Name("Sample.Shipping") Library_Name }
+	}
+	into ApplicationLibraries;

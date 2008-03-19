@@ -1,0 +1,4 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="1.0.0.0" defaultdevicename="" assembliesasstring="" librariesasstring="" name="DB2400Connection" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <files.filereference filename="Alphora.Dataphor.DAE.Connection.DB2400.dll" isassembly="True" />
+    <libraries.libraryreference name="Connection" version="*" />
+</library>

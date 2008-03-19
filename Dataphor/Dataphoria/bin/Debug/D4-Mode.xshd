@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+
+<SyntaxDefinition name = "D4" extensions = "*">
+	
+	<Environment> 
+		<Selection    color = "SystemColors.HighlightText" bgcolor = "SystemColors.Highlight"/>
+		<VRuler       color = "SystemColors.ControlLight"/>
+		<InvalidLines color = "Red"/>
+		<CaretMarker  color = "Yellow"/>
+		
+		<LineNumbers  color = "SystemColors.ControlDark" bgcolor = "SystemColors.Window"/>
+		
+		<FoldLine     color = "#808080" bgcolor="Black"/>
+		<FoldMarker   color = "#808080" bgcolor="White"/>
+		<SelectedFoldLine color = "Black" bgcolor="Black"/>
+
+		<EOLMarkers   color = "#E0E0E5"/>
+		<SpaceMarkers color = "#E0E0E5"/>
+		<TabMarkers   color = "#E0E0E5"/>
+	</Environment>
+	
+	<Properties>
+		<Property name="LineComment" value="//"/>
+	</Properties>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "Black"/>
+	<RuleSets>
+		<RuleSet ignorecase="false" noescapesequences="true">
+		  	<Delimiters>&lt;&gt;~!@%^*()-+=|\#/{}[]:;"' ,	.?</Delimiters>
+
+			<Span name = "LINECOMMENT" rule = "CommentSet" bold = "false" italic = "true" color = "Green" stopateol = "true">
+			   <Begin>//</Begin>
+			</Span>
+
+			<Span name = "BLOCKCOMMENT" rule = "CommentSet" bold = "false" italic = "true" color = "Green" stopateol = "false">
+				<Begin>/*</Begin>
+				<End>*/</End>
+			</Span>
+
+			<Span name = "STRING" bold = "false" italic = "false" color = "Maroon" stopateol = "false" noescapesequences = "true">
+				<Begin>"</Begin>
+				<End>"</End>
+			</Span>
+
+			<Span name = "SINGLESTRING" bold = "false" italic = "false" color = "Maroon" stopateol = "false" noescapesequences = "true">
+				<Begin>'</Begin>
+				<End>'</End>
+			</Span>
+
+			<KeyWords name = "Keywords" bold="false" italic="false" color="Blue">
+				<Key word="add" />            
+				<Key word="adorn" />          
+				<Key word="after" />          
+				<Key word="aggregate" />      
+				<Key word="aggregation" />    
+				<Key word="all" />            
+				<Key word="alter" />          
+				<Key word="and" />            
+				<Key word="apply" />            
+				<Key word="as" />             
+				<Key word="asc" />            
+				<Key word="attach" />         
+				<Key word="attributes" />     
+				<Key word="bag" />            
+				<Key word="before" />         
+				<Key word="begin" />          
+				<Key word="between" />        
+				<Key word="break" />          
+				<Key word="browse" />         
+				<Key word="by" />             
+				<Key word="capabilities" />   
+				<Key word="cascade" />        
+				<Key word="case" />           
+				<Key word="change" />         
+				<Key word="class" />          
+				<Key word="clear" />          
+				<Key word="column" />         
+				<Key word="commit" />
+				<Key word="const" />          
+				<Key word="constraint" />     
+				<Key word="continue" />       
+				<Key word="conversion" />
+				<Key word="create" />         
+				<Key word="cursor" />         
+				<Key word="default" />        
+				<Key word="delete" />         
+				<Key word="desc" />           
+				<Key word="detach" />         
+				<Key word="device" />         
+				<Key word="distinct" />       
+				<Key word="div" />
+				<Key word="divide" />         
+				<Key word="do" />             
+				<Key word="downto" />         
+				<Key word="drop" />           
+				<Key word="dynamic" />
+				<Key word="else" />           
+				<Key word="end" />            
+				<Key word="except" />         
+				<Key word="exists" />         
+				<Key word="exit" />           
+				<Key word="explode" />        
+				<Key word="false" />          
+				<Key word="finalization" />   
+				<Key word="finally" />        
+				<Key word="for" />            
+				<Key word="foreach" />            
+				<Key word="from" />           
+				<Key word="generic" />        
+				<Key word="grant" />          
+				<Key word="group" />          
+				<Key word="having" />
+				<Key word="if" />             
+				<Key word="in" />             
+				<Key word="include" />        
+				<Key word="inherited" />       
+				<Key word="initialization" /> 
+				<Key word="insert" />         
+				<Key word="intersect" />      
+				<Key word="into" />           
+				<Key word="invoke" />
+				<Key word="is" />             
+				<Key word="isolation" />      
+				<Key word="join" />           
+				<Key word="key" />            
+				<Key word="left" />           
+				<Key word="level" />          
+				<Key word="like" />           
+				<Key word="list" />           
+				<Key word="lookup" />         
+				<Key word="master" />         
+				<Key word="matches" />        
+				<Key word="minus" />          
+				<Key word="mod" />
+				<Key word="mode" /> 
+				<Key word="modify" />        
+				<Key word="narrowing" />  
+				<Key word="new" />            
+				<Key word="nil" />
+				<Key word="not" />            
+				<Key word="of" />            
+				<Key word="old" />            
+				<Key word="on" />             
+				<Key word="operator" />       
+				<Key word="or" />             
+				<Key word="order" />          
+				<Key word="origin"/>
+				<Key word="over" />           
+				<Key word="parent" />         
+				<Key word="raise" />          
+				<Key word="read" />           
+				<Key word="reconciliation" /> 
+				<Key word="recursively" /> 
+				<Key word="redefine" />       
+				<Key word="reference" />      
+				<Key word="references" />     
+				<Key word="remove" />         
+				<Key word="rename" />         
+				<Key word="repeat" />         
+				<Key word="representation" /> 
+				<Key word="require" />        
+				<Key word="result" />         
+				<Key word="return" />         
+				<Key word="revert" />         
+				<Key word="revoke" />         
+				<Key word="right" />          
+				<Key word="role" />            
+				<Key word="row" />            
+				<Key word="rowexists" />      
+				<Key word="scalar" />
+				<Key word="select" />         
+				<Key word="selector" />
+				<Key word="sequence" />       
+				<Key word="session" />       
+				<Key word="set" />            
+				<Key word="sort" />           
+				<Key word="source" />           
+				<Key word="special" />        
+				<Key word="step" />           
+				<Key word="static" />           
+				<Key word="table" />          
+				<Key word="tags" />           
+				<Key word="target" />             
+				<Key word="then" />           
+				<Key word="times" />          
+				<Key word="to" />             
+				<Key word="transition" />
+				<Key word="true" />           
+				<Key word="try" />            
+				<Key word="type" />           
+				<Key word="typeof" />         
+				<Key word="union" />          
+				<Key word="until" />          
+				<Key word="update" />         
+				<Key word="usage" />         
+				<Key word="user" />         
+				<Key word="users" />         
+				<Key word="using" />
+				<Key word="validate" />       
+				<Key word="value" />          
+				<Key word="var" />            
+				<Key word="view" />           
+				<Key word="when" />           
+				<Key word="where" />          
+				<Key word="while" />    
+				<Key word="widening" />      
+				<Key word="with" />  
+				<Key word="without" />         
+				<Key word="write" />          
+				<Key word="xor" />            
+			</KeyWords>		
+		</RuleSet>
+
+		<RuleSet name = "CommentSet" ignorecase = "true">
+		  	<Delimiters>&lt;&gt;~!@%^*()-+=|\#/{}[];"' ,	.?</Delimiters>
+			<KeyWords name = "ErrorWords" bold="true" italic="true" color="Red">
+				<Key word = "TODO:" />
+				<Key word = "FIXME:" />
+				<Key word = "ERROR:" />
+	 	 	</KeyWords>
+			<KeyWords name = "WarningWords" bold="true" italic="true" color="Maroon">
+				<Key word = "HACK:" />
+				<Key word = "UNDONE:" />
+				<Key word = "WORKAROUND:" />
+				<Key word = "Q:" />
+	 	 	</KeyWords>
+			<KeyWords name = "DescriptorWords" bold="true" italic="true" color="DarkGreen">
+				<Key word = "Rule:" />
+				<Key word = "Table:" />
+				<Key word = "View:" />
+				<Key word = "Right:" />
+				<Key word = "Reference:" />
+				<Key word = "Operator:" />
+				<Key word = "Constraint:" />
+				<Key word = "Type:" />
+				<Key word = "Device:" />
+				<Key word = "Role:" />
+				<Key word = "User:" />
+				<Key word = "Note:" />
+				<Key word = "SQL:" />
+				<Key word = "Trigger:" />
+				<Key word = "Data:" />
+				<Key word = "Handler:" />
+				<Key word = "Map:" />
+			</KeyWords>
+		</RuleSet>
+	</RuleSets>
+	
+</SyntaxDefinition>

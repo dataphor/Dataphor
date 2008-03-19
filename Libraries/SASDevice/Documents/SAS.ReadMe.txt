@@ -1,0 +1,32 @@
+The SASDevice provided with Dataphor provides a device for 
+communicating with SAS SQL Server.
+
+This SASDevice is a BETA version!
+
+===============================================
+
+EXAMPLE:
+
+create device SAS
+ reconciliation { mode = { command }, master = device }
+ class "SASDevice"
+  attributes
+  {
+   "Location" = "SASLocation",
+   "ServerID" = "SASServer"
+  };
+		
+CreateDeviceUser("System", "SAS", "SYSTEM", "SASPassword");
+CreateDeviceUser("Admin", "SAS", "SYSTEM", "SASPassword");
+
+In this example:
+ The name of the device is "SAS".
+ The reconciliation mode is "command".
+ The reconciliation master is "device".
+ The class is "SASDevice".
+ The data will be stored on the SAS server
+  running under the name of SASServer
+  which is running at the SASLocation.
+
+ Two Dataphor users are created, both are mapped to the
+  SAS server user named SYSTEM.

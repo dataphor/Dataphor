@@ -1,0 +1,182 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+delete CurrentCaseItems;
+
+// Normal
+begin
+	delete ListIntegerTestTableOne;
+	delete ListIntegerTestTableTwo;
+	
+	// Try to Insert an Item into each
+	try
+		insert table { row { 1 Integer1 } } into ListIntegerTestTableOne;
+		insert table { row { 1 Integer1 } } into ListIntegerTestTableTwo;
+	commit;
+	if not exists ListIntegerTestTableOne or not exists ListIntegerTestTableTwo then
+		RaiseCurrentCaseItem("Simple Double Insert (Positive)", false, "Two normal inserts didn't happen properly");
+end;
+
+begin
+	delete ListIntegerTestTableOne;
+	delete ListIntegerTestTableTwo;
+
+	var LThrew : Boolean := false;
+	// Try to Insert an Item into each and create an error
+	try
+		try
+			insert table { row { 2 Integer1 } } into ListIntegerTestTableOne;
+			insert table { row { 2 Integer1 } } into ListIntegerTestTableTwo;
+			insert table { row { 2 Integer1 } } into ListIntegerTestTableTwo;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrew := true;
+		end;
+	end;
+	if not LThrew then
+		RaiseCurrentCaseItem("Simple Double Insert (Negative)", false, "An error was not thrown when inserting an existing value into a table.")
+	else if exists ListIntegerTestTableOne or exists ListIntegerTestTableTwo then
+		RaiseCurrentCaseItem("Simple Double Insert (Negative)", false, "Two separate inserts followed by one duplicate insert didn't remove both");
+end;
+
+// References
+begin
+	delete ListIntegerTestTableOneReferences;
+	delete ListIntegerTestTableTwoReferenced;
+	// Try to Insert an Item into each
+	try
+		insert table { row { 3 Integer1 } } into ListIntegerTestTableOneReferences;
+		insert table { row { 3 Integer1 } } into ListIntegerTestTableTwoReferenced;
+	commit;
+	if not exists ListIntegerTestTableOneReferences or not exists ListIntegerTestTableTwoReferenced then
+		RaiseCurrentCaseItem("Referenced Double Insert (Positive)", false, "Two referenced inserts didn't happen properly");
+end;
+
+begin
+	delete ListIntegerTestTableOneReferences;
+	delete ListIntegerTestTableTwoReferenced;
+
+	var LThrew : Boolean := false;
+	// Try to Insert an Item into each and create an error
+	try
+		try
+			insert table { row { 4 Integer1 } } into ListIntegerTestTableOneReferences;
+			insert table { row { 4 Integer1 } } into ListIntegerTestTableTwoReferenced;
+			insert table { row { 4 Integer1 } } into ListIntegerTestTableOneReferences;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrew := true;
+		end;
+	end;
+	if not LThrew then
+		RaiseCurrentCaseItem("Referenced Double Insert (Negative)", false, "An error was not thrown when inserting an existing value into a table.")
+	else if exists ListIntegerTestTableOneReferences or exists ListIntegerTestTableTwoReferenced then
+		RaiseCurrentCaseItem("Referenced Double Insert (Negative)", false, "Two separate inserts followed by one duplicate insert didn't remove both");
+end;
+
+
+begin
+	delete ListIntegerTestTableOneReferences;
+	delete ListIntegerTestTableTwoReferenced;
+
+	var LThrew : Boolean := false;
+	try
+		try // Try to Insert an Item into each making the one that references, not and create an error	
+			insert table { row { 4 Integer1 } } into ListIntegerTestTableTwoReferenced;
+			insert table { row { 5 Integer1 } } into ListIntegerTestTableOneReferences;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrew := true;
+		end;
+	end;
+	if not LThrew then
+		RaiseCurrentCaseItem("Missing Reference Insert (Negative)", false, "An error was not thrown when inserting a value into a referencing table without an existing value in the referenced table.")
+	else if exists ListIntegerTestTableOneReferences or exists ListIntegerTestTableTwoReferenced then
+		RaiseCurrentCaseItem("Missing Reference Insert (Negative)", false, "Both rows weren't removed when inserting a value into a referencing table without an existing value in the referenced table.");
+end;
+
+// View
+begin
+	delete ListIntegerTestTableOneView;
+	delete ListIntegerTestTableTwoView;
+	// Try to Insert an Item which will insert both into each
+	try
+		insert table { row { 6 Integer1 } } into TestView;
+	commit;
+	if not exists ListIntegerTestTableOneView or not exists ListIntegerTestTableTwoView then
+		RaiseCurrentCaseItem("View Insert (Positive)", false, "A view inserts didn't insert into both properly");
+end;
+
+begin
+	delete ListIntegerTestTableOneView;
+	delete ListIntegerTestTableTwoView;
+
+	var LThrewCount : Integer := 0;
+	// Try to Insert an Item into one an then the view to create an error
+	try
+		try
+			insert table { row { 7 Integer1 } } into ListIntegerTestTableTwoView;
+			insert table { row { 7 Integer1 } } into TestView;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrewCount := LThrewCount + 1;
+		end;
+	end;
+	try
+		try
+			insert table { row { 8 Integer1 } } into ListIntegerTestTableOneView;
+			insert table { row { 8 Integer1 } } into TestView;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrewCount := LThrewCount + 1;
+		end;
+	end;
+	try
+		try
+			insert table { row { 9 Integer1 } } into TestView;
+			insert table { row { 9 Integer1 } } into ListIntegerTestTableTwoView;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrewCount := LThrewCount + 1;
+		end;
+	end;
+	try
+		try
+			insert table { row { 10 Integer1 } } into TestView;
+			insert table { row { 10 Integer1 } } into ListIntegerTestTableOneView;
+		commit;
+	except
+		on E : Error do
+		begin
+			LThrewCount := LThrewCount + 1;
+		end;
+	end;
+
+	if LThrewCount < 4 then
+		RaiseCurrentCaseItem("View Double Insert (Negative)", false, "An error was not thrown when inserting an existing value into a table.")
+	else if exists ListIntegerTestTableOneView or exists ListIntegerTestTableTwoView then
+		RaiseCurrentCaseItem("View Double Insert (Negative)", false, "Two separate inserts followed by one duplicate insert didn't remove both");
+end;
+
+
+
+
+/*
+if exists CurrentCaseItems then
+	raise Error("One or more case items failed.");
+	
+*/

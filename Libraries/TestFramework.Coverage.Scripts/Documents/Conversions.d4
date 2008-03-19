@@ -1,0 +1,263 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// Conversion Operators
+begin
+  var 
+    LString: String,
+    LByte: Byte,
+    LShort: Short,
+    LInteger: Integer,
+    LLong: Long,
+    LDecimal: Decimal,
+    LGuid: Guid,
+    LMoney: Money,
+    LTimeSpan: TimeSpan,
+    LDateTime: DateTime,
+    LDate: Date,
+    LTime: Time,
+    LBoolean: Boolean;
+    
+  // From Boolean
+  LBoolean := false;
+  LByte := ToByte(LBoolean);
+  if LByte <> ToByte(0) then
+    raise Error("Boolean to Byte conversion failed");
+    
+  LShort := ToShort(LBoolean);
+  if LShort <> ToShort(0) then
+    raise Error("Boolean to Short conversion failed");
+    
+  LInteger := ToInteger(LBoolean);
+  if LInteger <> 0 then
+    raise Error("BooleanToInteger conversion failed");
+    
+  LLong := ToLong(LBoolean);
+  if LLong <> ToLong(0) then
+    raise Error("Boolean to Long conversion failed");
+    
+  LString := ToString(LBoolean);
+  if LString <> "false" then
+    raise Error("BooleanToString conversion failed");
+
+  // From Byte
+  LByte := ToByte(10);
+  
+  LBoolean := ToBoolean(LByte);
+  if not(LBoolean) then
+    raise Error("Byte to Boolean conversion failed");
+    
+  LShort := ToShort(LByte);
+  if LShort <> ToShort(10) then
+    raise Error("Byte to Short conversion failed");
+    
+  LInteger := ToInteger(LByte);
+  if LInteger <> 10 then
+    raise Error("Byte to Integer conversion failed");
+    
+  LLong := ToLong(LByte);
+  if LLong <> ToLong(10) then
+    raise Error("Byte to Long conversion failed");
+    
+  LString := ToString(LByte);
+  if LString <> "10" then
+    raise Error("Byte to String conversion failed");
+
+  // From Short
+  LShort := ToShort(10);
+  
+  LBoolean := ToBoolean(LShort);
+  if not(LBoolean) then
+    raise Error("Short to Boolean conversion failed");
+    
+  LByte := ToByte(LShort);
+  if LByte <> ToByte(10) then
+    raise Error("Short to Byte conversion failed");
+    
+  LInteger := ToInteger(LShort);
+  if LInteger <> 10 then
+    raise Error("Short to Integer conversion failed");
+    
+  LLong := ToLong(LShort);
+  if LLong <> ToLong(10) then
+    raise Error("Short to Long conversion failed");
+    
+  LString := ToString(LShort);
+  if LString <> "10" then
+    raise Error("Short to String conversion failed");
+
+  // From Integer
+  LInteger := 10;
+
+  LBoolean := ToBoolean(LInteger);
+  if not(LBoolean) then
+    raise Error("IntegerToBoolean conversion failed"); 
+    
+  LByte := ToByte(LInteger);
+  if LByte <> ToByte(10) then
+    raise Error("Integer to Byte conversion failed");
+    
+  LShort := ToShort(LInteger);
+  if LShort <> ToShort(10) then
+    raise Error("Integer to Short conversion failed");
+    
+  LLong := ToLong(LInteger);
+  if LLong <> ToLong(10) then
+    raise Error("Integer to Long conversion failed");
+    
+  LDecimal := ToDecimal(LInteger);
+  if LDecimal <> 10d then
+    raise Error("IntegerToDecimal conversion failed");
+    
+  LMoney := ToMoney(LInteger);
+  if LMoney <> ToMoney(10) then
+    raise Error("Integer to Money conversion failed");
+    
+  LString := ToString(LInteger);
+  if LString <> "10" then
+    raise Error("IntegerToString conversion failed");
+     
+  // From Long
+  LLong := ToLong(10);
+
+  LBoolean := ToBoolean(LLong);
+  if not(LBoolean) then
+    raise Error("LongToBoolean conversion failed"); 
+    
+  LByte := ToByte(LLong);
+  if LByte <> ToByte(10) then
+    raise Error("Long to Byte conversion failed");
+    
+  LShort := ToShort(LLong);
+  if LShort <> ToShort(10) then
+    raise Error("Long to Short conversion failed");
+    
+  LInteger := ToInteger(LLong);
+  if LInteger <> 10 then
+    raise Error("Long to Integer conversion failed");
+    
+  LDecimal := ToDecimal(LLong);
+  if LDecimal <> 10d then
+    raise Error("LongToDecimal conversion failed");
+    
+  LMoney := ToMoney(LLong);
+  if LMoney <> ToMoney(10) then
+    raise Error("Long to Money conversion failed");
+    
+  LString := ToString(LLong);
+  if LString <> "10" then
+    raise Error("LongToString conversion failed");
+     
+  // From Decimal
+  LDecimal := 10.5d;
+
+  LInteger := ToInteger(LDecimal);
+  if LInteger <> 10 then
+    raise Error("DecimalToInteger conversion failed");
+    
+  LLong := ToLong(LDecimal);
+  if LLong <> ToLong(10) then
+    raise Error("DecimalToLong conversion failed");
+    
+  LMoney := ToMoney(LDecimal);
+  if LMoney <> $10.50 then
+    raise Error("DecimalToMoney conversion failed");
+    
+  LString := ToString(LDecimal);
+  if LString <> "10.5" then
+    raise Error("DecimalToString conversion failed");
+    
+  // From String
+  LString := "true";  
+  LBoolean := ToBoolean(LString);
+  if not(LBoolean) then
+    raise Error("StringToBoolean conversion failed");
+    
+  LString := "10";
+  LByte := ToByte(LString);
+  if LByte <> ToByte(10) then
+    raise Error("String to Byte conversion failed");
+    
+  LShort := ToShort(LString);
+  if LShort <> ToShort(10) then
+    raise Error("String to Short conversion failed");
+    
+  LInteger := ToInteger(LString);
+  if LInteger <> 10 then
+    raise Error("String to Integer conversion failed");
+    
+  LLong := ToLong(LString);
+  if LLong <> ToLong(10) then
+    raise Error("String to Long conversion failed");
+    
+  LString := "10.5";
+  LDecimal := ToDecimal(LString);
+  if LDecimal <> 10.5d then
+    raise Error("StringToDecimal conversion failed");
+    
+  LString := "6abefe3c-9a01-44d6-8cd7-8624be8ce26e";
+  LGuid := ToGuid(LString);
+  if LGuid <> Guid("6abefe3c-9a01-44d6-8cd7-8624be8ce26e") then
+    raise Error("String to Guid conversion failed");
+    
+  LString := "4/15/2002 12:00:00 AM";
+  LDateTime := ToDateTime(LString);
+  if LDateTime <> DateTime(2002, 4, 15) then
+    raise Error("String to DateTime conversion failed");
+    
+  LString := "100.00:00:00";
+  LTimeSpan := ToTimeSpan(LString);
+  if LTimeSpan <> TimeSpan(100) then
+    raise Error("String to TimeSpan conversion failed");
+    
+  if ToTime("10:30:45") <> Time(10, 30, 45) then
+  	raise Error("String to time conversion failed.");
+    
+  LString := "$50.00";
+  LMoney := ToMoney(LString);
+  if LMoney <> $50 then
+    raise Error("String to Money conversion failed");    
+    
+  // From Guid
+  LGuid := Guid("6abefe3c-9a01-44d6-8cd7-8624be8ce26e");
+  LString := ToString(LGuid);
+  if (LString <> "6abefe3c-9a01-44d6-8cd7-8624be8ce26e") then
+    raise Error("Guid to String conversion failed");
+    
+  // From TimeSpan
+  LTimeSpan := TimeSpan(100);
+  LString := ToString(LTimeSpan);
+  if (LString <> "14wks 2days ") then
+    raise Error("TimeSpan to String conversion failed");
+    
+  // From DateTime
+  LDateTime := DateTime(2002, 4, 15);
+  LString := ToString(LDateTime);
+  if (LString <> "4/15/2002 12:00:00 AM") then
+    raise Error("DateTime to String conversion failed");
+    
+  // From Date
+  if (Date(1974, 10, 20).ToString() <> "10/20/1974") then
+  	raise Error("Date to String conversion failed");
+  	
+  // From Time
+  if (Time(10, 15, 30).ToString() <> "10:15:30 AM") then
+  	raise Error("Time to String conversion failed");
+  
+  // From Money
+  LMoney := $50;
+  LInteger := ToInteger(LMoney);
+  if (LInteger <> 50) then
+    raise Error("Money to Integer conversion failed");
+    
+  LLong := ToLong(LMoney);
+  if (LLong <> ToLong(50)) then
+    raise Error("Money to Long conversion failed");
+    
+  LString := ToString(LMoney);
+  if (LString <> "$50.00") then
+    raise Error("Money to String conversion failed");
+end;
+

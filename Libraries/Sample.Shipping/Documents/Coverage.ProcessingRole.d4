@@ -1,0 +1,105 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Processing Role
+//
+// Process Sales
+// Receiving
+// Shipping
+
+create operator ProcessSaleOrders()
+begin
+	var LCursor : cursor(typeof(SaleOrdersToProcess)) := cursor(SaleOrdersToProcess isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				ProcessInvoice(ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator ShipSaleOrders()
+begin
+	var LCursor : cursor(typeof(SaleOrdersToShip)) := cursor(SaleOrdersToShip isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				CompleteInvoice(ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator ProcessPurchaseOrders()
+begin
+	var LCursor : cursor(typeof(PurchaseOrdersToProcess)) := cursor(PurchaseOrdersToProcess isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				ProcessInvoice(ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+create operator ReceivePurchaseOrders()
+begin
+	var LCursor : cursor(typeof(PurchaseOrdersToReceive)) := cursor(PurchaseOrdersToReceive isolation browse);
+	try
+		while LCursor.Next() do
+		begin
+			try
+				CompleteInvoice(ID from LCursor.Select());
+			commit;
+			LCursor.Reset();
+		end;
+	finally
+		LCursor.Close();
+	end;
+end;
+
+if not exists (TestRole where Name = "Processing") then
+	insert table { row { "Processing" Name } } into TestRole;
+	
+create operator RunProcessing()
+begin
+	// Stop all active transactions on this process
+	while (TransactionCount() > 0) do
+		RollbackTransaction();
+		
+	StartTestProcess("Processing");
+	try
+		while exists(TestActive) do
+		begin
+			try
+				case Random(4)
+					when 0 then ProcessSaleOrders();
+					when 1 then ProcessPurchaseOrders();
+					when 2 then ShipSaleOrders();
+					when 3 then ReceivePurchaseOrders();
+				end;
+			except
+				on E : Error do
+					LogError(E);
+			end;
+			Sleep(Random(1000, 5000));
+		end;
+	finally
+		StopTestProcess();
+	end;
+end;

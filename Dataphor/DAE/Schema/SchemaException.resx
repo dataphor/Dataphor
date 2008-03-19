@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="113100" xml:space="preserve">
+    <value>Object "{0}" cannot be copied into a remote catalog.</value>
+  </data>
+  <data name="113101" xml:space="preserve">
+    <value>Statement cannot be emitted for schema objects of type "{0}".</value>
+  </data>
+  <data name="113102" xml:space="preserve">
+    <value>Object reference cannot be null.</value>
+  </data>
+  <data name="113103" xml:space="preserve">
+    <value>Schema object container.</value>
+  </data>
+  <data name="113104" xml:space="preserve">
+    <value>Object "{0}" not found.</value>
+  </data>
+  <data name="113105" xml:space="preserve">
+    <value>Object name required.</value>
+  </data>
+  <data name="113106" xml:space="preserve">
+    <value>Duplicate object name "{0}".</value>
+  </data>
+  <data name="113107" xml:space="preserve">
+    <value>Duplicate object identifier "{0}".</value>
+  </data>
+  <data name="113108" xml:space="preserve">
+    <value>Object reference "{0}" is ambiguous between the following names: {1}.</value>
+  </data>
+  <data name="113109" xml:space="preserve">
+    <value>Internal Error: Name Index Bucket not found for name "{0}".</value>
+  </data>
+  <data name="113110" xml:space="preserve">
+    <value>Constraint container.</value>
+  </data>
+  <data name="113111" xml:space="preserve">
+    <value>Duplicate child object "{0}".</value>
+  </data>
+  <data name="113113" xml:space="preserve">
+    <value>Type specifier cannot be emitted for object class "{0}".</value>
+  </data>
+  <data name="113114" xml:space="preserve">
+    <value>Property container.</value>
+  </data>
+  <data name="113115" xml:space="preserve">
+    <value>Representation container.</value>
+  </data>
+  <data name="113116" xml:space="preserve">
+    <value>Special container.</value>
+  </data>
+  <data name="113117" xml:space="preserve">
+    <value>ScalarType container.</value>
+  </data>
+  <data name="113118" xml:space="preserve">
+    <value>Column container.</value>
+  </data>
+  <data name="113119" xml:space="preserve">
+    <value>Order columns list may only contain order columns.</value>
+  </data>
+  <data name="113120" xml:space="preserve">
+    <value>Duplicate order column definition "{0}".</value>
+  </data>
+  <data name="113121" xml:space="preserve">
+    <value>EmptyOrder.</value>
+  </data>
+  <data name="113122" xml:space="preserve">
+    <value>Order list may only contain orders.</value>
+  </data>
+  <data name="113123" xml:space="preserve">
+    <value>Key columns list may only contain references to table columns.</value>
+  </data>
+  <data name="113124" xml:space="preserve">
+    <value>Duplicate key column name "{0}".</value>
+  </data>
+  <data name="113125" xml:space="preserve">
+    <value>Key list may only contain keys.</value>
+  </data>
+  <data name="113126" xml:space="preserve">
+    <value>Table "{0}" does not have any keys from which to select a minimum.</value>
+  </data>
+  <data name="113127" xml:space="preserve">
+    <value>No key is a subset of the given columns.</value>
+  </data>
+  <data name="113128" xml:space="preserve">
+    <value>Reference container.</value>
+  </data>
+  <data name="113129" xml:space="preserve">
+    <value>Operand container.</value>
+  </data>
+  <data name="113130" xml:space="preserve">
+    <value>Cannot insert into a sorted list.</value>
+  </data>
+  <data name="113131" xml:space="preserve">
+    <value>Signature "{0}" not found.</value>
+  </data>
+  <data name="113132" xml:space="preserve">
+    <value>OperatorSignature container.</value>
+  </data>
+  <data name="113133" xml:space="preserve">
+    <value>Duplicate operator signature "{0}".</value>
+  </data>
+  <data name="113134" xml:space="preserve">
+    <value>Ambiguous inherited invocation in operator "{0}".</value>
+  </data>
+  <data name="113135" xml:space="preserve">
+    <value>Operator map container.</value>
+  </data>
+  <data name="113136" xml:space="preserve">
+    <value>Signature "{0}" not found.</value>
+  </data>
+  <data name="113137" xml:space="preserve">
+    <value>Signature group not found for operator "{0}".</value>
+  </data>
+  <data name="113138" xml:space="preserve">
+    <value>Operator map not found for operator "{0}".</value>
+  </data>
+  <data name="113139" xml:space="preserve">
+    <value>Device scalar type map not found for scalar type "{0}".</value>
+  </data>
+  <data name="113140" xml:space="preserve">
+    <value>Device operator map not found for operator "{0}".</value>
+  </data>
+  <data name="113141" xml:space="preserve">
+    <value>{0} not supported by device "{1}".</value>
+  </data>
+  <data name="113142" xml:space="preserve">
+    <value>Operation cannot be performed because device "{0}" is not running.</value>
+  </data>
+  <data name="113143" xml:space="preserve">
+    <value>Operation cannot be performed because device "{1}" is running.</value>
+  </data>
+  <data name="113144" xml:space="preserve">
+    <value>No active transaction.</value>
+  </data>
+  <data name="113145" xml:space="preserve">
+    <value>Invalid execute request "{0}".</value>
+  </data>
+  <data name="113146" xml:space="preserve">
+    <value>Heap may only contain table variables.</value>
+  </data>
+  <data name="113147" xml:space="preserve">
+    <value>User "{0}" not found.</value>
+  </data>
+  <data name="113148" xml:space="preserve">
+    <value>User container may only contain User objects.</value>
+  </data>
+  <data name="113149" xml:space="preserve">
+    <value>DeviceUser "{0}" not found.</value>
+  </data>
+  <data name="113150" xml:space="preserve">
+    <value>DeviceUser container may only contain DeviceUser objects.</value>
+  </data>
+  <data name="113151" xml:space="preserve">
+    <value>ServerLinkUser "{0}" not found.</value>
+  </data>
+  <data name="113152" xml:space="preserve">
+    <value>ServerLinkUser container may only contain ServerLinkUser objects.</value>
+  </data>
+  <data name="113153" xml:space="preserve">
+    <value>Catalog may only contain scalar types, operators, devices, tables, views, presentations, references, or catalog constraints.</value>
+  </data>
+  <data name="113154" xml:space="preserve">
+    <value>Catalog "{0}": Column "{1}" references unknown scalar type "{2}".</value>
+  </data>
+  <data name="113155" xml:space="preserve">
+    <value>Catalog "{0}": Reference "{1}" references unknown table "{2}".</value>
+  </data>
+  <data name="113156" xml:space="preserve">
+    <value>Catalog "{0}": Constraint "{1}" references unknown object "{2}".</value>
+  </data>
+  <data name="113157" xml:space="preserve">
+    <value>Catalog "{0}": DerivedTableVar "{1}" references unknown object "{2}".</value>
+  </data>
+  <data name="113158" xml:space="preserve">
+    <value>Catalog "{0}" is inconsistent.</value>
+  </data>
+  <data name="113159" xml:space="preserve">
+    <value>Object "{0}" cannot be changed while registered in catalog "{1}".</value>
+  </data>
+  <data name="113160" xml:space="preserve">
+    <value>Duplicate operator "{0}".</value>
+  </data>
+  <data name="113161" xml:space="preserve">
+    <value>Unable to resolve operator reference "{0}" with signature "{1}".</value>
+  </data>
+  <data name="113162" xml:space="preserve">
+    <value>Tag name required.</value>
+  </data>
+  <data name="113163" xml:space="preserve">
+    <value>Tag container.</value>
+  </data>
+  <data name="113164" xml:space="preserve">
+    <value>Tag "{0}" not found.</value>
+  </data>
+  <data name="113165" xml:space="preserve">
+    <value>Duplicate tag name: "{0}".</value>
+  </data>
+  <data name="113166" xml:space="preserve">
+    <value>Ambiguous tag name: "{0}".</value>
+  </data>
+  <data name="113167" xml:space="preserve">
+    <value>Unimplemented: {0}</value>
+  </data>
+  <data name="113168" xml:space="preserve">
+    <value>Event handler container.</value>
+  </data>
+  <data name="113169" xml:space="preserve">
+    <value>Operator "{0}" is already attached to event type "{1}" for this object.</value>
+  </data>
+  <data name="113170" xml:space="preserve">
+    <value>Encrypted data exceeds maximum length (255).</value>
+  </data>
+  <data name="113171" xml:space="preserve">
+    <value>Index ({0}) out of range.</value>
+  </data>
+  <data name="113172" xml:space="preserve">
+    <value>Invalid Connection String</value>
+  </data>
+  <data name="113173" xml:space="preserve">
+    <value>No generator table defined.</value>
+  </data>
+  <data name="113174" xml:space="preserve">
+    <value>Object name "{0}" cannot be used because it would hide the name "{1}".</value>
+  </data>
+  <data name="113175" xml:space="preserve">
+    <value>Object name "{0}" cannot be used because it would be hidden by the name "{1}".</value>
+  </data>
+  <data name="113176" xml:space="preserve">
+    <value>{0} container.</value>
+  </data>
+  <data name="113177" xml:space="preserve">
+    <value>Catalog object expected.</value>
+  </data>
+  <data name="113178" xml:space="preserve">
+    <value>Right "{0}" not found."</value>
+  </data>
+  <data name="113179" xml:space="preserve">
+    <value>Right assignment for right "{0}" not found."</value>
+  </data>
+  <data name="113180" xml:space="preserve">
+    <value>Group "{0}" not found."</value>
+  </data>
+  <data name="113181" xml:space="preserve">
+    <value>Group device user not found for Group "{0}", device "{1}".</value>
+  </data>
+  <data name="113182" xml:space="preserve">
+    <value>GroupDeviceUser container may only contain GroupDeviceUser objects.</value>
+  </data>
+  <data name="113183" xml:space="preserve">
+    <value>Column "{0}" not found.</value>
+  </data>
+  <data name="113184" xml:space="preserve">
+    <value>Role "{0}" not found.</value>
+  </data>
+  <data name="113185" xml:space="preserve">
+    <value>Constraint "{0}" is not a transition constraint.</value>
+  </data>
+  <data name="113186" xml:space="preserve">
+    <value>Constraint "{0}" is a transition constraint.</value>
+  </data>
+  <data name="113187" xml:space="preserve">
+    <value>Library "{0}" is already registered.</value>
+  </data>
+  <data name="113188" xml:space="preserve">
+    <value>Library "{0}" cannot be unregistered because there are registered libraries that require it.</value>
+  </data>
+  <data name="113189" xml:space="preserve">
+    <value>Load library can only be called while loading catalog.</value>
+  </data>
+  <data name="113190" xml:space="preserve">
+    <value>Library "{0}" is already loaded.</value>
+  </data>
+  <data name="113191" xml:space="preserve">
+    <value>Library "{0}" cannot be loaded because required library "{1}" is not loaded.</value>
+  </data>
+  <data name="113192" xml:space="preserve">
+    <value>Drop statement cannot be emitted for schema object of type "{0}".</value>
+  </data>
+  <data name="113193" xml:space="preserve">
+    <value>Library "{0}" cannot be registered because it would nested within library "{1}".</value>
+  </data>
+  <data name="113194" xml:space="preserve">
+    <value>Object "{0}" in library "{1}" cannot reference object "{2}" because it is not contained within a library.</value>
+  </data>
+  <data name="113195" xml:space="preserve">
+    <value>Object "{0}" in library "{1}" cannot reference object "{2}" in library "{3}" because the referenced library is not required by the referencing library.</value>
+  </data>
+  <data name="113196" xml:space="preserve">
+    <value>Library "{0}" is registered and cannot be dropped.</value>
+  </data>
+  <data name="113197" xml:space="preserve">
+    <value>Library "{0}" is registered and cannot be renamed.</value>
+  </data>
+  <data name="113198" xml:space="preserve">
+    <value>Library "{0}" is registered and cannot have requisites removed.</value>
+  </data>
+  <data name="113199" xml:space="preserve">
+    <value>Library "{0}" cannot require library "{1}" because it is a circular reference.</value>
+  </data>
+  <data name="113200" xml:space="preserve">
+    <value>System library cannot be modified.</value>
+  </data>
+  <data name="113201" xml:space="preserve">
+    <value>General library cannot be modified.</value>
+  </data>
+  <data name="113202" xml:space="preserve">
+    <value>System library cannot be unregistered.</value>
+  </data>
+  <data name="113203" xml:space="preserve">
+    <value>General library cannot be unregistered.</value>
+  </data>
+  <data name="113204" xml:space="preserve">
+    <value>Current session has no current library defined.</value>
+  </data>
+  <data name="113205" xml:space="preserve">
+    <value>Object "{0}" cannot reference object "{1}" because it is a session-specific temporary object.</value>
+  </data>
+  <data name="113206" xml:space="preserve">
+    <value>Library "{0}" is registered and cannot have its version changed.</value>
+  </data>
+  <data name="113207" xml:space="preserve">
+    <value>Library "{0}" is required to be version "{1}", but is available as version "{2}".</value>
+  </data>
+  <data name="113208" xml:space="preserve">
+    <value>A default device name could not be determined for library "{0}" because it has no default device name specified and more than one required library has a default device name specified.</value>
+  </data>
+  <data name="113209" xml:space="preserve">
+    <value>Registered class "{0}" not found.</value>
+  </data>
+  <data name="113210" xml:space="preserve">
+    <value>Registered class "{0}" cannot be referenced because the current library "{1}" does not require the library in which the class is registered "{2}".</value>
+  </data>
+  <data name="113211" xml:space="preserve">
+    <value>Object "{0}" cannot reference object "{1}" because it is an application transaction-specific temporary object.</value>
+  </data>
+  <data name="113212" xml:space="preserve">
+    <value>Transition constraint "{0}" already has a definition for the insert transition.</value>
+  </data>
+  <data name="113213" xml:space="preserve">
+    <value>Transition constraint "{0}" does not have a definition for the insert transition.</value>
+  </data>
+  <data name="113214" xml:space="preserve">
+    <value>Transition constraint "{0}" already has a definition for the update transition.</value>
+  </data>
+  <data name="113215" xml:space="preserve">
+    <value>Transition constraint "{0}" does not have a definition for the update transition.</value>
+  </data>
+  <data name="113216" xml:space="preserve">
+    <value>Transition constraint "{0}" already has a definition for the delete transition.</value>
+  </data>
+  <data name="113217" xml:space="preserve">
+    <value>Transition constraint "{0}" does not have a definition for the delete transition.</value>
+  </data>
+  <data name="113218" xml:space="preserve">
+    <value>Unable to locate a representation of scalar type "{0}" for use as the native accessor "{1}".</value>
+  </data>
+  <data name="113219" xml:space="preserve">
+    <value>Representation "{0}" of scalar type "{1}" cannot be used as a conversion representation because it has multiple properties.</value>
+  </data>
+  <data name="113220" xml:space="preserve">
+    <value>Table "{0}" cannot be stored in device "{1}" because the device does not have a type map for the type "{2}" of column "{3}".</value>
+  </data>
+  <data name="113221" xml:space="preserve">
+    <value>Table "{0}" cannot be stored in device "{1}" because the device does not support comparison for the type "{2}" of key column "{3}".</value>
+  </data>
+  <data name="113222" xml:space="preserve">
+    <value>Table "{0}" cannot be stored in device "{1}" because the device does not support comparison for the type "{2}" of order column "{3}".</value>
+  </data>
+  <data name="113223" xml:space="preserve">
+    <value>Duplicate operator match for operator "{0}".</value>
+  </data>
+  <data name="113224" xml:space="preserve">
+    <value>Column "{0}" in table "{1}" cannot be created not nil because the column does not have a default definition.</value>
+  </data>
+  <data name="113225" xml:space="preserve">
+    <value>Version number of registered library "{0}" cannot be changed because it would invalidate the reference from library "{1}", version number "{2}".</value>
+  </data>
+  <data name="113226" xml:space="preserve">
+    <value>The version number of library reference "{0}" in library "{1}" cannot be changed to "{2}" because the target library version is "{3}".</value>
+  </data>
+  <data name="113227" xml:space="preserve">
+    <value>Upgrade version number "{0}" must have Major, Minor and Revision specified, and must not have Build specified.</value>
+  </data>
+  <data name="113228" xml:space="preserve">
+    <value>Upgrades cannot be tracked for library "{0}" because the version number "{1}" does not have Revision specified.</value>
+  </data>
+  <data name="113229" xml:space="preserve">
+    <value>Unable to determine a clustering order for table variable "{0}" because it has no non-sparse keys defined.</value>
+  </data>
+  <data name="113230" xml:space="preserve">
+    <value>Setting "{0}" is defined in at least the following libraries: {1}.</value>
+  </data>
+  <data name="113231" xml:space="preserve">
+    <value>Library "{0}" is registered and cannot be detached.</value>
+  </data>
+  <data name="113232" xml:space="preserve">
+    <value>Could not resolve object for ID ({0}) and name "{1}".</value>
+  </data>
+  <data name="113233" xml:space="preserve">
+    <value>Object header not found for ID ({0}).</value>
+  </data>
+  <data name="113234" xml:space="preserve">
+    <value>Duplicate object ID ({0}).</value>
+  </data>
+  <data name="113235" xml:space="preserve">
+    <value>Name '{0}' exceeds the maximum allowable length for object names in the catalog ({1} characters).</value>
+  </data>
+  <data name="113236" xml:space="preserve">
+    <value>A right with the name '{0}' already exists.</value>
+  </data>
+  <data name="113237" xml:space="preserve">
+    <value>A user with the id '{0}' already exists.</value>
+  </data>
+  <data name="113238" xml:space="preserve">
+    <value>A user mapping for user id '{0}' for device '{1}' already exists.</value>
+  </data>
+  <data name="113239" xml:space="preserve">
+    <value>Catalog object header for object id ({0}) does not exist in the catalog store.</value>
+  </data>
+  <data name="113240" xml:space="preserve">
+    <value>Catalog object header for object id ({0}) was found and the object was successfully deserialized, but the object is not present in the catalog cache.</value>
+  </data>
+  <data name="113241" xml:space="preserve">
+    <value>Errors occurred while attempting to deserialize catalog object id ({0}).</value>
+  </data>
+  <data name="113242" xml:space="preserve">
+    <value>Library '{0}' is not registered.</value>
+  </data>
+  <data name="113243" xml:space="preserve">
+    <value>Object id ({0}) cannot be loaded because there is already an object being loaded on this process.</value>
+  </data>
+  <data name="113244" xml:space="preserve">
+    <value>Object id ({0}) was not found in the catalog cache.</value>
+  </data>
+  <data name="113245" xml:space="preserve">
+    <value>Cannot enter a nonloading context because the current loading context is not an internal context.</value>
+  </data>
+  <data name="113246" xml:space="preserve">
+    <value>Table "{0}" does not have any non-sparse keys from which to select a minimum.</value>
+  </data>
+  <data name="113247" xml:space="preserve">
+    <value>Table "{0}" does not have any non-nilable keys from which to select a minimum.</value>
+  </data>
+</root>

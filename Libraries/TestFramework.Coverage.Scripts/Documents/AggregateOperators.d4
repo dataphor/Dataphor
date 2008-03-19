@@ -1,0 +1,199 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Aggregate Operators
+// create aggregate operator
+create aggregate operator TestAggregateOperator(Total : Integer) : Integer
+initialization
+begin
+end
+aggregation
+begin
+end
+finalization
+begin
+end;
+
+// alter aggregate operator
+alter aggregate operator TestAggregateOperator(Integer);
+
+// drop aggregate operator
+drop aggregate operator TestAggregateOperator(Integer);
+	
+// aggregate operators
+create aggregate operator StdDev(AValue : Decimal) : Decimal
+initialization
+begin
+	var LSum : Decimal := 0d;
+	var LSumOfSquares : Decimal := 0d;
+	var LCount : Integer := 0;
+	result := 0d;
+end
+aggregation
+begin
+	LSum := LSum + AValue;
+	LSumOfSquares := LSumOfSquares + (AValue ** 2d);
+	LCount := LCount + 1;
+end
+finalization
+begin
+	result := 
+		(
+			(
+				(LSumOfSquares - ((LSum ** 2d) / ToDecimal(LCount))) / 
+				ToDecimal(LCount - 1)
+			) ** 
+			0.5d
+		);
+end;
+		
+if 
+	(
+		(
+			table { row { 0.1d DecimalValue }, row { 0.2d }, row { 0.3d }, row { 0.4d }, row { 0.5d } }
+				group add { StdDev(DecimalValue) StdDev }
+		)[].StdDev
+	) <> 0.158113883008419 then
+	raise Error("Standard deviation table invocation failed");
+
+if StdDev(DecimalValue from table { row { 0.1d DecimalValue }, row { 0.2d } }) <> 0.0707106781186548 then
+	raise Error("Standard deviation scalar invocation failed");
+	
+drop aggregate operator StdDev(Decimal);
+
+// Sum
+create table Test { ID : Integer, Amount : Money, key { ID } };
+
+for LIndex : Integer := 1 to 100 do
+	insert table { row { LIndex ID, (LIndex * 10).ToMoney() Amount } } into Test;
+	
+if Sum(ID from Test) <> 5050 then
+	raise Error("Sum aggregate failed.");
+
+// Multi column aggregate operator
+create aggregate operator Cost(ID : Integer, Amount : Money) : Money
+initialization 
+begin
+	result := $0;
+end
+aggregation 
+begin
+	result := result + Amount * ID;
+end
+finalization 
+begin
+end;
+
+if Cost({ID, Amount} from Test) <> $3383500 then
+	raise Error("Cost aggregate failed");
+
+drop aggregate operator Cost(Integer, Money);
+
+drop table Test;
+
+// Aggregate invocation with order
+create table Test
+{
+	Sequence : Integer,
+	Name : String,
+	key { Sequence }
+};
+
+insert row { 1 Sequence, "One" Name } into Test;
+insert row { 2 Sequence, "Two" Name } into Test;
+insert row { 3 Sequence, "Three" Name } into Test;
+
+create operator TestConcat() : String
+begin
+	result := Concat(Name from Test order by { Sequence });
+end;
+
+if TestConcat() <> "OneTwoThree" then
+	raise Error('TestConcat stand-alone ascending failed');
+
+begin
+	var LScript := Script('TestConcat()');
+	SafeDrop('TestConcat()');
+	Execute(LScript);
+end;
+
+if TestConcat() <> "OneTwoThree" then
+	raise Error('TestConcat stand-alone ascending serialization failed');
+	
+SafeDrop('TestConcat()');
+
+create operator TestConcat() : String
+begin
+	result := Concat(Name from Test order by { Sequence desc });
+end;
+
+if TestConcat() <> "ThreeTwoOne" then
+	raise Error('TestConcat stand-alone ascending failed');
+
+begin
+	var LScript := Script('TestConcat()');
+	SafeDrop('TestConcat()');
+	Execute(LScript);
+end;
+
+if TestConcat() <> "ThreeTwoOne" then
+	raise Error('TestConcat stand-alone ascending serialization failed');
+	
+SafeDrop('TestConcat()');
+
+create operator TestConcat() : String
+begin
+	result := (Test group add { Concat(Name order by { Sequence }) Data })[].Data;
+end;
+
+if TestConcat() <> "OneTwoThree" then
+	raise Error('TestConcat stand-alone ascending failed');
+
+begin
+	var LScript := Script('TestConcat()');
+	SafeDrop('TestConcat()');
+	Execute(LScript);
+end;
+
+if TestConcat() <> "OneTwoThree" then
+	raise Error('TestConcat stand-alone ascending serialization failed');
+	
+SafeDrop('TestConcat()');
+
+create operator TestConcat() : String
+begin
+	result := (Test group add { Concat(Name order by { Sequence desc }) Data })[].Data;
+end;
+
+if TestConcat() <> "ThreeTwoOne" then
+	raise Error('TestConcat stand-alone ascending failed');
+
+begin
+	var LScript := Script('TestConcat()');
+	SafeDrop('TestConcat()');
+	Execute(LScript);
+end;
+
+if TestConcat() <> "ThreeTwoOne" then
+	raise Error('TestConcat stand-alone ascending serialization failed');
+	
+SafeDrop('TestConcat()');
+
+create operator TestConcat() : String
+begin
+	result := Concat(Name from Test order by { Name desc });
+end;
+
+SafeDrop('TestConcat()');
+
+create operator TestConcat() : String
+begin
+	result := Concat(Name from Test);
+end;
+
+SafeDrop('TestConcat()');
+
+drop table Test;

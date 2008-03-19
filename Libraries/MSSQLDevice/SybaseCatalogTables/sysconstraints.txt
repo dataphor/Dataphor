@@ -1,0 +1,3 @@
+colid;spare1;constrid;tableid;error;status;spare2
+0;0;320004171;304004114;0;64;0
+0;0;336004228;304004114;0;64;0

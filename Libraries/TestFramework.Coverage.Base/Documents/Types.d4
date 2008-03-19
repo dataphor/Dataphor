@@ -1,0 +1,16 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+create type PossibleDate like Date;
+alter type PossibleDate { create special NotApplicable Date(1999,9,9) };
+
+
+create type RunStatus like String
+{
+	constraint Valid value in { "Succeeded", "Skipped", "Failed" }
+} 
+	tags { Frontend.ElementType = "Choice", Frontend.Choice.Items = "Succeeded=Succeeded;Skipped=Skipped;Failed=Failed" } 
+	static tags { Storage.Length = "10" };

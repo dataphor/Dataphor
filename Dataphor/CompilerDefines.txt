@@ -1,0 +1,8 @@
+#define AUTOUPGRADELIBRARIES in Alphora.Dataphor.DAE to have the Dataphor server automatically apply any pending upgrades on startup
+#define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
+#define RELYONCURSORFLAGSAFTERUPDATE in Alphora.Dataphor.DAE.Client "This define forces the server cursor to recognize the BOF and EOF flags by actually navigating"
+#define REPORTNARROWINGCONVERSIONWARNINGS in Alphora.Dataphor.DAE to have the compiler report warnings when implicit narrowing conversions are used
+#define REQUIRESAMEDATATYPESFORREFERENCECOLUMNS	in Alphora.Dataphor.DAE to disallow implicit conversions in compiler-generated reference constraint expressions
+#define RESPECTREADONLY in Alphora.Dataphor.DAE and Frontend.Server to have the library and document sub systems respect read only flag on files
+#define SKIPBETACHECK in Alphora.Dataphor.DAE to skip the beta time bomb check
+#define USEASYNCSTOPPROCESS in Alphora.Dataphor.DAE.Client to issue the stop process call asynchronously

@@ -1,0 +1,114 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// VersionNumber coverage
+begin
+	var LVersionNumber : VersionNumber;
+	
+	// VersionNumber specials
+	LVersionNumber := VersionNumberUndefined();
+	if LVersionNumber <> VersionNumber(-1) then
+		raise Error("VersionNumber Undefined special selector failed.");
+	
+	if not IsSpecial(LVersionNumber) then
+		raise Error("VersionNumber IsSpecial operator failed.");
+		
+	if not IsUndefined(LVersionNumber) then
+		raise Error("VersionNumber IsUndefined operator failed.");
+	
+	// VersionNumber selectors
+	LVersionNumber := VersionNumber(1);
+	if LVersionNumber <> VersionNumber(1) then
+		raise Error("VersionNumber major selector failed.");
+		
+	LVersionNumber := VersionNumber(1, 1);
+	if LVersionNumber <> VersionNumber(1, 1) then
+		raise Error("VersionNumber minor selector failed.");
+		
+	LVersionNumber := VersionNumber(1, 1, 1);
+	if LVersionNumber <> VersionNumber(1, 1, 1) then
+		raise Error("VersionNumber build selector failed.");
+		
+	LVersionNumber := VersionNumber(1, 1, 1, 1);
+	if LVersionNumber <> VersionNumber(1, 1, 1, 1) then
+		raise Error("VersionNumber revision selector failed.");
+		
+	// VersionNumber accessors
+	if (LVersionNumber.Major <> 1) then
+		raise Error("VersionNumber major read accessor failed.");
+		
+	LVersionNumber.Major := 2;
+	if (LVersionNumber.Major <> 2) then
+		raise Error("VersionNumber major write accessor failed.");
+		
+	if (LVersionNumber.Minor <> 1) then
+		raise Error("VersionNumber Minor read accessor failed.");
+		
+	LVersionNumber.Minor := 2;
+	if (LVersionNumber.Minor <> 2) then
+		raise Error("VersionNumber Minor write accessor failed.");
+		
+	if (LVersionNumber.Revision <> 1) then
+		raise Error("VersionNumber Revision read accessor failed.");
+		
+	LVersionNumber.Revision := 2;
+	if (LVersionNumber.Revision <> 2) then
+		raise Error("VersionNumber Revision write accessor failed.");
+		
+	if (LVersionNumber.Build <> 1) then
+		raise Error("VersionNumber Build read accessor failed.");
+		
+	LVersionNumber.Build := 2;
+	if (LVersionNumber.Build <> 2) then
+		raise Error("VersionNumber Build write accessor failed.");
+		
+	// VersionNumber conversions
+	if (LVersionNumber.ToString() <> "2.2.2.2") then
+		raise Error("VersionNumber ToString conversion failed.");
+		
+	LVersionNumber := VersionNumber(-1);
+	if (LVersionNumber.ToString() <> "*") then
+		raise Error("VersionNumber ToString conversion failed.");
+		
+	LVersionNumber := VersionNumber(1);
+	if (LVersionNumber.ToString() <> "1.*") then
+		raise Error("VersionNumber ToString conversion failed.");
+
+	LVersionNumber := VersionNumber(1, 1);
+	if (LVersionNumber.ToString() <> "1.1.*") then
+		raise Error("VersionNumber ToString conversion failed.");
+
+	LVersionNumber := VersionNumber(1, 1, 1);
+	if (LVersionNumber.ToString() <> "1.1.1.*") then
+		raise Error("VersionNumber ToString conversion failed.");
+
+	// VersionNumber comparisons
+	if (LVersionNumber <> VersionNumber(1, 1, 1)) then
+		raise Error("VersionNumber comparison failed.");
+		
+	// VersionNumber compatible
+	LVersionNumber := VersionNumber(1);
+	if not Compatible(LVersionNumber, VersionNumber(1, 1)) then
+		raise Error("VersionNumber compatible failed.");
+
+	LVersionNumber := VersionNumber(1, 1);
+	if not Compatible(LVersionNumber, VersionNumber(1, 1, 1)) then
+		raise Error("VersionNumber compatible failed.");
+
+	LVersionNumber := VersionNumber(1, 1, 1);
+	if not Compatible(LVersionNumber, VersionNumber(1, 1, 1, 1)) then
+		raise Error("VersionNumber compatible failed.");
+
+	LVersionNumber := VersionNumber(1, 1, 1, 1);
+	if not Compatible(LVersionNumber, VersionNumber(1, 1, 1, 1)) then
+		raise Error("VersionNumber compatible failed.");
+		
+	// VersionNumber Min/Max
+	if Min(Version from (table { row { VersionNumber(1, 0) Version }, row { VersionNumber(2, 0) } })) <> VersionNumber(1, 0) then
+		raise Error("Min(VersionNumber) failed.");
+		
+	if Max(Version from (table { row { VersionNumber(1, 0) Version }, row { VersionNumber(2, 0) } })) <> VersionNumber(2, 0) then
+		raise Error("Max(VersionNumber) failed.");
+end;

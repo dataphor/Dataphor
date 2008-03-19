@@ -1,0 +1,216 @@
+THIS IS DUPLICATED IN DOC FORMAT
+
+Simplified D4 DML Syntax ->
+	In the interest of space, several of the production rules 
+	in this quick reference are intentionally simplified.  Please
+	refer to the D4 Language Reference for a full DML syntax, as
+	well as the syntax for the DDL and imperative statements avilable
+	in D4.
+
+<identifier> ::=
+	_ | <letter> {_ | <letter> | <digit>}
+
+<integer> ::=
+	<digit>{<digit>} | 0x<hexdigit>{<hexdigit>}
+
+<decimal> ::=
+	<digit>{<digit>}[.{<digit>}][(e|E)[+|-]{<digit>}][d]
+	
+<money> ::=
+	$<digit>{<digit>}[.{<digit>}]
+
+<string> ::=
+	""{<character>}"" | '{<character>}'
+
+<comment> ::=
+	(// | --) <comment text> |
+	/* <comment text> */
+	
+<select statement> ::=
+	select <expression> [<order clause> | <browse clause>]
+
+<insert statement> ::=
+    insert <expression> into <target>
+
+<update statement> ::=
+    update <target> set "{"<ne update column commalist>"}" [where <expression term>]
+
+	<update column> ::=
+		<target> := <expression term>
+
+<delete statement> ::=
+    delete <target> [where <expression term>]
+
+<expression> ::= 
+	<expression term> <table operator clause list>
+
+<list selector> ::=
+    [<list type specifier>]"{"<expression>"}" <metadata>
+
+<table selector> ::=
+	table"{"<row expression commalist>"}" <metadata>
+	
+<row selector> ::=
+	row"{"<named expression commalist>"}" <metadata>
+
+<row extractor> ::=
+	row from <expression>
+
+<column extractor> ::=
+	<column name> from <expression>
+
+<restrict clause> ::=
+    where <expression term>
+
+<project clause> ::=
+    over "{<column name commalist>"}
+
+<remove clause> ::=
+    remove {<column name commalist>}
+
+<add clause> ::=
+	add {<ne named expression term commalist>}
+
+<rename clause> ::=
+	rename {<ne named column name commalist>}
+
+<aggregate clause> ::=
+    group [by {<ne column name commalist>}] 
+		add {<ne named aggregate expression commalist>}
+
+	<aggregate expression> ::=
+		<operator name>"("[distinct] [<column name>]")"
+
+<order clause> ::=
+    order by "{"<ne order column definition commalist>"}" 
+		[include sequence [as <column name>] <metadata>] 
+		<metadata>
+
+<browse clause> ::=
+    browse by "{"<ne order column definition commalist>"}" 
+		<metadata>
+
+<quota clause> ::=
+    return <expression term> 
+		by "{"<ne order column definition commalist>"}"
+
+<explode clause> ::=
+    explode by <expression term> where <expression term> 
+	    [include level [as <column name>] <metadata>]
+	    [include sequence [as <column name>] <metadata>]
+
+<on clause> ::=
+    on <server link name>
+
+<as clause> ::=
+    as <column name> <metadata>
+
+<adorn clause> ::=
+	adorn "{"<adorn column commalist>"}" <metadata>
+
+	<adorn column> ::=
+		<column name> 
+			["{"<ne column definition item commalist>"}"] 
+			<metadata>
+
+<redefine clause> ::=
+	redefine "{"<redefine column commalist>"}"
+
+	<redefine column> ::=
+		<column name> := <expression term>
+
+<binary table operator clause> ::=
+    <binary table operator> <expression term>
+
+	<binary table operator> ::=
+		union | intersect | minus | times | divide
+
+<join clause> ::=
+	join <join specifier>
+
+	<outer join clause> ::=
+		(left | right) (join | lookup) <join specifier>
+		[include rowexists [as <column name>] <metadata>]
+
+	<join specifier> ::=
+		<expression term> [by <expression term>]
+
+Operator Precedence ->
+
+	.										Qualifier
+	[]										Indexer
+	from									Extractor
+	~										Bitwise Unary
+	+ -										Arithmetic Unary
+	**										Exponentiation
+	* / %									Multiplicative
+	+ -										Additive
+	= <> < > <= >= ?=						Comparison
+	^ & | << >>								Bitwise Binary
+	exists									Existential
+	not										Logical Negation
+	and										Logical And
+	in or xor like matches					Logical Binary
+	between									Logical Ternary
+	where over remove add rename group
+	return explode on as adorn redefine		Relational Unary
+	union difference intersect join times	Relational Binary
+
+Conversion Operators ->
+		 \ B \ B \ S \ S \ U \ I \ U \ L \ U \ D \ S \ G \ D \ T \ M \
+		  \ o \ y \ B \ h \ S \ n \ I \ o \ L \ e \ t \ u \ a \ i \ o \
+		   \ o \ t \ y \ o \ h \ t \ n \ n \ o \ c \ r \ i \ t \ m \ n \
+			\ l \ e \ t \ r \ o \ e \ t \ g \ n \ i \ i \ d \ e \ e \ e \
+			 \ e \   \ e \ t \ r \ g \ e \   \ g \ m \ n \   \ T \ S \ y \ 
+			  \ a \   \   \   \ t \ e \ g \   \   \ a \ g \   \ i \ p \   \
+			   \ n \   \   \   \   \ r \ e \   \   \ l \   \   \ m \ a \   \
+				\   \   \   \   \   \   \ r \   \   \   \   \   \ e \ n \   \
+				|	|	|	|	|	|	|	|	|	|	|	|	|	|	|	|			
+	Boolean		| X	| E	| E	| E | E	| E	| E	| E	| E	| .	| E	| . | . | .	| .	|
+	Byte		| E	| X	| E	| E	| E	| E	| E	| E	| E	| .	| E	| .	| .	| .	| .	|
+	SByte		| E	| E	| X | E	| E	| E	| E	| E	| E	| .	| E	| .	| .	| .	| .	|
+	Short		| E	| E	| E	| X | E	| E	| E	| E	| E	| .	| E	| .	| .	| .	| .	|
+	UShort		| E	| E	| E	| E	| X	| E	| E	| E	| E	| .	| E	| .	| .	| .	| .	|
+	Integer		| E	| E	| E	| E	| E	| X	| E	| E	| E	| E	| E	| .	| .	| . | E	|
+	UInteger	| E	| E	| E	| E	| E	| E	| X	| E	| E	| E	| E	| .	| .	| .	| E	|
+	Long		| E	| E	| E	| E	| E	| E	| E	| X	| E	| E	| E	| .	| .	| .	| E	|
+	ULong		| E	| E	| E	| E	| E	| E	| E	| E	| X	| E	| E	| .	| .	| .	| E	|
+	Decimal		| .	| .	| .	| .	| .	| E	| E	| E	| E	| X	| E	| .	| .	| .	| E	|
+	String		| E	| E	| E	| E	| E	| E	| E	| E	| E	| E	| X	| E	| E	| E	| E	|
+	Guid		| .	| .	| .	| .	| .	| .	| .	| .	| .	| .	| E	| X	| .	| .	| .	|
+	DateTime	| .	| .	| .	| .	| .	| .	| .	| .	| .	| .	| E	| .	| X	| E	| .	|
+	TimeSpan	| .	| .	| .	| .	| .	| .	| .	| .	| .	| .	| E	| .	| E	| X	| .	|
+	Money		| . | .	| .	| .	| .	| E	| E	| E	| E	| E	| E	| .	| .	| .	| X	|
+
+	Legend ->
+		. - Not Supported
+		I - Implicit Conversion
+		E - Explicit Conversion Required
+		X - Not Applicable			
+	
+	The presence of an E indicates the existence of an operator of the form ToYYY(AValue : XXX)
+	where XXX represents the name of the data type along the x-axis, and YYY represents the name
+	of the data type along the y-axis, which can be used to perform the desired conversion.  D4 
+	does not support implicit conversion, as it can lead to ambiguity in a value-based inheritance
+	environment.
+
+
+System Data Types ->
+
+	System.Alpha
+	System.Decimal is { System.Alpha }
+	System.Long is { System.Decimal }
+	System.ULong is { System.Decimal }
+	System.Integer is { System.Long }
+	System.UInteger is { System.Long, System.ULong }
+	System.Short is { System.Integer }
+	System.UShort is { System.Integer, System.UInteger }
+	System.SByte is { System.Short }
+	System.Byte is { System.Short, System.UShort }
+	System.Boolean is { System.Alpha }
+	System.String is { System.Alpha }
+	System.Guid is { System.Alpha }
+	System.TimeSpan is { System.Alpha }
+	System.DateTime is { System.TimeSpan }
+	System.Money is { System.Alpha }
+

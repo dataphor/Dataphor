@@ -1,0 +1,18 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+
+create operator AlterMode(DeviceName : String, Mode : String)
+begin
+	Execute("alter device " + DeviceName + " alter reconciliation {mode = { " + Mode + " } };");
+end;
+
+create operator Repopulate()
+begin
+	insert Operators over {OperatorName} redefine {OperatorName := OperatorName.Value.ToIString()} rename {OperatorName OpName} minus (OperatorsList over {OpName}) add {false HasDocumentation, false HasCoverage} into OperatorsList;
+end;
+
+*/

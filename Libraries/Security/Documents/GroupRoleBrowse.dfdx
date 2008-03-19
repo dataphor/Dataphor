@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document="Derive('Security.GroupRole', 'Browse', 'Main.Name', 'Main.Group_Name', false)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <source bop:name="Main" useapplicationtransactions="False" />
+   <showformaction bop:name="Add" document="Derive('GroupRole', 'Add', 'Main.Name', 'Main.Group_Name', true)" />
+   <showformaction bop:name="Edit" document="Derive('GroupRole', 'Edit', 'Main.Name', 'Main.Group_Name', true)" />
+</interface>
+</document>
+</dilx>

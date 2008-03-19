@@ -1,0 +1,51 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create table SaveRowCount in Temp { UsedRowCount : Integer, key { } };
+
+insert table { row { UsedRowCount() UsedRowCount } } into SaveRowCount;
+
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 }; // - 2 accounts for rows being used during the update
+var LTable : table { ID : Integer } := table { row { 100 ID } };
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("select from table selector leaks a row");
+	
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+create table Test in Temp { ID : Integer, key { ID } static tags { Storage.Enforced = "true" } };
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("create table leaks a row");
+
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+insert table { row { 10003 ID } } into Test;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("insert leaks a row");
+	
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+for LIndex : Integer := 1 to 1000 do
+	insert table { row { LIndex ID } } into Test;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("for loop leaks a row");
+	
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+select Test;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("select leaks a row");
+	
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+update Test set { ID := 10000 } where ID = 1;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("update leaks a row");
+
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+delete Test;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("delete leaks a row");
+
+update SaveRowCount set { UsedRowCount := UsedRowCount() - 2 };
+drop table Test;
+if (UsedRowCount() <> (UsedRowCount from row from SaveRowCount)) then
+	raise Error("drop table leaks a row");
+
+drop table SaveRowCount;

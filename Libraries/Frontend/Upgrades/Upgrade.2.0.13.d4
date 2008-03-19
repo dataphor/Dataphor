@@ -1,0 +1,63 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Operator: ScriptApplication
+SafeDrop('ScriptApplication(Name)');
+create operator ScriptApplication(AApplicationID : Name) : String
+begin
+	var LApplication := '';
+	foreach row in Applications where ID = AApplicationID do
+		LApplication := 
+			(if LApplication = '' then '' else LApplication + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID + '") ID, "' 
+				+ Description.Replace('"', '""') + '" Description, "' 
+				+ StartDocument.Replace('"', '""') + '" StartDocument }';
+	
+	var LApplicationLibraries := '';
+	foreach row in ApplicationLibraries where Application_ID = AApplicationID do
+		LApplicationLibraries :=
+			(if LApplicationLibraries = '' then '' else LApplicationLibraries + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID 
+				+ '") Application_ID, System.Name("' + Library_Name + '") Library_Name }';
+	
+	var LWindowsClientApplications := '';
+	foreach row in WindowsClientApplications where Application_ID = AApplicationID do
+		LWindowsClientApplications :=
+			(if LWindowsClientApplications = '' then '' else LWindowsClientApplications + ',' + Unicode({ 13, 10, 9, 9 }))
+				+ 'row { System.Name("' + AApplicationID + '") Application_ID, "' 
+				+ ThemeDocument.Replace('"', '""') + '" ThemeDocument, "' 
+				+ DefaultIconImage.Replace('"', '""') + '" DefaultIconImage, ' + DocumentCacheSize.ToString()
+				+ ' DocumentCacheSize, ' + ImageCacheSize.ToString() + ' ImageCacheSize, "' 
+				+ HelpDocument.Replace('"', '""') + '" HelpDocument }';
+	
+	result :=
+		(
+			if LApplication = '' then
+				''
+			else
+				'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+					+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LApplication 
+					+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into Applications;' + Unicode({ 13, 10 })
+		)
+			+
+			(
+				if LApplicationLibraries = '' then
+					''
+				else
+					'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+						+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LApplicationLibraries
+						+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into ApplicationLibraries;' + Unicode({ 13, 10 })
+			)
+			+
+			(
+				if LWindowsClientApplications = '' then
+					''
+				else
+					'insert' + Unicode({ 13, 10, 9 }) + 'table' 
+						+ Unicode({ 13, 10, 9 }) + '{' + Unicode({ 13, 10, 9, 9 }) + LWindowsClientApplications
+						+ Unicode({ 13, 10, 9 }) + '}' + Unicode({ 13, 10, 9 }) + 'into WindowsClientApplications;' + Unicode({ 13, 10 })
+			);
+end;
+grant usage on ScriptApplication(Name) to role User;

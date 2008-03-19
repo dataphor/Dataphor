@@ -1,0 +1,6 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="2.1.0.0" defaultdevicename="Shipping" assembliesasstring="" librariesasstring="" settings="'ServerName'='.';'DatabaseName'='Shipping'" name="Sample.Shipping" issystem="False" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <files.filereference filename="Alphora.Shipping.dll" isassembly="True" />
+    <libraries.libraryreference name="MSSQLDevice" version="*" />
+    <libraries.libraryreference name="Frontend" version="*" />
+    <libraries.libraryreference name="Security" version="*" />
+</library>

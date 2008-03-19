@@ -1,0 +1,4 @@
+segment;name;status
+0;system;0
+1;default;1
+2;logsegment;0

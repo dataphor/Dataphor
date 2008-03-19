@@ -1,0 +1,50 @@
+/*
+	Sample.DetailAdd
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+	
+	This sample creates a detail many-to-many relationship, and shows how to build
+	a user-interface that skips the add form containing only the lookup to Category.
+	
+	First, the tables were created without the Frontend.Detail.Document tag on the Detail_Master
+	reference. A derivation on the Master table was then used to get the document expression to be
+	used as the ancestor for the DetailBrowse customized form. The Form Launcher was then used to
+	launch a detail derivation based on this document expression, and the customized form designer
+	loaded on that form. Then the Add action on this form was changed to a Browse of the Category
+	table, the Mode was set to Query instead of Add, and the SourceLinkType was set to none. Then
+	the AddCategory script was added and attached the FormAccepted event of the Add action. In the
+	form accepted event, the form being accepted is passed as the "Form" parameter in the Params
+	of the event. This form is then used to look up the category that was selected, and the Main
+	source is used to insert the row. The edit, view and delete actions for the form remain the
+	same.
+*/
+
+//* Table: Master
+SafeDrop('Master');
+create table Master
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+//* Table: Category
+SafeDrop('Category');
+create table Category
+{
+	ID : Integer,
+	Name : String,
+	key { ID }
+};
+
+//* Table: Detail
+SafeDrop('Detail');
+create table Detail
+{
+	Master_ID : Integer,
+	Category_ID : Integer,
+	reference Detail_Master { Master_ID } references Master { ID }
+		tags { Frontend.Detail.Embedded = "true", Frontend.Detail.Document = "Form('Sample.DetailAdd', 'DetailBrowse')" },
+	reference Detail_Category { Category_ID } references Category { ID }
+};
+

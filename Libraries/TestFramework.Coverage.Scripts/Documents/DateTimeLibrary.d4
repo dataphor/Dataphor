@@ -1,0 +1,280 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// System Library
+
+// DateTime tests
+
+
+create table DateTimeTest
+{
+	ID: Integer,
+	TestDateTime: DateTime,
+	key{ID}
+};
+
+begin
+	var LDateTime: DateTime;
+	var LString: String;
+
+	// Selectors
+	LDateTime := DateTime(1974, 10, 20);
+	if (LDateTime <> DateTime(1974, 10, 20)) then
+		raise Error("DateTime(Years, Months, Days) selector failed.");
+		
+	LDateTime := DateTime(1974, 10, 20, 10, 30, 20);
+	if (LDateTime <> DateTime(1974, 10, 20, 10, 30, 20)) then
+		raise Error("DateTime(Years, Months, Days, Hours, Minutes, Seconds) selector failed.");
+
+	/*		
+	LDateTime := DateTime(1974, 10, 20, 10, 30, 20, 10.5);
+	if (LDateTime <> DateTime(1974, 10, 20, 10, 30, 20, 10.5)) then
+		raise Error("DateTime(Years, Months, Days, Hours, Minutes, Seconds, Milliseconds) selector failed.");
+	*/
+	
+	// Accessors
+	if LDateTime.Year <> 1974 then
+		raise Error("DateTime read years part failed.");
+		
+	LDateTime.Year := 2000;
+	if LDateTime.Year <> 2000 then
+		raise Error("DateTime write years part failed.");
+		
+	if LDateTime.Month <> 10 then
+		raise Error("DateTime read months part failed.");
+		
+	LDateTime.Month := 12;
+	if LDateTime.Month <> 12 then
+		raise Error("DateTime write months part failed.");
+
+	if LDateTime.Day <> 20 then
+		raise Error("DateTime read Days part failed.");
+		
+	LDateTime.Day := 15;
+	if LDateTime.Day <> 15 then
+		raise Error("DateTime write Days part failed.");
+
+	if LDateTime.Hour <> 10 then
+		raise Error("DateTime read Hours part failed.");
+		
+	LDateTime.Hour := 11;
+	if LDateTime.Hour <> 11 then
+		raise Error("DateTime write Hours part failed.");
+
+	if LDateTime.Minute <> 30 then
+		raise Error("DateTime read Minutes part failed.");
+		
+	LDateTime.Minute := 45;
+	if LDateTime.Minute <> 45 then
+		raise Error("DateTime write Minutes part failed.");
+
+	if LDateTime.Second <> 20 then
+		raise Error("DateTime read Seconds part failed.");
+		
+	LDateTime.Second := 25;
+	if LDateTime.Second <> 25 then
+		raise Error("DateTime write Seconds part failed.");
+
+	/*
+	if LDateTime.Millisecond <> 10.5 then
+		raise Error("DateTime read Milliseconds part failed.");
+
+	LDateTime.Millisecond := 12.4;
+	if LDateTime.Millisecond <> 12.4 then
+		raise Error("DateTime write Milliseconds part failed.");
+	*/
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Conversions										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	LDateTime := DateTime(2001, 12, 25, 12, 57, 36);
+	LString := LDateTime.ToString();
+	if LString <> "12/25/2001 12:57:36 PM" then
+		raise Error("DateTime.ToString() Error.");
+	
+	// String->TimeSpan	
+	LString := "12/25/2001 12:57:36 PM";
+	if LDateTime <> ToDateTime(LString) then
+		raise Error("ToDateTime(System.String) Error.");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Comparison										   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	var LDateTime1: DateTime;
+	var LDateTime2: DateTime;
+	
+	// Equals
+	LDateTime1 := DateTime(2000, 12, 25);
+	LDateTime2 := DateTime(2000, 12, 25);
+	if LDateTime1 = LDateTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime = DateTime Error.");
+	end;
+	
+	// Not Equal
+	LDateTime2 := DateTime(2000, 12, 26);
+	if LDateTime1 <> LDateTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime <> DateTime Error.");
+	end;
+	
+	// less than, exclusive
+	if LDateTime1 < LDateTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime < DateTime Error.");
+	end;
+	
+	// less than, inclusive
+	if LDateTime1 <= LDateTime2 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime <= DateTime Error.");
+	end;
+	
+	// greater than, exclusive
+	if LDateTime2 > LDateTime1 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime > DateTime Error.");
+	end;
+	
+	// greater than, inclusive
+	if LDateTime2 >= LDateTime1 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime >= DateTime Error.");
+	end;
+	
+	// icompare
+	if (LDateTime2 ?= LDateTime1) = 1 then
+	begin
+	end
+	else
+	begin
+		raise Error("DateTime ?= DateTime Error.");
+	end;
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// 										Misc											   //
+	/////////////////////////////////////////////////////////////////////////////////////////////
+// Operator was removed because it is redundant.
+//	if DayOfMonth(LDateTime1) <> 25 then
+//		raise Error("DayOfMonth(DateTime) Error."); 
+
+	if DayOfWeek(LDateTime1) <> 1 then
+		raise Error("DayOfWeek(DateTime) Error.");
+		
+	if DayOfYear(LDateTime1) <> 360 then
+		raise Error("DayOfYear(DateTime) Error.");
+		
+	if DaysInMonth(LDateTime1.Year, LDateTime1.Month) <> 31 then
+		raise Error("DaysInMonth(Year, Month) Error.");
+		
+	if IsLeapYear(LDateTime1.Year) = false then
+		raise Error("IsLeapYear(DateTime) Error.");	
+		
+	LDateTime1 := DateTime(2002, 4, 15);
+	LDateTime1 := LDateTime1.AddMonths(2);
+	if (LDateTime1.Month <> 6) then
+	  raise Error("AddMonths failed");
+	  
+	LDateTime1 := LDateTime1.AddYears(1);
+	if (LDateTime1.Year <> 2003) then
+	  raise Error("AddYears failed");
+	  
+	LDateTime1 := DateTime(1,1,1);
+	var LTimeSpan1 : TimeSpan;
+	LTimeSpan1 := TimeSpan(2);
+	LDateTime2 := LDateTime1 + LTimeSpan1;
+	if (LDateTime2.Day <> 3) then
+	  raise Error("iAddition (DateTime + TimeSpan) failed");
+	
+
+	LDateTime1 := DateTime(1,1,2);
+	LDateTime2 := DateTime(1,1,1);
+	LTimeSpan1 := LDateTime1 - LDateTime2;
+	if (LTimeSpan1.Days <> 1) then
+	  raise Error("iSubtract(DateTime, DateTime) Failed.");
+	
+	var LTimeSpan2 : TimeSpan;
+	LDateTime1 := DateTime(2001,11,17,10,5,23);
+	LTimeSpan1 := TimeSpan(1);
+	LDateTime2 := LDateTime1 - LTimeSpan1;
+	if (LDateTime2.ToString() <> "11/16/2001 10:05:23 AM") then
+	  raise Error("iSubtract(DateTime, TimeSpan) Failed.");
+
+	insert table { row { 1 ID, DateTime.Ticks(0) TestDateTime } } into DateTimeTest;
+	insert table { row { 2 ID, DateTime(1, 1, 1, 0, 0, 1) TestDateTime } } into DateTimeTest;
+	insert table { row { 3 ID, DateTime(1, 1, 1, 0, 0, 2) TestDateTime } } into DateTimeTest;
+	insert table { row { 4 ID, DateTime(1, 1, 1, 0, 0, 3) TestDateTime } } into DateTimeTest;
+
+	// Min
+	var LMin: System.DateTime := DateTimeMin from row from DateTimeTest group add {Min(TestDateTime) DateTimeMin};
+	if LMin.Ticks <> 0 then
+		raise Error("DateTime Min Error.");
+	
+	// Max
+	var LMax: System.DateTime := DateTimeMax from row from DateTimeTest group add {Max(TestDateTime) DateTimeMax};
+	if LMax.Ticks <> Time(0, 0, 3).Ticks then
+		raise Error("DateTime Max Error.");
+
+end;
+
+drop table DateTimeTest;
+
+//* MonthsBetween
+begin
+	var LStartDate := DateTime(2007, 1, 1);
+	var LEndDate := DateTime(2007, 1, 1);
+	if MonthsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('MonthsBetween the same date failed');
+		
+	LEndDate := LEndDate.AddMonths(12);
+	if MonthsBetween(LStartDate, LEndDate) <> 12 then
+		raise Error('MonthsBetween one year failed');
+		
+	LEndDate := LEndDate.AddMonths(-2);
+	if MonthsBetween(LStartDate, LEndDate) <> 10 then
+		raise Error('MonthsBetween 10 months failed');
+		
+	LEndDate := LEndDate.AddMonths(-12);
+	if MonthsBetween(LStartDate, LEndDate) <> -2 then
+		raise Error('MonthsBetween -2 months failed');
+end;
+
+//* YearsBetween
+begin
+	var LStartDate := DateTime(2007, 1, 1);
+	var LEndDate := DateTime(2007, 1, 1);
+	if YearsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('YearsBetween the same date failed');
+		
+	LEndDate := LEndDate.AddMonths(12);
+	if YearsBetween(LStartDate, LEndDate) <> 1 then
+		raise Error('YearsBetween one year failed');
+		
+	LEndDate := LEndDate.AddMonths(-2);
+	if YearsBetween(LStartDate, LEndDate) <> 0 then
+		raise Error('YearsBetween 10 months failed');
+		
+	LEndDate := LEndDate.AddMonths(-24);
+	if YearsBetween(LStartDate, LEndDate) <> -2 then
+		raise Error('YearsBetween -2 years failed');
+end;
+

@@ -1,0 +1,20 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// Dataphor Server Diagnostics Script
+// Tests low level storage system functionality using built-in diagnostic operators
+
+TestCatalog();
+TestStreams();
+TestRowManager();
+TestScalarManager();
+TestConveyors();
+TestSemaphore();
+TestStreamManager();
+TestRowValues();
+TestOverflow();
+TestIndex(5, 5, 100, true);
+TestIndex(100, 100, 10000, false);
+TestTableBuffer(5, 5, 100, true);
+TestTableBuffer(100, 100, 10000, false);

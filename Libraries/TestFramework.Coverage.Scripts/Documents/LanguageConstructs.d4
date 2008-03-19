@@ -1,0 +1,358 @@
+// Alphora Dataphor
+//  © Copyright 2000-2008 Alphora
+//  This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+// Language Constructs
+
+/*
+	Test Multi-Line comments
+*/
+
+// Empty Statement
+;
+
+// Empty Block
+begin
+end;
+
+// Empty Operator
+create operator Test()
+begin
+end;
+
+// Operator Call
+Test();
+
+drop operator Test();
+
+// Empty If Statement
+if true then;
+
+// Empty Try Finally Statement
+try
+finally
+end;
+
+// Empty Try Except Statement
+try
+except
+end;
+
+// Empty Handler Statement
+try
+except
+  on Error do;
+end;
+
+// Re-raise Statement
+try
+except
+	raise;
+end;
+
+// Parameterized Handler
+try
+  raise Error("Test Error");
+except
+  on E: Error do
+    if E.Message <> "Test Error" then
+      raise Error("Parameterized Handler failed");
+end;
+
+// Finally Statement
+begin
+  var LFinallyHit : Boolean := false;
+  try
+    try
+      raise Error("Test Error");
+    finally
+      LFinallyHit := true;
+    end;
+  except
+  end;
+  if not(LFinallyHit) then
+    raise Error("Finally Block did not run");
+end;
+
+// Empty Commit Statement
+try
+commit;
+
+// While loop
+begin
+  var LCounter : Integer := 0;
+  while LCounter < 2 do
+  begin
+    LCounter := LCounter + 1;
+    if LCounter = 1 then
+    begin
+      continue;
+      raise Error("Continue Statement Failed");
+    end
+    else
+    begin
+      break;
+      raise Error("Break Statement Failed");
+    end;
+  end;
+  if LCounter = 1 then
+    raise Error("Continue Statement Failed, loop only executed once");
+end;
+
+// Do While loop
+begin
+  var LSum : Integer := 0;
+  var LCounter : Integer := 0;
+  do
+	LCounter := LCounter + 1;
+	LSum := LSum + LCounter;
+  while LCounter < 10;
+  if LSum <> 55 then
+	raise Error("Do while loop failed");
+end;
+
+// Repeat Until
+begin
+  var LSum : Integer := 0;
+  var LCounter : Integer := 0;
+  repeat
+	LCounter := LCounter + 1;
+	LSum := LSum + LCounter;
+  until LCounter >= 10;
+  if LSum <> 55 then
+	raise Error("Repeat until failed");
+end;
+
+// For loop
+begin
+  var LIndex : Integer;
+  var LSum : Integer := 0;
+  for LIndex := 1 to 10 do
+    LSum := LSum + LIndex;
+  if LSum <> 55 then
+    raise Error("For loop failed");
+    
+  LSum := 0;
+  for LIndex := 10 to 100 step 10 do
+    LSum :=	LSum + LIndex;
+  if LSum <> 550 then
+    raise Error("For loop with step failed");
+    
+  LSum := 0;
+  for LIndex := 10 downto 1 do
+    LSum := LSum + LIndex;
+  if LSum <> 55 then
+    raise Error("For loop downto failed");
+    
+  LSum := 0;
+  for LIndex := 100 downto 10 step 10 do
+    LSum := LSum + LIndex;
+  if LSum <> 550 then
+    raise Error("For loop downto with step failed");
+    
+  LSum := 0;
+  for var LNewIndex := 1 to 10 do
+  	LSum := LSum + LNewIndex;
+  if LSum <> 55 then
+  	raise Error("For loop with allocation failed");
+end;
+
+begin
+  var LSum : Integer := 0;
+  for LIndex : Integer := 1 to 10 do
+    LSum := LSum + LIndex;
+  if LSum <> 55 then
+    raise Error("For loop failed");
+end;
+
+// foreach statement
+begin
+	var LTable := table of { X : Integer, Y : Integer } { };
+	for var LIndex := 1 to 100 do
+		insert table { row { LIndex X, 101 - LIndex Y } } into LTable;
+	
+	var LSum := 0;
+	foreach row in LTable do
+		LSum := LSum + X;
+	
+	if LSum <> 5050 then 
+		raise Error('foreach with row failed');
+	
+	LSum := 0;
+	foreach var LRow in LTable do
+		LSum := LSum + LRow.X;
+		
+	if LSum <> 5050 then
+		raise Error('foreach with allocation failed');
+		
+	LSum := 0;
+	var LRow : typeof(LTable[]);
+	foreach LRow in LTable do
+		LSum := LSum + LRow.X;
+		
+	if LSum <> 5050 then
+		raise Error('foreach with external iteration variable failed');
+end;
+
+begin
+	var LList := { "A", "B", "C", "D", "E" };
+	
+	var LString := "";
+	foreach var LItem in LList do
+		LString := LString + LItem;
+		
+	if LString <> "ABCDE" then
+		raise Error("foreach with list and allocation failed");
+		
+	LString := "";
+	var LItem : String;
+	foreach LItem in LList do
+		LString := LString + LItem;
+		
+	if LString <> "ABCDE" then
+		raise Error("foreach with list and external variable failed");
+end;
+
+create operator TestForEach(const ATable : table { ID : Integer }) : Integer
+begin
+	result := 0;
+	foreach row in ATable do
+		result := result + ID;
+		
+	result := 0;
+	foreach var LRow in ATable do
+		result := result + LRow.ID;
+		
+	result := 0;
+	var LRow : typeof(ATable[]);
+	foreach LRow in ATable do
+		result := result + LRow.ID;
+end;
+
+if TestForEach(table { row { 1 ID } }) <> 1 then
+	raise Error('TestForEach failed');
+
+begin
+	var LScript := Script('TestForEach(table { ID : Integer })');
+	drop operator TestForEach(table { ID : Integer });
+	Execute(LScript);
+end;
+
+if TestForEach(table { row { 1 ID } }) <> 1 then
+	raise Error('TestForEach failed');
+
+drop operator TestForEach(table { ID : Integer });
+
+// case statement
+begin
+  var LMessage : String := '';
+  for LIndex : Integer := 1 to 5 do
+    case LIndex
+		when 1 then LMessage := LMessage + "1 ";
+		when 2 then LMessage := LMessage + "2 ";
+		when 3 then LMessage := LMessage + "3 ";
+		when 4 then LMessage := LMessage + "4 ";
+		else LMessage := LMessage + "5";
+	end;
+  if LMessage <> "1 2 3 4 5" then
+    raise Error("Case statement failed");
+    
+  LMessage := '';
+  for LIndex : Integer := 1 to 5 do
+    case
+		when LIndex = 1 then LMessage := LMessage + "1 ";
+		when LIndex = 2 then LMessage := LMessage + "2 ";
+		when LIndex = 3 then LMessage := LMessage + "3 ";
+		when LIndex = 4 then LMessage := LMessage + "4 ";
+		else LMessage := LMessage + "5";
+	end;
+  if LMessage <> "1 2 3 4 5" then
+    raise Error("Case statement failed");
+end;
+
+// exit statement
+create operator TestExit()
+begin
+  exit;
+  raise Error("Exit statement failed");
+end;
+
+TestExit();
+
+drop operator TestExit();
+
+// Recursive Operator
+create operator TestRecursion(AInteger : Integer) : Integer
+begin
+  if (AInteger > 0) then
+    result := TestRecursion(AInteger - 1)
+  else
+    result := AInteger;
+end;
+
+if (TestRecursion(5) <> 0) then
+  raise Error("TestRecursion failed");
+
+drop operator TestRecursion(Integer);
+
+// Name Resolution
+begin
+  var 
+	A.A : Integer := 10,
+	A.B : Integer := 15;
+	
+  if A <> 10 then
+	raise Error("Name resolution failed");
+	
+  if B <> 15 then
+    raise Error("Name resolution failed");
+end;  
+  
+// Property Resolution
+begin
+  var LTimeSpan : TimeSpan := TimeSpan.Ticks(ToLong(100));
+  if (LTimeSpan.Ticks <> ToLong(100)) then
+    raise Error("Property resolution failed");
+end;
+
+// Qualifier Invoked Method Resolution
+begin
+  var LInteger : Integer := 10;
+  if (LInteger.ToString() <> "10") then
+    raise Error("Qualifier invoked method resolution failed");
+end;
+
+// If expression
+begin
+	var LInteger : Integer := if true then 1 else 0;
+end;
+
+// Case expression
+begin
+	var LInteger : Integer := case true when true then 1 else 0 end;
+end;
+begin
+	var LInteger : Integer := case when true then 1 else 0 end;
+end;
+
+// type specifier is optional
+begin
+	var LInput := row { "John" Input };
+	if (Input from LInput) <> "John" then
+		raise Error("Optional type specifier failed");
+end;
+
+//* Verify initializer can access local scope
+// Test case for Defect #31447
+var AValue := 10;
+var ANotherValue := AValue + 10;
+if ANotherValue <> 20 then
+	raise Error('Initializer accessing local scope failed');
+	
+//* Verify dot-qualified column update does not incorrectly reference the column in the row
+begin
+	var X := 2;
+	var LRow := row { nil as Integer X };
+	LRow.X := X;
+	if LRow.X <> 2 then
+		raise Error("Column assignment using an rvalue referencing a variable with the same name as a column in the row failed");
+end;

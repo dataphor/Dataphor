@@ -1,0 +1,36 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+ExecuteScript('Coverage.Devices', 'Types');
+ExecuteScript('Coverage.Devices', 'TypesMSSQL');
+ExecuteScript('Coverage.Devices', 'Tables');
+//ExecuteScript('Coverage.Devices', 'InsertIntoIdealDeviceOperatorsTable');
+// Populates CurrentCase.
+//ExecuteScript('Coverage.Devices', 'InsertDeviceCase');
+ExecuteScript('Coverage.Devices', 'Logic');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       
+
+
+
+
+
+
+
+

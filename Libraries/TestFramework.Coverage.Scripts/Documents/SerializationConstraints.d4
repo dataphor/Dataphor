@@ -1,0 +1,23 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Constraints
+
+create table TestTable5 { ID : Integer, order {ID} };
+
+create table TestTable6 { ID : Integer, Name : String, key {ID} };
+
+create view TestView4 TestTable6
+	// reference
+	{
+		reference TestReference { ID } references TestTable5 { ID }
+	};
+
+	// create constraint
+	create constraint TestRootConstraint
+		1 = 1;
+	// alter constraint
+	create constraint TestRootConstraint2
+		not exists ( (TestTable6 rename t) join (TestView4 rename v) by t.ID = v.ID );		

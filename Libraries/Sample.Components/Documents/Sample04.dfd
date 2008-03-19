@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Sample04">
+  <source expression="SelectedValues left lookup (State rename State) by Capital_State_ID = State.ID;" beginscript="create session table State&#xD;&#xA;{&#xD;&#xA;	ID : String tags { Storage.Length = &quot;2&quot; },&#xD;&#xA;	Name : String,&#xD;&#xA;	Capital : String,&#xD;&#xA;	key { ID },&#xD;&#xA;	order { Name }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;State := table {&#xD;&#xA;	row { 'AL' ID, 'Alabama' Name, 'Montgomery' Capital },&#xD;&#xA;	row { 'AK', 'Alaska', 'Juneau' },&#xD;&#xA;	row { 'AZ', 'Arizona', 'Phoenix' },&#xD;&#xA;	row { 'AR', 'Arkansas', 'Little Rock' },&#xD;&#xA;	row { 'CA', 'California', 'Sacramento' },&#xD;&#xA;	row { 'CO', 'Colorado', 'Denver' },&#xD;&#xA;	row { 'CT', 'Connecticut', 'Hartford' },&#xD;&#xA;	row { 'DE', 'Delaware', 'Dover' },&#xD;&#xA;	row { 'FL', 'Florida', 'Tallahassee' },&#xD;&#xA;	row { 'GA', 'Georgia', 'Atlanta' },&#xD;&#xA;	row { 'HI', 'Hawaii', 'Honolulu' },&#xD;&#xA;	row { 'ID', 'Idaho', 'Boise' },&#xD;&#xA;	row { 'IL', 'Illinois', 'Springfield' },&#xD;&#xA;	row { 'IN', 'Indiana', 'Indianapolis' },&#xD;&#xA;	row { 'IA', 'Iowa', 'Des Moines' },&#xD;&#xA;	row { 'KS', 'Kansas', 'Topeka' },&#xD;&#xA;	row { 'KY', 'Kentucky', 'Frankfort' },&#xD;&#xA;	row { 'LA', 'Louisiana', 'Baton Rouge' },&#xD;&#xA;	row { 'ME', 'Maine', 'Augusta' },&#xD;&#xA;	row { 'MD', 'Maryland', 'Annapolis' },&#xD;&#xA;	row { 'MA', 'Massachusetts', 'Boston' },&#xD;&#xA;	row { 'MI', 'Michigan', 'Lansing' },&#xD;&#xA;	row { 'MN', 'Minnesota', 'St. Paul' },&#xD;&#xA;	row { 'MS', 'Mississippi', 'Jackson' },&#xD;&#xA;	row { 'MO', 'Missouri', 'Jefferson City' },&#xD;&#xA;	row { 'MT', 'Montana', 'Helena' },&#xD;&#xA;	row { 'NE', 'Nebraska', 'Lincoln' },&#xD;&#xA;	row { 'NV', 'Nevada', 'Carson City' },&#xD;&#xA;	row { 'NH', 'New Hampshire', 'Concord' },&#xD;&#xA;	row { 'NJ', 'New Jersey', 'Trenton' },&#xD;&#xA;	row { 'NM', 'New Mexico', 'Santa Fe' },&#xD;&#xA;	row { 'NY', 'New York', 'Albany' },&#xD;&#xA;	row { 'NC', 'North Carolina', 'Raleigh' },&#xD;&#xA;	row { 'ND', 'North Dakota', 'Bismarck' },&#xD;&#xA;	row { 'OH', 'Ohio', 'Columbus' },&#xD;&#xA;	row { 'OK', 'Oklahoma', 'Oklahoma City' },&#xD;&#xA;	row { 'OR', 'Oregon', 'Salem' },&#xD;&#xA;	row { 'PA', 'Pennsylvania', 'Harrisburg' },&#xD;&#xA;	row { 'RI', 'Rhode Island', 'Providence' },&#xD;&#xA;	row { 'SC', 'South Carolina', 'Columbia' },&#xD;&#xA;	row { 'SD', 'South Dakota', 'Pierre' },&#xD;&#xA;	row { 'TN', 'Tennessee', 'Nashville' },&#xD;&#xA;	row { 'TX', 'Texas', 'Austin' },&#xD;&#xA;	row { 'UT', 'Utah', 'Salt Lake City' },&#xD;&#xA;	row { 'VT', 'Vermont', 'Montpelier' },&#xD;&#xA;	row { 'VA', 'Virginia', 'Richmond' },&#xD;&#xA;	row { 'WA', 'Washington', 'Olympia' },&#xD;&#xA;	row { 'WV', 'West', 'Virginia Charleston' },&#xD;&#xA;	row { 'WI', 'Wisconsin', 'Madison' },&#xD;&#xA;	row { 'WY', 'Wyoming', 'Cheyenne' }&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;create session table SelectedValues&#xD;&#xA;{&#xD;&#xA;	State_ID : String { nil },&#xD;&#xA;	Capital_State_ID : String { nil },&#xD;&#xA;	Warmest_ID : String { nil },&#xD;&#xA;	key {}&#xD;&#xA;};&#xD;&#xA;&#xD;&#xA;//create session reference&#xD;&#xA;//	SelectedValues_State_State SelectedValues { State_ID } references State { ID };&#xD;&#xA;//create session reference&#xD;&#xA;//	SelectedValues_State_Warmest SelectedValues { Warmest_ID } references State { ID };&#xD;&#xA;//create session reference&#xD;&#xA;//	SelectedValues_State_Capital SelectedValues { Capital_State_ID } references State { ID };&#xD;&#xA;" endscript="SafeDrop('SelectedValues_State_Capital');&#xD;&#xA;SafeDrop('SelectedValues_State_State');&#xD;&#xA;SafeDrop('SelectedValues_State_Warmest');&#xD;&#xA;SafeDrop('SelectedValues');&#xD;&#xA;SafeDrop('State');" bop:name="Choices" />
+  <lookupaction lookupcolumnnames="Main.ID" columnnames="Warmest_ID" document="Derive('State', 'List', false)" source="Choices" text="LookupAction" bop:name="LookupAction1" />
+  <row bop:name="MainRow">
+    <column bop:name="SampleColumn">
+      <group title="State" bop:name="QuickLookupGroup">
+        <row bop:name="Row1">
+          <statictext text="Choose your favorite state." width="20" bop:name="QuickLookupStaticText" />
+          <quicklookup columnname="State_ID" lookupcolumnname="Main.ID" source="Choices" document="Derive('State', 'List', false)" title="QuickLookup" tabstop="True" bop:name="StateIDQuickLookup">
+            <textbox titlealignment="None" columnname="State_ID" source="Choices" bop:name="IDTextBox" />
+          </quicklookup>
+        </row>
+      </group>
+      <group title="State Capital" bop:name="FullLookupGroup">
+        <row bop:name="Row2">
+          <statictext text="Choose your favorite state capital." width="20" bop:name="FullLookupStaticText" />
+          <fulllookup columnnames="Capital_State_ID" lookupcolumnnames="Main.ID" source="Choices" document="Derive('State', 'List', false)" title="Full Lookup" bop:name="FullLookup1">
+            <row bop:name="Row4">
+              <textbox columnname="State.Name" source="Choices" bop:name="StateNameTextBox" />
+              <textbox columnname="State.Capital" source="Choices" bop:name="CapitalNameTextBox" />
+            </row>
+          </fulllookup>
+        </row>
+      </group>
+      <group title="Warmest" bop:name="LookupActionGroup">
+        <row bop:name="Row3">
+          <statictext text="Which state do you think is the warmest." width="20" bop:name="LookupActionStaticText" />
+          <trigger action="LookupAction1" margintop="10" bop:name="LooupActionTrigger" />
+          <textbox columnname="Warmest_ID" title="Warmest State" source="Choices" bop:name="StateIDTextBox" />
+        </row>
+      </group>
+    </column>
+    <frame document="Form('Sample.Components','Sample04Docs');" bop:name="DocsFrame" />
+  </row>
+</interface>

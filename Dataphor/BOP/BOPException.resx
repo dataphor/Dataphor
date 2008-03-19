@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="ResMimeType">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="Version">
+		<value>1.0.0.0</value>
+	</resheader>
+	<resheader name="Reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="Writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="101100">
+		<value>A referenced object ({0}) is not found.</value>
+	</data>
+	<data name="101101">
+		<value>Multiple attributes found.  Expecting single attribute ({0}).</value>
+	</data>
+	<data name="101102">
+		<value>Type ({0}) does not have a designated name.  Use the [PublishName] attribute to specify the type's name.</value>
+	</data>
+	<data name="101103">
+		<value>Invalid attribute name ({0}).</value>
+	</data>
+	<data name="101105">
+		<value>A constructor's reference argument ({0}) is not found.</value>
+	</data>
+	<data name="101106">
+		<value>A list name was not specified, and no default list is identified for type ({0}).</value>
+	</data>
+	<data name="101107">
+		<value>Unable to construct for type ({0}).</value>
+	</data>
+	<data name="101108">
+		<value>A constructor matching the default constructor signature ({0}) is not found.</value>
+	</data>
+	<data name="101109">
+		<value>Invalid DILX document node ({0}).</value>
+	</data>
+	<data name="101110">
+		<value>'document' element is required in a DILX document.</value>
+	</data>
+	<data name="101111">
+		<value>'document' element must be the last element in a DILX document.</value>
+	</data>
+	<data name="101112">
+		<value>Document requests that property ({0}) of type ({1}) is to be set to its default, but no [DefaultValue] attribute is specified for the property.</value>
+	</data>
+	<data name="101113">
+		<value>Constructor argument source ({0}) is not specified in type ({1}).  [PublishSource] attribute is missing for the constructor's argument.</value>
+	</data>
+	<data name="101114">
+		<value>Serialization/Deserialization of delegate (event) types is not supported.</value>
+	</data>
+	<data name="101115">
+		<value>Warning: The read element type name ({0}) doesn't match the instance's class name ({1}).</value>
+	</data>
+</root>

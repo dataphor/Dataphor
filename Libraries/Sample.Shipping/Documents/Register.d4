@@ -1,0 +1,62 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// Shipping Sample Database
+
+CreateRole('ShippingUser');
+CreateRole('CustomerService');
+CreateRole('InventoryClerk');
+CreateRole('Processor');
+
+// This script will create the shipping device as a memory device
+// When using this device, be sure to comment out the MSSQLDataTypes script as well
+//ExecuteScript('Sample.Shipping', 'Schema.MemoryDevice');
+
+// This script will create the shipping device as an MSSQL device
+ExecuteScript('Sample.Shipping', 'Schema.MSSQLDevice');
+
+SetDefaultDeviceName("Shipping");
+
+EnsureGenerators();
+
+// Creates the data types used by the shipping application
+ExecuteScript('Sample.Shipping', 'Schema.DataTypes');
+
+// Maps the data types into the shipping device
+// Only used if the device is an MSSQL device
+// Other SQL-based devices would have their own mapping scripts
+ExecuteScript('Sample.Shipping', 'Schema.MSSQLDataTypes');
+
+// Creates the tables for tracking shipping locations
+ExecuteScript('Sample.Shipping', 'Schema.LocationTables');
+
+// Creates the operator for importing zip codes from the zips text file
+ExecuteScript('Sample.Shipping', 'Schema.ImportZipcodes');
+
+// Creates the tables for tracking inventory
+ExecuteScript('Sample.Shipping', 'Schema.InventoryTables');
+
+// Creates the tables for tracking contacts
+ExecuteScript('Sample.Shipping', 'Schema.ContactTables');
+
+// Creates the tables for tracking customers
+ExecuteScript('Sample.Shipping', 'Schema.CustomerTables');
+
+// Creates the tables for tracking vendors
+ExecuteScript('Sample.Shipping', 'Schema.VendorTables');
+
+// Creates the tables for tracking invoices
+ExecuteScript('Sample.Shipping', 'Schema.InvoiceTables');
+
+// Creates the operators for processing invoices
+ExecuteScript('Sample.Shipping', 'Schema.InvoiceProcessing');
+
+// Creates the views used for reporting
+ExecuteScript('Sample.Shipping', 'Schema.ReportViews');
+
+// Inserts sample data for the shipping application
+ExecuteScript('Sample.Shipping', 'Schema.SampleData');
+
+

@@ -1,0 +1,43 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+// The following expressions execute each script file.
+// Examine each script file to see what steps are taken
+// to prepare the Rental tutorial for use.
+
+// Movies
+
+
+ExecuteScript('Sample.Rental', 'CreateDevice');
+ExecuteScript('Sample.Rental', 'Generators');
+ExecuteScript('Sample.Rental', 'MovieTypeTable');
+ExecuteScript('Sample.Rental', 'MovieRatingTable');
+ExecuteScript('Sample.Rental', 'MovieTable');
+ExecuteScript('Sample.Rental', 'ActorTable');
+ExecuteScript('Sample.Rental', 'MovieActorTable');
+
+// Rental
+
+ExecuteScript('Sample.Rental', 'VideoTable');
+ExecuteScript('Sample.Rental', 'AccountTable');
+ExecuteScript('Sample.Rental', 'SaleTable');
+ExecuteScript('Sample.Rental', 'SaleItemTable');
+ExecuteScript('Sample.Rental', 'RentalTables');
+ExecuteScript('Sample.Rental', 'AvailableVideoView');
+ExecuteScript('Sample.Rental', 'AddRentalOperator');
+
+// Renting Videos
+
+ExecuteScript('Sample.Rental', 'NewRentalView');
+
+// Returning Videos
+
+ExecuteScript('Sample.Rental', 'ReturnVideoOperator');
+
+// PayFees Operator
+
+ExecuteScript('Sample.Rental', 'PayFeesOperator');
+ExecuteScript('Sample.Rental', 'AlterAccountTable');
+

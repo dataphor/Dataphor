@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+	<ancestor document=".Frontend.Derive('Sample.Forms.Customer', 'Edit', '', '', true)" />
+	<ancestor document=".Frontend.Form('Sample.Forms', 'CustomerRow')" />
+	<document>
+		<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop">
+		   <source bop:name="Main" detailkeynames="Main.ID" masterkeynames="Main.ID" openstate="Edit" />
+		   <column bop:name="RootEditColumn">
+		      <column bop:name="Element1">
+		         <numerictextbox bop:name="MainColumnMain.ID" nilifblank="True" />
+		      </column>
+		   </column>
+		</interface>
+	</document>
+</dilx>

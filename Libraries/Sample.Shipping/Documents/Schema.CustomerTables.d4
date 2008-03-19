@@ -1,0 +1,74 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Alphora Shipping Application
+	Customer Tables
+*/
+
+//* Table: Customer
+// Contact [ID] is a customer with shipping address [Shipping_Address_Number] 
+// and billing address [Billing_Address_Number].
+create table Customer
+{
+	ID : ContactID,
+	Shipping_Address_Number : Integer 
+		tags { Frontend.Title = "Shipping Address", Frontend.Plural.Visible = "false" },
+	Billing_Address_Number : Integer 
+		tags { Frontend.Title = "Billing Address", Frontend.Plural.Visible = "false" },
+	key { ID }
+};
+grant usage on Customer to role CustomerService;
+
+create reference Customer_Contact Customer { ID } references Contact { ID } tags { Frontend.Include = "false" };
+
+create reference Customer_Shipping_CustomerAddress Customer { ID, Shipping_Address_Number } 
+	references ContactAddress { Contact_ID, Number } 
+	tags 
+	{ 
+		Frontend.Title = "Shipping Address", 
+		Frontend.Group.Title = "Shipping",
+		Frontend.Group.FlowBreak = "true",
+		Frontend.Plural.Embedded = "false"
+	};
+	
+create reference Customer_Billing_CustomerAddress Customer { ID, Billing_Address_Number } 
+	references ContactAddress { Contact_ID, Number } 
+	tags 
+	{ 
+		Frontend.Title = "Billing Address", 
+		Frontend.Group.Title = "Billing",
+		Frontend.Plural.Embedded = "false"
+	};
+	
+//* Table: CustomerPicture
+// Customer [Customer_ID] has a picture [Picture].
+SafeDrop('CustomerPicture');
+create table CustomerPicture
+{
+	Customer_ID : ContactID,
+	Picture : Graphic,
+	key { Customer_ID }
+}
+	tags
+	{
+		Frontend.Title = "Picture",
+		Frontend.Plural.Title = "Customer Pictures"
+	};
+grant usage on CustomerPicture to role CustomerService;
+
+create reference CustomerPicture_Customer CustomerPicture { Customer_ID } 
+	references Customer { ID } 
+	tags { Frontend.Embedded = "false", Frontend.Singular.Embedded = "true" };
+
+//* View: CustomerDetail
+create view CustomerDetail
+	Contact join Customer
+	tags
+	{
+		Frontend.Title = "Customer",
+		Frontend.Plural.Title = "Customers"
+	};
+grant usage on CustomerDetail to role CustomerService;

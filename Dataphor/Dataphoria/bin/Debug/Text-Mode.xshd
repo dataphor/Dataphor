@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<!-- default syntaxdefinition 2000 by Mike Krueger -->
+
+<SyntaxDefinition name = "Text" extensions = "*">
+	
+	<Environment> 
+		<Default      color = "SystemColors.WindowText" bgcolor="SystemColors.Window"/>
+		<VRuler       color = "Blue"/>
+		<Selection    bgcolor = "LightBlue"/>
+		<Cursor       color = "DarkBlue"/>
+		<LineNumbers  color = "#FF5D5D5D" bgcolor = "WhiteSmoke"/>
+		<InvalidLines color = "Red"/>
+		<EOLMarkers   color = "#E0E0E5"/>
+		<SpaceMarkers color = "#E0E0E5"/>
+		<TabMarkers   color = "#E0E0E5"/>
+		<CaretMarker  color = "Yellow"/>
+		<BookMarks    color = "Black" bgcolor = "#FF408080"/>
+		<FoldLine     color = "#808080" bgcolor="Black"/>
+		<FoldMarker   color = "#808080" bgcolor="White"/>
+	</Environment>
+	
+	<Digits name = "Digits" bold = "false" italic = "false" color = "SystemColors.WindowText"/>
+	<RuleSets>
+		<RuleSet ignorecase = "false">
+			<Delimiters> 	</Delimiters>
+		</RuleSet>
+	</RuleSets>
+	
+</SyntaxDefinition>

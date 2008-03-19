@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" iconimage="Image(&quot;Sample.Shipping&quot;, &quot;Alphora&quot;)" text="Alphora Shipping Application - Processing">
+  <showformaction document="Form(&quot;Sample.Shipping&quot;, &quot;ProcessSale&quot;)" text="Process Sales..." bop:name="ShowFormAction" />
+  <showformaction document="Form('Sample.Shipping', 'ShippingProcess')" text="Shipping..." bop:name="ShowFormAction1" />
+  <showformaction document="Form(&quot;Sample.Shipping&quot;, &quot;Receiving&quot;)" text="Receiving..." bop:name="ShowFormAction2" />
+  <row bop:name="Row">
+    <column bop:name="Column">
+      <staticimage image="Image(&quot;Sample.Shipping&quot;, &quot;ShippingProcessing&quot;)" bop:name="StaticImage" />
+      <statictext text="Welcome to the Alphora Shipping Sample Application!" bop:name="StaticText" />
+    </column>
+    <column bop:name="Column1">
+      <trigger action="ShowFormAction" bop:name="Trigger" />
+      <trigger action="ShowFormAction1" bop:name="Trigger1" />
+      <trigger action="ShowFormAction2" bop:name="Trigger2" />
+    </column>
+  </row>
+</interface>

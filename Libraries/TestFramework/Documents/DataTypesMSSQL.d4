@@ -1,0 +1,11 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+alter device TestingDevice
+{
+	create type D4Expression tags { Storage.Length = "8000" },	
+	create type Description tags { Storage.Length = "50" },	
+	create type ShortID tags { Storage.Length = "3" }		
+};

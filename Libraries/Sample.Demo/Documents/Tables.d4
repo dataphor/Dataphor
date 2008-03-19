@@ -1,0 +1,259 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//*
+// There is a person or corporate Contact identified by [ID] with notes of [Notes]
+create table Contact
+{
+	ID : ContactID { default GetNextID("Contact.ID") }
+		tags { Frontend.ReadOnly = "true" },
+	Notes : Notes { nil },
+	key { ID }
+};
+
+//*
+// Contact [ID] is an organization named [Name]
+create table Organization
+{
+	ID : ContactID,
+	Name : ProperName
+		tags { Frontend.Width = "35", Frontend.Preview.Include = "true" },
+	key { ID },
+	reference Organization_Contact { ID } references Contact { ID },
+	order { Name }
+};
+
+//*
+// Contact [ID] is a person named [FistName]/[MiddleInitial]/[LastName]
+//  whos primary phone number is the phone number associated with the type [Primary_PhoneType_ID]
+create table Person
+{
+	ID : ContactID,
+	FirstName : ProperName
+		tags { Frontend.Title = "First Name", Frontend.Preview.Include = "true", Frontend.FlowBreak = "true" },
+	MiddleInitial : ProperName 
+		{ default "", constraint MiddleSize Length(value.Value) <= 1 }
+		tags { Frontend.Title = "M", Frontend.Preview.Include = "true", Frontend.FlowBreak = "true", Frontend.Width = "2" },
+	LastName : ProperName
+		tags { Frontend.Title = "Last Name", Frontend.Preview.Include = "true" },
+	key { ID },
+	reference Person_Contact { ID } references Contact { ID },
+	order { LastName, FirstName, MiddleInitial },
+	order { FirstName, LastName, MiddleInitial }
+};
+
+/***************************/
+
+//*
+// The Organization [Organization_ID] has a location [ID] (site) named [Name] with [Notes]
+create table Location
+{
+	Organization_ID : ContactID
+		tags { Frontend.Title = "Organization ID" },
+	ID : LocationID { default GetNextID("Location.ID") } tags { Frontend.Visible = "false" },
+	Name : LocationName,
+	Notes : Notes { nil },
+	key { Organization_ID, Name },
+	reference Location_Organization { Organization_ID } references Organization { ID } delete cascade
+		tags { Frontend.Edit.Detail.Embedded = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Detail.Title = "Locations" }
+};
+
+/***************************/
+
+//*
+// There exists a country [Name] with code [Code]
+create table Country
+{
+	Code : CountryCode,
+	Name : Description,
+	key { Code }
+};
+
+//*
+// The Contact [Contact_ID] has a website address of [WebAddress] described as [Type] 
+create table ContactWebsite
+{
+	Contact_ID : ContactID,
+	Type : WebsiteType { nil },
+	WebAddress : WebAddress,
+	key { Contact_ID, Type },
+	reference ContactWebsite_Contact { Contact_ID } references Contact { ID } delete cascade
+		tags { Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true", Frontend.Detail.Title = "Websites" }
+};
+
+//*
+// The Contact [Contact_ID] has an email address of [EmailAddress] described as [Type]
+create table ContactEmail
+{
+	Contact_ID : ContactID,
+	Type : EmailType { nil },
+	EmailAddress : EmailAddress,
+	key { Contact_ID, Type },
+	reference ContactEmail_Contact { Contact_ID } references Contact { ID } delete cascade
+		tags { Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true", Frontend.Detail.Title = "Email Addresses" }
+};
+
+//*
+// There is an organization phone number type [ID] described as [Description]
+create table OrganizationPhoneType
+{
+	ID : OrganizationPhoneTypeID,
+	Description : Description,
+	key { ID }
+};
+
+//*
+// The organization [Organization_ID] has a phone number [Phone] of type [Type_ID]
+create table OrganizationPhone
+{
+	Organization_ID : ContactID
+		tags { Frontend.Title = "Organization ID" },
+	Type_ID : OrganizationPhoneTypeID { default "PRI" },
+	Phone : Phone,
+	key { Organization_ID, Type_ID },
+	reference OrganizationPhone_Organization { Organization_ID } references Organization { ID } delete cascade
+		tags { Frontend.Edit.Detail.Embedded = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Detail.Title = "Phone Numbers" },
+	reference OrganizationPhone_OrganizationPhoneType { Type_ID } references OrganizationPhoneType { ID }
+};
+
+//*
+// The organization location [Organization_ID]/[Location_Name] has a phone numer [Phone] of type [Type_ID]
+create table LocationPhone
+{
+	Organization_ID : ContactID
+		tags { Frontend.Title = "Organization ID" },
+	Location_Name : LocationName,
+	Type_ID : OrganizationPhoneTypeID { default "PRI" },
+	Phone : Phone,
+	key { Organization_ID, Location_Name, Type_ID },
+	reference LocationPhone_Location { Organization_ID, Location_Name } references Location { Organization_ID, Name } delete cascade
+		tags { Frontend.Edit.Detail.Embedded = "true", Frontend.Add.Detail.Embedded = "true", Frontend.Detail.Title = "Phone Numbers" },
+	reference LocationPhone_OrganizationPhoneType { Type_ID } references OrganizationPhoneType { ID }
+};
+
+//*
+// The organization location [Organization_ID]/[Location_Name] has an address of 
+//  [Street], [City], [State_ID], [Zip]
+create table LocationAddress
+{
+	Organization_ID : ContactID
+		tags { Frontend.Title = "Organization ID" },
+	Location_Name : LocationName,
+	Street : Description
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	City : Description
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State_ID : StateID
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	Zip : Zip
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	Country_Code : CountryCode
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	key { Organization_ID, Location_Name },
+	reference LocationAddress_Location { Organization_ID, Location_Name } references Location { Organization_ID, Name } delete cascade
+		tags { Frontend.Extension.Embedded = "true", Frontend.Extension.Title = "Address" },
+	reference LocationAddress_Country { Country_Code } references Country { Code }
+}
+	tags 
+	{ 
+		Frontend.Title = "Location Address" 
+	};
+
+//*
+// There is a person phone number type [ID] described as [Description]
+create table PersonPhoneType
+{
+	ID : PersonPhoneTypeID,
+	Description : Description,
+	key { ID }
+};
+
+//*
+// The person [Person_ID] has a phone number [Phone] of type [PhoneType_ID]
+create table PersonPhone
+{
+	Person_ID : ContactID
+		tags { Frontend.Title = "Person ID" },
+	Type_ID : PersonPhoneTypeID,
+	Phone : Phone,
+	key { Person_ID, Type_ID },
+	reference PersonPhone_Person { Person_ID } references Person { ID } delete cascade
+		tags { Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true", Frontend.Detail.Title = "Phone Numbers" },
+	reference PersonPhone_PersonPhoneType { Type_ID } references PersonPhoneType { ID }
+};
+
+//*
+// The person [Person_ID] has been at the address of [Street], [City], 
+//  [State_ID], [Zip] since [Since]
+create table PersonAddress
+{
+	Person_ID : ContactID
+		tags { Frontend.Title = "Person ID" },
+	Since : DateTime { default DateTime() }	// This should only be updated by the system
+		tags { Frontend.ReadOnly = "true", Frontend.Add.Visible = "false" },
+	Street : Description
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	City : Description
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State_ID : StateID
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	Zip : Zip
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	Country_Code : CountryCode
+		tags { Frontend.Preview.Include = "true", Frontend.Group = "Address" },
+	key { Person_ID },
+	reference PersonAddress_Person { Person_ID } references Person { ID } delete cascade
+		tags { Frontend.Extension.Embedded = "true" },
+	reference PersonAddress_Country { Country_Code } references Country { Code }
+}
+	tags 
+	{ 
+		Frontend.Title = "Address"
+	};
+
+//*
+// A role exists identified by [ID] described as [Description]
+create table Role
+{
+	ID : RoleID,
+	Description : Description,
+	key { ID },
+	order { Description }
+};
+
+//*
+// There is a department [ID] described as [Description]
+create table Department
+{
+	ID : DepartmentID,
+	Description : Description,
+	key { ID },
+	order { Description }
+};
+
+//*
+// The person [Person_ID] fills the role of [Role_ID] in department 
+//  [Department_ID} at organization [Organization_ID].  [Notes] is 
+//  additional information about their position.
+create table OrganizationPerson
+{
+	Organization_ID : ContactID
+		tags { Frontend.Title = "Organization ID" },
+	Person_ID : ContactID
+		tags { Frontend.Title = "Person ID" },
+	Role_ID : RoleID { nil },
+	Department_ID : DepartmentID { nil },
+	Notes : Notes { nil },
+	key { Organization_ID, Person_ID },
+	reference OrganizationPerson_Organization { Organization_ID } references Organization { ID } delete cascade
+		tags { Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true", Frontend.Detail.Title = "Persons" },
+	reference OrganizationPerson_Person { Person_ID } references Person { ID } delete cascade
+		tags { Frontend.Add.Detail.Embedded = "true", Frontend.Edit.Detail.Embedded = "true", Frontend.Detail.Title = "Organizations" },
+	reference OrganizationPerson_Role { Role_ID } references Role { ID },
+	reference OrganizationPerson_Department { Department_ID } references Department { ID },
+	order { Person_ID, Organization_ID },
+	order { Organization_ID, Role_ID }
+};
+

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('TestFramework.Coverage.Devices.DeviceInstances', 'Browse')" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <sourceaction ibop:order="0" bop:name="Refresh" />
+   <sourceaction ibop:order="1" bop:name="MoveLast" />
+   <source ibop:order="2" bop:name="Main" />
+   <showformaction ibop:order="3" bop:name="Main.Name.System.DeviceUsers_Devices" />
+   <showformaction ibop:order="4" bop:name="Main.Name.System.GroupDeviceUsers_Devices" />
+   <showformaction ibop:order="5" bop:name="Main.Name.System.DeviceSessions_Devices" />
+   <showformaction ibop:order="6" bop:name="Main.Name.System.DeviceScalarTypes_Devices" />
+   <showformaction ibop:order="7" bop:name="Main.Name.System.DeviceOperators_Devices" />
+   <showformaction ibop:order="8" bop:name="Main.Name.System.BaseTableVars_Devices" />
+   <showformaction ibop:order="9" bop:name="Main.Name.System.ApplicationTransactions_Devices" />
+   <menu ibop:order="10" bop:name="DetailsMenuItem" />
+   <showformaction ibop:order="11" bop:name="Main.Name.System.Devices_CatalogObjects" />
+   <menu ibop:order="12" bop:name="LookupViewMenuItem" />
+   <showformaction ibop:order="13" bop:name="Add" />
+   <showformaction ibop:order="14" bop:name="Edit" />
+   <showformaction ibop:order="15" bop:name="Delete" />
+   <showformaction ibop:order="16" bop:name="View" />
+   <sourceaction ibop:order="17" bop:name="MoveFirst" />
+   <sourceaction ibop:order="18" bop:name="MovePrior" />
+   <sourceaction ibop:order="19" bop:name="MoveNext" />
+   <scriptaction ibop:order="20" bop:name="PreTestDevice" script="using (Alphora.Dataphor.Frontend.Client.Windows.StatusForm LStatusForm = new &#xD;&#xA;Alphora.Dataphor.Frontend.Client.Windows.StatusForm(&quot;Testing Device... This will take a few minutes.&quot;))&#xD;&#xA;&#xD;&#xA;{&#xD;&#xA;&#xD;&#xA;      TestDevice.Execute();&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA; &#xD;&#xA;" />
+   <datascriptaction ibop:order="21" bop:name="TestDevice" afterexecute="ShowDeviceCaseResultsExtendedForm" script="EnsureDeviceStarted(Main.Name);&#xD;&#xA;TestFramework.Coverage.Devices.TestDevice(Main.Name, nil);">
+      <dataargument ibop:order="0" bop:name="TestDeviceArguments" columns="Main.Name" source="Main" />
+   </datascriptaction>
+   <showformaction ibop:order="22" bop:name="ShowDeviceCaseResultsExtendedForm" beforeexecute="PrepareApplicableDeviceCasesAction" document="Form('TestFramework.Coverage', 'DeviceCaseResultsExtended')" sourcelink.source="Main" sourcelink.detailkeynames="Main.Cases.DeviceName" sourcelink.masterkeynames="Main.Name" sourcelinktype="Detail" />
+   <datascriptaction ibop:order="23" bop:name="PrepareApplicableDeviceCasesAction" script="if not exists (ApplicableDeviceCases where DeviceName = Main.Name) then&#xD;&#xA;   TestFramework.Coverage.Devices.PrepareApplicableDeviceCases(Main.Name);&#xD;&#xA;&#xD;&#xA;	">
+      <dataargument ibop:order="0" bop:name="PrepareApplicableDeviceCasesActionArguments" columns="Main.Name" source="Main" />
+   </datascriptaction>
+   <menu ibop:order="24" bop:name="NavigationMenu" />
+   <dataargument ibop:order="25" bop:name="DataArgument" columns="" />
+   <column ibop:order="26" bop:name="RootBrowseColumn">
+      <row bop:name="GridRow">
+         <column bop:name="GridBar">
+            <trigger ibop:order="4" bop:name="TestDeviceTrigger" marginbottom="5" margintop="25" text="Test Device" imageheight="13" imagewidth="11" action="PreTestDevice" />
+            <trigger ibop:order="5" bop:name="ViewDeviceCaseResultsTrigger" text="View Results" action="ShowDeviceCaseResultsExtendedForm" />
+         </column>
+      </row>
+   </column>
+</interface>
+</document>
+</dilx>

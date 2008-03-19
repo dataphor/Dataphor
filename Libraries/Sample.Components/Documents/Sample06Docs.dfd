@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroRow">
+          <statictext text="This sample illustrates ways to handle user interface forms.&#xD;&#xA;&#xD;&#xA;SetNextRequestAction will cause another form to be displayed when the current form is closed. ShowFormAction displays another form while the current form remains in the background.  FormAction closes the current form.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   SetNextRequestAction&#xD;&#xA;   ClearNextRequestAction&#xD;&#xA;   ShowFormAction&#xD;&#xA;   FormAction" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="SetNextRequestAction" bop:name="SetNextRequestActionPage">
+        <row bop:name="SetNextRequestActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="SetNextRequestActionImage" />
+          <statictext text="The SetNextRequestAction tells Dataphor that when the main form closes another form should be opened.&#xD;&#xA;&#xD;&#xA;Executing another SetNextRequestAction will replace the previous document expression with the new one.&#xD;&#xA;&#xD;&#xA;Use ClearNextRequestAction to clear the document express completely so no form will be opened.&#xD;&#xA;&#xD;&#xA;In this sample the two SetNextRequestAction elements are used, one to set the next form to Sample06A, and one to set the form to Sample06B.  In both cases the Trigger is attached to the corresponding BlockAction.  When the BlockAction is executed, all actions in the BlockAction are executed one at a time in the sequence shown." width="50" margintop="10" bop:name="SetNextRequestActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="ClearNextRequestAction" bop:name="ClearNextRequestActionPage">
+        <row bop:name="ClearNextRequestActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="ClearNextRequestActionImage" />
+          <statictext text="The ClearNextRequestAction tells Dataphor that when the main form closes no form should be opened.&#xD;&#xA;&#xD;&#xA;Executing another SetNextRequestAction will again set a form to be opened when the main form closes.&#xD;&#xA;&#xD;&#xA;In this sample the ClearNextRequestAction executes with the SetNoFormTrigger is clicked.  The AfterExecute property of the ClearNextRequestAction is set so the NoFormSetPropertyAction executes." width="50" margintop="10" bop:name="ClearNextRequestActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="ShowFormAction" bop:name="ShowFormActionPage">
+        <row bop:name="ShowActionFormRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="ShowFormActionImage" />
+          <statictext text="The ShowFormAction tells Dataphor to open another form right now and leave the current form in the background.&#xD;&#xA;&#xD;&#xA;In this sample the ShowFormAction is executed with the ShowFormATrigger is clicked." width="50" margintop="10" bop:name="ShowFormActionText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="FormAction" bop:name="FormActionPage">
+        <row bop:name="FormActionRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Action&quot;)" bop:name="FormActionImage" />
+          <statictext text="The FormAction tells Dataphor to close the current form.  The close can be done as a Reject or an Accept dependent on the Behavior property.&#xD;&#xA;&#xD;&#xA;In this sample the FormAction is executed when the CloseFormTrigger is clicked.  The Behavior property is set to RejectOrClose however since this form has no user input this setting is not important.  The form will just be closed." width="50" margintop="10" bop:name="FormActionText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

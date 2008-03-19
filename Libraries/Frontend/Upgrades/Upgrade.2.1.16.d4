@@ -1,0 +1,24 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Operator: PrepareApplication
+SafeDrop('PrepareApplication(Name)');
+create operator PrepareApplication(const AApplicationID : Name) : String
+begin
+	result := Applications[AApplicationID].StartDocument;
+	var LCursor : cursor(table { Library_Name : Name }) :=
+		cursor
+		(
+			ApplicationLibraries where Application_ID = AApplicationID over { Library_Name }
+		);
+	try
+		while LCursor.Next() do
+			EnsureLibraryRegistered(LCursor.Select().Library_Name);
+	finally
+		LCursor.Close();
+	end;
+end;
+grant usage on PrepareApplication(Name) to role User;
+

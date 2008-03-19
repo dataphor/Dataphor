@@ -1,0 +1,49 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+if IfNil(nil as Integer, 5) <> 5 then raise Error('IfNil failed');
+if not(IsNil((nil as Integer) = 5)) then raise Error('Nil/Integer equal failed');
+if not(IsNil((nil as Integer) > 5)) then raise Error('Nil/Integer greater than failed');
+if not(IsNil((nil as Integer) < 5)) then raise Error('Nil/Integer less than failed');
+if not(IsNil((nil as Integer) >= 5)) then raise Error('Nil/Integer inclusive greater than failed');
+if not(IsNil((nil as Integer) <= 5)) then raise Error('Nil/Integer inclusive less than failed');
+if not(IsNil((nil as Integer) <> 5)) then raise Error('Nil/Integer not equal failed');
+if not(IsNil((nil as Integer) ?= 5)) then raise Error('Nil/Integer compare failed');
+
+if row { 5 ID } = row { nil as Integer ID } then
+	raise Error('Row equality with nil failed');
+
+if table { row { 5 ID } } = table { row { nil as Integer ID } } then
+	raise Error('Table equality with nil failed');
+
+if not(IsNil(nil as Integer)) then
+	raise Error('IsNil with nil failed');
+
+if IsNil(5) then
+	raise Error('IsNil with non-nil failed');
+	
+if IsNotNil(nil as Integer) then
+	raise Error('IsNotNil with nil failed');
+	
+if not(IsNotNil(5)) then
+	raise Error('IsNotNil with non-nil failed');
+
+if not(IsNil(row { nil as Integer ID }, "ID")) then
+	raise Error('IsNil with row and nil failed');
+	
+if IsNil(row { 5 ID }, "ID") then
+	raise Error('IsNil with row and non-nil failed');
+
+if IsNotNil(row { nil as Integer ID }, "ID") then
+	raise Error('IsNotNil with row and nil failed');
+	
+if not(IsNotNil(row { 5 ID }, "ID")) then
+	raise Error('IsNotNil with row and non-nil failed');
+
+if not(IsNil(nil as row, "ID")) then
+	raise Error('IsNil with nil row failed');
+
+if IsNotNil(nil as row, "ID") then
+	raise Error('IsNotNil with nil row failed');

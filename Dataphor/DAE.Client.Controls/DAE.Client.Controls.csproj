@@ -1,0 +1,318 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Alphora.Dataphor.DAE.Client.Controls</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Alphora.Dataphor.DAE.Client.Controls</RootNamespace>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>SIGNASSEMBLIES</DefineConstants>
+    <DocumentationFile>DaeClientControls.xml</DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
+    <OutputPath>bin\debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE;SIGNASSEMBLIES</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Design">
+      <Name>System.Design</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Name>Base</Name>
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
+      <Name>DAE.Client</Name>
+      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE\DAE.csproj">
+      <Name>DAE</Name>
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BitmapButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="BorderedControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ControlColor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ControlsException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DBCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBDateLookup.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBDateTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBFile.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBFileForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DBGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBImageAspect.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBLookupButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBNumericScrollBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBNumericTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBRadioButtonGroup.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBText.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Design\AdornExpressionDesigner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Design\DesignException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Design\Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Design\MultiLineEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Design\PasswordEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Design\PasswordEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Design\Serializer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ImageAspect.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="IncrementalCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="IncrementalSearch.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="IncrementalTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LookupBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LookupBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="LookupPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NativeMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Notebook.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="RadioButtonGroup.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Strings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UnsafeNativeMethods.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="ControlsException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFileForm.resx">
+      <DependentUpon>DBFileForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\AdornExpressionDesigner.resx">
+      <DependentUpon>AdornExpressionDesigner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\DesignException.resx">
+      <DependentUpon>DesignException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\DownArrow.bmp" />
+    <EmbeddedResource Include="Design\Editor.resx">
+      <DependentUpon>Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\MultiLineEditForm.resx">
+      <DependentUpon>MultiLineEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\PasswordEdit.resx">
+      <DependentUpon>PasswordEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Design\UpArrow.bmp" />
+    <EmbeddedResource Include="Icons\DBCheckBox.bmp" />
+    <EmbeddedResource Include="Icons\DBDateTextBox.bmp" />
+    <EmbeddedResource Include="Icons\DBGrid.bmp" />
+    <EmbeddedResource Include="Icons\DBGridColumn.bmp" />
+    <EmbeddedResource Include="Icons\DBImageAspect.bmp" />
+    <EmbeddedResource Include="Icons\DBLookup.bmp" />
+    <EmbeddedResource Include="Icons\DBLookupTextBox.bmp" />
+    <EmbeddedResource Include="Icons\DBNumericScrollBox.bmp" />
+    <EmbeddedResource Include="Icons\DBNumericTextBox.bmp" />
+    <EmbeddedResource Include="Icons\DBRadioButtonGroup.bmp" />
+    <EmbeddedResource Include="Icons\DBText.bmp" />
+    <EmbeddedResource Include="Icons\DBTextBox.bmp" />
+    <EmbeddedResource Include="Icons\DBTreeView.bmp" />
+    <EmbeddedResource Include="Icons\ImageAspect.bmp" />
+    <EmbeddedResource Include="Icons\IncrementalSearch.bmp" />
+    <EmbeddedResource Include="Icons\LookupPanel.bmp" />
+    <EmbeddedResource Include="Icons\RadioButtonGroup.bmp" />
+    <EmbeddedResource Include="Icons\ToolBar.bmp" />
+    <EmbeddedResource Include="Icons\ToolBarButton.bmp" />
+    <EmbeddedResource Include="Images\Calendar.png" />
+    <EmbeddedResource Include="Images\Clip.png" />
+    <EmbeddedResource Include="Images\DownButton.bmp" />
+    <EmbeddedResource Include="Images\File.png" />
+    <EmbeddedResource Include="Images\FileActive.png" />
+    <EmbeddedResource Include="Images\Lookup.bmp" />
+    <EmbeddedResource Include="Images\ScrollButton.bmp" />
+    <EmbeddedResource Include="Images\SortBy.png" />
+    <EmbeddedResource Include="Images\ThinGripper.png" />
+    <EmbeddedResource Include="Images\UpButton.bmp" />
+    <EmbeddedResource Include="Strings.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

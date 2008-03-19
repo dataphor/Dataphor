@@ -1,0 +1,179 @@
+//	Alphora Dataphor
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+// D4 Data Definition Language Coverage Script
+
+// Tables
+// create table
+create table TestTable { };
+	// column
+create table TestTable2 { ID : Integer nil, blah : String nil };
+		// default
+create table TestTable3 { ID : Integer { default 0 } };
+		// constraint
+create table TestTable4 { ID : Integer { constraint even value mod 2 = 0 } };
+	// order
+create table TestTable5 { ID : Integer, order { ID } };
+	// key
+create table TestTable6 { ID : Integer, Name : String, key { ID } };
+	// reference 
+create table TestTable7 { ID : Integer, reference TestReference { ID } references TestTable6 { ID } } ;
+// alter table
+alter table TestTable;
+/*
+// TODO: Columns in a memory device cannot be created
+alter table TestTable
+{
+	// create column
+	create column blah : String { nil },
+	create column ID : Integer { nil }
+};
+*/
+alter table TestTable2
+{
+	// alter column
+	alter column blah
+};
+alter table TestTable2
+{
+	alter column ID
+	{
+		// create constraint
+		create constraint odd value <> 0
+	}
+};
+alter table TestTable2
+{
+	alter column ID
+	{
+		// alter constraint
+		alter constraint odd value mod 2 = 1
+	}
+};
+alter table TestTable2
+{
+	alter column ID
+	{
+		// drop constraint
+		drop constraint odd
+	}
+};
+alter table TestTable2
+{
+	alter column blah
+	{
+		// create default
+		create default "McKay"
+	}
+};
+alter table TestTable2
+{
+	alter column blah
+	{
+		// alter default
+		alter default "Salisbury"
+	}
+};
+alter table TestTable2
+{
+	alter column blah
+	{
+		// drop default
+		drop default
+	}
+};
+/*
+// TODO: Columns in a memory device cannot be dropped
+alter table TestTable2
+{
+	// drop column
+	drop column blah
+};
+*/
+alter table TestTable2
+{
+	// create order
+	create order { ID asc }
+};
+alter table TestTable2
+{
+	// alter order
+	alter order { ID asc }
+};
+alter table TestTable2
+{
+	// drop order
+	drop order { ID }
+};
+alter table TestTable2
+{
+	// create key
+	create key { ID }
+};
+alter table TestTable2
+{
+	// alter key
+	alter key { ID }
+};
+alter table TestTable2
+{
+	// drop key
+	drop key { ID }
+};
+// drop table
+drop table TestTable;
+drop table TestTable2;
+drop table TestTable3;
+drop table TestTable4;
+drop table TestTable5;
+drop table TestTable7;
+drop table TestTable6;
+
+// alter table create key
+create table TestAlterKey { ID : Integer, Name : String, key { ID } };
+
+insert table { row { 1 ID, 'Joe' Name }, row { 2 ID, 'Joe' Name } } into TestAlterKey;
+
+begin
+	var LErrorHit := false;
+	try
+		alter table TestAlterKey { create key { Name } };
+	except
+		LErrorHit := true;
+	end;
+	if not(LErrorHit) then
+		raise Error('Invalid key create allowed.');
+end;
+
+update TestAlterKey set { Name := 'Joe2' } where ID = 2;
+
+alter table TestAlterKey { create key { Name } };
+
+drop table TestAlterKey;
+
+//* Test table selector
+create table TestSelector { ID : Integer, key { ID } };
+
+insert table { row { 1 ID }, row { 2 } } into TestSelector;
+
+if Count(TestSelector) <> 2 then
+	raise Error('TestSelector failed');
+	
+drop table TestSelector;
+
+//* Nilable definition and default definition
+create table Test 
+{ 
+	ID : Integer not nil { default 0 },
+	Name : String nil { default "" },
+	Phone : String not nil,
+	Address : String nil,
+	City : String { default "" },
+	key { ID }
+};
+
+select Script('Test');
+
+drop table Test;
+

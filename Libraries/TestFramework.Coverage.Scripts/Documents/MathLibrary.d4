@@ -1,0 +1,100 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//test for d4 System.Math functions
+
+begin
+	//declarations
+	var LInteger1 : Integer := 3;
+	var LInteger2 : Integer := 9;
+	
+	if (Log(LInteger2, LInteger1) <> 2) then
+		raise Error ("Math.Log function failed");
+		
+	LInteger1 := 0;
+	LInteger2 := 1;
+
+	if (Exp(LInteger1) <> LInteger2) then
+		raise Error ("Math.Exp failed");
+
+	if (Ln(LInteger2) <> LInteger1) then
+		raise Error ("Math.Ln failed");
+
+	var LDecimal1 : Decimal := 3.14159;
+	var LDecimal2 : Decimal := 23.140631226955;
+	
+	if (Exp(LDecimal1) <> LDecimal2) then
+		raise Error ("Math.Exp failed");
+
+	LDecimal1 := 3.14159265358979;
+//	LDecimal1 := 3.14159265358979323846;//no support for numbers that a double can't handle yet.
+	if (Exp(Ln(LDecimal1)) <> LDecimal1) then
+		raise Error ("Base E functions not exact");
+		
+	LInteger1 := 10000;
+	LInteger2 := 4;
+		
+	if (Log10(LInteger1) <> LInteger2) then
+		raise Error ("Math.Log10 failed");
+		
+	LInteger1 := 10;
+	LInteger2 := 3628800;
+		
+	if (Factorial(LInteger1) <> LInteger2) then
+		raise Error ("Math.Factorial failed");
+		
+	if (Random() = Random()) then
+		raise Error ("Math.Random failed.  It generated the same number twice");	
+	//note seeding not necassary
+	Seed();
+
+	if (Random() = Random()) then
+		raise Error ("Math.Seed failed.  Random generated the same number twice");	
+
+	Seed(34567);
+	LDecimal1 := Random();
+	Seed(34567);
+	LDecimal2 := Random();
+	
+	if (LDecimal1 <> LDecimal2) then
+		raise Error ("Math.Seed failed.  Random failed to generate the same number twice");	
+end;
+
+// Round
+begin
+	var LDecimal1 := 3141.5962;
+	var LMoney1 := $3141.5962;
+	
+	if Round(LDecimal1) <> 3141.60 then
+		raise Error('Single argument Decimal Round did not round to 2 places');
+	
+	if Round(LDecimal1, 2) <> 3141.60 then
+		raise Error('Decimal Round to two places did not function correctly');
+		
+	if Round(LDecimal1, 3) <> 3141.596 then
+		raise Error('Decimal Round to three places did not function correctly');
+		
+	if Round(LDecimal1, 0) <> 3142.0 then
+		raise Error('Decimal Round to zero places did not function correctly');
+		
+	if Round(LDecimal1, -1) <> 3140.0 then
+		raise Error('Decimal Round to -1 places did not function correctly');
+		
+	if Round(LMoney1) <> $3141.60 then
+		raise Error('Single argument Money Round did not round to 2 places');
+	
+	if Round(LMoney1, 2) <> $3141.60 then
+		raise Error('Money Round to two places did not function correctly');
+		
+	if Round(LMoney1, 3) <> $3141.596 then
+		raise Error('Money Round to three places did not function correctly');
+		
+	if Round(LMoney1, 0) <> $3142.0 then
+		raise Error('Money Round to zero places did not function correctly');
+		
+	if Round(LMoney1, -1) <> $3140.0 then
+		raise Error('Money Round to -1 places did not function correctly');
+end;
+

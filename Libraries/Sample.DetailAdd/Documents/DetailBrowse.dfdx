@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<dilx xmlns="http://www.alphora.com/schemas/dilx">
+  <ancestor document=".Frontend.Derive('Sample.DetailAdd.Detail', 'Browse', 'Main.ID', 'Main.Master_ID', true)" />
+  <document>
+<interface xmlns:bop="www.alphora.com/schemas/bop" xmlns:ibop="www.alphora.com/schemas/ibop" ondefault="Edit" bop:default-OnDefault="True">
+   <showformaction bop:name="Add" mode="Query" document="Derive('Sample.DetailAdd.Category', 'Browse')" onformaccepted="AddCategory" bop:default-sourcelinktype="True" bop:default-sourcelink.source="True" bop:default-sourcelink.attachmaster="True" />
+   <scriptaction ibop:order="14" bop:name="AddCategory" script="IFormInterface LForm = AParams[&quot;AForm&quot;] as IFormInterface;&#xD;&#xA;if (LForm == null)&#xD;&#xA;	throw new Exception(&quot;Form is null&quot;);&#xD;&#xA;&#xD;&#xA;Main.Insert();&#xD;&#xA;try&#xD;&#xA;{&#xD;&#xA;	Main[&quot;Category_ID&quot;].AsString = LForm.MainSource[&quot;ID&quot;].AsString;&#xD;&#xA;	Main.Post();&#xD;&#xA;}&#xD;&#xA;catch&#xD;&#xA;{&#xD;&#xA;	Main.Cancel();&#xD;&#xA;	throw;&#xD;&#xA;}&#xD;&#xA;" />
+</interface>
+</document>
+</dilx>

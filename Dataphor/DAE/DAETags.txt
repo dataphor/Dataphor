@@ -1,0 +1,47 @@
+DAE Tags ->
+
+	DAE.StaticByteSize -> 
+		Indicates the number of bytes to be stored with the row.  Refer to the DAE Developers Guide
+		for a complete discussion of the DAE value overflow architecture.  The Value of this tag must 
+		be an integer.
+
+	Meta Data tags controlling SQL translation and reconciliation ->
+	
+		Storage.Name -> 
+			Indicates that the schema object on which it appears is identified by the Value of the tag when translated to the device.
+			
+		Storage.Length -> 
+			Indicates the storage length for domains which are translated to character types in SQL such as varchar or nvarchar.
+		
+		Storage.Precision -> 
+			Indicates the storage precision for domains which are translated to exact numeric types in SQL such as decimal or numeric.
+			
+		Storage.Scale -> 
+			Indicates the storage scale for domains which are translated to exact numeric types in SQL such as decimal or numeric.
+
+		Storage.Deferred -> 
+			Indicates that the values for the column or domain on which it appears should be read entirely as overflow.  See the
+
+	Basic SQL to D4 Data Type Mapping ->
+		These data type mappings are only a general suggestion.  Each device may provide different mappings based on the
+		capabilities of the underlying SQL-based DBMS.
+	
+		DAE Type	|	ANSI SQL Type													|	C# Translation Handler Class
+		------------|-------------------------------------------------------------------|--------------------------------
+		boolean		|	integer (0 or 1)												|	SQLBoolean
+		byte		|   smallint														|	SQLByte
+		sbyte		|	smallint														|	SQLSByte
+		short		|	smallint														|	SQLShort
+		ushort		|	integer															|	SQLUShort
+		integer		|	integer															|	SQLInteger
+		uinteger	|	bigint															|	SQLUInteger
+		long		|	bigint															|	SQLLong
+		ulong		|	decimal(20, 0)													|	SQLULong
+		decimal		|	decimal(Storage.Precision, Storage.Scale)						|	SQLDecimal
+		datetime	|	date															|	SQLDateTime
+		timespan	|	bigint															|	SQLTimeSpan
+		money		|	decimal(28, 8)													|	SQLMoney
+		guid		|	char(24)														|	SQLGuid
+		string		|	Storage.Length = "unlimited" ? clob : varchar(StaticByteSize)	|	SQLString
+		image		|	blob															|	SQLImage
+

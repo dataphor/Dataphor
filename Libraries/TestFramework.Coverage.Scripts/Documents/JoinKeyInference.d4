@@ -1,0 +1,286 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+/*
+	Coverage script for join key inference
+
+	This script contains definitions for testing boundary conditions of the join key inference
+	algorithm. It contains variations based on the cardinality, condition, flavor, sparsity,
+	and number of keys on the operands.
+	
+	Ks - Left key columns
+	Kt - Right key columns
+	Kj - Join key columns
+*/
+
+// Inner natural join, single non-sparse key on each operand
+// Ks < Kj, Kr < Kj
+// Ks < Kj, Kr = Kj
+// Ks < Kj, Kr > Kj
+// Ks = Kj, Kr < Kj
+// Ks = Kj, Kr = Kj
+// Ks = Kj, Kr > Kj
+// Ks > Kj, Kr < Kj
+// Ks > Kj, Kr = Kj
+// Ks > Kj, Kr > Kj
+
+/******************************
+	Intersection
+******************************/
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { } };
+create table B { X : Integer, key { } };
+
+select A join B; // key { }
+select A left join B; // key { }
+select A right join B; // key { }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { X } };
+create table B { X : Integer, key { } };
+
+select A join B; // key { }
+select A left join B; // key { }
+select A right join B; // key { }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { } };
+create table B { X : Integer, key { X } };
+
+select A join B; // key { }
+select A left join B; // key { }
+select A right join B; // key { }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { X } };
+create table B { X : Integer, key { X } };
+
+select A join B; // key { X }
+select A left join B; // key { X }
+select A right join B; // key { X }
+
+/*****************************************
+	Times
+*****************************************/
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { key { } };
+create table B { key { } };
+
+select A join B; // key { }
+select A left join B; // key { }
+select A right join B; // key { }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { } };
+create table B { Y : Integer, key { } };
+
+select A join B; // key { }
+select A left join B; // key { }
+select A right join B; // key { }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { X } };
+create table B { Y : Integer, key { } };
+
+select A join B; // key { X }
+select A left join B; // key { X }
+select A right join B; // key { X }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { } };
+create table B { Y : Integer, key { Y } };
+
+select A join B; // key { Y }
+select A left join B; // key { Y }
+select A right join B; // key { Y }
+
+//* 
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, key { X } };
+create table B { Y : Integer, key { Y } };
+
+select A join B; // key { X, Y }
+select A left join B; // key { X, Y }
+select A right join B; // key { X, Y }
+
+/*****************************************
+	Natural Join
+*****************************************/
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select A join B; // key { Y }
+select A left join B; // key { Y }
+select A right join B; // key { Y }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select A join B; // key { X }
+select A left join B; // key { X }
+select A right join B; // key { X }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select A join B; // key { Z }
+select A left join B; // key { Z }
+select A right join B; // key { Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select A join B; // key { X, Z }
+select A left join B; // key { X, Z }
+select A right join B; // key { X, Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select A join B; // key { X, Y }
+select A left join B; // key { X, Y }
+select A right join B; // key { X, Y }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select A join B; // key { X, Z }
+select A left join B; // key { X, Z }
+select A right join B; // key { X, Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select A join B; // key { X, Z }
+select A left join B; // key { X, Z }
+select A right join B; // key { X, Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select A join B; // key { Y, Z }
+select A left join B; // key { Y, Z }
+select A right join B; // key { Y, Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select A join B; // key { X, Y, Z }
+select A left join B; // key { X, Y, Z }
+select A right join B; // key { X, Y, Z }
+
+/*****************************************
+	Conditioned Join
+*****************************************/
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.Y }, key { B.Y }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.Y }, key { B.Y } sparse
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.Y } sparse, key { B.Y }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { B.Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Y } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X, A.Y }, key { A.X, B.Y }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X, A.Y }, key { A.X, B.Y } sparse
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X, A.Y }, key { A.X, B.Y }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X, B.Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { Y } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.Y, B.Z }, key { B.Y, B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.Y, B.Z }, key { B.Y, B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.Y, B.Z } sparse, key { B.Y, B.Z }
+
+//*
+SafeDrop('A'); SafeDrop('B');
+create table A { X : Integer, Y : Integer, key { X, Y } };
+create table B { Y : Integer, Z : Integer, key { Y, Z } };
+
+select (A rename A) join (B rename B) by A.Y = B.Y; // key { A.X, A.Y, B.Z }, key { A.X, B.Y, B.Z }
+select (A rename A) left join (B rename B) by A.Y = B.Y; // key { A.X, A.Y, B.Z }, key { A.X, B.Y, B.Z }
+select (A rename A) right join (B rename B) by A.Y = B.Y; // key { A.X, A.Y, B.Z }, key { A.X, B.Y, B.Z }

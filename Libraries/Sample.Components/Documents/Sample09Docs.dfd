@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop">
+  <group title="Ex&amp;planation" bop:name="ExplanationGroup">
+    <notebook activepage="IntroductionPage" bop:name="DocumentationNotebook">
+      <notebookpage title="Introduction" bop:name="IntroductionPage">
+        <row bop:name="IntroductionRow">
+          <statictext text="This sample illustrates the use of the Choice, CheckBox, and NumericTextBox controls.&#xD;&#xA;&#xD;&#xA;A brief explanation of the use of each of the following components is provided in the other notebook tabs.&#xD;&#xA;&#xD;&#xA;   Choice&#xD;&#xA;   CheckBox&#xD;&#xA;   NumericTextBox&#xD;&#xA;" width="50" margintop="10" bop:name="IntroText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="Choice" bop:name="ChoicePage">
+        <row bop:name="ChoiceRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;Choice&quot;)" bop:name="ChoiceImage" />
+          <statictext text="A Choice control is used to provide a radio button still user interface.  It is used to make a single selection from a group of possibilities.&#xD;&#xA;&#xD;&#xA;The Items property is formatted as follows for each choice to be offered:&#xD;&#xA;   First is the text to be shown on the form&#xD;&#xA;   Followed by an equal sign&#xD;&#xA;   Followed by the value to be placed in the column of the source.&#xD;&#xA;&#xD;&#xA;Individual choices are separated by commas or semicolons.&#xD;&#xA;&#xD;&#xA;e.g. I Like Blue=blu, I Like Orange=ora&#xD;&#xA;   This would show the text      I Like Blue     beside the choice button.  If that button is selected the column identified in the ColumnName property will be set to blu.&#xD;&#xA;&#xD;&#xA;Note that there are no quote marks used in the Items property!&#xD;&#xA;&#xD;&#xA;In this sample Choice1 is used to choose between calculating the area and perimeter of a triange or circle.&#xD;&#xA;" width="50" margintop="10" bop:name="ChoiceText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="CheckBox" bop:name="CheckBoxPage">
+        <row bop:name="CheckBoxRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;CheckBox&quot;)" bop:name="CheckBoxImage" />
+          <statictext text="A CheckBox control is used to display and, optionally, modify a Boolean value.  An empty box will be shown for false, a checkmark for true, and the box will be grey filled if no value is present.&#xD;&#xA;&#xD;&#xA;In this sample CheckBox controls are used to choose select what output is desired, area and/or perimeter.&#xD;&#xA;" width="50" margintop="10" bop:name="CheckBoxText" />
+        </row>
+      </notebookpage>
+      <notebookpage title="NumericTextBox" bop:name="NumericTextBoxPage">
+        <row bop:name="NumericTextBoxRow">
+          <staticimage image="Image(&quot;Frontend&quot;,&quot;NumericTextBox&quot;)" bop:name="NumericTextBoxImage" />
+          <statictext text="A NumericTextBox is a data-aware control component that allows the display of numeric data from a column. Optionally the data can be editing.&#xD;&#xA;&#xD;&#xA;Note that the NumericTextBox has several unique settings useful for controlling the value:&#xD;&#xA;    MaximumValue&#xD;&#xA;    MinimumValue&#xD;&#xA;    LargeIncrement&#xD;&#xA;    SmallIncrement&#xD;&#xA;&#xD;&#xA;In this sample four NumericTextBox components are used.  In each case it is used to enter/edit the measurement of the shape.  They are attached to column in Source1.&#xD;&#xA;" width="50" margintop="10" bop:name="NumericTextBoxText" />
+        </row>
+      </notebookpage>
+    </notebook>
+  </group>
+</interface>

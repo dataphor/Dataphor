@@ -1,0 +1,437 @@
+/*
+	TSQL Implementation Script for the user defined functions that need to be mapped to the MSSQL Device.
+	Requires Microsoft SQL Server 2000 or above.
+*/	
+
+if exists (select * from sysobjects where id = Object_ID('DAE_Trunc'))
+	drop function DAE_Trunc
+go
+
+create function DAE_Trunc(@Value decimal(28,8))
+returns decimal(28,8)
+begin
+	return Round(@Value,0,1)
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_Frac'))
+	drop function DAE_Frac
+go
+
+create function DAE_Frac(@Value decimal(28,8))
+returns decimal(28,8)
+begin
+	return (@Value - Round(@Value,0,1))
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_LogB'))
+	drop function DAE_LogB
+go
+
+create function DAE_LogB(@Value decimal(28,8), @Base decimal(28,8))
+returns decimal(28,8)
+begin
+	return (Log(@Value) / Log(@Base))
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_Factorial'))
+	drop function DAE_Factorial
+go
+
+create function DAE_Factorial(@Value int)
+returns int
+begin
+declare @LReturnVal int;
+declare @i int;
+set @LReturnVal= 1;
+set @i = 1;
+while (@i <= @Value)
+begin
+	set @LReturnVal= @LReturnVal * @i;
+	set @i = @i + 1;
+end;
+return @LReturnVal;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSReadMillisecondsPart'))
+	drop function DAE_TSReadMillisecondsPart
+go
+
+create function DAE_TSReadMillisecondsPart(@ATimeSpan bigint)
+returns integer
+begin
+	return dbo.Trunc(dbo.Frac(@ATimeSpan / (10000.0 * 1000)) * 1000);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSReadSecondsPart'))
+	drop function DAE_TSReadSecondsPart
+go
+
+create function DAE_TSReadSecondsPart(@ATimeSpan bigint)
+returns integer
+begin
+	return dbo.Trunc(dbo.Frac(@ATimeSpan / (10000000.0 * 60)) * 60);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSReadMinutesPart'))
+	drop function DAE_TSReadMinutesPart
+go
+
+create function DAE_TSReadMinutesPart(@ATimeSpan bigint)
+returns integer
+begin
+	return dbo.Trunc(dbo.Frac(@ATimeSpan / (600000000.0 * 60)) * 60);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSReadHoursPart'))
+	drop function DAE_TSReadHoursPart
+go
+
+create function DAE_TSReadHoursPart(@ATimeSpan bigint)
+returns integer
+begin
+	return dbo.Trunc(dbo.Frac(@ATimeSpan / (36000000000.0 * 24)) * 24);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSReadDaysPart'))
+	drop function DAE_TSReadDaysPart
+go
+
+create function DAE_TSReadDaysPart(@ATimeSpan bigint)
+returns integer
+begin
+	return dbo.Trunc(@ATimeSpan / 864000000000.0);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSWriteMillisecondsPart'))
+	drop function DAE_TSWriteMillisecondsPart
+go
+
+create function DAE_TSWriteMillisecondsPart(@ATimeSpan bigint, @APart int)
+returns bigint
+begin
+	return @ATimeSpan + (@APart - dbo.TSReadMillisecondsPart(@ATimeSpan)) * 10000;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSWriteSecondsPart'))
+	drop function DAE_TSWriteSecondsPart
+go
+
+create function DAE_TSWriteSecondsPart(@ATimeSpan bigint, @APart int)
+returns bigint
+begin
+	return @ATimeSpan + (@APart - dbo.TSReadSecondsPart(@ATimeSpan) ) * 10000000;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSWriteMinutesPart'))
+	drop function DAE_TSWriteMinutesPart
+go
+
+create function DAE_TSWriteMinutesPart(@ATimeSpan bigint, @APart int)
+returns bigint
+begin
+	return @ATimeSpan + (@APart - dbo.TSReadMinutesPart(@ATimeSpan) ) * 600000000;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSWriteHoursPart'))
+	drop function DAE_TSWriteHoursPart
+go
+
+create function DAE_TSWriteHoursPart(@ATimeSpan bigint, @APart int)
+returns bigint
+begin
+	return @ATimeSpan + (@APart - dbo.TSReadHoursPart(@ATimeSpan) ) * 36000000000;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSWriteDaysPart'))
+	drop function DAE_TSWriteDaysPart
+go
+
+create function DAE_TSWriteDaysPart(@ATimeSpan bigint, @APart int)
+returns bigint
+begin
+	return @ATimeSpan + (@APart - dbo.TSReadDaysPart(@ATimeSpan) ) * 864000000000;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_AddMonths'))
+	drop function DAE_AddMonths
+go
+
+create function DAE_AddMonths(@ADate datetime, @AMonths int)
+returns datetime
+begin
+	return DateAdd(mm, @AMonths, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_AddYears'))
+	drop function DAE_AddYears
+go
+
+create function DAE_AddYears(@ADate datetime, @AYears int)
+returns datetime
+begin
+	return DateAdd(yyyy, @AYears, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DayOfWeek'))
+	drop function DAE_DayOfWeek
+go
+
+create function DAE_DayOfWeek(@ADate datetime)
+returns int
+begin
+	return DatePart(dw, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DayOfYear'))
+	drop function DAE_DayOfYear
+go
+
+create function DAE_DayOfYear(@ADate datetime)
+returns int
+begin
+	return DatePart(dy, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DaysInMonth'))
+	drop function DAE_DaysInMonth
+go
+
+create function DAE_DaysInMonth(@Year int, @Month int)
+returns int
+begin
+	declare @Date datetime;
+	set @Date = '10/01/1980';
+	set @Date = dbo.DTWriteYearsPart(@Date, @Year);
+	set @Date = dbo.DTWriteMonthsPart(@Date, @Month);
+	return DateDiff(dd, @Date, DateAdd(mm, 1, @Date));
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_IsLeapYear'))
+	drop function DAE_IsLeapYear
+go
+
+create function DAE_IsLeapYear(@Year int)
+returns int
+begin
+	declare @Date1 datetime;
+	declare @Date2 datetime;
+	set @Date1 = '2/28/1980';
+	set @Date1 = dbo.DTWriteYearsPart(@Date1, @Year);
+	set @Date2 = '3/1/1980';
+	set @Date2 = dbo.DTWriteYearsPart(@Date2, @Year);
+	return DateDiff(dd, @Date1, @Date2) - 1;
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTReadHoursPart'))
+	drop function DAE_DTReadHoursPart
+go
+
+create function DAE_DTReadHoursPart(@ADate datetime)
+returns int
+begin
+	return DatePart(hh, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTReadMinutesPart'))
+	drop function DAE_DTReadMinutesPart
+go
+
+create function DAE_DTReadMinutesPart(@ADate datetime)
+returns int
+begin
+	return DatePart(mi, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTReadSecondsPart'))
+	drop function DAE_DTReadSecondsPart
+go
+
+create function DAE_DTReadSecondsPart(@ADate datetime)
+returns int
+begin
+	return DatePart(ss, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTReadMillisecondsPart'))
+	drop function DAE_DTReadMillisecondsPart
+go
+
+create function DAE_DTReadMillisecondsPart(@ADate datetime)
+returns int
+begin
+	return DatePart(ms, @ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteMillisecondsPart'))
+	drop function DAE_DTWriteMillisecondsPart
+go
+
+create function DAE_DTWriteMillisecondsPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(ms,@APart - DatePart(ms,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteSecondsPart'))
+	drop function DAE_DTWriteSecondsPart
+go
+
+create function DAE_DTWriteSecondsPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(ss,@APart - DatePart(ss,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteMinutesPart'))
+	drop function DAE_DTWriteMinutesPart
+go
+
+create function DAE_DTWriteMinutesPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(mi,@APart - DatePart(mi,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteHoursPart'))
+	drop function DAE_DTWriteHoursPart
+go
+
+create function DAE_DTWriteHoursPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(hh,@APart - DatePart(hh,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteDaysPart'))
+	drop function DAE_DTWriteDaysPart
+go
+
+create function DAE_DTWriteDaysPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(dd,@APart - DatePart(dd,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteMonthsPart'))
+	drop function DAE_DTWriteMonthsPart
+go
+
+create function DAE_DTWriteMonthsPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(mm,@APart - DatePart(mm,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteMillisecondsPart'))
+	drop function DAE_DTWriteMillisecondsPart
+go
+
+create function DAE_DTWriteMillisecondsPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(ms,@APart - DatePart(ms,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTWriteYearsPart'))
+	drop function DAE_DTWriteYearsPart
+go
+
+create function DAE_DTWriteYearsPart(@ADate datetime, @APart int)
+returns datetime
+begin
+	return DateAdd(yyyy,@APart - DatePart(yyyy,@ADate),@ADate);
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DateTimeSelector'))
+	drop function DAE_DateTimeSelector
+go
+
+create function DAE_DateTimeSelector(@Year int, @Month int = 0, @Day int = 0, @Hour int = 0, @Minute int = 0, @Second int = 0, @Millisecond int = 0)
+returns datetime
+begin
+	return DateAdd(ms, @Millisecond, DateAdd(ss, @Second, DateAdd(mi, @Minute, DateAdd(hh, @Hour, dbo.DTWriteDaysPart(dbo.DTWriteMonthsPart(dbo.DTWriteYearsPart('1/1/1900', @Year), @Month), @Day)))))
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTDatePart'))
+	drop function DAE_DTDatePart
+go
+
+create function DAE_DTDatePart(@ADateTime datetime)
+returns datetime
+begin
+	return Convert( DateTime, Floor ( Convert( Float, @ADateTime ) ) );
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTTimePart'))
+	drop function DAE_DTTimePart
+go
+
+create function DAE_DTTimePart(@ADateTime datetime)
+returns datetime
+begin
+	return Convert( DateTime, dbo.Frac ( Convert( Float, @ADateTime ) ) );
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_DTTimeSpan'))
+	drop function DAE_DTTimeSpan
+go
+
+create function DAE_DTTimeSpan (@ADateTime datetime)
+returns bigint
+begin
+	declare @LRefDate datetime;
+	set @LRefDate = '01/01/2000';
+	return 10000 * (1000 * (DateDiff(ss, @LRefDate, @ADateTime) + 63082281600) + DatePart(ms, @ADateTime));
+end
+go
+
+if exists (select * from sysobjects where id = Object_ID('DAE_TSDateTime'))
+	drop function DAE_TSDateTime
+go
+
+create function DAE_TSDateTime (@ATimeSpan bigint)
+returns datetime
+begin
+	declare @TempTime bigint;
+	set @TempTime = (@ATimeSpan - 630822816000000000) / 10000000;
+	declare @TempTime2 bigint;
+	set @TempTime2 = dbo.Frac((@ATimeSpan - 630822816000000000) / 10000000.0) * 1000;
+	return DateAdd(ms, @TempTime2, DateAdd(ss, @TempTime ,'1/01/2000'));
+end
+go
+

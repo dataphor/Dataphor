@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" text="Manage Groups" mainsource="Main">
+  <source expression="select System.GroupParentGroups explode by Parent_Group_Name = parent Group_Name where Parent_Group_Name = System.GroupName() over { Group_Name } rename { Group_Name Main.Name } browse by { Main.Name }" useapplicationtransactions="False" bop:name="Main" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Parent_Group_Name" sourcelink.attachmaster="True" sourcelink.source="Main" document="Derive('AddGroup', 'Add', 'Main.Name', 'Main.Parent_Group_Name')" mode="Insert" text="&amp;Add..." hint="Add a new row." image="Image('Frontend', 'Image.Add')" bop:name="Add" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelink.source="Main" document="Derive('Security.Group', 'Edit', true)" mode="Edit" text="&amp;Edit..." hint="Edit the current row." image="Image('Frontend', 'Image.Edit')" bop:name="Edit" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelink.source="Main" document="Derive('Security.Group', 'Delete', 'Main.Name', 'Main.Parent_Group_Name')" mode="Delete" text="&amp;Delete..." hint="Delete the current row." image="Image('Frontend', 'Image.Delete')" bop:name="Delete" />
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelink.source="Main" document="Derive('Security.Group', 'View', 'Main.Name', 'Main.Parent_Group_Name')" text="&amp;View..." hint="View the current row." image="Image('Frontend', 'Image.View')" bop:name="View" />
+  <sourceaction action="First" source="Main" text="&amp;First" image="Image('Frontend', 'Image.First')" bop:name="MoveFirst" />
+  <sourceaction action="Prior" source="Main" text="&amp;Prior" image="Image('Frontend', 'Image.Prior')" bop:name="MovePrior" />
+  <sourceaction action="Next" source="Main" text="&amp;Next" image="Image('Frontend', 'Image.Next')" bop:name="MoveNext" />
+  <sourceaction action="Last" source="Main" text="&amp;Last" image="Image('Frontend', 'Image.Last')" bop:name="MoveLast" />
+  <sourceaction action="Refresh" source="Main" text="&amp;Refresh" image="Image('Frontend', 'Image.Refresh')" bop:name="Refresh" />
+  <menu text="&amp;Navigation" bop:name="NavigationMenu">
+    <menu action="MoveFirst" bop:name="MoveFirstMenu" />
+    <menu action="MovePrior" bop:name="MovePriorMenu" />
+    <menu action="MoveNext" bop:name="MoveNextMenu" />
+    <menu action="MoveLast" bop:name="MoveLastMenu" />
+    <menu text="-" bop:name="NavSepMenu1" />
+    <menu action="Refresh" bop:name="RefreshMenu" />
+  </menu>
+  <row bop:name="MainRow">
+    <column bop:name="RootBrowseColumn">
+      <search source="Main" hint="Search for a specific row." bop:name="MainSearch">
+        <searchcolumn title="Name" columnname="Main.Name" width="20" bop:name="MainSearchColumnMain.Name" />
+      </search>
+      <row bop:name="GridRow">
+        <tree columnname="Main.Name" rootexpression="(System.Groups rename Main) join (System.GroupParentGroups where Parent_Group_Name = System.GroupName() over { Group_Name } rename { Group_Name Main.Name })" childexpression="(System.Groups rename Main) join (System.GroupParentGroups where Parent_Group_Name = ACurrentMain.Name over { Group_Name } rename { Group_Name Main.Name })" parentexpression="(System.Groups rename Main) join (System.GroupParentGroups where Group_Name = ACurrentMain.Name and Parent_Group_Name &lt;&gt; System.GroupName() over { Parent_Group_Name } rename { Parent_Group_Name Main.Name })" source="Main" bop:name="Tree" />
+        <column bop:name="GridBar">
+          <trigger action="Add" imagewidth="11" imageheight="13" bop:name="AddTrigger" />
+          <trigger action="Edit" imagewidth="11" imageheight="13" bop:name="EditTrigger" />
+          <trigger action="Delete" imagewidth="11" imageheight="13" bop:name="DeleteTrigger" />
+          <trigger action="View" imagewidth="11" imageheight="13" bop:name="ViewTrigger" />
+          <trigger action="GroupRights" visible="False" bop:name="GroupRightsTrigger" />
+        </column>
+      </row>
+    </column>
+    <column bop:name="DetailColumn">
+      <notebook activepage="UserPage" bop:name="DetailNotebook">
+        <notebookframepage sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Group_Name" sourcelink.source="Main" document="Form('Security', 'UserBrowse')" menutext="Users" title="Users" bop:name="UserPage" />
+        <notebookframepage sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Group_Name" sourcelink.source="Main" document="Form('Security', 'GroupDeviceUserBrowse')" menutext="Device Users" title="Device Users" bop:name="GroupDeviceUserPage" />
+        <notebookframepage sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Group_Name" sourcelink.source="Main" document="Form('Security', 'GroupRoleBrowse')" menutext="Roles" title="Roles" bop:name="GroupRolePage" />
+      </notebook>
+    </column>
+  </row>
+  <showformaction sourcelinktype="Detail" sourcelink.masterkeynames="Main.Name" sourcelink.detailkeynames="Main.Name" sourcelink.source="Main" sourcelinkrefresh="False" document="Form('Security', 'GroupRightBrowse')" text="Rights..." hint="Manage the rights for this group." bop:name="GroupRights" />
+</interface>

@@ -1,0 +1,34 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+detach Security.GroupRole_Insert from Security.GroupRole on {before insert};
+detach Security.GroupRole_Delete from Security.GroupRole on {before delete};
+detach Security.GroupRole_Update from Security.GroupRole on {before update};
+drop view Security.GroupRole;
+
+create view GroupRole
+	GroupRoles
+		adorn
+		{
+			Role_Name tags { Frontend.Title = "Role Name", Frontend.Width = "50" },
+			Inherited { default true } tags { Frontend.Hint = "Whether or not the role assignment will be inherited by child groups" },
+			drop reference GroupRoles_Roles
+		}
+	{
+		reference GroupRole_Role { Role_Name } references Role { Name }
+			tags { Storage.Enforced = "true", Frontend.Priority = "-1", Frontend.Lookup.Title = "Role", Frontend.Detail.Visible = "false" }
+	}
+	tags 
+	{
+		Frontend.Title = "Role",
+		Frontend.UseList = "false", 
+		Frontend.UseApplicationTransactions = "false" 
+	};
+	
+grant usage on GroupRole to role SecurityUser;
+
+attach operator GroupRole_Insert to GroupRole on { before insert };
+attach operator GroupRole_Update to GroupRole on { before update };
+attach operator GroupRole_Delete to GroupRole on { before delete };

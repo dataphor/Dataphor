@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-16"?>
+<interface xmlns:bop="www.alphora.com/schemas/bop" iconimage="Image('Sample.Shipping', 'Alphora')" text="Alphora Shipping Application - Sales">
+  <showformaction document="Derive('CurrentLocation', 'Edit')" mode="Edit" text="Set Current Location..." bop:name="SetCurrentLocation" />
+  <showformaction document="Derive(&quot;Sample.Shipping.CustomerDetail&quot;)" text="Customer..." bop:name="CustomerBrowseAction" />
+  <showformaction document="Derive('SaleOrderEntry', 'Add')" mode="Insert" text="Order Entry..." bop:name="OrderEntryAction" />
+  <row bop:name="Row">
+    <column bop:name="Column">
+      <staticimage image="Image(&quot;Sample.Shipping&quot;, &quot;ShippingSales&quot;)" bop:name="StaticImage" />
+    </column>
+    <column bop:name="Column1">
+      <trigger action="SetCurrentLocation" bop:name="SetCurrentLocationTrigger" />
+      <trigger action="CustomerBrowseAction" bop:name="CustomerBrowseTrigger" />
+      <trigger action="OrderEntryAction" bop:name="OrderEntryTrigger" />
+    </column>
+  </row>
+</interface>

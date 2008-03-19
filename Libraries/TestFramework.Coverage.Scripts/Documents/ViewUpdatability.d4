@@ -1,0 +1,2586 @@
+//  View Updateablility Coverage Script
+//	 © Copyright 2000-2008 Alphora
+//	 This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+
+create table ClientType { ID : String, Description : String, key { ID } };
+create table Client { ID : String, Name : String, Type_ID : String { default "001" }, key { ID } };
+//create reference Client_ClientType Client { Type_ID } references ClientType { ID };
+create table VendorType { ID : String, Description : String, key { ID } };
+create table Vendor { ID : String, Name : String, Type_ID : String, key { ID } };
+//create reference Vendor_VendorType Vendor { Type_ID } references VendorType { ID };
+create table ClientExtension { Client_ID : String, Address : String, key { Client_ID } };
+//create reference ClientExtension_Client ClientExtension { Client_ID } references Client { ID };
+create table ClientPhone { Client_ID : String, Phone : String, key { Client_ID, Phone } };
+//create reference ClientPhone_Client ClientPhone { Client_ID } references Client { ID };
+
+create operator InsertClients()
+begin
+	insert
+		table
+		{
+			row { "001" ID, "One" Description },
+			row { "002", "Two" },
+			row { "003", "Three" },
+			row { "004", "Four" },
+			row { "005", "Five" }
+		}
+		into ClientType;
+
+	insert
+		table
+		{
+			row { "001" ID, "One" Description },
+			row { "002", "Two" },
+			row { "003", "Three" },
+			row { "004", "Four" },
+			row { "005", "Five" }
+		}
+		into VendorType;
+
+	insert 
+		table
+		{
+			row { "001" ID, "Cool Client One" Name, "001" Type_ID },
+			row { "002", "Cool Client Two", "001" },
+			row { "003", "Cool Client Three", "001" },
+			row { "004", "Cool Client Four", "002" },
+			row { "005", "Cool Client Five", "002" },
+			row { "006", "Cool Client Six", "002" },
+			row { "007", "Cool Client Seven", "003" },
+			row { "008", "Cool Client Eight", "003" },
+			row { "009", "Cool Client Nine", "003" }
+		}
+		into Client;
+
+	insert 
+		table
+		{
+			row { "001" ID, "Cool Vendor One" Name, "001" Type_ID },
+			row { "002", "Cool Vendor Two", "001" },
+			row { "003", "Cool Vendor Three", "001" },
+			row { "004", "Cool Vendor Four", "002" },
+			row { "005", "Cool Vendor Five", "002" },
+			row { "006", "Cool Vendor Six", "002" },
+			row { "007", "Cool Vendor Seven", "003" },
+			row { "008", "Cool Vendor Eight", "003" },
+			row { "009", "Cool Vendor Nine", "003" } 
+		}
+		into Vendor;
+
+	insert
+		table
+		{
+			row { "001" Client_ID, "123 Spinning Ave" Address },
+			row { "002", "Somewhere in Time" },
+			row { "003", "Along the Way" },
+			row { "006", "Cinco de mayo" },
+			row { "007", "Classic Skating" },
+			row { "009", "Classic Skating" }
+		}
+		into ClientExtension;
+
+	insert
+		table
+		{
+			row { "001" Client_ID, "221-0909" Phone },
+			row { "001", "222-0989" },
+			row { "001", "223-8998" },
+			row { "002", "223-0987" },
+			row { "002", "226-0090" },
+			row { "004", "228-0987" },
+			row { "005", "090-0987" },
+			row { "006", "098-0987" },
+			row { "007", "909-8978" },
+			row { "009", "909-0998" }
+		}
+		into ClientPhone;
+end;
+
+create operator DeleteClients()
+begin
+  delete ClientExtension;
+  delete ClientPhone;
+  delete Client;
+  delete ClientType;
+  delete Vendor;
+  delete VendorType;
+end;
+
+//*
+InsertClients();
+
+// base table update of single row using key column
+update Client set { Name := "Cool Client One Hundred" } where ID = "001";
+if not(exists(Client where ID = "001" and Name = "Cool Client One Hundred")) then
+	raise Error("Base table update of single row using key column failed");
+
+// base table update of multiple rows using non-key column
+update Client set { Name := "Cool " + Name } where Type_ID = "002";
+if not(exists(Client where Name = "Cool Cool Client Four")) then
+	raise Error("Base table update of multiple rows using non-key column failed");
+
+// base table update without condition
+update Client set { Name := "Test " + Name };
+if Count(Client where SubString(Name, 0, 4) = "Test") <> Count(Client) then
+	raise Error("Base table update without condition failed");
+
+// base table delete of single row using key column
+delete ClientExtension where Client_ID = "006";
+if exists(ClientExtension where Client_ID = "006") then
+	raise Error("Base table delete of single row using key column failed");
+
+// base table delete of multiple rows using non-key column
+delete ClientExtension where Address = "Classic skating";
+if exists(ClientExtension where Address = "Classic skating") then
+	raise Error("Base table delete of multiple rows using non-key column failed");
+
+// base table delete without condition
+delete ClientExtension;
+if exists(ClientExtension) then
+	raise Error("Base table delete without condition failed");
+
+DeleteClients();
+
+InsertClients();
+
+//*
+// Expression based updates
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into Client where Type_ID = "001";
+	if not(exists(Client where Type_ID = "001" where ID = "010")) then
+		raise Error("Restrict view insert failed");
+		
+	// update
+	update Client where Type_ID = "001" set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (Client where Type_ID = "001" where ID = "010")) <> "Cooler Client Ten"	then
+		raise Error("Restrict view update failed");
+		
+	// delete
+	delete Client where Type_ID = "001" where ID = "010";
+	if exists(Client where Type_ID = "001" where ID = "010") then
+		raise Error("Restrict view delete failed");
+
+//*
+// Projection
+create view OverView Client over { ID, Name };
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name}} into OverView;
+	if not(exists(OverView where ID = "010")) then
+		raise Error("Projection view insert failed");
+		
+	// update
+	update OverView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (OverView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Project view update failed");
+		
+	// delete
+	delete OverView where ID = "010";
+	if exists(OverView where ID = "010") then
+		raise Error("Projection view delete failed");
+		
+drop view OverView;
+
+//*
+// Restriction
+create view WhereView Client where Type_ID = "001";
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into WhereView;
+	if not(exists(WhereView where ID = "010")) then
+		raise Error("Restrict view insert failed");
+		
+	// update
+	update WhereView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (WhereView where ID = "010")) <> "Cooler Client Ten"	then
+		raise Error("Restrict view update failed");
+		
+	// delete
+	delete WhereView where ID = "010";
+	if exists(WhereView where ID = "010") then
+		raise Error("Restrict view delete failed");
+		
+drop view WhereView;
+
+//*
+// Rename
+create view RenameView Client rename {ID Client_ID, Name Client_Name, Type_ID ClientType_ID};
+
+	// insert
+	insert table{row{"010" Client_ID, "Cool Client Ten" Client_Name, "001" ClientType_ID}} into RenameView;
+	if not(exists(RenameView where Client_ID = "010")) then
+		raise Error("Rename view insert failed");
+		
+	// update
+	update RenameView set {Client_Name := "Cooler Client Ten"} where Client_ID = "010";
+	if (Client_Name from row from (RenameView where Client_ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Rename view update failed");
+		
+	// delete
+	delete RenameView where Client_ID = "010";
+	if exists(RenameView where Client_ID = "010") then
+		raise Error("Rename view delete failed");
+		
+drop view RenameView;
+
+//*
+// Extend
+create view AddView Client add {"Killer" KillerColumn};
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into AddView;
+	if not(exists(AddView where ID = "010")) then
+		raise Error("Extend view insert failed");
+		
+	// update
+	update AddView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (AddView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Extend view update failed");
+		
+	// delete
+	delete AddView where ID = "010";
+	if exists(AddView where ID = "010") then
+		raise Error("Extend view delete failed");
+		
+drop view AddView;
+
+//*
+// Redefine
+create view RedefineView Client redefine { Type_ID := case when Type_ID = "001" then "001" else "002" end };
+
+	// insert
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into RedefineView;
+	if not exists (RedefineView where ID = "010") then
+		raise Error("Redefine view insert failed");
+
+	// update
+	update RedefineView set { Name := "Cooler Client Ten" } where ID = "010";
+	if (Name from row from (RedefineView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Redefine view update failed");
+		
+	// delete
+	delete RedefineView where ID = "010";
+	if exists (RedefineView where ID = "010") then
+		raise Error("Redefine view delete failed");
+		
+drop view RedefineView;
+
+//*
+// Adorn
+create view AdornView Client adorn { Type_ID tags { Frontend.Title = "Type ID" } };
+
+	// insert
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into AdornView;
+	if not exists (AdornView where ID = "010") then
+		raise Error("Adorn view insert failed");
+
+	// update
+	update AdornView set { Name := "Cooler Client Ten" } where ID = "010";
+	if (Name from row from (AdornView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Adorn view update failed");
+		
+	// delete
+	delete AdornView where ID = "010";
+	if exists (AdornView where ID = "010") then
+		raise Error("Adorn view delete failed");
+		
+drop view AdornView;
+
+//*
+// TODO: Aggregate operator updatability
+//select Client group by { Type_ID } add { Count() CountPerType };
+
+// Quota
+create view QuotaView Client return 1 by { Type_ID };
+
+	// insert
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into QuotaView;
+	if not exists (QuotaView where ID = "010") then
+		raise Error("Quota view insert failed");
+
+	// update
+	update QuotaView set { Name := "Cooler Client Ten" } where ID = "010";
+	if (Name from row from (QuotaView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Quota view update failed");
+		
+	// delete
+	delete QuotaView where ID = "010";
+	if exists (QuotaView where ID = "010") then
+		raise Error("Quota view delete failed");
+		
+drop view QuotaView;
+
+//*
+// Union
+DeleteClients();
+InsertClients();
+
+create view UnionView 
+	(Client where Type_ID = "001" with { EnforcePredicate = "true" }) 
+	union
+	(Vendor where Type_ID = "002" with { EnforcePredicate = "true" });
+	
+	// insert (left table)
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into UnionView;
+	if not(exists(UnionView where ID = "010" and Type_ID = "001")) then
+		raise Error("Union view insert into left table failed");
+		
+	// insert (right table)
+	insert table{row{"010" ID, "Cool Vendor Ten" Name, "002" Type_ID}} into UnionView;
+	if not(exists(UnionView where ID = "010" and Type_ID = "002")) then
+		raise Error("Union view insert into right table failed");
+		
+	// insert (neither table)
+	begin
+		var LCaught : Boolean := false;
+		try
+			insert table{row{"011" ID, "Cool Client Eleven" Name, "003" Type_ID}} into UnionView;
+		except
+			LCaught := true;
+		end;
+		if not(LCaught) then
+			raise Error("Union view insert into neither table succeeded");
+	end;
+	
+	// update (left table)
+	update UnionView set {Name := "Cooler Client Ten"} where ID = "010" and Type_ID = "001";
+	if (Name from row from (UnionView where ID = "010" and Type_ID = "001")) <> "Cooler Client Ten" then
+		raise Error("Union view update of left table failed");
+		
+	// update (right table)
+	update UnionView set {Name := "Cooler Vendor Ten"} where ID = "010" and Type_ID = "002";
+	if (Name from row from (UnionView where ID = "010" and Type_ID = "002")) <> "Cooler Vendor Ten" then
+		raise Error("Union view update of right table failed");
+		
+	// delete (left table)
+	delete UnionView where ID = "010" and Type_ID = "001";
+	if exists(UnionView where ID = "010" and Type_ID = "001") then
+		raise Error("Union view delete of left table failed");
+		
+	// delete (right table)
+	delete UnionView where ID = "010" and Type_ID = "002";
+	if exists(UnionView where ID = "010" and Type_ID = "002") then
+		raise Error("Union view delete of right table failed");
+	
+	// update (move tables)
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into Client;
+	update UnionView set {Type_ID := "002"} where ID = "010";
+	if exists(Client where ID = "010") or not(exists(Vendor where ID = "010")) then
+		raise Error("Union view update of left table to move to right table failed");
+
+drop view UnionView;
+
+//*
+DeleteClients();
+InsertClients();
+
+create view UnionView (Client where Type_ID = "001") union (Vendor where Type_ID = "001");
+
+	// insert into both tables
+	insert table{row{"010" ID, "Cool CliVendor Ten" Name, "001" Type_ID}} into UnionView;
+	if not(exists(UnionView where ID = "010")) then
+		raise Error("Union view insert into both tables failed");
+		
+	// update both tables
+	update UnionView set { Name := "Cooler CliVendor Ten" } where ID = "010";
+	if not(exists(UnionView where ID = "010" and Name = "Cooler CliVendor Ten")) then
+		raise Error("Union view update of both tables failed");
+		
+	// delete both tables
+	delete UnionView where ID = "010";
+	if exists(UnionView where ID = "010") then
+		raise Error("Union view delete from both tables failed");
+		
+drop view UnionView;
+
+//*
+// Intersect
+create view IntersectView (Client where Type_ID = "001") intersect (Vendor where Type_ID = "001");
+
+	// insert
+	insert table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} into IntersectView;
+	if not(exists(IntersectView where ID = "010")) then
+		raise Error("Intersect view insert failed");
+	
+	// update
+	update IntersectView set {Name := "Cooler Row Ten"} where ID = "010";
+	if (Name from row from (IntersectView where ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Intersect view update failed");
+	
+	// delete
+	delete IntersectView where ID = "010";
+	if exists(IntersectView where ID = "010") then
+		raise Error("Intersect view delete failed");
+		
+drop view IntersectView;
+
+//*
+// Difference
+create view MinusView 
+	(Client where Type_ID = "001" with { EnforcePredicate = "true" }) 
+		minus (Vendor where Type_ID = "002" with { EnforcePredicate = "true" });
+		
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} into MinusView;
+	if not(exists(MinusView where ID = "010")) then
+		raise Error("Difference view insert failed");
+	
+	// update
+	update MinusView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (MinusView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Difference view update failed");
+		
+	// delete
+	delete MinusView where ID = "010";
+	if exists(MinusView where ID = "010") then
+		raise Error("Difference view delete failed");
+		
+drop view MinusView;
+
+//*	
+// Product
+// TODO: View with a times in it will throw the times warning whenver it is selected
+create view TimesView (Client rename C where Type_ID = "001") times (Vendor rename V where Type_ID = "002");
+// !!!
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Vendor Ten" Name, "002" Type_ID}} rename V)
+		into TimesView;
+	if not(exists(TimesView where C.ID = "010" and V.ID = "010")) then
+		raise Error("Product view insert failed");
+		
+	// update
+	update TimesView set {C.Name := "Cooler Client Ten", V.Name := "Cooler Vendor Ten"} where C.ID = "010" and V.ID = "010";
+	if (C.Name from row from (TimesView where C.ID = "010" and V.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Product view update failed, left side");
+	if (V.Name from row from (TimesView where C.ID = "010" and V.ID = "010")) <> "Cooler Vendor Ten" then
+		raise Error("Product view update failed, right side");
+		
+	// delete
+	delete TimesView where C.ID = "010" and V.ID = "010";
+	if exists(TimesView where C.ID = "010" or V.ID = "010") then
+		raise Error("Product view delete failed");
+		
+drop view TimesView;
+
+//*
+// Join Key to Key
+create view JoinKeyToKeyView (Client rename C) join (ClientExtension rename CE) by C.ID = CE.Client_ID;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "My Little Database" Address}} rename CE)
+		into JoinKeyToKeyView;
+	if not(exists(JoinKeyToKeyView where ID = "010")) then
+		raise Error("Join key to key view insert failed");
+		
+	// update
+	update JoinKeyToKeyView set {Name := "Cooler Client Ten", Address := "My Littler Database"} where ID = "010";
+	if (Name from row from (JoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Join key to key view update left table failed");
+	if (Address from row from (JoinKeyToKeyView where ID = "010")) <> "My Littler Database" then
+		raise Error("Join key to key view update right table failed");
+	
+	// delete
+	delete JoinKeyToKeyView where ID = "010";
+	if exists(JoinKeyToKeyView where ID = "010") then
+		raise Error("Join key to key view delete failed");
+
+drop view JoinKeyToKeyView;
+
+//*
+// Natural Join Key to Key
+create view NaturalJoinKeyToKeyView Client join (ClientExtension rename {Client_ID ID});
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "My Little Database" Address}}
+		into NaturalJoinKeyToKeyView;
+	if not(exists(NaturalJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural join key to key view insert failed");
+		
+	// update
+	update NaturalJoinKeyToKeyView set {Name := "Cooler Client Ten", Address := "My Littler Database"} where ID = "010";
+	if (Name from row from (NaturalJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural join key to key view update of left table failed");
+	if (Address from row from (NaturalJoinKeyToKeyView where ID = "010")) <> "My Littler Database" then
+		raise Error("Natural join key to key view update of right table failed");
+		
+	// delete
+	delete NaturalJoinKeyToKeyView where ID = "010";
+	if exists(NaturalJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural join key to key view delete failed");
+
+drop view NaturalJoinKeyToKeyView;
+
+//*
+// Join Key to Non-Key
+create view JoinKeyToNonKeyView (Client rename C) join (ClientPhone rename CP) by C.ID = CP.Client_ID;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "990-0990" Phone}} rename CP)
+		into JoinKeyToNonKeyView;
+	if not(exists(JoinKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Join key to non key view insert failed");
+		
+	// update
+	update JoinKeyToNonKeyView set {C.Name := "Cooler Client Ten", CP.Phone := "991-9019"} where C.ID = "010";
+	if (C.Name from row from (JoinKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Join key to non key view update left table failed");
+	if (CP.Phone from row from (JoinKeyToNonKeyView where C.ID = "010")) <> "991-9019" then
+		raise Error("Join key to non key view update right table failed");
+		
+	// delete
+	delete JoinKeyToNonKeyView where C.ID = "010";
+	if exists(JoinKeyToNonKeyView where C.ID = "010") then
+		raise Error("Join key to non key view delete failed");
+		
+drop view JoinKeyToNonKeyView;
+		
+//*
+// Natural Join Key To Non-Key View
+create view NaturalJoinKeyToNonKeyView Client join (ClientPhone rename {Client_ID ID});
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "990-0990" Phone}}
+		into NaturalJoinKeyToNonKeyView;
+	if not(exists(NaturalJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural join key to non key view insert failed");
+		
+	// update
+	update NaturalJoinKeyToNonKeyView set {Name := "Cooler Client Ten", Phone := "991-9019"} where ID = "010";
+	if (Name from row from (NaturalJoinKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural join key to non key view update left table failed");
+	if (Phone from row from (NaturalJoinKeyToNonKeyView where ID = "010")) <> "991-9019" then
+		raise Error("Natural join key to non key view update right table failed");
+		
+	// delete
+	delete NaturalJoinKeyToNonKeyView where ID = "010";
+	if exists(NaturalJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural join key to non key view delete failed");
+		
+drop view NaturalJoinKeyToNonKeyView;
+		
+//*
+// Join Non-Key to Key
+create view JoinNonKeyToKeyView (Client rename C) join (ClientType rename CT) by C.Type_ID = CT.ID;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) times
+		(table{row{"010" ID, "Ten" Description}} rename CT)
+		into JoinNonKeyToKeyView;
+	if not(exists(JoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Join non key to key view insert failed");
+		
+	// update
+	update JoinNonKeyToKeyView set {C.Name := "Cooler Client Ten", CT.Description := "Tener"} where C.ID = "010";
+	if (Name from row from (JoinNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Join non key to key view update of left table failed");
+	if (Description from row from (JoinNonKeyToKeyView where C.ID = "010")) <> "Tener" then
+		raise Error("Join non key to key view update of right table failed");
+		
+	// delete
+	delete JoinNonKeyToKeyView where C.ID = "010";
+	if exists(JoinNonKeyToKeyView where C.ID = "010") then
+		raise Error("Join non key to key view delete failed");
+		
+drop view JoinNonKeyToKeyView;
+
+//*
+// Natural Join Non-Key to Key
+create view NaturalJoinNonKeyToKeyView Client join (ClientType rename {ID Type_ID});
+
+	// insert
+	insert table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID, "Ten" Description}}
+		into NaturalJoinNonKeyToKeyView;
+	if not(exists(NaturalJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural join non key to key view insert failed");
+		
+	// update
+	update NaturalJoinNonKeyToKeyView set {Name := "Cooler Client Ten", Description := "Tener"} where ID = "010";
+	if (Name from row from (NaturalJoinNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural join non key to key view update of left table failed");
+	if (Description from row from (NaturalJoinNonKeyToKeyView where ID = "010")) <> "Tener" then
+		raise Error("Natural join non key to key view update of right table failed");
+		
+	// delete
+	delete NaturalJoinNonKeyToKeyView where ID = "010";
+	if exists(NaturalJoinNonKeyToKeyView where ID = "010") then
+		raise Error("Natural join non key to key view delete failed");
+		
+drop view NaturalJoinNonKeyToKeyView;
+
+//*
+// Join Non-Key to Non-Key
+create view JoinNonKeyToNonKeyView (Client rename C) join (Vendor rename V) by C.Name = V.Name;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename V)
+		into JoinNonKeyToNonKeyView;
+	if not(exists(JoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Join non key to non key view insert failed");
+		
+	// update
+	update JoinNonKeyToNonKeyView set {C.Name := "Cooler Row Ten", V.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (JoinNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Join non key to non key view update of left table failed");
+	if (V.Name from row from (JoinNonKeyToNonKeyView where V.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Join non key to non key view update of right table failed");
+		
+	// delete
+	delete JoinNonKeyToNonKeyView where C.ID = "010";
+	if exists(JoinNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Join non key to non key view delete failed");
+		
+drop view JoinNonKeyToNonKeyView;
+
+//*
+// Natural Join Non-Key to Non-Key
+create view NaturalJoinNonKeyToNonKeyView 
+	(Client rename {ID Client_ID, Type_ID Client_Type_ID}) join
+	(Vendor rename {ID Vendor_ID, Type_ID Vendor_Type_ID});
+	
+	// insert
+	insert 
+		table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID, "010" Vendor_ID, "001" Vendor_Type_ID}}
+		into NaturalJoinNonKeyToNonKeyView;
+	if not(exists(NaturalJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural join non key to non key view insert failed");
+		
+	// update
+	update NaturalJoinNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalJoinNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural join non key to non key view update failed");
+		
+	// delete
+	delete NaturalJoinNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalJoinNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural join non key to non key view delete failed");
+		
+drop view NaturalJoinNonKeyToNonKeyView;
+
+//*
+// Left Join Key to Key
+create view LeftJoinKeyToKeyView (Client rename C) left join (ClientExtension rename CE) by C.ID = CE.Client_ID include rowexists;
+
+	// insert left table only
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C
+		into LeftJoinKeyToKeyView;
+	if not(exists(LeftJoinKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join key to key view insert failed");
+		
+	// update left table
+	update LeftJoinKeyToKeyView set {C.Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (LeftJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join key to key view update left table failed");
+		
+	// update to insert right table
+	update LeftJoinKeyToKeyView set {rowexists := true, CE.Client_ID := "010", CE.Address := "41 Spinning Avenue"} where ID = "010";
+	if not(rowexists from row from (LeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Left join key to key view update to insert right table failed");
+	if (Address from row from (LeftJoinKeyToKeyView where ID = "010")) <> "41 Spinning Avenue" then
+		raise Error("Left join key to key view update to insert right table failed");
+	
+	// update to delete right table
+	update LeftJoinKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (LeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Left join key to key view update to delete right table failed");
+		
+	// delete
+	delete LeftJoinKeyToKeyView where ID = "010";
+	if exists(LeftJoinKeyToKeyView where ID = "010") then
+		raise Error("Left join key to key view delete failed");
+		
+	// insert both tables
+	insert
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "41 Spinning Avenue" Address}} rename CE) add {true rowexists}
+		into LeftJoinKeyToKeyView;
+	if not(exists(LeftJoinKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join key to key view insert both tables failed");
+	if not(rowexists from row from (LeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Left join key to key view insert both tables failed");
+		
+	// update both tables
+	update LeftJoinKeyToKeyView set {C.Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (LeftJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join key to key view update left table failed");
+	if (Address from row from (LeftJoinKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Left join key to key view update right table failed");
+
+	// delete
+	delete LeftJoinKeyToKeyView where ID = "010";
+	if exists(LeftJoinKeyToKeyView where ID = "010") then
+		raise Error("Left join key to key view delete failed");
+		
+drop view LeftJoinKeyToKeyView;
+
+//*
+// Natural Left Join Key to Key
+create view NaturalLeftJoinKeyToKeyView Client left join (ClientExtension rename {Client_ID ID}) include rowexists;
+
+	// insert left table only
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}}
+		into NaturalLeftJoinKeyToKeyView;
+	if not(exists(NaturalLeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join key to key view insert failed");
+		
+	// update left table
+	update NaturalLeftJoinKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join key to key view update left table failed");
+		
+	// update to insert right table
+	update NaturalLeftJoinKeyToKeyView set {rowexists := true, Address := "41 Spinning Avenue"} where ID = "010";
+	if not(rowexists from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join key to key view update to insert right table failed");
+	if (Address from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) <> "41 Spinning Avenue" then
+		raise Error("Natural left join key to key view update to insert right table failed");
+	
+	// update to delete right table
+	update NaturalLeftJoinKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftJoinKeyToKeyView where ID = "010";
+	if exists(NaturalLeftJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural left join key to key view delete failed");
+		
+	// insert both tables
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "41 Spinning Avenue" Address, true rowexists}}
+		into NaturalLeftJoinKeyToKeyView;
+	if not(exists(NaturalLeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join key to key view insert both tables failed");
+	if not(rowexists from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join key to key view insert both tables failed");
+		
+	// update both tables
+	update NaturalLeftJoinKeyToKeyView set {Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join key to key view update left table failed");
+	if (Address from row from (NaturalLeftJoinKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Natural left join key to key view update right table failed");
+
+	// delete
+	delete NaturalLeftJoinKeyToKeyView where ID = "010";
+	if exists(NaturalLeftJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural left join key to key view delete failed");
+		
+drop view NaturalLeftJoinKeyToKeyView;
+
+//*
+// Left Join Key to Non-Key
+create view LeftJoinKeyToNonKeyView (Client rename C) left join (ClientPhone rename CP) by C.ID = CP.Client_ID include rowexists;
+
+/*
+// TODO: The left side only cannot be updated because the key for this view is in the right side, which is nullable, which causes optimistic concurrency check failures on update and delete because the right side does not exist.
+	// insert left table
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C
+		into LeftJoinKeyToNonKeyView;
+	if not(exists(LeftJoinKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join key to non key view insert left table failed");
+		
+	// update left table
+	update LeftJoinKeyToNonKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftJoinKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join key to non key view update left table failed");
+		
+	// update to insert right table
+	update LeftJoinKeyToNonKeyView set {rowexists := true, CP.Client_ID := "010", CP.Phone := "990-0990"} where C.ID = "010";
+	if (Phone from row from (LeftJoinKeyToNonKeyView where C.ID = "010")) <> "990-0990" then
+		raise Error("Left join key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update LeftJoinKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftJoinKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join key to non key view update to delete right table failed");
+		
+	// delete left table
+	delete LeftJoinKeyToNonKeyView where C.ID = "010";
+	if exists(LeftJoinKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left join key to non key view delete failed");
+*/
+		
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "990-0990" Phone}} rename CP) add {true rowexists}
+		into LeftJoinKeyToNonKeyView;
+	if not(exists(LeftJoinKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join key to non key view insert into both tables failed");
+	if not(rowexists from row from (LeftJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Left join key to non key view insert both tables failed");
+		
+	// update both tables
+	update LeftJoinKeyToNonKeyView set {C.Name := "Cooler Client Ten", CP.Phone := "991-9019"} where C.ID = "010";
+	if (C.Name from row from (LeftJoinKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join key to non key view update left table failed");
+	if (CP.Phone from row from (LeftJoinKeyToNonKeyView where C.ID = "010")) <> "991-9019" then
+		raise Error("Left join key to non key view update right table failed");
+		
+	// delete both tables
+	delete LeftJoinKeyToNonKeyView where C.ID = "010";
+	if exists(LeftJoinKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left join key to non key view delete failed");
+		
+drop view LeftJoinKeyToNonKeyView;
+
+/*
+//*
+// TODO: This does not work because the resulting view has only sparse keys.
+// We may want to do something about this in general, but I'm not sure...
+// Natural Left Join Key to Non-Key
+create view NaturalLeftJoinKeyToNonKeyView Client left join (ClientPhone rename {Client_ID ID}) include rowexists;
+		
+// TODO: table updates
+	// insert left table
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}}
+		into NaturalLeftJoinKeyToNonKeyView;
+	if not(exists(NaturalLeftJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left join key to non key view insert left table failed");
+		
+	// update left table
+	update NaturalLeftJoinKeyToNonKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join key to non key view update left table failed");
+		
+	// update to insert right table
+	update NaturalLeftJoinKeyToNonKeyView set {rowexists := true, Phone := "990-0990"} where ID = "010";
+	if (Phone from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) <> "990-0990" then
+		raise Error("Natural left join key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalLeftJoinKeyToNonKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left join key to non key view update to delete right table failed");
+		
+	// delete left table
+	delete NaturalLeftJoinKeyToNonKeyView where ID = "010";
+	if exists(NaturalLeftJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural left join key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "990-0990" Phone, true rowexists}}
+		into NaturalLeftJoinKeyToNonKeyView;
+	if not(exists(NaturalLeftJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left join key to non key view insert into both tables failed");
+	if not(rowexists from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left join key to non key view insert into both tables failed");
+		
+	// update both tables
+	update NaturalLeftJoinKeyToNonKeyView set {Name := "Cooler Client Ten", Phone := "991-9019"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join key to non key view update left table failed");
+	if (Phone from row from (NaturalLeftJoinKeyToNonKeyView where ID = "010")) <> "991-9019" then
+		raise Error("Natural left join key to non key view update right table failed");
+		
+	// delete both tables
+	delete NaturalLeftJoinKeyToNonKeyView where ID = "010";
+	if exists(NaturalLeftJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural left join key to non key view delete failed");
+		
+drop view NaturalLeftJoinKeyToNonKeyView;
+*/
+
+//*
+// Left Join Non-Key to Key
+create view LeftJoinNonKeyToKeyView (Client rename C) left join (ClientType rename CT) by C.Type_ID = CT.ID include rowexists;
+
+	// insert left table only
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) 
+		into LeftJoinNonKeyToKeyView;
+	if not(exists(LeftJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join non key to key view insert failed");
+		
+	// update left table
+	update LeftJoinNonKeyToKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (Name from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join non key to key view update of left table failed");
+		
+	// update to insert right table
+	update LeftJoinNonKeyToKeyView set {rowexists := true, C.Type_ID := "010", CT.ID := "010", CT.Description := "Ten"} where C.ID = "010";
+	if not(rowexists from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join non key to key view update to insert right table failed");
+	if (Description from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) <> "Ten" then
+		raise Error("Left join non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update LeftJoinNonKeyToKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join non key to key view update to delete right table failed");
+
+	// delete
+	delete LeftJoinNonKeyToKeyView where C.ID = "010";
+	if exists(LeftJoinNonKeyToKeyView where C.ID = "010") then
+		raise Error("Left join non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) times
+		(table{row{"010" ID, "Ten" Description}} rename CT) add {true rowexists}
+		into LeftJoinNonKeyToKeyView;
+	if not(exists(LeftJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join non key to key view insert failed");
+	if not(rowexists from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left join non key to key view update left table failed");
+		
+	// update both tables
+	update LeftJoinNonKeyToKeyView set {C.Name := "Cooler Client Ten", CT.Description := "Tener"} where C.ID = "010";
+	if (Name from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left join non key to key view update of left table failed");
+	if (Description from row from (LeftJoinNonKeyToKeyView where C.ID = "010")) <> "Tener" then
+		raise Error("Left join non key to key view update of right table failed");
+		
+	// delete
+	delete LeftJoinNonKeyToKeyView where C.ID = "010";
+	if exists(LeftJoinNonKeyToKeyView where C.ID = "010") then
+		raise Error("Left join non key to key view delete failed");
+		
+drop view LeftJoinNonKeyToKeyView;
+
+//*
+// Natural Left Join Non-Key to Key
+create view NaturalLeftJoinNonKeyToKeyView Client left join (ClientType rename {ID Type_ID}) include rowexists;
+
+	// insert left table only
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}}
+		into NaturalLeftJoinNonKeyToKeyView;
+	if not(exists(NaturalLeftJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join non key to key view insert failed");
+		
+	// update left table
+	update NaturalLeftJoinNonKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join non key to key view update of left table failed");
+		
+	// update to insert right table
+	update NaturalLeftJoinNonKeyToKeyView set {rowexists := true, Type_ID := "010", Description := "Ten"} where ID = "010";
+	if (Description from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) <> "Ten" then
+		raise Error("Natural left join non key to key view update to insert right table failed");
+	if not(rowexists from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalLeftJoinNonKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join non key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftJoinNonKeyToKeyView where ID = "010";
+	if exists(NaturalLeftJoinNonKeyToKeyView where ID = "010") then
+		raise Error("Natural left join non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID, "Ten" Description, true rowexists}}
+		into NaturalLeftJoinNonKeyToKeyView;
+	if not(exists(NaturalLeftJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join non key to key view insert failed");
+	if not(rowexists from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left join non key to key view insert failed");
+		
+	// update both tables
+	update NaturalLeftJoinNonKeyToKeyView set {Name := "Cooler Client Ten", Description := "Tener"} where ID = "010";
+	if (Name from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left join non key to key view update of left table failed");
+	if (Description from row from (NaturalLeftJoinNonKeyToKeyView where ID = "010")) <> "Tener" then
+		raise Error("Natural left join non key to key view update of right table failed");
+		
+	// delete
+	delete NaturalLeftJoinNonKeyToKeyView where ID = "010";
+	if exists(NaturalLeftJoinNonKeyToKeyView where ID = "010") then
+		raise Error("Natural left join non key to key view delete failed");
+		
+drop view NaturalLeftJoinNonKeyToKeyView;
+
+/*
+//*
+// Left Join Non-Key to Non-Key
+create view LeftJoinNonKeyToNonKeyView (Client rename C) left join (Vendor rename V) by C.Name = V.Name include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) 
+		into LeftJoinNonKeyToNonKeyView;
+	if not(exists(LeftJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join non key to non key view insert failed");
+		
+	// update
+	update LeftJoinNonKeyToNonKeyView set {C.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Left join non key to non key view update of left table failed");
+		
+	// update to insert right table
+	update LeftJoinNonKeyToNonKeyView set {rowexists := true, V.ID := "010", V.Name := "Cooler Row Ten", V.Type_ID := "001"} where C.ID = "010";
+	if not(rowexists from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update LeftJoinNonKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join non key to non key view update to delete right table failed");
+		
+	// delete
+	delete LeftJoinNonKeyToNonKeyView where C.ID = "010";
+	if exists(LeftJoinNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left join non key to non key view delete failed");
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename V) add {true rowexists}
+		into LeftJoinNonKeyToNonKeyView;
+	if not(exists(LeftJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join non key to non key view insert failed");
+	if not(rowexists from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left join non key to non key view insert failed");
+		
+	// update
+	update LeftJoinNonKeyToNonKeyView set {C.Name := "Cooler Row Ten", V.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Left join non key to non key view update of left table failed");
+	if (V.Name from row from (LeftJoinNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Left join non key to non key view update of right table failed");
+		
+	// delete
+	delete LeftJoinNonKeyToNonKeyView where C.ID = "010";
+	if exists(LeftJoinNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left join non key to non key view delete failed");
+		
+drop view LeftJoinNonKeyToNonKeyView;
+*/
+
+/*
+//*
+// Natural Left Join Non-Key to Non-Key
+create view NaturalLeftJoinNonKeyToNonKeyView 
+	(Client rename {ID Client_ID, Type_ID Client_Type_ID}) 
+	left join (Vendor rename {ID Vendor_ID, Type_ID Vendor_Type_ID}) include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID}}) 
+		into NaturalLeftJoinNonKeyToNonKeyView;
+	if not(exists(NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left join non key to non key view insert failed");
+
+	// update
+	update NaturalLeftJoinNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural left join non key to non key view update of left table failed");
+		
+	// update to insert right table
+	update NaturalLeftJoinNonKeyToNonKeyView set {rowexists := true, Vendor_ID := "010", Vendor_Type_ID := "001"} where Client_ID = "010";
+	if not(rowexists from row from (NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left join non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalLeftJoinNonKeyToNonKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left join non key to non key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural left join non key to non key view delete failed");
+
+	// insert
+	insert 
+		table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID, "010" Vendor_ID, "001" Vendor_Type_ID, true rowexists}}
+		into NaturalLeftJoinNonKeyToNonKeyView;
+	if not(exists(NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left join non key to non key view insert failed");
+	if not(rowexists from row from (NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left join non key to non key view insert failed");
+		
+	// update
+	update NaturalLeftJoinNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural left join non key to non key view update of left table failed");
+		
+	// delete
+	delete NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalLeftJoinNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural left join non key to non key view delete failed");
+		
+drop view NaturalLeftJoinNonKeyToNonKeyView;
+*/
+
+DeleteClients();
+InsertClients();
+
+//*
+// Right Join Key to Key
+create view RightJoinKeyToKeyView (Client rename C) right join (ClientExtension rename CE) by C.ID = CE.Client_ID include rowexists;
+
+	// insert Right table only
+	insert
+		table { row { "010" Client_ID, "Extension Address" Address } } rename CE add { false rowexists }
+		into RightJoinKeyToKeyView;
+	if not(exists(RightJoinKeyToKeyView where CE.Client_ID = "010")) then
+		raise Error("Right join key to key view insert failed");
+		
+	// update Right table
+	update RightJoinKeyToKeyView set {CE.Address := "Extensioner Address"} where CE.Client_ID = "010";
+	if (Name from row from (RightJoinKeyToKeyView where CE.Client_ID = "010")) <> "Extensioner Address" then
+		raise Error("Right join key to key view update Right table failed");
+
+	// update to insert left table
+	update RightJoinKeyToKeyView set { rowexists := true, C.ID := "010", C.Name := "Cool Client Ten", C.Type_ID := "001" } where CE.Client_ID = "010";
+	if not(rowexists from row from (RightJoinKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right join key to key view update to insert left table failed");
+	if (Name from row from (RightJoinKeyToKeyView where Client_ID = "010")) <> "Cool Client Ten" then
+		raise Error("Right join key to key view update to insert left table failed");
+	
+	// update to delete left table
+	update RightJoinKeyToKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (RightJoinKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right join key to key view update to delete left table failed");
+		
+	// delete
+	delete RightJoinKeyToKeyView where Client_ID = "010";
+	if exists(RightJoinKeyToKeyView where Client_ID = "010") then
+		raise Error("Right join key to key view delete failed");
+		
+	// insert both tables
+	insert
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "41 Spinning Avenue" Address}} rename CE) add {true rowexists}
+		into RightJoinKeyToKeyView;
+	if not(exists(RightJoinKeyToKeyView where C.ID = "010")) then
+		raise Error("Right join key to key view insert failed");
+	if not(rowexists from row from (RightJoinKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right join key to key view insert failed");
+		
+	// update both tables
+	update RightJoinKeyToKeyView set {C.Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (RightJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Right join key to key view update Right table failed");
+	if (Address from row from (RightJoinKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Right join key to key view update right table failed");
+
+	// delete
+	delete RightJoinKeyToKeyView where ID = "010";
+	if exists(RightJoinKeyToKeyView where ID = "010") then
+		raise Error("Right join key to key view delete failed");
+		
+drop view RightJoinKeyToKeyView;
+
+//*
+// Natural Right Join Key to Key
+create view NaturalRightJoinKeyToKeyView Client right join (ClientExtension rename {Client_ID ID}) include rowexists;
+
+	// insert Right table only
+	insert table { row { "010" ID, "41 Spinning Avenue" Address, false rowexists } } into NaturalRightJoinKeyToKeyView;
+	if not exists (NaturalRightJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural right join key to key view insert failed");
+		
+	// update right table
+	update NaturalRightJoinKeyToKeyView set { Address := "41 Spinninger Avenue" } where ID = "010";
+	if (Address from row from (NaturalRightJoinKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Natural right join key to key view update right table failed");
+		
+	// update to insert left table
+	update NaturalRightJoinKeyToKeyView set { rowexists := true, Name := "Cool Client Ten", Type_ID := "001" } where ID = "010";
+	if not(rowexists from row from (NaturalRightJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural right join key to key view update to insert left table failed");
+	if (Name from row from (NaturalRightJoinKeyToKeyView where ID = "010")) <> "Cool Client Ten" then
+		raise Error("Natural right join key to key view update to insert left table failed");
+		
+	// update to delete left table
+	update NaturalRightJoinKeyToKeyView set { rowexists := false } where ID = "010";
+	if (rowexists from row from (NaturalRightJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural right join key to key view update to delete left table failed");
+	
+	// delete
+	delete NaturalRightJoinKeyToKeyView where ID = "010";
+	if exists(NaturalRightJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural Right join key to key view delete failed");
+		
+	// insert both tables
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "41 Spinning Avenue" Address, true rowexists}}
+		into NaturalRightJoinKeyToKeyView;
+	if not(exists(NaturalRightJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural right join key to key view insert failed");
+	if not(rowexists from row from (NaturalRightJoinKeyToKeyView where ID = "010")) then
+		raise Error("Natural right join key to key view insert failed");
+		
+	// update both tables
+	update NaturalRightJoinKeyToKeyView set {Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (NaturalRightJoinKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural Right join key to key view update Right table failed");
+	if (Address from row from (NaturalRightJoinKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Natural Right join key to key view update right table failed");
+
+	// delete
+	delete NaturalRightJoinKeyToKeyView where ID = "010";
+	if exists(NaturalRightJoinKeyToKeyView where ID = "010") then
+		raise Error("Natural Right join key to key view delete failed");
+		
+drop view NaturalRightJoinKeyToKeyView;
+
+//*
+// Right Join Key to Non-Key
+create view RightJoinKeyToNonKeyView (Client rename C) right join (ClientPhone rename CP) by C.ID = CP.Client_ID include rowexists;
+
+	// insert Right table
+	insert table { row { "010" CP.Client_ID, "990-0990" CP.Phone, false rowexists } } into RightJoinKeyToNonKeyView;
+	if not exists (RightJoinKeyToNonKeyView where CP.Client_ID = "010") then
+		raise Error("Right join key to non key view insert right table failed");
+		
+	// update right table
+	update RightJoinKeyToNonKeyView set { CP.Phone := "991-9119" } where CP.Client_ID = "010";
+	if (CP.Phone from row from (RightJoinKeyToNonKeyView where CP.Client_ID = "010")) <> "991-9119" then
+		raise Error("Right join key to non key view update right table failed");
+		
+	// update to insert right table
+	update RightJoinKeyToNonKeyView set { rowexists := true, C.ID := "010", C.Name := "Cool Client Ten" } where CP.Client_ID = "010";
+	if not(rowexists from row from (RightJoinKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Right join key to non key view update to insert left table failed");
+	if (C.ID from row from (RightJoinKeyToNonKeyView where CP.Client_ID = "010")) <> "010" then
+		raise Error("Right join key to non key view update to insert left table failed");
+		
+	// update to delete right table
+	update RightJoinKeyToNonKeyView set { rowexists := false } where CP.Client_ID = "010";
+	if (rowexists from row from (RightJoinKeyToNonKeyView where CP.Client_ID = "010")) then
+		raise Error("Right join key to non-key view update to delete left table failed");
+		
+	// delete Right table
+	delete RightJoinKeyToNonKeyView where CP.Client_ID = "010";
+	if exists(RightJoinKeyToNonKeyView where CP.Client_ID = "010") then
+		raise Error("Right join key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "990-0990" Phone}} rename CP) add {true rowexists}
+		into RightJoinKeyToNonKeyView;
+	if not(exists(RightJoinKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right join key to non key view insert into both tables failed");
+	if not(rowexists from row from (RightJoinKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Right join key to non key view insert into both tables failed");
+		
+	// update both tables
+	update RightJoinKeyToNonKeyView set {C.Name := "Cooler Client Ten", CP.Phone := "991-9019"} where C.ID = "010";
+	if (C.Name from row from (RightJoinKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Right join key to non key view update Right table failed");
+	if (CP.Phone from row from (RightJoinKeyToNonKeyView where C.ID = "010")) <> "991-9019" then
+		raise Error("Right join key to non key view update right table failed");
+		
+	// delete both tables
+	delete RightJoinKeyToNonKeyView where C.ID = "010";
+	if exists(RightJoinKeyToNonKeyView where C.ID = "010") then
+		raise Error("Right join key to non key view delete failed");
+		
+drop view RightJoinKeyToNonKeyView;
+		
+//*
+// Right Join Key to Non-Key
+create view NaturalRightJoinKeyToNonKeyView Client right join (ClientPhone rename {Client_ID ID}) include rowexists;
+	
+	// insert Right table
+	insert table { row { "010" ID, "990-0990" Phone, false rowexists } } into NaturalRightJoinKeyToNonKeyView;
+	if not exists (NaturalRightJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural right join key to non key view insert right table failed");
+		
+	// update Right table
+	update NaturalRightJoinKeyToNonKeyView set { Phone := "919-9119" } where ID = "010";
+	if (Phone from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) <> "919-9119" then
+		raise Error("Natural Right join key to non key view update Right table failed");
+		
+	// update to insert left table
+	update NaturalRightJoinKeyToNonKeyView set { rowexists := true, Name := "Cool Client Ten", Type_ID := "001" } where ID = "010"; 
+	if not(rowexists from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right join key to non key view update to insert left table failed");
+	if (Name from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) <> "Cool Client Ten" then
+		raise Error("Natural right join key to non key view update to insert left table failed");
+		
+	// update to delete right table
+	update NaturalRightJoinKeyToNonKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural Right join key to non key view update to delete right table failed");
+		
+	// delete Right table
+	delete NaturalRightJoinKeyToNonKeyView where ID = "010";
+	if exists(NaturalRightJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural Right join key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "990-0990" Phone, true rowexists}}
+		into NaturalRightJoinKeyToNonKeyView;
+	if not(exists(NaturalRightJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right join key to non key view insert into both tables failed");
+	if not(rowexists from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right join key to non key view insert into both tables failed");
+		
+	// update both tables
+	update NaturalRightJoinKeyToNonKeyView set {Name := "Cooler Client Ten", Phone := "991-9019"} where ID = "010";
+	if (Name from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural Right join key to non key view update Right table failed");
+	if (Phone from row from (NaturalRightJoinKeyToNonKeyView where ID = "010")) <> "991-9019" then
+		raise Error("Natural Right join key to non key view update right table failed");
+		
+	// delete both tables
+	delete NaturalRightJoinKeyToNonKeyView where ID = "010";
+	if exists(NaturalRightJoinKeyToNonKeyView where ID = "010") then
+		raise Error("Natural Right join key to non key view delete failed");
+		
+drop view NaturalRightJoinKeyToNonKeyView;
+
+/*
+//*
+// Right Join Non-Key to Key
+create view RightJoinNonKeyToKeyView (Client rename C) right join (ClientType rename CT) by C.Type_ID = CT.ID include rowexists;
+
+	// insert Right table only
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) 
+		into RightJoinNonKeyToKeyView;
+	if not(exists(RightJoinNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Right join non key to key view insert failed");
+		
+	// update Right table
+	update RightJoinNonKeyToKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (Name from row from (RightJoinNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Right join non key to key view update of Right table failed");
+		
+	// update to insert right table
+	update RightJoinNonKeyToKeyView set {rowexists := true, CT.ID := "010", CT.Description := "Ten"} where C.ID = "010";
+	if (Description from row from (RightJoinNonKeyToKeyView where C.ID = "010")) <> "Ten" then
+		raise Error("Right join non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update RightJoinNonKeyToKeyView set {rowexists := false} where C.ID = "010"; 
+	if (rowexists from row from (RightJoinNonKeyTOKeyView where C.ID = "010")) then
+		raise Error("Right join non key to key view update to delete right table failed");
+		
+	// delete
+	delete RightJoinNonKeyToKeyView where C.ID = "010";
+	if exists(RightJoinNonKeyToKeyView where C.ID = "010") then
+		raise Error("Right join non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) times
+		(table{row{"010" ID, "Ten" Description}} rename CT) add {true rowexists}
+		into RightJoinNonKeyToKeyView;
+	if not(exists(RightJoinNonKeyToKeyView where CT.ID = "010")) then
+		raise Error("Right join non key to key view insert failed");
+	if not(rowexists from row from (RightJoinNonKeyToKeyView where CT.ID = "010")) then
+		raise Error("Right join non key to key view insert failed");
+		
+	// update both tables
+	update RightJoinNonKeyToKeyView set {C.Name := "Cooler Client Ten", CT.Description := "Tener"} where CT.ID = "010";
+	if (Name from row from (RightJoinNonKeyToKeyView where CT.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Right join non key to key view update of Right table failed");
+	if (Description from row from (RightJoinNonKeyToKeyView where CT.ID = "010")) <> "Tener" then
+		raise Error("Right join non key to key view update of right table failed");
+		
+	// delete
+	delete RightJoinNonKeyToKeyView where CT.ID = "010";
+	if exists(RightJoinNonKeyToKeyView where CT.ID = "010") then
+		raise Error("Right join non key to key view delete failed");
+		
+drop view RightJoinNonKeyToKeyView;
+*/
+		
+/*
+//*
+// Natural Right Join Non-Key to Key
+create view NaturalRightJoinNonKeyToKeyView Client right join (ClientType rename {ID Type_ID}) include rowexists;
+
+	// insert Right table only
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}}
+		into NaturalRightJoinNonKeyToKeyView;
+	if not(exists(NaturalRightJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural Right join non key to key view insert failed");
+		
+	// update Right table
+	update NaturalRightJoinNonKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalRightJoinNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural Right join non key to key view update of Right table failed");
+		
+	// update to insert right table
+	update NaturalRightJoinNonKeyToKeyView set {rowexists := true, ID := "010", Description := "Ten"} where ID = "010";
+	if (Description from row from (NaturalRightJoinNonKeyToKeyView where ID = "010")) <> "Ten" then
+		raise Error("Natural Right join non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalRightJoinNonKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalRightJoinNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural Right join non key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalRightJoinNonKeyToKeyView where ID = "010";
+	if exists(NaturalRightJoinNonKeyToKeyView where ID = "010") then
+		raise Error("Natural Right join non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID, "Ten" Description, true rowexists}}
+		into NaturalRightJoinNonKeyToKeyView;
+	if not(exists(NaturalRightJoinNonKeyToKeyView where not(ID.IsNil()) and ID = "010")) then
+		raise Error("Natural right join non key to key view insert failed");
+	if not(rowexists from row from (NaturalRightJoinNonKeyToKeyView where not(ID.IsNil()) and ID = "010")) then
+		raise Error("Natural right join non key to key view insert failed");
+		
+	// update both tables
+	update NaturalRightJoinNonKeyToKeyView set {Name := "Cooler Client Ten", Description := "Tener"} where Type_ID = "010";
+	if (Name from row from (NaturalRightJoinNonKeyToKeyView where Type_ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural Right join non key to key view update of Right table failed");
+	if (Description from row from (NaturalRightJoinNonKeyToKeyView where Type_ID = "010")) <> "Tener" then
+		raise Error("Natural Right join non key to key view update of right table failed");
+		
+	// delete
+	delete NaturalRightJoinNonKeyToKeyView where Type_ID = "010";
+	if exists(NaturalRightJoinNonKeyToKeyView where Type_ID = "010") then
+		raise Error("Natural Right join non key to key view delete failed");
+		
+drop view NaturalRightJoinNonKeyToKeyView;
+*/
+
+/*
+//*
+// Right Join Non-Key to Non-Key
+create view RightJoinNonKeyToNonKeyView (Client rename C) right join (Vendor rename V) by C.Name = V.Name include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) 
+		into RightJoinNonKeyToNonKeyView;
+	if not(exists(RightJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right join non key to non key view insert failed");
+
+	// update
+	update RightJoinNonKeyToNonKeyView set {C.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (RightJoinNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Right join non key to non key view update of Right table failed");
+		
+	// update to insert right table
+	update RightJoinNonKeyToNonKeyView set {rowexists := true, V.ID := "010", V.Name := "Cooler Row Ten", V.Type_ID := "001"} where C.ID = "010";
+	if not(rowexists from row from (RightJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right join non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update RightJoinNonKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (RightJoinNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right join non key to non key view update to delete right table failed");
+		
+	// delete
+	delete RightJoinNonKeyToNonKeyView where C.ID = "010";
+	if exists(RightJoinNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Right join non key to non key view delete failed");
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename V) add {true rowexists}
+		into RightJoinNonKeyToNonKeyView;
+	if not(exists(RightJoinNonKeyToNonKeyView where V.ID = "010")) then
+		raise Error("Right join non key to non key view insert failed");
+	if not(rowexists from row from (RightJoinNonKeyToNonKeyView where V.ID = "010")) then
+		raise Error("Right join non key to non key view insert failed");
+		
+	// update
+	update RightJoinNonKeyToNonKeyView set {C.Name := "Cooler Row Ten", V.Name := "Cooler Row Ten"} where V.ID = "010";
+	if (C.Name from row from (RightJoinNonKeyToNonKeyView where V.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Right join non key to non key view update of Right table failed");
+	if (V.Name from row from (RightJoinNonKeyToNonKeyView where V.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Right join non key to non key view update of right table failed");
+		
+	// delete
+	delete RightJoinNonKeyToNonKeyView where V.ID = "010";
+	if exists(RightJoinNonKeyToNonKeyView where V.ID = "010") then
+		raise Error("Right join non key to non key view delete failed");
+		
+drop view RightJoinNonKeyToNonKeyView;
+*/
+
+/*
+//*
+// Natural Right Join Non-Key to Non-Key
+create view NaturalRightJoinNonKeyToNonKeyView 
+	(Client rename {ID Client_ID, Type_ID Client_Type_ID}) 
+	right join (Vendor rename {ID Vendor_ID, Type_ID Vendor_Type_ID}) include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" Client_ID, "Cool Row Ten" Client_Name, "001" Client_Type_ID}}) 
+		into NaturalRightJoinNonKeyToNonKeyView;
+	if not(exists(NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right join non key to non key view insert failed");
+
+	// update
+	update NaturalRightJoinNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural Right join non key to non key view update of Right table failed");
+		
+	// update to insert right table
+	update NaturalRightJoinNonKeyToNonKeyView set {rowexists := true, Vendor_ID := "010", Vendor_Type_ID := "001"} where Client_ID = "010";
+	if not(rowexists from row from (NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right join non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalRightJoinNonKeyToNonKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right join non key to non key view update to delete right table failed");
+		
+	// delete
+	delete NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalRightJoinNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural Right join non key to non key view delete failed");
+
+	// insert
+	insert 
+		table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID, "010" Vendor_ID, "001" Vendor_Type_ID, true rowexists}}
+		into NaturalRightJoinNonKeyToNonKeyView;
+	if not(exists(NaturalRightJoinNonKeyToNonKeyView where Vendor_ID = "010")) then
+		raise Error("Natural right join non key to non key view insert failed");
+	if not(rowexists from row from (NaturalRightJoinNonKeyToNonKeyView where Vendor_ID = "010")) then
+		raise Error("Natural right join non key to non key view update to insert left table failed");
+		
+	// update
+	update NaturalRightJoinNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Vendor_ID = "010";
+	if (Name from row from (NaturalRightJoinNonKeyToNonKeyView where Vendor_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural Right join non key to non key view update of Right table failed");
+		
+	// delete
+	delete NaturalRightJoinNonKeyToNonKeyView where Vendor_ID = "010";
+	if exists(NaturalRightJoinNonKeyToNonKeyView where Vendor_ID = "010") then
+		raise Error("Natural Right join non key to non key view delete failed");
+	
+drop view NaturalRightJoinNonKeyToNonKeyView;
+*/
+
+DeleteClients();
+InsertClients();
+
+//*
+// Left Lookup Key to Key
+create view LeftLookupKeyToKeyView (Client rename C) left lookup (ClientExtension rename CE) by C.ID = CE.Client_ID include rowexists;
+
+	// insert left table only
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C
+		into LeftLookupKeyToKeyView;
+	if not(exists(LeftLookupKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup key to key view insert failed");
+		
+	// update left table
+	update LeftLookupKeyToKeyView set {C.Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (LeftLookupKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup key to key view update left table failed");
+		
+	// update to insert right table
+	update LeftLookupKeyToKeyView set {rowexists := true, CE.Client_ID := "010", CE.Address := "41 Spinning Avenue"} where ID = "010";
+	if (rowexists from row from (LeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Left lookup key to key view update was propogated to the right side.");
+	
+	// update to delete right table
+	update LeftLookupKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (LeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Left lookup key to key view update to delete right table failed");
+		
+	// delete
+	delete LeftLookupKeyToKeyView where ID = "010";
+	if exists(LeftLookupKeyToKeyView where ID = "010") then
+		raise Error("Left lookup key to key view delete failed");
+		
+	// insert both tables
+	insert
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "41 Spinning Avenue" Address}} rename CE) add {true rowexists}
+		into LeftLookupKeyToKeyView;
+	if not(exists(LeftLookupKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup key to key view insert failed");
+	if (rowexists from row from (LeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Left lookup key to key view insert was propogated to the right side.");
+		
+	// update both tables
+	update LeftLookupKeyToKeyView set {C.Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (LeftLookupKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup key to key view update left table failed");
+	if (Address from row from (LeftLookupKeyToKeyView where ID = "010")) = "41 Spinninger Avenue" then
+		raise Error("Left lookup key to key view update right table failed");
+
+	// delete
+	delete LeftLookupKeyToKeyView where ID = "010";
+	if exists(LeftLookupKeyToKeyView where ID = "010") then
+		raise Error("Left lookup key to key view delete failed");
+		
+	// verify that deletes and updates are not propogated
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into Client;
+	insert table { row { "010" Client_ID, "41 Spinning Avenue" Address } } into ClientExtension;
+	
+	update LeftLookupKeyToKeyView set { rowexists := false } where ID = "010";
+	if not(rowexists from row from (LeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Left lookup key to key view update propogated to the right side");
+		
+	delete LeftLookupKeyToKeyView where ID = "010";
+	if not exists (ClientExtension where Client_ID = "010") then
+		raise Error("Left lookup key to key view delete propogated to the right side");
+		
+	delete ClientExtension where Client_ID = "010";
+		
+drop view LeftLookupKeyToKeyView;
+
+//*
+// Natural Left Lookup Key to Key
+create view NaturalLeftLookupKeyToKeyView Client left lookup (ClientExtension rename {Client_ID ID}) include rowexists;
+
+	// insert left table only
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}}
+		into NaturalLeftLookupKeyToKeyView;
+	if not(exists(NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view insert failed");
+		
+	// update left table
+	update NaturalLeftLookupKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup key to key view update left table failed");
+		
+	// update to insert right table
+	update NaturalLeftLookupKeyToKeyView set {rowexists := true, Address := "41 Spinning Avenue"} where ID = "010";
+	if (rowexists from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view update was propogated to the right side.");
+	
+	// update to delete right table
+	update NaturalLeftLookupKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftLookupKeyToKeyView where ID = "010";
+	if exists(NaturalLeftLookupKeyToKeyView where ID = "010") then
+		raise Error("Natural left lookup key to key view delete failed");
+		
+	// insert both tables
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "41 Spinning Avenue" Address, true rowexists}}
+		into NaturalLeftLookupKeyToKeyView;
+	if not(exists(NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view insert failed");
+	if (rowexists from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view insert was propogated to the right side.");
+		
+	// update both tables
+	update NaturalLeftLookupKeyToKeyView set {Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup key to key view update left table failed");
+	if (Address from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) = "41 Spinninger Avenue" then
+		raise Error("Natural left lookup key to key view update right table failed");
+
+	// delete
+	delete NaturalLeftLookupKeyToKeyView where ID = "010";
+	if exists(NaturalLeftLookupKeyToKeyView where ID = "010") then
+		raise Error("Natural left lookup key to key view delete failed");
+		
+	// verify that deletes and updates are not propogated
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into Client;
+	insert table { row { "010" Client_ID, "41 Spinning Avenue" Address } } into ClientExtension;
+	
+	update NaturalLeftLookupKeyToKeyView set { rowexists := false } where ID = "010";
+	if not(rowexists from row from (NaturalLeftLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to key view update propogated to the right side");
+		
+	delete NaturalLeftLookupKeyToKeyView where ID = "010";
+	if not exists (ClientExtension where Client_ID = "010") then
+		raise Error("Natural left lookup key to key view delete propogated to the right side");
+		
+	delete ClientExtension where Client_ID = "010";
+		
+drop view NaturalLeftLookupKeyToKeyView;
+
+/*
+//*
+// Left Lookup Key to Non-Key
+create view LeftLookupKeyToNonKeyView (Client rename C) left lookup (ClientPhone rename CP) by C.ID = CP.Client_ID include rowexists;
+
+	// insert left table
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C
+		into LeftLookupKeyToNonKeyView;
+	if not(exists(LeftLookupKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup key to non key view insert left table failed");
+		
+	// update left table
+	update LeftLookupKeyToNonKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftLookupKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup key to non key view update left table failed");
+		
+	// update to insert right table
+	update LeftLookupKeyToNonKeyView set {rowexists := true, CP.Client_ID := "010", CP.Phone := "990-0990"} where C.ID = "010";
+	if (Phone from row from (LeftLookupKeyToNonKeyView where C.ID = "010")) <> "990-0990" then
+		raise Error("Left lookup key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update LeftLookupKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftLookupKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup key to non key view update to delete right table failed");
+		
+	// delete left table
+	delete LeftLookupKeyToNonKeyView where C.ID = "010";
+	if exists(LeftLookupKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left lookup key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "990-0990" Phone}} rename CP) add {true rowexists}
+		into LeftLookupKeyToNonKeyView;
+	if not(exists(LeftLookupKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup key to non key view insert into both tables failed");
+	if (rowexists from row from (LeftLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Left lookup key to key view insert was propogated to the right side.");
+		
+	// update both tables
+	update LeftLookupKeyToNonKeyView set {C.Name := "Cooler Client Ten", CP.Phone := "991-9019"} where C.ID = "010";
+	if (C.Name from row from (LeftLookupKeyToNonKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup key to non key view update left table failed");
+	if (CP.Phone from row from (LeftLookupKeyToNonKeyView where C.ID = "010")) = "991-9019" then
+		raise Error("Left lookup key to non key view update right table failed");
+		
+	// delete both tables
+	delete LeftLookupKeyToNonKeyView where C.ID = "010";
+	if exists(LeftLookupKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left lookup key to non key view delete failed");
+	delete Client where ID = "010";
+	
+drop view LeftLookupKeyToNonKeyView;
+*/
+
+/*
+//*
+// Natural Left Lookup Key to Non-Key
+create view NaturalLeftLookupKeyToNonKeyView Client left lookup (ClientPhone rename {Client_ID ID}) include rowexists;
+		
+	// insert left table
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}}
+		into NaturalLeftLookupKeyToNonKeyView;
+	if not(exists(NaturalLeftLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to non key view insert left table failed");
+		
+	// update left table
+	update NaturalLeftLookupKeyToNonKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup key to non key view update left table failed");
+		
+	// update to insert right table
+	update NaturalLeftLookupKeyToNonKeyView set {rowexists := true, Phone := "990-0990"} where ID = "010";
+	if (Phone from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) <> "990-0990" then
+		raise Error("Natural left lookup key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalLeftLookupKeyToNonKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to non key view update to delete right table failed");
+		
+	// delete left table
+	delete NaturalLeftLookupKeyToNonKeyView where ID = "010";
+	if exists(NaturalLeftLookupKeyToNonKeyView where ID = "010") then
+		raise Error("Natural left lookup key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "990-0990" Phone, true rowexists}}
+		into NaturalLeftLookupKeyToNonKeyView;
+	if not(exists(NaturalLeftLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to non key view insert into both tables failed");
+	if (rowexists from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural left lookup key to non key view insert was propogated to the right side.");
+		
+	// update both tables
+	update NaturalLeftLookupKeyToNonKeyView set {Name := "Cooler Client Ten", Phone := "991-9019"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup key to non key view update left table failed");
+	if (Phone from row from (NaturalLeftLookupKeyToNonKeyView where ID = "010")) = "991-9019" then
+		raise Error("Natural left lookup key to non key view update right table failed");
+		
+	// delete both tables
+	delete NaturalLeftLookupKeyToNonKeyView where ID = "010";
+	if exists(NaturalLeftLookupKeyToNonKeyView where ID = "010") then
+		raise Error("Natural left lookup key to non key view delete failed");
+
+	delete Client where ID = "010";
+	
+drop view NaturalLeftLookupKeyToNonKeyView;
+*/
+
+//*
+// Left Lookup Non-Key to Key
+DeleteClients();
+InsertClients();
+create view LeftLookupNonKeyToKeyView (Client rename C) left lookup (ClientType rename CT) by C.Type_ID = CT.ID include rowexists;
+
+	// insert left table only
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) 
+		into LeftLookupNonKeyToKeyView;
+	if not(exists(LeftLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to key view insert failed");
+		
+	// update left table
+	update LeftLookupNonKeyToKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (Name from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup non key to key view update of left table failed");
+		
+	// update to insert right table
+	update LeftLookupNonKeyToKeyView set {rowexists := true, C.Type_ID := "010", CT.ID := "010", CT.Description := "Ten"} where C.ID = "010";
+	if (rowexists from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to key view update was propogated to the right side.");
+		
+	// update to delete right table
+	update LeftLookupNonKeyToKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to key view update to delete right table failed");
+		
+	// delete
+	delete LeftLookupNonKeyToKeyView where C.ID = "010";
+	if exists(LeftLookupNonKeyToKeyView where C.ID = "010") then
+		raise Error("Left lookup non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) times
+		(table{row{"010" ID, "Ten" Description}} rename CT) add {true rowexists}
+		into LeftLookupNonKeyToKeyView;
+	if not(exists(LeftLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to key view insert failed");
+	if (rowexists from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to key view insert was propogated to the right side.");
+		
+	// update both tables
+	update LeftLookupNonKeyToKeyView set {C.Name := "Cooler Client Ten", CT.Description := "Tener"} where C.ID = "010";
+	if (Name from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Left lookup non key to key view update of left table failed");
+	if (Description from row from (LeftLookupNonKeyToKeyView where C.ID = "010")) = "Tener" then
+		raise Error("Left lookup non key to key view update of right table failed");
+		
+	// delete
+	delete LeftLookupNonKeyToKeyView where C.ID = "010";
+	if exists(LeftLookupNonKeyToKeyView where C.ID = "010") then
+		raise Error("Left lookup non key to key view delete failed");
+			
+	insert table { row { "010" C.ID, "Cool Client Ten" C.Name, "001" C.Type_ID } } into LeftLookupNonKeyToKeyView;
+	if not exists (LeftLookupNonKeyToKeyView where C.ID = "010") then
+		raise Error("Left lookup non key to key view insert failed");
+		
+	update LeftLookupNonKeyToKeyView set { rowexists := false } where C.ID = "010";
+	if not exists (ClientType where ID = "001") then
+		raise Error("Left lookup non key to key view update propogated to the right side");
+		
+	delete LeftLookupNonKeyToKeyView where C.ID = "010";
+	if not exists (ClientType where ID = "001") then
+		raise Error("Left lookup non key to key view delete propogated to the right side");
+		
+drop view LeftLookupNonKeyToKeyView;
+
+//*
+// Natural Left Lookup Non-Key to Key
+create view NaturalLeftLookupNonKeyToKeyView Client left lookup (ClientType rename {ID Type_ID}) include rowexists;
+
+	// insert left table only
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}}
+		into NaturalLeftLookupNonKeyToKeyView;
+	if not(exists(NaturalLeftLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup non key to key view insert failed");
+		
+	// update left table
+	update NaturalLeftLookupNonKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup non key to key view update of left table failed");
+		
+	// update to insert right table
+	update NaturalLeftLookupNonKeyToKeyView set {rowexists := true, ID := "010", Description := "Ten"} where ID = "010";
+	if (rowexists from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup non key to key view update was propogated to the right side.");
+		
+	// update to delete right table
+	update NaturalLeftLookupNonKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup non key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftLookupNonKeyToKeyView where ID = "010";
+	if exists(NaturalLeftLookupNonKeyToKeyView where ID = "010") then
+		raise Error("Natural left lookup non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID, "Ten" Description, true rowexists}}
+		into NaturalLeftLookupNonKeyToKeyView;
+	if not(exists(NaturalLeftLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup non key to key view insert failed");
+	if (rowexists from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural left lookup non key to key view insert was propogated to the right side.");
+		
+	// update both tables
+	update NaturalLeftLookupNonKeyToKeyView set {Name := "Cooler Client Ten", Description := "Tener"} where ID = "010";
+	if (Name from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural left lookup non key to key view update of left table failed");
+	if (Description from row from (NaturalLeftLookupNonKeyToKeyView where ID = "010")) = "Tener" then
+		raise Error("Natural left lookup non key to key view update of right table failed");
+		
+	// delete
+	delete NaturalLeftLookupNonKeyToKeyView where ID = "010";
+	if exists(NaturalLeftLookupNonKeyToKeyView where ID = "010") then
+		raise Error("Natural left lookup non key to key view delete failed");
+		
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into NaturalLeftLookupNonKeyToKeyView;
+	if not exists (NaturalLeftLookupNonKeyToKeyView where ID = "010") then
+		raise Error("Left lookup non key to key view insert failed");
+		
+	update NaturalLeftLookupNonKeyToKeyView set { rowexists := false } where ID = "010";
+	if not exists (ClientType where ID = "001") then
+		raise Error("Left lookup non key to key view update propogated to the right side");
+		
+	delete NaturalLeftLookupNonKeyToKeyView where ID = "010";
+	if not exists (ClientType where ID = "001") then
+		raise Error("Left lookup non key to key view delete propogated to the right side");
+		
+drop view NaturalLeftLookupNonKeyToKeyView;
+
+/*
+//*
+// Left Lookup Non-Key to Non-Key
+create view LeftLookupNonKeyToNonKeyView (Client rename C) left lookup (Vendor rename V) by C.Name = V.Name include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) 
+		into LeftLookupNonKeyToNonKeyView;
+	if not(exists(LeftLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to non key view insert failed");
+		
+	// update
+	update LeftLookupNonKeyToNonKeyView set {C.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Left lookup non key to non key view update of left table failed");
+		
+	// update to insert right table
+	update LeftLookupNonKeyToNonKeyView set {rowexists := true, V.ID := "010", V.Name := "Cooler Row Ten", V.Type_ID := "001"} where C.ID = "010";
+	if not(rowexists from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update LeftLookupNonKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to non key view update to delete right table failed");
+		
+	// delete
+	delete LeftLookupNonKeyToNonKeyView where C.ID = "010";
+	if exists(LeftLookupNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left lookup non key to non key view delete failed");
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename V) add {true rowexists}
+		into LeftLookupNonKeyToNonKeyView;
+	if not(exists(LeftLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to non key view insert failed");
+	if (rowexists from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Left lookup non key to non key view insert was propogated to the right side.");
+		
+	// update
+	update LeftLookupNonKeyToNonKeyView set {C.Name := "Cooler Row Ten", V.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Left lookup non key to non key view update of left table failed");
+	if (V.Name from row from (LeftLookupNonKeyToNonKeyView where C.ID = "010")) = "Cooler Row Ten" then
+		raise Error("Left lookup non key to non key view update of right table failed");
+		
+	// delete
+	delete LeftLookupNonKeyToNonKeyView where C.ID = "010";
+	if exists(LeftLookupNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Left lookup non key to non key view delete failed");
+	delete Client where ID = "010";		
+
+drop view LeftLookupNonKeyToNonKeyView;
+*/
+
+/*
+//*
+// Natural Left Lookup Non-Key to Non-Key
+create view NaturalLeftLookupNonKeyToNonKeyView 
+	(Client rename {ID Client_ID, Type_ID Client_Type_ID}) 
+	left lookup (Vendor rename {ID Vendor_ID, Type_ID Vendor_Type_ID}) include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID}}) 
+		into NaturalLeftLookupNonKeyToNonKeyView;
+	if not(exists(NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left lookup non key to non key view insert failed");
+
+	// update
+	update NaturalLeftLookupNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural left lookup non key to non key view update of left table failed");
+		
+	// update to insert right table
+	update NaturalLeftLookupNonKeyToNonKeyView set {rowexists := true, Vendor_ID := "010", Vendor_Type_ID := "001"} where Client_ID = "010";
+	if not(rowexists from row from (NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left lookup non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalLeftLookupNonKeyToNonKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left lookup non key to non key view update to delete right table failed");
+		
+	// delete
+	delete NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural left lookup non key to non key view delete failed");
+
+	// insert
+	insert 
+		table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID, "010" Vendor_ID, "001" Vendor_Type_ID, true rowexists}}
+		into NaturalLeftLookupNonKeyToNonKeyView;
+	if not(exists(NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left lookup non key to non key view insert failed");
+	if (rowexists from row from (NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural left lookup non key to non key view insert was propogated to the right side.");
+		
+	// update
+	update NaturalLeftLookupNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural left lookup non key to non key view update of left table failed");
+		
+	// delete
+	delete NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalLeftLookupNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural left lookup non key to non key view delete failed");
+		
+	delete Client where ID = "010";
+		
+drop view NaturalLeftLookupNonKeyToNonKeyView;
+*/
+
+//*
+// Right Lookup Key to Key
+create view RightLookupKeyToKeyView (Client rename C) right lookup (ClientExtension rename CE) by C.ID = CE.Client_ID include rowexists;
+
+	// insert Right table only
+	insert
+		table { row { "010" Client_ID, "Extension Address" Address } } rename CE add { false rowexists }
+		into RightLookupKeyToKeyView;
+	if not(exists(RightLookupKeyToKeyView where CE.Client_ID = "010")) then
+		raise Error("Right lookup key to key view insert failed");
+		
+	// update Right table
+	update RightLookupKeyToKeyView set {CE.Address := "Extensioner Address"} where CE.Client_ID = "010";
+	if (Name from row from (RightLookupKeyToKeyView where CE.Client_ID = "010")) <> "Extensioner Address" then
+		raise Error("Right lookup key to key view update Right table failed");
+
+	// update to insert left table
+	update RightLookupKeyToKeyView set { rowexists := true, C.ID := "010", C.Name := "Cool Client Ten", C.Type_ID := "001" } where CE.Client_ID = "010";
+	if (rowexists from row from (RightLookupKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right lookup key to key view update was propogated to the left side");
+	
+	// update to delete left table
+	update RightLookupKeyToKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (RightLookupKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right lookup key to key view update to delete left table failed");
+		
+	// delete
+	delete RightLookupKeyToKeyView where Client_ID = "010";
+	if exists(RightLookupKeyToKeyView where Client_ID = "010") then
+		raise Error("Right lookup key to key view delete failed");
+		
+	// insert both tables
+	insert
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "41 Spinning Avenue" Address}} rename CE) add {true rowexists}
+		into RightLookupKeyToKeyView;
+	if not(exists(RightLookupKeyToKeyView where CE.Client_ID = "010")) then
+		raise Error("Right lookup key to key view insert failed");
+	if (rowexists from row from (RightLookupKeyToKeyView where Client_ID = "010")) then
+		raise Error("Right lookup key to key view insert was propogated to the left side");
+		
+	// update both tables
+	update RightLookupKeyToKeyView set {C.Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where Client_ID = "010";
+	if (Name from row from (RightLookupKeyToKeyView where Client_ID = "010")) = "Cooler Client Ten" then
+		raise Error("Right lookup key to key view update Right table failed");
+	if (Address from row from (RightLookupKeyToKeyView where Client_ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Right lookup key to key view update right table failed");
+
+	// delete
+	delete RightLookupKeyToKeyView where Client_ID = "010";
+	if exists(RightLookupKeyToKeyView where Client_ID = "010") then
+		raise Error("Right lookup key to key view delete failed");
+		
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into Client;
+	insert table { row { "010" Client_ID, "41 Spinning Avenue" Address } } into ClientExtension;
+	
+	update RightLookupKeyToKeyView set { rowexists := false } where Client_ID = "010";
+	if not exists (Client where ID = "010") then
+		raise Error("Right lookup key to key view update propogated to the left side");
+		
+	delete RightLookupKeyToKeyView where Client_ID = "010";
+	if not exists (Client where ID = "010") then
+		raise Error("Right lookup key to key view delete propogated to the left side");
+	
+	delete Client where ID = "010";
+
+drop view RightLookupKeyToKeyView;
+
+//*
+// Natural Right Lookup Key to Key
+create view NaturalRightLookupKeyToKeyView Client right lookup (ClientExtension rename {Client_ID ID}) include rowexists;
+
+	// insert Right table only
+	insert table { row { "010" ID, "41 Spinning Avenue" Address, false rowexists } } into NaturalRightLookupKeyToKeyView;
+	if not exists (NaturalRightLookupKeyToKeyView where ID = "010") then
+		raise Error("Natural right lookup key to key view insert failed");
+		
+	// update right table
+	update NaturalRightLookupKeyToKeyView set { Address := "41 Spinninger Avenue" } where ID = "010";
+	if (Address from row from (NaturalRightLookupKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Natural right lookup key to key view update right table failed");
+		
+	// update to insert left table
+	update NaturalRightLookupKeyToKeyView set { rowexists := true, Name := "Cool Client Ten", Type_ID := "001" } where ID = "010";
+	if (rowexists from row from (NaturalRightLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to key view update was propogated to the left side");
+		
+	// update to delete left table
+	update NaturalRightLookupKeyToKeyView set { rowexists := false } where ID = "010";
+	if (rowexists from row from (NaturalRightLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to key view update to delete left table failed");
+	
+	// delete
+	delete NaturalRightLookupKeyToKeyView where ID = "010";
+	if exists(NaturalRightLookupKeyToKeyView where ID = "010") then
+		raise Error("Natural Right lookup key to key view delete failed");
+		
+	// insert both tables
+	insert
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "41 Spinning Avenue" Address, true rowexists}}
+		into NaturalRightLookupKeyToKeyView;
+	if not(exists(NaturalRightLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural Right lookup key to key view insert failed");
+	if (rowexists from row from (NaturalRightLookupKeyToKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to key view insert was propogated to the left side");
+		
+	// update both tables
+	update NaturalRightLookupKeyToKeyView set {Name := "Cooler Client Ten", Address := "41 Spinninger Avenue"} where ID = "010";
+	if (Name from row from (NaturalRightLookupKeyToKeyView where ID = "010")) = "Cooler Client Ten" then
+		raise Error("Natural Right lookup key to key view update Right table failed");
+	if (Address from row from (NaturalRightLookupKeyToKeyView where ID = "010")) <> "41 Spinninger Avenue" then
+		raise Error("Natural Right lookup key to key view update right table failed");
+
+	// delete
+	delete NaturalRightLookupKeyToKeyView where ID = "010";
+	if exists(NaturalRightLookupKeyToKeyView where ID = "010") then
+		raise Error("Natural Right lookup key to key view delete failed");
+		
+	insert table { row { "010" ID, "Cool Client Ten" Name, "001" Type_ID } } into Client;
+	insert table { row { "010" Client_ID, "41 Spinning Avenue" Address } } into ClientExtension;
+	
+	update NaturalRightLookupKeyToKeyView set { rowexists := false } where ID = "010";
+	if not exists (Client where ID = "010") then
+		raise Error("Right lookup key to key view update propogated to the left side");
+		
+	delete NaturalRightLookupKeyToKeyView where ID = "010";
+	if not exists (Client where ID = "010") then
+		raise Error("Right lookup key to key view delete propogated to the left side");
+	
+	delete Client where ID = "010";
+	
+drop view NaturalRightLookupKeyToKeyView;
+
+//*
+// Right Lookup Key to Non-Key
+create view RightLookupKeyToNonKeyView (Client rename C) right lookup (ClientPhone rename CP) by C.ID = CP.Client_ID include rowexists;
+
+	// insert Right table
+	insert table { row { "010" CP.Client_ID, "990-0990" CP.Phone, false rowexists } } into RightLookupKeyToNonKeyView;
+	if not exists (RightLookupKeyToNonKeyView where CP.Client_ID = "010") then
+		raise Error("Right lookup key to non key view insert right table failed");
+		
+	// update right table
+	update RightLookupKeyToNonKeyView set { CP.Phone := "991-9119" } where CP.Client_ID = "010";
+	if (CP.Phone from row from (RightLookupKeyToNonKeyView where CP.Client_ID = "010")) <> "991-9119" then
+		raise Error("Right lookup key to non key view update right table failed");
+		
+	// update to insert right table
+	update RightLookupKeyToNonKeyView set { rowexists := true, C.ID := "010", C.Name := "Cool Client Ten" } where CP.Client_ID = "010";
+	if (rowexists from row from (RightLookupKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Right lookup key to non key view update was propogated to the left side");
+		
+	// update to delete right table
+	update RightLookupKeyToNonKeyView set { rowexists := false } where CP.Client_ID = "010";
+	if (rowexists from row from (RightLookupKeyToNonKeyView where CP.Client_ID = "010")) then
+		raise Error("Right lookup key to non-key view update to delete left table failed");
+		
+	// delete Right table
+	delete RightLookupKeyToNonKeyView where CP.Client_ID = "010";
+	if exists(RightLookupKeyToNonKeyView where CP.Client_ID = "010") then
+		raise Error("Right lookup key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" Client_ID, "990-0990" Phone}} rename CP) add {true rowexists}
+		into RightLookupKeyToNonKeyView;
+	if not(exists(RightLookupKeyToNonKeyView where CP.Client_ID = "010")) then
+		raise Error("Right lookup key to non key view insert into both tables failed");
+	if (rowexists from row from (RightLookupKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Right lookup key to non key view insert was propogated to the left side");
+		
+	// update both tables
+	update RightLookupKeyToNonKeyView set {C.Name := "Cooler Client Ten", CP.Phone := "991-9019"} where CP.Client_ID = "010";
+	if (C.Name from row from (RightLookupKeyToNonKeyView where CP.Client_ID = "010")) = "Cooler Client Ten" then
+		raise Error("Right lookup key to non key view update Right table failed");
+	if (CP.Phone from row from (RightLookupKeyToNonKeyView where CP.Client_ID = "010")) <> "991-9019" then
+		raise Error("Right lookup key to non key view update right table failed");
+		
+	// delete both tables
+	delete RightLookupKeyToNonKeyView where CP.Client_ID = "010";
+	if exists(RightLookupKeyToNonKeyView where CP.Client_ID = "010") then
+		raise Error("Right lookup key to non key view delete failed");
+		
+	insert table { row { "001" CP.Client_ID, "222-2222" CP.Phone } } into RightLookupKeyToNonKeyView;
+	if not exists (RightLookupKeyToNonKeyView where CP.Client_ID = "001" and CP.Phone = "222-2222") then
+		raise Error("Right lookup key to non key view insert failed");
+		
+	update RightLookupKeyToNonKeyView set { rowexists := false } where CP.Client_ID = "001" and CP.Phone = "222-2222";
+	if not exists (Client where ID = "001") then
+		raise Error("Right lookup key to non key view update propogated to the right side");
+	
+	delete RightLookupKeyToNonKeyView where CP.Client_ID = "001" and CP.Phone = "222-2222";
+	if not exists (Client where ID = "001") then
+		raise Error("Right lookup key to non key view delete propogated to the right side");
+		
+drop view RightLookupKeyToNonKeyView;
+
+//*
+// Right Lookup Key to Non-Key
+create view NaturalRightLookupKeyToNonKeyView Client right lookup (ClientPhone rename {Client_ID ID}) include rowexists;
+
+	// insert Right table
+	insert table { row { "010" ID, "990-0990" Phone, false rowexists } } into NaturalRightLookupKeyToNonKeyView;
+	if not exists (NaturalRightLookupKeyToNonKeyView where ID = "010") then
+		raise Error("Natural right lookup key to non key view insert right table failed");
+		
+	// update Right table
+	update NaturalRightLookupKeyToNonKeyView set { Phone := "919-9119" } where ID = "010";
+	if (Phone from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) <> "919-9119" then
+		raise Error("Natural Right lookup key to non key view update Right table failed");
+		
+	// update to insert left table
+	update NaturalRightLookupKeyToNonKeyView set { rowexists := true, Name := "Cool Client Ten", Type_ID := "001" } where ID = "010"; 
+	if (rowexists from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to non key view update was propogated to the left side");
+		
+	// update to delete right table
+	update NaturalRightLookupKeyToNonKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural Right lookup key to non key view update to delete right table failed");
+		
+	// delete Right table
+	delete NaturalRightLookupKeyToNonKeyView where ID = "010";
+	if exists(NaturalRightLookupKeyToNonKeyView where ID = "010") then
+		raise Error("Natural Right lookup key to non key view delete failed");
+		
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "001" Type_ID, "990-0990" Phone, true rowexists}}
+		into NaturalRightLookupKeyToNonKeyView;
+	if not(exists(NaturalRightLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to non key view insert into both tables failed");
+	if (rowexists from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) then
+		raise Error("Natural right lookup key to non key view insert was propogated to the left side");
+		
+	// update both tables
+	update NaturalRightLookupKeyToNonKeyView set {Name := "Cooler Client Ten", Phone := "991-9019"} where ID = "010";
+	if (Name from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) = "Cooler Client Ten" then
+		raise Error("Natural Right lookup key to non key view update Right table failed");
+	if (Phone from row from (NaturalRightLookupKeyToNonKeyView where ID = "010")) <> "991-9019" then
+		raise Error("Natural Right lookup key to non key view update right table failed");
+		
+	// delete both tables
+	delete NaturalRightLookupKeyToNonKeyView where ID = "010";
+	if exists(NaturalRightLookupKeyToNonKeyView where ID = "010") then
+		raise Error("Natural Right lookup key to non key view delete failed");
+		
+	insert table { row { "001" ID, "222-2222" Phone } } into NaturalRightLookupKeyToNonKeyView;
+	if not exists (NaturalRightLookupKeyToNonKeyView where ID = "001" and Phone = "222-2222") then
+		raise Error("Right lookup key to non key view insert failed");
+		
+	update NaturalRightLookupKeyToNonKeyView set { rowexists := false } where ID = "001" and Phone = "222-2222";
+	if not exists (Client where ID = "001") then
+		raise Error("Right lookup key to non key view update propogated to the right side");
+	
+	delete NaturalRightLookupKeyToNonKeyView where ID = "001" and Phone = "222-2222";
+	if not exists (Client where ID = "001") then
+		raise Error("Right lookup key to non key view delete propogated to the right side");
+		
+drop view NaturalRightLookupKeyToNonKeyView;
+
+/*
+//*
+// Right Lookup Non-Key to Key
+create view RightLookupNonKeyToKeyView (Client rename C) right lookup (ClientType rename CT) by C.Type_ID = CT.ID include rowexists;
+
+	// insert Right table only
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) 
+		into RightLookupNonKeyToKeyView;
+	if not(exists(RightLookupNonKeyToKeyView where C.ID = "010")) then
+		raise Error("Right lookup non key to key view insert failed");
+		
+	// update Right table
+	update RightLookupNonKeyToKeyView set {C.Name := "Cooler Client Ten"} where C.ID = "010";
+	if (Name from row from (RightLookupNonKeyToKeyView where C.ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Right lookup non key to key view update of Right table failed");
+		
+	// update to insert right table
+	update RightLookupNonKeyToKeyView set {rowexists := true, CT.ID := "010", CT.Description := "Ten"} where C.ID = "010";
+	if (Description from row from (RightLookupNonKeyToKeyView where C.ID = "010")) <> "Ten" then
+		raise Error("Right lookup non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update RightLookupNonKeyToKeyView set {rowexists := false} where C.ID = "010"; 
+	if (rowexists from row from (RightLookupNonKeyTOKeyView where C.ID = "010")) then
+		raise Error("Right lookup non key to key view update to delete right table failed");
+		
+	// delete
+	delete RightLookupNonKeyToKeyView where C.ID = "010";
+	if exists(RightLookupNonKeyToKeyView where C.ID = "010") then
+		raise Error("Right lookup non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		(table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}} rename C) times
+		(table{row{"010" ID, "Ten" Description}} rename CT) add {true rowexists}
+		into RightLookupNonKeyToKeyView;
+	if not(exists(RightLookupNonKeyToKeyView where CT.ID = "010")) then
+		raise Error("Right lookup non key to key view insert failed");
+	if (rowexists from row from (RightLookupNonKeyToKeyView where CT.ID = "010")) then
+		raise Error("Right lookup non key to key view insert was propogated to the left side");
+		
+	// update both tables
+	update RightLookupNonKeyToKeyView set {C.Name := "Cooler Client Ten", CT.Description := "Tener"} where CT.ID = "010";
+	if (Name from row from (RightLookupNonKeyToKeyView where CT.ID = "010")) = "Cooler Client Ten" then
+		raise Error("Right lookup non key to key view update of Right table failed");
+	if (Description from row from (RightLookupNonKeyToKeyView where CT.ID = "010")) <> "Tener" then
+		raise Error("Right lookup non key to key view update of right table failed");
+		
+	// delete
+	delete RightLookupNonKeyToKeyView where CT.ID = "010";
+	if exists(RightLookupNonKeyToKeyView where CT.ID = "010") then
+		raise Error("Right lookup non key to key view delete failed");
+	delete ClientType where ID = "010";
+		
+drop view RightLookupNonKeyToKeyView;
+*/
+		
+/*
+//*
+// Natural Right Lookup Non-Key to Key
+create view NaturalRightLookupNonKeyToKeyView Client right lookup (ClientType rename {ID Type_ID}) include rowexists;
+
+ 	// insert Right table only
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID}}
+		into NaturalRightLookupNonKeyToKeyView;
+	if not(exists(NaturalRightLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural Right lookup non key to key view insert failed");
+		
+	// update Right table
+	update NaturalRightLookupNonKeyToKeyView set {Name := "Cooler Client Ten"} where ID = "010";
+	if (Name from row from (NaturalRightLookupNonKeyToKeyView where ID = "010")) <> "Cooler Client Ten" then
+		raise Error("Natural Right lookup non key to key view update of Right table failed");
+		
+	// update to insert right table
+	update NaturalRightLookupNonKeyToKeyView set {rowexists := true, ID := "010", Description := "Ten"} where ID = "010";
+	if (Description from row from (NaturalRightLookupNonKeyToKeyView where ID = "010")) <> "Ten" then
+		raise Error("Natural Right lookup non key to key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalRightLookupNonKeyToKeyView set {rowexists := false} where ID = "010";
+	if (rowexists from row from (NaturalRightLookupNonKeyToKeyView where ID = "010")) then
+		raise Error("Natural Right lookup non key to key view update to delete right table failed");
+		
+	// delete
+	delete NaturalRightLookupNonKeyToKeyView where ID = "010";
+	if exists(NaturalRightLookupNonKeyToKeyView where ID = "010") then
+		raise Error("Natural Right lookup non key to key view delete failed");
+
+	// insert both tables
+	insert 
+		table{row{"010" ID, "Cool Client Ten" Name, "010" Type_ID, "Ten" Description, true rowexists}}
+		into NaturalRightLookupNonKeyToKeyView;
+	if not(exists(NaturalRightLookupNonKeyToKeyView where Type_ID = "010")) then
+		raise Error("Natural Right lookup non key to key view insert failed");
+	if (rowexists from row from (NaturalRightLookupNonKeyToKeyView where Type_ID = "010")) then
+		raise Error("Natural Right lookup non key to key view insert was propogated to the left side");
+		
+	// update both tables
+	update NaturalRightLookupNonKeyToKeyView set {Name := "Cooler Client Ten", Description := "Tener"} where Type_ID = "010";
+	if (Name from row from (NaturalRightLookupNonKeyToKeyView where Type_ID = "010")) = "Cooler Client Ten" then
+		raise Error("Natural Right lookup non key to key view update of Right table failed");
+	if (Description from row from (NaturalRightLookupNonKeyToKeyView where Type_ID = "010")) <> "Tener" then
+		raise Error("Natural Right lookup non key to key view update of right table failed");
+		
+	// delete
+	delete NaturalRightLookupNonKeyToKeyView where Type_ID = "010";
+	if exists(NaturalRightLookupNonKeyToKeyView where Type_ID = "010") then
+		raise Error("Natural Right lookup non key to key view delete failed");
+	delete ClientType where ID = "010";
+	
+drop view NaturalRightLookupNonKeyToKeyView;
+*/
+
+/*
+//*
+// Right Lookup Non-Key to Non-Key
+create view RightLookupNonKeyToNonKeyView (Client rename C) right lookup (Vendor rename V) by C.Name = V.Name include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) 
+		into RightLookupNonKeyToNonKeyView;
+	if not(exists(RightLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right lookup non key to non key view insert failed");
+
+	// update
+	update RightLookupNonKeyToNonKeyView set {C.Name := "Cooler Row Ten"} where C.ID = "010";
+	if (C.Name from row from (RightLookupNonKeyToNonKeyView where C.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Right lookup non key to non key view update of Right table failed");
+		
+	// update to insert right table
+	update RightLookupNonKeyToNonKeyView set {rowexists := true, V.ID := "010", V.Name := "Cooler Row Ten", V.Type_ID := "001"} where C.ID = "010";
+	if not(rowexists from row from (RightLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right lookup non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update RightLookupNonKeyToNonKeyView set {rowexists := false} where C.ID = "010";
+	if (rowexists from row from (RightLookupNonKeyToNonKeyView where C.ID = "010")) then
+		raise Error("Right lookup non key to non key view update to delete right table failed");
+		
+	// delete
+	delete RightLookupNonKeyToNonKeyView where C.ID = "010";
+	if exists(RightLookupNonKeyToNonKeyView where C.ID = "010") then
+		raise Error("Right lookup non key to non key view delete failed");
+
+	// insert
+	insert 
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename C) times
+		(table{row{"010" ID, "Cool Row Ten" Name, "001" Type_ID}} rename V) add {true rowexists}
+		into RightLookupNonKeyToNonKeyView;
+	if not(exists(RightLookupNonKeyToNonKeyView where V.ID = "010")) then
+		raise Error("Right lookup non key to non key view insert failed");
+	if (rowexists from row from (RightLookupNonKeyToNonKeyView where V.ID = "010")) then
+		raise Error("Right lookup non key to non key view insert was propogated to the left side");
+
+	// update
+	update RightLookupNonKeyToNonKeyView set {C.Name := "Cooler Row Ten", V.Name := "Cooler Row Ten"} where V.ID = "010";
+	if (C.Name from row from (RightLookupNonKeyToNonKeyView where V.ID = "010")) = "Cooler Row Ten" then
+		raise Error("Right lookup non key to non key view update of Right table failed");
+	if (V.Name from row from (RightLookupNonKeyToNonKeyView where V.ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Right lookup non key to non key view update of right table failed");
+		
+	// delete
+	delete RightLookupNonKeyToNonKeyView where V.ID = "010";
+	if exists(RightLookupNonKeyToNonKeyView where V.ID = "010") then
+		raise Error("Right lookup non key to non key view delete failed");
+	delete Vendor where ID = "010";
+		
+drop view RightLookupNonKeyToNonKeyView;
+*/
+
+/*
+//*
+// Natural Right Lookup Non-Key to Non-Key
+create view NaturalRightLookupNonKeyToNonKeyView 
+	(Client rename {ID Client_ID, Type_ID Client_Type_ID}) 
+	right lookup (Vendor rename {ID Vendor_ID, Type_ID Vendor_Type_ID}) include rowexists;
+
+	// insert
+	insert 
+		(table{row{"010" Client_ID, "Cool Row Ten" Client_Name, "001" Client_Type_ID}}) 
+		into NaturalRightLookupNonKeyToNonKeyView;
+	if not(exists(NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right lookup non key to non key view insert failed");
+
+	// update
+	update NaturalRightLookupNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Client_ID = "010";
+	if (Name from row from (NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010")) <> "Cooler Row Ten" then
+		raise Error("Natural Right lookup non key to non key view update of Right table failed");
+		
+	// update to insert right table
+	update NaturalRightLookupNonKeyToNonKeyView set {rowexists := true, Vendor_ID := "010", Vendor_Type_ID := "001"} where Client_ID = "010";
+	if not(rowexists from row from (NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right lookup non key to non key view update to insert right table failed");
+		
+	// update to delete right table
+	update NaturalRightLookupNonKeyToNonKeyView set {rowexists := false} where Client_ID = "010";
+	if (rowexists from row from (NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010")) then
+		raise Error("Natural Right lookup non key to non key view update to delete right table failed");
+		
+	// delete
+	delete NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010";
+	if exists(NaturalRightLookupNonKeyToNonKeyView where Client_ID = "010") then
+		raise Error("Natural Right lookup non key to non key view delete failed");
+
+	// insert
+	insert 
+		table{row{"010" Client_ID, "Cool Row Ten" Name, "001" Client_Type_ID, "010" Vendor_ID, "001" Vendor_Type_ID, true rowexists}}
+		into NaturalRightLookupNonKeyToNonKeyView;
+	if not(exists(NaturalRightLookupNonKeyToNonKeyView where Vendor_ID = "010")) then
+		raise Error("Natural Right lookup non key to non key view insert failed");
+	if (rowexists from row from (NaturalRightLookupNonKeyToNonKeyView where Vendor_ID = "010")) then
+		raise Error("Natural Right lookup non key to non key view insert was propogated to the left side");
+		
+	// update
+	update NaturalRightLookupNonKeyToNonKeyView set {Name := "Cooler Row Ten"} where Vendor_ID = "010";
+	if (Name from row from (NaturalRightLookupNonKeyToNonKeyView where Vendor_ID = "010")) = "Cooler Row Ten" then
+		raise Error("Natural Right lookup non key to non key view update of Right table failed");
+		
+	// delete
+	delete NaturalRightLookupNonKeyToNonKeyView where Vendor_ID = "010";
+	if exists(NaturalRightLookupNonKeyToNonKeyView where Vendor_ID = "010") then
+		raise Error("Natural Right lookup non key to non key view delete failed");
+	delete Vendor where ID = "010";
+	
+drop view NaturalRightLookupNonKeyToNonKeyView;
+*/
+
+//*
+drop operator DeleteClients();
+drop operator InsertClients();
+//drop reference ClientPhone_Client;
+drop table ClientPhone;
+//drop reference ClientExtension_Client;
+drop table ClientExtension;
+//drop reference Vendor_VendorType;
+drop table Vendor;
+drop table VendorType;
+//drop reference Client_ClientType;
+drop table Client;
+drop table ClientType;
+

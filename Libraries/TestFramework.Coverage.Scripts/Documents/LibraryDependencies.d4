@@ -1,0 +1,23 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+CreateLibrary(LibraryDescriptor('TestA'));
+insert table { row { 'TestA' Library_Name, 'System' Required_Library_Name } } into LibraryRequisites;
+
+CreateLibrary(LibraryDescriptor('TestB'));
+insert table { row { 'TestB' Library_Name, 'System' Required_Library_Name } } into LibraryRequisites;
+
+RegisterLibrary('TestB');
+insert table { row { 'TestB' Library_Name, 'TestA' Required_Library_Name } } into LibraryRequisites;
+create table TestBObject { ID : Integer };
+if (LibraryName('TestBObject') <> 'TestB') then
+	raise Error('TestBObject was created in library ' + LibraryName('TestBObject'));
+	
+drop table TestBObject;
+UnregisterLibrary('TestB');
+UnregisterLibrary('TestA');
+DropLibrary('TestB');
+DropLibrary('TestA');

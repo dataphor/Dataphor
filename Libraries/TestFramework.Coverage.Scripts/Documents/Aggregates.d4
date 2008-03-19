@@ -1,0 +1,113 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+//* Table: TestCount
+SafeDrop('TestCount');
+create table TestCount { ID : Integer, Name : String, Amount : Money, key { ID } };
+
+insert row { 1 ID, 'John' Name, $10 Amount } into TestCount;
+insert row { 2 ID, 'John' Name, $10 Amount } into TestCount;
+insert row { 3 ID, 'James' Name, $10 Amount } into TestCount;
+insert row { 4 ID, 'Peter' Name, $10 Amount } into TestCount;
+insert row { 5 ID, 'Peter' Name, $10 Amount } into TestCount;
+insert row { 6 ID, 'Carlos' Name, $20 Amount } into TestCount;
+insert row { 7 ID, 'Rodriguez' Name, $30 Amount } into TestCount;
+
+//* Test: Count
+select TestCount group add { Count() C };
+select TestCount group add { Count(ID) C };
+select TestCount group by { Name } add { Count() C };
+select TestCount group by { Name } add { Count(ID) C };
+
+//* Test: distinct Count
+select TestCount group add { Count(distinct Name) C };
+select TestCount group by { Amount } add { Count(distinct Name) C };
+
+//* Type: TestMoney
+SafeDrop('TestMoney');
+create type TestMoney like Money;
+
+//* Table: TestSum
+SafeDrop('TestSum');
+create table TestSum { ID : Integer, Name : String, Amount : Money, TestAmount : TestMoney, key { ID } };
+
+// sum
+select TestSum group add { Sum(Amount) S };
+select TestSum group by { Name } add { Sum(Amount) S };
+
+// distinct sum
+select TestSum group add { Sum(distinct Amount) S };
+select TestSum group by { Name } add { Sum(distinct Amount) S };
+
+// sum w/ conversion
+select TestSum group add { Sum(TestAmount) S };
+select TestSum group by { Name } add { Sum(TestAmount) S };
+
+// distinct sum w/ conversion
+select TestSum group add { Sum(distinct TestAmount) S };
+select TestSum group by { Name } add { Sum(distinct TestAmount) S };
+
+//* Type: TestString
+SafeDrop('TestString');
+create type TestString like String;
+
+//* Table: TestConcat
+SafeDrop('TestConcat');
+create table TestConcat { ID : Integer, Name : String, Address : String, TestAddress : TestString, key { ID } };
+
+// concat
+select TestConcat group add { Concat(Name) C };
+select TestConcat group by { Name } add { Concat(Address) C };
+select TestConcat add { ', ' Delim } group add { Concat(Name, Delim) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(Address, Delim) C };
+
+// distinct concat
+select TestConcat group add { Concat(distinct Name) C };
+select TestConcat group by { Name } add { Concat(distinct Address) C };
+select TestConcat add { ', ' Delim } group add { Concat(distinct Name, Delim) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(distinct Address, Delim) C };
+
+// concat w/ conversion
+select TestConcat group add { Concat(TestAddress) C };
+select TestConcat group by { Name } add { Concat(TestAddress) C };
+select TestConcat add { ', ' Delim } group add { Concat(TestAddress, Delim) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(TestAddress, Delim) C };
+
+// distinct concat w/ conversion
+select TestConcat group add { Concat(distinct TestAddress) C };
+select TestConcat group by { Name } add { Concat(distinct TestAddress) C };
+select TestConcat add { ', ' Delim } group add { Concat(distinct TestAddress, Delim) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(distinct TestAddress, Delim) C };
+
+// concat w/ order
+select TestConcat group add { Concat(Address order by { ID }) C };
+select TestConcat group by { Name } add { Concat(Address order by { ID }) C };
+select TestConcat add { ', ' Delim } group add { Concat(Address, Delim order by { ID }) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(Address, Delim order by { ID }) C };
+
+// distinct concat w/ order
+select TestConcat group add { Concat(distinct Address order by { Address }) C };
+select TestConcat group by { Name } add { Concat(distinct Address order by { Address }) C };
+select TestConcat add { ', ' Delim } group add { Concat(distinct Address, Delim order by { Address, Delim }) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(distinct Address, Delim order by { Address, Delim }) C };
+
+// concat w/ order and conversion
+select TestConcat group add { Concat(TestAddress order by { ID }) C };
+select TestConcat group by { Name } add { Concat(TestAddress order by { ID }) C };
+select TestConcat add { ', ' Delim } group add { Concat(TestAddress, Delim order by { ID }) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(TestAddress, Delim order by { ID }) C };
+
+// distinct concat w/ order and conversion
+select TestConcat group add { Concat(distinct TestAddress order by { TestAddress }) C };
+select TestConcat group by { Name } add { Concat(distinct TestAddress order by { TestAddress }) C };
+select TestConcat add { ', ' Delim } group add { Concat(distinct TestAddress, Delim order by { TestAddress, Delim }) C };
+select TestConcat add { ', ' Delim } group by { Name } add { Concat(distinct TestAddress, Delim order by { TestAddress, Delim }) C };
+
+// Defect #34302
+create table X { ID : Integer, Count : Integer nil, key { ID } };
+insert table { row { 1 ID, nil as Integer Count } } into X;
+if Sum(Count from X).IsNotNil() then
+	raise Error('Integer Sum involving nils failed');
+drop table X;
