@@ -1,5 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
+	ProjectSection(SolutionItems) = preProject
+		CompilerDefines.txt = CompilerDefines.txt
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BOP", "BOP\BOP.csproj", "{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base", "Base\Base.csproj", "{6EC1F378-510B-48D0-8D00-E36BEF214766}"
@@ -17,11 +22,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Client.Provider", "DAE.Client.Provider\DAE.Client.Provider.csproj", "{2A36CE97-A296-462A-8C3F-C194F1A2D758}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataphoria", "Dataphoria\Dataphoria.csproj", "{AF54209E-0687-4C10-9784-487B1006E0BD}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9923DA0B-B157-41AA-AB27-E48F60EABD36}"
-	ProjectSection(SolutionItems) = preProject
-		CompilerDefines.txt = CompilerDefines.txt
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

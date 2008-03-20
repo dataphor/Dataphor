@@ -1,7 +1,7 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{AF54209E-0687-4C10-9784-487B1006E0BD}</ProjectGuid>
     <SccProjectName>
@@ -37,6 +37,7 @@
     <ManifestKeyFile>Dataphoria_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
+    <OldToolsVersion>2.0</OldToolsVersion>
     <PublishUrl>\\ibas\Dataphoria\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
@@ -50,7 +51,9 @@
     <ProductName>Dataphor Dataphoria</ProductName>
     <PublisherName>Alphora</PublisherName>
     <AutorunEnabled>true</AutorunEnabled>
+    <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>2.1.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -288,7 +291,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FormDesigner\FormDesigner.cs">
-      <SubType>Component</SubType>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
@@ -393,6 +396,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Analyzer\Analyzer.resx">
       <DependentUpon>Analyzer.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="BaseForms.resx">
       <DependentUpon>BaseForms.cs</DependentUpon>
@@ -407,12 +411,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\CustomFormDesigner.resx">
       <DependentUpon>CustomFormDesigner.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\DesignerTree.resx">
       <DependentUpon>DesignerTree.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\FormDesigner.resx">
       <DependentUpon>FormDesigner.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Images\Customize.bmp" />
     <EmbeddedResource Include="Images\Edit.bmp" />
@@ -424,12 +431,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\D4Editor.resx">
       <DependentUpon>D4Editor.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\ResultPanel.resx">
       <DependentUpon>ResultPanel.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\TextEditor.resx">
       <DependentUpon>TextEditor.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Dataphoria_TemporaryKey.pfx" />
@@ -440,8 +450,18 @@
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0</ProductName>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
       <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
