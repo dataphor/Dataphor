@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+#define USEUNIFIEDJOINKEYINFERENCE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 //#define DISALLOWMANYTOMANYOUTERJOINS
 	
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
@@ -1384,8 +1385,70 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			RemoveSuperKeys();
 		}
 		
+		#if USEUNIFIEDJOINKEYINFERENCE
+		// BTR -> The USEUNIFIEDJOINKEYINFERENCE define is introduced to make reversion easier if it becomes necessary, and to allow for easy reference of
+		// the way the old algorithms worked. I am confident that this is now the correct algorithm for all join types.
+		protected void InferJoinKeys(Plan APlan, JoinCardinality ACardinality, bool AIsLeftOuter, bool AIsRightOuter)
+		{
+			// foreach key of the left table var
+				// foreach key of the right table var
+					// copy the left key, adding all the columns of the right key that are not join columns
+						// if the left key is sparse, or the join is a cardinality preserving right outer, the resulting key is sparse
+					// copy the right key, adding all the columns of the left key that are not join columns
+						// if the right key is sparse, or the join is a cardinality preserving left outer, the resulting key is sparse
+			Schema.Key LNewKey;
+			foreach (Schema.Key LLeftKey in LeftTableVar.Keys)
+				foreach (Schema.Key LRightKey in RightTableVar.Keys)
+				{
+					LNewKey = new Schema.Key();
+					LNewKey.IsInherited = true;
+					LNewKey.IsSparse = 
+						LLeftKey.IsSparse 
+							|| (AIsRightOuter && !IsNatural && ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.OneToMany)));
+							
+					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+						
+					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						if (!RightKey.Columns.ContainsName(LColumn.Name) && !LNewKey.Columns.ContainsName(LColumn.Name)) // if this is not a right join column, and it is not already part of the key
+							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+							
+					if (LNewKey.Columns.Count == 0)
+						LNewKey.IsSparse = false;
+							
+					if (!TableVar.Keys.Contains(LNewKey))
+						TableVar.Keys.Add(LNewKey);
+							
+					LNewKey = new Schema.Key();
+					LNewKey.IsInherited = true;
+					LNewKey.IsSparse =
+						LRightKey.IsSparse
+							|| (AIsLeftOuter && !IsNatural && ((ACardinality == JoinCardinality.OneToOne) || (ACardinality == JoinCardinality.ManyToOne)));
+							
+					foreach (Schema.TableVarColumn LColumn in LLeftKey.Columns)
+						if (!LeftKey.Columns.ContainsName(LColumn.Name) ) // if this is not a left join column
+							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+
+					foreach (Schema.TableVarColumn LColumn in LRightKey.Columns)
+						if (!LNewKey.Columns.ContainsName(LColumn.Name)) // if this column is not already part of the key
+							LNewKey.Columns.Add(TableVar.Columns[TableVar.Columns.IndexOfName(LColumn.Name)]);
+							
+					if (LNewKey.Columns.Count == 0)
+						LNewKey.IsSparse = false;
+						
+					if (!TableVar.Keys.Contains(LNewKey))
+						TableVar.Keys.Add(LNewKey);
+				}
+				
+			RemoveSuperKeys();
+		}
+		#endif
+		
 		protected virtual void DetermineJoinKey(Plan APlan)
 		{
+			#if USEUNIFIEDJOINKEYINFERENCE
+			InferJoinKeys(APlan, Cardinality, false, false);
+			#else
 			if (FLeftKey.IsUnique && FRightKey.IsUnique)
 			{
 				// If both the left and right join keys are unique
@@ -1538,6 +1601,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				DetermineManyToManyKeys(APlan);
 			}
+			#endif
 		}
 		
 		protected virtual void DetermineOrders(Plan APlan)
@@ -2950,6 +3014,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void DetermineJoinKey(Plan APlan)
 		{
+			#if USEUNIFIEDJOINKEYINFERENCE
+			InferJoinKeys(APlan, Cardinality, true, false);
+			#else
 			if (FLeftKey.IsUnique && FRightKey.IsUnique)
 			{
 				// If the left and right join keys are unique
@@ -3126,6 +3193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// Moved this code down to the JoinNode because it is the same for inner and left and right outer joins.
 				DetermineManyToManyKeys(APlan);
 			}
+			#endif
 		}
 		
 		protected override void DetermineJoinAlgorithm(Plan APlan)
@@ -3766,6 +3834,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected override void DetermineJoinKey(Plan APlan)
 		{
+			#if USEUNIFIEDJOINKEYINFERENCE
+			InferJoinKeys(APlan, Cardinality, false, true);
+			#else
 			if (FRightKey.IsUnique && FLeftKey.IsUnique)
 			{
 				// If the left and right join keys are unique 
@@ -3922,6 +3993,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				DetermineManyToManyKeys(APlan);
 			}
+			#endif
 		}
 		
 		protected override void DetermineJoinAlgorithm(Plan APlan)
