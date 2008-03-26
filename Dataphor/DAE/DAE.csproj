@@ -751,8 +751,6 @@
     <Content Include="Language.SQL\BNFDifferences.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
-    <Content Include="V1Changes.txt" />
-    <Content Include="V2Changes.txt" />
     <EmbeddedResource Include="Schema\SystemStoreCatalog.sql" />
     <None Include="Schema\SQLDeviceMappings.d4" />
     <None Include="Storage\AllocationManager.cs">
