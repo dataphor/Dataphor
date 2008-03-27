@@ -10,6 +10,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
+using Microsoft.Win32;
 
 namespace Alphora.Dataphor.DAE.Service
 {
@@ -29,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Service
 			FServiceInstaller.StartType = ServiceStartMode.Automatic;
 
 			//Add installers to the collection.
-			Installers.AddRange(new Installer[] {FServiceInstaller, FServiceProcessInstaller});
+			Installers.AddRange(new Installer[] { FServiceInstaller, FServiceProcessInstaller });
 		}
 
 		private void Prepare()
@@ -40,12 +41,20 @@ namespace Alphora.Dataphor.DAE.Service
 
 			FServiceInstaller.DisplayName = LServiceName;
 			FServiceInstaller.ServiceName = LServiceName;
+			FServiceInstaller.Description = "Provides platform services for Dataphor applications.";
 		}
 
 		public override void Install(IDictionary AStateSaver)
 		{
 			Prepare();
 			base.Install(AStateSaver);
+			
+			string LServiceKey = String.Format("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}", FServiceInstaller.ServiceName);
+			string LImagePath = Registry.GetValue(LServiceKey, "ImagePath", null) as String;
+			if (LImagePath != null)
+				Registry.SetValue(LServiceKey, "ImagePath", String.Format("{0} -name \"{1}\"", LImagePath, FServiceInstaller.ServiceName));
+			else
+				throw new InvalidOperationException("Could not retrieve service ImagePath from registry.");
 		}
 
 		public override void Uninstall(IDictionary ASavedState)

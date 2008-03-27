@@ -163,10 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Frontend.Client.Windows.Executable_1_TemporaryKey.pfx" />
-    <None Include="Frontend.Client.Windows.Executable_2_TemporaryKey.pfx" />
-    <None Include="Frontend.Client.Windows.Executable_TemporaryKey.pfx" />
-    <None Include="WindowsClient.pfx" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

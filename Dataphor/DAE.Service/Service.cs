@@ -61,13 +61,8 @@ namespace Alphora.Dataphor.DAE.Service
 						LInstaller = PrepareInstaller(LServiceName);
 						LInstaller.Context.Parameters.Add
 						(
-							"assemblypath", 
-							String.Format
-							(
-								"{0} -name \"{1}\"",
-								System.Reflection.Assembly.GetExecutingAssembly().Location,
-								LServiceName
-							)
+						    "assemblypath", 
+					        System.Reflection.Assembly.GetExecutingAssembly().Location
 						);
 						LInstaller.Install(new HybridDictionary());
 						return;
