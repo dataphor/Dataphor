@@ -132,7 +132,4 @@
   <data name="115104" xml:space="preserve">
     <value>Catalog store cursor has no current row.</value>
   </data>
-  <data name="115105" xml:space="preserve">
-    <value>Maximum number of connections to the catalog store exceeded.</value>
-  </data>
 </root>

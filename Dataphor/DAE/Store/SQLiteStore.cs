@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Alphora.Dataphor.DAE.Device.Catalog
+namespace Alphora.Dataphor.DAE.Store.SQLite
 {
-	class SimpleSQLiteStore
+	class SQLiteStore
 	{
 	}
 }

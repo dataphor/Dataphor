@@ -25,6 +25,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Connection;
@@ -2760,7 +2761,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				using (SimpleSQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryVersions())
+				using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryVersions())
 				{
 					while (LCursor.Next())
 					{
@@ -2826,7 +2827,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				using (SimpleSQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryOwners())
+				using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryOwners())
 				{
 					while (LCursor.Next())
 					{
@@ -2989,7 +2990,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				using (SimpleSQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryDirectories())
+				using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryDirectories())
 				{
 					while (LCursor.Next())
 						SystemAttachLibraryNode.AttachLibrary(ServerProcess, (string)LCursor[0], (string)LCursor[1], true);
@@ -6469,7 +6470,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			// TODO: Implement...
 			throw new NotSupportedException();
 			
-			//SimpleSQLStoreCounter LCounter;
+			//SQLStoreCounter LCounter;
 			//for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
 			//{
 			//    LCounter = Device.Store.Counters[LIndex];

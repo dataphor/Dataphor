@@ -29,9 +29,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			/// <summary>Error code 115104: "Catalog store cursor has no current row."</summary>
 			CursorHasNoCurrentRow = 115104,
-			
-			/// <summary>Error code 115105: "Maximum number of connections to the catalog store exceeded."</summary>
-			MaximumConnectionsExceeded = 115105,
 		}
 
 		// Resource manager for this exception class

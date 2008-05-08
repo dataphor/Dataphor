@@ -189,9 +189,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Device.Catalog\CatalogStore.cs" />
-    <Compile Include="Device.Catalog\SimpleSQLCEStore.cs" />
-    <Compile Include="Device.Catalog\SimpleSQLiteStore.cs" />
-    <Compile Include="Device.Catalog\SimpleSQLStore.cs" />
     <Compile Include="Device.Memory\MemoryDevice.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -645,6 +642,10 @@
     <Compile Include="Storage\Utilities.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Store\SQLCEStore.cs" />
+    <Compile Include="Store\SQLiteStore.cs" />
+    <Compile Include="Store\SQLStore.cs" />
+    <Compile Include="Store\StoreException.cs" />
     <Compile Include="Streams\Conveyor.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -746,6 +747,11 @@
     <EmbeddedResource Include="Storage\StorageException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Store\StoreException.resx">
+      <DependentUpon>StoreException.cs</DependentUpon>
+      <LastGenOutput>StoreException.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Streams\ConveyorException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -801,9 +807,6 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Store\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -24,11 +24,11 @@ using System.Data.Common;
 
 using Alphora.Dataphor.DAE.Connection;
 
-namespace Alphora.Dataphor.DAE.Device.Catalog
+namespace Alphora.Dataphor.DAE.Store
 {
-	public class SimpleSQLStoreCounter
+	public class SQLStoreCounter
 	{
-		public SimpleSQLStoreCounter(string AOperation, string ATableName, string AIndexName, bool AIsMatched, bool AIsRanged, bool AIsUpdatable, TimeSpan ADuration)
+		public SQLStoreCounter(string AOperation, string ATableName, string AIndexName, bool AIsMatched, bool AIsRanged, bool AIsUpdatable, TimeSpan ADuration)
 		{
 			FOperation = AOperation;
 			FTableName = ATableName;
@@ -61,9 +61,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public TimeSpan Duration { get { return FDuration; } }
 	}
 	
-	public class SimpleSQLStoreCounters : List<SimpleSQLStoreCounter> {}
+	public class SQLStoreCounters : List<SQLStoreCounter> {}
 
-	public abstract class SimpleSQLStore : System.Object
+	public abstract class SQLStore : System.Object
 	{
 		public abstract string GetConnectionString();
 		
@@ -105,22 +105,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return LBatches;
 		}
 		
-		private SimpleSQLStoreCounters FCounters = new SimpleSQLStoreCounters();
-		public SimpleSQLStoreCounters Counters { get { return FCounters; } }
+		private SQLStoreCounters FCounters = new SQLStoreCounters();
+		public SQLStoreCounters Counters { get { return FCounters; } }
 		
-		protected virtual SimpleSQLStoreConnection InternalConnect()
+		protected virtual SQLStoreConnection InternalConnect()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return new SimpleSQLStoreConnection(this);
+				return new SQLStoreConnection(this);
 			#if SQLSTORETIMING
 			}
 			finally
 			{
-				Counters.Add(new SimpleSQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
@@ -152,12 +152,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private int FConnectionCount;
 		
 		/// <summary>Establishes a connection to the store.</summary>		
-		public SimpleSQLStoreConnection Connect()
+		public SQLStoreConnection Connect()
 		{
 			lock (this)
 			{
 				if ((FMaxConnections > 0) && (FConnectionCount >= FMaxConnections))
-					throw new CatalogException(CatalogException.Codes.MaximumConnectionsExceeded, ErrorSeverity.Environment);
+					throw new StoreException(StoreException.Codes.MaximumConnectionsExceeded, ErrorSeverity.Environment);
 				FConnectionCount++;
 			}
 			
@@ -205,9 +205,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 	}
 	
-	public class SimpleSQLStoreConnection : System.Object, IDisposable
+	public class SQLStoreConnection : System.Object, IDisposable
 	{
-		internal SimpleSQLStoreConnection(SimpleSQLStore AStore) : base()
+		internal SQLStoreConnection(SQLStore AStore) : base()
 		{
 			FStore = AStore;
 			FConnection = InternalCreateConnection();
@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			InternalDispose();
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SimpleSQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 			
 			if (FStore != null)
@@ -257,9 +257,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#endregion
 
-		private SimpleSQLStore FStore;
+		private SQLStore FStore;
 		/// <summary>The store for this connection.</summary>
-		public SimpleSQLStore Store { get { return FStore; } }
+		public SQLStore Store { get { return FStore; } }
 		
 		// Connection
 		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
@@ -283,7 +283,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void ExecuteScript(string AScript)
 		{
-			List<String> LStatements = SimpleSQLStore.ProcessBatches(AScript);
+			List<String> LStatements = SQLStore.ProcessBatches(AScript);
 			for (int LIndex = 0; LIndex < LStatements.Count; LIndex++)
 				ExecuteStatement(LStatements[LIndex]);
 		}
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ExecuteCommand.ExecuteNonQuery();
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SimpleSQLStoreCounter("ExecuteNonQuery", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("ExecuteNonQuery", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -321,7 +321,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Store.Counters.Add(new SimpleSQLStoreCounter("ExecuteScalar", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("ExecuteScalar", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
@@ -341,15 +341,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Store.Counters.Add(new SimpleSQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
 		
-		protected virtual SimpleSQLStoreCursor InternalOpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
+		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
 		{
 			return
-				new SimpleSQLStoreCursor
+				new SQLStoreCursor
 				(
 					this,
 					ATableName,
@@ -359,7 +359,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				);
 		}
 		
-		public SimpleSQLStoreCursor OpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
+		public SQLStoreCursor OpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
 		{
 			return InternalOpenCursor(ATableName, AIndexName, AKey, AIsUpdatable);
 		}
@@ -367,18 +367,18 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private int FTransactionCount = 0;
 		public int TransactionCount { get { return FTransactionCount; } }
 		
-		internal abstract class SimpleSQLStoreOperation : System.Object
+		internal abstract class SQLStoreOperation : System.Object
 		{
-			public virtual void Undo(SimpleSQLStoreConnection AConnection) {}
+			public virtual void Undo(SQLStoreConnection AConnection) {}
 		}
 		
-		internal class SimpleSQLStoreOperationLog : List<SimpleSQLStoreOperation> {}
+		internal class SQLStoreOperationLog : List<SQLStoreOperation> {}
 		
-		private SimpleSQLStoreOperationLog FOperationLog = new SimpleSQLStoreOperationLog();
+		private SQLStoreOperationLog FOperationLog = new SQLStoreOperationLog();
 		
-		internal class BeginTransactionOperation : SimpleSQLStoreOperation {}
+		internal class BeginTransactionOperation : SQLStoreOperation {}
 		
-		internal class ModifyOperation : SimpleSQLStoreOperation
+		internal class ModifyOperation : SQLStoreOperation
 		{
 			public ModifyOperation(string AUndoStatement) : base()
 			{
@@ -387,7 +387,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			private string FUndoStatement;
 
-			public override void Undo(SimpleSQLStoreConnection AConnection)
+			public override void Undo(SQLStoreConnection AConnection)
 			{
 				AConnection.ExecuteStatement(FUndoStatement);
 			}
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FTransaction = FConnection.BeginTransaction(AIsolationLevel);
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SimpleSQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
 
 				ExecuteCommand.Transaction = FTransaction;
@@ -427,7 +427,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FTransaction.Commit();
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SimpleSQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
 
 				FTransaction.Dispose();
@@ -450,7 +450,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			for (int LIndex = FOperationLog.Count - 1; LIndex >= 0; LIndex--)
 			{
-				SimpleSQLStoreOperation LOperation = FOperationLog[LIndex];
+				SQLStoreOperation LOperation = FOperationLog[LIndex];
 				FOperationLog.RemoveAt(LIndex);
 				if (LOperation is BeginTransactionOperation)
 					break;
@@ -467,7 +467,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FTransaction.Rollback();
 				
 				#if SQLSTORETIMING
-				Store.Counters.Add(new SimpleSQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
 
 				FTransaction.Dispose();
@@ -498,7 +498,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FOperationLog.Add(new ModifyOperation(GenerateUndoInsertStatement(ATableName, AColumns, AKey, ARow)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SimpleSQLStoreCounter("LogInsert", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogInsert", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 
@@ -524,7 +524,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FOperationLog.Add(new ModifyOperation(GenerateUndoUpdateStatement(ATableName, AColumns, AKey, AOldRow, ANewRow)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SimpleSQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 
@@ -557,7 +557,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FOperationLog.Add(new ModifyOperation(GenerateUndoDeleteStatement(ATableName, AColumns, AKey, ARow)));
 
 			#if SQLSTORETIMING
-			Store.Counters.Add(new SimpleSQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Store.Counters.Add(new SQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 
@@ -576,9 +576,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 	}
 	
-	public class SimpleSQLStoreCursor : System.Object, IDisposable
+	public class SQLStoreCursor : System.Object, IDisposable
 	{
-		internal SimpleSQLStoreCursor(SimpleSQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
+		internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
 		{
 			FConnection = AConnection;
 			FTableName = ATableName;
@@ -627,8 +627,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		#endregion
 		
-		private SimpleSQLStoreConnection FConnection;
-		public SimpleSQLStoreConnection Connection { get { return FConnection; } }
+		private SQLStoreConnection FConnection;
+		public SQLStoreConnection Connection { get { return FConnection; } }
 
 		private DbDataReader FReader;
 		protected DbDataReader Reader { get { return FReader; } }
@@ -742,7 +742,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private void CheckIsOnRow()
 		{
 			if (!FIsOnRow)
-				throw new CatalogException(CatalogException.Codes.CursorHasNoCurrentRow, ErrorSeverity.System);
+				throw new StoreException(StoreException.Codes.CursorHasNoCurrentRow, ErrorSeverity.System);
 		}
 		
 		private object InternalGetValue(int AIndex)
@@ -757,7 +757,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SimpleSQLStoreCounter("GetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("GetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
@@ -773,7 +773,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//FReader.SetValue(AIndex, NativeToStoreValue(AValue));
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -808,7 +808,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				LRow[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 
 			return LRow;
@@ -833,7 +833,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Next", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Next", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
@@ -859,7 +859,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//FResultSet.ReadLast();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -887,7 +887,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Prior", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Prior", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
@@ -913,7 +913,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//FResultSet.ReadFirst();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -957,14 +957,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//	LRecord.SetValue(LIndex, NativeToStoreValue(ARow[LIndex]));
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
 			//FResultSet.Insert(LRecord, DbInsertOptions.KeepCurrentPosition);
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -988,7 +988,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//FResultSet.Update();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -1023,7 +1023,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			//FResultSet.Delete();
 
 			#if SQLSTORETIMING
-			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			Connection.Store.Counters.Add(new SQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 		
@@ -1061,7 +1061,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Seek", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				Connection.Store.Counters.Add(new SQLStoreCounter("Seek", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
