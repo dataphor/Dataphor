@@ -12,18 +12,15 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public abstract class DotNetConnection : SQLConnection
 	{
+		/// <summary>
+		/// Parameterless constructor used by descendents to establish state prior to establishing the connection.
+		/// </summary>
+		protected DotNetConnection() : base()
+		{ }
+		
 		public DotNetConnection(string AConnectionString) : base()
 		{
-			FConnection = CreateDbConnection(AConnectionString);
-			try
-			{
-				FConnection.Open();
-			}
-			catch (Exception LException)
-			{
-				WrapException(LException, "connect", false);
-			}
-			SetState(SQLConnectionState.Idle);
+			InternalConnect(AConnectionString);
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -49,6 +46,20 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 
+		protected void InternalConnect(string AConnectionString)
+		{
+			FConnection = CreateDbConnection(AConnectionString);
+			try
+			{
+				FConnection.Open();
+			}
+			catch (Exception LException)
+			{
+				WrapException(LException, "connect", false);
+			}
+			SetState(SQLConnectionState.Idle);
+		}
+		
 		protected abstract IDbConnection CreateDbConnection(string AConnectionString);
 		
 		protected IDbCommand CreateDbCommand()

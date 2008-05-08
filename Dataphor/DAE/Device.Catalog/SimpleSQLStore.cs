@@ -6,9 +6,9 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 	Simple SQL Store
 	
-	A simple storage device that uses a SQL Server Everywhere instance as it's backend.
+	A simple storage device that uses a SQL DBMS as it's backend.
 	The store is capable of storing integers, strings, booleans, and long text and binary data.
-	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in SQL Server Everywhere.
+	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
 
 using System;
@@ -20,7 +20,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
-using System.Data.SqlServerCe;
+using System.Data.Common;
+
+using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
@@ -61,25 +63,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	public class SimpleSQLStoreCounters : List<SimpleSQLStoreCounter> {}
 
-	public class SimpleSQLStore : System.Object
+	public abstract class SimpleSQLStore : System.Object
 	{
-		public string GetConnectionString()
+		public abstract string GetConnectionString();
+		
+		public abstract SQLConnection GetSQLConnection();
+
+		public abstract void Initialize();
+		
+		/// <summary> Returns the set of batches in the given script, delimited by the default 'go' batch terminator. </summary>
+		public static List<String> ProcessBatches(string AScript)
 		{
-			return String.Format("Data Source={0};Password={1};Mode={2}", FDatabaseFileName, FPassword, "Read Write");
+			return ProcessBatches(AScript, "go");
 		}
 		
-		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
-		public virtual void Initialize()
-		{
-			if (!File.Exists(FDatabaseFileName))
-			{
-				SqlCeEngine LEngine = new SqlCeEngine(GetConnectionString());
-				LEngine.CreateDatabase();
-			}
-		}
-
-		/// <summary>Returns the set of batches in the given script, delimited by the 'go' terminator in TSQL.</summary>
-		public static List<String> ProcessBatches(string AScript)
+		/// <summary>Returns the set of batches in the given script, delimited by the given terminator.</summary>
+		public static List<String> ProcessBatches(string AScript, string ATerminator)
 		{
 			// NOTE: This is the same code as SQLUtility.ProcessBatches, duplicated to avoid the dependency
 			List<String> LBatches = new List<String>();
@@ -180,7 +179,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FConnectionCount--;
 			}
 		}
-
+		
 		// DatabaseFileName
 		private string FDatabaseFileName = "DAEStore.sdf";
 		/// <summary>The name of the database file.</summary>
@@ -211,8 +210,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		internal SimpleSQLStoreConnection(SimpleSQLStore AStore) : base()
 		{
 			FStore = AStore;
-			FConnection = new SqlCeConnection(FStore.GetConnectionString());
+			FConnection = InternalCreateConnection();
 			FConnection.Open();
+		}
+		
+		protected virtual DbConnection InternalCreateConnection()
+		{
+			throw new NotSupportedException();
 		}
 		
 		#region IDisposable Members
@@ -224,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FExecuteCommand.Dispose();
 				FExecuteCommand = null;
 			}
-			
+
 			if (FConnection != null)
 			{
 				FConnection.Dispose();
@@ -259,35 +263,32 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		// Connection
 		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
-		private SqlCeConnection FConnection;
+		private DbConnection FConnection;
 		
 		/// <summary>The transaction object for this connection.</summary>
-		private SqlCeTransaction FTransaction;
+		private DbTransaction FTransaction;
 		
 		// ExecuteCommand
-		private SqlCeCommand FExecuteCommand;
+		private DbCommand FExecuteCommand;
 		/// <summary>This is the internal command used to execute statements on this connection.</summary>
-		private SqlCeCommand ExecuteCommand
+		protected DbCommand ExecuteCommand
 		{
 			get
 			{
 				if (FExecuteCommand == null)
-				{
-					FExecuteCommand = new SqlCeCommand();
-					FExecuteCommand.Connection = FConnection;
-				}
+					FExecuteCommand = FConnection.CreateCommand();
 				return FExecuteCommand;
 			}
 		}
 		
-		private void ExecuteScript(string AScript)
+		public void ExecuteScript(string AScript)
 		{
 			List<String> LStatements = SimpleSQLStore.ProcessBatches(AScript);
 			for (int LIndex = 0; LIndex < LStatements.Count; LIndex++)
 				ExecuteStatement(LStatements[LIndex]);
 		}
 
-		private void ExecuteStatement(string AStatement)
+		public void ExecuteStatement(string AStatement)
 		{
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
@@ -303,7 +304,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private object ExecuteScalar(string AStatement)
+		public object ExecuteScalar(string AStatement)
 		{
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
@@ -325,7 +326,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private SqlCeDataReader ExecuteReader(string AStatement)
+		protected DbDataReader ExecuteReader(string AStatement)
 		{
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
@@ -345,94 +346,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private SqlCeResultSet ExecuteResultSet(string ATableName, string AIndexName, DbRangeOptions ARangeOptions, object[] AStartValues, object[] AEndValues, ResultSetOptions AResultSetOptions)
+		protected virtual SimpleSQLStoreCursor InternalOpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
 		{
-			ExecuteCommand.CommandType = CommandType.TableDirect;
-			ExecuteCommand.CommandText = ATableName;
-			ExecuteCommand.IndexName = AIndexName;
-			ExecuteCommand.SetRange(ARangeOptions, AStartValues, AEndValues);
-
-			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			try
-			{
-			#endif
-			
-				return ExecuteCommand.ExecuteResultSet(AResultSetOptions);
-			
-			#if SQLSTORETIMING
-			}
-			finally
-			{
-				Store.Counters.Add(new SimpleSQLStoreCounter("ExecuteResultSet", ATableName, AIndexName, AStartValues != null && AEndValues == null, AStartValues != null && AEndValues != null, (ResultSetOptions.Updatable & AResultSetOptions) != 0, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			}
-			#endif
+			return
+				new SimpleSQLStoreCursor
+				(
+					this,
+					ATableName,
+					AIndexName,
+					AKey,
+					AIsUpdatable
+				);
 		}
 		
 		public SimpleSQLStoreCursor OpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
 		{
-			return
-				new SimpleSQLStoreCursor
-				(
-					this,
-					ExecuteResultSet
-					(
-						ATableName,
-						AIndexName,
-						DbRangeOptions.Default,
-						null,
-						null,
-						ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | (AIsUpdatable ? ResultSetOptions.Updatable : ResultSetOptions.None)
-					),
-					ATableName,
-					AIndexName,
-					AKey,
-					AIsUpdatable
-				);
-		}
-		
-		public SimpleSQLStoreCursor OpenMatchedCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable, params object[] AMatchValues)
-		{
-			return
-				new SimpleSQLStoreCursor
-				(
-					this,
-					ExecuteResultSet
-					(
-						ATableName,
-						AIndexName,
-						DbRangeOptions.Match,
-						AMatchValues,
-						null,
-						ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | (AIsUpdatable ? ResultSetOptions.Updatable : ResultSetOptions.None)
-					),
-					ATableName,
-					AIndexName,
-					AKey,
-					AIsUpdatable
-				);
-		}
-		
-		public SimpleSQLStoreCursor OpenRangedCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable, object[] AStartValues, object[] AEndValues)
-		{
-			return
-				new SimpleSQLStoreCursor
-				(
-					this, 
-					ExecuteResultSet
-					(
-						ATableName, 
-						AIndexName, 
-						DbRangeOptions.Default, 
-						AStartValues, 
-						AEndValues, 
-						ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | (AIsUpdatable ? ResultSetOptions.Updatable : ResultSetOptions.None)
-					), 
-					ATableName, 
-					AIndexName,
-					AKey,
-					AIsUpdatable
-				);
+			return InternalOpenCursor(ATableName, AIndexName, AKey, AIsUpdatable);
 		}
 		
 		private int FTransactionCount = 0;
@@ -465,7 +394,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		// BeginTransaction
-		public virtual void BeginTransaction(IsolationLevel AIsolationLevel)
+		public virtual void BeginTransaction(System.Data.IsolationLevel AIsolationLevel)
 		{
 			if (FTransaction == null)
 			{
@@ -473,7 +402,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				long LStartTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				FTransaction = FConnection.BeginTransaction();
+				FTransaction = FConnection.BeginTransaction(AIsolationLevel);
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SimpleSQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -649,34 +578,51 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	public class SimpleSQLStoreCursor : System.Object, IDisposable
 	{
-		internal SimpleSQLStoreCursor(SimpleSQLStoreConnection AConnection, SqlCeResultSet AResultSet, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
+		internal SimpleSQLStoreCursor(SimpleSQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
 		{
 			FConnection = AConnection;
-			FResultSet = AResultSet;
 			FTableName = ATableName;
 			FIndexName = AIndexName;
 			FKey = AKey;
 			FIsUpdatable = AIsUpdatable;
 			FCursorName = AIndexName + AIsUpdatable.ToString();
+			FReader = InternalCreateReader();
 			FColumns = new List<string>();
-			for (int LIndex = 0; LIndex < FResultSet.FieldCount; LIndex++)
-				FColumns.Add(FResultSet.GetName(LIndex));
+			for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
+				FColumns.Add(FReader.GetName(LIndex));
 			FKeyIndexes = new List<int>();
 			for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
 				FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
 		}
 		
+		protected virtual DbDataReader InternalCreateReader()
+		{
+			// TODO: Implement...
+			throw new NotSupportedException();
+		}
+		
 		#region IDisposable Members
+		
+		protected virtual void InternalDispose()
+		{
+		}
 
 		public void Dispose()
 		{
-			if (FResultSet != null)
+			try
 			{
-				FResultSet.Dispose();
-				FResultSet = null;
+				InternalDispose();
 			}
-			
-			FConnection = null;
+			finally
+			{
+				if (FReader != null)
+				{
+					FReader.Dispose();
+					FReader = null;
+				}
+				
+				FConnection = null;
+			}
 		}
 
 		#endregion
@@ -684,10 +630,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private SimpleSQLStoreConnection FConnection;
 		public SimpleSQLStoreConnection Connection { get { return FConnection; } }
 
-		private SqlCeResultSet FResultSet;
+		private DbDataReader FReader;
+		protected DbDataReader Reader { get { return FReader; } }
+		
 		private string FTableName;
+		public string TableName { get { return FTableName; } }
+		
 		private string FIndexName;
+		public string IndexName { get { return FIndexName; } }
+		
 		private bool FIsUpdatable;
+		public bool IsUpdatable { get { return FIsUpdatable; } }
 
 		private string FCursorName;
 		public string CursorName { get { return FCursorName; } }
@@ -799,7 +752,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 			#endif
-				return StoreToNativeValue(FResultSet.GetValue(AIndex)); 
+				return StoreToNativeValue(FReader.GetValue(AIndex)); 
 			#if SQLSTORETIMING
 			}
 			finally
@@ -809,13 +762,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 		}
 		
-		private void InternalSetValue(int AIndex, object AValue)
+		protected virtual void InternalSetValue(int AIndex, object AValue)
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FResultSet.SetValue(AIndex, NativeToStoreValue(AValue));
+			// TODO: Implement...
+			throw new NotSupportedException();
+			//FReader.SetValue(AIndex, NativeToStoreValue(AValue));
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -848,9 +803,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			object[] LRow = new object[FResultSet.FieldCount];
+			object[] LRow = new object[FReader.FieldCount];
 			for (int LIndex = 0; LIndex < LRow.Length; LIndex++)
-				LRow[LIndex] = StoreToNativeValue(FResultSet.GetValue(LIndex));
+				LRow[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -865,14 +820,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return InternalSelect();
 		}
 		
-		private bool InternalNext()
+		protected virtual bool InternalNext()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return FResultSet.Read();
+				// TODO: Need to introduce ReaderDirection...
+				return FReader.Read();
 			#if SQLSTORETIMING
 			}
 			finally
@@ -892,13 +848,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return FIsOnRow;
 		}
 		
-		private void InternalLast()
+		protected virtual void InternalLast()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
-			FResultSet.ReadLast(); // TODO: Does this put the cursor on a row or a crack?
+			
+			// TODO: Implement...
+			throw new NotSupportedException();
+			//FResultSet.ReadLast();
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -915,14 +873,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FIsOnRow = false;
 		}
 		
-		private bool InternalPrior()
+		protected virtual bool InternalPrior()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return FResultSet.ReadPrevious();
+				// TODO: Implement...
+				throw new NotSupportedException();
+				// FResultSet.ReadPrevious();
 			#if SQLSTORETIMING
 			}
 			finally
@@ -941,14 +901,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 			return FIsOnRow;
 		}
-		
-		private void InternalFirst()
+
+		protected virtual void InternalFirst()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FResultSet.ReadFirst(); // TODO: Does this put the cursor on a row or a crack?
+			// TODO: Implement...
+			throw new NotSupportedException();
+			//FResultSet.ReadFirst();
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -981,22 +943,25 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return AValue;
 		}
 		
-		private void InternalInsert(object[] ARow)
+		protected virtual void InternalInsert(object[] ARow)
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
+			
+			// TODO: Implement...
+			throw new NotSupportedException();
 
-			SqlCeUpdatableRecord LRecord = FResultSet.CreateRecord();
-			for (int LIndex = 0; LIndex < ARow.Length; LIndex++)
-				LRecord.SetValue(LIndex, NativeToStoreValue(ARow[LIndex]));
+			//SqlCeUpdatableRecord LRecord = FResultSet.CreateRecord();
+			//for (int LIndex = 0; LIndex < ARow.Length; LIndex++)
+			//	LRecord.SetValue(LIndex, NativeToStoreValue(ARow[LIndex]));
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FResultSet.Insert(LRecord, DbInsertOptions.KeepCurrentPosition);
+			//FResultSet.Insert(LRecord, DbInsertOptions.KeepCurrentPosition);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1012,13 +977,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FConnection.LogInsert(FTableName, FColumns, FKey, ARow);
 		}
 		
-		private void InternalUpdate()
+		protected virtual void InternalUpdate()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FResultSet.Update();
+			// TODO: Implement...
+			throw new NotSupportedException();
+			//FResultSet.Update();
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1045,13 +1012,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FCurrentRow = null;
 		}
 		
-		private void InternalDelete()
+		protected virtual void InternalDelete()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FResultSet.Delete();
+			// TODO: Implement...
+			throw new NotSupportedException();
+			//FResultSet.Delete();
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SimpleSQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1074,17 +1043,20 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FIsOnRow = false;
 		}
 		
-		private bool InternalSeek(object[] AKey)
+		protected virtual bool InternalSeek(object[] AKey)
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				object[] LKey = new object[AKey.Length];
-				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
-				return FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
+				// TODO: Implement...
+				throw new NotSupportedException();
+
+				//object[] LKey = new object[AKey.Length];
+				//for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
+				//	LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
+				//return FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
 			#if SQLSTORETIMING
 			}
 			finally
@@ -1103,6 +1075,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				
 			if (InternalSeek(AKey))
 			{
+				// TODO: I am fairly certain this code is wrong and it's only not been a problem because we don't use this behavior in the catalog store
 				FIsOnRow = InternalNext();
 				return FIsOnRow;
 			}

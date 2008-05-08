@@ -27,6 +27,8 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using System.Data.Common;
+using Alphora.Dataphor.DAE.Connection;
 
 // TODO: Study the performance impact of using literals vs. parameterized statements, including the impact of the required String.Replace calls
 
@@ -84,37 +86,34 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	internal class StoreIndexHeaders : Dictionary<string, StoreIndexHeader> {}
 
-	public class CatalogStore : SimpleSQLStore
+	public class CatalogStore : System.Object
 	{
+		public CatalogStore()
+		{
+			FStore = new SimpleSQLCEStore();
+		}
+		
 		/// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
 		public void Initialize(Server.Server AServer)
 		{
-			Initialize();
-
+			FStore.Initialize();
+			
 			// Establish a connection to the catalog store server
-			SqlCeConnection LConnection = new SqlCeConnection(GetConnectionString());
+			SimpleSQLStoreConnection LConnection = FStore.Connect();
 			try
 			{
-				LConnection.Open();
-
+				// TODO: This needs to be specific to the type of store
 				// if there is no DAEServerInfo table
-				SqlCeCommand LCommand = new SqlCeCommand();
-				LCommand.Connection = LConnection;
-				LCommand.CommandText = "select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'DAEServerInfo'";
-				if ((int)LCommand.ExecuteScalar() == 0)
+				if ((int)LConnection.ExecuteScalar("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'DAEServerInfo'") == 0)
 				{
 					// run the SystemStoreCatalog sql script
 					using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemStoreCatalog.sql"))
 					{
-						List<String> LBatches = ProcessBatches(new StreamReader(LStream).ReadToEnd());
-						for (int LIndex = 0; LIndex < LBatches.Count; LIndex++)
-						{
-							LCommand.CommandText = LBatches[LIndex];
-							LCommand.ExecuteNonQuery();
-						}
+						LConnection.ExecuteScript(new StreamReader(LStream).ReadToEnd());
 					}
 					
-					LCommand.CommandText =
+					LConnection.ExecuteStatement
+					(
 						String.Format
 						(
 							"insert into DAEServerInfo (Name, Version, MaxConcurrentProcesses, ProcessWaitTimeout, ProcessTerminationTimeout, PlanCacheSize) values ('{0}', '{1}', {2}, {3}, {4}, {5})",
@@ -124,17 +123,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							(int)AServer.ProcessWaitTimeout.TotalMilliseconds,
 							(int)AServer.ProcessTerminationTimeout.TotalMilliseconds,
 							AServer.PlanCacheSize
-						);
-					LCommand.ExecuteNonQuery();
+						)
+					);
 					
-					LCommand.CommandText = String.Format("insert into DAELoadedLibraries (Library_Name) values ('{0}')", Server.Server.CSystemLibraryName);
-					LCommand.ExecuteNonQuery();
-					
-					LCommand.CommandText = String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, GetType().Assembly.GetName().Version.ToString());
-					LCommand.ExecuteNonQuery();
-					
-					LCommand.CommandText = String.Format("insert into DAELibraryOwners (Library_Name, Owner_User_ID) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, Server.Server.CSystemUserID);
-					LCommand.ExecuteNonQuery();
+					LConnection.ExecuteStatement(String.Format("insert into DAELoadedLibraries (Library_Name) values ('{0}')", Server.Server.CSystemLibraryName));
+					LConnection.ExecuteStatement(String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, GetType().Assembly.GetName().Version.ToString()));
+					LConnection.ExecuteStatement(String.Format("insert into DAELibraryOwners (Library_Name, Owner_User_ID) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, Server.Server.CSystemUserID));
 				}
 			}
 			finally
@@ -143,14 +137,43 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		#region Connection
-
-		// TODO: If the store is ever torn down, we will be relying on garbage collection to dispose these connections...
-		protected override SimpleSQLStoreConnection InternalConnect()
+		private SimpleSQLStore FStore;
+		
+		// TODO: This needs to be connection-string based...
+		public string DatabaseFileName
 		{
-			return new CatalogStoreConnection(this);
+			get { return FStore.DatabaseFileName; }
+			set { FStore.DatabaseFileName = value; }
 		}
 		
+		public string Password
+		{
+			get { return FStore.Password; }
+			set { FStore.Password = value; }
+		}
+		
+		public int MaxConnections
+		{
+			get { return FStore.MaxConnections; }
+			set { FStore.MaxConnections = value; }
+		}
+		
+		#region Connection
+		
+		// TODO: I'm not happy with this but without a major re-architecture of the crap-wrapper layer, I'm not sure what else to do...
+		// The provider factory seems attractive, but it fails fundamentally to deliver on actual abstraction because it ignores 
+		// even basic syntactic disparity like parameter markers and basic semantic disparity like parameter types. The crap wrapper
+		// is already plugged in to the catalog device (see CatalogDeviceTable), so I'm taking the easy way out on this one...
+		public SQLConnection GetSQLConnection()
+		{
+			return FStore.GetSQLConnection();
+		}
+		
+		public CatalogStoreConnection Connect()
+		{
+			return new CatalogStoreConnection(this, FStore.Connect());
+		}
+
 		private List<CatalogStoreConnection> FConnectionPool = new List<CatalogStoreConnection>();
 		
 		public CatalogStoreConnection AcquireConnection()
@@ -165,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 			}
 			
-			return (CatalogStoreConnection)Connect();
+			return Connect();
 		}
 		
 		public void ReleaseConnection(CatalogStoreConnection AConnection)
@@ -461,39 +484,59 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	public class SimpleSQLStoreCursorCache : Dictionary<string, SimpleSQLStoreCursor> {}
 	
-	public class CatalogStoreConnection : SimpleSQLStoreConnection
+	public class CatalogStoreConnection : System.Object, IDisposable
 	{
-		internal CatalogStoreConnection(CatalogStore AStore) : base(AStore) {}
+		internal CatalogStoreConnection(CatalogStore AStore, SimpleSQLStoreConnection AConnection)
+		{
+			FStore = AStore;
+			FConnection = AConnection;
+		}
 
-		protected override void InternalDispose()
+		public void Dispose()
 		{
 			FlushCache();
 			
-			base.InternalDispose();
+			if (FConnection != null)
+			{
+				FConnection.Dispose();
+				FConnection = null;
+			}
+			
+			FStore = null;
 		}
 		
-		public override void BeginTransaction(IsolationLevel AIsolationLevel)
+		private SimpleSQLStoreConnection FConnection;
+		
+		public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
-			if (TransactionCount == 0)
+			if (FConnection.TransactionCount == 0)
 				FlushCache();
-			base.BeginTransaction(AIsolationLevel);
+			System.Data.IsolationLevel LIsolationLevel = System.Data.IsolationLevel.Unspecified;
+			switch (AIsolationLevel)
+			{
+				case IsolationLevel.Isolated : LIsolationLevel = System.Data.IsolationLevel.Serializable; break;
+				case IsolationLevel.CursorStability : LIsolationLevel = System.Data.IsolationLevel.ReadCommitted; break;
+				case IsolationLevel.Browse : LIsolationLevel = System.Data.IsolationLevel.ReadUncommitted; break;
+			}
+			FConnection.BeginTransaction(LIsolationLevel);
 		}
 
-		public override void CommitTransaction()
+		public void CommitTransaction()
 		{
-			if (TransactionCount == 1)
+			if (FConnection.TransactionCount == 1)
 				FlushCache();
-			base.CommitTransaction();
+			FConnection.CommitTransaction();
 		}
 
-		public override void RollbackTransaction()
+		public void RollbackTransaction()
 		{
-			if (TransactionCount == 1)
+			if (FConnection.TransactionCount == 1)
 				FlushCache();
-			base.RollbackTransaction();
+			FConnection.RollbackTransaction();
 		}
 		
-		public new CatalogStore Store { get { return (CatalogStore)base.Store; } }
+		private CatalogStore FStore;
+		public CatalogStore Store { get { return FStore; } }
 		
 		private SimpleSQLStoreCursorCache FCursorCache = new SimpleSQLStoreCursorCache();
 		
@@ -524,7 +567,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			else
 			{
 				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(AIndexName);
-				LCursor = OpenCursor(LIndexHeader.TableName, LIndexHeader.Name, LIndexHeader.Columns, AIsUpdatable);
+				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LIndexHeader.Name, LIndexHeader.Columns, AIsUpdatable);
 			}
 			return LCursor;
 		}

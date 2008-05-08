@@ -997,7 +997,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			if (FCatalogStoreConnection == null)
 			{
 				if (AIsUpdatable)
-					FCatalogStoreConnection = (CatalogStoreConnection)Device.Store.Connect();
+					FCatalogStoreConnection = Device.Store.Connect();
 				else
 					FCatalogStoreConnection = Device.Store.AcquireConnection();
 			}
@@ -6466,25 +6466,31 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		public void PopulateStoreCounters(Table ATable, Row ARow)
 		{
-			SimpleSQLStoreCounter LCounter;
-			for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
-			{
-				LCounter = Device.Store.Counters[LIndex];
-				ARow[0].AsInt32 = LIndex;
-				ARow[1].AsString = LCounter.Operation;
-				ARow[2].AsString = LCounter.TableName;
-				ARow[3].AsString = LCounter.IndexName;
-				ARow[4].AsBoolean = LCounter.IsMatched;
-				ARow[5].AsBoolean = LCounter.IsRanged;
-				ARow[6].AsBoolean = LCounter.IsUpdatable;
-				ARow[7].AsTimeSpan = LCounter.Duration;
-				ATable.Insert(ARow);
-			}
+			// TODO: Implement...
+			throw new NotSupportedException();
+			
+			//SimpleSQLStoreCounter LCounter;
+			//for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
+			//{
+			//    LCounter = Device.Store.Counters[LIndex];
+			//    ARow[0].AsInt32 = LIndex;
+			//    ARow[1].AsString = LCounter.Operation;
+			//    ARow[2].AsString = LCounter.TableName;
+			//    ARow[3].AsString = LCounter.IndexName;
+			//    ARow[4].AsBoolean = LCounter.IsMatched;
+			//    ARow[5].AsBoolean = LCounter.IsRanged;
+			//    ARow[6].AsBoolean = LCounter.IsUpdatable;
+			//    ARow[7].AsTimeSpan = LCounter.Duration;
+			//    ATable.Insert(ARow);
+			//}
 		}
 
 		public void ClearStoreCounters()
 		{
-			Device.Store.Counters.Clear();
+			// TODO: Implement...
+			throw new NotSupportedException();
+			
+			//Device.Store.Counters.Clear();
 		}
 	}
 	
@@ -6610,7 +6616,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		protected override void InternalOpen()
 		{
 			// Connect to the Catalog Store
-			FConnection = new SQLCEConnection(Session.Device.Store.GetConnectionString());
+			FConnection = Session.Device.Store.GetSQLConnection();
 
 			// Start a read-committed transaction
 			FConnection.BeginTransaction(SQLIsolationLevel.ReadCommitted);

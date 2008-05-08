@@ -58,6 +58,12 @@ namespace Alphora.Dataphor.DAE.Connection
 
 			/// <summary>Error code 127122: "Unable to open cursor."</summary>
 			UnableToOpenCursor = 127122,
+			
+			/// <summary>Error code 127123: "Provider invariant name cannot be set for this connection because the provider factory has already been constructed."</summary>
+			ProviderFactoryAlreadyConstructed = 127123,
+			
+			/// <summary>Error code 127124: "Provider invariant name must be specified for the generic connection."</summary>
+			ProviderInvariantNameRequired = 127124,
 		}
 		
 		// Resource manager for this exception class.

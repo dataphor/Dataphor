@@ -81,4 +81,10 @@
   <data name="127122">
     <value>Unable to open cursor.</value>
   </data>
+	<data name="127123">
+		<value>Provider invariant name cannot be set for this connection because the provider factory has already been constructed.</value>
+	</data>
+	<data name="127124">
+		<value>Provider invariant name must be specified for the generic connection.</value>
+	</data>
 </root>
