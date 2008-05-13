@@ -863,28 +863,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				throw new ClientException(ClientException.Codes.FormAlreadyModal);
 		}
 
-		private bool FIsLookup;
-		[Browsable(false)]
-		[Publish(PublishMethod.None)]
-		public bool IsLookup
-		{
-			get { return FIsLookup; }
-			set
-			{
-				if (FIsLookup != value)
-				{
-					FIsLookup = value;
-					if (Active)
-						InternalUpdateIsLookup();
-				}
-			}
-		}
-
-		private void InternalUpdateIsLookup()
-		{
-			FForm.IsLookup = FIsLookup;
-		}
-
 		// Accept/Reject is tied to the data edit state and modal state (someone waiting on accept/reject)
 
 		private FormMode FMode;
@@ -1010,6 +988,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		#endregion
 
+		#region IsLookup
+
+		private bool FIsLookup;
+		
+		/// <remarks> Only effectual on show. </remarks>
+		[Browsable(false)]
+		[Publish(PublishMethod.None)]
+		public bool IsLookup
+		{
+			get { return FIsLookup; }
+			set 
+			{ 
+				if (FIsLookup != value)
+				{
+					FIsLookup = value;
+					if (Active) 
+						InternalUpdateIsLookup();
+				}
+			}
+		}
+		
+		private void InternalUpdateIsLookup()
+		{
+			FForm.IsLookup = FIsLookup;
+		}
+		
+		#endregion
+		
 		#region Enabled / Disabled
 
 		private int FDisableCount;

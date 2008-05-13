@@ -1328,6 +1328,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public SearchByDropDown(Control AOwner, TableDataSet ADataSet)
 		{
+			Owner = AOwner.FindForm();
 			FormBorderStyle = FormBorderStyle.None;
 			StartPosition = FormStartPosition.Manual;
 			ShowInTaskbar = false;

@@ -136,11 +136,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FContentPanel.Controls.SetChildIndex(this.AdvancedButton, 0);
 			this.FContentPanel.Controls.SetChildIndex(this.cbIsUserAlias, 0);
 			this.FContentPanel.Controls.SetChildIndex(this.label1, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.FBarToggleButton, 0);
-			// 
-			// FBarToggleButton
-			// 
-			this.FBarToggleButton.Location = new System.Drawing.Point(315, 0);
 			// 
 			// SessionInfoPropertyGrid
 			// 

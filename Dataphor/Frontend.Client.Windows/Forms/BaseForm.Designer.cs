@@ -53,7 +53,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FStatusPanel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.FToolBar = new System.Windows.Forms.ToolStrip();
 			this.FContentPanel = new System.Windows.Forms.Panel();
-			this.FBarToggleButton = new Alphora.Dataphor.Frontend.Client.Windows.StaticButton();
 			this.FMainMenu.SuspendLayout();
 			this.FStatusBar.SuspendLayout();
 			this.FContentPanel.SuspendLayout();
@@ -118,25 +117,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// FContentPanel
 			// 
-			this.FContentPanel.Controls.Add(this.FBarToggleButton);
 			this.FContentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.FContentPanel.Paint += new PaintEventHandler(ContentPanelPaint);
 			this.FContentPanel.Location = new System.Drawing.Point(0, 49);
 			this.FContentPanel.Name = "FContentPanel";
 			this.FContentPanel.Size = new System.Drawing.Size(272, 130);
 			this.FContentPanel.TabIndex = 0;
-			// 
-			// FBarToggleButton
-			// 
-			this.FBarToggleButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.FBarToggleButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.FBarToggleButton.Location = new System.Drawing.Point(261, 0);
-			this.FBarToggleButton.Name = "FBarToggleButton";
-			this.FBarToggleButton.Size = new System.Drawing.Size(10, 10);
-			this.FBarToggleButton.TabIndex = 0;
-			this.FBarToggleButton.TabStop = false;
-			this.FBarToggleButton.UseVisualStyleBackColor = true;
-			this.FBarToggleButton.Click += new System.EventHandler(this.FBarToggleButton_Click);
 			// 
 			// BaseForm
 			// 
@@ -162,7 +148,5 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		}
 
 		#endregion
-
-		protected StaticButton FBarToggleButton;
 	}
 }

@@ -37,11 +37,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// Prepare Accept/Reject/Close menu items
 			InitializeAcceptReject();
 
-			UpdateBarsExpanded();
-
 			// Default dialog key mappings
 			DialogKeys[Keys.Enter] = new DialogKeyHandler(ProcessEnter);
-			DialogKeys[Keys.F10] = new DialogKeyHandler(ExpandBars);
 
 			#if TRACEFOCUS
 			FDialogKeys[Keys.Control | Keys.Shift | Keys.Alt | Keys.F] = new DialogKeyHandler(ProcessQueryFocus);
@@ -204,8 +201,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							);
 					}
 				}
-
-				FBarToggleButton.Location = new Point(ClientSize.Width - FBarToggleButton.Width, 0);
 
 				FContentPanel.AutoScroll = true;
 			}
@@ -573,15 +568,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FAcceptButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Accept.png");
 			FRejectButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Reject.png");
 			FCloseButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Close.png");
-			FExpandButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Expand.png");
-			FCollapseButtonImage = (System.Drawing.Image)LoadBitmap("Alphora.Dataphor.Frontend.Client.Windows.Images.Collapse.png");
 		}
 
 		private static System.Drawing.Image FAcceptButtonImage;
 		private static System.Drawing.Image FRejectButtonImage;
 		private static System.Drawing.Image FCloseButtonImage;
-		private static System.Drawing.Image FExpandButtonImage;
-		private static System.Drawing.Image FCollapseButtonImage;
 
 		#endregion
 
@@ -827,70 +818,50 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				if (FIsLookup != value)
 				{
-					BarsExpanded = !value;
-					if (value)
-					{
-						FormBorderStyle = FormBorderStyle.SizableToolWindow;
-					}
-					else
-					{
-						FormBorderStyle = FormBorderStyle.Sizable;
-					}
-				}
-				FIsLookup = value;
-			}
-		}
-
-		// TODO: Better lookup handling... for example, close the form if the covered form is selected etc.
-
-		#endregion
-
-		#region BarsExpanded
-
-		private bool FBarsExpanded = true;
-		[DefaultValue(true)]
-		public bool BarsExpanded
-		{
-			get { return FBarsExpanded; }
-			set
-			{
-				if (FBarsExpanded != value)
-				{
-					FBarsExpanded = value;
-					UpdateBarsExpanded();
+					FIsLookup = value;
+					UpdateIsLookup();
 				}
 			}
 		}
 
-		private void UpdateBarsExpanded()
+		protected void UpdateIsLookup()
 		{
-			SuspendLayout();
-			try
+			if (FIsLookup)
 			{
-				FBarToggleButton.Image = (FBarsExpanded ? FCollapseButtonImage : FExpandButtonImage);
-				FMainMenu.Visible = FBarsExpanded;
-				FStatusBar.Visible = FBarsExpanded;
-			}
-			finally
-			{
-				ResumeLayout(Visible && IsHandleCreated);
-			}
-		}
-
-		private void FBarToggleButton_Click(object sender, EventArgs e)
-		{
-			BarsExpanded = !BarsExpanded;
-		}
-
-		private bool ExpandBars(Form AForm, Keys AKey)
-		{
-			if (!BarsExpanded)
-			{
-				BarsExpanded = true;
-				return true;
+				ShowInTaskbar = false;
+				FormBorderStyle = FormBorderStyle.None;
+				ShowIcon = false;
 			}
 			else
-				return false;
+			{
+				ShowInTaskbar = true;
+				FormBorderStyle = FormBorderStyle.Sizable;
+				ShowIcon = true;
+			}
+		}
+
+		protected override void OnDeactivate(EventArgs e)
+		{
+			base.OnDeactivate(e);
+			if (FIsLookup && !Disposing && (OwnedForms.Length == 0) && (DialogResult == DialogResult.None))
+				Close(CloseBehavior.RejectOrClose);
+		}
+
+		private const int CS_DROPSHADOW = 0x00020000;
+		
+		protected override CreateParams CreateParams
+		{
+			get
+			{
+				CreateParams result = base.CreateParams;
+				// If this form is a lookup, put a small border and a drop shadow on it
+				if (FIsLookup)
+				{
+					result.Style |= 0x800000;
+					result.ClassStyle |= CS_DROPSHADOW;
+				}
+				return result;
+			}
 		}
 
 		#endregion
