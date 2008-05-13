@@ -120,14 +120,6 @@
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.48.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\System.Data.SQLite.DLL</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe, Version=9.0.242.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Design">
       <Name>System.Design</Name>
     </Reference>
@@ -170,7 +162,6 @@
     <Compile Include="Connection\DotNetConnection.cs" />
     <Compile Include="Connection\GenericDotNetConnection.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
-    <Compile Include="Connection\SQLCEConnection.cs" />
     <Compile Include="Connection\SQLConnection.cs" />
     <Compile Include="Connection\SQLTypes.cs" />
     <Compile Include="DAEException.cs">
@@ -642,8 +633,6 @@
     <Compile Include="Storage\Utilities.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Store\SQLCEStore.cs" />
-    <Compile Include="Store\SQLiteStore.cs" />
     <Compile Include="Store\SQLStore.cs" />
     <Compile Include="Store\StoreException.cs" />
     <Compile Include="Streams\Conveyor.cs">
@@ -767,7 +756,6 @@
     <Content Include="Language.SQL\BNFDifferences.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
-    <EmbeddedResource Include="Schema\SystemStoreCatalog.sql" />
     <None Include="Schema\SQLDeviceMappings.d4" />
     <None Include="Storage\AllocationManager.cs">
       <SubType>Code</SubType>

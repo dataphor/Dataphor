@@ -29,6 +29,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			/// <summary>Error code 115104: "Catalog store cursor has no current row."</summary>
 			CursorHasNoCurrentRow = 115104,
+			
+			/// <summary>Error code 115105: "Store settings cannot be changed once the catalog store has been initialized."</summary>
+			CatalogStoreInitialized = 115105,
+			
+			/// <summary>Error code 115106: "Catalog store class name required."</summary>
+			CatalogStoreClassNameRequired = 115106,
 		}
 
 		// Resource manager for this exception class

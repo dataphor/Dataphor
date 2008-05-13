@@ -199,6 +199,30 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return FStartupScriptUri; }
 			set { FStartupScriptUri = value; }
 		}
+		
+		private string FCatalogStoreClassName;
+		/// <summary>
+		/// The assembly-qualified class name of the store used to persist the system catalog.
+		/// </summary>
+		[Description("The assembly-qualified class name of the store used to persist the system catalog.")]
+		[DefaultValue(null)]
+		public string CatalogStoreClassName
+		{
+			get { return FCatalogStoreClassName; }
+			set { FCatalogStoreClassName = value; }
+		}
+		
+		private string FCatalogStoreConnectionString;
+		/// <summary>
+		/// The connection string to be used to connect to the system catalog store.
+		/// </summary>
+		[Description("The connection string to be used to connect to the system catalog store.")]
+		[DefaultValue(null)]
+		public string CatalogStoreConnectionString
+		{
+			get { return FCatalogStoreConnectionString; }
+			set { FCatalogStoreConnectionString = value; }
+		}
 
 		private string FCatalogDirectory = String.Empty;
 		/// <summary>The directory used by the Dataphor Server to persist it's catalog (schema).</summary>
@@ -619,6 +643,8 @@ namespace Alphora.Dataphor.DAE.Client
 					FHostedServer.LogErrors = LInProcessAlias.LogErrors;
 					FHostedServer.TracingEnabled = LInProcessAlias.TracingEnabled;
 					FHostedServer.StartupScriptUri = LInProcessAlias.StartupScriptUri;
+					FHostedServer.CatalogStoreClassName = LInProcessAlias.CatalogStoreClassName;
+					FHostedServer.CatalogStoreConnectionString = LInProcessAlias.CatalogStoreConnectionString;
 					FHostedServer.CatalogDirectory = LInProcessAlias.CatalogDirectory;
 					FHostedServer.CatalogStoreDatabaseName = LInProcessAlias.CatalogStoreDatabaseName;
 					FHostedServer.CatalogStorePassword = LInProcessAlias.CatalogStorePassword;

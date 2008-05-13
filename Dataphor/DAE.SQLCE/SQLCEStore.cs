@@ -13,23 +13,35 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
-using System.Data.SqlServerCe;
-using System.Data.Common;
-using Alphora.Dataphor.DAE.Connection;
 using System.Data;
+using System.Data.Common;
+using System.Data.SqlServerCe;
+
+using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Store.SQLCE
 {
 	public class SQLCEStore : SQLStore
 	{
-		public override string GetConnectionString()
+		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
+		protected override void InternalInitialize()
 		{
-			return String.Format("Data Source={0};Password={1};Mode={2}", DatabaseFileName, Password, "Read Write");
+			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
+			LBuilder.ConnectionString = ConnectionString;
+			if (LBuilder.ContainsKey("Data Source"))
+			{
+				string LDatabaseFileName = (string)LBuilder["Data Source"];
+				if (!File.Exists(LDatabaseFileName))
+				{
+					SqlCeEngine LEngine = new SqlCeEngine(ConnectionString);
+					LEngine.CreateDatabase();
+				}
+			}
 		}
-		
+
 		public override SQLConnection GetSQLConnection()
 		{
-			return new SQLCEConnection(GetConnectionString());
+			return new SQLCEConnection(ConnectionString);
 		}
 
 		protected override SQLStoreConnection InternalConnect()
@@ -48,16 +60,6 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			}
 			#endif
 		}
-
-		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
-		public override void Initialize()
-		{
-			if (!File.Exists(DatabaseFileName))
-			{
-				SqlCeEngine LEngine = new SqlCeEngine(GetConnectionString());
-				LEngine.CreateDatabase();
-			}
-		}
 	}
 	
 	public class SQLCEStoreConnection : SQLStoreConnection
@@ -67,7 +69,12 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 		
 		protected override DbConnection InternalCreateConnection()
 		{
-			return new SqlCeConnection(Store.GetConnectionString());
+			return new SqlCeConnection(Store.ConnectionString);
+		}
+
+		public override bool HasTable(string ATableName)
+		{
+			return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);
 		}
 
 		internal SqlCeResultSet ExecuteResultSet(string ATableName, string AIndexName, DbRangeOptions ARangeOptions, object[] AStartValues, object[] AEndValues, ResultSetOptions AResultSetOptions)

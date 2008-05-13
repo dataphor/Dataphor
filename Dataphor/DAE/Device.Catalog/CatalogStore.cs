@@ -26,7 +26,6 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Store;
-using Alphora.Dataphor.DAE.Store.SQLCE;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Connection;
@@ -89,26 +88,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 	public class CatalogStore : System.Object
 	{
-		public CatalogStore()
+		public CatalogStore() { }
+		
+		public void CreateStore()
 		{
-			FStore = new SQLCEStore();
+			FStore = (SQLStore)Activator.CreateInstance(Type.GetType(FStoreClassName, true, true));
+			FStore.ConnectionString = FStoreConnectionString;
+			FStore.MaxConnections = FMaxConnections;
 		}
 		
 		/// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
 		public void Initialize(Server.Server AServer)
 		{
+			CreateStore();
 			FStore.Initialize();
 			
 			// Establish a connection to the catalog store server
 			SQLStoreConnection LConnection = FStore.Connect();
 			try
 			{
-				// TODO: This needs to be specific to the type of store
 				// if there is no DAEServerInfo table
-				if ((int)LConnection.ExecuteScalar("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'DAEServerInfo'") == 0)
+				if (!LConnection.HasTable("DAEServerInfo"))
 				{
 					// run the SystemStoreCatalog sql script
-					using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemStoreCatalog.sql"))
+					using (Stream LStream = FStore.GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.SystemStoreCatalog.sql"))
 					{
 						LConnection.ExecuteScript(new StreamReader(LStream).ReadToEnd());
 					}
@@ -140,23 +143,51 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private SQLStore FStore;
 		
-		// TODO: This needs to be connection-string based...
-		public string DatabaseFileName
+		private string FStoreClassName;
+		public string StoreClassName
 		{
-			get { return FStore.DatabaseFileName; }
-			set { FStore.DatabaseFileName = value; }
+			get { return FStoreClassName; }
+			set
+			{
+				if (FStoreClassName != value)
+				{
+					if (FStore != null)
+						throw new CatalogException(CatalogException.Codes.CatalogStoreInitialized);
+						
+					if (String.IsNullOrEmpty(value))
+						throw new CatalogException(CatalogException.Codes.CatalogStoreClassNameRequired);
+						
+					FStoreClassName = value;
+				}
+			}
 		}
 		
-		public string Password
+		private string FStoreConnectionString;
+		public string StoreConnectionString
 		{
-			get { return FStore.Password; }
-			set { FStore.Password = value; }
+			get { return FStoreConnectionString; }
+			set
+			{
+				if (FStoreConnectionString != value)
+				{
+					if (FStore != null)
+						throw new CatalogException(CatalogException.Codes.CatalogStoreInitialized);
+						
+					FStoreConnectionString = value;
+				}
+			}
 		}
 		
+		private int FMaxConnections;
 		public int MaxConnections
 		{
-			get { return FStore.MaxConnections; }
-			set { FStore.MaxConnections = value; }
+			get { return FMaxConnections; }
+			set 
+			{ 
+				FMaxConnections = value;
+				if (FStore != null)
+					FStore.MaxConnections = value; 
+			}
 		}
 		
 		#region Connection

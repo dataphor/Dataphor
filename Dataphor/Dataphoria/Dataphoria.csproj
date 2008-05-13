@@ -57,7 +57,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>bin\debug\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
@@ -442,6 +442,16 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="TextEditor\Modes\CS-Mode.xshd">
+    </None>
+    <None Include="TextEditor\Modes\D4-Mode.xshd">
+    </None>
+    <None Include="TextEditor\Modes\Result-Mode.xshd">
+    </None>
+    <None Include="TextEditor\Modes\SQL.xshd">
+    </None>
+    <None Include="TextEditor\Modes\Text-Mode.xshd">
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{CF845C55-C321-4742-B673-E6212D061ED9}" />
@@ -473,7 +483,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy $(ProjectDir)TextEditor\Modes\*.xshd $(OutDir) /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -127,16 +127,51 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 			}
 		}
+		
+		// CatalogStoreClassName
+		private string FCatalogStoreClassName;
+		/// <summary>
+		/// Specifies the assembly-qualified class name of the store used to persist the system catalog.
+		/// </summary>
+		[Description("Specifies the assembly-qualified class name of the store used to persist the system catalog.")]
+		[Category("Configuration")]
+		public string CatalogStoreClassName
+		{
+			get { return FCatalogStoreClassName; }
+			set
+			{
+				CheckNotStarted();
+				FCatalogStoreClassName = value;
+			}
+		}
+		
+		// CatalogStoreConnectionString
+		private string FCatalogStoreConnectionString;
+		/// <summary>
+		/// Specifies the connection string used to connect to the system catalog store.
+		/// </summary>
+		[Description("Specifies the connection string used to connect to the system catalog store.")]
+		[Category("Configuration")]
+		public string CatalogStoreConnectionString
+		{
+			get { return FCatalogStoreConnectionString; }
+			set
+			{
+				CheckNotStarted();
+				FCatalogStoreConnectionString = value;
+			}
+		}
+		
 
 		// CatalogDirectory
 		private string FCatalogDirectory = String.Empty;
-		/// <summary> Specifies the file used to persist the DAE catalog (schema). </summary>
+		/// <summary> Specifies the directory used to persist the DAE catalog (schema). </summary>
 		/// <remarks>
 		///		Default to empty.  Use <see cref="SetCatalogDirectoryToDefault"/> to point the file to 
 		///		the system's default DAE server catalog.  The DAE server must not be started or an
 		///		exception will be thrown.
 		///	</remarks>
-		[Description("Specifies the directory used to persist the DAE catalog (schema).")]
+		[Description("Specifies the directory used to persist the DAE catalog (schema). This setting is for backwards-compatibility; use CatalogStoreConnectionString instead.")]
 		[Category("Configuration")]
 		public string CatalogDirectory
 		{
@@ -157,7 +192,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private string FCatalogStoreDatabaseName = "DAECatalog";
 		/// <summary>The name of the database to be used for the catalog store.</summary>
 		[DefaultValue("DAECatalog")]
-		[Description("The name of the database to be used for the catalog store.")]
+		[Description("The name of the database to be used for the catalog store. This setting is for backwards-compatibility; use CatalogStoreConnectionString instead.")]
 		public string CatalogStoreDatabaseName
 		{
 			get { return FCatalogStoreDatabaseName; }
@@ -174,7 +209,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private string FCatalogStorePassword = String.Empty;
 		/// <summary>If not using integrated security, the password to be used to connect to the catalog store.</summary>
 		[DefaultValue("")]
-		[Description("If not using integrated security, the password to be used to connect to the catalog store.")]
+		[Description("If not using integrated security, the password to be used to connect to the catalog store. This setting is for backwards-compatibility; use CatalogStoreConnectionString instead.")]
 		public string CatalogStorePassword
 		{
 			get { return FCatalogStorePassword; }
@@ -256,6 +291,8 @@ namespace Alphora.Dataphor.DAE.Server
 					FServer.LogErrors = FLogErrors;
 					FServer.TracingEnabled = FTracingEnabled;
 					FServer.StartupScriptUri = StartupScriptUri;
+					FServer.CatalogStoreClassName = CatalogStoreClassName;
+					FServer.CatalogStoreConnectionString = CatalogStoreConnectionString;
 					FServer.CatalogDirectory = CatalogDirectory;
 					FServer.CatalogStoreDatabaseName = CatalogStoreDatabaseName;
 					FServer.CatalogStorePassword = CatalogStorePassword;

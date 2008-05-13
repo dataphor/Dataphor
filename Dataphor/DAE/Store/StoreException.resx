@@ -104,4 +104,7 @@
 	<data name="130101" xml:space="preserve">
 		<value>Store cursor has no current row.</value>
 	</data>
+	<data name="130102" xml:space="preserve">
+		<value>Store settings cannot be changed once the store has been initialized.</value>
+	</data>
 </root>

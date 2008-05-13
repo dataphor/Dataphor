@@ -18,6 +18,9 @@ namespace Alphora.Dataphor.DAE.Store
 
 			/// <summary>Error code 130101: "Store cursor has no current row."</summary>
 			CursorHasNoCurrentRow = 130101,
+			
+			/// <summary>Error code 130102: "Store settings cannot be changed once the store has been initialized."</summary>
+			StoreInitialized = 130102,
 		}
 
 		// Resource manager for this exception class

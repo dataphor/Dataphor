@@ -195,8 +195,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (!AProcess.ServerSession.Server.IsRepository)
 			{
 				FStore = new CatalogStore();
-				FStore.DatabaseFileName = AProcess.ServerSession.Server.GetCatalogStoreDatabaseFileName();
-				FStore.Password = AProcess.ServerSession.Server.CatalogStorePassword;
+				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
+				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
 				FStore.Initialize(AProcess.ServerSession.Server);
 			}
 		}

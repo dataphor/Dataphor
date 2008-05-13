@@ -63,14 +63,38 @@ namespace Alphora.Dataphor.DAE.Store
 	
 	public class SQLStoreCounters : List<SQLStoreCounter> {}
 
+	// TODO: Move timing functionality into the base, not the internals
 	public abstract class SQLStore : System.Object
 	{
-		public abstract string GetConnectionString();
+		private string FConnectionString;
+		public string ConnectionString
+		{
+			get { return FConnectionString; }
+			set 
+			{ 
+				if (FInitialized)
+					throw new StoreException(StoreException.Codes.StoreInitialized);
+				FConnectionString = value; 
+			}
+		}
+		
+		private bool FInitialized;
+		public bool Initialized { get { return FInitialized; } }
+
+		protected abstract void InternalInitialize();
+		
+		public void Initialize()
+		{
+			if (FInitialized)
+				throw new StoreException(StoreException.Codes.StoreInitialized);
+				
+			InternalInitialize();
+			
+			FInitialized = true;
+		}
 		
 		public abstract SQLConnection GetSQLConnection();
 
-		public abstract void Initialize();
-		
 		/// <summary> Returns the set of batches in the given script, delimited by the default 'go' batch terminator. </summary>
 		public static List<String> ProcessBatches(string AScript)
 		{
@@ -179,35 +203,12 @@ namespace Alphora.Dataphor.DAE.Store
 				FConnectionCount--;
 			}
 		}
-		
-		// DatabaseFileName
-		private string FDatabaseFileName = "DAEStore.sdf";
-		/// <summary>The name of the database file.</summary>
-		/// <remarks>
-		/// The default for this property is 'DAEStore.sdf'.
-		/// </remarks>
-		public string DatabaseFileName
-		{
-			get { return FDatabaseFileName; }
-			set { FDatabaseFileName = value; }
-		}
-		
-		// Password
-		private string FPassword = String.Empty;
-		/// <summary>The password to use to connect to the server housing the store.</summary>
-		/// <remarks>
-		/// The default for this property is ''.
-		/// </remarks>
-		public string Password
-		{
-			get { return FPassword; }
-			set { FPassword = value; }
-		}
 	}
 	
+	// TODO: Move timing functionality into the base, not the internals
 	public class SQLStoreConnection : System.Object, IDisposable
 	{
-		internal SQLStoreConnection(SQLStore AStore) : base()
+		protected internal SQLStoreConnection(SQLStore AStore) : base()
 		{
 			FStore = AStore;
 			FConnection = InternalCreateConnection();
@@ -216,6 +217,7 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual DbConnection InternalCreateConnection()
 		{
+			// TODO: Implement...
 			throw new NotSupportedException();
 		}
 		
@@ -262,12 +264,20 @@ namespace Alphora.Dataphor.DAE.Store
 		public SQLStore Store { get { return FStore; } }
 		
 		// Connection
-		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
 		private DbConnection FConnection;
+		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
+		protected DbConnection Connection { get { return FConnection; } }
 		
 		/// <summary>The transaction object for this connection.</summary>
 		private DbTransaction FTransaction;
 		
+		/// <summary>Returns whether or not the store has a table of the given name.</summary>
+		public virtual bool HasTable(string ATableName)
+		{
+			// TODO: Implement...
+			throw new NotSupportedException();
+		}
+
 		// ExecuteCommand
 		private DbCommand FExecuteCommand;
 		/// <summary>This is the internal command used to execute statements on this connection.</summary>
@@ -576,9 +586,10 @@ namespace Alphora.Dataphor.DAE.Store
 		}
 	}
 	
+	// TODO: Move timing functionality into the base, not the internals
 	public class SQLStoreCursor : System.Object, IDisposable
 	{
-		internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
+		protected internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
 		{
 			FConnection = AConnection;
 			FTableName = ATableName;

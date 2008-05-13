@@ -386,13 +386,14 @@ namespace Alphora.Dataphor.BOP
 		{
 			DefaultValueAttribute LDefaultValues = (DefaultValueAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueAttribute));
 			if (LDefaultValues != null)
-				return !AValue.Equals(LDefaultValues.Value);
+				return !Object.Equals(AValue, LDefaultValues.Value);
 
 			DefaultValueMemberAttribute LDefaultMember = (DefaultValueMemberAttribute)ReflectionUtility.GetAttribute(AMember, typeof(DefaultValueMemberAttribute));
 			if (LDefaultMember != null)
 				return 
-					!AValue.Equals
+					!Object.Equals
 					(
+						AValue,
 						ReflectionUtility.GetMemberValue
 						(
 							ReflectionUtility.FindSimpleMember(AInstance.GetType(), LDefaultMember.MemberName), 

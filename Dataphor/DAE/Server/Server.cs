@@ -2364,8 +2364,72 @@ namespace Alphora.Dataphor.DAE.Server
 		// DerivationTimeStamp
 		public long DerivationTimeStamp { get { return FCatalog.DerivationTimeStamp; } }
 		
+		private string FCatalogStoreClassName;
+		/// <summary>
+		/// Gets or sets the assembly qualified class name of the store used to persist the system catalog.
+		/// </summary>
+		/// <remarks>
+		/// This property cannot be changed once the server has been started. If this property
+		/// is not set, the default store class (SQLCEStore in the DAE.SQLCE assembly) will be used.
+		/// </remarks>
+		public string CatalogStoreClassName
+		{
+			get { return FCatalogStoreClassName; }
+			set
+			{
+				CheckState(ServerState.Stopped);
+				FCatalogStoreClassName = value;
+			}
+		}
+		
+		/// <summary>
+		/// Gets the class name of the store used to persist the system catalog.
+		/// </summary>
+		/// <returns>The value of the CatalogStoreClassName property if it is set, otherwise, the assembly qualified class name of the SQLCEStore.</returns>
+		public string GetCatalogStoreClassName()
+		{
+			return 
+				String.IsNullOrEmpty(FCatalogStoreClassName) 
+					? "Alphora.Dataphor.DAE.Store.SQLCE.SQLCEStore,Alphora.Dataphor.DAE.SQLCE" 
+					: FCatalogStoreClassName;
+		}
+		
+		private string FCatalogStoreConnectionString;
+		/// <summary>
+		/// Gets or sets the connection string for the store used to persist the system catalog.
+		/// </summary>
+		/// <remarks>
+		/// This property cannot be changed once the server has been started. If this property is not
+		/// set, a default SQLCE connection string will be built based on the values of the CatalogDirectory,
+		/// CatalogStoreDatabaseName and CatalogStorePassword properties.
+		/// </remarks>
+		public string CatalogStoreConnectionString
+		{
+			get { return FCatalogStoreConnectionString; }
+			set
+			{
+				CheckState(ServerState.Stopped);
+				FCatalogStoreConnectionString = value;
+			}
+		}
+		
+		/// <summary>
+		/// Gets the connection string for the store used to persist the system catalog.
+		/// </summary>
+		/// <returns>The value of the CatalogStoreCnnectionString property if it set, otherwise, a default SQL CE connection string.</returns>
+		public string GetCatalogStoreConnectionString()
+		{
+			return 
+				String.IsNullOrEmpty(FCatalogStoreConnectionString)
+					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), CatalogStorePassword, "Read Write")
+					: FCatalogStoreConnectionString;
+		}
+		
 		private string FCatalogDirectory = String.Empty;
 		/// <summary> The directory the DAE will use to persist system and library catalogs. </summary>
+		/// <remarks>
+		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
+		/// </remarks>
 		public string CatalogDirectory
 		{
 			get { return FCatalogDirectory; }
@@ -2386,6 +2450,9 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private string FCatalogStoreDatabaseName = "DAECatalog";
 		/// <summary>The name of the database to be used for the catalog store.</summary>
+		/// <remarks>
+		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
+		/// </remarks>
 		public string CatalogStoreDatabaseName
 		{
 			get { return FCatalogStoreDatabaseName; }
@@ -2420,6 +2487,9 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private string FCatalogStorePassword = String.Empty;
 		/// <summary>The password to be used to connect to the catalog store.</summary>
+		/// <remarks>
+		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
+		/// </remarks>
 		public string CatalogStorePassword
 		{
 			get { return FCatalogStorePassword; }
