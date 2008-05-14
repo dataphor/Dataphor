@@ -121,9 +121,11 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 	{
 		public SQLCEStoreCursor(SQLCEStoreConnection AConnection, string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable) 
 			: base(AConnection, ATableName, AIndexName, AKey, AIsUpdatable)
-		{ }
+		{ 
+			EnsureReader(null, true, true);
+		}
 
-		protected override System.Data.Common.DbDataReader InternalCreateReader()
+		protected override System.Data.Common.DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
 		{
 			FResultSet =
 				Connection.ExecuteResultSet
@@ -150,6 +152,11 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 		private SqlCeResultSet FResultSet;
 		
 		public new SQLCEStoreConnection Connection { get { return (SQLCEStoreConnection)base.Connection; } }
+		
+		protected override bool InternalNext()
+		{
+			return FResultSet.Read();
+		}
 
 		protected override void InternalLast()
 		{
@@ -201,6 +208,7 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			try
 			{
 			#endif
+				EnsureReader(null, true, true);
 				object[] LKey = new object[AKey.Length];
 				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
 					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);

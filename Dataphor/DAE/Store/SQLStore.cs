@@ -275,6 +275,8 @@ namespace Alphora.Dataphor.DAE.Store
 		public virtual bool HasTable(string ATableName)
 		{
 			// TODO: Implement...
+			// To implement this 'generically' would require dealing with all the provider-specific 'schema collection' tables
+			// returned from a call to GetSchema. ADO.NET does not define a common schema collection for tables.
 			throw new NotSupportedException();
 		}
 
@@ -336,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 		}
 		
-		protected DbDataReader ExecuteReader(string AStatement)
+		protected internal DbDataReader ExecuteReader(string AStatement)
 		{
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
@@ -487,7 +489,7 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 
-		private object NativeToLiteralValue(object AValue)
+		internal object NativeToLiteralValue(object AValue)
 		{
 			if (AValue is bool)
 				return ((bool)AValue ? 1 : 0).ToString();
@@ -497,6 +499,11 @@ namespace Alphora.Dataphor.DAE.Store
 				return "null";
 			return AValue.ToString();
 		}
+		
+		internal void PerformInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		{
+			ExecuteStatement(GenerateInsertStatement(ATableName, AColumns, AKey, ARow));
+		}
 
 		// TODO: Parameterized statements for undo?
 		internal void LogInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
@@ -505,73 +512,14 @@ namespace Alphora.Dataphor.DAE.Store
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			FOperationLog.Add(new ModifyOperation(GenerateUndoInsertStatement(ATableName, AColumns, AKey, ARow)));
+			FOperationLog.Add(new ModifyOperation(GenerateDeleteStatement(ATableName, AColumns, AKey, ARow)));
 
 			#if SQLSTORETIMING
 			Store.Counters.Add(new SQLStoreCounter("LogInsert", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
 		}
 
-		private string GenerateUndoInsertStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
-		{
-			StringBuilder LStatement = new StringBuilder();
-			LStatement.AppendFormat("delete from {0} where", ATableName);
-			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
-			{
-				if (LIndex > 0)
-					LStatement.Append(" and");
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(ARow[AColumns.IndexOf(AKey[LIndex])]));
-			}
-			return LStatement.ToString();
-		}
-
-		internal void LogUpdate(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
-		{
-			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			#endif
-
-			FOperationLog.Add(new ModifyOperation(GenerateUndoUpdateStatement(ATableName, AColumns, AKey, AOldRow, ANewRow)));
-
-			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			#endif
-		}
-
-		private string GenerateUndoUpdateStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
-		{
-			StringBuilder LStatement = new StringBuilder();
-			LStatement.AppendFormat("update {0} set", ATableName);
-			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
-			{
-				if (LIndex > 0)
-					LStatement.Append(",");
-				LStatement.AppendFormat(" {0} = {1}", AColumns[LIndex], NativeToLiteralValue(AOldRow[LIndex]));
-			}
-			LStatement.AppendFormat(" where");
-			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
-			{
-				if (LIndex > 0)
-					LStatement.Append(" and");
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(ANewRow[AColumns.IndexOf(AKey[LIndex])]));
-			}
-			return LStatement.ToString();
-		}
-
-		internal void LogDelete(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
-		{
-			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			#endif
-
-			FOperationLog.Add(new ModifyOperation(GenerateUndoDeleteStatement(ATableName, AColumns, AKey, ARow)));
-
-			#if SQLSTORETIMING
-			Store.Counters.Add(new SQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			#endif
-		}
-
-		private string GenerateUndoDeleteStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		protected virtual string GenerateInsertStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
 		{
 			StringBuilder LStatement = new StringBuilder();
 			LStatement.AppendFormat("insert into {0} values (", ATableName);
@@ -582,6 +530,75 @@ namespace Alphora.Dataphor.DAE.Store
 				LStatement.Append(NativeToLiteralValue(ARow[LIndex]));
 			}
 			LStatement.Append(")");
+			return LStatement.ToString();
+		}
+
+		internal void PerformUpdate(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		{
+			ExecuteStatement(GenerateUpdateStatement(ATableName, AColumns, AKey, AOldRow, ANewRow));
+		}
+
+		internal void LogUpdate(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		{
+			#if SQLSTORETIMING
+			long LStartTicks = TimingUtility.CurrentTicks;
+			#endif
+
+			FOperationLog.Add(new ModifyOperation(GenerateUpdateStatement(ATableName, AColumns, AKey, ANewRow, AOldRow)));
+
+			#if SQLSTORETIMING
+			Store.Counters.Add(new SQLStoreCounter("LogUpdate", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			#endif
+		}
+
+		protected virtual string GenerateUpdateStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
+		{
+			StringBuilder LStatement = new StringBuilder();
+			LStatement.AppendFormat("update {0} set", ATableName);
+			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
+			{
+				if (LIndex > 0)
+					LStatement.Append(",");
+				LStatement.AppendFormat(" {0} = {1}", AColumns[LIndex], NativeToLiteralValue(ANewRow[LIndex]));
+			}
+			LStatement.AppendFormat(" where");
+			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
+			{
+				if (LIndex > 0)
+					LStatement.Append(" and");
+				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(AOldRow[AColumns.IndexOf(AKey[LIndex])]));
+			}
+			return LStatement.ToString();
+		}
+		
+		internal void PerformDelete(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		{
+			ExecuteStatement(GenerateDeleteStatement(ATableName, AColumns, AKey, ARow));
+		}
+
+		internal void LogDelete(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		{
+			#if SQLSTORETIMING
+			long LStartTicks = TimingUtility.CurrentTicks;
+			#endif
+
+			FOperationLog.Add(new ModifyOperation(GenerateInsertStatement(ATableName, AColumns, AKey, ARow)));
+
+			#if SQLSTORETIMING
+			Store.Counters.Add(new SQLStoreCounter("LogDelete", ATableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			#endif
+		}
+
+		protected virtual string GenerateDeleteStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
+		{
+			StringBuilder LStatement = new StringBuilder();
+			LStatement.AppendFormat("delete from {0} where", ATableName);
+			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
+			{
+				if (LIndex > 0)
+					LStatement.Append(" and");
+				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(ARow[AColumns.IndexOf(AKey[LIndex])]));
+			}
 			return LStatement.ToString();
 		}
 	}
@@ -595,21 +612,11 @@ namespace Alphora.Dataphor.DAE.Store
 			FTableName = ATableName;
 			FIndexName = AIndexName;
 			FKey = AKey;
+			FIndexColumns = new SQLIndexColumns(); // To support bi-directional indexes, this needs to be passed instead of AKey
+			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
+				FIndexColumns.Add(new SQLIndexColumn(AKey[LIndex], true));
 			FIsUpdatable = AIsUpdatable;
 			FCursorName = AIndexName + AIsUpdatable.ToString();
-			FReader = InternalCreateReader();
-			FColumns = new List<string>();
-			for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
-				FColumns.Add(FReader.GetName(LIndex));
-			FKeyIndexes = new List<int>();
-			for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
-				FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
-		}
-		
-		protected virtual DbDataReader InternalCreateReader()
-		{
-			// TODO: Implement...
-			throw new NotSupportedException();
 		}
 		
 		#region IDisposable Members
@@ -626,11 +633,7 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 			finally
 			{
-				if (FReader != null)
-				{
-					FReader.Dispose();
-					FReader = null;
-				}
+				DisposeReader();
 				
 				FConnection = null;
 			}
@@ -656,13 +659,145 @@ namespace Alphora.Dataphor.DAE.Store
 		private string FCursorName;
 		public string CursorName { get { return FCursorName; } }
 
+		private SQLIndexColumns FIndexColumns;
 		private List<String> FColumns;
 		private List<String> FKey;
 		private List<int> FKeyIndexes;
 		private object[] FCurrentRow;
+		private object[] FEditingRow;
 		private object[] FStartValues;
 		private object[] FEndValues;
 		private bool FIsOnRow;
+		
+		private void DisposeReader()
+		{
+			if (FReader != null)
+			{
+				FReader.Dispose();
+				FReader = null;
+			}
+		}
+		
+		private void CreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		{
+			FReader = InternalCreateReader(AOrigin, AForward, AInclusive);
+			FOrigin = AOrigin;
+			FForward = AForward;
+			FInclusive = AInclusive;
+			if (FColumns == null)
+			{
+				FColumns = new List<string>();
+				for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
+					FColumns.Add(FReader.GetName(LIndex));
+				FKeyIndexes = new List<int>();
+				for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
+					FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
+			}
+		}
+		
+		protected virtual DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		{
+			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndexColumns, AOrigin, AForward, AInclusive));
+		}
+		
+		private object[] FOrigin;
+		private bool FForward;
+		private bool FInclusive;
+		
+		protected virtual void EnsureReader(object[] AOrigin, bool AForward, bool AInclusive)
+		{
+			if (((FOrigin == null) != (AOrigin == null)) || (CompareKeys(FOrigin, AOrigin) != 0) || (FForward != AForward) || (FInclusive != AInclusive))
+				DisposeReader();
+				
+			if (FReader == null)
+				CreateReader(AOrigin, AForward, AInclusive);
+		}
+		
+		#region Ranged Reader Statement Generation
+
+		/*
+			for each column in the order descending
+				if the current order column is also in the origin
+					[or]
+					for each column in the origin less than the current order column
+						[and] 
+						current origin column = current origin value
+                        
+					[and]
+					if the current order column is ascending xor the requested set is forward
+						if requested set is inclusive and current order column is the last origin column
+							current order column <= current origin value
+						else
+							current order column < current origin value
+					else
+						if requested set is inclusive and the current order column is the last origin column
+							current order column >= current origin value
+						else
+							current order column > current origin value
+                            
+					for each column in the order greater than the current order column
+						if the current order column does not include nulls
+							and current order column is not null
+				else
+					if the current order column does not include nulls
+						[and] current order column is not null
+		*/
+		
+		protected virtual string GetReaderStatement(string ATableName, SQLIndexColumns AIndexColumns, object[] AOrigin, bool AForward, bool AInclusive)
+		{
+			StringBuilder LStatement = new StringBuilder();
+			
+			LStatement.AppendFormat("select * from {0}", ATableName);
+
+			for (int LIndex = AIndexColumns.Count - 1; LIndex >= 0; LIndex--)
+			{
+				if ((AOrigin != null) && (LIndex < AOrigin.Length))
+				{
+					if (LIndex == AIndexColumns.Count - 1)
+						LStatement.AppendFormat(" where ");
+					else
+						LStatement.Append(" or ");
+					
+					LStatement.Append("(");
+
+					for (int LOriginIndex = 0; LOriginIndex < LIndex; LOriginIndex++)
+					{
+						if (LOriginIndex > 0)
+							LStatement.Append(" and ");
+							
+						LStatement.AppendFormat("({0} = {1})", AIndexColumns[LOriginIndex].Name, FConnection.NativeToLiteralValue(AOrigin[LOriginIndex]));
+					}
+					
+					if (LIndex > 0)
+						LStatement.Append(" and ");
+						
+					LStatement.AppendFormat
+					(
+						"({0} {1} {2})", 
+						AIndexColumns[LIndex].Name, 
+						(AIndexColumns[LIndex].Ascending == AForward)
+							? (((LIndex == (AIndexColumns.Count - 1)) && AInclusive) ? ">=" : ">")
+							: (((LIndex == (AIndexColumns.Count - 1)) && AInclusive) ? "<=" : "<"),
+						FConnection.NativeToLiteralValue(AOrigin[LIndex])
+					);
+					
+					LStatement.Append(")");
+				}
+			}
+			
+			LStatement.AppendFormat(" order by ");
+			
+			for (int LIndex = 0; LIndex < AIndexColumns.Count; LIndex++)
+			{
+				if (LIndex > 0)
+					LStatement.Append(", ");
+				LStatement.AppendFormat("{0} {1}", AIndexColumns[LIndex].Name, AIndexColumns[LIndex].Ascending == AForward ? "asc" : "desc");
+			}
+			
+			return LStatement.ToString();
+		}
+		
+		#endregion
 		
 		public void SetRange(object[] AStartValues, object[] AEndValues)
 		{
@@ -710,6 +845,15 @@ namespace Alphora.Dataphor.DAE.Store
 		/// <remarks>The values of ALeftKey and ARightKey are expected to be native, not store, values.</remarks>
 		private int CompareKeys(object[] ALeftKey, object[] ARightKey)
 		{
+			if ((ALeftKey == null) && (ARightKey == null))
+				return 0;
+				
+			if (ALeftKey == null)
+				return -1;
+				
+			if (ARightKey == null)
+				return 1;
+				
 			int LResult = 0;
 			for (int LIndex = 0; LIndex < (ALeftKey.Length >= ARightKey.Length ? ALeftKey.Length : ARightKey.Length); LIndex++)
 			{
@@ -731,6 +875,15 @@ namespace Alphora.Dataphor.DAE.Store
 		/// <remarks>The values of ACompareKey are expected to be native, not store, values.</remarks>
 		private int CompareKeys(object[] ACompareKey)
 		{
+			if (!FIsOnRow && (ACompareKey == null))
+				return 0;
+				
+			if (!FIsOnRow)
+				return -1;
+				
+			if (ACompareKey == null)
+				return 1;
+				
 			int LResult = 0;
 			object LIndexValue;
 			for (int LIndex = 0; LIndex < ACompareKey.Length; LIndex++)
@@ -763,6 +916,9 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+				if (FEditingRow != null)
+					return FEditingRow[AIndex];
+					
 				return StoreToNativeValue(FReader.GetValue(AIndex)); 
 			#if SQLSTORETIMING
 			}
@@ -778,10 +934,11 @@ namespace Alphora.Dataphor.DAE.Store
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
-			// TODO: Implement...
-			throw new NotSupportedException();
-			//FReader.SetValue(AIndex, NativeToStoreValue(AValue));
+			
+			if (FEditingRow == null)
+				FEditingRow = InternalSelect();
+				
+			FEditingRow[AIndex] = AValue;
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("SetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -831,6 +988,18 @@ namespace Alphora.Dataphor.DAE.Store
 			return InternalSelect();
 		}
 		
+		public object[] SelectKey()
+		{
+			if (!FIsOnRow)
+				return null;
+				
+			object[] LKey = new object[FKey.Count];
+			for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
+				LKey[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
+				
+			return LKey;
+		}
+		
 		protected virtual bool InternalNext()
 		{
 			#if SQLSTORETIMING
@@ -838,7 +1007,8 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
-				// TODO: Need to introduce ReaderDirection...
+				EnsureReader(SelectKey(), true, !FIsOnRow);
+
 				return FReader.Read();
 			#if SQLSTORETIMING
 			}
@@ -865,9 +1035,8 @@ namespace Alphora.Dataphor.DAE.Store
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			// TODO: Implement...
-			throw new NotSupportedException();
-			//FResultSet.ReadLast();
+			DisposeReader();
+			EnsureReader(null, false, true);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -891,9 +1060,9 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
-				// TODO: Implement...
-				throw new NotSupportedException();
-				// FResultSet.ReadPrevious();
+				EnsureReader(SelectKey(), false, !FIsOnRow);
+				
+				return FReader.Read();
 			#if SQLSTORETIMING
 			}
 			finally
@@ -918,10 +1087,9 @@ namespace Alphora.Dataphor.DAE.Store
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
-			// TODO: Implement...
-			throw new NotSupportedException();
-			//FResultSet.ReadFirst();
+			
+			DisposeReader();
+			EnsureReader(null, true, true);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -960,20 +1128,13 @@ namespace Alphora.Dataphor.DAE.Store
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 			
-			// TODO: Implement...
-			throw new NotSupportedException();
-
-			//SqlCeUpdatableRecord LRecord = FResultSet.CreateRecord();
-			//for (int LIndex = 0; LIndex < ARow.Length; LIndex++)
-			//	LRecord.SetValue(LIndex, NativeToStoreValue(ARow[LIndex]));
-
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			//FResultSet.Insert(LRecord, DbInsertOptions.KeepCurrentPosition);
-
+			Connection.PerformInsert(FTableName, FColumns, FKey, ARow);
+			
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Insert", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
@@ -993,14 +1154,17 @@ namespace Alphora.Dataphor.DAE.Store
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
-			// TODO: Implement...
-			throw new NotSupportedException();
-			//FResultSet.Update();
+			
+			if (FCurrentRow == null)
+				FCurrentRow = InternalSelect();
+			
+			Connection.PerformUpdate(FTableName, FColumns, FKey, FCurrentRow, FEditingRow);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Update", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
+			
+			FEditingRow = null;
 		}
 		
 		public void Update()
@@ -1028,10 +1192,11 @@ namespace Alphora.Dataphor.DAE.Store
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
-			// TODO: Implement...
-			throw new NotSupportedException();
-			//FResultSet.Delete();
+			
+			if (FCurrentRow == null)
+				FCurrentRow = InternalSelect();
+				
+			Connection.PerformDelete(FTableName, FColumns, FKey, FCurrentRow);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1043,7 +1208,7 @@ namespace Alphora.Dataphor.DAE.Store
 			CheckIsOnRow();
 			
 			if ((FCurrentRow == null) && (FConnection.TransactionCount > 1))
-				FCurrentRow = Select();
+				FCurrentRow = InternalSelect();
 				
 			InternalDelete();
 
@@ -1061,13 +1226,11 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
-				// TODO: Implement...
-				throw new NotSupportedException();
-
-				//object[] LKey = new object[AKey.Length];
-				//for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-				//	LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
-				//return FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
+				object[] LKey = new object[AKey.Length];
+				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
+					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
+				EnsureReader(AKey, true, true);
+				return false;
 			#if SQLSTORETIMING
 			}
 			finally
@@ -1086,13 +1249,12 @@ namespace Alphora.Dataphor.DAE.Store
 				
 			if (InternalSeek(AKey))
 			{
-				// TODO: I am fairly certain this code is wrong and it's only not been a problem because we don't use this behavior in the catalog store
 				FIsOnRow = InternalNext();
 				return FIsOnRow;
 			}
 			
 			FIsOnRow = InternalNext();
-			return false;
+			return FIsOnRow && (CompareKeys(AKey) == 0);
 		}
 		
 		public void FindNearest(object[] AKey)
