@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Store
 		public virtual bool HasTable(string ATableName)
 		{
 			// TODO: Implement...
-			// To implement this 'generically' would require dealing with all the provider-specific 'schema collection' tables
+			// To implement this generically would require dealing with all the provider-specific 'schema collection' tables
 			// returned from a call to GetSchema. ADO.NET does not define a common schema collection for tables.
 			throw new NotSupportedException();
 		}
@@ -500,12 +500,12 @@ namespace Alphora.Dataphor.DAE.Store
 			return AValue.ToString();
 		}
 		
+		// TODO: Statement parameterization?
 		internal void PerformInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
 		{
 			ExecuteStatement(GenerateInsertStatement(ATableName, AColumns, AKey, ARow));
 		}
 
-		// TODO: Parameterized statements for undo?
 		internal void LogInsert(string ATableName, List<string> AColumns, List<string> AKey, object[] ARow)
 		{
 			#if SQLSTORETIMING
@@ -1007,8 +1007,8 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+				FEditingRow = null;
 				EnsureReader(SelectKey(), true, !FIsOnRow);
-
 				return FReader.Read();
 			#if SQLSTORETIMING
 			}
@@ -1034,7 +1034,8 @@ namespace Alphora.Dataphor.DAE.Store
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-			
+
+			FEditingRow = null;			
 			DisposeReader();
 			EnsureReader(null, false, true);
 
@@ -1060,8 +1061,8 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+				FEditingRow = null;
 				EnsureReader(SelectKey(), false, !FIsOnRow);
-				
 				return FReader.Read();
 			#if SQLSTORETIMING
 			}
@@ -1088,6 +1089,7 @@ namespace Alphora.Dataphor.DAE.Store
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 			
+			FEditingRow = null;
 			DisposeReader();
 			EnsureReader(null, true, true);
 
@@ -1143,7 +1145,7 @@ namespace Alphora.Dataphor.DAE.Store
 		public void Insert(object[] ARow)
 		{
 			InternalInsert(ARow);
-			FIsOnRow = false;
+			FIsOnRow = false; // TODO: Is this correct?
 
 			if (FConnection.TransactionCount > 1)
 				FConnection.LogInsert(FTableName, FColumns, FKey, ARow);
@@ -1197,6 +1199,8 @@ namespace Alphora.Dataphor.DAE.Store
 				FCurrentRow = InternalSelect();
 				
 			Connection.PerformDelete(FTableName, FColumns, FKey, FCurrentRow);
+			
+			FEditingRow = null;
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Delete", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1226,6 +1230,7 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+				FEditingRow = null;
 				object[] LKey = new object[AKey.Length];
 				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
 					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
