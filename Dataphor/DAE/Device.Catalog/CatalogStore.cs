@@ -69,17 +69,38 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	internal class StoreIndexHeader : StoreObjectHeader
 	{
-		public StoreIndexHeader(string ATableName, string AIndexName, List<string> AColumns) : base(AIndexName)
+		public StoreIndexHeader(string ATableName, string AIndexName, bool AIsUnique, List<string> AColumns) : base(AIndexName)
 		{
 			FTableName = ATableName;
+			FIsUnique = AIsUnique;
 			FColumns = AColumns;
 		}
 		
 		private string FTableName;
 		public string TableName { get { return FTableName; } }
+		
+		private bool FIsUnique;
+		public bool IsUnique { get { return FIsUnique; } }
 
 		private List<string> FColumns;
 		public List<string> Columns { get { return FColumns; } }
+		
+		private SQLIndex FSQLIndex;
+		public SQLIndex SQLIndex
+		{
+			get
+			{
+				if (FSQLIndex == null)
+				{
+					FSQLIndex = new SQLIndex(Name);
+					FSQLIndex.IsUnique = FIsUnique;
+					foreach (String LColumn in FColumns)
+						FSQLIndex.Columns.Add(new SQLIndexColumn(LColumn, true));
+				}
+				
+				return FSQLIndex;
+			}
+		}
 	}
 	
 	internal class StoreTableHeaders : Dictionary<string, StoreTableHeader> {}
@@ -297,199 +318,199 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				case "PK_DAEServerInfo" : 
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEServerInfo", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEServerInfo", AIndexName, true, LColumns);
 					
 				case "PK_DAEUsers" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEUsers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEUsers", AIndexName, true, LColumns);
 				
 				case "PK_DAELoadedLibraries" :
 					LColumns.Add("Library_Name");
-					return new StoreIndexHeader("DAELoadedLibraries", AIndexName, LColumns);
+					return new StoreIndexHeader("DAELoadedLibraries", AIndexName, true, LColumns);
 				
 				case "PK_DAELibraryDirectories" :
 					LColumns.Add("Library_Name");
-					return new StoreIndexHeader("DAELibraryDirectories", AIndexName, LColumns);
+					return new StoreIndexHeader("DAELibraryDirectories", AIndexName, true, LColumns);
 				
 				case "PK_DAELibraryVersions" :
 					LColumns.Add("Library_Name");
-					return new StoreIndexHeader("DAELibraryVersions", AIndexName, LColumns);
+					return new StoreIndexHeader("DAELibraryVersions", AIndexName, true, LColumns);
 				
 				case "PK_DAELibraryOwners" :
 					LColumns.Add("Library_Name");
-					return new StoreIndexHeader("DAELibraryOwners", AIndexName, LColumns);
+					return new StoreIndexHeader("DAELibraryOwners", AIndexName, true, LColumns);
 				
 				case "PK_DAEObjects" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjects", AIndexName, true, LColumns);
 				
 				case "IDX_DAEObjects_Catalog_Object_ID" :
 					LColumns.Add("Catalog_Object_ID");
-					return new StoreIndexHeader("DAEObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjects", AIndexName, false, LColumns);
 					
 				case "IDX_DAEObjects_Parent_Object_ID" :
 					LColumns.Add("Parent_Object_ID");
-					return new StoreIndexHeader("DAEObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjects", AIndexName, false, LColumns);
 					
 				case "IDX_DAEObjects_Generator_Object_ID" :
 					LColumns.Add("Generator_Object_ID");
-					return new StoreIndexHeader("DAEObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjects", AIndexName, false, LColumns);
 				
 				case "PK_DAEObjectDependencies" :
 					LColumns.Add("Object_ID");
 					LColumns.Add("Dependency_Object_ID");
-					return new StoreIndexHeader("DAEObjectDependencies", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjectDependencies", AIndexName, true, LColumns);
 				
 				case "IDX_DAEObjectDependencies_Dependency_Object_ID" :
 					LColumns.Add("Dependency_Object_ID");
-					return new StoreIndexHeader("DAEObjectDependencies", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEObjectDependencies", AIndexName, false, LColumns);
 				
 				case "PK_DAECatalogObjects" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAECatalogObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjects", AIndexName, true, LColumns);
 				
 				case "IDX_DAECatalogObjects_Owner_User_ID" :
 					LColumns.Add("Owner_User_ID");
-					return new StoreIndexHeader("DAECatalogObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjects", AIndexName, false, LColumns);
 					
 				case "IDX_DAECatalogObjects_Library_Name" :
 					LColumns.Add("Library_Name");
-					return new StoreIndexHeader("DAECatalogObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjects", AIndexName, false, LColumns);
 					
 				case "UIDX_DAECatalogObjects_Name" :
 					LColumns.Add("Name");
-					return new StoreIndexHeader("DAECatalogObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjects", AIndexName, true, LColumns);
 				
 				case "PK_DAECatalogObjectNames" :
 					LColumns.Add("Depth");
 					LColumns.Add("Name");
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAECatalogObjectNames", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjectNames", AIndexName, true, LColumns);
 				
 				case "IDX_DAECatalogObjectNames_ID" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAECatalogObjectNames", AIndexName, LColumns);
+					return new StoreIndexHeader("DAECatalogObjectNames", AIndexName, false, LColumns);
 				
 				case "PK_DAEBaseCatalogObjects" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEBaseCatalogObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEBaseCatalogObjects", AIndexName, true, LColumns);
 					
 				case "PK_DAEScalarTypes" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEScalarTypes", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEScalarTypes", AIndexName, true, LColumns);
 					
 				case "PK_DAEOperatorNames" :
 					LColumns.Add("Name");
-					return new StoreIndexHeader("DAEOperatorNames", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEOperatorNames", AIndexName, true, LColumns);
 				
 				case "PK_DAEOperatorNameNames" :
 					LColumns.Add("Depth");
 					LColumns.Add("Name");
 					LColumns.Add("OperatorName");
-					return new StoreIndexHeader("DAEOperatorNameNames", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEOperatorNameNames", AIndexName, true, LColumns);
 				
 				case "IDX_DAEOperatorNameNames_OperatorName" :
 					LColumns.Add("OperatorName");
-					return new StoreIndexHeader("DAEOperatorNameNames", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEOperatorNameNames", AIndexName, false, LColumns);
 				
 				case "PK_DAEOperators" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEOperators", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEOperators", AIndexName, true, LColumns);
 				
 				case "IDX_DAEOperators_OperatorName" :
 					LColumns.Add("OperatorName");
-					return new StoreIndexHeader("DAEOperators", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEOperators", AIndexName, false, LColumns);
 					
 				case "PK_DAEEventHandlers" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEEventHandlers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEEventHandlers", AIndexName, true, LColumns);
 					
 				case "IDX_DAEEventHandlers_Operator_ID" :
 					LColumns.Add("Operator_ID");
-					return new StoreIndexHeader("DAEEventHandlers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEEventHandlers", AIndexName, false, LColumns);
 					
 				case "IDX_DAEEventHandlers_Source_Object_ID" :
 					LColumns.Add("Source_Object_ID");
-					return new StoreIndexHeader("DAEEventHandlers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEEventHandlers", AIndexName, false, LColumns);
 					
 				case "PK_DAEApplicationTransactionTableMaps" :
 					LColumns.Add("Source_TableVar_ID");
-					return new StoreIndexHeader("DAEApplicationTransactionTableMaps", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEApplicationTransactionTableMaps", AIndexName, true, LColumns);
 					
 				case "PK_DAEApplicationTransactionOperatorNameMaps" :
 					LColumns.Add("Source_OperatorName");
-					return new StoreIndexHeader("DAEApplicationTransactionOperatorNameMaps", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEApplicationTransactionOperatorNameMaps", AIndexName, true, LColumns);
 					
 				case "PK_DAEApplicationTransactionOperatorMaps" :
 					LColumns.Add("Source_Operator_ID");
-					return new StoreIndexHeader("DAEApplicationTransactionOperatorMaps", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEApplicationTransactionOperatorMaps", AIndexName, true, LColumns);
 					
 				case "IDX_DAEApplicationTransactionOperatorMaps_Translated_Operator_ID" :
 					LColumns.Add("Translated_Operator_ID");
-					return new StoreIndexHeader("DAEApplicationTransactionOperatorMaps", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEApplicationTransactionOperatorMaps", AIndexName, false, LColumns);
 					
 				case "PK_DAEUserRoles" :
 					LColumns.Add("User_ID");
 					LColumns.Add("Role_ID");
-					return new StoreIndexHeader("DAEUserRoles", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEUserRoles", AIndexName, true, LColumns);
 					
 				case "IDX_DAEUserRoles_Role_ID" :
 					LColumns.Add("Role_ID");
-					return new StoreIndexHeader("DAEUserRoles", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEUserRoles", AIndexName, false, LColumns);
 					
 				case "PK_DAERights" :
 					LColumns.Add("Name");
-					return new StoreIndexHeader("DAERights", AIndexName, LColumns);
+					return new StoreIndexHeader("DAERights", AIndexName, true, LColumns);
 					
 				case "IDX_DAERights_Owner_User_ID" :
 					LColumns.Add("Owner_User_ID");
-					return new StoreIndexHeader("DAERights", AIndexName, LColumns);
+					return new StoreIndexHeader("DAERights", AIndexName, false, LColumns);
 					
 				case "IDX_DAERights_Catalog_Object_ID" :
 					LColumns.Add("Catalog_Object_ID");
-					return new StoreIndexHeader("DAERights", AIndexName, LColumns);
+					return new StoreIndexHeader("DAERights", AIndexName, false, LColumns);
 				
 				case "PK_DAERoleRightAssignments" :
 					LColumns.Add("Role_ID");
 					LColumns.Add("Right_Name");
-					return new StoreIndexHeader("DAERoleRightAssignments", AIndexName, LColumns);
+					return new StoreIndexHeader("DAERoleRightAssignments", AIndexName, true, LColumns);
 					
 				case "IDX_DAERoleRightAssignments_Right_Name" :
 					LColumns.Add("Right_Name");
-					return new StoreIndexHeader("DAERoleRightAssignments", AIndexName, LColumns);
+					return new StoreIndexHeader("DAERoleRightAssignments", AIndexName, false, LColumns);
 					
 				case "PK_DAEUserRightAssignments" :
 					LColumns.Add("User_ID");
 					LColumns.Add("Right_Name");
-					return new StoreIndexHeader("DAEUserRightAssignments", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEUserRightAssignments", AIndexName, true, LColumns);
 					
 				case "IDX_DAEUserRightAssignments_Right_Name" :
 					LColumns.Add("Right_Name");
-					return new StoreIndexHeader("DAEUserRightAssignments", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEUserRightAssignments", AIndexName, false, LColumns);
 					
 				case "PK_DAEDevices" :
 					LColumns.Add("ID");
-					return new StoreIndexHeader("DAEDevices", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEDevices", AIndexName, true, LColumns);
 					
 				case "PK_DAEDeviceUsers" :
 					LColumns.Add("User_ID");
 					LColumns.Add("Device_ID");
-					return new StoreIndexHeader("DAEDeviceUsers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEDeviceUsers", AIndexName, true, LColumns);
 					
 				case "IDX_DAEDeviceUsers_Device_ID" :
 					LColumns.Add("Device_ID");
-					return new StoreIndexHeader("DAEDeviceUsers", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEDeviceUsers", AIndexName, false, LColumns);
 					
 				case "PK_DAEDeviceObjects" :
 					LColumns.Add("ID");
 					LColumns.Add("Device_ID");
 					LColumns.Add("Mapped_Object_ID");
-					return new StoreIndexHeader("DAEDeviceObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEDeviceObjects", AIndexName, true, LColumns);
 					
 				case "IDX_DAEDeviceObjects_Device_ID_Mapped_Object_ID" :
 					LColumns.Add("Device_ID");
 					LColumns.Add("Mapped_Object_ID");
-					return new StoreIndexHeader("DAEDeviceObjects", AIndexName, LColumns);
+					return new StoreIndexHeader("DAEDeviceObjects", AIndexName, false, LColumns);
 				
 			}
 
@@ -599,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			else
 			{
 				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(AIndexName);
-				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LIndexHeader.Name, LIndexHeader.Columns, AIsUpdatable);
+				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LIndexHeader.SQLIndex, AIsUpdatable);
 			}
 			return LCursor;
 		}

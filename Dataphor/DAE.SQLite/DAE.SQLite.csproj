@@ -37,9 +37,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\System.Data.SQLite.DLL</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SQLiteConnection.cs" />
     <Compile Include="SQLiteStore.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +53,9 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>DAE</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SystemStoreCatalog.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

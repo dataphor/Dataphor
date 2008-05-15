@@ -4,9 +4,9 @@
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
-	Simple SQL Store
+	Abstract SQL Store
 	
-	A simple storage device that uses a SQL DBMS as it's backend.
+	Defines the expected behavior for a simple storage device that uses a SQL DBMS as it's backend.
 	The store is capable of storing integers, strings, booleans, and long text and binary data.
 	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
@@ -63,7 +63,6 @@ namespace Alphora.Dataphor.DAE.Store
 	
 	public class SQLStoreCounters : List<SQLStoreCounter> {}
 
-	// TODO: Move timing functionality into the base, not the internals
 	public abstract class SQLStore : System.Object
 	{
 		private string FConnectionString;
@@ -132,22 +131,7 @@ namespace Alphora.Dataphor.DAE.Store
 		private SQLStoreCounters FCounters = new SQLStoreCounters();
 		public SQLStoreCounters Counters { get { return FCounters; } }
 		
-		protected virtual SQLStoreConnection InternalConnect()
-		{
-			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			try
-			{
-			#endif
-				return new SQLStoreConnection(this);
-			#if SQLSTORETIMING
-			}
-			finally
-			{
-				Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			}
-			#endif
-		}
+		protected abstract SQLStoreConnection InternalConnect();
 
 		/// <summary>Default maximum number of connections to an SSCE server.</summary>
 		/// <remarks>
@@ -187,7 +171,21 @@ namespace Alphora.Dataphor.DAE.Store
 			
 			try
 			{
-				return InternalConnect();
+				#if SQLSTORETIMING
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+				#endif
+
+					return InternalConnect();
+
+				#if SQLSTORETIMING
+				}
+				finally
+				{
+					Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+				}
+				#endif
 			}
 			catch
 			{
@@ -206,7 +204,7 @@ namespace Alphora.Dataphor.DAE.Store
 	}
 	
 	// TODO: Move timing functionality into the base, not the internals
-	public class SQLStoreConnection : System.Object, IDisposable
+	public abstract class SQLStoreConnection : System.Object, IDisposable
 	{
 		protected internal SQLStoreConnection(SQLStore AStore) : base()
 		{
@@ -215,11 +213,7 @@ namespace Alphora.Dataphor.DAE.Store
 			FConnection.Open();
 		}
 		
-		protected virtual DbConnection InternalCreateConnection()
-		{
-			// TODO: Implement...
-			throw new NotSupportedException();
-		}
+		protected abstract DbConnection InternalCreateConnection();
 		
 		#region IDisposable Members
 		
@@ -293,6 +287,12 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 		
+		/// <summary>Returns a new command that can be used to open readers on this connection.</summary>
+		public DbCommand GetReaderCommand()
+		{
+			return FConnection.CreateCommand();
+		}
+		
 		public void ExecuteScript(string AScript)
 		{
 			List<String> LStatements = SQLStore.ProcessBatches(AScript);
@@ -340,15 +340,16 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected internal DbDataReader ExecuteReader(string AStatement)
 		{
-			ExecuteCommand.CommandType = CommandType.Text;
-			ExecuteCommand.CommandText = AStatement;
+			DbCommand LReaderCommand = GetReaderCommand();
+			LReaderCommand.CommandType = CommandType.Text;
+			LReaderCommand.CommandText = AStatement;
 
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return ExecuteCommand.ExecuteReader();
+				return LReaderCommand.ExecuteReader();
 			#if SQLSTORETIMING
 			}
 			finally
@@ -358,22 +359,21 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 		}
 		
-		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
+		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, SQLIndex AIndex, bool AIsUpdatable)
 		{
 			return
 				new SQLStoreCursor
 				(
 					this,
 					ATableName,
-					AIndexName,
-					AKey,
+					AIndex,
 					AIsUpdatable
 				);
 		}
 		
-		public SQLStoreCursor OpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
+		public SQLStoreCursor OpenCursor(string ATableName, SQLIndex AIndex, bool AIsUpdatable)
 		{
-			return InternalOpenCursor(ATableName, AIndexName, AKey, AIsUpdatable);
+			return InternalOpenCursor(ATableName, AIndex, AIsUpdatable);
 		}
 		
 		private int FTransactionCount = 0;
@@ -527,7 +527,7 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (LIndex > 0)
 					LStatement.Append(", ");
-				LStatement.Append(NativeToLiteralValue(ARow[LIndex]));
+				LStatement.Append(NativeToLiteralValue(LIndex >= ARow.Length ? null : ARow[LIndex]));
 			}
 			LStatement.Append(")");
 			return LStatement.ToString();
@@ -606,17 +606,16 @@ namespace Alphora.Dataphor.DAE.Store
 	// TODO: Move timing functionality into the base, not the internals
 	public class SQLStoreCursor : System.Object, IDisposable
 	{
-		protected internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, string AIndexName, List<String> AKey, bool AIsUpdatable) : base()
+		protected internal SQLStoreCursor(SQLStoreConnection AConnection, string ATableName, SQLIndex AIndex, bool AIsUpdatable) : base()
 		{
 			FConnection = AConnection;
 			FTableName = ATableName;
-			FIndexName = AIndexName;
-			FKey = AKey;
-			FIndexColumns = new SQLIndexColumns(); // To support bi-directional indexes, this needs to be passed instead of AKey
-			for (int LIndex = 0; LIndex < AKey.Count; LIndex++)
-				FIndexColumns.Add(new SQLIndexColumn(AKey[LIndex], true));
+			FIndex = AIndex;
+			FKey = new List<string>(AIndex.Columns.Count);
+			for (int LIndex = 0; LIndex < AIndex.Columns.Count; LIndex++)
+				FKey.Add(AIndex.Columns[LIndex].Name);
 			FIsUpdatable = AIsUpdatable;
-			FCursorName = AIndexName + AIsUpdatable.ToString();
+			FCursorName = FIndex.Name + AIsUpdatable.ToString();
 		}
 		
 		#region IDisposable Members
@@ -650,8 +649,10 @@ namespace Alphora.Dataphor.DAE.Store
 		private string FTableName;
 		public string TableName { get { return FTableName; } }
 		
-		private string FIndexName;
-		public string IndexName { get { return FIndexName; } }
+		private SQLIndex FIndex;
+		public SQLIndex Index { get { return FIndex; } }
+		
+		public string IndexName { get { return FIndex.Name; } }
 		
 		private bool FIsUpdatable;
 		public bool IsUpdatable { get { return FIsUpdatable; } }
@@ -659,7 +660,6 @@ namespace Alphora.Dataphor.DAE.Store
 		private string FCursorName;
 		public string CursorName { get { return FCursorName; } }
 
-		private SQLIndexColumns FIndexColumns;
 		private List<String> FColumns;
 		private List<String> FKey;
 		private List<int> FKeyIndexes;
@@ -697,12 +697,21 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
 		{
-			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndexColumns, AOrigin, AForward, AInclusive));
+			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndex.Columns, AOrigin, AForward, AInclusive));
 		}
 		
 		private object[] FOrigin;
 		private bool FForward;
 		private bool FInclusive;
+		private List<object[]> FBuffer;
+		private bool FBufferForward;
+		private int FBufferIndex;
+		
+		protected void EnsureReader()
+		{
+			if (FReader == null)
+				EnsureReader(null, true, true);
+		}
 		
 		protected virtual void EnsureReader(object[] AOrigin, bool AForward, bool AInclusive)
 		{
@@ -753,7 +762,7 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if ((AOrigin != null) && (LIndex < AOrigin.Length))
 				{
-					if (LIndex == AIndexColumns.Count - 1)
+					if (LIndex == AOrigin.Length - 1)
 						LStatement.AppendFormat(" where ");
 					else
 						LStatement.Append(" or ");
@@ -776,8 +785,8 @@ namespace Alphora.Dataphor.DAE.Store
 						"({0} {1} {2})", 
 						AIndexColumns[LIndex].Name, 
 						(AIndexColumns[LIndex].Ascending == AForward)
-							? (((LIndex == (AIndexColumns.Count - 1)) && AInclusive) ? ">=" : ">")
-							: (((LIndex == (AIndexColumns.Count - 1)) && AInclusive) ? "<=" : "<"),
+							? (((LIndex == (AOrigin.Length - 1)) && AInclusive) ? ">=" : ">")
+							: (((LIndex == (AOrigin.Length - 1)) && AInclusive) ? "<=" : "<"),
 						FConnection.NativeToLiteralValue(AOrigin[LIndex])
 					);
 					
@@ -903,13 +912,30 @@ namespace Alphora.Dataphor.DAE.Store
 			return LResult;
 		}
 		
+		private object[] RowToKey(object[] ARow)
+		{
+			object[] LKey = new object[FKey.Count];
+			for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
+				LKey[LIndex] = ARow[FKeyIndexes[LIndex]];
+			return LKey;
+		}
+		
+		/// <summary>
+		/// Returns -1 if the key values of the left row are less than the key values of the right row, 1 if they are greater, and 0 if they are equal.
+		/// </summary>
+		/// <remarks>The values of ALeftRow and ARightRow are expected to be native, not store, values.</remarks>
+		private int CompareRows(object[] ALeftRow, object[] ARightRow)
+		{
+			return CompareKeys(RowToKey(ALeftRow), RowToKey(ARightRow));
+		}
+		
 		private void CheckIsOnRow()
 		{
 			if (!FIsOnRow)
 				throw new StoreException(StoreException.Codes.CursorHasNoCurrentRow, ErrorSeverity.System);
 		}
 		
-		private object InternalGetValue(int AIndex)
+		protected virtual object InternalGetValue(int AIndex)
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
@@ -917,7 +943,10 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 				if (FEditingRow != null)
-					return FEditingRow[AIndex];
+					return FEditingRow[AIndex];					
+					
+				if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
+					return FBuffer[FBufferIndex][AIndex];
 					
 				return StoreToNativeValue(FReader.GetValue(AIndex)); 
 			#if SQLSTORETIMING
@@ -965,15 +994,15 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 		
-		private object[] InternalSelect()
+		protected virtual object[] InternalSelect()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
-			object[] LRow = new object[FReader.FieldCount];
+			object[] LRow = new object[FColumns.Count];
 			for (int LIndex = 0; LIndex < LRow.Length; LIndex++)
-				LRow[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
+				LRow[LIndex] = InternalGetValue(LIndex);
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Select", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -995,9 +1024,18 @@ namespace Alphora.Dataphor.DAE.Store
 				
 			object[] LKey = new object[FKey.Count];
 			for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
-				LKey[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
+				LKey[LIndex] = InternalGetValue(FKeyIndexes[LIndex]);
 				
 			return LKey;
+		}
+		
+		protected virtual object[] InternalReadRow()
+		{
+			object[] LRow = new object[FReader.FieldCount];
+			for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
+				LRow[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
+				
+			return LRow;
 		}
 		
 		protected virtual bool InternalNext()
@@ -1007,9 +1045,52 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+
 				FEditingRow = null;
-				EnsureReader(SelectKey(), true, !FIsOnRow);
-				return FReader.Read();
+				
+				if ((FBuffer != null) && ((FBufferForward && (FBufferIndex < FBuffer.Count - 1)) || (!FBufferForward && (FBufferIndex > 0))))
+				{
+					if (FBufferForward)
+						FBufferIndex++;
+					else
+						FBufferIndex--;
+					return true;
+				}
+				
+				if ((FReader == null) || !FForward)
+					EnsureReader(SelectKey(), true, !FIsOnRow);
+				
+				if ((FBuffer == null) && !FIndex.IsUnique)
+				{
+					FBuffer = new List<object[]>();
+					FBufferForward = true;
+					FBufferIndex = -1;
+				}
+				
+				if (FReader.Read())
+				{
+					if (!FIndex.IsUnique)
+					{
+						object[] LRow = InternalReadRow();
+						if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
+							if (CompareRows(FBuffer[FBufferIndex], LRow) != 0)
+							{
+								FBuffer.Clear();
+								FBufferForward = true;
+								FBufferIndex = -1;
+							}
+
+						if (FBufferForward)
+							FBuffer.Insert(++FBufferIndex, LRow);
+						else
+							FBuffer.Insert(FBufferIndex, LRow);
+					}
+
+					return true;
+				}
+				
+				return false;
+
 			#if SQLSTORETIMING
 			}
 			finally
@@ -1038,6 +1119,15 @@ namespace Alphora.Dataphor.DAE.Store
 			FEditingRow = null;			
 			DisposeReader();
 			EnsureReader(null, false, true);
+			if (!FIndex.IsUnique)
+			{
+				if (FBuffer == null)
+					FBuffer = new List<object[]>();
+				else
+					FBuffer.Clear();
+				FBufferForward = false;
+				FBufferIndex = FBuffer.Count;
+			}
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1061,9 +1151,52 @@ namespace Alphora.Dataphor.DAE.Store
 			try
 			{
 			#endif
+
 				FEditingRow = null;
-				EnsureReader(SelectKey(), false, !FIsOnRow);
-				return FReader.Read();
+				
+				if ((FBuffer != null) && ((FBufferForward && (FBufferIndex > 0)) || (!FBufferForward && (FBufferIndex < FBuffer.Count))))
+				{
+					if (FBufferForward)
+						FBufferIndex--;
+					else
+						FBufferIndex++;
+					return true;
+				}
+				
+				if ((FReader == null) || FForward)
+					EnsureReader(SelectKey(), false, !FIsOnRow);
+				
+				if (!FIndex.IsUnique && (FBuffer == null))
+				{
+					FBuffer = new List<object[]>();
+					FBufferForward = false;
+					FBufferIndex = FBuffer.Count;
+				}
+				
+				if (FReader.Read())
+				{
+					if (!FIndex.IsUnique)
+					{
+						object[] LRow = InternalReadRow();
+						if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
+							if (CompareRows(FBuffer[FBufferIndex], LRow) != 0)
+							{
+								FBuffer.Clear();
+								FBufferForward = false;
+								FBufferIndex = FBuffer.Count;
+							}
+
+						if (FBufferForward)
+							FBuffer.Insert(FBufferIndex, LRow);
+						else
+							FBuffer.Insert(++FBufferIndex, LRow);
+					}
+					
+					return true;
+				}
+				
+				return false;
+				
 			#if SQLSTORETIMING
 			}
 			finally
@@ -1092,6 +1225,16 @@ namespace Alphora.Dataphor.DAE.Store
 			FEditingRow = null;
 			DisposeReader();
 			EnsureReader(null, true, true);
+			
+			if (!FIndex.IsUnique)
+			{
+				if (FBuffer == null)
+					FBuffer = new List<object[]>();
+				else
+					FBuffer.Clear();
+				FBufferForward = true;
+				FBufferIndex = -1;
+			}
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -1134,7 +1277,8 @@ namespace Alphora.Dataphor.DAE.Store
 			Connection.Store.Counters.Add(new SQLStoreCounter("CreateRecord", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			LStartTicks = TimingUtility.CurrentTicks;
 			#endif
-
+			
+			// TODO: This will need to dispose and re-open the reader, as well as clear the buffer
 			Connection.PerformInsert(FTableName, FColumns, FKey, ARow);
 			
 			#if SQLSTORETIMING
@@ -1144,6 +1288,7 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		public void Insert(object[] ARow)
 		{
+			EnsureReader();
 			InternalInsert(ARow);
 			FIsOnRow = false; // TODO: Is this correct?
 
@@ -1160,6 +1305,7 @@ namespace Alphora.Dataphor.DAE.Store
 			if (FCurrentRow == null)
 				FCurrentRow = InternalSelect();
 			
+			// TODO: This will need to dispose and re-open the reader, as well as clear the buffer
 			Connection.PerformUpdate(FTableName, FColumns, FKey, FCurrentRow, FEditingRow);
 
 			#if SQLSTORETIMING
@@ -1197,7 +1343,8 @@ namespace Alphora.Dataphor.DAE.Store
 			
 			if (FCurrentRow == null)
 				FCurrentRow = InternalSelect();
-				
+			
+			// TODO: This will need to dispose and re-open the reader, as well as clear the buffer	
 			Connection.PerformDelete(FTableName, FColumns, FKey, FCurrentRow);
 			
 			FEditingRow = null;
@@ -1231,6 +1378,17 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 				FEditingRow = null;
+				
+				if (!FIndex.IsUnique)
+				{
+					if (FBuffer == null)
+						FBuffer = new List<object[]>();
+					else
+						FBuffer.Clear();
+					FBufferForward = true;
+					FBufferIndex = -1;
+				}
+				
 				object[] LKey = new object[AKey.Length];
 				for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
 					LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);

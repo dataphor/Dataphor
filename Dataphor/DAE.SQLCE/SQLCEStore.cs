@@ -46,19 +46,7 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 
 		protected override SQLStoreConnection InternalConnect()
 		{
-			#if SQLSTORETIMING
-			long LStartTicks = TimingUtility.CurrentTicks;
-			try
-			{
-			#endif
-				return new SQLCEStoreConnection(this);
-			#if SQLSTORETIMING
-			}
-			finally
-			{
-				Counters.Add(new SQLStoreCounter("Connect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
-			}
-			#endif
+			return new SQLCEStoreConnection(this);
 		}
 	}
 	
@@ -103,15 +91,14 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 		
 		public new SqlCeCommand ExecuteCommand { get { return (SqlCeCommand)base.ExecuteCommand; } }
 
-		protected override SQLStoreCursor InternalOpenCursor(string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable)
+		protected override SQLStoreCursor InternalOpenCursor(string ATableName, SQLIndex AIndex, bool AIsUpdatable)
 		{
 			return
 				new SQLCEStoreCursor
 				(
 					this,
 					ATableName,
-					AIndexName,
-					AKey,
+					AIndex,
 					AIsUpdatable
 				);
 		}
@@ -119,8 +106,8 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 	
 	public class SQLCEStoreCursor : SQLStoreCursor
 	{
-		public SQLCEStoreCursor(SQLCEStoreConnection AConnection, string ATableName, string AIndexName, List<string> AKey, bool AIsUpdatable) 
-			: base(AConnection, ATableName, AIndexName, AKey, AIsUpdatable)
+		public SQLCEStoreCursor(SQLCEStoreConnection AConnection, string ATableName, SQLIndex AIndex, bool AIsUpdatable) 
+			: base(AConnection, ATableName, AIndex, AIsUpdatable)
 		{ 
 			EnsureReader(null, true, true);
 		}
@@ -218,6 +205,23 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			finally
 			{
 				Connection.Store.Counters.Add(new SQLStoreCounter("Seek", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			}
+			#endif
+		}
+		
+		protected override object InternalGetValue(int AIndex)
+		{
+			#if SQLSTORETIMING
+			long LStartTicks = TimingUtility.CurrentTicks;
+			try
+			{
+			#endif
+				return StoreToNativeValue(FResultSet.GetValue(AIndex)); 
+			#if SQLSTORETIMING
+			}
+			finally
+			{
+				Connection.Store.Counters.Add(new SQLStoreCounter("GetValue", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			}
 			#endif
 		}
