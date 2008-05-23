@@ -26,6 +26,11 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
 			if (AArguments.Length > 1)
 				LRequest.Credentials = new NetworkCredential(AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+			
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
+			// Details: The error: "The remote server returned an error: 227 Entering Passive Mode (208,186,252,59,8,103)"
+			
 			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
 			Stream LResponseStream = LResponse.GetResponseStream();
 			try
@@ -52,6 +57,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
 			if (AArguments.Length > 1)
 				LRequest.Credentials = new NetworkCredential(AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
 			Stream LResponseStream = LResponse.GetResponseStream();
 			try
@@ -90,6 +97,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					byte[] LValue = AArguments[1].Value.AsByteArray;
 					LRequestStream.Write(LValue, 0, LValue.Length);
 				}
+				// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+				LRequest.UsePassive = false;
 				((FtpWebResponse)LRequest.GetResponse()).Close();
 			}
 			finally
@@ -191,6 +200,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			if (AUser != "")
 				LRequest.Credentials = new NetworkCredential(AUser, APassword);
 			LRequest.Method = WebRequestMethods.Ftp.ListDirectory;
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
 			Stream LResponseStream = LResponse.GetResponseStream();
 			try
@@ -216,6 +227,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				LRequest.Credentials = new NetworkCredential(AArguments[2].Value.AsString, AArguments[3].Value.AsString);
 			LRequest.Method = WebRequestMethods.Ftp.Rename;
 			LRequest.RenameTo = AArguments[1].Value.AsString;
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			((FtpWebResponse)LRequest.GetResponse()).Close();
 			return null;
 		}
@@ -269,6 +282,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 		{
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AURL);
 			LRequest.Method = AMethod;
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			((FtpWebResponse)LRequest.GetResponse()).Close();
 		}
 
@@ -277,6 +292,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AURL);
 			LRequest.Credentials = new NetworkCredential(AUserName, APassword);
 			LRequest.Method = AMethod;
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			((FtpWebResponse)LRequest.GetResponse()).Close();
 		}
 	}
