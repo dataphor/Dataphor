@@ -130,6 +130,12 @@ namespace Alphora.Dataphor.DAE.Connection
 			try
 			{
 				UnprepareCommand();
+				
+				if (FCommand != null)
+				{
+					FCommand.Dispose();
+					FCommand = null;
+				}
 			}
 			finally
 			{

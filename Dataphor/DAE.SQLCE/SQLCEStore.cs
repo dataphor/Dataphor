@@ -60,6 +60,14 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			return new SqlCeConnection(Store.ConnectionString);
 		}
 
+		protected override DbTransaction InternalBeginTransaction(System.Data.IsolationLevel AIsolationLevel)
+		{
+			// SQLServerCE does not support the ReadUncommitted isolation level because it uses versioning
+			if (AIsolationLevel == System.Data.IsolationLevel.ReadUncommitted)
+				AIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
+			return base.InternalBeginTransaction(AIsolationLevel);
+		}
+
 		public override bool HasTable(string ATableName)
 		{
 			return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);

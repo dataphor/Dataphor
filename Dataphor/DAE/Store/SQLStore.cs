@@ -338,18 +338,18 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 		}
 		
-		protected internal DbDataReader ExecuteReader(string AStatement)
+		protected internal DbDataReader ExecuteReader(string AStatement, out DbCommand AReaderCommand)
 		{
-			DbCommand LReaderCommand = GetReaderCommand();
-			LReaderCommand.CommandType = CommandType.Text;
-			LReaderCommand.CommandText = AStatement;
+			AReaderCommand = GetReaderCommand();
+			AReaderCommand.CommandType = CommandType.Text;
+			AReaderCommand.CommandText = AStatement;
 
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
 			{
 			#endif
-				return LReaderCommand.ExecuteReader();
+				return AReaderCommand.ExecuteReader();
 			#if SQLSTORETIMING
 			}
 			finally
@@ -404,6 +404,11 @@ namespace Alphora.Dataphor.DAE.Store
 				AConnection.ExecuteStatement(FUndoStatement);
 			}
 		}
+		
+		protected virtual DbTransaction InternalBeginTransaction(System.Data.IsolationLevel AIsolationLevel)
+		{
+			return FConnection.BeginTransaction(AIsolationLevel);
+		}
 
 		// BeginTransaction
 		public virtual void BeginTransaction(System.Data.IsolationLevel AIsolationLevel)
@@ -414,7 +419,7 @@ namespace Alphora.Dataphor.DAE.Store
 				long LStartTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				FTransaction = FConnection.BeginTransaction(AIsolationLevel);
+				FTransaction = InternalBeginTransaction(AIsolationLevel);
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -642,6 +647,8 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		private SQLStoreConnection FConnection;
 		public SQLStoreConnection Connection { get { return FConnection; } }
+		
+		private DbCommand FReaderCommand;
 
 		private DbDataReader FReader;
 		protected DbDataReader Reader { get { return FReader; } }
@@ -671,6 +678,12 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		private void DisposeReader()
 		{
+			if (FReaderCommand != null)
+			{
+				FReaderCommand.Dispose();
+				FReaderCommand = null;
+			}
+			
 			if (FReader != null)
 			{
 				FReader.Dispose();
@@ -697,7 +710,7 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
 		{
-			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndex.Columns, AOrigin, AForward, AInclusive));
+			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndex.Columns, AOrigin, AForward, AInclusive), out FReaderCommand);
 		}
 		
 		private object[] FOrigin;
