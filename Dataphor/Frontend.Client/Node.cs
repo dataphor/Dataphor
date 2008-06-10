@@ -329,7 +329,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <remarks> Optimistically attempts to activate each child.  The last error (if any) will be thrown. </remarks>
 		protected internal virtual void AfterActivate()
 		{
-			Exception LLastException = null;
+			ErrorList LErrors = null;
 			foreach (Node LChild in Children)
 			{
 				try
@@ -338,11 +338,13 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				catch (Exception LException)
 				{
-					LLastException = LException;
+					if (LErrors == null)
+						LErrors = new ErrorList();
+					LErrors.Add(LException);
 				}
 			}
-			if (LLastException != null)
-				throw LLastException;
+			if (LErrors != null)
+				HostNode.Session.ReportErrors(this.HostNode, LErrors);
 		}
 
 		/// <summary> Used internally to bring the node to an inactive state. </summary>
@@ -357,7 +359,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (Children != null)
 			{
-				Exception LLastException = null;
+				ErrorList LErrors = null;
 				foreach (Node LChild in Children)
 				{
 					try
@@ -366,11 +368,13 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 					catch (Exception LException)
 					{
-						LLastException = LException;
+						if (LErrors == null)
+							LErrors = new ErrorList();
+						LErrors.Add(LException);
 					}
 				}
-				if (LLastException != null)
-					throw LLastException;
+				if (LErrors != null)
+					HostNode.Session.ReportErrors(HostNode, LErrors);
 			}
 		}
 
@@ -379,7 +383,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (Children != null)
 			{
-				Exception LLastException = null;
+				ErrorList LErrors = null;
 				foreach (Node LChild in Children)
 				{
 					try
@@ -388,11 +392,13 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 					catch (Exception LException)
 					{
-						LLastException = LException;
+						if (LErrors == null)
+							LErrors = new ErrorList();
+						LErrors.Add(LException);
 					}
 				}
-				if (LLastException != null)
-					throw LLastException;
+				if (LErrors != null)
+					HostNode.Session.ReportErrors(HostNode, LErrors);
 			}
 		}
 
