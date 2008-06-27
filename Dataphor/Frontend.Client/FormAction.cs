@@ -650,7 +650,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		protected void InternalBeforeActivateForm(IFormInterface AForm)
 		{
-			if (AForm.MainSource != null)
+			if ((AForm.MainSource != null) && !String.IsNullOrEmpty(FFilter))
 				AForm.MainSource.Filter = FFilter;
 
 			if (FSourceLink != null) 
