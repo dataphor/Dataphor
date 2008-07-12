@@ -59,8 +59,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InternalUpdateTextEditControl()
 		{
 			DBTextEdit LControl = TextEditControl;
-			LControl.NilIfBlank = FNilIfBlank;
-			LControl.DocumentType = FDocumentType;
+			if (LControl != null)
+			{
+				LControl.NilIfBlank = FNilIfBlank;
+				LControl.DocumentType = FDocumentType;
+			}
 		}
 
 		// Height
