@@ -366,8 +366,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "password");
 				else
 					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-				if (ReadOnly)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
+				// HACK: IE does not recognize foreground colors for disabled controls, so we must leave the control enabled (and ignore changes)
+				//if (ReadOnly)
+				//    AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
 				AWriter.AddAttribute(HtmlTextWriterAttribute.Size, Width.ToString());
 				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, LValue);
 				AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
