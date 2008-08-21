@@ -708,6 +708,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override object CopyNativeAs(Schema.IDataType ADataType)
 		{
+			if (FRow == null)
+				return null;
+				
 			if (Object.ReferenceEquals(DataType, ADataType))
 			{
 				NativeRow LNewRow = new NativeRow(DataType.Columns.Count);
