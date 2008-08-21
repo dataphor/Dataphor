@@ -23,6 +23,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// DetermineDataType not used, ListNode.ListType is set by the compiler
 		
+		public override void DetermineCharacteristics(Plan APlan)
+		{
+			FIsLiteral = true;
+			FIsFunctional = true;
+			FIsDeterministic = true;
+			FIsRepeatable = true;
+			FIsNilable = false;
+			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			{
+				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
+				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
+				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
+				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
+			} 
+		}
+		
 		// Evaluate
 		public override DataVar InternalExecute(ServerProcess AProcess)
 		{
