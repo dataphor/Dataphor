@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 		public virtual bool GetEnabled()
 		{
-			return base.Enabled && !FLink.ReadOnly;
+			return FEnabled && !FLink.ReadOnly;
 		}
 
 		protected virtual void UpdateEnabled()
