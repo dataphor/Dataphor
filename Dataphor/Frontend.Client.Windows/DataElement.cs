@@ -166,20 +166,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void InitializeControl()
 		{
 			Control.BackColor = ((Session)HostNode.Session).Theme.ContainerColor;
-			Control.Height =  GetPixelHeight(Control);
-			InternalUpdateTitle();
+			CheckBoxControl.AutoEllipsis = true;
 			InternalUpdateAutoUpdate();
 			InternalUpdateAutoUpdateInterval();
 			base.InitializeControl();
-		}
-
-		// ColumnElement
-	
-		protected override void InternalUpdateTitle()
-		{
-			base.InternalUpdateTitle();
-			using (Graphics LGraphics = Control.CreateGraphics())
-				Control.Width = (int)LGraphics.MeasureString(Control.Text, Control.Font).Width + CMinCheckBoxWidth;
 		}
 
 		// Element
@@ -192,12 +182,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				ABounds.Y += LOffset;
 				ABounds.Height -= LOffset;
 			}
-			base.InternalLayout(new Rectangle(ABounds.Location, Control.Size));
+			base.InternalLayout(ABounds);
 		}
 		
 		protected override Size InternalNaturalSize
 		{
-			get { return Control.Size; }
+			get 
+			{ 
+				return Control.GetPreferredSize(Size.Empty);
+			}
 		}
 	}
 

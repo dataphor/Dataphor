@@ -875,8 +875,6 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Published
 
-		// TODO: Element property bool Tabstop { get; set; }
-
 		/// <summary> Text which describes the element to the end-user. </summary> <doc/>
 		/// <value> <para>String </para>
 		/// <para>Default: empty string</para></value>
