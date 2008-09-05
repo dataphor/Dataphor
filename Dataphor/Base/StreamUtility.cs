@@ -26,17 +26,21 @@ namespace Alphora.Dataphor
 		///	</param>
 		public static void CopyStream(Stream ASource, Stream ATarget)
 		{
-			if (ASource is MemoryStream)
+			MemoryStream LSourceMemoryStream = ASource as MemoryStream;
+			MemoryStream LTargetMemoryStream = ATarget as MemoryStream;
+
+			if (LSourceMemoryStream != null)
 			{
-				if (ATarget is MemoryStream)
-					CopyStream((MemoryStream)ASource, (MemoryStream)ATarget);
+				if (LTargetMemoryStream != null)
+					CopyStream(LSourceMemoryStream, LTargetMemoryStream);
 				else
-					CopyStream((MemoryStream)ASource, ATarget);
+					CopyStream(LSourceMemoryStream, ATarget);
 			}
-			else if (ATarget is MemoryStream)
-				CopyStream(ASource, (MemoryStream)ATarget);
-			else
-				CopyStreamWithBufferSize(ASource, ATarget, CCopyBufferSize);
+			else 
+				if (LTargetMemoryStream != null)
+					CopyStream(ASource, LTargetMemoryStream);
+				else
+					CopyStreamWithBufferSize(ASource, ATarget, CCopyBufferSize);
 		}
 		
 		public static void CopyStreamWithBufferSize(Stream ASource, Stream ATarget, int ACopyBufferSize)

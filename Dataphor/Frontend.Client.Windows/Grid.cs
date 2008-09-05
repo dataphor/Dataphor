@@ -493,7 +493,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						if (ARequest.Result.IsNative)
 						{
-							FInternalImage = System.Drawing.Image.FromStream(new MemoryStream(ARequest.Result.AsByteArray, false));
+							byte[] LResultBytes = ARequest.Result.AsByteArray;
+							FInternalImage = System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
 						}
 						else
 						{

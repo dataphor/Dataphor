@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (((Scalar)AArguments[0].Value).IsNative)
 				{
 					LLeftByteArray = AArguments[0].Value.AsByteArray;
-					LLeftStream = new MemoryStream(LLeftByteArray, 0, LLeftByteArray.Length, false);
+					LLeftStream = new MemoryStream(LLeftByteArray, 0, LLeftByteArray.Length, false, true);
 				}
 				else
 					LLeftStream = AArguments[0].Value.OpenStream();
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (((Scalar)AArguments[1].Value).IsNative)
 					{
 						LRightByteArray = AArguments[1].Value.AsByteArray;
-						LRightStream = new MemoryStream(LRightByteArray, 0, LRightByteArray.Length, false);
+						LRightStream = new MemoryStream(LRightByteArray, 0, LRightByteArray.Length, false, true);
 					}
 					else
 						LRightStream = AArguments[1].Value.OpenStream();

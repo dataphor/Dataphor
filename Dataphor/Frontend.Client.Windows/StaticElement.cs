@@ -824,7 +824,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					if (ARequest.Result.IsNative)
 					{
-						FImageAspect.Image = System.Drawing.Image.FromStream(new MemoryStream(ARequest.Result.AsByteArray, false));
+						byte[] LResultBytes = ARequest.Result.AsByteArray;
+						FImageAspect.Image = System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
 					}
 					else
 					{

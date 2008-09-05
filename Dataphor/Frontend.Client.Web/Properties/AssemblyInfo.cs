@@ -18,7 +18,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyProduct("Dataphor")]
 [assembly: AssemblyCopyright("© Copyright 2000-2008 Alphora")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]		
+[assembly: AssemblyCulture("")]
 
 //
 // Version information for an assembly consists of the following four values:

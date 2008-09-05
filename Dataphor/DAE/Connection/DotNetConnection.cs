@@ -400,7 +400,7 @@ namespace Alphora.Dataphor.DAE.Connection
 						
 					byte[] LData = new byte[(int)LLength];
 					FRecord.GetBytes(AIndex, 0, LData, 0, LData.Length);
-					return new MemoryStream(LData);
+					return new MemoryStream(LData, 0, LData.Length, true, true);	// Must use this overload or GetBuffer() will not be accessible
 
 				default: throw new ConnectionException(ConnectionException.Codes.NonDeferredDataType, FRecord.GetDataTypeName(AIndex));
 			}

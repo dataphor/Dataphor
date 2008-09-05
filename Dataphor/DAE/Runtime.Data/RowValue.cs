@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false);
+									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
 									FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
 									FRow.Values[LIndex] = LConveyor.Read(LStream);
 									AOffset += LElementSize;
@@ -490,7 +490,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false);
+									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
 									FRow.DataTypes[LIndex] = LScalarType;
 									FRow.Values[LIndex] = LConveyor.Read(LStream);
 									AOffset += LElementSize;

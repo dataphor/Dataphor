@@ -1,152 +1,63 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0D97E6A8-0AFC-4D80-9B5B-8D0DB2887C4C}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ApplicationIcon>
-    </ApplicationIcon>
-    <AssemblyKeyContainerName>
-    </AssemblyKeyContainerName>
-    <AssemblyName>Alphora.Dataphor.Frontend.Client.Web</AssemblyName>
-    <AssemblyOriginatorKeyFile>Alphora.snk</AssemblyOriginatorKeyFile>
-    <DefaultClientScript>JScript</DefaultClientScript>
-    <DefaultHTMLPageLayout>Flow</DefaultHTMLPageLayout>
-    <DefaultTargetSchema>IE50</DefaultTargetSchema>
-    <DelaySign>false</DelaySign>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0D97E6A8-0AFC-4D80-9B5B-8D0DB2887C4C}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Alphora.Dataphor.Frontend.Client.Web</RootNamespace>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <StartupObject>
-    </StartupObject>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <AssemblyName>Alphora.Dataphor.Frontend.Client.Web</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>bin\</OutputPath>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
-    <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
-    <Optimize>false</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\release\</OutputPath>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>FrontendClientWeb.xml</DocumentationFile>
-    <DebugSymbols>false</DebugSymbols>
-    <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>3</WarningLevel>
-    <DebugType>none</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
-    <DebugSymbols>true</DebugSymbols>
-    <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
-    <Optimize>false</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
-    <DebugType>full</DebugType>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Alphora.Dataphor">
-      <Name>Alphora.Dataphor</Name>
+    <Reference Include="Alphora.Dataphor, Version=2.1.3147.38977, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\bin\Alphora.Dataphor.dll</HintPath>
     </Reference>
-    <Reference Include="Alphora.Dataphor.BOP">
-      <Name>Alphora.Dataphor.BOP</Name>
+    <Reference Include="Alphora.Dataphor.BOP, Version=2.1.3147.38978, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\bin\Alphora.Dataphor.BOP.dll</HintPath>
     </Reference>
-    <Reference Include="Alphora.Dataphor.DAE">
-      <Name>Alphora.Dataphor.DAE</Name>
+    <Reference Include="Alphora.Dataphor.DAE, Version=2.1.3149.41709, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\bin\Alphora.Dataphor.DAE.dll</HintPath>
     </Reference>
-    <Reference Include="Alphora.Dataphor.DAE.Client">
-      <Name>Alphora.Dataphor.DAE.Client</Name>
+    <Reference Include="Alphora.Dataphor.DAE.Client, Version=2.1.3149.41711, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\bin\Alphora.Dataphor.DAE.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Alphora.Dataphor.Frontend.Client">
-      <Name>Alphora.Dataphor.Frontend.Client</Name>
+    <Reference Include="Alphora.Dataphor.Frontend.Client, Version=2.1.3167.31152, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\bin\Alphora.Dataphor.Frontend.Client.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <Name>System</Name>
-    </Reference>
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Data">
-      <Name>System.Data</Name>
-    </Reference>
-    <Reference Include="System.Drawing">
-      <Name>System.Drawing</Name>
-    </Reference>
-    <Reference Include="System.Web">
-      <Name>System.Web</Name>
-    </Reference>
-    <Reference Include="System.Xml">
-      <Name>System.XML</Name>
-    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Applications.aspx">
@@ -190,20 +101,19 @@
     <Content Include="style.css" />
     <Content Include="ViewImage.aspx" />
     <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Applications.aspx.cs">
       <DependentUpon>Applications.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AssemblyInfo.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Connect.aspx.cs">
       <DependentUpon>Connect.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.cs">
-      <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
     <Compile Include="EditAlias.aspx.cs">
       <DependentUpon>EditAlias.aspx</DependentUpon>
@@ -211,69 +121,37 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Nodes\Container.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Control.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\DataElement.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Element.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Nodes\Container.cs" />
+    <Compile Include="Nodes\Control.cs" />
+    <Compile Include="Nodes\DataElement.cs" />
+    <Compile Include="Nodes\Element.cs" />
     <Compile Include="Nodes\Form.cs">
       <SubType>Actions</SubType>
     </Compile>
-    <Compile Include="Nodes\Frame.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Nodes\Frame.cs" />
     <Compile Include="Nodes\Grid.cs">
       <SubType>Actions</SubType>
     </Compile>
-    <Compile Include="Nodes\Interface.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Lookup.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Menu.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Node.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Notebook.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Search.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Session.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\StaticElement.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Nodes\Tree.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Strings.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Nodes\Interface.cs" />
+    <Compile Include="Nodes\Lookup.cs" />
+    <Compile Include="Nodes\Menu.cs" />
+    <Compile Include="Nodes\Node.cs" />
+    <Compile Include="Nodes\Notebook.cs" />
+    <Compile Include="Nodes\Search.cs" />
+    <Compile Include="Nodes\Session.cs" />
+    <Compile Include="Nodes\StaticElement.cs" />
+    <Compile Include="Nodes\Tree.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strings.cs" />
     <Compile Include="ViewImage.aspx.cs">
       <DependentUpon>ViewImage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="WebClientException.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="WebInterfaces.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="WebClientException.cs" />
+    <Compile Include="WebInterfaces.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Applications.aspx.resx">
       <DependentUpon>Applications.aspx.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -308,27 +186,34 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
+    <Folder Include="App_Data\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>58946</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

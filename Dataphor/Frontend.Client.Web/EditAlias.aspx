@@ -11,7 +11,7 @@
 		<script language="JavaScript" src="Default.js"></script>
 	</HEAD>
 	<body MS_POSITIONING="FlowLayout">
-		<form id="EditAlias" method="post" runat="server" action="EditAction.aspx?Mode='<% Response.Write(Mode); %>'">
+		<form id="EditAlias" method="post" runat="server" action="EditAlias.aspx?Mode='<% Response.Write(Mode); %>'">
 			<P>
 				<asp:Label id="Label1" runat="server">Alias Name</asp:Label>
 				<asp:TextBox id="FAliasNameTextBox" runat="server" Width="240px"></asp:TextBox></P>
