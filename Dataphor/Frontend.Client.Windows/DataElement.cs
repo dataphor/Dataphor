@@ -343,6 +343,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
+        public override Size MinSize
+        {
+            get { return RadioControl.MinimumSize; }
+        }
+
 		protected override Size InternalNaturalSize
 		{
 			get { return RadioControl.NaturalSize(); }
