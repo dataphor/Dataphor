@@ -504,6 +504,52 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				}
 			}
 		}
+
+        private bool FHideDate = false;
+        /// <summary> Do not display the date part. </summary>
+        /// <remarks> Will display an empty string if then time part is not displayed. </remarks>
+        [DefaultValue(false)]
+        [Category("Behavior")]
+        [Description("Do not display the date part.")]
+        public bool HideDate
+        {
+            get
+            {
+                if (DateLookupControl == null)
+                    return FHideDate;
+                return DateLookupControl.TextBox.HideDate;
+            }
+            set
+            {
+                if (DateLookupControl == null)
+                    FHideDate= value;
+                else
+                    DateLookupControl.TextBox.HideDate = value;
+            }
+        }
+
+        private bool FHideTime = true;
+        /// <summary> Do not display the time part. </summary>
+        /// <remarks> Will display an empty string if the date part is not displayed. </remarks>
+        [DefaultValue(true)]
+        [Category("Behavior")]
+        [Description("Do not display the time part.")]
+        public bool HideTime
+        {
+            get 
+            {
+                if (DateLookupControl == null)
+                    return FHideTime;
+                return DateLookupControl.TextBox.HideTime; 
+            }
+            set 
+            {
+                if (DateLookupControl == null)
+                    FHideTime = value;
+                else
+                    DateLookupControl.TextBox.HideTime = value; 
+            }
+        }
 		
 		protected virtual void InternalUpdateTextBox()
 		{
@@ -550,7 +596,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		protected override WinForms.Control CreateControl()
 		{
-			return new DAE.Client.Controls.DateLookup();
+            DAE.Client.Controls.DateLookup LDateLookup = new DAE.Client.Controls.DateLookup();
+            LDateLookup.TextBox.HideDate = FHideDate;
+            LDateLookup.TextBox.HideTime = FHideTime;
+            return LDateLookup;
 		}
 
 		protected override void InitializeControl()
