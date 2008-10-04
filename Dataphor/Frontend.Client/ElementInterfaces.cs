@@ -82,8 +82,6 @@ namespace Alphora.Dataphor.Frontend.Client
 	/// in the Sample10 [dfd] document.</example>
 	public interface IDateTimeBox : IAlignedElement
 	{
-        bool HideDate { get; set; }
-        bool HideTime { get; set; }
 	}
 
 	/// <summary> Allows the triggering of an action (button). </summary> <doc/>
