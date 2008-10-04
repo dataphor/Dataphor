@@ -232,7 +232,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (LChild.GetVisible()) 
 					{
 						LNatural = LChild.NaturalSize;
-						LResult.Height += LNatural.Height;
+                        LResult.Height += LNatural.Height + LChild.MarginTop + LChild.MarginBottom + 2;
 						ConstrainMinWidth(ref LResult, LNatural.Width);
 					}
 				}
@@ -368,7 +368,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						LNatural = LChild.NaturalSize;
 						LResult.Width += LNatural.Width;
-						ConstrainMinHeight(ref LResult, LNatural.Height);
+						ConstrainMinHeight(ref LResult, LNatural.Height + LChild.MarginBottom + LChild.MarginTop + 2);
 					}
 				}
 				
