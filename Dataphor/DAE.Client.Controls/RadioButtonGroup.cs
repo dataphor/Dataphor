@@ -511,21 +511,23 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		public Size NaturalSize()
 		{
 			Size LResult = Size.Empty;
+            int LTotalWidth = 0;
+            int LRowHeight = 0;
 			if (FItems.Length > 0)
 			{
 				int LButtonsPerColumn = (FItems.Length / FColumns) + ((FItems.Length % FColumns) == 0 ? 0 : 1);
 				int LColumns = Math.Min(FColumns, FItems.Length);
                 int[] LColumnWidths = GetColumnWidths(LButtonsPerColumn);
 				
-				int LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
-				int LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
-				LResult = 
-					new Size
-					(
-						LTotalWidth + ((LColumns - 1) * FSpacingWidth), 
-						(LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight)
-					);
-			}
+				LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
+                LTotalWidth += ((LColumns - 1) * FSpacingWidth);
+				LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
+                LRowHeight += (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight);			    
+			}            
+            using (Graphics LGraphics = CreateGraphics())
+            {
+                LResult = new Size(Math.Max(LTotalWidth, Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width), LRowHeight);
+            }        
 			return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
 		}
 	}
