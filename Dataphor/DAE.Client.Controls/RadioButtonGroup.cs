@@ -500,7 +500,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
                             (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight)
                         );
                 }
-                return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));              
+                return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 0);              
             }
             set
             {
@@ -528,7 +528,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
             {
                 LResult = new Size(Math.Max(LTotalWidth, Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width), LRowHeight);
             }        
-			return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
+			return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 0);
 		}
 	}
 }
