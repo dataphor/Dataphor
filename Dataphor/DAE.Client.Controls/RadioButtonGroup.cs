@@ -500,7 +500,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
                             (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight)
                         );
                 }
-                return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 0);              
+                return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));               
             }
             set
             {
@@ -522,13 +522,13 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
                 LTotalWidth += ((LColumns - 1) * FSpacingWidth);
 				LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
-                LRowHeight += (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight);			    
+                LRowHeight = (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight);			    
 			}            
             using (Graphics LGraphics = CreateGraphics())
             {
                 LResult = new Size(Math.Max(LTotalWidth, Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width), LRowHeight);
-            }        
-			return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 0);
+            }
+            return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
 		}
 	}
 }

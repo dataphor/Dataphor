@@ -368,7 +368,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						LNatural = LChild.NaturalSize;
 						LResult.Width += LNatural.Width;
-						ConstrainMinHeight(ref LResult, LNatural.Height + LChild.MarginBottom + LChild.MarginTop + 2);
+						ConstrainMinHeight(ref LResult, LNatural.Height);
 					}
 				}
 				
