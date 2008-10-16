@@ -339,15 +339,21 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (LHint != String.Empty)
 				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, ID);
-			if (TextAlignment != HorizontalAlignment.Left)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "text-Alignment: " + TextAlignment.ToString().ToLower());
 
 			bool LHasValue;
 			string LValue = GetFieldValue(out LHasValue);
 
+			string LStyle = "";
 			string LClass;
+			
+			if (TextAlignment != HorizontalAlignment.Left)
+				LStyle = "text-Alignment: " + TextAlignment.ToString().ToLower() + "; ";
+				
 			if (ReadOnly)
+			{
 				LClass = "readonlytextbox";
+				LStyle += "width: " + Width.ToString() + "ex;";
+			}
 			else
 			{
 				LClass = "textbox";
@@ -360,39 +366,48 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (!LHasValue)
 				LClass = LClass + "null";
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, LClass);
-			if (FHeight == 1)
+			
+			if (!String.IsNullOrEmpty(LStyle))
+				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, LStyle);
+				
+			if (ReadOnly)
 			{
-				if (IsPassword)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "password");
-				else
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-				// HACK: IE does not recognize foreground colors for disabled controls, so we must leave the control enabled (and ignore changes)
-				//if (ReadOnly)
-				//    AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Size, Width.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, LValue);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+				// HACK: IE does not recognize foreground colors for disabled controls, so we must use a div rather than a textbox control for read-only
+				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+				AWriter.Write(HttpUtility.HtmlEncode(FWordWrap ? LValue.Replace("\r\n", " ") : LValue));
 				AWriter.RenderEndTag();
 			}
 			else
 			{
-				if (ReadOnly)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.ReadOnly, null);
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cols, Width.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, Height.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Wrap, (FWordWrap ? "soft" : "off"));
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Textarea);
-				AWriter.Write(HttpUtility.HtmlEncode(LValue));
-				AWriter.RenderEndTag();
-			}
+				if (FHeight == 1)
+				{
+					if (IsPassword)
+						AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "password");
+					else
+						AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Size, Width.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Value, LValue);
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+					AWriter.RenderEndTag();
+				}
+				else
+				{
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Cols, Width.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, Height.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Wrap, (FWordWrap ? "soft" : "off"));
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Textarea);
+					AWriter.Write(HttpUtility.HtmlEncode(LValue));
+					AWriter.RenderEndTag();
+				}
 
-			if (!LHasValue && !ReadOnly)
-			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHasValueID);
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, "false");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-				AWriter.RenderEndTag();
+				if (!LHasValue)
+				{
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHasValueID);
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Value, "false");
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+					AWriter.RenderEndTag();
+				}
 			}
 		}
 

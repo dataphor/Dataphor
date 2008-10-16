@@ -49,8 +49,8 @@ input.trigger				{ text-align: center; padding-left: 5px; padding-right: 5px; wi
 input.textbox				{ border: navy 1px solid; }
 input.textboxnull			{ border: navy 1px solid; background: #EEFFEE; }
 input.textboxfailed			{ border: navy 1px solid; background: #FFF5DF; }
-input.readonlytextbox		{ background: #EEEEEE; color: #000000; border: solid 1px navy; cursor: default; }
-input.readonlytextboxnull	{ background: #DDEEDD; border: solid 1px navy; }
+div.readonlytextbox			{ background: #EEEEEE; color: #000000; padding: 2px; border: inset 1px navy; cursor: default; }
+div.readonlytextboxnull		{ background: #DDEEDD; padding: 2px; border: inset 1px navy; }
 textarea.textbox			{ border: navy 1px solid; font-family: Tahoma, Arial, Verdana, Helvetica, Sans-Serif; font-size: 8pt; }
 textarea.textboxnull		{ background: #EEFFEE; border: navy 1px solid; font-family: Tahoma, Arial, Verdana, Helvetica, Sans-Serif; font-size: 8pt; }
 textarea.readonlytextbox	{ background: #EEEEEE; color: #000000; border: navy 1px solid; font-family: Tahoma, Arial, Verdana, Helvetica, Sans-Serif; font-size: 8pt; }
