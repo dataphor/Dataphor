@@ -326,12 +326,13 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public virtual void PreprocessRequest(HttpContext AContext)	// this is not part of an IWebPrehandler interface
 		{
 			IncrementLogicalClock();
-			if (GetContextClock(AContext) != (FLogicalClock - 1))	// If logical clock was missing or incorrect, do not apply request and warn
-				throw new WebClientException(WebClientException.Codes.LogicalClockWarning, GetContextClock(AContext), FLogicalClock - 1);
-			PreprocessRequestEvent LEvent = new PreprocessRequestEvent(AContext);
-			BroadcastEvent(LEvent);
-			if (LEvent.AnyErrors)
-				throw new AbortException();
+			if (GetContextClock(AContext) == (FLogicalClock - 1))	// If logical clock was missing or incorrect, do not apply request
+			{
+				PreprocessRequestEvent LEvent = new PreprocessRequestEvent(AContext);
+				BroadcastEvent(LEvent);
+				if (LEvent.AnyErrors)
+					throw new AbortException();
+			}
 		}
 
 		// IWebHandler
