@@ -138,6 +138,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Requests that any child data changes be posted. </summary>
 		void PostChanges();
 
+        /// <summary> Requests that any child data changes be posted. </summary>
+        void PostChangesIfModified();
+
 		/// <summary> Requests that any child data changes be canceled. </summary>
 		void CancelChanges();
 

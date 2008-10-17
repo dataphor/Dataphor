@@ -128,10 +128,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			BroadcastEvent(new ViewActionEvent(SourceActions.Post));
 		}
 
+        public void PostChangesIfModified()
+        {
+            BroadcastEvent(new ViewActionEvent(SourceActions.PostIfModified));
+        }
+
 		public void CancelChanges()
 		{
 			BroadcastEvent(new ViewActionEvent(SourceActions.Cancel));
 		}
+
 
 		// BackgroundImage
 
@@ -350,6 +356,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 							if (FOnCancel != null)
 								FOnCancel.Execute(this, new EventParams());
 							break;
+                        case (SourceActions.PostIfModified):
+                            if (FOnPost != null)
+                                FOnPost.Execute(this, new EventParams());
+                            break;
 					}
 				}
 				else if ((AEvent is FormShownEvent) && (FOnShown != null))

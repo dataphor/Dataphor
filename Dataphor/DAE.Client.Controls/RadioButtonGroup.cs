@@ -19,6 +19,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		private const int CRadioButtonSize = 12;
 		private const int CButtonSpacing = 4;
         private const int CMinimumWidth = CRadioButtonSize + CButtonSpacing;
+        // Right Buffer is needed to adjust for differing behavior between Windows themes
+        private const int CTitleBuffer = 10;
 		
 		public RadioButtonGroup() : base()
 		{
@@ -526,7 +528,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}            
             using (Graphics LGraphics = CreateGraphics())
             {
-                LResult = new Size(Math.Max(LTotalWidth, Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width), LRowHeight);
+                LResult = new Size(Math.Max(LTotalWidth, (Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width + CTitleBuffer)), LRowHeight);
             }
             return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
 		}
