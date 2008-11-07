@@ -20,6 +20,7 @@ using Microsoft.VisualBasic;
 
 using Alphora.Dataphor.BOP;
 using DAE = Alphora.Dataphor.DAE.Server;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -143,47 +144,17 @@ namespace Alphora.Dataphor.Frontend.Client
 			AExecute = AScript;
 		}
 		
-/*
-		private string GetTempAssemblyName()
-		{
-			return FScript.GetHashCode().ToString();
-		}
-		
-		private string GetTempAssemblyFileName()
-		{
-			string LResult = Path.GetTempPath() + GetTempAssemblyName();
-			string LAttempt = LResult + ".dll";
-			int i = 1;
-			while (File.Exists(LAttempt))
-			{
-				LAttempt = String.Format("{0}_{1}.dll", LResult, i);
-				i++;
-			}
-			return LAttempt;
-		}
-*/
-		
-/*
-		private Assembly FindCompiledAssembly(string AAssemblyName)
-		{
-			// TODO: If there is an existing assembly with this name, ensure that it's script matches. (hash isn't perfect)
-			Assembly[] LAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-			foreach (Assembly LAssembly in LAssemblies)
-				if (String.Compare(AAssemblyName, LAssembly.GetName().Name, true) == 0)
-					return LAssembly;
-			return null;
-		}
-*/
-		
-		private static Hashtable FCompiledAssemblies = new Hashtable(); // key - FSourceCode, value - FResults
+		private static object FAssemblyCacheLock = new Object();
+		private static Dictionary<string, CompilerResults> FAssemblyCache = new Dictionary<string, CompilerResults>(); // key - FSourceCode, value - FResults
 		
 		private CompilerResults FindCompilerResults()
 		{
 			if (FSourceCode == null)
 				BuildSourceCode();
 				
-			if (FCompiledAssemblies.Contains(FSourceCode))
-				return (CompilerResults)FCompiledAssemblies[FSourceCode];
+			lock (FAssemblyCacheLock)
+				if (FAssemblyCache.ContainsKey(FSourceCode))
+					return FAssemblyCache[FSourceCode];
 
 			return null;
 		}
@@ -286,25 +257,28 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 
 					FResults = LProvider.CompileAssemblyFromSource(LParameters, FSourceCode);
-					FCompiledAssemblies.Add(FSourceCode, FResults);
+					lock (FAssemblyCacheLock)
+						if (!FAssemblyCache.ContainsKey(FSourceCode))
+							FAssemblyCache.Add(FSourceCode, FResults);
 				}
 			}
 
 			if (FResults.NativeCompilerReturnValue != 0)
-			{
-				StringBuilder LErrors = new StringBuilder();
-				foreach (CompilerError LError in FResults.Errors)
-					LErrors.AppendFormat
-					(
-						"\r\n{0} {1} at line ({2}) column ({3}): {4}",
-						(LError.IsWarning ? "Warning" : "Error"),
-						LError.ErrorNumber,
-						LError.Line,
-						LError.Column,
-						LError.ErrorText
-					);
-				throw new ClientException(ClientException.Codes.ScriptCompilerError, LErrors.ToString());
-			}
+				lock (FAssemblyCacheLock)	// Error enumeration is not concurrent, must lock
+				{
+					StringBuilder LErrors = new StringBuilder();
+					foreach (CompilerError LError in FResults.Errors)
+						LErrors.AppendFormat
+						(
+							"\r\n{0} {1} at line ({2}) column ({3}): {4}",
+							(LError.IsWarning ? "Warning" : "Error"),
+							LError.ErrorNumber,
+							LError.Line,
+							LError.Column,
+							LError.ErrorText
+						);
+					throw new ClientException(ClientException.Codes.ScriptCompilerError, LErrors.ToString());
+				}
 
 			return FResults.CompiledAssembly;
 		}
