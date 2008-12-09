@@ -6,7 +6,7 @@
 
 using System;
 using System.ComponentModel;
-using Timers = System.Timers;
+using WinForms=System.Windows.Forms;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: 100</para></value></value>
 		/// <remarks>Setting the interval when the timer is enabled has 
 		/// the effect of resetting the interval count.</remarks>
-		double Interval { get; set; }
+		int Interval { get; set; }
 		
 		/// <summary>The action to bo executed when the timer elapses.</summary> <doc/>
 		/// <value><para>IAction: An action in the same node tree.</para>
@@ -76,9 +76,9 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private Timers.Timer FTimer;
+		private WinForms.Timer FTimer;
 		
-		private void TimerElapsed(object ASource, Timers.ElapsedEventArgs AArgs)
+		private void TimerElapsed(object ASource, EventArgs AArgs)
 		{
 			DoOnElapsed();
 			if (!FAutoReset)
@@ -115,8 +115,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		{
 			if (!FEnabled)
 			{
-				FTimer = new Timers.Timer(FInterval);
-				FTimer.Elapsed += new Timers.ElapsedEventHandler(TimerElapsed);
+				FTimer = new WinForms.Timer();
+				FTimer.Interval = FInterval;
+				FTimer.Tick += new EventHandler(TimerElapsed);
 				FEnabled = true;
 			}
 
@@ -128,7 +129,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			if (FEnabled)
 			{
 				FTimer.Stop();
-				FTimer.Elapsed -= new Timers.ElapsedEventHandler(TimerElapsed);
+				FTimer.Tick -= new EventHandler(TimerElapsed);
 				FTimer.Dispose();
 				FTimer = null;
 				FEnabled = false;
@@ -136,10 +137,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 		
 		// Interval
-		private double FInterval = 100;
+		private int FInterval = 100;
 		[Description("The interval, in milliseconds between each OnElapsed call.  Setting the interval when the timer is enabled has the effect of resetting the interval count.")]
 		[DefaultValue(100)]
-		public double Interval
+		public int Interval
 		{
 			get { return FInterval; }
 			set
