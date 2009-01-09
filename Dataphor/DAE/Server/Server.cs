@@ -6430,11 +6430,15 @@ namespace Alphora.Dataphor.DAE.Server
 			APlan.Symbols.PushFrame();
 			for (int LIndex = FContext.Count - 1; LIndex >= 0; LIndex--)
 				APlan.Symbols.Push(FContext[LIndex]);
+			if (FContext.AllowExtraWindowAccess)
+				APlan.Symbols.AllowExtraWindowAccess = true;
 		}
 		
 		private void PopProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PopFrame();
+			if (FContext.AllowExtraWindowAccess)
+				APlan.Symbols.AllowExtraWindowAccess = false;
 		}
 		#endif
 		
