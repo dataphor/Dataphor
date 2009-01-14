@@ -620,6 +620,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			return base.GetOverhead() + new Size(0, CBottomPadding);
 		}
+
+        protected override Size InternalMinSize
+        {
+            get
+            {
+                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((FChild != null) && FChild.GetVisible())
+                {
+                    ConstrainMinWidth(ref LResult, FChild.MinSize.Width);
+                    ConstrainMinHeight(ref LResult, FChild.MinSize.Height);
+                }
+                return LResult;         
+            }
+        }
 	}
 
 	[ToolboxItem(false)]
