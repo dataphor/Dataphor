@@ -634,6 +634,20 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
                 return LResult;         
             }
         }
+
+        protected override Size InternalNaturalSize
+        {
+            get
+            {
+                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((FChild != null) && FChild.GetVisible())
+                {
+                    ConstrainMinWidth(ref LResult, FChild.NaturalSize.Width);
+                    ConstrainMinHeight(ref LResult, FChild.NaturalSize.Height);
+                }
+                return LResult;
+            }
+        }
 	}
 
 	[ToolboxItem(false)]
