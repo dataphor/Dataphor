@@ -120,8 +120,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					InternalUpdateAutoUpdate();
 			}
 		}
-		
-		private void InternalUpdateAutoUpdate()
+
+        // TrueFirst
+
+        private bool FTrueFirst = true;
+        [DefaultValue(true)]
+        [Description("Determines the CheckState transition sequence for CheckBoxes with three-states.")]
+        public bool TrueFirst
+        {
+            get { return FTrueFirst; }
+            set { FTrueFirst = value; }
+        }
+        
+        private void InternalUpdateAutoUpdate()
 		{
 			CheckBoxControl.AutoUpdate = FAutoUpdate;
 		}
