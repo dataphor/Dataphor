@@ -28,7 +28,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
 			FLink.OnFocusControl += new DataLinkFieldHandler(FocusControl);
 			FAutoUpdateInterval = 200;
-            FTrueFirst = true;
 			base.ThreeState = false;
 			base.CheckState = CheckState.Indeterminate;
 			base.AutoCheck = false;
@@ -86,7 +85,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-        private bool FTrueFirst;
+        private bool FTrueFirst = true;
         /// <summary> Determines the CheckState transition sequence for CheckBoxes with three-states. </summary>
         /// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBCheckBox.dxd"/>
         [DefaultValue(true)]
@@ -94,11 +93,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
         public bool TrueFirst
         {
             get { return FTrueFirst; }
-            set
-            {
-                if (FTrueFirst != value)
-                    FTrueFirst = value;
-            }
+            set { FTrueFirst = value; }
         }
         
         private int FAutoUpdateInterval;

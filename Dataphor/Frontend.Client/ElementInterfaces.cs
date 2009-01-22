@@ -572,8 +572,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value> <para>Integer: </para>
 		/// <para>Default: 200</para></value>
 		int AutoUpdateInterval { get; set; }
-    
+
         /// <summary> Determines the CheckState transition sequence for CheckBoxes with three-states. </summary> <doc/>
+        /// <example>Frontend.CheckBox.TrueFirst='true'
+        /// provides the checkstate sequence nil->true(checked)->false(unchecked). Frontend.CheckBox.TrueFirst='false' provides
+        /// the checkstate sequence nil->false(uncheck)->true(checked).
+        /// </example>
         /// <value> <para>Boolean: </para>
         /// <para>Default: true</para></value>
         bool TrueFirst { get; set; }

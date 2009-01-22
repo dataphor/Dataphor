@@ -129,9 +129,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
         public bool TrueFirst
         {
             get { return FTrueFirst; }
-            set { FTrueFirst = value; }
+            set
+            {
+                    FTrueFirst = value;
+                    if (Active)
+                        InternalUpdateTrueFirst();
+            }
         }
-        
+
+        private void InternalUpdateTrueFirst()
+        {
+            CheckBoxControl.TrueFirst = FTrueFirst;
+        }
+
         private void InternalUpdateAutoUpdate()
 		{
 			CheckBoxControl.AutoUpdate = FAutoUpdate;
@@ -180,6 +190,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			CheckBoxControl.AutoEllipsis = true;
 			InternalUpdateAutoUpdate();
 			InternalUpdateAutoUpdateInterval();
+            InternalUpdateTrueFirst();
 			base.InitializeControl();
 		}
 
