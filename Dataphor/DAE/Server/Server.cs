@@ -22,6 +22,7 @@ using System.Resources;
 using Remoting = System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting.Services;
+using System.Security.Principal;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
@@ -1518,17 +1519,31 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			return LLogList;
 		}
-		
-		private FileStream FLogFile;
+
+        private bool IsAdministrator()
+        {
+            if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                WindowsIdentity LWID = WindowsIdentity.GetCurrent();
+                WindowsPrincipal LWP = new WindowsPrincipal(LWID);
+                return LWP.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            else
+                return (false); // Might not be Windows
+        }
+
+        private FileStream FLogFile;
 		private StreamWriter FLog;
 
 		private void StartLog()
 		{
 			if (FLoggingEnabled)
 			{
-				if (!IsRepository && (System.Environment.OSVersion.Platform == PlatformID.Win32NT) && !EventLog.SourceExists(CServerSourceName))
-					EventLog.CreateEventSource(CServerSourceName, CServerLogName);
-	
+                if (!IsRepository && IsAdministrator())
+                {
+                    if (!EventLog.SourceExists(CServerSourceName))
+                        EventLog.CreateEventSource(CServerSourceName, CServerLogName);
+                }
 				try
 				{
 					OpenLogFile(GetLogFileName());
@@ -2150,7 +2165,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (FLoggingEnabled)
 			{
-				if (!IsRepository && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
+				if (!IsRepository && IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
 					try
 					{
 						EventLog.WriteEntry(CServerSourceName, String.Format("Server: {0}\r\n{1}", Name, ADescription), LogEntryTypeToEventLogEntryType(AEntryType));
