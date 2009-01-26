@@ -514,7 +514,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// UNSUPPORTED IN WEB
 
-		private int FAutoUpdateInterval = 200;
+        private bool FTrueFirst = true;
+        public bool TrueFirst
+        {
+            get { return FTrueFirst; }
+            set { FTrueFirst = value; }
+        }
+        
+        private int FAutoUpdateInterval = 200;
 		public int AutoUpdateInterval
 		{
 			get { return FAutoUpdateInterval; }
