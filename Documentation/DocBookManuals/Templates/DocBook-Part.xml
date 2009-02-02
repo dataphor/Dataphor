@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="DocBookx.css" ?>
+<!-- if this is to be embedded, comment out the doctype declaration -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "c:/src/alphora/docs/docbookmanuals/DocBookx.dtd">
+<part>
+    <partinfo>
+        <copyright><year>2002</year><holder>Alphora</holder></copyright>
+    </partinfo>
+    <title><?xm-replace_text {Part Title}?></title>
+    <partintro>
+      <para><?xm-replace_text {Part Intro Paragraph}?></para>
+    </partintro>
+    <chapter>
+      <title><?xm-replace_text {Chapter Title}?></title>
+      <para><?xm-replace_text {Chapter Intro Paragraph}?></para>
+      <sect1>
+        <title><?xm-replace_text {Section Title}?></title>
+        <para><?xm-replace_text {Paragraph}?></para>
+      </sect1>
+    </chapter>
+</part>
+

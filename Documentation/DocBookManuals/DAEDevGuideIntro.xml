@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<chapter id="DDGIntroduction"> 
+	 <chapterinfo> 
+		  <date role="LastMod">Saturday, March 02, 2002 2:28:39 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 9:43:38 AM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </chapterinfo> 
+	 <title>Introduction</title> 
+	 <para>The 
+		  <citetitle>DAE Developer's Guide</citetitle> describes the Dataphor
+		  Data Access Engine architecture and provides complete reference information.
+		  This manual covers intermediate to advanced topics such as a description of the
+		  DAE's query processing architecture and information on extending the DAE. This
+		  manual assumes familiarity with fundamental Dataphor concepts and techniques.
+		  For in introduction to Dataphor, see the 
+		  <citetitle>Dataphor User's Guide</citetitle>.</para> 
+	 <sect1 id="DDGWhatsInThisManual"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+		  </sect1info> 
+		  <title>What's In This Manual?</title> 
+		  <para>This manual contains three parts, as follows:</para> 
+		  <para> 
+				<itemizedlist mark="bullet"> 
+					 <listitem> 
+						  <para> 
+								<citetitle>Part I</citetitle> </para> 
+						  <para>"Application Development" describes the Dataphor DAE
+								from the perspective of application development. This includes detailed
+								coverage of the logical model in which the developer describes the data model
+								and "business rules" of the application. This logical application description
+								is independent of the interpretation provided by the implementation. This part
+								is important for Application Developers and Database Administrators, but is
+								also essential for those wishing to understand Dataphor.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para> 
+								<citetitle>Part II</citetitle> </para> 
+						  <para> "Implementation Architecture" describes the
+								mechanisms and techniques used to implement a system based on the logical model
+								described in Part I. Details about the architecture of the Dataphor DAE are
+								provided in order to utilize and extend its capabilities. This part will be
+								interesting for systems developers wishing to extend the DAE, or for
+								application developers who wish to better understand the inner workings of the
+								DAE.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para> 
+								<citetitle>Part III</citetitle> </para> 
+						  <para> "Reference" provides a detailed reference for both
+								the logical and physical (or implementation) aspects of the DAE. It contains
+								class definition documentation, language specifications and other essential
+								reference information.</para> 
+					 </listitem> 
+				</itemizedlist> </para> 
+	 </sect1> 
+	 <sect1 id="DDGManualConventions"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+		  </sect1info> 
+		  <title>Manual Conventions</title> 
+		  <para>Unless otherwise noted, when the text in 
+				<citetitle>Part I</citetitle> of this manual uses the term
+				"object," it refers to items in the DAE catalog, not objects in the
+				object-oriented sense. Because 
+				<citetitle>Part II</citetitle> discusses object-oriented objects
+				extensively, the text will be explicit when mentioning DAE catalog
+				objects.</para> 
+	 </sect1> 
+	 <sect1 id="DDGPrerequisites"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+		  </sect1info> 
+		  <title>Prerequisites</title> 
+		  <para>The material in this manual builds on the assumption that the
+				reader has some familiarity with the basic components of the Dataphor DAE as
+				introduced in the Dataphor User's Guide. Some familiarity with basic
+				programming concepts is also assumed.</para> 
+		  <para> 
+				<itemizedlist mark="bullet"> 
+					 <listitem> 
+						  <para><citetitle>Part I</citetitle> of this manual includes
+								an overview of database management concepts and techniques, as well as a D4
+								language guide and a description of the overall architecture of the DAE.
+								General understanding of current application development processes and tools
+								will help in comprehending the concepts in this part.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><citetitle>Part II</citetitle> contains class
+								definitions, which may require familiarity with modern Object-Oriented
+								Programming (OOP) concepts--particularly as implemented by the .NET Framework.
+								Examples are provided in C#, though because of the multi-language nature of the
+								.NET Framework, the same concepts apply in other .NET languages.</para> 
+					 </listitem> 
+				</itemizedlist> </para> 
+	 </sect1> 
+	 <sect1 id="DDGAdditionalResources"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+		  </sect1info> 
+		  <title>Additional Resources</title> 
+		  <para>Additional information may be obtained from the following
+				sources:</para> 
+		  <para> 
+				<itemizedlist mark="bullet"> 
+					 <listitem> 
+						  <para> 
+								<link role="cref" linkend="DataphorUsersGuide">Dataphor
+									 User's Guide</link> contains information about the overall purpose of Dataphor
+								and the role of the Dataphor Data Access Engine.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>Texts such as 
+								<citetitle>An Introduction to Database
+									 Systems</citetitle> by C. J. Date (Addison Wesley Longman) contain information
+								about the Relational Model and its significance.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The.NET Framework MSDN documentation, included with
+								the .NET Framework SDK, provides information about the technology on which the
+								Dataphor DAE is built.</para> 
+					 </listitem> 
+				</itemizedlist> </para> 
+	 </sect1> 
+</chapter> 

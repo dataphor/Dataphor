@@ -1,0 +1,319 @@
+<sect1 id="DDGCatalogRef"> 
+	 <sect1info><date role="LastMod">Monday, August 05, 2002 9:46:32 AM</date> 
+	 </sect1info> 
+	 <title>Catalog</title> 
+	 <para/> 
+		  <sect2 id="D4SystemDataTypes"> 
+				<title>System Data Types</title> 
+				<para>The DAE provides a set of built-in data types for
+					 manipulating values.</para> 
+				<sect3 id="D4SystemDataTypeSystemAlpha"> 
+					 <title>System.Alpha</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Alpha { constraint IsValue true };		</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemError"> 
+					 <title>System.Error</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Error is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemHostError"> 
+					 <title>System.HostError</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.HostError is { System.Error };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemBoolean"> 
+					 <title>System.Boolean</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Boolean is { System.Alpha } { default false };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemHuge"> 
+					 <title>System.Huge</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Huge is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemLong"> 
+					 <title>System.Long</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Long is { System.Huge };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemULong"> 
+					 <title>System.ULong</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.ULong is { System.Huge };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemInteger"> 
+					 <title>System.Integer</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Integer is { System.Long };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemUInteger"> 
+					 <title>System.UInteger</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.UInteger is { System.Long, System.ULong };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemShort"> 
+					 <title>System.Short</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Short is { System.Integer };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemUShort"> 
+					 <title>System.UShort</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.UShort is { System.Integer, System.UInteger };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemByte"> 
+					 <title>System.Byte</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Byte is { System.Short, System.UShort };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemSByte"> 
+					 <title>System.SByte</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.SByte is { System.Short };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemPuny"> 
+					 <title>System.Puny</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Puny is { System.SByte, System.Byte };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemDecimal"> 
+					 <title>System.Decimal</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Decimal is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemString"> 
+					 <title>System.String</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.String is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemMoney"> 
+					 <title>System.Money</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Money is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemGuid"> 
+					 <title>System.Guid</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Guid is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemTimeSpan"> 
+					 <title>System.TimeSpan</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.TimeSpan is { System.Alpha }
+{
+	representation Ticks { Ticks : Long },
+	representation Milliseconds { Milliseconds : Decimal },
+	representation Seconds { Seconds : Decimal },
+	representation Minutes { Minutes : Decimal },
+	representation Hours { Hours : Decimal },
+	representation Days { Days : Decimal },
+	representation TimeSpan
+	{
+		DaysPart : Integer,
+		HoursPart : Integer,
+		MinutesPart : Integer,
+		SecondsPart : Integer,
+		MillisecondsPart : Integer
+	}
+};
+		</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemDateTime"> 
+					 <title>System.DateTime</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.DateTime is { System.TimeSpan }
+{
+	representation DateTime
+	{
+		YearsPart : Integer,
+		MonthsPart : Integer,
+		DaysPart : Integer,
+		HoursPart : Integer,
+		MinutesPart : Integer,
+		SecondsPart : Integer,
+		MillisecondsPart : Integer
+	},
+	constraint DateTimeValue Value.Ticks &gt;= 0
+};
+		</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemImage"> 
+					 <title>System.Image</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Image is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemName"> 
+					 <title>System.Name</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Name is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemComment"> 
+					 <title>System.Comment</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Comment is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemObjectType"> 
+					 <title>System.ObjectType</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.ObjectType is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemDataTypeType"> 
+					 <title>System.DataTypeType</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.DataTypeType is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemColumnType"> 
+					 <title>System.ColumnType</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.ColumnType is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemModifier"> 
+					 <title>System.Modifier</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Modifier is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemReferenceAction"> 
+					 <title>System.ReferenceAction</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.ReferenceAction is { System.String };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemCatalog"> 
+					 <title>System.Catalog</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.Catalog is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+				<sect3 id="D4SystemDataTypeSystemPlanTree"> 
+					 <title>System.PlanTree</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Syntax</title> 
+								<para> 
+									 <programlisting>domain System.PlanTree is { System.Alpha };</programlisting> </para> 
+						  </sect4> 
+				</sect3> 
+		  </sect2> <?entryTopic 
+            title=""
+            summary=""
+            name="CatalogClasses"
+            topic="//namespace[@name='Alphora.Dataphor.DAE.Schema']"
+            template=""
+            prefix=""
+        ?>
+</sect1>

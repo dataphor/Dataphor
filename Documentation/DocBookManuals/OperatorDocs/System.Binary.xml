@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 21, 2004 12:22:44</date> 
+	 </sect2info> 
+	 <title>System.Binary</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Binary
+{
+	representation Binary
+	{
+		Value : System.String
+	}selector  class "System.SystemBinarySelectorNode", 
+	representation AsDisplayString
+	{
+		AsDisplayString : System.String
+	}selector  class "System.BinaryAsDisplayStringSelectorNode"
+} class "System.ObjectConveyor" 
+	static tags { Catalog.Comment = "System Binary", DAE.AsDisplayString = "AsDisplayString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>Binary</symbol>. Binary
+		  date is data stored in its raw format. This data type is often used to store
+		  images.</para> 
+	 <para><symbol>System.Binary</symbol> is the set of all byte streams of data
+		  with length less than or equal to 2,147,483,647
+		  (2<superscript>31</superscript>-1).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table TestBinary in Temp
+{
+      ID : Integer,
+      Image : Binary,
+      key { ID }
+};
+// Image.Warning is a .png image file
+insert table 
+  { 
+      row { 1 ID, Image('Frontend',
+											 'Image.Warning') Image }
+  } into TestBinary;
+select TestBinary;
+// The image can be viewed by selecting the table
+// in Dataphoria and selecting Browse.
+drop table TestBinary;</programlisting> 
+		  <programlisting>ID Image
+-- -------------
+1  &lt;binary data&gt;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

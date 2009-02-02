@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 14:39:51</date> 
+	 </sect2info> 
+	 <title>System.Guid</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Guid
+{
+	representation Guid
+	{
+		Value : System.String
+	}selector  class "System.SystemGuidSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.GuidAsStringSelectorNode"
+} class "System.GuidConveyor" static tags { Catalog.Comment = "System Globally Unique Identifier", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is an operator and the selector for the <symbol>Guid</symbol>
+		  datatype.</para> 
+	 <para><symbol>System.Guid</symbol> is the set of all possible Globally
+		  Unique Identifiers (GUIDs). The physical representation for this type is a
+		  128-bit unsigned integer. The operator <symbol>NewGuid()</symbol> generates a
+		  new globally unique identifier.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Guid("12345678-1234-1234-1234-123456789012");</programlisting> 
+		  <programlisting>12345678-1234-1234-1234-123456789012</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.NewGuid.html">System.NewGuid</ulink>
+<ulink url="SLRSystem.Guid.html">System.Guid</ulink>
+<ulink url="SLRSystem.NameFromGuid.html">System.NameFromGuid</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGConveyors.html">Domains, Conveyors</ulink>
+<ulink url="DDGP2Identity.html">Schema Objects, Identity</ulink>
+<ulink url="D4LGObjects.html">Objects, ID</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversion</ulink>
+<ulink url="SLRSystem.ToGuid.html">System.ToGuid</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

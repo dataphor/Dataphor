@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:11:23</date> 
+	 </sect2info> 
+	 <title>iAggregate</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>aggregate</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>aggregate</symbol> keyword is an operator modifier. It
+		  makes the operator an aggregate operator, which will then make the operator
+		  apply to all of the rows in a query.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create aggregate operator SelfCount() : Integer
+	initialization
+	begin		var i : Integer := 0;
+	end
+	aggregation
+	begin		i := i + 1;
+	end
+	finalization
+	begin		result := i;
+	end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGAggregate.html">Aggregate Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

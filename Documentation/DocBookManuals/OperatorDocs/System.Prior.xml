@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 11:47:41</date> 
+	 </sect2info> 
+	 <title>System.Prior</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator moves the specified cursor to the prior (or previous)
+		  row of the specified cursor. <symbol>prior</symbol> returns true if the cursor
+		  is not on the BOF crack after the attempted move.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var OutputString : String := Unicode({13}) + "From the Beginning: ";
+	var EmployeeCursor : cursor(table { ID : Integer, Name : String }) := cursor(Employee);
+	try
+		EmployeeCursor.First();
+		while EmployeeCursor.Next() do
+		begin
+			OutputString := OutputString + Unicode({13}) + (Name from EmployeeCursor.Select()) + " ";
+		end;
+		EmployeeCursor.Last();
+		OutputString := OutputString + Unicode({13}) + "From the End: ";
+		while EmployeeCursor.Prior() do
+		begin
+			OutputString := OutputString + Unicode({13}) + (Name from EmployeeCursor.Select()) + " ";
+		end;
+		raise Error(OutputString);
+	finally
+		EmployeeCursor.Close();
+	end;
+end;</programlisting> 
+		  <programlisting>From the Beginning: 
+Joe 
+John 
+Josh 
+Jeff 
+Jake 
+Jeff 
+From the End: 
+Jeff 
+Jake 
+Jeff 
+Josh 
+John 
+Joe</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="SLRSystem.BOF.html">System.BOF</ulink>
+<ulink url="DDGP2BackwardsNavigable.html">Backwards Navigable</ulink>
+<ulink url="D4LGCursorCapabilities.html">Cursor Capabilities</ulink>
+<ulink url="DACDGNavigation.html">Navigation</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

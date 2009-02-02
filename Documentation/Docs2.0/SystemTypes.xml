@@ -1,0 +1,1421 @@
+<?xml version="1.0"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "/src/Docs/DocBookManuals/docbookx.dtd">
+<section id="DRSystemLibrary-ScalarTypes"> 
+	 <sectioninfo><date>Thursday, February 03, 2005 11:46:38</date> 
+	 </sectioninfo> 
+	 <title><indexterm><primary>System
+					 Library</primary><secondary>Types</secondary></indexterm> 
+		  <indexterm><primary>Types</primary><secondary>System</secondary></indexterm><indexterm><primary>System
+					 Library</primary><secondary>Scalar Types</secondary></indexterm> 
+		  <indexterm><primary>Scalar
+					 Types</primary><secondary>System</secondary></indexterm>Scalar Types</title> 
+	 <para>The following sections describe the scalar types declared in the
+		  System Library.</para> 
+	 <section id="T-System.Binary"> 
+		  <title><indexterm><primary>Binary - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Binary</secondary></indexterm>System.Binary</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting><emphasis role="bold">create type</emphasis> Binary
+{
+	<emphasis role="bold">representation</emphasis> Binary { Value : String },
+	<emphasis role="bold">representation</emphasis> AsDisplayString { AsDisplayString : String }
+}
+	<emphasis role="bold">static tags</emphasis> 
+	{ 
+		Catalog.Comment = "System Binary", 
+		DAE.AsDisplayString = "AsDisplayString" 
+};</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Binary" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType <symbol>Binary</symbol>.
+				Binary data is simply a stream of bit data. This data type is often used to
+				store images or other uninterpreted data streams such as files.</para> 
+		  <para><symbol>System.Binary</symbol> is the set of all byte streams of
+				data with length less than or equal to 2,147,483,647
+				(2<superscript>31</superscript>-1) bytes.</para> 
+		  <example> 
+				<title>Using System.Binary</title> 
+				<programlisting>create table TestBinary in Temp
+{
+ ID : Integer,
+ Image : Binary,
+ key { ID }
+};
+// Image.Warning is a .png image file
+insert table 
+{ 
+ row
+ {
+  1 ID, Image('Frontend', 'Image.Warning') Image }
+ } into TestBinary;
+select TestBinary;
+// The image can be viewed by selecting the table
+// in Dataphoria and selecting Browse.
+drop table TestBinary;</programlisting> 
+				<programlisting>ID Image
+-- -------------
+1  &lt;binary data&gt;</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				 type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink></para> 
+	 </section> 
+	 <section id="T-System.Boolean"> 
+		  <title><indexterm><primary>Boolean - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Boolean</secondary></indexterm>System.Boolean</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Boolean
+{
+	representation Boolean
+	{
+		Value : System.Boolean
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.BooleanAsStringSelectorNode"
+} class "System.BooleanConveyor"
+	static tags { Catalog.Comment = "System Boolean", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Boolean" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Boolean</symbol></para> 
+		  <para><symbol>System.Boolean</symbol> consists of the truth values true
+				and false. </para> 
+		  <example> 
+				<title>Using System.Boolean</title> 
+				<programlisting>create table Test in Temp
+{
+ TestValue : Boolean,
+ key {}
+};
+insert table { row { 1 = 0 TestValue } } into Test;
+select Test;
+drop table Test;</programlisting> 
+				<programlisting>TestValue
+---------
+False</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				 type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html">Parser
+					 Literals</ulink> | 
+				<ulink url="O-System.ToBoolean.html"
+				 type="xref">System.ToBoolean</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Byte"> 
+		  <title><indexterm><primary>Byte - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Byte</secondary></indexterm>System.Byte</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Byte
+{
+	representation Byte
+	{
+		Value : System.Byte
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.ByteAsStringSelectorNode"
+} class "System.ByteConveyor" static tags { Catalog.Comment = "System Unsigned 8-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Byte" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Byte</symbol>.</para> 
+		  <para><symbol>System.Byte</symbol> is the set of all integer values in
+				the range 0 through positive 255 (2<superscript>8</superscript>-1). The
+				physical representation of this type is an unsigned 8-bit integer.</para> 
+		  <example> 
+				<title>Using System.Byte</title> 
+				<programlisting>create table Test in Temp
+{
+ TestValue : Byte,
+ key {}
+};
+begin
+ var RosesGrown : Byte := 17;
+ var RosesCut : Byte := 8;
+ insert table 
+ {
+  row {  RosesGrown - RosesCut TestValue }
+ } into Test;
+end;
+select Test rename { TestValue RosesLeft };
+drop table Test;</programlisting> 
+				<programlisting>RosesLeft
+---------
+9</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				 type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<ulink url="O-System.ToByte.html" type="xref">System.ToByte</ulink>
+				</para> 
+	 </section> 
+	 <section id="T-System.Date"> 
+		  <title><indexterm><primary>Date - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Date</secondary></indexterm>System.Date</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Date
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	} selector  class "System.SystemDateTicksSelectorNode", 
+	representation Date
+	{
+		Year : System.Integer, 
+		Month : System.Integer, 
+		Day : System.Integer
+	} selector  class "System.SystemDateTimeDateTimeDaysSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.DateAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Date", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Date" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>Date</symbol> is the selector for the
+				<symbol>Date</symbol> Datatype and an operator.</para> 
+		  <para><symbol>System.Date</symbol> is the set of all possible dates
+				from a fixed point. The physical representation for this type is a 64-bit
+				signed integer representing the number of ticks since 12:00 midnight, January
+				1, 1 C.E. (Common Era) in the Gregorian calendar. This means that the range of
+				values for this domain is from January 1, 0001 C.E. to December 31, 9999
+				C.E.</para> 
+		  <example> 
+				<title>Using System.Date</title> 
+				<programlisting>create table Test in Temp
+{
+ WhatDate : String,
+ Date : Date,
+ key {Date}
+};
+insert table
+{
+ row { "Today" WhatDate, Date() Date },
+ row { "VE day", Date(1945, 5, 8) },
+ row { "DateTicks", Date.Ticks(627346080000000000) }
+} into Test;
+select Test;
+drop table Test;</programlisting> 
+				<programlisting>WhatDate  Date
+--------- ----------
+VE day    1945-05-08
+DateTicks 1988-12-25
+Today     2004-06-18</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para><!--Link to Date and Time Operators--><ulink
+				url="O-System.Date.html" type="link">System.Date Operator</ulink> | 
+				<ulink url="T-System.DateTime.html"
+				 type="xref">System.DateTime</ulink> | 
+				<ulink url="T-System.Time.html" type="xref">System.Time</ulink> | 
+				<ulink url="T-System.TimeSpan.html"
+				 type="xref">System.TimeSpan</ulink> | 
+				<ulink
+				 url="D4LGProgrammingTopics-UsingDateandTimeValues.html" type="olinkb">Using
+					 Date and Time Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<!--Link To DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGCatalogElements-Conversions.html"
+				 type="olinkb">Type Conversions</ulink> | 
+				<ulink url="O-System.ToDate.html" type="xref">System.ToDate</ulink>
+				</para> 
+	 </section> 
+	 <section id="T-System.DateTime"> 
+		  <title><indexterm><primary>DateTime - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>DateTime</secondary></indexterm>System.DateTime</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.DateTime
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	} selector  class "System.SystemDateTimeTicksSelectorNode", 
+	representation DateTime
+	{
+		Year : System.Integer, 
+		Month : System.Integer, 
+		Day : System.Integer, 
+		Hour : System.Integer, 
+		Minute : System.Integer, 
+		Second : System.Integer
+	} selector  class "System.SystemDateTimeDateTimeSecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.DateTimeAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Date Time", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.DateTime" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>DateTime</symbol> is a selector for the
+				<symbol>DateTime</symbol> Datatype and an operator.</para> 
+		  <para><symbol>System.DateTime</symbol> is the set of all possible
+				dates, or times from a fixed point. The physical representation for this type
+				is a 64-bit signed integer representing the number of ticks since 12:00
+				midnight, January 1, 1 C.E. (Common Era) in the Gregorian calendar. This means
+				that the range of values for this domain is from 12:00:00 midnight, January 1,
+				0001 C.E. to 11:59:59 P.M., December 31, 9999 C.E.</para> 
+		  <para>The <symbol>DateTime</symbol> operator, with no arguments,
+				returns a <symbol>DateTime</symbol> type representing the current date and
+				time. Unlike the <symbol>Date</symbol> operator, this operator returns both the
+				date and time.</para> 
+		  <para>With integer year, month, day, [hours, minutes, [seconds]]
+				specified, this operator returns a <symbol>DateTime</symbol> type value
+				representing the date and time specified.</para> 
+		  <example> 
+				<title>Using System.DateTime</title> 
+				<programlisting>create table Test in Temp
+{
+ What : String,
+ When : DateTime,
+ key {When}
+};
+insert table
+{
+ row { "Now" What, DateTime() When },
+ row { "New Years Morning", DateTime(2005,01,01, 8, 15) },
+ row { "DateTimeTicks", DateTime.Ticks(631680313950000000) }
+} into Test;
+select Test;
+drop table Test;</programlisting> 
+				<programlisting>What              When
+----------------- -------------------
+DateTimeTicks     2002-09-19 11:23:15
+Now               2004-06-18 09:07:42
+New Years Morning 2005-01-01 08:15:00</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para><!--Link to Date and Time Operators-->
+				<ulink url="O-System.DateTime.html" type="link">System.DateTime
+					 Operator</ulink> | 
+				<ulink url="T-System.Date.html" type="xref">System.Date</ulink> | 
+				<ulink url="T-System.Time.html" type="xref">System.Time</ulink> | 
+				<ulink url="T-System.TimeSpan.html"
+				 type="xref">System.TimeSpan</ulink> | 
+				<ulink
+				 url="D4LGProgrammingTopics-UsingDateandTimeValues.html" type="olinkb">Using
+					 Date and Time Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<!--Link To DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html">Type
+					 Conversions</ulink> | 
+				<ulink url="O-System.ToDateTime.html"
+				 type="xref">System.ToDateTime</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Decimal"> 
+		  <title><indexterm><primary>Decimal - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Decimal</secondary></indexterm>System.Decimal</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Decimal
+{
+	representation Decimal
+	{
+		Value : System.Decimal
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.DecimalAsStringSelectorNode"
+} class "System.DecimalConveyor" static tags { Catalog.Comment = "System Binary Coded Decimal", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Decimal" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Decimal</symbol>.</para> 
+		  <para><symbol>System.Decimal</symbol> is the set of all possible
+				numbers. Values of this domain are represented physically by a 96-bit signed
+				scaled integer, so in practice, the available values are negative
+				79,228,162,514,264,337,593,543,950,335 (-2<superscript>96</superscript>-1)
+				through positive 79,228,162,514,264,337,593,543,950,335
+				(2<superscript>96</superscript>-1).</para> 
+		  <example> 
+				<title>Using System.Decimal</title> 
+				<programlisting>create table Test in Temp
+{
+ TestValue : Decimal,
+ key {}
+};
+begin
+ var MilesToMoon : Decimal := 236000;
+ var MilesPerLightyear : Decimal := 5878499810000;
+ insert table 
+ {
+  row {  MilesToMoon / MilesPerLightyear TestValue }
+ } into Test;
+end;
+select Test rename { TestValue LightyearsToMoon };
+drop table Test;
+select Decimal(17);</programlisting> 
+				<programlisting>LightyearsToMoon
+------------------------------
+0.0000000401462971213398746372</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				 type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html"
+				 type="olinkb">Parser Literals</ulink> | 
+				<ulink url="O-System.ToDecimal.html"
+				 type="xref">System.ToDecimal</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Error"> 
+		  <title><indexterm><primary>Error - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Error</secondary></indexterm>System.Error</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Error
+{
+	representation Error
+	{
+		Severity : System.String,
+		Code : System.Integer,
+		Message : System.String,
+		InnerError : System.Error
+	} selector  class "System.SystemErrorSelectorNode"
+} class "System.ObjectConveyor" static tags { Catalog.Comment = "System Error" };</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Error" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the <symbol>Error</symbol> data
+				type.</para> 
+		  <para><symbol>System.Error</symbol> is the set of all
+				<symbol>error</symbol> values in the DAE. Values of this type are used to
+				implement the exception-handling mechanisms of D4.</para> 
+		  <para><symbol>ASeverity</symbol> is one of User, Application, System,
+				or Environment. <symbol>ACode</symbol> is a six digit error code. The first
+				three digit indicates the origin, the last three digits indicate the message
+				code. Origin codes in the range 500000 to 500999 are reserved for
+				<symbol>User</symbol> error messages. <symbol>AMessage</symbol> is the message
+				to be displayed.</para> 
+		  <example> 
+				<title>Using System.Error</title> 
+				<programlisting>raise Error
+(
+ "User",
+ 500000,
+ "This isn't a real error, but it will generate an error anyway."
+);</programlisting> 
+				<programlisting>Warnings
+  Description
+  (User:500000) This isn't a real error, but it will generate an error anyway.</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="O-System.Error.html" type="link">System.Error
+					 Operator</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html">System
+					 Data Types</ulink> | 
+				<ulink url="D4LGImperativeStatements-ExceptionHandling.html"
+				type="olinkb">Exception Handling</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Graphic"> 
+		  <title><indexterm><primary>Binary - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Binary</secondary></indexterm>System.Graphic</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Graphic
+{
+ representation Graphic
+ {
+  Value : System.String
+ }selector  class "System.SystemBinarySelectorNode", 
+ representation AsDisplayString
+ {
+  AsDisplayString : System.String
+	}selector  class "System.GraphicAsDisplayStringSelectorNode"
+} class "System.ObjectConveyor" tags { Frontend.ElementType = "Image", Frontend.Grid.ElementType = "ImageColumn" } static tags { Catalog.Comment = "System Graphic", DAE.AsDisplayString = "AsDisplayString" };</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Graphic" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType <symbol>Graphic</symbol>.
+				Graphic date is data stored in its raw format. This data type is used to store
+				images.</para> 
+		  <para><symbol>System.Graphic</symbol> is the set of all byte streams of
+				data with length less than or equal to 2,147,483,647
+				(2<superscript>31</superscript>-1) bytes.</para> 
+		  <example> 
+				<title>Using System.Graphic</title> 
+				<programlisting>create table TestGraphic in Temp
+{
+ ID : Integer,
+ Image : Graphic,
+ key { ID }
+};
+// Image.Warning is a .png image file
+insert table 
+{ 
+ row
+ {
+  1 ID, Image('Frontend', 'Image.Warning') Image },
+  key { ID }
+ } into TestGraphic;
+select TestGraphic;
+// The image can be viewed by selecting the table
+// in Dataphoria and selecting Browse.
+drop table TestGraphic;</programlisting> 
+				<programlisting>ID Image
+-- -------------
+1  &lt;binary data&gt;</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink></para> 
+	 </section> 
+	 <section id="T-System.GroupName"> 
+		  <title><indexterm><primary>GroupName - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>GroupName</secondary></indexterm>System.GroupName</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.GroupName
+	like System.String
+	tags { Frontend.Title = "Group Name", Frontend.Width = "30"}
+	static tags { Catalog.Comment = "System String", Storage.Length = "255" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.GroupName" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>GroupName</symbol> is the selector for the DataType and
+				an operator.</para> 
+		  <para><symbol>GroupName</symbol> is the set of all possible group
+				names.</para> 
+		  <example> 
+				<title>Using System.GroupName</title> 
+				<programlisting>select GroupName("Development");</programlisting> 
+				<programlisting>Development</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="DUGP3Security.html" type="olinkb">Security</ulink> | 
+				<ulink url="O-System.CreateGroup.html"
+				type="xref">System.CreateGroup</ulink> | 
+				<ulink url="O-System.DropGroup.html"
+				type="xref">System.DropGroup</ulink> | 
+				<ulink url="O-System.GroupExists.html"
+				type="xref">System.GroupExists</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Guid"> 
+		  <title><indexterm><primary>Guid - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Guid</secondary></indexterm>System.Guid</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Guid
+{
+	representation Guid
+	{
+		Value : System.String
+	} selector  class "System.SystemGuidSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.GuidAsStringSelectorNode"
+} class "System.GuidConveyor" static tags { Catalog.Comment = "System Globally Unique Identifier", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Guid" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is an operator and the selector for the
+				<symbol>Guid</symbol> datatype.</para> 
+		  <para><symbol>System.Guid</symbol> is the set of all possible Globally
+				Unique Identifiers (GUIDs). The physical representation for this type is a
+				128-bit unsigned integer. The operator <symbol>NewGuid()</symbol> generates a
+				new globally unique identifier.</para> 
+		  <example> 
+				<title>Using System.Guid</title> 
+				<programlisting>select Guid("12345678-1234-1234-1234-123456789012");</programlisting> 
+				<programlisting>12345678-1234-1234-1234-123456789012</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="O-System.NewGuid.html"
+				type="xref">System.NewGuid</ulink> | 
+				<ulink url="O-System.NameFromGuid.html"
+				type="xref">System.NameFromGuid</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<!--Link To DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinkb">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html"
+				type="olinkb">Type Conversion</ulink> | 
+				<ulink url="O-System.ToGuid.html" type="xref">System.ToGuid</ulink>
+				</para> 
+	 </section> 
+	 <section id="T-System.Integer"> 
+		  <title><indexterm><primary>Integer - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Integer</secondary></indexterm>System.Integer</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Integer
+{
+	representation Integer
+	{
+		Value : System.Integer
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.IntegerAsStringSelectorNode"
+} class "System.Int32Conveyor" static tags { Catalog.Comment = "System Signed 32-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Integer" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Integer</symbol>.</para> 
+		  <para><symbol>System.Integer</symbol> is the set of all integer values
+				in the range negative 2,147,483,648 (-2<superscript>31</superscript>) through
+				positive 2,147,483,647 (2<superscript>31</superscript>-1). The physical
+				representation of this type is a signed 32-bit integer.</para> 
+		  <example> 
+				<title>Using System.Integer</title> 
+				<programlisting>create table Test in Temp
+{
+ Processor : Integer,
+ Transistors : Integer,
+ key {Processor}
+};
+insert table 
+{
+ row { 8080 Processor, 6000 Transistors },
+ row { 8088, 29000 },
+ row { 80286, 134000 },
+ row { 80386, 275000 },
+ row { 80486, 1200000 }
+} into Test;
+select Test add { Transistors - 6000 Increase };
+drop table Test;</programlisting> 
+				<programlisting>Processor Transistors Increase
+--------- ----------- --------
+8080      6000        0
+8088      29000       23000
+80286     134000      128000
+80386     275000      269000
+80486     1200000     1194000</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html"
+				type="olinkb">Parser Literals</ulink> | 
+				<ulink url="O-System.ToInteger.html"
+				type="xref">System.ToInteger</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Long"> 
+		  <title><indexterm><primary>Long - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Long</secondary></indexterm>System.Long</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Long
+{
+	representation Long
+	{
+		Value : System.Long
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.LongAsStringSelectorNode"
+} class "System.Int64Conveyor" static tags { Catalog.Comment = "System Signed 64-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Long" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Long</symbol>.</para> 
+		  <para><symbol>System.Long</symbol> is the set of all integer values in
+				the range negative 9,223,372,036,854,775,808 (-2<superscript>63</superscript>)
+				through positive 9,223,372,036,854,775,807 (2<superscript>63</superscript>-1).
+				The physical representation of this type is a signed 64-bit integer.</para> 
+		  <example> 
+				<title>Using System.Long</title> 
+				<programlisting>create table Test in Temp
+{
+ Type : String,
+ NumberInUSA : Long, //in 2001
+ key {Type}
+};
+insert table 
+{
+ row { 'Autos' Type, 137633467 NumberInUSA },
+ row { 'Cycles', 4903056 },
+ row { 'Buses', 749548 },
+ row { 'Trucks', 92045311 }
+} into Test;
+select "Vehicles in USA in 2001";
+select Test;
+select Test group add { Sum(NumberInUSA) TotalVehiclesIn2001 };
+drop table Test;</programlisting> 
+				<programlisting>Vehicles in USA in 2001
+Type   NumberInUSA
+------ -----------
+Autos  137633467
+Buses  749548
+Cycles 4903056
+Trucks 92045311
+
+TotalVehiclesIn2001
+-------------------
+235331382</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="O-System.ToLong.html" type="xref">System.ToLong</ulink>
+				</para> 
+	 </section> 
+	 <section id="T-System.Money"> 
+		  <title><indexterm><primary>Money - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Money</secondary></indexterm>System.Money</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Money
+{
+	representation Money
+	{
+		Value : System.Decimal
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.MoneyAsStringSelectorNode", 
+	representation AsDisplayString
+	{
+		AsDisplayString : System.String
+	} selector  class "System.MoneyAsStringSelectorNode"
+} class "System.DecimalConveyor" static tags { Catalog.Comment = "System Money", DAE.AsString = "AsString", DAE.AsDisplayString = "AsDisplayString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Money" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Money</symbol>.</para> 
+		  <para><symbol>System.Money</symbol> is the set of all monetary values
+				in the range negative $79,228,162,514,264,337,593,543,950,335
+				(-$2<superscript>96</superscript>-1) through positive
+				$79,228,162,514,264,337,593,543,950,335 ($2<superscript>96</superscript>-1).
+				The physical representation of this type is 96-bit signed scaled
+				integer.</para> 
+		  <para>Placing a $ symbol at the beginning of a number identifies the
+				number to the compiler as a literal of type money. The $ symbol does
+				<emphasis>not</emphasis> designate the currency being identified, i.e.
+				dollars.</para> 
+		  <example> 
+				<title>Using System.Money</title> 
+				<programlisting>create table Test in Temp
+{
+ Area : String,
+ June7 : Money,
+ June14 : Money,
+ ChangeSinceLastYear : Money,
+ key {Area}
+};
+insert table 
+{
+ row { ' East Coast' Area, $2.026 June7, $1.999 June14, $.536 ChangeSinceLastYear },
+ row { ' MidWest', $1.975, $1.882, $.364 },
+ row { ' West Coast', $2.276, $2.243, $.504 },
+ row { 'National', $2.034, $1.985, $.467 }
+} into Test;
+select "U.S. regular-grade gas prices 2004";
+select Test add { June14 - June7 ChangeFromLastWeek } ;
+select "From U.S. Engergy Information Administration weekly survey";
+drop table Test;</programlisting> 
+				<programlisting>U.S. regular-grade gas prices 2004
+Area        June7 June14 ChangeSinceLastYear ChangeFromLastWeek
+----------- ----- ------ ------------------- ------------------
+ East Coast $2.03 $2.00  $0.54               ($0.03)
+ MidWest    $1.98 $1.88  $0.36               ($0.09)
+ West Coast $2.28 $2.24  $0.50               ($0.03)
+National    $2.03 $1.99  $0.47               ($0.05)
+
+From U.S. Engergy Information Administration weekly survey
+</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html
+" type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html"
+				type="olinkb">Parser Literals</ulink> | 
+				<ulink url="O-System.ToMoney.html"
+				type="xref">System.ToMoney</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Name"> 
+		  <title><indexterm><primary>Name - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Name</secondary></indexterm>System.Name</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Name
+{
+	representation Name
+	{
+		Value : System.String
+	} selector  class "System.SystemNameSelectorNode"
+} class "System.StringConveyor" tags { Frontend.Width = "50" } static tags { Catalog.Comment = "System Catalog Name", Storage.Length = "200" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Name" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Name</symbol>.</para> 
+		  <para><symbol>Name</symbol> is the set of all possible names.</para> 
+		  <example> 
+				<title>Using System.Name</title> 
+				<programlisting>select Name("User");</programlisting> 
+				<programlisting>User</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink></para> 
+	 </section> 
+	 <section id="T-System.Short"> 
+		  <title><indexterm><primary>Short - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Short</secondary></indexterm>System.Short</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Short
+{
+	representation Short
+	{
+		Value : System.Short
+	} selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.ShortAsStringSelectorNode"
+} class "System.Int16Conveyor" static tags { Catalog.Comment = "System Signed 16-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Short" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>Short</symbol>.</para> 
+		  <para><symbol>System.Short</symbol> is the set of all integer values in
+				the range negative 32768 (-2<superscript>15</superscript>) through positive
+				32767 (2<superscript>15</superscript>-1). The physical representation of this
+				type is a signed 16-bit integer.</para> 
+		  <example> 
+				<title>Using System.Short</title> 
+				<programlisting>create table Test in Temp
+{
+ Area : String,
+ Bones : Short
+};
+insert table 
+{
+ row { 'Shull' Area, 28 Bones },
+ row { 'Neck', 7 },
+ row { 'Vertebrae', 26 },
+ row { 'Ribs', 24 },
+ row { 'Pelvic', 2 },
+ row { 'Arms &amp; Legs', 120 } 
+} into Test;
+select "Bones in the adult human body";
+select Test;
+select Test group add { Sum(Bones) TotalBones };
+drop table Test;</programlisting> 
+				<programlisting>Area        Bones
+----------- -----
+Arms &amp; Legs 120
+Neck        7
+Pelvic      2
+Ribs        24
+Shull       28
+Vertebrae   26
+
+TotalBones 
+---------- 
+207</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html"
+				type="olinkb">Parser Literals</ulink> | 
+				<ulink url="O-System.ToShort.html"
+				type="xref">System.ToShort</ulink> </para> 
+	 </section> 
+	 <section id="T-System.String"> 
+		  <title><indexterm><primary>String - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>String</secondary></indexterm>System.String</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.String
+{
+	representation String
+	{
+		Value : System.String
+	} selector  class "System.ScalarSelectorNode", 
+	representation Unicode
+	{
+		Unicode : list(System.Integer)
+	} selector  class "System.SystemStringUnicodeNode", 
+	representation UTF8
+	{
+		UTF8 : list(System.Byte)
+	}selector  class "System.SystemStringUTF8Node", 
+	representation ASCII
+	{
+		ASCII : list(System.Byte)
+	} selector  class "System.SystemStringASCIINode"
+} class "System.StringConveyor" static tags { Catalog.Comment = "System String", Storage.Length = "20" }</programlisting> 
+					 <ulink url="T-System.String.Unicode.html" type="link">See
+						  System.String.Unicode</ulink> | 
+					 <ulink url="T-System.String.UTF8.html" type="link">See
+						  System.String.UTF8</ulink> | 
+					 <ulink url="T-System.String.ASCII.html" type="link">See
+						  System.String.ASCII</ulink></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.String" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para>This is the selector for the DataType
+				<symbol>String</symbol>.</para> 
+		  <para><symbol>System.String</symbol> is the set of all case-sensitive
+				character strings. The physical representation of this type is a Unicode string
+				with a maximum length of 2<superscript>31</superscript>-1. The comparison
+				operators for this domain are defined case-sensitively.</para> 
+		  <para><symbol>ASCII</symbol> the selector for the
+				<symbol>ASCII</symbol> representation of the <symbol>String</symbol> DataType.
+				This can be used to return a native string given a list of Bytes. It can also
+				be used to return a list of Bytes for a given String.</para> 
+		  <para><symbol>Unicode</symbol> is the selector for the
+				<symbol>Unicode</symbol> representation of the <symbol>String</symbol>
+				DataType. This can be used to return a native string given a list of Integers.
+				It can also be used to return a list of Integers for a given String.</para> 
+		  <para><symbol>UTF8</symbol> is the selector for the
+				<symbol>UTF8</symbol> representation of the <symbol>String</symbol> DataType.
+				This can be used to return a native string given a list of Bytes. It can also
+				be used to return a list of Bytes for a given String.</para> 
+		  <example> 
+				<title>Using System.String</title> 
+				<programlisting>select String("123abc");
+
+create session table Example { ASCIIString : String, key{} };
+begin
+	var LString : String;
+	LString.ASCII := list(Byte) { 65, 108, 112, 104, 111, 114, 97 };
+	insert table { row { LString ASCIIString } } into Example;
+end;
+select Example
+	add { "Fun".ASCII[0] F, "Fun".ASCII[1] u, "Fun".ASCII[2] n };
+drop table Example;</programlisting> 
+				<programlisting>123abc
+
+ASCIIString F  u   n
+----------- -- --- ---
+Alphora     70 117 110</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<!--Link to String Operators Category--><ulink
+				url="T-System.String.Unicode.html" type="xref">System.String.Unicode</ulink> | 
+				<ulink url="T-System.String.UTF8.html"
+				type="xref">System.String.UTF8</ulink> | 
+				<ulink url="T-System.String.ASCII.html"
+				type="xref">System.String.ASCII</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-SystemDataTypes.html"
+				type="olinkb">System Data Types</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<ulink url="D4LGLexicalElements-ParserLiterals.html"
+				type="olinkb">Parser Literals</ulink> | 
+				<ulink url="O-System.ToString.html"
+				type="olinkb">System.ToString</ulink> </para> 
+	 </section> 
+	 <section id="T-System.Time"> 
+		  <title><indexterm><primary>Time - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>Time</secondary></indexterm>System.Time</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.Time
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	} selector  class "System.SystemTimeTicksSelectorNode", 
+	representation Time
+	{
+		Hour : System.Integer, 
+		Minute : System.Integer,
+		Second : System.Integer
+	} selector  class "System.SystemTimeTimeSecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.TimeAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Time", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.Time" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>Time</symbol> is an operator and the selector for the
+				<symbol>Time</symbol> Datatype.</para> 
+		  <example> 
+				<title>Using System.Time</title> 
+				<programlisting>create table Test in Temp
+{
+ Event : String,
+ When : Time, key { Event }
+};
+insert table 
+{
+ row { '1. Get up' Event, Time(5, 30) When },
+ row { '2. Go to work', Time(7, 00, 18) },
+ row { '3. Go home', Time(16, 30) },
+ row { '4. Sleep', Time(21, 30, 54) }
+} into Test;
+select Test;
+select "Time awake as TimeSpan "
+ + (
+    (When from row from Test where Event = "4. Sleep")
+    - (When from row from Test where Event = "1. Get up")
+   ).AsString;
+drop table Test;</programlisting> 
+				<programlisting>Event         When
+------------- --------
+1. Get Up     05:30:00
+2. Go to work 07:00:18
+3. Go home    16:30:00
+4. Sleep      21:30:54
+
+Time awake as TimeSpan 16hrs 0min 54sec</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para><!--Link to Date and Time Operators-->
+				<ulink url="O-System.Time.html" type="olinkb">System.Time
+					 Operator</ulink> | 
+				<ulink url="T-System.DateTime.html"
+				type="xref">System.DateTime</ulink> | 
+				<ulink url="T-System.Date.html" type="xref">System.Date</ulink> | 
+				<ulink url="T-System.TimeSpan.html"
+				type="xref">System.TimeSpan</ulink> | 
+				<ulink
+				url="D4LGProgrammingTopics-UsingDateandTimeValues.html" type="olinkb">Using
+					 Date and Time Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				type="olinkb">Scalar Values</ulink> | 
+				<!--Link to DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html"
+				type="olinkb">Type Conversions</ulink> | 
+				<ulink url="O-System.ToTime.html" type="xref">System.ToTime</ulink>
+				</para> 
+	 </section> 
+	 <section id="T-System.TimeSpan"> 
+		  <title><indexterm><primary>TimeSpan - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>TimeSpan</secondary></indexterm>System.TimeSpan</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.TimeSpan
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	} selector  class "System.SystemTimeSpanTicksSelectorNode", 
+	representation Milliseconds
+	{
+		Milliseconds : System.Decimal
+	} selector  class "System.SystemTimeSpanMillisecondsSelectorNode", 
+	representation Seconds
+	{
+		Seconds : System.Decimal
+	} selector  class "System.SystemTimeSpanSecondsSelectorNode", 
+	representation Minutes
+	{
+		Minutes : System.Decimal
+	} selector  class "System.SystemTimeSpanMinutesSelectorNode", 
+	representation Hours
+	{
+		Hours : System.Decimal
+	} selector  class "System.SystemTimeSpanHoursSelectorNode", 
+	representation Days
+	{
+		Days : System.Decimal
+	} selector  class "System.SystemTimeSpanDaysSelectorNode", 
+	representation TimeSpan
+	{
+		Day : System.Integer,
+		Hour : System.Integer,
+		Minute : System.Integer,
+		Second : System.Integer,
+		Millisecond : System.Decimal
+	} selector  class "System.SystemTimeSpanTimeSpanMillisecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.TimeSpanAsStringSelectorNode"
+} class "System.TimeSpanConveyor" static tags { Catalog.Comment = "System Time Span", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.TimeSpan" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>TimeSpan</symbol> is an operator and the selector for the
+				<symbol>TimeSpan</symbol> Datatype.</para> 
+		  <para>The <symbol>TimeSpan</symbol> can accept one to five integers
+				representing days, hours, minutes, seconds, and milliseconds. It will return a
+				<symbol>TimeSpan</symbol> Datetype.</para> 
+		  <example> 
+				<title>Using System.TimeSpan</title> 
+				<programlisting>// What will the date be two weeks (14 days) from now?
+select Date() + TimeSpan(14);
+
+// What was the time (UTC) between Pearl Harbor bombing
+// and cease fire order after Japan's surrender?
+// Returned as a <symbol>TimeSpan</symbol>
+select Date(1945,8,15,23,5) - Date(1941,12,7,17,58);</programlisting> 
+				<programlisting>2004-05-07 00:00:00
+
+192wks 3days 5hrs 7min</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para><!--Link to Date and Time Operators-->
+				<ulink url="T-System.DateTime.html"
+				 type="xref">System.DateTime</ulink> | 
+				<ulink url="T-System.Date.html" type="xref">System.Date</ulink> | 
+				<ulink url="T-System.TimeSpan.html"
+				 type="xref">System.TimeSpan</ulink> | 
+				<ulink
+				 url="D4LGProgrammingTopics-UsingDateandTimeValues.html" type="olinkb">Using
+					 Date and Time Values</ulink> | 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html"
+				 type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html"
+				 type="olinkb">Scalar Values</ulink> | 
+				<!--Link To DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html"
+				 type="olinkb">Type Conversions</ulink> | 
+				<ulink url="O-System.ToTimeSpan.html"
+				 type="xref">System.ToTimeSpan</ulink> </para> 
+	 </section> 
+	 <section id="T-System.UserID"> 
+		  <title><indexterm><primary>UserID - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>UserID</secondary></indexterm>System.UserID</title> 
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.UserID like System.String
+	tags { Frontend.Title = "User ID", Frontend.Width = "10" }
+	static tags { Catalog.Comment = "System String", Storage.Length = "255" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.UserID" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>System.UserID</symbol> is the selector for the
+				<symbol>UserID</symbol> Datatype.</para> 
+		  <example> 
+				<title>Using System.UserID</title> 
+				<programlisting>select UserID("JD4");</programlisting> 
+				<programlisting>JD4</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para><ulink url="O-System.CreateUser.html" type="link">System.UserID
+					 Operator</ulink> | 
+				<ulink url="DUGP3Security.html" type="olinkb">Security</ulink> | 
+				<ulink url="O-System.CreateUser.html"
+				 type="xref">System.CreateUser</ulink> | 
+				<ulink url="O-System.CreateUserWithEncryptedPassword.html"
+				 type="xref">System.CreateUserWithEncryptedPassword</ulink> | 
+				<ulink url="O-System.DropUser.html"
+				 type="xref">System.DropUser</ulink> | 
+				<ulink url="O-System.SetEncryptedPassword.html"
+				 type="xref">System.SetEncryptedPassword</ulink> | 
+				<ulink url="O-System.SetPassword.html"
+				 type="xref">System.SetPassword</ulink> | 
+				<ulink url="O-System.UserExists.html"
+				 type="xref">System.UserExists</ulink> | 
+				<ulink url="O-System.UserName.html"
+				 type="xref">System.UserName</ulink> | 
+				<ulink url="DUGP1Dataphoria-Aliases-SessionInformation.html"
+				 type="olinka">Session, Aliases</ulink> | 
+				<ulink url="DUGP1UserCredentials.html" type="olinkb">User
+					 Credentials</ulink> | 
+				<ulink url="DDGP1Session.html" type="olinka">Session, CLI</ulink> |
+				
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html
+" type="olinkb">Conveyors</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html
+" type="olinkb">Scalar Values</ulink> | 
+				<!--Link to DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html
+" type="olinkb">Type Conversions</ulink></para> 
+	 </section> 
+	 <section id="T-System.VersionNumber"> 
+		  <title><indexterm><primary>VersionNumber - Scalar
+						  Type</primary></indexterm><indexterm><primary>Scalar
+						  Types</primary><secondary>VersionNumber</secondary></indexterm>System.VersionNumber</title>
+		  
+		  <para></para> 
+		  <formalpara> 
+				<title>Type Declaration</title> 
+				<para> 
+					 <programlisting>create type .System.VersionNumber
+{
+	representation VersionNumber
+	{
+		Major : System.Integer,
+		Minor : System.Integer,
+		Revision : System.Integer,
+		Build : System.Integer
+	} selector  class "System.VersionNumberSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	} selector  class "System.VersionNumberAsStringSelectorNode"
+} class "System.VersionNumberConveyor" static tags { Storage.Length = "14", DAE.AsString = "AsString" }</programlisting></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock programlisting Operators where OperatorName = "System.VersionNumber" add { Script(Name) Declaration }?>
+		  <formalpara> 
+				<title>Declarations</title> 
+				<para> 
+					 <programlisting><?DocLib D4Field Declaration?></programlisting></para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect3">Remarks</bridgehead> 
+		  <para><symbol>VersionNumber</symbol> is the selector for the
+				<symbol>VersionNumber</symbol> Datatype.</para> 
+		  <para>One demonstrated use of <symbol>VersionNumber</symbol> is in the
+				libraries of Dataphor. The version of a library is specified using the
+				<symbol>VersionNumber</symbol> data type. By default, the version of a library
+				is the special value <symbol>VersionNumberUndefined</symbol>. When a library is
+				referenced as a dependency by another library, the version number may also be
+				specified, allowing libraries to require not only other libraries, but specific
+				versions of those libraries. The notion of version compatibility is used to
+				allow library references to target any granularity of the version number
+				desired. For example, a library could reference version 2.0.* of the System
+				library, meaning that the library is compatible with any System library that
+				has major version 2, and minor version 0.</para> 
+		  <example> 
+				<title>Using System.VersionNumber</title> 
+				<programlisting>select VersionNumberUndefined();
+select VersionNumber(2,0,15,9);</programlisting> 
+				<programlisting>*
+2.3.4.5</programlisting> 
+		  </example> 
+		  <bridgehead renderas="sect3">See Also</bridgehead> 
+		  <para> 
+				<ulink url="D4LGCatalogElements-ScalarTypes-Conveyors.html
+" type="olinkb">Conveyors</ulink> | 
+				<ulink url="O-System.ToVersionNumber.html"
+				 type="xref">System.ToVersionNumber</ulink> | 
+				<ulink url="O-System.Compatible.html"
+				 type="xref">System.Compatible</ulink> | 
+				<ulink url="O-System.IsUndefined.html"
+				 type="xref">System.IsUndefined</ulink> | 
+				<ulink url="D4LGLanguageElements-Values-ScalarValues.html
+" type="olinkb">Scalar Values</ulink> | 
+				<!--Link To DDG --><ulink url="bk02pt01ch03s02s01s01.html"
+				type="olinka">Presentation Layer Representations</ulink> | 
+				<ulink url="D4LGLanguageElements-Types-TypeConversions.html
+" type="olinkb">Type Conversions</ulink></para> 
+	 </section> 
+</section> 

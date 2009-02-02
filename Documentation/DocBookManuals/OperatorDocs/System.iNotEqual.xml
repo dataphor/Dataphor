@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:39:27</date> 
+	 </sect2info> 
+	 <title>iNotEqual</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>&lt;&gt;</symbol> is the parser recognized symbol for this
+		  operator. This operator is a comparison operator that checks to see if the two
+		  values on either side of the operator are not equal. This operator returns a
+		  boolean value representing the comparison.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager where Manager_ID &lt;&gt; Employee_ID;</programlisting> 
+		  <programlisting>Manager_ID Employee_ID 
+---------- ----------- 
+1          2           
+1          3           
+2          4           
+2          6           
+4          5</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGComparisonOperators.html">Comparison Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

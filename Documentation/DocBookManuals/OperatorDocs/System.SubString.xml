@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 08, 2004 15:27:59</date> 
+	 </sect2info> 
+	 <title>System.SubString</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns a string that is a part, or substring of, the
+		  given string.</para> 
+	 <note> 
+		  <para>D4 uses zero based strings.</para> 
+	 </note> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { "Data" + SubString("Alphora", 2, 4) Copied };</programlisting> 
+		  <programlisting>Copied
+--------
+Dataphor</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para><ulink url="D4LGUsingStrings.html">Using Strings</ulink></para> 
+	 </formalpara> 
+</sect2> 

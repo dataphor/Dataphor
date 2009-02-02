@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:45:08</date> 
+	 </sect2info> 
+	 <title>iRemove</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>remove</symbol> is the parser recognized symbol for this
+		  operator is . The <symbol>remove</symbol> clause removes a column from a
+		  particular dataset.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee join EmployeePhone remove {ID};</programlisting> 
+		  <programlisting>Name Phone    
+---- -------- 
+Jake 555-5678 
+Jeff 555-4444 
+Joe  555-1000 
+Joe  555-1234 
+John 555-4321</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGProjectandRemove.html">Over and Remove</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

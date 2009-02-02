@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:34:08</date> 
+	 </sect2info> 
+	 <title>System.ToTime</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>A <symbol>String</symbol> type can be explicitly converted to a
+		  <symbol>Time</symbol> type using this operator.</para> 
+	 <para>A string that takes any of the forms described in 
+		  <ulink
+			url="http://msdn.microsoft.com/library/en-us/cpguide/html/cpconstandarddatetimeformatstrings.asp">Standard
+				DateTime Format Strings (Web link)</ulink> can be converted to a
+		  <symbol>Time</symbol> type.</para> 
+	 <para>Standard DataTime format strings can be seen at
+		  http://msdn.microsoft.com/library/en-us/cpguide/html/cpconstandarddatetimeformatstrings.asp</para>
+	 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select ToTime("8:15");
+select ToTime("8:15 pm");
+select ToTime("18:30:59");</programlisting> 
+		  <programlisting>08:15:00
+20:15:00
+18:30:59</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGTypes.html">Types</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+<ulink url="SLRSystem.String.html">System.String</ulink>
+<ulink url="http://msdn.microsoft.com/library/en-us/cpguide/html/cpconstandarddatetimeformatstrings.asp">Standard DateTime Format Strings Web Link</ulink>
+<ulink url="SLRSystem.ToBoolean.html">System.ToBoolean</ulink>
+<ulink url="SLRSystem.ToByte.html">System.ToByte</ulink>
+<ulink url="SLRSystem.ToDate.html">System.ToDate</ulink>
+<ulink url="SLRSystem.ToDateTime.html">System.ToDateTime</ulink>
+<ulink url="SLRSystem.ToDecimal.html">System.ToDecimal</ulink>
+<ulink url="SLRSystem.ToGuid.html">System.ToGuid</ulink>
+<ulink url="SLRSystem.ToInteger.html">System.ToInteger</ulink>
+<ulink url="SLRSystem.ToLong.html">System.ToLong</ulink>
+<ulink url="SLRSystem.ToMoney.html">System.ToMoney</ulink>
+<ulink url="SLRSystem.ToShort.html">System.ToShort</ulink>
+<ulink url="SLRSystem.ToString.html">System.ToString</ulink>
+<ulink url="SLRSystem.ToTimeSpan.html">System.ToTimeSpan</ulink>
+<ulink url="SLRSystem.ToVersionNumber.html">System.ToVersionNumber</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

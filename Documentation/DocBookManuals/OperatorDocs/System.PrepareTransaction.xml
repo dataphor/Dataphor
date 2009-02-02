@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 11:22:17</date> 
+	 </sect2info> 
+	 <title>System.PrepareTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator prepares the transaction for for the final commit in a
+		  transaction. Executing the <symbol>PrepareTransaction</symbol> operator checks
+		  all of the integrity constraints and ensures that everything is ready in this
+		  transaction to commit.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	BeginTransaction();
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.First();
+	TempCursor.Next();
+	TempCursor.Insert( row { 10 ID, "Juan" Name});
+	PrepareTransaction();
+	RollbackTransaction();
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginTransaction.html">System.BeginTransaction</ulink>
+<ulink url="DDGP2TransactionManager.html">Transaction Manager</ulink>
+<ulink url="DDGP2TransactionManagement.html">Transaction Management</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

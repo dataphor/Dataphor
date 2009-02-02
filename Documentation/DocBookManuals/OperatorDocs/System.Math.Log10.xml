@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 14:52:59</date>
+	 </sect2info>
+	 <title>System.Math.Log10</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns the common logarithm (base 10) of the specified number. The
+		  number that is returned is the number that if 10 was raised to that power would
+		  result in the specified number.
+		  <informalexample> 
+				<para><emphasis>10<superscript>3</superscript> =
+					 1000</emphasis></para> 
+		  </informalexample></para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add { Math.Log10(1000) log };</programlisting> 
+		  <programlisting>log 
+--- 
+3</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Math.Log10.html">System.Math.Log10</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

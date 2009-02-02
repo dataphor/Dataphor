@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 09:34:32</date> 
+	 </sect2info> 
+	 <title>System.UserID</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.VersionNumber
+{
+	representation VersionNumber
+	{
+		Major : System.Integer,
+		Minor : System.Integer,
+		Revision : System.Integer,
+		Build : System.Integer
+	}selector  class "System.VersionNumberSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.VersionNumberAsStringSelectorNode"
+} class "System.VersionNumberConveyor" static tags { Storage.Length = "14", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>VersionNumber</symbol> is the selector for the
+		  <symbol>VersionNumber</symbol> Datatype.</para> 
+	 <para>One demonstrated use of <symbol>VersionNumber</symbol> is in the
+		  libraries of Dataphor. The version of a library is specified using the
+		  <symbol>VersionNumber</symbol> data type. By default, the version of a library
+		  is the special value <symbol>VersionNumberUndefined</symbol>. When a library is
+		  referenced as a dependency by another library, the version number may also be
+		  specified, allowing libraries to require not only other libraries, but specific
+		  versions of those libraries. The notion of version compatibility is used to
+		  allow library references to target any granularity of the version number
+		  desired. For example, a library could reference version 2.0.* of the System
+		  library, meaning that the library is compatible with any System library that
+		  has major version 2, and minor version 0.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select VersionNumberUndefined();
+select VersionNumber(2,0,15,9);</programlisting> 
+		  <programlisting>*
+2.3.4.5</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="SLRSystem.ToVersionNumber.html">System.ToVersionNumber</ulink>
+<ulink url="SLRSystem.IsUndefined.html">System.IsUndefined</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

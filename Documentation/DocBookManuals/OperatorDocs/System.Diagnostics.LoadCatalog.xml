@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:41:45</date> 
+	 </sect2info> 
+	 <title>System.Diagnostics.LoadCatalog</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator loads the system catalog from the file specified. If no
+		  file is specified then the catalog will be loaded from the file specified in
+		  the server properties. This Operator can only be used by the Admin users. The
+		  operator runs the system catalog script on the system process.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>SaveCatalog();</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Server.html">Server</ulink>
+<ulink url="SLRSystem.Diagnostics.SaveCatalog.html">System.Diagnostics.SaveCatalog</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:43:56</date> 
+	 </sect2info> 
+	 <title>System.Decimal</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Decimal
+{
+	representation Decimal
+	{
+		Value : System.Decimal
+	}selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.DecimalAsStringSelectorNode"
+} class "System.DecimalConveyor" static tags { Catalog.Comment = "System Binary Coded Decimal", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType
+		  <symbol>Decimal</symbol>.</para> 
+	 <para><symbol>System.Decimal</symbol> is the set of all possible numbers.
+		  Values of this domain are represented physically by a 96-bit signed scaled
+		  integer, so in practice, the available values are negative
+		  79,228,162,514,264,337,593,543,950,335 (-2<superscript>96</superscript>-1)
+		  through positive 79,228,162,514,264,337,593,543,950,335
+		  (2<superscript>96</superscript>-1).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Decimal(17);</programlisting> 
+		  <programlisting>17</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGParserLiterals.html">Parser Literals</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToDecimal.html">System.ToDecimal</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

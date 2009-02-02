@@ -1,0 +1,351 @@
+<?xml version="1.0"?>
+<?DocLib D4ExpressionBlock * TableDee add { "DR" BookName, "Security" LibraryName } add { BookName + LibraryName + "Library" ChapterID }?>
+<chapter id="DocLib:D4Field_ChapterID"> 
+	 <chapterinfo><date role="LastMod">Wednesday, August 25, 2004
+				14:33:43</date> 
+	 </chapterinfo> 
+	 <title> 
+		  <indexterm><primary><?DocLib D4Field LibraryName?></primary><secondary>Libraries</secondary></indexterm>
+		  
+		  <indexterm><primary><?DocLib D4Field LibraryName?>
+					 Library</primary></indexterm> 
+		  <indexterm><primary>Libraries</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+		  <?DocLib D4Field LibraryName?> </title> 
+	 <para>This chapter provides reference material for working with and
+		  understanding the Dataphor <?DocLib D4Field LibraryName?> Library.</para> <?DocLib D4ExpressionBlock * TableDee add { ABookName BookName, ALibraryName LibraryName } add { BookName + LibraryName + "-Definition" DefinitionID};ABookName=BookName;ALibraryName=LibraryName?>
+	 <sect1 id="DocLib:D4Field_DefinitionID"> 
+		  <title> 
+				<indexterm><primary><?DocLib D4Field LibraryName?>
+						  Library</primary><secondary>Definition</secondary></indexterm>
+				
+				<indexterm><primary>Definitions</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+				Definition </title> 
+		  <para>The following information describes the definition of the <?DocLib D4Field LibraryName?>
+				library.</para> <?DocLib D4ExpressionBlock * Libraries where Name=ALibraryName;ALibraryName=LibraryName?>
+		  <formalpara> 
+				<title>Version</title> 
+				<para><?DocLib D4Field Version?></para> 
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryRequisites where Library_Name=ALibraryName;ALibraryName=LibraryName?>
+		  <formalpara> 
+				<title>Requisites</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry> 
+										  <entry colname="col2">Version</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field Required_Library_Name?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field Required_Library_Version?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryFiles where Library_Name = ALibraryName;ALibraryName=LibraryName?>
+		  <formalpara> 
+				<title><?DocLib D4Field LibraryName?> Files</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry><entry
+										  colname="col2">Is Assembly</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field FileName?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field IsAssembly?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara>
+<!--		  <bridgehead renderas="sect4">See Also</bridgehead> 
+		  <para><?xm-replace_text {para}?></para>
+-->
+<?DocLib D4ExpressionBlock member RegisteredAssemblies where Library_Name = ALibraryName over { Name } add { Name.SubString(0, Name.IndexOf(",")) SimpleName, ABookName BookName, ALibraryName LibraryName } add { BookName + LibraryName + "Library-RegisteredAssemblies" AssembliesID};ABookName=BookName;ALibraryName=LibraryName?>
+		  <sect2 id="DocLib:D4Field_AssembliesID"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Registered
+								Assemblies</secondary></indexterm> Registered Assemblies </title> 
+				<para>The following lists the assemblies registered in the <?DocLib D4Field LibraryName?>
+					 Library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </sect2> <?DocLib D4ExpressionBlock member RegisteredClasses where Library_Name = ALibraryName add { Name.SubString(Name.IndexOf('.') + 1) SimpleName, ABookName BookName, ALibraryName LibraryName } add { BookName + LibraryName + "Library-RegisteredClases" ClassesID};ABookName=BookName;ALibraryName=LibraryName?>
+		  <sect2 id="DocLib:D4Field_ClassesID"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Registered
+								Classes</secondary></indexterm> Registered Classes </title> 
+				<para>The following lists the classes registered in the <?DocLib D4Field Name?>
+					 library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </sect2> 
+	 </sect1>
+	<!-- the below assumes a documentation database where the ObjectDocumentation table exists... -->
+<!--DocLib D4ExpressionIf TableDee add{ Count(Objects join ObjectDocumentation where Objects.Name = ALibraryName and (TextType = "DocSettings" or TextType = "DocConnectivity" or TextType = "DocExample") ) > 0 Result, ALbraryName LibraryName, ABookName BookName };ALibraryName=LibraryName;ABookName=BookName-->
+<?DocLib D4ExpressionIf TableDee add { 'False' Result} ?>
+<?DocLib D4ExpressionBlock * TableDee add { ABookName BookName, ALibraryName LibraryName, ABookName + ALibraryName + 'Library-Documentation' SettingsID, ABookName + ALibraryName + 'Library-Connectivity' ConnectivityID, ABookName + ALibraryName + 'Library-Translation' TranslationID, ABookName + ALibraryName + 'Library-Example' ExampleID };ABookName=BookName;ALibraryName=LibraryName?>
+	 <sect1 id="DocLib:D4Field_SettingsID"> 
+		  <title>Documentation</title>
+		<!--This contains all the human-written documentation-->
+		  <para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  <sect2 id="DRSecurityLibrary-Settings"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Settings</secondary></indexterm>
+					 
+					 <indexterm><primary>Settings</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Settings </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </sect2> 
+		  <sect2 id="DocLib:D4Field_ConnectivityID"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Connectivity</secondary></indexterm>
+					 
+					 <indexterm><primary>Connectivity</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Connectivity </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </sect2> 
+		  <sect2 id="DocLib:D4Field_TranslationID"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Translation</secondary></indexterm>
+					 
+					 <indexterm><primary>Translations</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Translation </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </sect2> 
+		  <sect2 id="DocLib:D4Field_ExampleID"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Example</secondary></indexterm>
+					 
+					 <indexterm><primary>Examples</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Example </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </sect2> 
+	 </sect1> <?DocLib D4ExpressionIf TableDee add{  'False' Result } ?>
+	 <sect1 id="DRSecurityLibrary-Schema"> 
+		  <title> 
+				<indexterm><primary><?DocLib D4Field LibraryName?>
+						  Library</primary><secondary>Schema</secondary></indexterm> 
+				<indexterm><primary>Schema</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+				Schema </title>
+		<!--This contains forms and everything else extracted from the catalog-->
+		  <para>The following sections list the schema elements defined in the <?DocLib D4Field LibraryName?>
+				library.</para> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = ALibraryName and Type_ID = 'dfd';ALbraryName=LibraryName?>
+		  <sect2 id="DRSecurityLibrary-Schema-Forms"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Forms</secondary></indexterm>
+					 
+					 <indexterm><primary>Forms</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Forms </title> 
+				<para>The following lists the forms defined in the <?DocLib D4Field LibraryName?>
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = ALibraryName and Type_ID = 'dfdx';ALibraryName=LibraryName?>
+		  <sect2 id="DRSecurityLibrary-Schema-CustomizedForms"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Customized
+								Forms</secondary></indexterm> 
+					 <indexterm><primary>Customized Forms</primary><secondary><?DocLib D4Field LibraryName?></secondary></indexterm>
+					 Customized Forms </title> 
+				<para>The following lists the forms defined in the <?DocLib D4Field LibraryName?>
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> <?DocLib D4ExpressionBlock listitem Roles where (ALibraryName + '.').Pos(Name) = 0;ALibraryName=LibraryName?>
+		  <sect2 id="DRSecurityLibrary-Schema-Roles"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field Name?>
+								Library</primary><secondary>Roles</secondary></indexterm>
+					 
+					 <indexterm><primary>Roles</primary><secondary><?DocLib D4Field Name?></secondary></indexterm>
+					 Roles </title> 
+				<para>The following lists the roles defined in the <?DocLib D4Field Name?>
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> <?DocLib D4ExpressionBlock listitem Devices where (ALibraryName + '.').Pos(Name) = 0?>
+		  <sect2 id="DRSecurityLibrary-Schema-Devices"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field Name?>
+								Library</primary><secondary>Devices</secondary></indexterm>
+					 
+					 <indexterm><primary>Devices</primary><secondary><?DocLib D4Field Name?></secondary></indexterm>
+					 Devices </title> 
+				<para>The following lists the devices defined in the <?DocLib D4Field Name?>
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> <?DocLib D4ExpressionBlock sect3 ScalarTypes where Name.StartsWith(ALibraryName + ".") add { ObjectMetaData(Name, "Catalog.Comment", System.String(Name)) Comment, Name.SubString(Name.IndexOf('.') + 1) SimpleName, ALibraryName LibraryName, ABookName BookName };ALibraryName=LibraryName;ABookName=BookName?>
+		  <sect2 id="DRSecurityLibrary-Schema-Types"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field Name?>
+								Library</primary><secondary>Types</secondary></indexterm>
+					 
+					 <indexterm><primary>Types</primary><secondary><?DocLib D4Field Name?></secondary></indexterm>
+					 Types </title> 
+				<para>The following sections describe the types declared in the
+					 System Library.</para> 
+				<sect3> 
+					 <title> 
+						  <indexterm><primary><?DocLib D4Field Name?>
+									 Library</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm>
+						  
+						  <indexterm><primary><?DocLib D4Field Name?></primary></indexterm>
+						  
+						  <indexterm><primary>Types</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm>
+						  Type: <?DocLib D4Field SimpleName?>
+					 </title> 
+					 <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+					 
+					 <para><?DocLib D4Field Comment?></para> 
+				</sect3> 
+		  </sect2>
+		<!--The following DocLib instruction includes the whole section level data of the System Operators-->
+<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SecurityOperators.xml?>
+<?DocLib D4ExpressionBlock sect3 TableVars over { Name } where LibraryName(Name) = ALibraryName add { Name.SubString(Name.IndexOf('.') + 1) SimpleName, ALibraryName LibraryName  } add { ABookName + ALibraryName + 'Table' + SimpleName DocID };ABookName=BookName;ALibraryName=LibraryName?>
+		  <sect2 id="DRSecurityLibrary-Schema-Tables"> 
+				<title> 
+					 <indexterm><primary><?DocLib D4Field LibraryName?>
+								Library</primary><secondary>Tables</secondary></indexterm>
+					 Tables </title> 
+				<para>The following sections describe the tables declared in the <?DocLib D4Field LibraryName?>
+					 Library.</para> 
+				<sect3 id="DocLib:D4Field_DocID"> 
+					 <title> 
+						  <indexterm><primary><?DocLib D4Field Name?>
+									 Library</primary><secondary><?DocLib D4Field Name?></secondary></indexterm>
+						  
+						  <indexterm><primary><?DocLib D4Field Name?></primary></indexterm>
+						  
+						  <indexterm><primary>Tables</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm><?DocLib
+						  D4Field SimpleName?></title> 
+					 <para></para> <!--jimh--><?DocLib D4ExpressionBlock row TableVarColumns where TableVar_Name = ATableName add {  DataType_Name.SubString(DataType_Name.IndexOf('.') + 1) SimpleTypeName };ATableName=Name?>
+					 <formalpara> 
+						  <title>Columns</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="3">
+										  <colspec colnum="1" colname="col1" colwidth="45*"/>
+										  <colspec colnum="2" colname="col2" colwidth="17*"/>
+										  <colspec colnum="3" colname="col3" colwidth="38*"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Name</entry> 
+													 <entry colname="col2">Type</entry> 
+													 <entry
+													  colname="col3">Description</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry colname="col1"><?DocLib D4Field Name?></entry>
+													 
+													 <entry colname="col2"><?DocLib D4Field SimpleTypeName?></entry>
+													 
+													 <entry colname="col3"><?DocLib D4ExtDoc Text external DropTags="" CatalogObjectText where Object_ID = AObjectID....;AObjectID=... ?></entry>
+													 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable></para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem TableVarKeys where TableVar_Name = ATableName over { Name, Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Keys</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem TableVarOrders where TableVar_Name = ATableName over { Name, Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Orders</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem TableVarConstraints where not(IsGenerated(Object_ID)) and TableVar_Name = ATableName over { Name, Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Constraints</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock row References where Source_TableVar_Name = ATableName over { Name, Target_TableVar_Name, Source_IsUnique };ATableName=Name?>
+					 <formalpara> 
+						  <title>References</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="2">
+										  <colspec colnum="1" colname="col1" colwidth="*"/>
+										  <colspec colnum="2" colname="col2" colwidth="*"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Name</entry> 
+													 <entry colname="col2">Target</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry colname="col1"><?DocLib D4Field Name?></entry>
+													 
+													 <entry colname="col2"><?DocLib D4Field Target_TableVar_Name?></entry>
+													 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </formalpara> 
+				</sect3> 
+		  </sect2> 
+	 </sect1>
+</chapter>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 15:14:36</date>
+	 </sect2info>
+	 <title>System.Min</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is an aggregate operator that returns the smallest
+		  value in the specified expression. If there are no rows then the operator will
+		  return the largest possible value for the particular datatype.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select Employee group add { Min(Name) MinName };</programlisting> 
+		  <programlisting>MinName 
+------- 
+Jake</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="D4LGMin.html">Min</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

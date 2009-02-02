@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:54:41</date> 
+	 </sect2info> 
+	 <title>System.Last</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator moves the specified cursor to the last row of the
+		  current dataset. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var Output : String := "";
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.Last();
+	TempCursor.Prior();
+	while not TempCursor.BOF() do
+	begin
+		Output := Output + String.Unicode({13})+ Name from TempCursor.Select();
+		TempCursor.Prior();
+	end;
+	raise Error(Output + Unicode({13}));
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Cursor Operators</ulink>
+<ulink url="DDGP2Navigable.html">Cursor Capabilities, Navigable</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

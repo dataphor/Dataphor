@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:30:09</date> 
+	 </sect2info> 
+	 <title>iAdorn</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>adorn</symbol> is the parser recognized symbol for this
+		  operator. <symbol>adorn</symbol> may apply any column definition to any column
+		  in a view. This includes adding to, modifying, or overriding the column
+		  definitions that may exist on the columns of the underlying tables. The
+		  underlying tables are not affected by the use of adorn.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create view TempView SomeTable adorn { ID { default 0 } } ;
+// changes the default to zero regardless of what the default is on the base table. </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGAdorn.html">Adorn</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 11:10:01</date> 
+	 </sect2info> 
+	 <title>System.RevokeRightFromUser</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator revokes the specified <symbol>Right</symbol> from the
+		  specified <symbol>User</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateRole("SoftwareDeveloper");
+CreateUser("JS1", "John Smith", "Password");
+AddUserToRole("JS1", "SoftwareDeveloper");
+
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+select UserHasRight("JS1", "AddProgram");
+
+RevokeRightFromUser("AddProgram", "JS1");
+select UserHasRight("JS1", "AddProgram");select RoleRightAssignments where Right_Name = "AddProgram";
+select UserRightAssignments where User_ID = "JS1";
+DropUser("JS1");
+DropRole("SoftwareDeveloper");
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>true
+false
+
+Role_Name              Right_Name Granted
+---------------------- ---------- -------
+Docs.SoftwareDeveloper AddProgram True
+
+User_ID Right_Name Granted 
+------- ---------- ------- 
+JS1     AddProgram False </programlisting> 
+		  <para>Note in this example, without the <symbol>Revoke</symbol> the
+				user JS1 would have the AddProgram <symbol>Right</symbol> since he is a member
+				of the SoftwareDeveloper <symbol>Role</symbol>.</para> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.RevertRightForUser.html">System.RevertRightForUser</ulink> 
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

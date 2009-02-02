@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 27, 2004 10:56:36</date> 
+	 </sect2info> 
+	 <title>System.CreateGenerators</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator creates the Generators table and creates the
+		  GetNextGenerator operator.
+		  <programlisting>create operator CreateGenerators()
+ begin
+  Execute
+  (
+   "
+    create table Generators
+    {
+     ID : String { constraint IsValid value.Length() &lt;= 50 } tags { Storage.Length = '50' },
+     NextKey : Integer,
+     key { ID }
+    } tags { DAE.ShouldTranslate = 'false' };
+
+    create operator GetNextGenerator(const AID : String) : Integer
+    begin
+     update Generators set { NextKey := NextKey + 1 } where ID = AID;
+     if not exists (Generators where ID = AID) then
+      insert table { row { AID ID, 2 NextKey } } into Generators;
+     result := (NextKey from row from (Generators where ID = AID)) - 1;
+     end tags { DAE.ShouldTranslate = 'false' };
+
+     grant usage on GetNextGenerator(String) to role System.User;
+   "
+  );
+ end;</programlisting></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateGenerators();</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.EnsureGenerators.html">System.EnsureGenerators</ulink>
+<ulink url="D4LGUsingGenerators.html">Using Generators</ulink>
+<ulink url="D4LGUsingEventHandlers.html">Using Event Handlers, Examples</ulink>
+<ulink url="D4LGExamples1.html">Tables, Examples</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

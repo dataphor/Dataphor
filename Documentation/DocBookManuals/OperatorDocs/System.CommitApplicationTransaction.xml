@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:39:37</date> 
+	 </sect2info> 
+	 <title>System.CommitApplicationTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Commits all that has occurred since the beginning of the current
+		  application transaction. For more information about application transactions,
+		  see the corresponding entry in the Dataphor Developers guide.</para> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.CommitTransaction.html">System.CommitTransaction</ulink>
+<ulink url="SLRSystem.BeginApplicationTransaction.html">System.BeginApplicationTransaction</ulink>
+<ulink url="SLRSystem.JoinApplicationTransaction.html">System.JoinApplicationTransaction</ulink>
+<ulink url="SLRSystem.PrepareApplicationTransaction.html">System.PrepareApplicationTransaction</ulink>
+<ulink url="SLRSystem.RollbackApplicationTransaction.html">System.RollbackApplicationTransaction</ulink>
+<ulink url="DDGP1TransactionManagement.html">DBM Concepts Transaction Management</ulink>
+<ulink url="DDGApplicationTransactions.html">DAE Application Transactions</ulink>
+<ulink url="DDGP2ApplicationTransactions.html">Application Transactions Processes</ulink>
+<ulink url="DDGP2TransactionManagement.html">Device Session Transaction Management</ulink>
+<ulink url="DDGP2TransactionalCallProtocol.html">Transaction Call Protocol</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

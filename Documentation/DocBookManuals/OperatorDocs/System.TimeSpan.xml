@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:49:18</date> 
+	 </sect2info> 
+	 <title>System.TimeSpan</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.TimeSpan
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	}selector  class "System.SystemTimeSpanTicksSelectorNode", 
+	representation Milliseconds
+	{
+		Milliseconds : System.Decimal
+	}selector  class "System.SystemTimeSpanMillisecondsSelectorNode", 
+	representation Seconds
+	{
+		Seconds : System.Decimal
+	}selector  class "System.SystemTimeSpanSecondsSelectorNode", 
+	representation Minutes
+	{
+		Minutes : System.Decimal
+	}selector  class "System.SystemTimeSpanMinutesSelectorNode", 
+	representation Hours
+	{
+		Hours : System.Decimal
+	}selector  class "System.SystemTimeSpanHoursSelectorNode", 
+	representation Days
+	{
+		Days : System.Decimal
+	}selector  class "System.SystemTimeSpanDaysSelectorNode", 
+	representation TimeSpan
+	{
+		Day : System.Integer,
+		Hour : System.Integer,
+		Minute : System.Integer,
+		Second : System.Integer,
+		Millisecond : System.Decimal
+	}selector  class "System.SystemTimeSpanTimeSpanMillisecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.TimeSpanAsStringSelectorNode"
+} class "System.TimeSpanConveyor" static tags { Catalog.Comment = "System Time Span", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>TimeSpan</symbol> is an operator and the selector for the
+		  <symbol>TimeSpan</symbol> Datatype.</para> 
+	 <para>The <symbol>TimeSpan</symbol> operator can accept one to five
+		  integers representing days, hours, minutes, seconds, and milliseconds. It will
+		  return a <symbol>TimeSpan</symbol> Datetype.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>// What will the date be two weeks (14 days) from now?
+select Date() + TimeSpan(14);
+
+// What was the time (UTC) between Pearl Harbor bombing
+// and cease fire order after Japan's surrender?
+// Returned as a <symbol>TimeSpan</symbol>
+select Date(1945,8,15,23,5) - Date(1941,12,7,17,58);</programlisting> 
+		  <programlisting>2004-05-07 00:00:00
+
+192wks 3days 5hrs 7min</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.TimeSpan.html">System.TimeSpan</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+<ulink url="SLRSystem.ToTimeSpan.html">System.ToTimeSpan</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

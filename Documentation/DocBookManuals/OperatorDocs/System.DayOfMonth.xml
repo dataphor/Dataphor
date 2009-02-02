@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 20, 2004 09:33:43</date> 
+	 </sect2info> 
+	 <title>System.DayOfMonth</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns an Integer from 0 to 31 representing the day of
+		  the month.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { DateTime(2004,04,19).DayOfMonth() Date;</programlisting> 
+		  <programlisting>Date
+----
+19</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="SLRSystem.DayOfWeek.html">System.DayOfWeek</ulink>
+<ulink url="SLRSystem.DayOfYear.html">System.DayOfYear</ulink>
+<ulink url="SLRSystem.DaysInMonth.html">System.DaysInMonth</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:43:26</date> 
+	 </sect2info> 
+	 <title>System.DateTime</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.DateTime
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	}selector  class "System.SystemDateTimeTicksSelectorNode", 
+	representation DateTime
+	{
+		Year : System.Integer, 
+		Month : System.Integer, 
+		Day : System.Integer, 
+		Hour : System.Integer, 
+		Minute : System.Integer, 
+		Second : System.Integer
+	}selector  class "System.SystemDateTimeDateTimeSecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.DateTimeAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Date Time", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>DateTime</symbol> is a selector for the
+		  <symbol>DateTime</symbol> Datatype and an operator.</para> 
+	 <para><symbol>System.DateTime</symbol> is the set of all possible dates, or
+		  times from a fixed point. The physical representation for this type is a 64-bit
+		  signed integer representing the number of ticks since 12:00 midnight, January
+		  1, 1 C.E. (Common Era) in the Gregorian calendar. This means that the range of
+		  values for this domain is from 12:00:00 midnight, January 1, 0001 C.E. to
+		  11:59:59 P.M., December 31, 9999 C.E.</para> 
+	 <para>The <symbol>DateTime</symbol> operator, with no arguments, returns a
+		  <symbol>DateTime</symbol> type representing the current date and time. Unlike
+		  the <symbol>Date</symbol> operator, this operator returns both the date and
+		  time.</para> 
+	 <para>With integer year, month, day, [hours, minutes, [seconds]] specified,
+		  this operator returns a <symbol>DateTime</symbol> type value representing the
+		  date and time specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select DateTime();
+select DateTime(1998, 11, 22, 10, 15);
+select DateTime.Ticks(631680313950000000);</programlisting> 
+		  <programlisting>2004-04-20 07:25:13
+1998-11-22 10:15:00
+2002-09-19 11:23:15</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.TimeSpan.html">System.TimeSpan</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+<ulink url="SLRSystem.ToDateTime.html">System.ToDateTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

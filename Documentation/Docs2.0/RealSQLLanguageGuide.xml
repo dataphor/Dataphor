@@ -1,0 +1,514 @@
+<?xml version="1.0"?>
+<chapter id="DDGP1RealSQLLanguage"> 
+		  <chapterinfo><date role="LastMod">Wednesday, April 21, 2004 3:38:17 PM</date></chapterinfo><title><indexterm><primary>Real SQL Language
+						  Reference</primary></indexterm>RealSQL Language</title> 
+		  <para>In addition to its native language of D4, the DAE can accept user
+				commands in terms of RealSQL, a dialect of SQL designed specifically for use
+				with the DAE. This chapter provides a detailed description of the RealSQL
+				language.</para> 
+		  <sect1 id="DDGP1Introduction"> 
+				<title><indexterm><primary>Introduction</primary></indexterm><indexterm><primary>Real
+								SQL Language ReferenceRealSQL
+								Language</primary><secondary>Introduction</secondary></indexterm>Introduction</title>
+				
+				<para>RealSQL is only a data manipulation language. Data definition
+					 commands and imperative statements must be issued using D4. The RealSQL
+					 language is designed to allow users familiar with SQL to access data in the DAE
+					 without having to learn a new language. However, unlike traditional SQL,
+					 RealSQL conforms to the same data management principles as D4. For a complete
+					 discussion of these issues see the Data Management Differences section of the
+					 Comparison With SQL in this manual.</para> 
+				<para>This language guide uses a variation of Extended Backus-Naur
+					 Form (EBNF) notation to describe the syntax of RealSQL. For a complete
+					 description of this notation refer to the Syntactic Conventions section of the
+					 D4 Language Guide.</para> 
+				<para>Note that several of the non-terminals appearing in this
+					 grammar are not defined such as <emphasis>qualified identifier</emphasis> and
+					 <emphasis>literal</emphasis>. These non-terminals are borrowed from the D4
+					 grammar, and have the same interpretation.</para> 
+				<para>RealSQL also uses the same lexical analyzer as D4, so the
+					 lexical elements of the two languages are the same. For a complete description
+					 of these elements of RealSQL refer to the Lexical Elements section of the D4
+					 Language Guide.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1ScriptsandExecution"> 
+				<title><indexterm><primary>RealSQL Scripts and
+								Execution</primary></indexterm>Scripts and Execution</title> 
+				<para>A RealSQL script is a sequence of statements to perform a
+					 given task. Statements in the script must be separated by a semi-colon. Note
+					 that the semi-colon in RealSQL is a statement separator, not a statement
+					 terminator. Scripts in RealSQL have the following syntax: 
+					 <programlisting>&lt;script&gt; ::=
+	&lt;statement&gt;{; &lt;statement&gt;}</programlisting></para> 
+				<para>All statements in a RealSQL script are compiled into the same
+					 batch for execution.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1Statements"> 
+				<title><indexterm><primary>RealSQL</primary><secondary>Statements</secondary></indexterm>Statements</title>
+				
+				<para>The only statements available in RealSQL are data
+					 manipulation language statements such as select and insert, and operator
+					 invocations. RealSQL does not support any imperative constructs such as
+					 variable declaration or flow control. Statements of RealSQL have the following
+					 syntax: 
+					 <programlisting>&lt;statement&gt; ::=
+	&lt;select statement&gt; |
+	&lt;insert statement&gt; |
+	&lt;update statement&gt; |
+	&lt;delete statement&gt; |
+	&lt;expression&gt;</programlisting></para> 
+				<sect2 id="DDGP1SelectStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Select
+									 Statement</secondary></indexterm>Select Statement</title> 
+					 <para>Data retrieval in RealSQL is done using the select
+						  statement. This statement describes a result and, optionally, the order in
+						  which that result should be returned. The result to be returned is described
+						  using a <emphasis>query expression</emphasis>, which will be described in the
+						  next section. The order of the result is specified as a list of column
+						  identifiers which are allowed to be either ascending or descending.</para> 
+					 <para>The select statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;select statement&gt; ::=
+	&lt;query expression&gt;
+	[&lt;order by clause&gt;]
+
+&lt;order by clause&gt; ::=
+	order by &lt;order column expression commalist&gt;
+	
+&lt;order column expression&gt; ::=
+	&lt;column identifier&gt; [asc | desc]
+	
+&lt;column identifier&gt; ::=
+	&lt;qualified identifier&gt;</programlisting></para> 
+					 <sect3 id="DDGP1QueryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Query
+										  Expression</secondary></indexterm>Query Expression</title> 
+						  <para>Query expressions in RealSQL are made up of one or
+								more select expressions concatenated using one of the union-compatible table
+								operators union, intersect, or minus.</para> 
+						  <para>The union operator includes rows from both inputs in
+								the result. Note that the union operator has no optional <symbol>all</symbol>
+								keyword because duplicates are always eliminated from results.</para> 
+						  <para>The intersect operator only includes a row in the
+								result if it appears in both inputs.</para> 
+						  <para>The minus operator only includes a row in the result
+								if it appears in the first input and not in the second.</para> 
+						  <para>The query expression in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;query expression&gt; ::=
+	&lt;select expression&gt; [&lt;binary table expression&gt;]
+
+&lt;binary table expression&gt; ::=
+	[union | intersect | minus] &lt;select expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1SelectExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Select
+										  Expression</secondary></indexterm>Select Expression</title> 
+						  <para>Select expressions in RealSQL are made up of several
+								different clauses, each describing a different group of actions to be performed
+								on the result. These different clauses are: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Select Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>From Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Where Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Group By Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Having Clause</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>Each of these clauses will be described in detail in
+								the following sections.</para> 
+						  <para>The select expression in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;select expression&gt; ::=
+	&lt;select clause&gt;
+		&lt;from clause&gt;
+		[&lt;where clause&gt;]
+		[&lt;group by clause&gt;]
+		[&lt;having clause&gt;]</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1SelectClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Select
+										  Clause</secondary></indexterm>Select Clause</title> 
+						  <para>The select clause performs four distinct operations
+								on the result: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Projection</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Extension</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Renaming</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Aggregate Extension</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>The select clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;select clause&gt; ::=
+	select (* | &lt;column expression commalist&gt;)
+
+&lt;column expression&gt; ::=
+	&lt;expression&gt; [as &lt;identifier&gt;]</programlisting></para> 
+						  <para>Projection involves selecting the columns to be
+								included in the result. Note that unlike SQL, the select list includes no
+								optional <symbol>distinct</symbol> keyword to specify duplicate elimination
+								should occur. This is because, like the union operator, duplicates are always
+								eliminated from a result.</para> 
+						  <para>Extension involves adding new columns to the result
+								based on computational expressions. For example, a new column Name could be
+								added based on the concatenation of the existing columns LastName and
+								FirstName. Values for the columns of the row being extended are accessible by
+								name within the expressions defining the new columns.</para> 
+						  <para>Renaming involves changing the name of a column in
+								the result. Renaming does not change the values in the column.</para> 
+						  <para>Aggregate extension involves adding new columns to
+								the result based on computational expressions involving aggregate functions
+								such as <symbol>Count</symbol> and <symbol>Sum</symbol>. If a given select
+								clause includes both aggregate and non-aggregate expressions, the group by
+								clause must be used to specify the non-aggregate expressions. The arguments to
+								the aggregation are allowed to be expressions themselves. Values for the
+								columns of the rows being aggregated are accessible by name within these
+								expressions.</para> 
+					 </sect3> 
+					 <sect3 id="DDGP1FromClause"> 
+						  <title><indexterm><primary>From
+										  Clause</primary></indexterm><indexterm><primary>RealSQLSelect StatementSelect
+										  Statement</primary><secondary>From Clause</secondary></indexterm>From
+								Clause</title> 
+						  <para>The from clause in RealSQL consists of a table
+								specifier followed by any number of join clauses. The table specifier describes
+								the initial result set, and each join clause specifies a join operation to be
+								used to join in additional results.</para> 
+						  <para>The from clause in D4 has the following syntax: 
+								<programlisting>&lt;from clause&gt; ::=
+	from &lt;table specifier&gt; [&lt;join clause list&gt;]
+
+&lt;table specifier&gt; ::=
+	(&lt;table identifier&gt; | "("&lt;query expression&gt;")") [as &lt;table identifier&gt;]
+	
+&lt;table identifier&gt; ::=
+	&lt;identifier&gt;
+
+&lt;join clause&gt; ::=
+	[cross | inner | ((left | right) [outer])] join &lt;table specifier&gt; [on &lt;expression&gt;]</programlisting></para> 
+						  <para>The table specifier is allowed to be a simple table
+								variable reference, or a nested query expression in its own right. The table
+								specifier also includes an optional table alias which can be used to resolve
+								ambiguous column names in the result.</para> 
+						  <para>The join clause specifies the type of join to be
+								performed (cross, inner, or left or right outer), and which columns are to be
+								used in the join. Note that unlike SQL, joins in RealSQL must be equi-joins. In
+								other words, the expression specifying the columns to be joined must consist of
+								one or more column equality comparisons between columns from opposite tables in
+								the join, concatenated with the and operator.</para> 
+						  <para>The cross join computes the cartesian product of the
+								inputs. In other words, for each row of the left table, for each row of the
+								right table, the result will include a row that is the concatenation of both
+								rows.</para> 
+						  <para>The inner join operator includes a row in the result
+								for every row in the left table, for every row in the right table for which the
+								specified join condition evaluates to true.</para> 
+						  <para>The left outer join operator includes a row in the
+								result for every row in the left table, for every row in the right table for
+								which the specified join condition evaluates to true, and includes a row for
+								every row in the left table for which no matching row in the right table is
+								found, with all the columns of the right table set to null.</para> 
+						  <para>The right outer join operator includes a row in the
+								result for every row in the left table, for every row in the right table for
+								which the specified join condition evaluates to true, and includes a row for
+								every row in the right table for which no matching row in the left table is
+								found, with all the columns of the left table set to null.</para> 
+						  <para>Note carefully that the outer join operators are not
+								relational operators. Because the result of an outer join may include rows in
+								which some of the columns have no values, the result is not a relation. For
+								more discussion on this topic, see the discussion for outer join operators in
+								the Table Expressions section of the D4 Language Guide.</para> 
+					 </sect3> 
+					 <sect3 id="DDGP1WhereClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Where
+										  Clause</secondary></indexterm>Where Clause</title> 
+						  <para>The where clause specifies a filter to be applied to
+								the result. Only rows for which the specified condition evaluates to true will
+								be included in the result. Values for the columns of the row being evaluated
+								are accessible by name within the filter expression.</para> 
+						  <para>The where clause in RealSQL has the following syntax:
+								
+								<programlisting>&lt;where clause&gt; ::=
+	where &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1GroupByClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Group
+										  By Clause</secondary></indexterm>Group By Clause</title> 
+						  <para>The group by clause specifies a grouping to be
+								applied to the result. The columns specified in the group clause must include
+								all the non-aggregate columns specified in the select clause.</para> 
+						  <para>The group by clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;group by clause&gt; ::=
+	group by &lt;expression commalist&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1HavingClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Having
+										  Clause</secondary></indexterm>Having Clause</title> 
+						  <para>The having clause specifies a filter to be applied to
+								the result after aggregation has been computed. The specified condition is
+								allowed to reference aggregate expressions. Only rows for which the specified
+								condition evaluates to true will be included in the result. Values for the
+								columns of the row being evaluated are accessible by name within the filter
+								expression.</para> 
+						  <para>The having clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;having clause&gt; ::=
+	having &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+				</sect2> 
+				<sect2 id="DDGP1InsertStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Insert
+									 Statement</secondary></indexterm>Insert Statement</title> 
+					 <para>The insert statement allows data to be inserted into a
+						  table. RealSQL supports two variations of the insert statement, one in which a
+						  single row is specified via the values clause, and one in which the data to be
+						  inserted is described by a query expression. Note that the values clause can be
+						  constructed from arbitrary expressions, unlike the values clause of typical SQL
+						  implementations.</para> 
+					 <para>The insert statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;insert statement&gt; ::=
+	insert into &lt;table identifier&gt;"("&lt;column identifier commalist&gt;")"
+		(&lt;values clause&gt; | &lt;query expression&gt;)
+		
+&lt;values clause&gt; ::=
+	values"("&lt;expression commalist&gt;")"</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1UpdateStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Update
+									 Statement</secondary></indexterm>Update Statement</title> 
+					 <para>The update statement allows the data in existing rows of
+						  a table to be changed. The current values of the row being changed are
+						  accessible by name within the expressions defining the new values. The update
+						  statement includes an optional where clause which specifies the rows for which
+						  the update should occur. Values for the columns of the row being updated are
+						  accessible within the where clause by name. If no where clause is specified,
+						  the update applies to all rows in the table.</para> 
+					 <para>The update statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;update statement&gt; ::=
+	update &lt;table identifier&gt; 
+		set &lt;update column expression commalist&gt;
+		[&lt;where clause&gt;]
+
+&lt;update column expression&gt; ::=
+	&lt;identifier&gt; = &lt;expression&gt;</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1DeleteStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Delete
+									 Statement</secondary></indexterm>Delete Statement</title> 
+					 <para>The delete statement deletes the rows of a table. The
+						  delete statement includes an optional where clause which specifies which rows
+						  should be deleted. Values for the columns of the row being deleted are
+						  accessible within the where clause by name. If no where clause is specified,
+						  the delete applies to all rows in the table.</para> 
+					 <para>The delete statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;delete statement&gt; ::=
+	delete &lt;table identifier&gt;
+		[&lt;where clause&gt;]</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1Expression"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Expressions</secondary></indexterm>Expression</title>
+					 
+					 <para>An expression of RealSQL is a combination of literals,
+						  identifiers, and operators which describe an operation to be performed. The
+						  result of evaluating any given expression is a value of some type. Expressions
+						  may be used anywhere the language requires a value to be specified.</para> 
+					 <para>Expressions in RealSQL have the following syntax: 
+						  <programlisting>&lt;expression&gt; ::=
+	&lt;binary expression&gt; &lt;between clause&gt;</programlisting></para> 
+					 <sect3 id="DDGP1BetweenClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Between
+										  Clause</secondary></indexterm>Between Clause</title> 
+						  <para>The between operator is a ternary operator that
+								returns true if the first operand is between the second and third operands,
+								inclusively. In other words, the expression: 
+								<programlisting>A between B and C</programlisting> is equivalent to the double comparison: 
+								<programlisting>A &gt;= B and A &lt;= C</programlisting></para> 
+						  <para>The between clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;between clause&gt; ::=
+	between &lt;arithmetic expression&gt; and &lt;arithmetic expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1BinaryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Binary
+										  Expression</secondary></indexterm>Binary Expression</title> 
+						  <para>A binary expression consists of two operands
+								separated by one of the built-in binary operators of the language. Operator
+								precedence and associativity in RealSQL is the same as D4. For a description of
+								operator precedence and associativity in D4, as well as a complete description
+								of each built-in operator, refer to the D4 Language Guide.</para> 
+						  <para>Binary expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;binary expression&gt; ::=
+	&lt;arithmetic expression&gt; {&lt;binary operator&gt; &lt;arithmetic expression&gt;}
+
+&lt;binary operator&gt; ::=
+	and | or | xor | like | matches | in
+	^ | &amp; | "|" | "&lt;&lt;" | "&gt;&gt;" |
+	= | "&lt;&gt;" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | ?=</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1ArithmeticExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Arithmetic
+										  Expression</secondary></indexterm>Arithmetic Expression</title> 
+						  <para>An arithmetic expression consists of two operands
+								separataed by one of the built-in arithmetic operators of the langauge. For a
+								complete description of these operators, refer to the D4 Language Guide.</para>
+						  
+						  <para>Arithmetic expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;arithmetic expression&gt; ::=
+	&lt;unary expression&gt; {&lt;arithmetic operator&gt; &lt;unary expression&gt;}
+
+&lt;arithmetic operator&gt; ::=
+	+ | - | * | / | div | mod | **</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1UnaryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Unary
+										  Expression</secondary></indexterm>Unary Expression</title> 
+						  <para>A unary expression consists of one of the built-in
+								unary operators of the language, followed by an operand. For a complete
+								description of these operators, refer to the D4 Language Guide.</para> 
+						  <para>Unary expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;unary expression&gt; ::=
+	{&lt;unary operator&gt;} &lt;qualifier expression&gt;
+	
+&lt;unary operator&gt; ::=
+	+ | - | ~ | not | exists</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1QualifierExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Qualifier
+										  Expression</secondary></indexterm>Qualifier Expression</title> 
+						  <para>A qualifier expression consists of an optional
+								<symbol>.</symbol> followed by an expression qualified as many times as
+								desired. Qualification in RealSQL serves the same purposes as it does in D4,
+								with the addition that in RealSQL it also serves to qualify column names with
+								the appropriate table alias name. For a complete description of the qualifier
+								operator, refer to the D4 Language Guide.</para> 
+						  <para>Qualifier expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;qualifier expression&gt; ::=
+	[.]{&lt;indexer expression&gt;.}&lt;indexer expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1IndexerExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Indexer
+										  Expression</secondary></indexterm>Indexer Expression</title> 
+						  <para>Indexer expressions consist of an expression followed
+								by an indexing clause as many times as desired. Indexing in RealSQL serves the
+								same purposes as it does in D4. For a complete description of the indexer
+								operator, refer to the D4 Language Guide.</para> 
+						  <para>Indexer expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;indexer expression&gt; ::=
+	&lt;factor&gt;{"["&lt;expression&gt;"]"}</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1Factor"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Factor</secondary></indexterm>Factor</title>
+						  
+						  <para>A factor in RealSQL is the basic building block of
+								any expression. It may be a literal, an identifier, an operator invocation, a
+								case expression, or another expression nested within parentheses. Each of these
+								possibilities will be discussed in detail in the following sections.</para> 
+						  <para>Factors in RealSQL have the following syntax: 
+								<programlisting>&lt;factor&gt; ::= 
+	"("&lt;expression&gt;")" |
+	"("&lt;query expression&gt;")" |
+	&lt;literal&gt; |
+	&lt;identifier&gt; |
+	&lt;operator invocation&gt; |
+	&lt;aggregate operator invocation&gt; |
+	&lt;case expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1OperatorInvocation"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Operational
+										  Invocation</secondary></indexterm>Operator Invocation</title> 
+						  <para>An operator invocation in RealSQL consists of the
+								name of the operator to be invoked followed by a comma separated list of
+								arguments to the operator in parentheses. These arguments may be expressions in
+								themselves. Note that unlike D4, operators which take variable arguments may
+								not be invoked, because RealSQL has no imperative mechanism for declaring a
+								variable. Besides this restriction, any operator of D4 which returns a value
+								may be invoked within a RealSQL expression.</para> 
+						  <para>Operator invocations in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;operator invocation&gt; ::=
+	&lt;identifier&gt;"("&lt;expression commalist&gt;")"</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1AggregateOperatorInvocation"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Aggregate
+										  Operator Invocation</secondary></indexterm>Aggregate Operator
+								Invocation</title> 
+						  <para>An aggregate operator invocation in RealSQL consists
+								of the name of the aggregate operator to be invoked followed by the argument to
+								be aggregated in parentheses. The argument may include an optional
+								<symbol>distinct</symbol> specification which indicates that duplicates should
+								be eliminated from the column being aggregated prior to performing the
+								aggregation. RealSQL only supports the following aggregate operators: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Sum</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Min</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Max</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Avg</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Count</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>Aggregate operator invocations in RealSQL have the
+								following syntax: 
+								<programlisting>&lt;aggregate operator invocation&gt; ::=
+	&lt;identifier&gt;"("[distinct] &lt;expression&gt;")"</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1CaseExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Case
+										  Expression</secondary></indexterm>Case Expression</title> 
+						  <para>A case expression in RealSQL allows a particular
+								value to be selected based on the result of evaluating a specified condition or
+								set of conditions. There are two flavors of the case expression, one in which a
+								single expression is used as the comparison target for each case item, and one
+								in which no comparison target is given, rather each case item condition is a
+								boolean comparison in itself. In both versions of the expression, the final
+								unsatisfied condition is given by the else expression, and the results of all
+								case items and the else expression must return values of compatible
+								types.</para> 
+						  <para>Case expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;case expression&gt; ::=
+	case [&lt;expression&gt;]
+		&lt;ne case item expression commalist&gt;
+		else &lt;expression&gt;
+	end
+    
+&lt;case item expression&gt; ::=
+	when &lt;expression&gt; then &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+				</sect2> 
+		  </sect1> 
+	 </chapter>

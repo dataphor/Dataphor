@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:48:23</date> 
+	 </sect2info> 
+	 <title>iShiftRight</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>&gt;&gt;</symbol> is the parser recognized symbol for this
+		  operator is . This operator performs a binary right bit shift on the given
+		  number. It takes the value on the left and shifts it to the right the number of
+		  bits indicated by the right value. Bits shifted off the value are lost. In the
+		  case of unsigned types, the DAE performs a logical shift (i.e. zeroes are
+		  shifted in from the left). In signed types, the DAE performs an arithmetic
+		  right shift (i.e. the most significant bit is copied and shifted in from the
+		  right).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { -1 &gt;&gt; 5 BitShift };
+</programlisting> 
+		  <programlisting>BitShift 
+-------- 
+-1</programlisting> 
+		  <programlisting>select TableDee add { 1048576 &gt;&gt; 10 BitShift };</programlisting> 
+		  <programlisting>BitShift 
+-------- 
+1024</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRiShiftRight.html">iShiftRight (<symbol>&gt;&gt;</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,7 @@
+<sect1 id="Alphora.Dataphor.DAE.Runtime.Instructions"> 
+	 <title>Alphora.Dataphor.DAE.Runtime.Instructions Namespace</title> 
+	 <para>This section Contains information about the two classes that
+		  represent the extensibility of the D4 Runtime Instructions. Descend from 
+		  <classname>InstructionNode</classname> when creating new operators for
+		  D4.</para> &PlanNode;&InstructionNode; 
+</sect1> 

@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 08:32:31</date> 
+	 </sect2info> 
+	 <title>System.RevertRightForGroup</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator removes any reference (Grant or Revoke) to the
+		  specified <symbol>Right</symbol> from the specified
+		  <symbol>Group</symbol>.</para>
+	 <para>If ApplyRecursively is set to true, any reference to the
+		  <symbol>Right</symbol> will be removed from all child (subordinate)
+		  groups.</para> 
+	 <para>If IncludeUsers is set to true, all users in the group (and child
+		  (subordinate) groups if recursing) will have any reference to the
+		  <symbol>Right</symbol> removed.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateGroup("Developers", "User");
+
+GrantRightToGroup("AddProgram", "Developers");
+select GroupHasRight("Developers", "AddProgram");
+
+RevertRightForGroup("AddProgram", "Developers");
+select GroupHasRight("Developers", "AddProgram");
+
+DropGroup("Developers");
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>true
+false</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.GrantRightToGroup.html">System.GrantRightToGroup</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+<ulink url="SLRSystem.RevokeRightFromGroup.html">System.RevokeRightFromGroup</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

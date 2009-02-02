@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 12:42:23</date> 
+	 </sect2info> 
+	 <title>System.Reset</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator resets the current cursor. <symbol>reset</symbol>
+		  closes and reopens the cursor. The resultant cursor after a call to
+		  <symbol>refresh</symbol> is always dynamic, even if the cursor was initially
+		  static. The <symbol>refresh</symbol> operator also performs a
+		  <symbol>FindNearest</symbol> on the cursor in addition to performing a reset.
+		  </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmployeeCursor : cursor( table { ID : Integer, Name : String });
+	EmployeeCursor := cursor(Employee);
+	var NewRow : row { ID : Integer, Name : String };	NewRow := row { 11 ID, "Jose" Name};	insert table { NewRow } into Employee;
+	EmployeeCursor.Reset();
+	EmployeeCursor.FindKey(row { 11 ID } );
+	raise Error("The current row is: " + (Name from EmployeeCursor.Select() ) );
+end;</programlisting> 
+		  <programlisting>The current row is: Jose</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Refresh.html">System.Refresh</ulink>
+<ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Navigable.html">Cursor Capabilities, Navigable</ulink>
+<ulink url="DDGP2Static.html">Cursor Type, Static</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,587 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="DocBookx.css"?>
+<!DOCTYPE set PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "docbookx.dtd" [
+	 <!ENTITY ADO.NetTutorial SYSTEM "ADO.NETTutorial.xml">
+	 <!ENTITY ADONETProvider SYSTEM "AdoNetProvider.xml">
+	 <!ENTITY AlphoraDataphor SYSTEM "Base.xml">
+	 <!ENTITY BOP SYSTEM "BOP.xml">
+	 <!ENTITY CatalogReference SYSTEM "CatalogReference.xml">
+	 <!ENTITY D4LanguageGuide SYSTEM "D4LanguageGuide.xml">
+	 <!ENTITY D4LexerBNF SYSTEM "D4LexerBNF.xml">
+	 <!ENTITY D4ParserBNF SYSTEM "D4ParserBNF.xml">
+	 <!ENTITY DACDevGuide SYSTEM "DACDevGuide.xml">
+	 <!ENTITY DACDevPart1Using SYSTEM "DACDevP1UsingtheDAC.xml">
+	 <!ENTITY DACDevPart2Extending SYSTEM "DACDevP2ExtendingTheDAC.xml">
+	 <!ENTITY DACDevPreface SYSTEM "DACDevIntroduction.xml">
+	 <!ENTITY DAE SYSTEM "DAE.xml">
+	 <!ENTITY DAEClient SYSTEM "DaeClient.xml">
+	 <!ENTITY DAEClientControls SYSTEM "DaeClientControls.xml">
+	 <!ENTITY DAEClientDB2 SYSTEM "DaeClientDB2.xml">
+	 <!ENTITY DAEClientLinter SYSTEM "DaeClientLinter.xml">
+	 <!ENTITY DAEClientMSSQL SYSTEM "DAEClientMSSQL.xml">
+	 <!ENTITY DAEClientOracle SYSTEM "DaeClientOracle.xml">
+	 <!ENTITY DAEClientProvider SYSTEM "DaeClientProvider.xml">
+	 <!ENTITY DAEDevGuideIntro SYSTEM "DAEDevGuideIntro.xml">
+	 <!ENTITY DAEDevGuidePartI SYSTEM "DAEDevGuidePartI.xml">
+	 <!ENTITY DAEDevGuidePartII SYSTEM "DAEDevGuidePartII.xml">
+	 <!ENTITY DAEDevGuidePartIII SYSTEM "DaeDevGuidePartIII.xml">
+	 <!ENTITY DAEDevice SYSTEM "DaeDevice.xml">
+	 <!ENTITY DAELanguage SYSTEM "DaeLanguage.xml">
+	 <!ENTITY DAELanguageD4 SYSTEM "DaeLanguageD4.xml">
+	 <!ENTITY DAERuntime SYSTEM "Runtime.xml">
+	 <!ENTITY DAERuntimeData SYSTEM "RuntimeData.xml">
+	 <!ENTITY DAERuntimeInstructions SYSTEM "RuntimeInstructions.xml">
+	 <!ENTITY DAESchema SYSTEM "DAESchema.xml">
+	 <!ENTITY DAEServer SYSTEM "DaeServer.xml">
+	 <!ENTITY DAEStreams SYSTEM "Streams.xml">
+	 <!ENTITY DILReference SYSTEM "DilReference.xml">
+	 <!ENTITY DataphorFileStructures SYSTEM "DataphorFileStructures.xml">
+	 <!ENTITY DerivationReference SYSTEM "DerivationReference.xml">
+	 <!ENTITY Device.SQL SYSTEM "DeviceSQL.xml">
+	 <!ENTITY DeviceDB2 SYSTEM "DeviceDB2.xml">
+	 <!ENTITY DeviceLinter SYSTEM "DeviceLinter.xml">
+	 <!ENTITY DeviceMSSQL SYSTEM "DeviceMSSQL.xml">
+	 <!ENTITY DeviceMemory SYSTEM "DeviceMemory.xml">
+	 <!ENTITY DeviceOracle SYSTEM "DeviceOracle.xml">
+	 <!ENTITY FrontendClient SYSTEM "FrontendClient.xml">
+	 <!ENTITY FrontendClientReporting SYSTEM "FrontendClientReporting.xml">
+	 <!ENTITY FrontendClientWeb SYSTEM "FrontendClientWeb.xml">
+	 <!ENTITY FrontendClientWindows SYSTEM "FrontendClientWindows.xml">
+	 <!ENTITY FrontendDevGuideIntro SYSTEM "FrontendDevGuideIntro.xml">
+	 <!ENTITY FrontendDevGuidePartI SYSTEM "FrontendDevGuidePartI.xml">
+	 <!ENTITY FrontendDevGuidePartII SYSTEM "FrontendDevGuidePartII.xml">
+	 <!ENTITY FrontendDevGuidePartIII SYSTEM "FrontendDevGuidePartIII.xml">
+	 <!ENTITY FrontendServer SYSTEM "FrontendServer.xml">
+	 <!ENTITY FrontendServerRequestTypes SYSTEM "FrontendServerRequestTypes.xml">
+	 <!ENTITY Glossary SYSTEM "DataphorGlossary.xml">
+	 <!ENTITY InstructionNode SYSTEM "InstructionNode.xml">
+	 <!ENTITY LanguageDB2 SYSTEM "LanguageDB2.xml">
+	 <!ENTITY LanguageOracle SYSTEM "LanguageOracle.xml">
+	 <!ENTITY LanguageSQL SYSTEM "LanguageSQL.xml">
+	 <!ENTITY LanguageTSQL SYSTEM "LanguageTSQL.xml">
+	 <!ENTITY PlanNode SYSTEM "PlanNode.xml">
+	 <!ENTITY RealSQL SYSTEM "RealSQL.xml">
+	 <!ENTITY RealSQLBNF SYSTEM "RealSQLBNF.xml">
+	 <!ENTITY RentalTutorial SYSTEM "RetalTutorial.xml">
+	 <!ENTITY SystemLibraryReference SYSTEM "SystemLibrary.xml">
+	 <!ENTITY SystemTables SYSTEM "SystemTables.xml">
+	 <!ENTITY UsersGuideIntro SYSTEM "UsersGuideIntro.xml">
+	 <!ENTITY UsersGuidePartI SYSTEM "UsersGuidePartI.xml">
+	 <!ENTITY UsersGuidePartII SYSTEM "UsersGuidePartII.xml">
+	 <!ENTITY UsersGuidePartIII SYSTEM "UsersGuidePartIII.xml">
+	 <!ENTITY VS.NetComponentsTutorial SYSTEM "VS.NETComponentsTutorial.xml">
+]>
+<set id="DataphorCombinedHelp"> 
+	 <title>The Alphora Dataphor Combined Help Collection</title> 
+	 <setinfo> 
+		  <abstract> 
+				<para>
+					 <inlinegraphic fileref="images/dataphor.jpg" width="300" depth="116"/> </para> 
+				<para> The Alphora Dataphor Combined Help Collection contains the
+					 documentation for the Alphora Dataphor Toolset which includes both the Alphora
+					 Dataphor Data Access Engine (DAE) and the Alphora Dataphor Frontend. </para> 
+				<para> The Alphora Dataphor toolset is a Database Application
+					 Development Framework that automates many of the tasks involved in the creation
+					 and maintenance of database applications. The Dataphor Data Access Engine
+					 provides a logical abstraction for communication with database management
+					 systems (DBMS), while the Dataphor Frontend provides a logical abstraction of
+					 user interface definitions. Together these technologies form the foundation for
+					 the next generation of database applications. </para> 
+				<para>This help collection is organized as follows: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>User's Guide</para> 
+								<para>Provides a high-level introduction to the
+									 Dataphor toolset, as well as several tutorials, and information on using the
+									 various utilities that come with the Dataphor product such as Dataphoria and
+									 the DAE Service.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>DAE Developer's Guide</para> 
+								<para>Provides detailed coverage of the Dataphor Data
+									 Access Engine including a D4 language guide and information on using and
+									 extending the DAE.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Frontend Developer's Guide</para> 
+								<para>Provides detailed documentation for using the
+									 Dataphor Frontend to develop applications in the Automated Application
+									 Development paradigm.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>DAC Developer's Guide</para> 
+								<para>Provides documentation for using the Dataphor
+									 Data Access Components in a classic Rapid Application Development
+									 paradigm.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>The following links may be used to gain a quick overview of
+					 Dataphor product features: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><ulink url="DUGWhatisDataphor.html">Dataphor
+										  Introduction</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink url="D4LGD4LanguageGuide.html">D4 Language
+										  Guide</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink
+									 url="DDGP1TheRelationalModelofData.html">The Relational Model of
+										  Data</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink url="DDGSpecialFeatures.html">The Dataphor
+										  Data Access Engine (DAE) as a Database Management System</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink url="DDGSpecialFeatures.html">The DAE as a
+										  Data Access Engine</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink url="D4LGComparisonWithSQL.html">D4
+										  Compared wtih SQL</ulink></para> 
+						  </listitem> 
+						  <listitem> 
+								<para><ulink url="DDGSIA.html">Storage
+										  Integration</ulink></para> 
+						  </listitem> 
+					 </itemizedlist></para></abstract> 
+		  <date role="LastMod">Thursday, July 17, 2003 10:34:24 AM</date> 
+	 </setinfo> 
+	 <book id="DataphorUsersGuide"> 
+		  <title>Dataphor User's Guide</title> 
+		  <bookinfo><abstract> 
+					 <para>
+						  <inlinegraphic fileref="images/Dataphor Logo.gif" width="320" depth="66"/>
+						  </para> 
+					 <para>The Dataphor User's Guide provides the reader with the
+						  information necessary to begin using Dataphor. The Guide provides an overview
+						  of the motivation behind Dataphor, introduces the Dataphor technology, then
+						  provides several tutorials.</para></abstract> 
+		  </bookinfo> &UsersGuideIntro; &UsersGuidePartI; &UsersGuidePartII; &Glossary; 
+	 </book> 
+	 <book id="DataphorDevelopersGuide"> 
+		  <title>Dataphor Developer's Guide</title> 
+		  <bookinfo><abstract> 
+					 <para>
+						  <inlinegraphic fileref="images/Dataphor Logo.gif" width="320" depth="66"/>
+						  </para> 
+					 <para><!--TODO: Revise this description-->The Dataphor
+						  Developer's Guide provides detailed information relating to application
+						  development using Dataphor. It contains architectural material necessary to
+						  take full advantage of the capabilities of Dataphor, as well as a detailed
+						  description of the extensibility points available for tailoring the DAE to meet
+						  specific application requirements. </para></abstract> 
+		  </bookinfo> &DAEDevGuideIntro; &DAEDevGuidePartI; &DAEDevGuidePartII; 
+		  <part id="DDGReference"> 
+				<title><indexterm><primary>Dataphor DAE
+								Reference</primary></indexterm>Reference</title> 
+				<partintro> 
+					 <para>This part provides detailed reference information for the
+						  Dataphor Data Access Engine (DAE).</para></partintro> 
+				<chapter> 
+					 <title>D4 Language DOM</title> 
+					 <para>This chapter contains describes the D4 Language Document
+						  Object Model. For the D4 Language Reference see 
+						  <ulink url="D4LGD4LanguageGuide.html">D4 Language
+								Guide</ulink>.</para>&DAELanguage;&DAELanguageD4; 
+				</chapter> 
+				<chapter id="RealSQLLanguageRef"> 
+					 <title>RealSQL Language DOM</title> 
+					 <para>This chapter describes the RealSQL Document Object Model.
+						  For the RealSQL Language reference see 
+						  <ulink url="DDGP1RealSQLLanguage.html">RealSQL
+								Language</ulink>.</para>&RealSQL; 
+				</chapter> 
+				<chapter> 
+					 <title>Catalog</title> 
+					 <para>This chapter contains reference information for the
+						  elements of the Dataphor Catalog.</para> &CatalogReference;&DAESchema;
+					 &SystemTables; 
+				</chapter> 
+				<chapter> 
+					 <title>System Library</title> 
+					 <para>This chapter contains information about D4 operators
+						  available in the System Library.</para> &SystemLibraryReference; 
+				</chapter> 
+				<chapter> 
+					 <title>Call Level Interface</title> 
+					 <para>This chapter contains information about the classes that
+						  make up the DAE Call Level Interface.</para>&DAE;&DAEServer; 
+				</chapter> 
+				<chapter> 
+					 <title>Query Processing</title> 
+					 <para>This chapter contains information about the classes that
+						  make up the query processing layer of
+						  dataphor.</para>&DAEStreams;&DAERuntime;&DAERuntimeData;&DAERuntimeInstructions;
+					 
+				</chapter> 
+				<chapter> 
+					 <title>Storage Devices</title> 
+					 <para>This chapter contains information about the Dataphor
+						  storage
+						  devices.</para>&DAEDevice;&Device.SQL;&LanguageSQL;&DeviceMSSQL;&LanguageTSQL;&DeviceOracle;&LanguageOracle;&DeviceDB2;&LanguageDB2;&DeviceLinter;&DeviceMemory;
+					 
+				</chapter> 
+				<chapter> 
+					 <title>Data Access Components</title> 
+					 <para>This chapter contains information about the Data Access
+						  Components.</para>&DAEClient;&DAEClientControls;&DAEClientProvider; 
+				</chapter> 
+				<chapter> 
+					 <title>ADO.NET Provider</title> 
+					 <para>This chapter contains information about the Dataphor ADO
+						  .NET provider.</para>&ADONETProvider; 
+				</chapter> 
+				<chapter> 
+					 <title>Base Classes</title> 
+					 <para>This chapter contains information about the base classes
+						  used in Dataphor.</para>&AlphoraDataphor; 
+				</chapter> 
+		  </part> 
+		  <appendix> 
+				<title><indexterm><primary>D4
+								BNF</primary></indexterm><indexterm><primary>RealSQL
+								BNF</primary></indexterm>D4 and RealSQL BNF Listings</title> 
+				<sect1> 
+					 <title>D4 Lexer BNF</title> 
+					 <para>&D4LexerBNF;</para> 
+				</sect1> 
+				<sect1> 
+					 <title>D4 Parser BNF</title> 
+					 <para>&D4ParserBNF;</para> 
+				</sect1> 
+				<sect1> 
+					 <title>RealSQL BNF</title> &RealSQLBNF; 
+				</sect1> 
+		  </appendix> 
+	 </book> 
+	 <book id="DataphorFrontendDevelopersGuide"> 
+		  <title>Dataphor Frontend Developers Guide</title> 
+		  <bookinfo><abstract> 
+					 <para>
+						  <inlinegraphic fileref="images/Dataphor Frontend.gif" width="300" depth="93"/>
+						  </para> 
+					 <para> The Frontend Developer’s Guide focuses on the user
+						  interface and interaction capabilities of the toolset. It includes a detailed
+						  view of the server and client architectures, an analysis of the mechanisms
+						  involved in application automation, as well as complete reference and
+						  extensibility information. </para></abstract> 
+		  </bookinfo> &FrontendDevGuideIntro; &FrontendDevGuidePartI;
+		  &FrontendDevGuidePartII; 
+		  <part id="DFDGReference"> 
+				<title><indexterm><primary>Frontend
+								Reference</primary></indexterm>Frontend Reference</title> 
+				<partintro> 
+					 <para>This part provides detailed reference information for the
+						  Dataphor Frontend.</para></partintro> 
+				<chapter> 
+					 <title><indexterm><primary>DIL
+									 Reference</primary></indexterm><indexterm><primary>Dataphor user Interface
+									 Language Reference</primary></indexterm>Dataphor user Interface
+						  Language</title> 
+					 <bridgehead renderas="sect3">Overview of DIL</bridgehead> 
+					 <para>DIL is an XML application tightly integrated with the
+						  Frontend Client. Each element tag of DIL represents a node that is defined in a
+						  Frontend Client. So, when you see a <symbol>&lt;checkbox ... &gt;</symbol> tag
+						  in an interface document you know that the client has a 
+						  <classname>checkbox</classname> node defined to render the
+						  DIL element. Properties in the client nodes which may be set are represented as
+						  element attributes in DIL. The values attached to the attributes are converted
+						  to the appropriate type and assigned to the properties of the client node.
+						  </para> 
+					 <para>When a DIL element is derived rather than built by hand,
+						  the Derivation engine uses the metadata described in 
+						  <ulink url="DFRDerivationReference.HTML">Derivation
+								Reference</ulink> to generate attributes and values for the client.</para> 
+					 <para>Nearly every DIL element has a <symbol>bop:name</symbol>
+						  attribute. This is the name used to resolve references to other elements, such
+						  as a reference to a source element.</para> 
+					 <bridgehead>Empty Interface</bridgehead> 
+					 <para>The following is an empty Interface element. The
+						  interface may contain exactly one Element node and several action, source, and
+						  other non-element nodes. The Designer enforces the rules of
+						  ownership/parenthood in DIL. If you have questions about whether a node can
+						  appear in a specific location, try out the Designer.</para> 
+					 <programlisting>&lt;interface
+    xmlns:bop='www.alphora.com/schemas/bop'
+    text='form name goes here'
+    mainsource='MainSourceName goes here'
+&gt;
+
+&lt;/interface&gt;
+</programlisting> 
+					 <para>The <symbol>xmlns:bop</symbol> declaration provides
+						  several services used in converting DIL from a text format to an interactive
+						  form. The text attribute provides the title used on the form. The
+						  <symbol>mainsource</symbol> attribute provides a global alias to a source
+						  defined in the body of the <symbol>interface</symbol>. See the appropriate
+						  interface class (listed in the see also section) for more information about the
+						  <symbol>interface</symbol>.</para> 
+					 <bridgehead>Keyboard Accelerators</bridgehead> 
+					 <para>The text/title of nodes may include accelerator hints
+						  marked by an ampersand ("&amp;"), but these are considered optional by the
+						  client. The Windows client will allocate the requested accelerator hint if
+						  available, or assign its own if not available. The Web client currently strips
+						  off accelerators.</para> 
+					 <bridgehead>Designer Toolbox</bridgehead> 
+					 <para>The list of core elements in the toolbox comes from the
+						  <filename>nodetype.dnt</filename> file.</para> 
+					 <para>If you extend DIL by adding controls and their
+						  corresponding Frontend Nodes, you must list the new nodes in the
+						  <filename>nodetype.dnt</filename> file to expose them for use in the
+						  Designer.</para> 
+					 <para>If you would like to assign an icon to a Frontend Node
+						  that you create, use the <property>DesignerImageAttribute</property> to select
+						  an image form the list of images used by the Designer.</para> &DILReference;<!-- Reference to the DILReference.xml to be included -->
+				</chapter> 
+				<chapter> 
+					 <title>Basic Object Persistence (BOP)</title> 
+					 <para>This chapter contains information about the classes
+						  implementing Dataphor BOP.</para> &BOP; 
+				</chapter> 
+				<chapter> 
+					 <title>Common Nodes</title> 
+					 <para>This chapter contains information about the Frontend
+						  nodes common to the Windows and Web clients.</para>
+					 &FrontendClient;&FrontendClientReporting; 
+				</chapter> 
+				<chapter> 
+					 <title>Windows Nodes</title> 
+					 <para>This chapter contains information about the Frontend
+						  nodes specific to the Windows Client.</para> &FrontendClientWindows; 
+				</chapter> 
+				<chapter> 
+					 <title>Web Nodes</title> 
+					 <para>This chapter contains information about the Frontend
+						  nodes specific to the Web client.</para> &FrontendClientWeb; 
+				</chapter> 
+				<chapter> 
+					 <title>Frontend Server</title> 
+					 <para>This chapter contains information about the Frontend
+						  Server.</para> &FrontendServer; 
+					 <sect1> 
+						  <title>Requests</title> 
+						  <para>This section contains information about the Frontend
+								requests.</para> &FrontendServerRequestTypes;&DerivationReference; 
+					 </sect1> 
+				</chapter> 
+		  </part> 
+	 </book> 
+	 <book id="RequiredNotices"> 
+		  <title>Notices and References</title> 
+		  <preface> 
+				<title>Legal Notices</title> 
+				<para> Information in this Dataphor Documentation is subject to
+					 change without notice. </para> 
+				<para> No part of this document may be reproduced by any means or
+					 for any purpose without the express written permission of Alphora. The software
+					 described in this document is furnished under a license agreement and may be
+					 used or copied only in accordance with the terms of the license agreement.
+					 </para> 
+				<para> © Copyright 2001-2003 Alphora. All rights reserved.</para> 
+				<para> Dataphor is a registered trademark of Alphora. </para> 
+				<para> The trademarks referenced in this document are the property
+					 of their respective owners and used in reference to their products. </para> 
+				<para>
+					 <inlinegraphic fileref="images/alphora _logo.jpg" width="165" depth="70"/> 
+					 <address><street>2474 N. University Ave.</street>
+						  <city>Provo</city>, <state>UT</state> <postcode>84604</postcode> Phone:
+						  <phone>801-371-6080</phone> Fax:<fax>801-371-6079</fax> E-mail:
+						  <email>info@alphora.com</email> Web: www.alphora.com</address> </para> 
+		  </preface> 
+		  <bibliography> 
+				<para>The following titles are used as references throughout the 
+					 <citetitle>Dataphor Combined Help
+						  Collection</citetitle>.</para> 
+				<biblioentry><abbrev>1</abbrev> 
+					 <title>An Introduction to Database Systems</title> 
+					 <pubdate>2000</pubdate> 
+					 <edition>7th Edition</edition> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>2</abbrev> 
+					 <title>A Relational Model for Large Shared Data Banks</title> 
+					 <author> 
+						  <firstname>E.
+								F.</firstname><surname>Codd</surname></author> 
+					 <publisher> 
+						  <publishername>Communications of the ACM</publishername> 
+					 </publisher><volumenum>13</volumenum><date>1970</date><pagenums>377
+						  - 387</pagenums> 
+				</biblioentry> 
+				<biblioentry><abbrev>3</abbrev> 
+					 <title>Foundation for Future Database Systems</title> 
+					 <subtitle>The Third Manifesto</subtitle> 
+					 <edition>Second Edition</edition> 
+					 <authorgroup><author><firstname>C.
+									 J.</firstname><surname>Date</surname></author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Addison-Wesley</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+					 <copyright><year>2000</year><holder>Addison Wesley Longman,
+								Inc</holder> 
+					 </copyright><isbn>0-201-70928-7</isbn> 
+				</biblioentry> 
+				<biblioentry><abbrev>4</abbrev> 
+					 <title>What Not How</title> 
+					 <subtitle>The Business Rules Approach to Application
+						  Development</subtitle><pubdate>2000</pubdate><author><firstname>C.
+								J.</firstname><surname>Date</surname></author> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>5</abbrev> 
+					 <title>The Database Relational Model</title> 
+					 <subtitle>A Retrospective Review and
+						  Analysis</subtitle><pubdate>2001</pubdate><author><firstname>C.
+								J.</firstname><surname>Date</surname></author> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry> 
+					 <abbrev>6</abbrev> 
+					 <title>Relational Database: Selected
+						  Writings</title><pubdate>1986</pubdate><author><firstname>C.
+								J.</firstname><surname>Date</surname></author> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>7</abbrev> 
+					 <title>Relational Database Writings
+						  1985-1989</title><pubdate>1990</pubdate> 
+					 <authorgroup><author><firstname>C.
+									 J.</firstname><surname>Date</surname></author><author><firstname>Andrew</firstname><surname>Warden</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>8</abbrev> 
+					 <title>Relational Database Writings
+						  1989-1991</title><pubdate>1992</pubdate> 
+					 <authorgroup><author><firstname>C.
+									 J.</firstname><surname>Date</surname> 
+						  </author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>9</abbrev> 
+					 <title>Relational Database Writings
+						  1991-1994</title><pubdate>1995</pubdate><author><firstname>C.
+								J.</firstname><surname>Date</surname></author> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>10</abbrev> 
+					 <title>Relational Database Writings
+						  1994-1997</title><pubdate>1998</pubdate> 
+					 <authorgroup><author><firstname>C.
+									 J.</firstname><surname>Date</surname></author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+						  
+						  <author><firstname>David</firstname><surname>McGoveran</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry> 
+					 <abbrev>11</abbrev> 
+					 <title>Practical Issues in Database Management</title> 
+					 <subtitle>A Reference for the Thinking
+						  Practitioner</subtitle><pubdate>2000</pubdate><author><firstname>Fabian</firstname><surname>Pascal</surname></author>
+					 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>12</abbrev> 
+					 <title>Transaction Processing</title> 
+					 <subtitle>Conecpts and
+						  Techniques</subtitle><pubdate>1993</pubdate> 
+					 <authorgroup><author><firstname>Jim</firstname><surname>Gray</surname></author><author><firstname>Andreas</firstname><surname>Reuter</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Morgan Kaufmann</publishername> 
+						  <address><city>San Francisco,
+								</city><state>California</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>13</abbrev> 
+					 <title>Database Systems</title> 
+					 <subtitle>A Practical Approach to Design, Implementation, and
+						  Management</subtitle><pubdate>1999</pubdate> 
+					 <edition>Second Edition</edition> 
+					 <authorgroup><author><firstname>Thomas</firstname><surname>Connolly</surname></author><author><firstname>Carolyn</firstname><surname>Begg</surname></author><author><firstname>Anne</firstname><surname>Strachan</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>14</abbrev> 
+					 <title>The Art of Computer
+						  Programming</title><pubdate>1998</pubdate><volumenum>Vol. 3</volumenum> 
+					 <edition>Second
+						  Edition</edition><author><firstname>Donald</firstname><surname>Knuth</surname></author>
+					 
+					 <publisher> 
+						  <publishername>Addison Wesley Longman</publishername> 
+						  <address><city>Reading,
+								</city><state>Massachusetts</state></address> 
+					 </publisher> 
+				</biblioentry> 
+				<biblioentry><abbrev>15</abbrev> 
+					 <title>Database System Implementation</title><pubdate><?xm-replace_text {pubdate}?></pubdate>
+					 
+					 <authorgroup><author><firstname>Hector</firstname><surname>Garcia-Molina</surname></author><author><firstname>Jeffrey
+									 D.</firstname><surname>Ullman</surname></author><author><firstname>Jennifer</firstname><surname>Widom</surname></author>
+						  
+					 </authorgroup> 
+					 <publisher> 
+						  <publishername>Prentice Hall</publishername> 
+						  <address><city>Upper Saddle River, </city><state>New
+								Jersey</state></address> 
+					 </publisher> 
+				</biblioentry> 
+		  </bibliography> 
+	 </book> 
+</set> 

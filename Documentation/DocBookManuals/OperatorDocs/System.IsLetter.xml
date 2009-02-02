@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 15:54:43</date> 
+	 </sect2info> 
+	 <title>System.IsLetter</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>If AIndex is specified, <symbol>IsLetter</symbol> returns
+		  <symbol>true</symbol> if the character AString[AIndex] is a letter, otherwise
+		  <symbol>IsLetter</symbol> returns <symbol>false</symbol>.</para> 
+	 <para> If AIndex is not specified, <symbol>IsLetter</symbol> returns
+		  <symbol>true</symbol> if every character of AString is a letter, otherwise
+		  <symbol>IsLetter</symbol> returns <symbol>false</symbol>. 
+		  <note> 
+				<para>Dataphor uses zero based indexing.</para> 
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select IsLetter("123abc");
+select IsLetter("123abc", 4);</programlisting> 
+		  <programlisting>False
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.IsDigit.html">System.IsDigit</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

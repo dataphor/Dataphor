@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 21, 2004 13:01:19</date> 
+	 </sect2info> 
+	 <title>System.Error</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Error
+{
+	representation Error
+	{
+		Message : System.String
+	}selector  class "System.SystemErrorSelectorNode"
+} class "System.ObjectConveyor" static tags { Catalog.Comment = "System Error" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the <symbol>Error</symbol> data type. It is
+		  used frequently with the <symbol>raise</symbol> operator.</para> 
+	 <para><symbol>System.Error</symbol> is the set of all
+		  <symbol>error</symbol> values in the DAE. Values of this type are used to
+		  implement the exception-handling mechanisms of D4. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>raise Error("This isn't a real error, but it will generate an error anyway.");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="D4LGExceptionHandling.html">Exception Handling</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

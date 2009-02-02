@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 14:25:16</date> 
+	 </sect2info> 
+	 <title>System.Math.Ln</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns the natural logarithm (base <emphasis>e</emphasis>) of the
+		  specified value. The value that is returned is the value that if raised to the
+		  power of <emphasis>e</emphasis> would result in the value passed to the
+		  function.
+		  <informalexample> 
+				<para><emphasis>6<superscript>e</superscript> =
+					 1.79175946922806</emphasis></para> 
+		  </informalexample></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {Math.Ln(6) ln };</programlisting> 
+		  <programlisting>ln 
+---------------- 
+1.79175946922806</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Math.Exp.html">System.Math.Exp</ulink>
+<ulink url="SLRSystem.Math.Log10.html">System.Math.Log10</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

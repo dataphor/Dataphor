@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 16:12:38</date> 
+	 </sect2info> 
+	 <title>System.ToString</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>Boolian, Byte, Date, DateTime, Decimal, Guid, Integer, Long,
+		  Money, Short, Time, TimeSpan,</symbol> and <symbol>VersionNumber</symbol> types
+		  can be explicitly converted to <symbol>String</symbol> using this
+		  operator.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select ToString(123.45*83); // Long
+select ToString(DateTime() + ToTimeSpan("714hours")); // DateTime
+select ToString("yes" = "Yes"); // boolean</programlisting> 
+		  <programlisting>10246.35
+2004-05-26 19:53:49
+false</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGTypes.html">Types</ulink>
+<ulink url="SLRSystem.Integer.html">System.Boolean</ulink>
+<ulink url="SLRSystem.Integer.html">System.Byte</ulink>
+<ulink url="SLRSystem.Integer.html">System.Date</ulink>
+<ulink url="SLRSystem.Integer.html">System.DateTime</ulink>
+<ulink url="SLRSystem.Integer.html">System.Decimal</ulink>
+<ulink url="SLRSystem.Integer.html">System.Guid</ulink>
+<ulink url="SLRSystem.Integer.html">System.Integer</ulink>
+<ulink url="SLRSystem.Long.html">System.Long</ulink>
+<ulink url="SLRSystem.Money.html">System.Money</ulink>
+<ulink url="SLRSystem.Integer.html">System.Short</ulink>
+<ulink url="SLRSystem.Integer.html">System.Time</ulink>
+<ulink url="SLRSystem.Integer.html">System.TimeSpan</ulink>
+<ulink url="SLRSystem.String.html">System.VersionNumber</ulink>
+<ulink url="SLRSystem.ToBoolean.html">System.ToBoolean</ulink>
+<ulink url="SLRSystem.ToByte.html">System.ToByte</ulink>
+<ulink url="SLRSystem.ToDate.html">System.ToDate</ulink>
+<ulink url="SLRSystem.ToDateTime.html">System.ToDateTime</ulink>
+<ulink url="SLRSystem.ToDecimal.html">System.ToDecimal</ulink>
+<ulink url="SLRSystem.ToGuid.html">System.ToGuid</ulink>
+<ulink url="SLRSystem.ToInteger.html">System.ToInteger</ulink>
+<ulink url="SLRSystem.ToLong.html">System.ToLong</ulink>
+<ulink url="SLRSystem.ToMoney.html">System.ToMoney</ulink>
+<ulink url="SLRSystem.ToShort.html">System.ToShort</ulink>
+<ulink url="SLRSystem.ToTime.html">System.ToTime</ulink>
+<ulink url="SLRSystem.ToTimeSpan.html">System.ToTimeSpan</ulink>
+<ulink url="SLRSystem.ToVersionNumber.html">System.ToVersionNumber</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

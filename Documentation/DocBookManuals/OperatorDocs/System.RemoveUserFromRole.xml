@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 14:21:16</date> 
+	 </sect2info> 
+	 <title>System.RemoveUserFromRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Removes the specified <symbol>User</symbol> as a member of the
+		  specified <symbol>Role</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRole("SoftwareTester");
+CreateUser("JS1", "John Smith", "Password");
+
+AddUserToRole("JS1", "SoftwareDeveloper");
+AddUserToRole("JS1", "SoftwareTester");
+
+select UserRoles where User_ID = "JS1";
+RemoveUserFromRole("JS1", "SoftwareDeveloper");
+select UserRoles where User_ID = "JS1";
+
+DropUser("JS1");
+DropRole("SoftwareDeveloper");DropRole("SoftwareTester");</programlisting> 
+		  <programlisting>User_ID Role_Name             
+------- ----------------------
+JS1     Test.SoftwareDeveloper
+JS1     Test.SoftwareTester
+
+User_ID Role_Name             
+------- ----------------------
+JS1     Test.SoftwareTester</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddUserToRole.html">System.AddUserToRole</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropRole.html">System.DropRole</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

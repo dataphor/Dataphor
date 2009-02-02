@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:31:45</date> 
+	 </sect2info> 
+	 <title>iDivision</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>/</symbol> is the parser recognized symbol for this operator.
+		  The <symbol>Division</symbol> operator returns a quotient of the two values. In
+		  all cases, decimal division will be performed. For Integer division, even in
+		  the case of two decimals, use 
+		  <ulink url="SLRiDiv.html">iDiv</ulink>.</para> 
+	 <para>The result type of this operator depends on the types of arguments
+		  passed to it. See the Declarations section above for more information.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {17 / 5 IntDiv, 1.2 / 0.35 DecIntDiv };</programlisting> 
+		  <programlisting>IntDiv DecIntDiv
+------ ------------------------------
+3.4    3.4285714285714285714285714286 </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGArithmeticExpression.html">Arithmetic Expressions</ulink>
+<ulink url="SLRiMod.html">iMod (<symbol>mod</symbol>)</ulink>
+<ulink url="SLRiDiv.html">iDiv (<symbol>div</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

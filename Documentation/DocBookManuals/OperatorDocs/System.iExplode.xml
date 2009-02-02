@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:23:14</date> 
+	 </sect2info> 
+	 <title>iExplode</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>explode</symbol> is the parser recognized symbol for this
+		  operator. <symbol>explode</symbol> is a heirchical query operator. For more
+		  information see the 
+		  <ulink url="D4LGExplode.html">explode</ulink> document in the D4
+		  language guide.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager
+	explode by
+		Manager_ID = parent Employee_ID
+	where
+		Manager_ID = 1
+	include level
+	include sequence;	</programlisting> 
+		  <programlisting>Manager_ID Employee_ID level sequence 
+---------- ----------- ----- -------- 
+1          2           1     1        
+2          4           2     2        
+4          5           3     3        
+2          6           2     4        
+1          3           1     5</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGExplode.html">Explode</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 30, 2004 10:31:24</date> 
+	 </sect2info> 
+	 <title>System.ObjectDescription</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>ObjectExists</symbol> returns <symbol>true</symbol> if the
+		  name ASpecifier exists in the Catalog items, otherwise <symbol>false</symbol>
+		  is returned.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Objects where ID = 994;
+select ObjectExists("Boolean");</programlisting> 
+		  <programlisting>ID  Name    DisplayName Description                                      
+--- ------- ----------- -------------------------------------------------
+994 Boolean Boolean     Representation "Boolean" of type "System.Boolean"
+
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGTypes.html">Types</ulink>
+<ulink url="D4LGCatalogElements.html">Catalog Elements</ulink>
+<ulink url="D4LGObjects.html">Objects</ulink>
+<ulink url="SLRSystem.ObjectDescription.html">System.ObjectDescription</ulink>
+<ulink url="SLRSystem.ObjectDisplayName.html">System.ObjectDisplayName</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

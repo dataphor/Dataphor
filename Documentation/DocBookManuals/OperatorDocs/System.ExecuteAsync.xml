@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 11:16:53</date> 
+	 </sect2info> 
+	 <title>System.ExecuteAsync</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator compiles and executes the code in the string specified
+		  in AString. It is executed as if it were normal code and is run on the
+		  specified process AProcessID. The string can be typed in as literals or built
+		  and placed as variable.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table Example in Temp
+	 { PID : Integer, Key : String, key{Key} };
+insert table "
+begin
+ var LProcessID : Integer := StartProcess();
+ insert table { row { LProcessID PID, "Cur" Key } } into Example;
+ ExecuteAsync( LProcessID, "insert table { row { ProcessID() PID, 'Pro' Key } } into Example;" );
+ StopProcess(LProcessID);
+end;
+select Example;
+drop table Example;</programlisting> 
+		  <programlisting>PID  Key 
+---- --- 
+2703 Cur 
+2696 New 
+2696 Pro</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRFrontend.ExecuteScript.html">Frontend.ExecuteScript</ulink>
+<ulink url="SLRSystem.Evaluate.html">System.Evaluate</ulink>
+<ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+<ulink url="SLRSystem.ExecuteAs.html">System.ExecuteAs</ulink>
+<ulink url="SLRSystem.ExecuteMultiple.html">System.ExecuteMultiple</ulink>
+<ulink url="SLRSystem.ExecuteWithTimeout.html">System.ExecuteWithTimeout</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

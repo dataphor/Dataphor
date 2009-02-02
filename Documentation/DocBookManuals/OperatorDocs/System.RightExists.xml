@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 11:46:15</date> 
+	 </sect2info> 
+	 <title>System.RightExists</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns <symbol>true</symbol> if the specified
+		  <symbol>Right</symbol> exists, otherwise it returns
+		  <symbol>false</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+
+select if RightExists("AddProgram") 
+    then "The AddProgram right exists"
+    else "The AddProgram right does NOT exists";
+
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>The AddProgram right exists</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

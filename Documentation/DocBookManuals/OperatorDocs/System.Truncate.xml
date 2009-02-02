@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 10:59:15</date>
+	 </sect2info>
+	 <title>System.Truncate</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the integer portion of a decimal value.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add { Truncate(-3.2) Neg, Truncate(3.2) Pos };</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Ceiling.html">System.Ceiling</ulink>
+<ulink url="SLRSystem.Floor.html">System.Floor</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

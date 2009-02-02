@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:18:06</date> 
+	 </sect2info> 
+	 <title>iBrowse</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>browse</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>browse</symbol> keyword is very powerful. The
+		  <symbol>browse</symbol> keyword can be used anyhere an <symbol>order</symbol>
+		  can be used. The <symbol>browse</symbol> clause does what the
+		  <symbol>order</symbol> does and more. In addition to <symbol>order</symbol>
+		  capabilities an index is included. When searching on a browsed column, the
+		  cursor goes immediately to the requested row and the cursor is opened from that
+		  point to the end of the query. It is not limited to forward cursor motion. If
+		  an attempt is made to go backwards on a browsable cursor from the original
+		  point of search, then the DAE recognizes this and the cursor actually swaps
+		  directions and is accessible to the opposite direction.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee browse by {Name};</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+5  Jake 
+4  Jeff 
+6  Jeff 
+1  Joe  
+2  John 
+3  Josh </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRiOrder.html.">iOrder (<symbol>order</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

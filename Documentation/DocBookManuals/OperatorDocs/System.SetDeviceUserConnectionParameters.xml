@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 19, 2004 12:59:12</date> 
+	 </sect2info> 
+	 <title>System.SetDeviceUserConnectionParameters</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator alters a mapping previously created by
+		  <symbol>CreateDeviceUser</symbol>. This only changes the connection parameters
+		  used to connect to the specified device. This Operator can only be used by the
+		  Admin users.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>// assuming that the current user is an admin user
+create device MSSQL reconciliation { mode = { command }, master = server }
+ 	class "Alphora.Dataphor.DAE.Device.MSSQL.MSSQLDevice.AlphoraMSSQLDevice";
+    {
+      "ServerName" = ".",
+      "DatebaseName" = "SP",
+      "IsCaseSensitive" = "true"
+    };
+CreateDeviceUser("Admin", "MSSQL", "Admin", "secret");
+SetDeviceUserConnectionParameters("Admin", "MSSQL", "IsCaseSensitive" = "false");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="D4LGDevices.html">Devices</ulink>
+<ulink url="DDGP2UserMapping.html">User Mapping</ulink>
+<ulink url="SLRSystem.ChangeDeviceUserPassword.html">System.ChangeDeviceUserPassword</ulink>
+<ulink url="SLRSystem.CreateDeviceUser.html">System.CreateDeviceUser</ulink>
+<ulink url="SLRSystem.CreateDeviceUserWithEncryptedPassword.html">System.CreateDeviceUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.CreateGroupDeviceUser.html">System.CreateGroupDeviceUser</ulink>
+<ulink url="SLRSystem.CreateGroupDeviceUserWithEncryptedPassword.html">System.CreateGroupDeviceUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DeviceUserExists.html">System.DeviceUserExists</ulink>
+<ulink url="SLRSystem.DropDeviceUser.html">System.DropDeviceUser</ulink>
+<ulink url="SLRSystem.DropGroupDeviceUser.html">System.DropGroupDeviceUser</ulink>
+<ulink url="SLRSystem.GroupDeviceUserExists.html">System.GroupDeviceUserExists</ulink>
+<ulink url="SLRSystem.SetDeviceUserID.html">System.SetDeviceUserID</ulink>
+<ulink url="SLRSystem.SetDeviceUserPassword.html">System.SetDeviceUserPassword</ulink>
+<ulink url="SLRSystem.SetGroupDeviceUserConnectionParameters.html">System.SetGroupDeviceUserConnectionParameters</ulink>
+<ulink url="SLRSystem.SetGroupDeviceUserID.html">System.SetGroupDeviceUserID</ulink>
+<ulink url="SLRSystem.SetGroupDeviceUserPassword.html">System.SetGroupDeviceUserPassword</ulink>
+</literallayout> </para> 
+	 </formalpara> 
+</sect2> 

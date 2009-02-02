@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<doc>
+  <members>
+	<member name="T:Alphora.Dataphor.DAE.Client.Controls.DBText">
+		<remarks>
+			<para>
+			Use a <c>DBText</c> to represent the value of a field as static text. 
+			The DBText control manages its 
+			<see cref="P:System.Windows.Forms.Control.Text" name="Text"/> 
+			property by setting it to the
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>'s 
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> value.
+			The <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue" name="FieldValue"/> 
+			property defines how the field's value is converted to a string before
+			being assigned to the Text property.
+			</para>
+		</remarks>
+		<seealso cref="P:System.Windows.Forms.Control.Text" name="Text"/> 
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue" name="FieldValue"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>
+	</member>
+	
+	<member name="M:Alphora.Dataphor.DAE.Client.Controls.DBText.#ctor">
+		<remarks>
+			By default <see cref="P:System.Windows.Forms.Label.AutoSize" name="AutoSize"/> is false.
+		</remarks>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBText.Link">
+		<remarks>
+			Use the <c>Link</c> property to reference the <see cref="T:Alphora.Dataphor.DAE.Client.FieldDataLink" name="FieldDataLink"/> instance used by this control.
+			Links this control to a DataView through the <see cref="P:Alphora.Dataphor.DAE.Client.DataLink.Source" name="Source"/> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.FieldDataLink.ColumnName" name="ColumnName"/> properties.
+		</remarks>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.FieldDataLink" name="FieldDataLink"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBText.ColumnName">
+		<remarks>
+			Set ColumnName to the name of the column in the view that this Text will represent.
+			Access to the view is provided by a DataSource specified by the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.Source" name="Source"/> property.
+			For a complete data linkage the <c>ColumnName</c> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.Source" name="Source"/> 
+			properties must be set.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.Source" name="Source"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBText.Source">
+		<remarks>
+			Links the <c>DBText</c> control to the view that contains the field it represents.
+			Set Source to the <see cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/> 
+			through which the data from a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> 
+			is provided to the <c>DBText</c>.
+			For a complete data linkage the <c>Source</c> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.ColumnName" name="ColumnName"/> 
+			properties must be set.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.ColumnName" name="ColumnName"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBText.DataField">
+		<value>
+			The DataField the DBText represents; otherwise null.
+		</value>
+		<remarks>
+			Use <c>DataField</c> to get direct access to the 
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> 
+			in the view that this Text represents.
+			The <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> 
+			must be active for the field to exist.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataView.Fields" name="View.Fields"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue">
+		<value>
+			A <see cref="T:System.String" name="string"/> that represents the field's value.
+		</value>
+		<remarks>
+			Returns the field value as a string that this control represents.
+			Override <c>FieldValue</c> to define how to obtain the field's value as a string.
+			By default the field's value is obtained by the DataField's 
+			<see cref="P:Alphora.Dataphor.DAE.Client.DataField.AsString" name="AsString"/> method.
+		</remarks>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+	</member>
+	
+  </members>
+</doc>

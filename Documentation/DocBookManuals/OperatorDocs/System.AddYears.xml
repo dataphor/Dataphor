@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 08, 2004 13:43:59</date> 
+	 </sect2info> 
+	 <title>System.AddYears</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Adds the specified number of Years to the given DateTime and returns
+		  it.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {Date().AddYears(6) SixYears}; // returns the date 6 years from today.
+select TableDee add {AddYears(DateTime(),-1) LastYear}; // returns the date represented by 1 year ago from now.</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

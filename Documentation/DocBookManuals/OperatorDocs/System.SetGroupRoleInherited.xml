@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 12:57:47</date> 
+	 </sect2info> 
+	 <title>System.SetGroupRoleInherited</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is used to set whether the specified
+		  <symbol>Role</symbol> in the specified <symbol>Group</symbol> will be inherited
+		  by the subordinate groups (child, child's child, etc). The inheritence can be
+		  set to <symbol>true</symbol> of <symbol>false</symbol>.
+		  <note>
+				<para>When a <symbol>Group</symbol> is made a member of a
+					 <symbol>Role</symbol> (added), the default setting is <symbol>true</symbol> for
+					 inheritence.</para>
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateGroup("Developers", "User");
+
+AddGroupToRole("Developers", "SoftwareDeveloper");
+select GroupRoles where Group_Name = "Developers");
+
+SetGroupRoleInherited
+   ("Developers", "SoftwareDeveloper", false);
+select GroupRoles where Group_Name = "Developers");
+
+DropGroup("Developers");
+DropRole("SoftwareDeveloper");</programlisting> 
+		  <programlisting>Group_Name Role_Name              Inherited
+---------- ---------------------- ---------
+Developers Docs.SoftwareDeveloper True</programlisting>
+		  <programlisting>Group_Name Role_Name              Inherited
+---------- ---------------------- ---------
+Developers Docs.SoftwareDeveloper False</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRole.html">System.DropRole</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

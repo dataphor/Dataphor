@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:39:50</date> 
+	 </sect2info> 
+	 <title>System.CloseSession</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Closes the session corresponding to the Session ID specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CloseSession(0);</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGCLIProcessAndSession.html">Session</ulink>
+<ulink url="DDGP2Sessions.html">Server Architecture, Session</ulink>
+<ulink url="DDGP2SessionManager.html">Server, Session Manager</ulink>
+<ulink url="DDGP2DeviceSessionManager.html">Device Session Manager</ulink>
+<ulink url="DDGP2DataRetrieval.html">Data Retrieval</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

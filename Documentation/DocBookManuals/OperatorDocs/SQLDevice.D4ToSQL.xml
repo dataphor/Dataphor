@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 15:58:18</date> 
+	 </sect2info> 
+	 <title>SQLDevice.D4ToSQL</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is an operator that translates D4 code into the SQL dialect used
+		  by the specified device. This operator returns "Query is unsupported by the
+		  device" if the query is not supported. This operator returns "Device is not an
+		  SQL device" if the specified device is not an SQL device (e.g. a memory
+		  device).</para> 
+	 <para> There are no devices that have RealSQL as its language, so this
+		  operator can not translate to RealSQL. The System.RealSQLToD4 operator does
+		  translate from RealSQL to D4 and not from another dialect of SQL. They are not
+		  symmetrical operators. You could translate RealSQL to D4 then to an SQL dialect
+		  for a device but that would not necessarily return the same code. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create device Linter
+	class "Alphora.Dataphor.DAE.Device.Linter.LinterDevice,AlphoraLinterDevice";
+select
+	TableDee add { D4ToSQL(Name("Linter"), "select Employee;") SQL};</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.RealSQL.ToD4.html">System.RealSQLToD4</ulink>
+<ulink url="D4LGComparisonWithSQL.html">D4 Comparison with SQL</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

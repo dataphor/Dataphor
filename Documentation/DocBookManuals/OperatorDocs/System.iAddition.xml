@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:29:56</date> 
+	 </sect2info> 
+	 <title>iAddition</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>+</symbol> is the parser recognized symbol for this operator.
+		  <symbol>Addition</symbol> adds two values together (arithmetic sum or string
+		  concatenation).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { 4.7 + 6.1 sum };
+select Manager add { Manager_ID + Employee_ID sum};</programlisting> 
+		  <programlisting>sum
+----
+10.8
+
+Manager_ID Employee_ID sum
+---------- ----------- ---
+1          2           3
+1          3           4
+2          4           6
+2          6           8
+4          5           9</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

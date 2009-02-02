@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 20, 2004 09:48:16</date> 
+	 </sect2info> 
+	 <title>System.DaysInMonth</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This returns an Integer representing the number of days in the
+		  specified month of the specified year. This number will always be between 28
+		  and 31 inclusive. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { DaysInMonth(2004,2) Days }; </programlisting> 
+		  <programlisting>Days
+----
+29</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="SLRSystem.DayOfWeek.html">System.DayOfWeek</ulink>
+<ulink url="SLRSystem.DayOfMonth.html">System.DayOfMonth</ulink>
+<ulink url="SLRSystem.DayOfYear.html">System.DayOfYear</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:43:58</date> 
+	 </sect2info> 
+	 <title>iQuota</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>return</symbol> is the parser recognized symbol for this
+		  operator. The call specifies a number of unique values to return and columns to
+		  choose values from. The results of <symbol>iQuota</symbol> will be the rows
+		  that have those unique values.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee return 3 by {Name};</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+5  Jake 
+4  Jeff 
+6  Jeff 
+1  Joe</programlisting> 
+		  <para>In the first example above, though three was specified as a
+				return amount, four rows were returned, because among those four rows there are
+				only three unique values.</para> 
+		  <programlisting>select Employee return 178 by {Name};</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+5  Jake 
+4  Jeff 
+6  Jeff 
+1  Joe  
+2  John 
+3  Josh</programlisting> 
+		  <para>In this second example, because the amount of rows specified
+				exceeded the number of rows in the specified table, all of the rows in the
+				table were returned.</para> 
+		  <programlisting>select Employee return 4 by {ID};</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+1  Joe  
+2  John 
+3  Josh 
+4  Jeff </programlisting> 
+		  <para>In the third example, the number of rows returned was equal to
+				the number of rows specified, because a key was chosen in the
+				<symbol>by</symbol> clause of the operator, and sufficient rows existed in the
+				table.</para> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGQuota.html">Quota</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

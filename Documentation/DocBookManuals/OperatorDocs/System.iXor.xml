@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:53:36</date> 
+	 </sect2info> 
+	 <title>iXor</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>xor</symbol> is the parser recognized symbol for this
+		  operator is . The <symbol>xor</symbol> operator is a logical exclusive or. Only
+		  one of the operands can be true for the result to be true.</para> 
+	 <para> 
+		  <informaltable> 
+				<tgroup cols="3"><colspec colnum="1" colname="col1"
+					 colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="1.04*"/><colspec
+					 colnum="3" colname="col3" colwidth="1.09*"/><tbody> 
+						  <row><entry colname="col1">Left Side</entry><entry
+								colname="col2">Right Side</entry><entry colname="col3">Result</entry> 
+						  </row> 
+						  <row><entry colname="col1">False</entry><entry
+								colname="col2">False</entry><entry colname="col3">False</entry> 
+						  </row> 
+						  <row><entry colname="col1">False</entry><entry
+								colname="col2">True</entry><entry colname="col3">True</entry> 
+						  </row> 
+						  <row><entry colname="col1">True</entry><entry
+								colname="col2">False</entry><entry colname="col3">True</entry> 
+						  </row> 
+						  <row><entry colname="col1">True</entry><entry
+								colname="col2">True</entry><entry colname="col3">False</entry> 
+						  </row></tbody> 
+				</tgroup> 
+		  </informaltable></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager where (Employee_ID mod 2 = 0) xor (Manager_ID &gt; 2);</programlisting> 
+		  <programlisting>Manager_ID Employee_ID 
+---------- ----------- 
+1          2           
+2          4           
+2          6           
+4          5</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

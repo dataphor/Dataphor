@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 21, 2004 16:00:40</date> 
+	 </sect2info> 
+	 <title>System.Name</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Name
+{
+	representation Name
+	{
+		Value : System.String
+	}selector  class "System.SystemNameSelectorNode"
+} class "System.StringConveyor" tags { Frontend.Width = "50" } static tags { Catalog.Comment = "System Catalog Name", Storage.Length = "200" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>Name</symbol>.</para> 
+	 <para><symbol>Name</symbol> is the set of all possible names.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Name("User");</programlisting> 
+		  <programlisting>User</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

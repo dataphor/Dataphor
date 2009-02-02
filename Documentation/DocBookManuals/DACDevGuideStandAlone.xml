@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/css" href="DocBookx.css"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "DocBookx.dtd" [
+	 <!ENTITY D4LangGuide SYSTEM "D4LanguageGuide.xml">
+	 <!ENTITY D4ParserBNF SYSTEM "D4ParserBNF.xml">
+	 <!ENTITY DACDevPart1Using SYSTEM "DACDevP1UsingtheDAC.xml">
+	 <!ENTITY DACDevPart2Extending SYSTEM "DACDevP2ExtendingTheDAC.xml">
+	 <!ENTITY DACDevPreface SYSTEM "DACDevIntroduction.xml">
+	 <!ENTITY DAEClientControls SYSTEM "DaeClientControls.xml">
+	 <!ENTITY DAEClientDB2 SYSTEM "DaeClientDB2.xml">
+	 <!ENTITY DAEClientLinter SYSTEM "DaeClientLinter.xml">
+	 <!ENTITY DAEClientMSSQL SYSTEM "DAEClientMSSQL.xml">
+	 <!ENTITY DAEClientOracle SYSTEM "DaeClientOracle.xml">
+	 <!ENTITY RealSQL SYSTEM "RealSQL.xml">
+	 <!ENTITY RealSQLBNF SYSTEM "RealSQLBNF.xml">
+	 <!ENTITY SystemLibraryReference SYSTEM "SystemLibrary.xml">
+]>
+<book id="DACDevGuideStandAlone"> 
+	 <title>Dataphor DAC Developer's Guide</title> 
+	 <bookinfo> 
+		  <abstract>
+				<para><inlinegraphic fileref="images/dac.jpg" width="300"
+					 depth="107"/></para></abstract>
+		  <copyright><year>2002</year><holder>Alphora</holder> 
+		  </copyright> 
+		  <date role="LastMod">Friday, October 18, 2002 4:35:55 PM</date> 
+	 </bookinfo> &DACDevPreface; &DACDevPart1Using; &DACDevPart2Extending; 
+	 <part id="DACDevReferenceStandAlone"> 
+		  <title>DAC Reference</title> 
+		  <partintro> 
+				<para>The following chapters document elements of the DAC.</para> 
+		  </partintro> 
+		  <chapter id="DACDGControlsStandAlone"> 
+				<title>Controls</title> 
+				<para>The following sections document the controls classes of the
+					 DAC.</para> &DAEClientControls; 
+		  </chapter> 
+		  <chapter id="DACDGSessionsStandAlone"> 
+				<title>Sessions</title> 
+				<para>The following sections document the classes that are part of
+					 sessions.</para>
+				&DAEClientDB2;&DAEClientLinter;&DAEClientMSSQL;&DAEClientOracle; 
+		  </chapter> &D4LangGuide; 
+		  <chapter id="DACDGSystemLibraryReference"> 
+				<title>System Library Reference</title> 
+				<para>The following sections document the D4 operators. Note that
+					 the operators that do not return a value may not be invoked in context of the
+					 DAC.</para>&SystemLibraryReference; 
+		  </chapter> 
+		  <chapter id="DACDGRealSQLStandAlone"> 
+				<title>RealSQL Language</title> 
+				<para>The following sections document the RealSQL language.</para>
+				&RealSQLBNF;&RealSQL; 
+		  </chapter> 
+	 </part> 
+</book> 

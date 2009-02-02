@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:41:49</date> 
+	 </sect2info> 
+	 <title>System.Diagnostics.SaveCatalog</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator saves the system catalog to the file specified. If no
+		  file is specified then the catalog will be saved to the catalog file specified
+		  in the server properties</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>SaveCatalog();</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Server.html">Server</ulink>
+<ulink url="SLRSystem.Diagnostics.LoadCatalog.html">System.Diagnostics.LoadCatalog</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

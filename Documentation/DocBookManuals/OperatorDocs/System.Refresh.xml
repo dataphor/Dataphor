@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 12:27:04</date> 
+	 </sect2info> 
+	 <title>System.Refresh</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator refreshes the current cursor. <symbol>refresh</symbol>
+		  closes, reopens, and does a <symbol>FindNearest</symbol> on the cursor. If a
+		  row is not specified as the current location, the current row is used in the
+		  findindex. The resultant cursor after a call to <symbol>refresh</symbol> is
+		  always dynamic, even if the cursor was initially static. The
+		  <symbol>reset</symbol> does not perform a <symbol>FindNearest</symbol> on the
+		  cursor. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmployeeCursor : cursor( table { ID : Integer, Name : String });
+	EmployeeCursor := cursor(Employee);
+	var NewRow : row { ID : Integer, Name : String };	NewRow := row { 9 ID, "Jack" Name};	insert table { NewRow } into Employee;
+	EmployeeCursor.Refresh(NewRow);
+	raise Error("The current row is: " + (Name from EmployeeCursor.Select() ) );
+end;</programlisting> 
+		  <programlisting>The current row is: Jack</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Reset.html">System.Reset</ulink>
+<ulink url="DDGP2Searchable.html">Using Cursors</ulink>
+<ulink url="D4LGUsingCursors.html">Cursor Capabilities, Searchable</ulink>
+<ulink url="DDGP2Static.html">Cursor Type, Static</ulink>
+<ulink url="SLRSystem.FindNearest.html">System.FindNearest</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

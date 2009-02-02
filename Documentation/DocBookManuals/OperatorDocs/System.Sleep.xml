@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 15:56:53</date>
+	 </sect2info>
+	 <title>System.Sleep</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator stops the current process for the specified number of
+		  milliseconds.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>Sleep(2000);</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="DDGP2Processes.html">Process Information</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

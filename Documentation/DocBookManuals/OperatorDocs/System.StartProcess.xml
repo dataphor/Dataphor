@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 11:27:35</date> 
+	 </sect2info> 
+	 <title>System.StartProcess</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator starts a new process.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table Example in Temp
+	 { PID : Integer, Key : String, key{Key} };
+insert table "
+begin
+ var LProcessID : Integer := StartProcess();
+ insert table { row { LProcessID PID, "Cur" Key } } into Example;
+ ExecuteAsync( LProcessID, "insert table { row { ProcessID() PID, 'Pro' Key } } into Example;" );
+ StopProcess(LProcessID);
+end;
+select Example;
+drop table Example;</programlisting> 
+		  <programlisting>PID  Key 
+---- --- 
+2703 Cur 
+2696 New 
+2696 Pro</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Processes.html">Processes</ulink>
+<ulink url="DDGP1Process.html">Processes</ulink>
+<ulink url="SLRSystem.ProcessID.html">System.ProcessID</ulink>
+<ulink url="SLRSystem.SetMaxConcurrentProcesses.html">System.SetMaxConcurrentProcesses</ulink>
+<ulink url="SLRSystem.SetProcessWaitTimeout.html">System.SetProcessWaitTimeout</ulink>
+<ulink url="SLRSystem.StopProcess.html">System.StopProcess</ulink>
+<ulink url="SLRSystem.ExecuteAsync.html">System.ExecuteAsync</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

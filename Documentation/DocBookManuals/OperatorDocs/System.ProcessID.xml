@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 11:55:14</date> 
+	 </sect2info> 
+	 <title>System.ProcessID</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the ID of the current process. This operator is
+		  non-deterministic unless called within the same process.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Processes where ID = ProcessID();</programlisting> 
+		  <programlisting>ID   Session_ID UseDTC 
+---- ---------- ------ 
+1934 1          False</programlisting> 
+		  <para>Note: This is just an example, results will probably vary.</para>
+		  
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Processes.html">Processes</ulink>
+<ulink url="DDGP1Process.html">Processes</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

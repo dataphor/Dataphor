@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 11:17:15</date>
+	 </sect2info>
+	 <title>System.PrepareApplicationTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This prepares the transaction for for the final commit in an
+		  application transaction. Executing the
+		  <symbol>PrepareApplicationTransaction</symbol> operator checks all of the
+		  integrity constraints and ensures that everything is ready in this application
+		  transaction to commit.</para> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginApplicationTransaction.html">System.BeginApplicationTransaction</ulink>
+<ulink url="SLRSystem.DDGP2ApplicationTransactions.html">Application Transactions</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

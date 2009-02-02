@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:31:25</date> 
+	 </sect2info> 
+	 <title>iDifferencesymbol&gt;)</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>minus</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>minus</symbol> operator is similar to the other
+		  relational binary operators. <symbol>minus</symbol> returns a table (or
+		  presentation) that has all of the rows in the table specified by the first
+		  operand that are not the same as any row in the table specified by the second
+		  operand. A row is considered to be the same only if the data in all of the
+		  requested columns are the same.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee minus (TableDee add { 67 ID, "Joe" Name } );</programlisting> 
+		  <programlisting>ID Name
+-- ----
+1  Joe
+2  John
+3  Josh
+4  Jeff
+5  Jake
+6  Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGMinus.html">Table Expressions, Minus</ulink>
+<ulink url="SLRiJoin.html">iJoin</ulink>
+<ulink url="SLRiUnion.html">iUnion</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

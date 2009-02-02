@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 14:27:01</date> 
+	 </sect2info> 
+	 <title>System.HostName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>HostName</symbol> returns the name of the computer on which
+		  the Dataphor client is running.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select HostName();</programlisting> 
+		  <programlisting>MyClient</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.MachineName.html">System.MachineName</ulink>
+<ulink url="bk01pt01ch04s01s02s01.html">Connecting to an Out Of Process Server</ulink>
+<ulink url="DDGP2DeviceSettings2.html">Device Settings</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

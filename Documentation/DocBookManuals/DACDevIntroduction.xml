@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<preface id="DACDGPreface"> 
+	 <title>Introduction</title> 
+	 <para>The Dataphor DAC Developer's guide provides architecture and
+		  reference information for the Dataphor Data Access Components. This book
+		  describes how to utilize and extend the DAC and also provides detailed
+		  reference information. The reader should already be familiar with common object
+		  oriented programming concepts, as well as basic concepts specific to working
+		  with Microsoft Visual Studio .NET. It is also important that the reader be
+		  comfortable with basic database systems concepts and terminology.</para> 
+</preface>

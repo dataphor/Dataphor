@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:51:32</date> 
+	 </sect2info> 
+	 <title>IsSpecial</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>IsSpecial</symbol> is the parser recognized symbol for this
+		  operator. Checks to see if a given value is special. This will check among all
+		  specials for a given domain, whether built-in, or user defined. When a new
+		  domain is created, an overload of <symbol>IsSpecial</symbol> is created to
+		  provide a means of checking for special values. The DAE uses this operator as
+		  an alternative to references to other tables.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table BoolResults {ID : Integer, Result : Boolean };
+create domain TestDevice
+{
+	representation TestDevice { Name : String },
+	special Included TestDevice("Linter")
+};
+begin
+	var Temp : Boolean;
+	Temp := IsSpecial(TestDeviceIncluded()); // returns true
+	insert table { row { 1 ID, Temp Result } } into BoolResults;
+	Temp := IsSpecial("Linter"); // returns false because String is used as the default domain
+	insert table { row { 2 ID, Temp Result } } into BoolResults;
+	Temp := IsSpecial(TestDevice("Linter")); // returns true
+	insert table { row { 3 ID, Temp Result } } into BoolResults;
+end;
+select BoolResults;</programlisting> 
+		  <programlisting>Statement Executed Successfully!
+
+Statement Executed Successfully!
+
+Statement Executed Successfully!
+
+Statement Executed Successfully!
+
+ID Result 
+-- ------ 
+1  True   
+2  False  
+3  True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGSpecialvalues.html">Developers Guide, Special values</ulink>
+<ulink url="DDGP2Specials.html">Specials</ulink>
+<ulink url="D4LGSpecialValues.html">Language Guide, Special Values</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

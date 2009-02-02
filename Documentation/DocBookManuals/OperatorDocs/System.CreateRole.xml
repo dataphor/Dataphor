@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:08:36</date> 
+	 </sect2info> 
+	 <title>System.CreateRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>A role is an optional grouping of right assignments in the DAE. The
+		  DAE defines several system roles which it uses to manage basic system rights.
+		  Users and groups can be assigned to any number of roles. When a user is a
+		  member of a role, the rights assigned to that role are available to the user.
+		  When a group is a member of a role, the rights assigned to that role are
+		  available to all the users in that group. If the group role assignment is
+		  inherited, the rights assigned to that role are also available to all the users
+		  in all all sub-groups of the group. A role is itself a catalog object with
+		  rights and ownership.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.AddUserToRole.html">System.AddUserToRole</ulink>
+<ulink url="SLRSystem.DropRole.html">System.DropRole</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.GroupRoleIsInherited.html">System.GroupRoleIsInherited</ulink>
+<ulink url="SLRSystem.RemoveGroupFromRole.html">System.RemoveGroupFromRole</ulink>
+<ulink url="SLRSystem.RemoveUserFromRole.html">System.RemoveUserFromRole</ulink>
+<ulink url="SLRSystem.RevertRightForRole.html">System.RevertRightForRole</ulink>
+<ulink url="SLRSystem.RevokeRightFromRole.html">System.RevokeRightFromRole</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.RoleHasRight.html">System.RoleHasRight</ulink>
+<ulink url="SLRSystem.SetGroupRoleInherited.html">System.SetGroupRoleInherited</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

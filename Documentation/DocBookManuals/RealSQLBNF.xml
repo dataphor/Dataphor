@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  This file was generated from code doc sources, using ExtractBNF.exe.
+  Do not edit the text of this file, go to the code comments to change any text.
+-->
+<!-- RealSQL BNF -->
+<programlisting >
+The following non terminals in the Lexer BNF are referenced by the D4 BNF with equivalent meaning:
+	&lt;identifier&gt;
+	&lt;literal&gt;
+	&lt;string&gt;
+
+The same conventions found in the The Third Manifesto are used here, namely:
+	&lt;XYZ list&gt; ::= {&lt;XYZ&gt;}
+	&lt;XYZ commalist&gt; ::= [&lt;XYZ&gt;{,&lt;XYZ&gt;}]
+	&lt;ne XYZ list&gt; ::= &lt;XYZ&gt;{&lt;XYZ&gt;}
+	&lt;ne XYZ commalist&gt; ::= &lt;XYZ&gt;{,&lt;XYZ&gt;}
+
+
+	&lt;script&gt;<anchor id="RealSQLBNFscript"/> ::=
+		<link linkend="RealSQLBNFstatement">&lt;statement&gt;</link>{; <link linkend="RealSQLBNFstatement">&lt;statement&gt;</link>}
+
+	&lt;statement&gt;<anchor id="RealSQLBNFstatement"/> ::=
+		<link linkend="RealSQLBNFselectstatement">&lt;select statement&gt;</link> |
+		<link linkend="RealSQLBNFinsertstatement">&lt;insert statement&gt;</link> |
+		<link linkend="RealSQLBNFupdatestatement">&lt;update statement&gt;</link> |
+		<link linkend="RealSQLBNFdeletestatement">&lt;delete statement&gt;</link> |
+		<link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+	&lt;select statement&gt;<anchor id="RealSQLBNFselectstatement"/> ::=
+		<link linkend="RealSQLBNFqueryexpression">&lt;query expression&gt;</link>
+		[<link linkend="RealSQLBNForderbyclause">&lt;order by clause&gt;</link>]
+
+	&lt;order by clause&gt;<anchor id="RealSQLBNForderbyclause"/> ::=
+		order by <link linkend="RealSQLBNFordercolumnexpression">&lt;order column expression commalist&gt;</link>
+
+	&lt;order column expression&gt;<anchor id="RealSQLBNFordercolumnexpression"/> ::=
+		<link linkend="RealSQLBNFcolumnidentifier">&lt;column identifier&gt;</link> [asc | desc]
+
+	&lt;column identifier&gt;<anchor id="RealSQLBNFcolumnidentifier"/> ::=
+		<link linkend="RealSQLBNFqualifiedidentifier">&lt;qualified identifier&gt;</link>
+
+	&lt;query expression&gt;<anchor id="RealSQLBNFqueryexpression"/> ::=
+		<link linkend="RealSQLBNFselectexpression">&lt;select expression&gt;</link> [<link linkend="RealSQLBNFbinarytableexpression">&lt;binary table expression&gt;</link>]
+
+	&lt;binary table expression&gt;<anchor id="RealSQLBNFbinarytableexpression"/> ::=
+		[union | intersect | minus] <link linkend="RealSQLBNFselectexpression">&lt;select expression&gt;</link>
+
+	&lt;select expression&gt;<anchor id="RealSQLBNFselectexpression"/> ::=
+		select * | <link linkend="RealSQLBNFcolumnexpression">&lt;column expression commalist&gt;</link>
+			<link linkend="RealSQLBNFfromclause">&lt;from clause&gt;</link>
+			[<link linkend="RealSQLBNFwhereclause">&lt;where clause&gt;</link>]
+			[<link linkend="RealSQLBNFgroupbyclause">&lt;group by clause&gt;</link>]
+			[<link linkend="RealSQLBNFhavingclause">&lt;having clause&gt;</link>]
+
+	&lt;column expression&gt;<anchor id="RealSQLBNFcolumnexpression"/> ::=
+		<link linkend="RealSQLBNFexpression">&lt;expression&gt;</link> [as &lt;identifier&gt;]
+
+	&lt;from clause&gt;<anchor id="RealSQLBNFfromclause"/> ::=
+		from <link linkend="RealSQLBNFtablespecifier">&lt;table specifier&gt;</link> [<link linkend="RealSQLBNFjoinclause">&lt;join clause list&gt;</link>]
+
+	&lt;table specifier&gt;<anchor id="RealSQLBNFtablespecifier"/> ::=
+		(<link linkend="RealSQLBNFtableidentifier">&lt;table identifier&gt;</link> | "("<link linkend="RealSQLBNFqueryexpression">&lt;query expression&gt;</link>")") [as <link linkend="RealSQLBNFtableidentifier">&lt;table identifier&gt;</link>]
+
+	&lt;table identifier&gt;<anchor id="RealSQLBNFtableidentifier"/> ::=
+		&lt;identifier&gt;
+
+	&lt;join clause&gt;<anchor id="RealSQLBNFjoinclause"/> ::=
+		[cross | inner | ((left | right) [outer])] join <link linkend="RealSQLBNFtablespecifier">&lt;table specifier&gt;</link> [on <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>]
+
+	&lt;where clause&gt;<anchor id="RealSQLBNFwhereclause"/> ::=
+		where <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+	&lt;group by clause&gt;<anchor id="RealSQLBNFgroupbyclause"/> ::=
+		group by <link linkend="RealSQLBNFexpression">&lt;expression commalist&gt;</link>
+
+	&lt;having clause&gt;<anchor id="RealSQLBNFhavingclause"/> ::=
+		having <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+	&lt;insert statement&gt;<anchor id="RealSQLBNFinsertstatement"/> ::=
+		insert into <link linkend="RealSQLBNFtableidentifier">&lt;table identifier&gt;</link>"("<link linkend="RealSQLBNFcolumnidentifier">&lt;column identifier commalist&gt;</link>")"
+			(<link linkend="RealSQLBNFvaluesclause">&lt;values clause&gt;</link> | <link linkend="RealSQLBNFqueryexpression">&lt;query expression&gt;</link>)
+
+	&lt;values clause&gt;<anchor id="RealSQLBNFvaluesclause"/> ::=
+		values"("<link linkend="RealSQLBNFexpression">&lt;expression commalist&gt;</link>")"
+
+	&lt;update statement&gt;<anchor id="RealSQLBNFupdatestatement"/> ::=
+		update <link linkend="RealSQLBNFtableidentifier">&lt;table identifier&gt;</link> 
+				set <link linkend="RealSQLBNFupdatecolumnexpression">&lt;update column expression commalist&gt;</link>
+			[<link linkend="RealSQLBNFwhereclause">&lt;where clause&gt;</link>]
+
+	&lt;update column expression&gt;<anchor id="RealSQLBNFupdatecolumnexpression"/> ::=
+		&lt;identifier&gt; = <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+	&lt;delete statement&gt;<anchor id="RealSQLBNFdeletestatement"/> ::=
+		delete <link linkend="RealSQLBNFtableidentifier">&lt;table identifier&gt;</link>
+			[<link linkend="RealSQLBNFwhereclause">&lt;where clause&gt;</link>]
+
+	&lt;expression&gt;<anchor id="RealSQLBNFexpression"/> ::=
+              <link linkend="RealSQLBNFlogicalandexpression">&lt;logical and expression&gt;</link> <link linkend="RealSQLBNFlogicaloperatorclause">&lt;logical operator clause list&gt;</link>
+
+          &lt;logical operator clause&gt;<anchor id="RealSQLBNFlogicaloperatorclause"/> ::=
+		<link linkend="RealSQLBNFlogicalternaryclause">&lt;logical ternary clause&gt;</link> |
+		<link linkend="RealSQLBNFlogicalbinaryclause">&lt;logical binary clause&gt;</link>
+
+	&lt;logical ternary clause&gt;<anchor id="RealSQLBNFlogicalternaryclause"/> ::=
+		<link linkend="RealSQLBNFlogicalternaryoperator">&lt;logical ternary operator&gt;</link> <link linkend="RealSQLBNFadditiveexpression">&lt;additive expression&gt;</link> and <link linkend="RealSQLBNFadditiveexpression">&lt;additive expression&gt;</link>
+
+	&lt;logical ternary operator&gt;<anchor id="RealSQLBNFlogicalternaryoperator"/> ::=
+		between
+
+          &lt;logical binary clause&gt;<anchor id="RealSQLBNFlogicalbinaryclause"/> ::=
+		<link linkend="RealSQLBNFlogicalbinaryoperator">&lt;logical binary operator&gt;</link> <link linkend="RealSQLBNFlogicalandexpression">&lt;logical and expression&gt;</link>
+
+          &lt;logical binary operator&gt;<anchor id="RealSQLBNFlogicalbinaryoperator"/> ::=
+              in | or | xor | like | matches
+
+          &lt;logical and expression&gt;<anchor id="RealSQLBNFlogicalandexpression"/> ::= 
+              <link linkend="RealSQLBNFbitwisebinaryexpression">&lt;bitwise binary expression&gt;</link> {<link linkend="RealSQLBNFlogicalandoperator">&lt;logical and operator&gt;</link> <link linkend="RealSQLBNFbitwisebinaryexpression">&lt;bitwise binary expression&gt;</link>}
+
+          &lt;logical and operator&gt;<anchor id="RealSQLBNFlogicalandoperator"/> ::=
+              and
+
+          &lt;bitwise binary expression&gt;<anchor id="RealSQLBNFbitwisebinaryexpression"/> ::= 
+              <link linkend="RealSQLBNFcomparisonexpression">&lt;comparison expression&gt;</link> {<link linkend="RealSQLBNFbitwisebinaryoperator">&lt;bitwise binary operator&gt;</link> <link linkend="RealSQLBNFcomparisonexpression">&lt;comparison expression&gt;</link>}
+
+          &lt;bitwise binary operator&gt;<anchor id="RealSQLBNFbitwisebinaryoperator"/> ::=
+              ^ | &amp; | "|" | "&lt;&lt;" | "&gt;&gt;"
+
+          &lt;comparison expression&gt;<anchor id="RealSQLBNFcomparisonexpression"/> ::= 
+              <link linkend="RealSQLBNFadditiveexpression">&lt;additive expression&gt;</link> {<link linkend="RealSQLBNFcomparisonoperator">&lt;comparison operator&gt;</link> <link linkend="RealSQLBNFadditiveexpression">&lt;additive expression&gt;</link>}
+
+          &lt;comparison operator&gt;<anchor id="RealSQLBNFcomparisonoperator"/> ::=
+              = | "&lt;&gt;" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | ?=
+
+          &lt;additive expression&gt;<anchor id="RealSQLBNFadditiveexpression"/> ::= 
+              <link linkend="RealSQLBNFmultiplicativeexpression">&lt;multiplicative expression&gt;</link> {<link linkend="RealSQLBNFadditiveoperator">&lt;additive operator&gt;</link> <link linkend="RealSQLBNFmultiplicativeexpression">&lt;multiplicative expression&gt;</link>}
+
+          &lt;additive operator&gt;<anchor id="RealSQLBNFadditiveoperator"/> ::=
+              + | -
+
+          &lt;multiplicative expression&gt;<anchor id="RealSQLBNFmultiplicativeexpression"/> ::= 
+              <link linkend="RealSQLBNFexponentexpression">&lt;exponent expression&gt;</link> {<link linkend="RealSQLBNFmultiplicativeoperator">&lt;multiplicative operator&gt;</link> <link linkend="RealSQLBNFexponentexpression">&lt;exponent expression&gt;</link>}
+
+          &lt;multiplicative operator&gt;<anchor id="RealSQLBNFmultiplicativeoperator"/> ::=
+              * | / | div | mod
+
+          &lt;exponent expression&gt;<anchor id="RealSQLBNFexponentexpression"/> ::= 
+              <link linkend="RealSQLBNFunaryexpression">&lt;unary expression&gt;</link> {<link linkend="RealSQLBNFexponentoperator">&lt;exponent operator&gt;</link> <link linkend="RealSQLBNFunaryexpression">&lt;unary expression&gt;</link>}
+
+          &lt;exponent operator&gt;<anchor id="RealSQLBNFexponentoperator"/> ::=
+              **
+
+	&lt;unary expression&gt;<anchor id="RealSQLBNFunaryexpression"/> ::=
+		{<link linkend="RealSQLBNFunaryoperator">&lt;unary operator&gt;</link>} <link linkend="RealSQLBNFqualifiedfactor">&lt;qualified factor&gt;</link>
+
+	&lt;unary operator&gt;<anchor id="RealSQLBNFunaryoperator"/> ::=
+		+ | - | ~ | not | exists
+
+	&lt;qualified factor&gt;<anchor id="RealSQLBNFqualifiedfactor"/> ::=
+		(([.]&lt;identifier&gt;) | <link linkend="RealSQLBNFqualifierexpression">&lt;qualifier expression&gt;</link>){"["<link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>"]"[.<link linkend="RealSQLBNFqualifierexpression">&lt;qualifier expression&gt;</link>]}
+
+	&lt;qualifier expression&gt;<anchor id="RealSQLBNFqualifierexpression"/> ::=
+		<link linkend="RealSQLBNFfactor">&lt;factor&gt;</link>[.<link linkend="RealSQLBNFqualifierexpression">&lt;qualifier expression&gt;</link>]
+
+          &lt;factor&gt;<anchor id="RealSQLBNFfactor"/> ::= 
+              "("<link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>")" |
+              "("<link linkend="RealSQLBNFqueryexpression">&lt;query expression&gt;</link>")" |
+              &lt;literal&gt; |
+              &lt;identifier&gt; |
+              &lt;identifier&gt;"("<link linkend="RealSQLBNFactualparameter">&lt;actual parameter commalist&gt;</link>")" |
+              &lt;identifier&gt;"("[distinct] <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>")" |
+              <link linkend="RealSQLBNFcaseexpression">&lt;case expression&gt;</link>
+
+	&lt;actual parameter&gt;<anchor id="RealSQLBNFactualparameter"/> ::=
+		[var] <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+          &lt;case expression&gt;<anchor id="RealSQLBNFcaseexpression"/> ::=
+              case [<link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>]
+                  <link linkend="RealSQLBNFcaseitemexpression">&lt;ne case item expression commalist&gt;</link>
+                  else <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+              end
+
+          &lt;case item expression&gt;<anchor id="RealSQLBNFcaseitemexpression"/> ::=
+              when <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link> then <link linkend="RealSQLBNFexpression">&lt;expression&gt;</link>
+
+          &lt;qualified identifier&gt;<anchor id="RealSQLBNFqualifiedidentifier"/> ::=
+              [.]{&lt;identifier&gt;.}&lt;identifier&gt;
+
+</programlisting>

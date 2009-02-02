@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 14:19:16</date> 
+	 </sect2info> 
+	 <title>System.Floor</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator rounds down to the nearest Integer. It takes and
+		  returns a double or a decimal, but will return a value that could be
+		  represented as an integer. This is done because it still allows you to multiply
+		  and divide by a power of ten (or any other number) to round to different
+		  precisions. An integer can be easily attained by converting to an
+		  integer.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { Floor(-3.4) Neg, Floor(3.4) Pos };</programlisting> 
+		  <programlisting>Neg Pos
+--- ---
+-4  3</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Ceiling.html">System.Ceiling</ulink>
+<ulink url="SLRSystem.Round.html">System.Round</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

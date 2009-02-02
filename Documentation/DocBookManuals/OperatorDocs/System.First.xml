@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 10:15:52</date>
+	 </sect2info>
+	 <title>System.First</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator moves the specified cursor to the first row of the
+		  current dataset. </para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>begin
+	var Output : String := "";
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.First();
+	TempCursor.Next();
+	while not TempCursor.EOF() do
+	begin
+		Output := Output + String.Unicode({13})+ Name from TempCursor.Select();
+		TempCursor.Next();
+	end;
+	raise Error(Output + Unicode({13}));
+end;</programlisting> 
+		  <programlisting>Joe
+John
+Josh
+Jeff
+Jake
+Jeff</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para><ulink url="D4LGUsingCursors.html">Using Cursors</ulink></para>
+	 </formalpara> 
+</sect2> 

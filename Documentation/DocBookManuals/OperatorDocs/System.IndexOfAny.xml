@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, August 26, 2005 5:20:01 PM</date> 
+	 </sect2info> 
+	 <title>System.IndexOfAny</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>IndexOfAny</symbol> returns the index of the starting
+		  location of the FIRST occurrence of the FIRST substring found in
+		  <symbol>AString</symbol>. If none of the substrings in the
+		  <symbol>AAnyOf</symbol> list are found in <symbol>AString</symbol>, -1 is
+		  returned. An empty string in the <symbol>AAnyOf</symbol> list will not be found
+		  (the empty string is not found in any string).</para> 
+	 <para>The substrings are checked in order from first to last only until a
+		  match is found. Once a match is found no remaining substrings are checked. 
+		  <note> 
+				<para>Dataphor indexes are zero based.</para> 
+				<para>IndexOfAny does a case-sensitive comparison.</para> 
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example 
+ { TIndex : Integer, Occurance : String, key{TIndex} };
+begin
+ var LStringList : list(String) := { "or", "at", "if", "oo" };
+ insert table { row
+ { 
+  "Dataphor from Alphora is so cool!".IndexOfAny(LStringList) TIndex,
+  "First" Occurance
+ } } into Example;
+ insert table { row
+ { 
+  "Dataphor from Alphora is so cool!".LastIndexOfAny(LStringList) TIndex,
+  "Last" Occurance
+ } } into Example;
+end;
+select Example;
+drop table Example;</programlisting> 
+		  <programlisting>TIndex Occurance
+------ ---------
+6      First
+18     Last</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.StartsWith.html">System.StartsWith</ulink>
+<ulink url="SLRSystem.EndsWith.html">System.EndsWith</ulink>
+<ulink url="SLRSystem.IndexOf.html">System.IndexOf</ulink>
+<ulink url="SLRSystem.LastIndexOf.html">System.LastIndexOf</ulink>
+<ulink url="SLRSystem.LastIndexOfAny.html">System.LastIndexOfAny</ulink>
+<ulink url="SLRSystem.Pos.html">System.Pos</ulink>
+<ulink url="SLRSystem.LastPos.html">System.LastPos</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="SLRSystem.Lower.html">System.Lower</ulink>
+<ulink url="SLRSystem.Upper.html">System.Upper</ulink>
+<ulink url="D4LGQualifierExpression.html">Qualifier Expression</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

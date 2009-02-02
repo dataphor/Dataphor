@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:44:38</date> 
+	 </sect2info> 
+	 <title>iRedefine </title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>redefine</symbol> is the parser recognized symbol for this
+		  operator. This clause is used to change the expression of one column. Redefine
+		  is a shorthand for add, remove, rename.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select EmployeePhone redefine { Phone := "(801)" + Phone };</programlisting> 
+		  <programlisting>ID Phone
+-- -------------
+1  (801)555-1000
+1  (801)555-1234
+2  (801)555-4321
+4  (801)555-4444
+5  (801)555-5678
+10 (801)411
+12 (801)911</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGRedefine.html">Redefine</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

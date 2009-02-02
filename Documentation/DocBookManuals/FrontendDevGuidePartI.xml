@@ -1,0 +1,773 @@
+<?xml version="1.0"?>
+<part id="DDGPartI"> 
+	 <partinfo> 
+		  <date role="LastMod">Thursday, December 04, 2003 9:25:00 AM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 9:28:47 AM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </partinfo> 
+	 <title>Part I - Logical Architecture</title> 
+	 <partintro> 
+		  <para>Part I of this guide discusses the concepts underlying the
+				Dataphor Frontend, saving most of the implementation details for Part
+				II.</para></partintro> 
+	 <chapter id="DFDGPurposeoftheFrontend"> 
+		  <title>Architecture Overview</title> 
+		  <para>This chapter provides an introduction to the philosophy and
+				architecture behind the Dataphor Frontend tools.</para> 
+		  <sect1> 
+				<title>Purpose of Dataphor Frontend</title> 
+				<para>The 
+					 <indexterm><primary>Frontend</primary><secondary>Architectural
+								Overview</secondary></indexterm>Dataphor Frontend is a user interface
+					 abstraction layer that provides automated and uniform application interaction.
+					 Beyond what you would expect from a typical user interface toolset, the 
+					 <indexterm><primary>Frontend</primary><secondary>Special
+								Features</secondary></indexterm>Frontend technologies are designed to: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Support multiple client platforms based on a
+									 single user interface description.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Enable clients that "feel" rich but are thin in
+									 the sense that the presentation logic is retrieved from the server.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Automate layout issues so that the developer can
+									 focus on the logic and design elements.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Allow user interfaces to be easily described both
+									 statically and dynamically.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Facilitate arbitrary customizations to existing
+									 dynamic or static user interfaces, without copying them.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Allow application user interfaces to easily be
+									 customized and extended in specific, or sweeping ways.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Provide the means for the developer to allow
+									 perception and interaction with the data from any perspective.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Facilitate user interfaces that let the user
+									 naturally navigate the application data in a natural and intuitive
+									 manner.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Dataphor user Interface Language (DIL)</title> 
+				<para>The Dataphor Frontend uses an XML-based language called
+					 Dataphor user Interface Language (DIL) to describe user interfaces.</para> 
+				<para>Clients then consume these documents in much the same way
+					 that a web browser consumes HTML documents from a web server. </para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Frontend Server</title> 
+				<para>The Frontend Server is responsible for </para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Windows and Web Clients</title> 
+				<para>Because the DAE provides metadata with the results of an
+					 expression, the Dataphor Frontend is capable of producing user interfaces
+					 automatically based on that information. This process is called Derivation and
+					 helps to automate the processes involved in data presentation. There are two
+					 main types of derivation that occur in a Frontend Server: Expression
+					 Derivation, and User Interface Derivation.</para> 
+				<para><?xm-replace_text {Paragraph}?></para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Reference Application</title> 
+				<para><?xm-replace_text {Paragraph}?></para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter> 
+		  <title>Dataphor user Interface Language (DIL)</title> 
+		  <para><indexterm><primary>Dataphor user Interface
+						  Language</primary></indexterm><indexterm><primary>DIL</primary></indexterm>Dataphor
+				user Interface Language (or DIL) is an XML based language for describing
+				application user interfaces in a way that is abtracted from specific client
+				platforms. In other words, DIL represents a user interface in it's logical,
+				rather than physical form. A centralized DIL "document" can be consumed and
+				interpreted by disparate clients so that the application's user interface need
+				only be described once to provide application support for multiple client
+				platforms.</para> 
+		  <para>This chapter assumes that the reader is familiar with the basic
+				aspects of XML. High level and complete specification information concerning
+				XML can be obtained from 
+				<ulink
+				 url="http://www.w3c.org/">http://www.w3c.org/</ulink>.</para> 
+		  <sect1> 
+				<title>DIL vs HTML</title> 
+				<para>Since HTML is a commonly applied language also used to
+					 present user interfaces, it seems helpful to make at least an informal
+					 comparison between it and DIL. There are many differences between the two, but
+					 perhaps the biggest difference is the core intent of each language. HTML was
+					 originally designed "to represent a hypertext document for transmission over
+					 the network." Since then, it has been evolved and stretched into new realms,
+					 including interactive software applications, but such support remains built
+					 upon it's rather simple beginnings. 
+					 <indexterm><primary>DIL</primary><secondary>purpose
+								of</secondary></indexterm>DIL on the other hand is intended to provide an
+					 infrastructure for the presentation of and interaction with data within a
+					 database application. It should be stated that, with the exception of where
+					 HTML is stretched to work within the problem domain of DIL, <emphasis>DIL is
+					 not intended to augment or replace HTML</emphasis>. 
+					 <indexterm><primary>DIL vs
+								HTML</primary></indexterm><indexterm><primary>HTML vs
+								DIL</primary></indexterm>Here is a table of some aspects where HTML and DIL
+					 differ: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>HTML</entry><entry>DIL</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>Designed to display the same result on
+												any browser client.</entry><entry>Designed to be interpreted differently by
+												each client, but preserve the same presentation logic.</entry> 
+									 </row> 
+									 <row><entry>Primarily used as a markup language;
+												HTML tags are interspersed with text "content".</entry><entry>Only uses the
+												structural elements of XML; all data is represented by elements and attributes
+												of those elements.</entry> 
+									 </row> 
+									 <row><entry>Layout and application data are encoded
+												in the same HTML document.</entry><entry>Actual data is not part of the user
+												interface document. Data aware controls are used to interact with the
+												DBMS.</entry> 
+									 </row> 
+									 <row><entry>Extensions are provided through
+												scripting and embedded objects.</entry><entry>Extensions are implemented just
+												like the intrinsic elements.</entry> 
+									 </row> 
+									 <row><entry>Provides minimal data entry and
+												manipulation support.</entry><entry>Provides extensive data entry and
+												manipulation support.</entry> 
+									 </row> 
+									 <row><entry>Presentation is primarily based on
+												replacing the currently displayed page with a subsequent
+												page.</entry><entry>Presentation is primarily based on one or more individually
+												windowed forms, tied together in threads of modality.*</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable>* Note that the Dataphor Web Client simulates
+					 these concepts even though it renders HTML to the web browser. In this way, the
+					 resulting user interface exhibits the same logical structure even though the
+					 actual presentation is a product of HTML interpretation.</para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Basic Object Persistence (BOP)</title> 
+				<para><indexterm><primary>BOP</primary></indexterm>Basic Object
+					 Persistence (or BOP) is the fundamental mechanism used by Dataphor to read and
+					 write DIL documents; so a structural understanding of BOP is essential to
+					 working with DIL documents. The actual BOPing and deBOPing mechanisms are not
+					 discussed here, but rather the anatomy of a document that is BOP-based. The
+					 element and attribute structure of a BOP-based document is defined at a higher
+					 level of abstraction than BOP (e.g. DIL document types).</para> 
+				<para> 
+					 <programlisting>&lt;node xmlns:bop="www.alphora.com/schemas/bop" property="PropertyValue"&gt;
+	&lt;bop:inline bop:member="MemberName" property="PropertyValue"/&gt;
+	&lt;subnode property="PropertyValue" name="NodeName1" /&gt;
+	&lt;subnode bop:parent="MemberName" 
+		property="PropertyValue" name="NodeName2" /&gt;
+	&lt;subnode property="PropertyValue" 
+		bop:typeof-property="System.Integer" /&gt;
+	&lt;bop:inline bop:member="ReferenceListMemberName" 
+		bop:items="NodeName1,NodeName2" /&gt;
+&lt;/node&gt;</programlisting>A BOP document is a well formed XML document that can contain
+					 certain BOP-specific element and attribute tags.</para> 
+		  </sect1> 
+		  <sect1> 
+				<title>DIL Document Basics</title> 
+				<para><indexterm><primary>DIL</primary><secondary>Document
+								description</secondary></indexterm>A DIL document in it's simplest form is a
+					 well formed XML document that may contain certain DIL specific element and
+					 attribute tags. On top of this basic groundwork, specific DIL document types —
+					 including the list of valid elements and attributes — are established.</para> 
+				<para>Attributes of DIL elements are called properties. There are
+					 two types of elements within a DIL document: "nodes" and "inline properties". A
+					 node element always has an optional name property and has an additional set of
+					 properties depending on the type of node. Inline property elements are not
+					 named, but rather are considered extensions of set of properties of the parent
+					 element. Nodes that have properties which reference other nodes do so using the
+					 referenced node's "name"; so if a node is to be referenced, it must be
+					 named.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DFDGDataManipulationPatterns"> 
+		  <title>Data Manipulation Patterns</title> 
+		  <para><indexterm><primary>Data Manipulation
+						  Patterns</primary></indexterm>Data Manipulation Patterns provide the basis for
+				user interface automation in the Dataphor toolset. By recognizing and
+				formalizing these patterns, the toolset is capable of dynamically producing
+				intuitive user interfaces based on a data model definition.</para> 
+		  <para>The base patterns are built from the four types of references:
+				Parent, Extension, Lookup, and Detail. All other patterns are essentially
+				different combinations of these basic building blocks. The set of patterns
+				listed here is not exhaustive. As new patterns are identified and formalized,
+				they will be incorporated into the toolset. In theory, any combination of these
+				patterns will be correctly automated by Dataphor, however, the requirements of
+				specific applications may dictate specialized handling in some cases.</para> 
+		  <sect1 id="DFDGSignificanceofReferenceConstraints"> 
+				<title>Significance of Reference Constraints</title> 
+				<para><indexterm><primary>Data Manipulation
+								Patterns</primary><secondary>Significance of Reference
+								Constraints</secondary></indexterm>The DAE recognizes four categories of
+					 references, distinguished by the cardinality of the relationship defined. The
+					 following four categories become evident. We have named them so that we can
+					 conveniently converse about them.</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para> <emphasis role="strong">Parent</emphasis>
+									 </para> 
+								<para><indexterm><primary>Reference
+												Constraints</primary><secondary>Parent</secondary></indexterm>A Parent
+									 reference is one for which the referencing columns in the source table form a
+									 key in that table, and the corresponding columns in the target table also form
+									 a key. This is a 1:1 relationship; the source and target tables must both have
+									 a row.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> <emphasis role="strong">Extension</emphasis>
+									 </para> 
+								<para><indexterm><primary>Reference
+												Constraints</primary><secondary>Extension</secondary></indexterm>An Extension
+									 reference is one for which the referenced columns in the target table form a
+									 key in that table, and the corresponding columns in the target table also form
+									 a key. This is a 1:0 or 1 relationship; for every row in the target table, the
+									 source may or may not have a row.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> <emphasis role="strong">Lookup</emphasis>
+									 </para> 
+								<para><indexterm><primary>Reference
+												Constraints</primary><secondary>Lookup</secondary></indexterm>A Lookup
+									 reference is one for which the referencing columns in the source table do not
+									 form a key, but the corresponding columns in the target table do. This is a 1:N
+									 relationship; the target table must have a row for every row in the
+									 source.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> <emphasis role="strong">Detail</emphasis>
+									 </para> 
+								<para><indexterm><primary>Reference
+												Constraints</primary><secondary>Detail</secondary></indexterm>A Detail
+									 reference is one for which the referenced columns in the target table form a
+									 key, but the corresponding columns in the source table do not. This is a 1:N
+									 relationship; the source table must reference a row in the target table.</para>
+								
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<sect2 id="DFDGDataManipulation"> 
+					 <title>Data Manipulation Patterns</title> 
+					 <para/> 
+						  <sect3> 
+								<title>Parent Extension</title> 
+								<para><indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Parent Extension</secondary></indexterm> This
+									 pattern is defined by a reference between two tables where the columns involved
+									 form some unique set of attributes in both the source and target tables.</para>
+								
+								<para>
+									 <inlinegraphic fileref="images/Parent_Extention Graphic.jpg" width="156"
+									 depth="60"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table Entity
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table EntityExtension
+{
+	Entity_ID : string,
+	Address : string,
+	key { Entity_ID },
+	reference EntityExtension_Entity { Entity_ID }
+		references Entity { ID }
+};</programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Lookup Detail</title> 
+								<para><indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Lookup Detail</secondary></indexterm> This pattern
+									 is defined by a reference between two tables where the columns involved form
+									 some unique set of attributes in the target table, but not in the source
+									 table.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Lookup _ Detail Graphic.jpg" width="47"
+									 depth="180"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table ItemType
+{
+	ID : string,
+	Description : string,
+	key { ID }
+};
+
+create table Item
+{
+	ID : string,
+	ItemType_ID : string,
+	Quantity : integer,
+	key { ID },
+	reference Item_ItemType { ItemType_ID }
+		references ItemType { ID }
+}; </programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Recursive</title> 
+								<para><indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Recursive</secondary></indexterm> This pattern is
+									 a special case of the <symbol>Lookup Detail</symbol> pattern where the source
+									 and target tables involved in the reference are the same.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Recursive Graphic.jpg" width="69" depth="82"/>
+									 </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create domain SecurityGroupID is { string }
+{
+	special None SecurityGroupID("")
+};
+
+create table SecurityGroup
+{
+	ID : SecurityGroupID
+		{ constraint IDNotNone not(IsSpecial(value)) },
+	Name : string,
+	Parent_ID : SecurityGroupID
+		{ default SecurityGroupIDNone() },
+	key { ID },
+	reference SecurityGroup_SecurityGroup { Parent_ID } 
+		references SecurityGroup { ID }
+}; </programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Generalized Recursive (Tree)</title> 
+								<para><indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Generalized Recursive
+												(Tree)</secondary></indexterm> This pattern is a generalization of the
+									 <symbol>Recursive</symbol> pattern in which the parent reference is moved to an
+									 extension table. </para> 
+								<para><inlinegraphic fileref="images/Tree Graphic.jpg"
+									 width="47" depth="180"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table GroupNode
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table GroupBranch
+{
+	GroupNode_ID : string,
+	Parent_GroupNode_ID : string,
+	key { GroupNode_ID },
+	reference GroupBranch_GroupNode { GroupNode_ID } 
+		references GroupNode { ID },
+	reference GroupBranch_Parent_GroupNode { Parent_GroupNode_ID } 
+		references GroupNode { ID }
+}; </programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Association</title> 
+								<para> 
+									 <indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Association</secondary></indexterm>This pattern is
+									 the classic many-to-many association. It is built from a concatenation of
+									 multiple <symbol>Lookup Detail</symbol> patterns, but is so common as to merit
+									 specialized handling.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Association Graphic.jpg" width="150"
+									 depth="148"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table User
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table Location
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table UserLocation
+{
+	User_ID : string, 
+	Location_ID : string,
+	key { User_ID, Location_ID },
+	reference UserLocation_User { User_ID }
+		references User { ID },
+	reference UserLocation_Location { Location_ID }
+		references Location { ID }
+}; </programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Specialized Association (Network)</title> 
+								<para> 
+									 <indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Specialized Association
+												(Network)</secondary></indexterm>This pattern is a specialization of the
+									 <symbol>Association</symbol> pattern in which the target tables of the lookup
+									 references are the same.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Network Graphic.jpg" width="75" depth="173"/>
+									 </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>
+create table Node
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table Link
+{
+	Parent_Node_ID : string,
+	Child_Node_ID : string,
+	key { Parent_Node_ID, Child_Node_ID },
+	reference Link_Parent_Node { Parent_Node_ID } 
+		references Node { ID },
+	reference Link_Child_Node { Child_Node_ID } 
+		references Node { ID }
+}; </programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Detail Lookup</title> 
+								<para> 
+									 <indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Detail Lookup</secondary></indexterm>This pattern
+									 is a special case of the <symbol>Lookup Detail</symbol> pattern in which the
+									 target of one reference is the source of the other and vice versa.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Detail _ Lookup Graphic.jpg" width="47"
+									 depth="180"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table Customer
+{
+	ID : string,
+	Name : string,
+	Phone : string,
+	key { ID }
+};
+
+create table CustomerPhone
+{
+	Customer_ID : string,
+	Phone : string,
+	key { Customer_ID, Phone },
+	reference CustomerPhone_Customer { Customer_ID } 
+		references Customer { ID }
+};
+
+create reference Customer_CustomerPhone Customer { ID, Phone } 
+		references CustomerPhone { Customer_ID, Phone };</programlisting> 
+						  </sect3> 
+						  <sect3> 
+								<title>Generalized Detail Lookup</title> 
+								<para> 
+									 <indexterm><primary>Data Manipulation
+												Patterns</primary><secondary>Generalized Detail
+												Lookup</secondary></indexterm>This pattern is defined by Association between
+									 <symbol>Lookup Detail</symbol> references to the same target.</para> 
+								<para>
+									 <inlinegraphic fileref="images/Generalized Detail Lookup Graphic.jpg"
+									 width="148" depth="241"/> </para> 
+								<para> The following code demonstrates how to implement
+									 this pattern using the D4 Language: </para> 
+								<programlisting>create table Assembly
+{
+	ID : string,
+	Name : string,
+	key { ID }
+};
+
+create table AssemblyStep
+{
+	Assembly_ID : string,
+	Number : integer,
+	Instructions : string,
+	key { Assembly_ID, Number },
+	reference AssemblyStep_Assembly { Assembly_ID } 
+		references Assembly { ID }
+};
+
+create table AssemblyPart
+{
+	Assembly_ID : string,
+	PartNumber : integer,
+	key { Assembly_ID, PartNumber },
+	reference AssemblyPart_Assembly { Assembly_ID }
+		references Assembly { ID }
+};
+
+create table AssemblyStepPart
+{
+	Assembly_ID : string,
+	Number : integer,
+	PartNumber : integer,
+	key { Assembly_ID, Number, PartNumber },
+	reference AssemblyStepPart_AssemblyStep { Assembly_ID, Number }
+		references AssemblyStep { Assembly_ID, Number },
+	reference AssemblyStepPart_AssemblyPart { Assembly_ID, PartNumber }
+		references AssemblyPart { Assembly_ID, PartNumber }
+};</programlisting> 
+						  </sect3> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DFDGExpressionDerivationConcepts"> 
+				<title>Expression Derivation Concepts</title> 
+				<para><indexterm><primary>Expression Derivation
+								Concepts</primary></indexterm>Expression Derivation is concerned with using the
+					 business model to derive a meaningful expression to manipulate the contents of
+					 a given table variable. Given a table variable, and the information about which
+					 references it participates in, the Frontend is capable of deriving the D4
+					 expression to use for meaningful presentation of the data in that table. For
+					 parent references, a join operator is used to include the table variable. For
+					 extension and lookup references, a left join operator is used, and detail
+					 references are not included in the expression. The resulting expression is then
+					 used as the source for the user interface. This process can also be customized
+					 through the use of meta data on the objects involved. For example, the
+					 existence of an Embedded tag on a lookup reference will determine whether it is
+					 included in the expression, or simply made available through the user
+					 interface.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DFDGUserInterfaceDerivation"> 
+		  <title>User Interface Derivation</title> 
+		  <para/> 
+				<sect1 id="DFDGUIDerivationConcepts"> 
+					 <title>UI Derivation Concepts</title> 
+					 <para><indexterm><primary>User Interface
+									 Derivation</primary></indexterm>User Interface Derivation is concerned with
+						  taking the result type of an expression and transforming it into a user
+						  interface. There are two basic types of interfaces that can be derived, Table
+						  interfaces, and Row interfaces. A Table interface is concerned with presenting
+						  all the data from a particular result set, together with the ability to
+						  manipulate the data in that set. A Row interface is concerned with presenting
+						  all the data from a particular row for the purpose of data entry or
+						  analysis.</para> 
+					 <para>Both interface types include connective actions that
+						  allow the user to navigate to the tables which are related to the expression
+						  through references. In this way, the business model is connected and navigable
+						  without effort by the developer.</para> 
+				</sect1> 
+				<sect1 id="DFDGTableFormTypes"> 
+					 <title>Table Form Types</title> 
+					 <para><indexterm><primary>User Interface
+									 Derivation</primary><secondary>Tables</secondary></indexterm>Table Interface
+						  derivation simply produces a grid element connected to the source for the
+						  expression, and a toolbar of actions to add, edit, delete, or view the
+						  currently selected row in the grid. These actions then request the appropriate
+						  interface from the Frontend Server to perform the manipulation.</para> 
+				</sect1> 
+				<sect1 id="DFDGRowFormTypes"> 
+					 <title>Row Form Types</title> 
+					 <para><indexterm><primary>User Interface
+									 Derivation</primary><secondary>Rows</secondary></indexterm>Row Interface
+						  derivation produces a data entry element for each column in the row. The
+						  metadata and the type of the column determine the type of data entry element.
+						  Meta data can also be used to affect other properties of the column such as
+						  width, title, and visibility. For columns that participate in the source of a
+						  lookup reference, the appropriate lookup control is created, with actions to
+						  enable the selection of a row of the target table.</para> 
+				</sect1> 
+				<sect1 id="DFDGMetadataTags"> 
+					 <title>Metadata Tags</title> 
+					 <para><indexterm><primary>User Interface
+									 Derivation</primary><secondary>metadata</secondary></indexterm>Metadata
+						  <emphasis>Tags</emphasis> are an ideal way to influence the structure of
+						  dynamically derived Frontend user interfaces. Tags are embedded in the
+						  centralized schema and therefore don't necessitate schema duplication and the
+						  associated maintenance. Metadata tags allow for control of many aspects of
+						  dynamic forms such as:</para> 
+					 <para> 
+						  <itemizedlist mark="bullet"> 
+								<listitem> 
+									 <para>The title and character width of
+										  columns.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The grouping and ordering of controls.</para>
+									 
+								</listitem> 
+								<listitem> 
+									 <para>Whether child or detail tables are embedded,
+										  linked, or exposed on the toolbar.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The nodes (controls) and settings of those
+										  nodes used to represent data fields.</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+				</sect1> 
+	 </chapter> 
+	 <chapter id="DFDGUserInterfaceCustomization"> 
+		  <title>User Interface Customization</title> 
+		  <para><indexterm><primary>User Interface
+						  Customization</primary></indexterm>The Dataphor Frontend provides a
+				Customization Engine that allows user interfaces to be customized to nearly any
+				degree. The results of these customizations are saved as difference structures,
+				so that only the changed information is saved, and schema duplication is
+				minimized. This allows the business model to be changed without affecting the
+				customizations wherever possible.</para> 
+	 </chapter> 
+	 <chapter id="DFDGClients"> 
+		  <title>Clients</title> 
+		  <para/> 
+				<sect1 id="DFDGPurposeandOverview"> 
+					 <title>Purpose and Overview</title> 
+					 <para><indexterm><primary>Frontend
+									 Clients</primary></indexterm>Dataphor Frontend Clients are responsible for
+						  transforming DIL documents into user interfaces, presenting those interfaces to
+						  the user, and performing the manipulations requested by the users against the
+						  DAE. Dataphor comes with two clients built in, the Windows Client, and the Web
+						  Client.</para> 
+				</sect1> 
+	 </chapter> 
+	 <chapter id="DUGBuildingApplications"> 
+		  <title>Building Applications</title> 
+		  <para><indexterm><primary>How to</primary><secondary>Build Dataphor
+						  Applications</secondary></indexterm>This chapter describes some general
+				guidelines for building an application using Dataphor.  The described processes
+				are certainly not the only way to build applications using the tools, but they
+				do present some common approaches.</para> 
+		  <sect1 id="DUGImportorBuildaDataModel"> 
+				<title>Import or Build a Data Model</title> 
+				<para>Much of the Dataphor toolset revolves around the data model
+					 (or schema), so it is important that it be accurate and complete.  Database
+					 <emphasis>normalization</emphasis> and other design techniques should be
+					 employed to ensure that the schema is logically capable of accurately
+					 reflecting the intended business model.  Constraints (or Business Rules) should
+					 be utilized to ensure that the data in the database always matches the
+					 requirements and policies set forth by the business processes of the
+					 enterprise.</para> 
+				<para>If a data model already exists in the catalog of another
+					 device then that data model should be reconciled (imported) and scrutinized. 
+					 It may be desirable to add references and other constraints to be enforced by
+					 the DAE.</para> 
+				<para>In addition to defining the basic catalog structures,
+					 metadata can and should be used to adorn the schema with information that will
+					 steer the user interface derivation process and provide annotation to other
+					 administrators of the database.</para> 
+		  </sect1> 
+		  <sect1 id="DUGTestandCustomizetheUserInterfaces"> 
+				<title>Test and Customize the User Interfaces</title> 
+				<para>It is not necessary to complete the data model before testing
+					 and utilizing the dynamic user interfaces provided by the Dataphor Frontend. 
+					 In this way, applications can be built and maintained iteratively.  It may be
+					 advantageous in some cases to customize the dynamic user interfaces. Before
+					 this is done, thought should be given to whether the same customization could
+					 be performed using metadata within the schema.  The data model itself should
+					 also be taken into consideration before making user interface customizations.
+					 Often a customization can be eliminated by adjusting the schema to more closely
+					 match the desired perception of the data.</para> 
+		  </sect1> 
+		  <sect1 id="DUGWriteApplicableProcessLogic"> 
+				<title>Write Applicable Process Logic</title> 
+				<para>Once the data model is adequately described, it may be
+					 desirable to automate certain high-level tasks that are part of the problem
+					 domain.  For example, maybe there is a <symbol>PurchaseOrder</symbol> table, a
+					 <symbol>PurchaseItem</symbol> table, and an <symbol>Inventory</symbol> table as
+					 part of an application.  Using the derived user interfaces the user could
+					 manually change the quantities of items in the <symbol>Inventory</symbol> table
+					 when the ordered items are received.  However, the application developer can
+					 automate the task by providing process logic.  Such process logic usually, if
+					 not always, belongs in the DAE Catalog in terms of Operators (or
+					 subroutines).</para> 
+				<para>Besides the task of streamlined data manipulation, there are
+					 cases where requirements dictate very specific user interface behavior as part
+					 of the application process logic.  This behavior can be provided in several
+					 ways:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Scripted behavior in the client -- from a client
+									 side script any task, large or small can be performed.  The developer may wish
+									 to invoke a custom built user interface, communicate with proprietary hardware,
+									 or just modify the presented user interface in some way.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Extension of the client node system -- the
+									 Windows and Web Frontend Clients utilize nodes to maintain the logical user
+									 interface description structure.  For behavior that occurs frequently, it may
+									 be desirable to utilize the node mechanism to extend the clients.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Application server coding -- Frontend user
+									 interfaces can be tailored from the server side using ASP.NET in much the same
+									 way that traditional web applications are built.  The Frontend clients post
+									 data when requests are made to the server in the same manner as HTML
+									 forms.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DUGDeployingApplications"> 
+		  <title>Deploying Applications</title> 
+		  <para><indexterm><primary>How to</primary><secondary>Deploy
+						  Applications</secondary></indexterm>Once a Dataphor application is completed it
+				can be utilized from the development environment. The application must then be
+				deployed into a production environment. Dataphor application deployment is
+				relatively simple.</para> 
+		  <sect1 id="DUGDeploytheServer"> 
+				<title>Deploy the Server</title> 
+				<para>Once a DAE instance is installed in the deployment
+					 environment, it should be configured to utilize the catalog created in the
+					 development environment.  The catalog persistence script may require certain
+					 alterations to reflect the differences from development to deployment, such as
+					 storage device host names and login passwords.  When the DAE is put into a
+					 production environment, more care should be taken for matters such as
+					 security.</para> 
+		  </sect1> 
+		  <sect1 id="DUGDeploytheApplicationServer"> 
+				<title>Deploy the Application Server</title> 
+				<para>The application server deployment is very similar to a
+					 standard web application.  Make sure to configure the folder as an Application
+					 in IIS.  When put into a different environment, the application's client
+					 session file is likely to require modification because it directs clients to
+					 the DAE instance.</para> 
+		  </sect1> 
+		  <sect1 id="DUGDeploytheClients"> 
+				<title>Deploy the Clients</title> 
+				<para>Client deployment involves the installation of the Dataphor
+					 Client to be used.  Windows Client deployment is simply .NET application
+					 deployment. Web Client deployment ASP.NET web application deployment to the
+					 appropriate server or servers.  For the Web Client, it may be useful to provide
+					 a link that includes the session URI. For the Windows client, a shortcut could
+					 be provided that passes the session URI.  If nodes have been added or replaced
+					 from the standard client, the appropriate assemblies (.DLL files) will need to
+					 placed in the client executable folder and the nodes must be registered in the
+					 <symbol>nodetypes.dnt</symbol> file.</para> 
+		  </sect1> 
+	 </chapter> 
+</part> 

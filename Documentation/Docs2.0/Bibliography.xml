@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<bibliography> 
+	 <para>The following titles are used as references throughout the 
+		  <citetitle>Dataphor Combined Help Collection</citetitle>.</para> 
+	 <biblioentry><abbrev>1</abbrev> 
+		  <title>An Introduction to Database Systems</title> 
+		  <pubdate>2000</pubdate> 
+		  <author><firstname>C. J.</firstname><surname>Date</surname></author> 
+		  <edition>7th Edition</edition> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>2</abbrev> 
+		  <title>A Relational Model for Large Shared Data Banks</title> 
+		  <author> 
+				<firstname>E. F.</firstname><surname>Codd</surname></author> 
+		  <publisher> 
+				<publishername>Communications of the ACM</publishername> 
+		  </publisher><volumenum>13</volumenum><date>Tuesday, December 14, 2004
+				1:46:43 PM</date><pagenums>377 - 387</pagenums> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>3</abbrev> 
+		  <title>Foundation for Future Database Systems</title> 
+		  <subtitle>The Third Manifesto</subtitle> 
+		  <edition>Second Edition</edition> 
+		  <authorgroup><author><firstname>C.
+						  J.</firstname><surname>Date</surname></author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Addison-Wesley</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+		  <copyright><year>2000</year><holder>Addison Wesley Longman,
+					 Inc</holder> 
+		  </copyright><isbn>0-201-70928-7</isbn> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>4</abbrev> 
+		  <title>What Not How</title> 
+		  <subtitle>The Business Rules Approach to Application
+				Development</subtitle><pubdate>2000</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>5</abbrev> 
+		  <title>The Database Relational Model</title> 
+		  <subtitle>A Retrospective Review and
+				Analysis</subtitle><pubdate>2001</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry> 
+		  <abbrev>6</abbrev> 
+		  <title>Relational Database: Selected
+				Writings</title><pubdate>1986</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>7</abbrev> 
+		  <title>Relational Database Writings
+				1985-1989</title><pubdate>1990</pubdate> 
+		  <authorgroup><author><firstname>C.
+						  J.</firstname><surname>Date</surname></author><author><firstname>Andrew</firstname><surname>Warden</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>8</abbrev> 
+		  <title>Relational Database Writings
+				1989-1991</title><pubdate>1992</pubdate> 
+		  <authorgroup><author><firstname>C.
+						  J.</firstname><surname>Date</surname> 
+				</author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>9</abbrev> 
+		  <title>Relational Database Writings
+				1991-1994</title><pubdate>1995</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>10</abbrev> 
+		  <title>Relational Database Writings
+				1994-1997</title><pubdate>1998</pubdate> 
+		  <authorgroup><author><firstname>C.
+						  J.</firstname><surname>Date</surname></author><author><firstname>Hugh</firstname><surname>Darwen</surname></author>
+				
+				<author><firstname>David</firstname><surname>McGoveran</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry> 
+		  <abbrev>11</abbrev> 
+		  <title>Practical Issues in Database Management</title> 
+		  <subtitle>A Reference for the Thinking
+				Practitioner</subtitle><pubdate>2000</pubdate><author><firstname>Fabian</firstname><surname>Pascal</surname></author>
+		  
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>12</abbrev> 
+		  <title>Transaction Processing</title> 
+		  <subtitle>Conecpts and Techniques</subtitle><pubdate>1993</pubdate> 
+		  <authorgroup><author><firstname>Jim</firstname><surname>Gray</surname></author><author><firstname>Andreas</firstname><surname>Reuter</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Morgan Kaufmann</publishername> 
+				<address><city>San Francisco,
+					 </city><state>California</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>13</abbrev> 
+		  <title>Database Systems</title> 
+		  <subtitle>A Practical Approach to Design, Implementation, and
+				Management</subtitle><pubdate>1999</pubdate> 
+		  <edition>Second Edition</edition> 
+		  <authorgroup><author><firstname>Thomas</firstname><surname>Connolly</surname></author><author><firstname>Carolyn</firstname><surname>Begg</surname></author><author><firstname>Anne</firstname><surname>Strachan</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>14</abbrev>
+		  <title>Database Systems</title>
+		  <subtitle>Design, Implementation, &amp; Management</subtitle>
+		  <edition>Fourth Edition</edition> 
+		  <pubdate>2000</pubdate>
+		  <authorgroup><author><firstname>Peter</firstname><surname>Rob</surname>
+					 
+				</author><author><firstname>Carlos</firstname><surname>Coronel</surname></author>
+		  </authorgroup>
+		  <publisher>
+				<publishername>Course Technology</publishername>
+				<address><city>Cambridge,
+					 </city><state>Massachusetts</state></address>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>15</abbrev> 
+		  <title>The Art of Computer
+				Programming</title><pubdate>1998</pubdate><volumenum>Vol. 3</volumenum> 
+		  <edition>Second
+				Edition</edition><author><firstname>Donald</firstname><surname>Knuth</surname></author>
+		  
+		  <publisher> 
+				<publishername>Addison Wesley Longman</publishername> 
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>16</abbrev> 
+		  <title>Database System Implementation</title><pubdate>2000</pubdate> 
+		  <authorgroup><author><firstname>Hector</firstname><surname>Garcia-Molina</surname></author><author><firstname>Jeffrey
+						  D.</firstname><surname>Ullman</surname></author><author><firstname>Jennifer</firstname><surname>Widom</surname></author>
+				
+		  </authorgroup> 
+		  <publisher> 
+				<publishername>Prentice Hall</publishername> 
+				<address><city>Upper Saddle River, </city><state>New
+					 Jersey</state></address> 
+		  </publisher> 
+	 </biblioentry> 
+	 <biblioentry><abbrev>17</abbrev>
+		  <title>Updating Logical
+				Databases</title><pubdate>1990</pubdate><author><firstname>Marianne</firstname><surname>Winslett</surname></author>
+		  <publisher>
+				<publishername>Cambridge University Press</publishername>
+				<address><city>New York, </city><state>New York</state></address>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>18</abbrev>
+		  <title>Transactional COM+</title>
+		  <subtitle>Building Scalable
+				Applications</subtitle><pubdate>2001</pubdate><author><firstname>Tim</firstname><surname>Ewald</surname></author>
+		  <publisher>
+				<publishername>Addison Wesley</publishername>
+				<address><city>Reading,
+					 </city><state>Massachusetts</state></address>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>19</abbrev>
+		  <title>Temporal Data And The Relational Model</title>
+		  <subtitle>A Detailed Investigation into the Application of Interval and
+				Relation Theory to the Problem of Temporal Database
+				Management</subtitle><pubdate>2003</pubdate>
+		  <authorgroup><author><firstname>C.
+						  J.</firstname><surname>Date</surname></author><author><firstname>Hugh</firstname><surname>Darwen</surname></author><author><firstname>Nikos
+						  A.</firstname><surname>Lorentzos</surname></author>
+		  </authorgroup>
+		  <publisher>
+				<publishername>Morgan Kaufmann</publishername>
+				<address><city>San Francisco,
+					 </city><state>California</state></address>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>20</abbrev>
+		  <title>Multiple Assignment</title>
+		  <subtitle>Practical Database Foundations Paper
+				#5</subtitle><pubdate>2004</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author>
+		  <publisher>
+				<publishername>www.dbdebunk.com</publishername>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>21</abbrev>
+		  <title>The Logic Of Business Rules</title>
+		  <subtitle>Practical Database Foundations Paper
+				#7</subtitle><pubdate>2004</pubdate><author><firstname>C.
+					 J.</firstname><surname>Date</surname></author> 
+		  <publisher>
+				<publishername>www.dbdebunk.com</publishername>
+		  </publisher>
+	 </biblioentry>
+	 <biblioentry><abbrev>22</abbrev>
+		  <title>The Costly Illusion: Normalization, Integrity, &amp;
+				Performance</title>
+		  <subtitle>Practical Database Foundations Paper
+				#6</subtitle><pubdate>2004</pubdate><author><firstname>Fabian</firstname><surname>Pascal</surname></author>
+		  <publisher>
+				<publishername>www.dbdebunk.com</publishername>
+		  </publisher>
+	 </biblioentry>
+</bibliography>

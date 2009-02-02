@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:43:25</date> 
+	 </sect2info> 
+	 <title>System.GetBookmark</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns a row that acts as a bookmark, that will be
+		  unique to the current row. This information can be saved in a row variable and
+		  used later in <symbol>GotoBookmark</symbol>. This is similar to a key, except
+		  that the data and structure of a key are actually the same as the data in the
+		  columns associated with a key.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmpCursor : cursor := cursor (Employee capabilities {Updateable});
+	var TempRow : row;
+	TempRow = row {"Jed" Name,45 ID};
+	EmpCursor.Insert(TempRow);
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Bookmarkable.html">Cursor Capabilities, Bookmarkable</ulink>
+<ulink url="SLRSystem.GotoBookmark.html">System.GotoBookmark</ulink>
+<ulink url="SLRSystem.GetKey.html">System.GetKey</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

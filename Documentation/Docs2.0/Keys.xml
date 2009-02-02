@@ -1,0 +1,480 @@
+<?xml version="1.0"?>
+<appendix id="Alphora.Dataphor.Keys"> 
+	 <appendixinfo><date role="LastMod">Monday, January 03, 2005 10:32:18</date>
+		  
+	 </appendixinfo> 
+	 <title>Editor Shortcut Keys</title> 
+	 <indexterm><primary>Editor Shortcut
+				Keys</primary></indexterm><indexterm><primary>Shortcut
+				Keys</primary></indexterm><indexterm><primary>Keys,
+				Shortcut</primary></indexterm>
+	 <para>The editor has the following commands and associated shortcut
+		  keys:</para> 
+	 <para>EDITING</para> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry colname="col1"><guimenuitem>Cursor
+									 Left</guimenuitem></entry><entry
+						  colname="col02"><keycap>Left</keycap></entry><entry colname="col2">Moves the
+								cursor left one character.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor
+									 Right</guimenuitem></entry><entry
+						  colname="col02"><keycap>Right</keycap></entry><entry colname="col2">Moves the
+								cursor right one character.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor
+									 Up</guimenuitem></entry><entry
+						  colname="col02"><keycap>Up</keycap></entry><entry colname="col2">Moves the
+								cursor up one line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor
+									 Down</guimenuitem></entry><entry
+						  colname="col02"><keycap>Down</keycap></entry><entry colname="col2">Moves the
+								cursor down one line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Start of
+									 Line</guimenuitem></entry><entry
+						  colname="col02"><keycap>Home</keycap></entry><entry colname="col2">Moves the
+								cursor to beginning of line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>End of
+									 Line</guimenuitem></entry><entry
+						  colname="col02"><keycap>End</keycap></entry><entry colname="col2">Moves the
+								cursor to end of line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor Word
+									 Left</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Left</keycap></keycombo></entry><entry
+						  colname="col2">Moves the cursor left one word.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor Home
+									 </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Home</keycap></keycombo></entry><entry
+						  colname="col2">Moves the cursor to the beginning of the text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Cursor End
+									 </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>End</keycap></keycombo></entry><entry
+						  colname="col2">Moves the cursor to the end of the text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Start of Text/Line
+									 </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Alt</keycap><keycap>Home</keycap></keycombo></entry><entry
+						  colname="col2">Moves the cursor to the beginning of the text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Page
+									 Up</guimenuitem></entry><entry
+						  colname="col02"><keycap>PageUp</keycap></entry><entry colname="col2">Scrolls
+								the view up one page.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Page
+									 Down</guimenuitem></entry><entry
+						  colname="col02"><keycap>PageDown</keycap></entry><entry colname="col2">Scrolls
+								the view down one page.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Scroll
+									 Up</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Up</keycap></keycombo></entry><entry
+						  colname="col2">Scrolls the view up one line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Scroll
+									 Down</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Down</keycap></keycombo></entry><entry
+						  colname="col2">Scrolls the view down one line.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Delete</guimenuitem></entry><entry
+						  colname="col02"><keycap>Delete</keycap></entry><entry colname="col2">Deletes
+								the current character or selected text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Delete Word
+									 Right</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Delete</keycap></keycombo></entry><entry
+						  colname="col2">Deletes from the cursor to the start of the next word.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Delete Word
+									 Left</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Delete</keycap></keycombo></entry><entry
+						  colname="col2">Deletes from the cursor to the start of the current
+								word.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Delete To Line
+									 End</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Delete</keycap></keycombo></entry><entry
+						  colname="col2">Deletes from the cursor to the end of the current line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Delete
+									 Line</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>L</keycap></keycombo></entry><entry
+						  colname="col2">Deletes the current line.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Find...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo></entry><entry
+						  colname="col2">Searches for a given text string within the contents of the
+								designer.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Find &amp;
+									 Replace...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>H</keycap></keycombo></entry><entry
+						  colname="col2">Replaces a given text string with another.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Find
+									 Next</guimenuitem></entry><entry
+						  colname="col02"><keycap>F3</keycap></entry><entry colname="col2">Repeats the
+								last find operation.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Goto Matching
+									 Brace</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>B</keycap></keycombo></entry><entry
+						  colname="col2">Moves cursor to the matching brace.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Toggle Edit
+									 Mode</guimenuitem></entry><entry
+						  colname="col02"><keycap>Insert</keycap></entry><entry colname="col2">Toggles
+								between insert and overtype.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Undo</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Z</keycap></keycombo> or
+								
+								<keycombo><keycap>Alt</keycap><keycap>BkSp</keycap></keycombo></entry><entry
+						  colname="col02"><keycap>Delete</keycap></entry><entry colname="col2">Undoes the
+								last keystroke.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Redo</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Y</keycap></keycombo></entry><entry
+						  colname="col02"><keycap>Delete</keycap></entry><entry colname="col2">Repeates
+								the last keystroke.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Split
+									 Window</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>1</keycap></keycombo></entry><entry
+						  colname="col2">Split the editor window. Allowes two locations of the same text
+								to be viewed/edited at the same time.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable> 
+	 <para></para> 
+	 <para>SELECTION/BLOCK</para> 
+	 <note> 
+		  <para>Blocks are delimited using <symbol>//*</symbol> (slash slash
+				asterisk). On end of the block can be delimited by the beginning or the end of
+				the text.</para> 
+	 </note> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry colname="col1"><guimenuitem>Select Character
+									 Left</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>Left</keycap></keycombo></entry><entry
+						  colname="col2">Selects the next character to the left.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select Character
+									 Right</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>Right</keycap></keycombo></entry><entry
+						  colname="col2">Selects the next character to the right.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select Line
+									 Up</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>Up</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the same position
+								one line up.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select Line
+									 Down</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>Down</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the same position
+								one line down.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select Page
+									 Up</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>PageUp</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position one page up.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select Page
+									 Down</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>PageDown</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position one page down.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to Beginning of
+									 Line </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>Home</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the beginning of the
+								current line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to End of Line
+									 </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Shift</keycap><keycap>End</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the end of the
+								current line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to Beginning of
+									 Text </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Home</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the beginning of the
+								text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to End of Text
+									 </guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>End</keycap></keycombo></entry><entry
+						  colname="col2">Selects from the current cursor position to the end of the
+								text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Toggle Block
+									 Delimiter</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>/</keycap></keycombo></entry><entry
+						  colname="col2">Insert/remove a block delimiter at the beginning of the current
+								line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Previous
+									 Block</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>,</keycap></keycombo></entry><entry
+						  colname="col2">Move cursor to pevious block delimiter.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Next
+									 Block</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>.</keycap></keycombo></entry><entry
+						  colname="col2">Move cursor to next block delimiter.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to Previous
+									 Block</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>,</keycap></keycombo></entry><entry
+						  colname="col2">Select from the current cursor location to the pevious block
+								delimiter.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select to Next
+									 Block</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>.</keycap></keycombo></entry><entry
+						  colname="col2">Select from the current cursor location to the next block
+								delimiter.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select
+									 Block</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>D</keycap></keycombo></entry><entry
+						  colname="col2">Selects the current block.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Select
+									 All</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>A</keycap></keycombo></entry><entry
+						  colname="col2">Selects all the text.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Clear Selection
+									 </guimenuitem></entry><entry colname="col02"><keycap>ESC</keycap></entry><entry
+						  colname="col2">Clears (deselects) all selections.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Cut</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>X</keycap></keycombo> or
+								
+								<keycombo><keycap>Shift</keycap><keycap>Delete</keycap></keycombo></entry><entry
+						  colname="col2">Removes the currently selected text and places it on the
+								clipboard.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Copy</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>C</keycap></keycombo> or
+								
+								<keycombo><keycap>Ctrl</keycap><keycap>Insert</keycap></keycombo></entry><entry
+						  colname="col2">Copies the currently selected text to the clipboard.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Paste</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo> or
+								
+								<keycombo><keycap>Shift</keycap><keycap>Insert</keycap></keycombo></entry><entry
+						  colname="col2">Pastes the current contents of the clipboard at the current
+								cursor location.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable> 
+	 <para></para> 
+	 <para>OPEN/SAVE/PRINT/CLOSE</para> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry
+						  colname="col1"><guimenuitem>New...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo></entry><entry
+						  colname="col2">Open editor for new item.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Open...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>O</keycap></keycombo></entry><entry
+						  colname="col2">Open existing file/document.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Open
+									 with...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>W</keycap></keycombo></entry><entry
+						  colname="col2">Open existing file/document and query which editor to
+								use.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Save</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>S</keycap></keycombo></entry><entry
+						  colname="col2">Save changes in current editor.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Save
+									 All</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>S</keycap></keycombo></entry><entry
+						  colname="col2">Save changes in all editors.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Save...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>S</keycap></keycombo></entry><entry
+						  colname="col2">Saves the contents of the current editor.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Save As
+									 File...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>F</keycap></keycombo></entry><entry
+						  colname="col2">Saves the contents of the current editor as a physical
+								file.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Save As
+									 Document...</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>D</keycap></keycombo></entry><entry
+						  colname="col2">Saves the contents of the current editor as a document.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Print</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo></entry><entry
+						  colname="col2">Print the contents of the current editor.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Close</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>F4</keycap></keycombo></entry><entry
+						  colname="col2">Closes the current editor, prompting to save if the contents of
+								the editor have been modified.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Exit</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Alt</keycap><keycap>F4</keycap></keycombo></entry><entry
+						  colname="col2">Close and exit Dataphoria.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Show
+									 Explorer</guimenuitem></entry><entry
+						  colname="col02"><keycap>F12</keycap></entry><entry colname="col2">Display the
+								Dataphore Explorer pane.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Lanch
+									 Form...</guimenuitem></entry><entry
+						  colname="col02"><keycap>F6</keycap></entry><entry colname="col2">Lanch a
+								derived form.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable> 
+	 <para></para> 
+	 <para>D4 SCRIPTS</para> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry colname="col1"><guimenuitem>Execute
+									 all/selection</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>E</keycap></keycombo></entry><entry
+						  colname="col2">Executes the currently selected script, or the entire script if
+								nothing is selected.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Execute Current
+									 Line</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>E</keycap></keycombo></entry><entry
+						  colname="col2">Executes the script on the current line.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Prepare</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>R</keycap></keycombo></entry><entry
+						  colname="col2">Checks the currently selected text, or the entire script if no
+								text is selected, for syntactic and semantic correctness by compiling the
+								script without executing it.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col1"><guimenuitem>Inject</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>I</keycap></keycombo></entry><entry
+						  colname="col2">Executes InjectUpgrade( System.LibraryName(),
+								<symbol>AScript</symbol> ) ,where <symbol>AScript</symbol> is the currently
+								selected script, or the entire script if nothing is selected.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Toggle
+									 Comment</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>/</keycap></keycombo></entry><entry
+						  colname="col2">Comments or Uncomments the current line or selection.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Show
+									 Results</guimenuitem></entry><entry
+						  colname="col02"><keycap>F7</keycap></entry><entry colname="col2">Show the
+								Results pane.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable> 
+	 <para></para> 
+	 <para>DATAPHOR FUNCTIONS</para> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry colname="col1"><guimenuitem>Inject As
+									 Upgrade</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Ctrl</keycap><keycap>I</keycap></keycombo></entry><entry
+						  colname="col2">Injects the currently selected text, or the entire script if no
+								text is selected, as an upgrade in the current library.</entry> 
+					 </row></tbody> 
+		  </tgroup> 
+	 </informaltable> 
+	 <para></para> 
+	 <para>BOOKMARKS</para> 
+	 <informaltable> 
+		  <tgroup cols="3"><colspec colnum="1" colname="col1"
+				colwidth="1*"/><colspec colname="col02" colnum="2" colwidth="1*"/><colspec
+				colnum="3" colname="col2" colwidth="2*"/><thead> 
+					 <row><entry colname="col1">Command</entry><entry
+						  colname="col02">Shortcut</entry><entry colname="col2">Description</entry> 
+					 </row></thead><tbody> 
+					 <row><entry colname="col1"><guimenuitem>Goto Previous
+									 Bookmark</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Alt</keycap><keycap>Up</keycap></keycombo> or
+								
+								<keycap>BrowserBack</keycap></entry><entry
+						  colname="col2">Repositions cursor to the previous bookmarked line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Goto Next
+									 Bookmark</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Alt</keycap><keycap>Down</keycap></keycombo>
+								or 
+								<keycap>BrowserForward</keycap></entry><entry
+						  colname="col2">Repositions cursor to the next bookmarked line.</entry> 
+					 </row> 
+					 <row><entry colname="col1"><guimenuitem>Toggle
+									 Bookmark</guimenuitem></entry><entry
+						  colname="col02"><keycombo><keycap>Alt</keycap><keycap>Left</keycap></keycombo> 
+								<keycap>BrowserStop</keycap> </entry><entry
+						  colname="col2">Set/Remove bookmark from the current line.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable> 
+</appendix> 

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 20, 2004 07:14:32</date> 
+	 </sect2info> 
+	 <title>System.DatePart</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>DatePart</symbol> returns the date portion of a DateTime data
+		  type as a DateTime type.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select DateTime();
+select DatePart(DateTime());</programlisting> 
+		  <programlisting>2004-04-20 07:10:30
+2004-04-20</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.TimePart.html">System.TimePart</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

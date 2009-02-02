@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 14:49:34</date> 
+	 </sect2info> 
+	 <title>System.ServerName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the current server name. The server name is
+		  specified upon creation. The default server name for both In-Process servers
+		  and servers running as a service is "dataphor".</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {ServerName() server };</programlisting> 
+		  <programlisting>server   
+-------- 
+dataphor </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGConnectingToServer.html">Connecting to a Server</ulink>
+<ulink url="DDGP1Server.html">Server</ulink>
+<ulink url="DDGP2ServerArchitecture.html">Server Architecture</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

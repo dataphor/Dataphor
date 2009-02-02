@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, August 26, 2005 4:54:39 PM</date> 
+	 </sect2info> 
+	 <title>System.IsUpper</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>If AIndex is specified, <symbol>IsUpper</symbol> returns
+		  <symbol>true</symbol> if the character AString[AIndex] is an upper case letter,
+		  otherwise <symbol>IsUpper</symbol> returns <symbol>false</symbol>.</para> 
+	 <para> If AIndex is not specified, <symbol>IsUpper</symbol> returns
+		  <symbol>true</symbol> if every character of AString is an upper case letter,
+		  otherwise <symbol>IsUpper</symbol> returns <symbol>false</symbol>. If there are
+		  no case relative characters, or no characters at all in the string,
+		  <symbol>IsUpper</symbol> returns <symbol>true</symbol>.
+		  <note> 
+				<para>Dataphor uses zero based indexing.</para> 
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select IsUpper("abcDEF");
+select IsUpper("abcDEF", 4);
+select IsUpper("");</programlisting> 
+		  <programlisting>False
+True
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.IsLower.html">System.IsLower</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

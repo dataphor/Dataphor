@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:31:54</date> 
+	 </sect2info> 
+	 <title>iEqual</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>=</symbol> is the parser recognized symbol for this operator.
+		  The <symbol>Equal</symbol> operator is a comparison operator that checks to see
+		  if the two values on either side of the operator are equal. This operator
+		  returns a boolean value representing the result of the comparison.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select EmployeePhone where Phone.Length() = 8 add {ID.ToString() = Phone bool};</programlisting> 
+		  <programlisting>ID Phone    bool  
+-- -------- ----- 
+1  555-1000 False 
+1  555-1234 False 
+2  555-4321 False 
+4  555-4444 False 
+5  555-5678 False </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGComparisonOperators.html">Comparison Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,1285 @@
+<?xml version="1.0" ?>
+<part id="DACDGUsing"> 
+	 <partinfo><date role="LastMod">Wednesday, October 09, 2002 5:11:29
+				PM</date>
+	 </partinfo>
+	 <title><indexterm><primary>Using the DAC</primary></indexterm>Using the
+		  DAC</title> 
+	 <partintro> 
+		  <para>Part I of the DAC Developer's Guide contains an architectural
+				overview of the Dataphor Data Access Components.</para> 
+	 </partintro> 
+	 <chapter id="DADDGUsingOverview"> 
+		  <title>Overview</title> 
+		  <sect1> 
+				<title>Introduction</title> 
+				<para>Components are classes that do not manifest themselves on a
+					 user interface (non-visual), but instead perform "internal" behavior for the
+					 application. Controls are are classes that are usually presented on the user
+					 interface of the application (visual). When designing and application, both
+					 components and controls can be visually prepared and manipulated from within
+					 the Visual Studio .NET designer. The Dataphor Data Access Components (DAC) is a
+					 set of components and Windows Forms controls that provide interactive access to
+					 data housed in a database system.</para> 
+				<para>The .NET Framework (and therefore Visual Studio .NET)
+					 includes a data access paradigm called ADO.NET. The Dataphor Data Access
+					 Components provide a complete alternative to ADO.NET, with some distinct
+					 advantages. Some benefits of the DAC are most apparent when compared with
+					 ADO.NET, while others are distinct for the industry.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGUsingDifferences"> 
+				<title><indexterm><primary>DAC versus
+								ADO.NET</primary></indexterm>Differences From ADO.NET</title> 
+				<para>ADO.NET and the DAC are fundamentally different in the way
+					 that they buffer and navigate the data. ADO.NET requires the developer to
+					 determine an adequate subset of data to retrieve from the DBMS into a buffer.
+					 The developer then performs interaction and manipulation within the absolutely
+					 indexed buffers. Then the developer determines how to appropriately post
+					 updates to the DBMS. ADO.NET does not abstract or insulate the data source's
+					 query language or capabilities. The DAC on the other hand performs the data
+					 querying, buffering, and reconciliation automatically. Navigation in the DAC is
+					 performed as relative positioning within what logically appears to be the
+					 entire dataset. These differences are so fundamental that the DAC concepts
+					 could not be built on top of ADO.NET without severely compromising the desired
+					 architecture. Here are a few comparisons between ADO.NET and the Dataphor DAC: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>ADO.NET</entry><entry>DAC</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>Each different DBMS is queried using a
+												different query dialect. Application logic must be re-created for each
+												DBMS.</entry><entry>Accepts a single query dialect then emits whatever dialect
+												is necessary to the backend DBMS.</entry> 
+									 </row> 
+									 <row><entry>The developer must formulate queries
+												that retrieve only a "reasonable" amount of data.</entry><entry>The DAC handles
+												the end query formulation and automatically ensures appropriate quantities are
+												fetched.</entry> 
+									 </row> 
+									 <row><entry>Controls are "loosly" bound to the
+												dataset buffer through property binding.</entry><entry>Controls are made
+												intrinsically data aware.</entry> 
+									 </row> 
+									 <row><entry>Reconciliation is facilitated manually
+												by formulating parameterized update statements.</entry><entry>The DAC
+												automatically manages buffer reconciliation including transactional
+												implications.</entry> 
+									 </row> 
+									 <row><entry>Control data binding is based (by
+												default) on control containership.</entry><entry>Controls are data bound
+												independent from their containers.</entry> 
+									 </row> 
+									 <row><entry>Most data behavior only takes place at
+												run-time.</entry><entry>Datasets can be activated and viewed both at run-time
+												and design-time.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGUsingBenefits"> 
+				<title><indexterm><primary>DAC
+								Benefits</primary></indexterm>Benefits</title> 
+				<para>There are many benefits to using the DAC including: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Intrinsically data aware controls can react
+									 intelligently to focus changes, dataset states, and formatting.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Controls are bound to datasets indirectly through
+									 DataSource instances. This allows for existing forms to be easily attached to
+									 different datasets regardless of control containership.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Controls report the number of rows that each
+									 requires, so the dataset buffer size is dynamic (based on demand).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The DataView (dataset buffer) automatically
+									 retrieves data into the buffer and updates the DBMS from the buffer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Data aware user interfaces can be configured and
+									 activated at design time within the Visual Studio .NET environment.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Controls and data components can be visually
+									 connected and configured so very little coding is required to build data aware
+									 applications.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+		  </sect1> 
+		  <sect1 id="DACDGAdvancedBenefits"> 
+				<title><indexterm><primary>DAC Advanced
+								Benefits</primary></indexterm>Advanced Benefits</title> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Single query dialect - The DAC can be attached
+									 one of a variety of data sources, yet queries are formulated in a single
+									 dialect and translated realtime into the appropriate dialect for the data
+									 source. This allows for applications to be easily ported from one database
+									 backend to another.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Query processor - If a particular data source
+									 does not support certain functionality (i.e. scalar or relational operators)
+									 the DAC will automatically pick up the query processing.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Updatable queries - Regardless of the expression
+									 used by the dataset, the data can be updated. This is especially useful in the
+									 case of joins and unions where views of that nature would not ordinarily be
+									 updatable against the DBMS.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Navigational access - Dataset query is logically
+									 formulated for the entire set of data. The DAC will automatically rewrite the
+									 query underneith and fetch subsets of data.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Incremental search - Users can perform on-the-fly
+									 "find nearest" type queries of even the largest underlying tables. As part of
+									 the navigation access, the DAC will automatically re-query and fetch
+									 appropriately to make such access effecient and tranparent.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Application transactions - Manipulations to
+									 complex data relationship automatically participate in optimisticly concurrent
+									 transactions so changes are all committed or rolled back when a "master"
+									 dataset's change is accepted or rejected respectively.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGInstallation"> 
+		  <title><indexterm><primary>DAC
+						  Installation</primary></indexterm>Installation</title> 
+		  <para><indexterm><primary>Installation</primary></indexterm>The Data
+				Access Components are relatively easy to install. For application design they
+				can be installed into the Visual Studio .NET's "toolbox". For runtime
+				deployment, the DAC assemblies can be copied into an application's local
+				folder, or they can be installed into the Global Assembly Cache (GAC). For more
+				general information on these concepts, see the MSDN documentation for the .NET
+				Framework.</para> 
+		  <sect1 id="DACDGStandardSetup"> 
+				<title><indexterm><primary>DAC Standard
+								Setup</primary></indexterm>Standard Setup</title> 
+				<para>To install the Data Access Components, run the setup.exe
+					 program and follow the instructions.</para> 
+				<para>The standard DAC setup performs the following: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Copies the DAC Assemblies (DLLs) to the directory
+									 you chose during the install.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Installs the DAC Assemblies into the GAC.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Registers the Assemblies in the GAC with Visual
+									 Studio so that they appear in the Form Designer ToolBox.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Copies the documentation help files and the
+									 readme.rfd.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Creates links on start menu for docs and
+									 readme</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Generates a GAC.licence file and places it in
+									 CommonAppDataPath directory (which in this case is Documents and Settings\All
+									 Users\Application Data\Alphora\Dataphor.)</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Copies DAERegisteredAssemblies.config, an
+									 Assembly Map that contains Assembly Aliases for use in D4 code, to the Version
+									 Specifice CommonAppDataPath directory (which in this case is Documents and
+									 Settings\All Users\Application Data\Alphora\Dataphor\VersionNumber.)</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Creates registry key to instll path for use by
+									 other programs. This is not used by the DAC components directly.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>The components can also be installed on a machine manually
+					 via the Deployment and then installed manually on the Visual Studio toolbox.
+					 The assemblies must be placed into the GAC to be used from within Visual Studio
+					 .NET.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGDeployment"> 
+				<title><indexterm><primary>DAC
+								Deployment</primary></indexterm>Deployment</title> 
+				<para><indexterm><primary>Deployment</primary></indexterm>When
+					 deploying the programs you have created which use the DAC, the following steps
+					 need to be done. 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>The DAC DLLs must be installed. They can be place
+									 in the program directory or they can be installed into the GAC.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The GAC.license file must be copied the the
+									 CommonAppDataPath of the DAC, the same directory it was installed to
+									 originally.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The Assembly map (DAERegisteredAssemblies.config)
+									 must be installed into the Version Specific CommonAppDataPath of the DAC, the
+									 same directory it was installed to originally.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGDataSessionComponents"> 
+		  <title>DataSession Components</title> 
+		  <para><indexterm><primary>DataSession</primary></indexterm>The
+				DataSession components represents a logical connection with a data source.
+				There are different 
+				<classname>DataSessionBase</classname> descendant components for
+				each backend data source, each prefixed with the name of the DBMS. To establish
+				DAC data source connectivity place the appropriate DataSession component into
+				the designer from the Visual Studio .NET toolbox (e.g. DB2DataSession for IBM
+				DB2). To establish a connection to an instance of the Dataphor DAE, use a 
+				<classname>DataSession</classname> component.</para> 
+		  <para>Typically an application will only need one DataSession instance.
+				This instance should be configured and created at application startup so that
+				the DataSession instance is available for data connectivity from the various
+				forms of the application.</para> 
+		  <sect1 id="DACDGDeviceDataSessionProperties"> 
+				<title><indexterm><primary>Device-specific DataSession
+								Properties</primary></indexterm>Device-specific DataSession Properties</title> 
+				<para>Each specific 
+					 <classname>DataSessionBase</classname> descendant has it's own
+					 set of unique properties. The properties allow device specific settings to be
+					 configured, such as connectivity information. See the reference part for
+					 information about each specific DataSessionBase descendant's properties.</para>
+				
+		  </sect1> 
+		  <sect1 id="DACDGDatasessionProperties"> 
+				<title><indexterm><primary>DataSession
+								Properties</primary></indexterm>DataSession Properties</title> 
+				<para> To configure a DataSession component, configure the
+					 <property>SessionInfo</property> and the <property>SessionName</property>
+					 properties. The <property>SessionInfo</property> contains settings and
+					 configuration parameters such as <property>UserID</property> and
+					 <property>Password</property>. See reference information for the 
+                     <!-- note: this link will be broken in the Stand Alone verison of this document -->
+					 <ulink
+					 url="Alphora.Dataphor.DAE.SessionInfo.html">SessionInfo</ulink> class for
+					 details.</para> 
+				<para>Setting the SessionName property registers the DataSession
+					 with a static "global" list of application DataSessions so that DataViews can
+					 be connected without being on the same design surface.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGActivateDataSession"> 
+				<title><indexterm><primary>Activating the
+								DataSession</primary></indexterm>Activating the DataSession</title> 
+				<para>Activating the DataSession is done by setting the
+					 <property>Active</property> property to <literal>True</literal> or calling the 
+					 <methodname>Open</methodname> method at runtime. Activating the
+					 DataSession causes it to establish a connection with the underlying data
+					 source. If a connection cannot be made, and appropriate exception will be
+					 thrown.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGDataViewComponent"> 
+		  <title><indexterm><primary>DataView
+						  Component</primary></indexterm>DataView Component</title> 
+		  <para><indexterm><primary>DataView</primary></indexterm>The DataView
+				component represents a dataset within a data source, based on a specific query
+				expression. The DataView forms the core data manipulation component around
+				which the other components in the DAC revolve. Through the DataView, data can
+				be searched, retrieved, and modified. The DataView performs all data buffering
+				transparently as navigation/searching occur.</para> 
+		  <sect1 id="DACDGConnectingDataSession"> 
+				<title><indexterm><primary>Connecting to the
+								DataSession</primary></indexterm>Connecting to the DataSession</title> 
+				<para>The DataView established connectivity with the underlying
+					 data source through a DataSession instance. The DataView is associated with a
+					 DataSession instance through the <property>Session</property> property. If the
+					 DataSession associated with the DataView is not active when the DataView is
+					 activated, it will be activated at that time (if possible).</para> 
+				<para>The <property>Session</property> property can be set
+					 directly, or it can be set indirectly through the
+					 <property>SessionName</property> property. The SessionName property makes it
+					 easy to link the DataView to DataSession instances that are located elsewhere
+					 in the application.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGSettingExpression"> 
+				<title><indexterm><primary>Setting the
+								Expression</primary></indexterm>Setting the Expression</title> 
+				<para>The DataView uses a query expression to retrieve it's logical
+					 dataset. The expression is given in terms of a D4 or RealSQL expression which
+					 returns a relation (table result). The query does not need to restrict the
+					 dataset beyond what is logically desired, because the DataView will only
+					 retrieve the sets of information that are necessary to populate it's internal
+					 buffers.</para> 
+				<para>The query dialect (D4 or RealSQL) used for the expression
+					 depends on the <property>Language</property> property setting of the 
+					 <classname>DataView</classname>, not the
+					 <property>Language</property> property of the 
+					 <classname>SessionInfo</classname> structure of the associated 
+					 <classname>DataSession</classname> instance. See the D4 or
+					 RealSQL reference for details on each language.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnAdornments"> 
+				<title><indexterm><primary>Column
+								Adornments</primary></indexterm>Column Adornments</title> 
+				<para>The <property>Columns</property> collection property of the
+					 DataView allows the specification of additional per-column definitions such as
+					 defaults and constraints. Each column "adornment" is an instance of the
+					 AdornColumnExpression class. The AdornColumnExpression has the following
+					 "interesting" properties: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>ColumnName</entry><entry>Specifies the
+												name of the column for which this adornment applies.</entry> 
+									 </row> 
+									 <row><entry>Default</entry><entry>Specifies the
+												default value for the specified column of a newly inserted row.</entry> 
+									 </row> 
+									 <row><entry>Constraints</entry><entry>Contains a
+												collection of 
+												<classname>ConstraintDefinition</classname>
+												classes specifying the list of constraints applicable to this column. A 
+												<classname>ConstraintDefinition</classname>
+												class has an <property>ExpressionString</property> property containing a valid
+												D4 expression that evaluates to <literal>True</literal> if the value satisfies
+												the constraint, <literal>False</literal> otherwise. Within the constraint
+												expression, the value of the column is represented by an instrinsic variable
+												called "<literal>value</literal>".</entry> 
+									 </row> 
+									 <row><entry>MetaData</entry><entry>MetaData is
+												extra information about the column that might be useful to the application.
+												This is a list of arbitrary identifier/string values.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGRowConstraints"> 
+				<title><indexterm><primary>Row Constraints</primary></indexterm>Row
+					 Constraints</title> 
+				<para>Row-level constraints can be specified through the DataView's
+					 <property>Constraints</property> collection property. Like column level
+					 constraints, the row level constraints are manifest as a collection of 
+					 <classname>ConstraintDefinition</classname> instances. Each 
+					 <classname>ConstraintDefinition</classname> instance contains a
+					 D4 expression that returns <literal>True</literal> if the constraint is
+					 satisfied. For row level constraint expressions, the column values are
+					 accessible by their names.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGSettingOrder"> 
+				<title><indexterm><primary>Setting the
+								Order</primary></indexterm>Setting the Order</title> 
+				<para>Before the DataView can be activated, a sort order must be
+					 established for the dataset. The order is set through the
+					 <property>OrderString</property> property of the 
+					 <classname>DataView</classname>. The order string takes the
+					 following form: 
+					 <programlisting>order {&lt;ne column name comma list&gt;}</programlisting>For example: 
+					 <programlisting>order {LastName, FirstName}</programlisting></para> 
+				<para>It should be noted that not only does the sort order affect
+					 the logical ordering of the data, but incremental searching is also tied to the
+					 sort order.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGActivatingDataView"> 
+				<title><indexterm><primary>Activating the
+								DataView</primary></indexterm>Activating the DataView</title> 
+				<para>The DataView is activated by setting the
+					 <property>Active</property> property to <literal>True</literal>, or calling 
+					 <methodname>Open</methodname> at runtime.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGDataManipulationStates"> 
+				<title><indexterm><primary>Data Manipulation
+								States</primary></indexterm>Data Manipulation States</title> 
+				<para>At any given moment, a DataView is in one of the following
+					 states: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>State</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry><literal>Inactive</literal></entry><entry>The
+												DataView is not active. In this state, data navigation and manipulation
+												operations fail.</entry> 
+									 </row> 
+									 <row><entry><literal>Browse</literal></entry><entry>The
+												DataView is active and is in a navagable state. Data can be read, but not
+												modified.</entry> 
+									 </row> 
+									 <row><entry><literal>Insert</literal></entry><entry>The
+												DataView is active and is positioned on an inserted (but not yet posted) row of
+												data. The DataView is placed into <literal>Insert</literal> state by a call to
+												the 
+												<methodname>Insert</methodname> or 
+												<methodname>Append</methodname> method, or
+												by a call to 
+												<methodname>Edit</methodname> when there
+												are no rows in the dataset.</entry> 
+									 </row> 
+									 <row><entry><literal>Edit</literal></entry><entry>The
+												DataView is active and the row buffer at the current positioned can be edited.
+												The DataView is placed into <literal>Edit</literal> state by a call to the 
+												<methodname>Edit</methodname>
+												method.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> The state of a DataView can be determined by
+					 examining the <property>State</property> property.</para> 
+				<para>The state of the DataView is changed by activating,
+					 deactivating, or by calling one of the state changing methods. The following
+					 methods affect the state of the DataView: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Method</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry><literal>Edit</literal></entry><entry>Places
+												the DataView into <literal>Edit</literal> state, or does nothing if the
+												DataView is already in that state. If the DataView is empty (0 rows), 
+												<methodname>Edit</methodname> causes the
+												DataView to go into <literal>Insert</literal> state.</entry> 
+									 </row> 
+									 <row><entry><literal>Insert</literal></entry><entry>Places
+												the DataView into <literal>Insert</literal> state. The temporary row buffer
+												will appear at the position previously occupied by the active row.</entry> 
+									 </row> 
+									 <row><entry><literal>Append</literal></entry><entry>Places
+												the DataView into <literal>Insert</literal> state. The temporary row buffer
+												will appear after the last row in the dataset.</entry> 
+									 </row> 
+									 <row><entry><literal>Cancel</literal></entry><entry>Cancels
+												any changed made to the data buffered by insert or edit and returns the
+												DataView to the <literal>Browse</literal> state. If the DataView is already in
+												<literal>Browse</literal> state, 
+												<methodname>Cancel</methodname> does
+												nothing.</entry> 
+									 </row> 
+									 <row><entry><literal>Post</literal></entry><entry>Accepts
+												any changes made to the data buffered by insert or edit and returns the
+												DataView to the <literal>Browse</literal> state. If the DataView is already in
+												<literal>Browse</literal> state, 
+												<methodname>Post</methodname> does
+												nothing.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGMasterDetailLinking"> 
+				<title><indexterm><primary>Master/Detail
+								Linking</primary></indexterm>Master/Detail Linking</title> 
+				<para>DataView instances can be linked in such a way that one
+					 instance presents a restriction (or detail) of information from another. This
+					 is informally referred to as master/detail linking, where the "detail" is the
+					 DataView being restricted and the "master" is the DataView from which the
+					 restriction information is coming. As the master DataView is modified or
+					 navigated, the detail DataView will reflect the new restriction
+					 criteria.</para> 
+				<para>Master/detail linking helps to automate data manipulation
+					 tasks involving tables involved in a one-to-many relationship. For example, if
+					 we have a Customer table and a CustomerPhone table and we allow there to be
+					 many CustomerPhone rows for each Customer row, we may wish to present a user
+					 interface that shows the list of CustomerPhone rows under the current Customer
+					 we have selected. This would be accomplished by performing a master/detail link
+					 between the DataView representing the CustomerPhone table and the DataView
+					 representing the Customer.</para> 
+				<para>Master/detail links are accomplished by setting the
+					 <property>MasterSource</property> property of the detail DataView to a
+					 DataSource instance that is attached to the master DataView. Additionally, the
+					 <property>MasterColumnNames</property> and
+					 <property>DetailColumnNames</property> are set to represent the column or
+					 columns that are to be used to join the tables.</para> 
+				<para>A master table must be active, have at least one row, and
+					 have values for the columns that constitute the
+					 <property>MasterColumnNames</property> in order for the detail DataView to be
+					 in a Valid state. If an active detail DataView not in a Valid state, it will
+					 behave similarly to when it is not Active. If a change occurs to the master
+					 DataView which makes the detail DataView valid, the detail DataView will
+					 automatically act normally for an Active DataView. To determine if a detail
+					 DataView is in an invalid state, call the 
+					 <methodname>IsValid</methodname> method.</para> 
+				<para> When a detail table row buffer is inserted, the linked
+					 detail table's columns are automatically defaulted to values from the
+					 appropriate columns of the master table's active row.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGFilteringData"> 
+				<title><indexterm><primary>Filtering
+								Data</primary></indexterm>Filtering Data</title> 
+				<para>Arbitrary filter conditions can be specified for a DataView
+					 by setting the <property>Filter</property> property to a valid restriction
+					 ("where clause") expression. If this value is changed while the DataView is
+					 active, the DataView will automatically requery underneath to reflect the
+					 change.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGNavigation"> 
+				<title><indexterm><primary>Navigation</primary></indexterm>Navigation</title>
+				
+				<para>At any given moment, the DataView represents a single
+					 "active" row position within the logical dataset specified by the
+					 <property>Expression</property>. Navigating the active row in the DataView
+					 takes place in a relative manner not based on an absolutely indexed position.
+					 In other words, the DataView can be navigated to the beginning of the set,
+					 forwards by a specific number of rows, or even to memorized bookmarks, but
+					 there is no concept of row (or record) numbers. The ordering of the rows being
+					 navigated is based on the sort order of the DataView.</para> 
+				<para> There are two indicators, <literal>BOF</literal> and
+					 <literal>EOF</literal>, that indicate when the DataView is at the beginning or
+					 end of the logical dataset respectively. When initially opened, the
+					 <property>BOF</property> property of the DataView will always be
+					 <literal>True</literal>. The <property>EOF</property> property will return
+					 <literal>True</literal> <emphasis>after</emphasis> navigating past the last row
+					 of the dataset (not when navigating <emphasis>to</emphasis> the last row).
+					 <property>EOF</property> will only be <literal>True</literal> upon activation
+					 of the DataView if the dataset is empty. Just like <literal>EOF</literal>, once
+					 the DataView has been navigated past the first row, the <literal>BOF</literal>
+					 indicator will not be <literal>True</literal> until navigating
+					 <emphasis>before</emphasis> the first row.</para> 
+				<para>The following methods can be used to perform basic DataView
+					 navigation: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Method</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry><methodname>First</methodname></entry><entry>Navigates
+												the active row to the first row of the logical dataset. After this method is
+												called, the <property>BOF</property> property will return
+												<literal>True</literal>.</entry> 
+									 </row> 
+									 <row><entry><methodname>Prior</methodname></entry><entry>Navigates
+												the active row to the row immediately prior to currently active row, or, if the
+												DataView is already situated on the first row, sets the BOF indicator.</entry> 
+									 </row> 
+									 <row><entry><methodname>Next</methodname></entry><entry>Navigates
+												the active row to the row immediately following to currently active row, or, if
+												the DataView is already situated on the last row, sets the EOF
+												indicator.</entry> 
+									 </row> 
+									 <row><entry><methodname>Last</methodname></entry><entry>Navigates
+												the active row to the last row of the logical dataset. After this method is
+												called, the <property>EOF</property> property will return
+												<literal>True</literal>.</entry> 
+									 </row> 
+									 <row><entry><methodname>MoveBy</methodname></entry><entry>Navigates
+												the active row a specific number of rows away from the currently active row,
+												or, sets the BOF or EOF indicator appropriately.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGBookmarks"> 
+				<title><indexterm><primary>Bookmarks</primary></indexterm>Bookmarks</title>
+				
+				<para>Bookmarks are used to memorize and recall specific active row
+					 positions in the DataView. A bookmark is retrieved by getting the
+					 <property>Bookmark</property> property; the position is restored by setting the
+					 same.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGSearching"> 
+				<title><indexterm><primary>Searching</primary></indexterm>Searching</title>
+				
+				<para>A DataView can be searched and navigated to specific rows.
+					 This type of searching does not <emphasis>restrict</emphasis> the logical
+					 dataset like the <property>Filter</property> or <property>Expression</property>
+					 does, this search is navigational. Navigational searching takes place on the
+					 columns specified in the sort order of the DataView.</para> 
+				<para>Navigational searching is performed using the 
+					 <methodname>FindKey</methodname> and 
+					 <methodname>FindNearest</methodname> methods of the DataView. 
+					 <methodname>FindKey</methodname> either locates the row by the
+					 given criteria and returns <literal>True</literal>, or performs no navigation
+					 and returns <literal>False</literal>. 
+					 <methodname>FindNearest</methodname> positions the active row
+					 on the row of the dataset that most closely matches the given criteria. 
+					 <methodname>FindNearest</methodname> is particularly useful for
+					 allowing the user to perform "incremental search" behavior.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGAccessingData"> 
+				<title><indexterm><primary>Accessing Data
+								Programmatically</primary></indexterm>Accessing Data Programmatically</title> 
+				<para>Access to the data in the active row buffer can obtained
+					 through the <property>Fields</property> collection of the DataView. Specific
+					 Field class instances are retrieved from the <property>Fields</property>
+					 collection either by their column name or their ordinal position in the
+					 collection. The <property>Fields</property> collection can be enumerated and
+					 also contains the standard collection properties such as
+					 <property>Count</property>.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGFieldClass"> 
+				<title><indexterm><primary>Field Class</primary></indexterm>Field
+					 Class</title> 
+				<para>The Field class contains the logic necessary to get and set
+					 data values for individual columns within the active row. It also provides
+					 information about the represented columns data type. Field instances are
+					 obtained from the <property>Fields</property> collection of the
+					 DataView.</para> 
+				<para>Field data is typically read and written to using the AsXXX
+					 properties (where XXX is the data type). Columns within a newly inserted row
+					 will not have values yet, and attempting to read the field value will throw an
+					 exception. To determine if a Field has a value, use the
+					 <property>HasValue</property> property. If the DataView associated with the
+					 Field instance is not already in an editing state (<literal>Edit</literal> or
+					 <literal>Insert</literal>) when a Field value is changed, than the DataView
+					 will automatically be placed in an editable state.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGDataSourceComponent"> 
+		  <title><indexterm><primary>DataSource
+						  Component</primary></indexterm>DataSource Component</title> 
+		  <para><indexterm><primary>DataSource</primary></indexterm>The
+				DataSource components provides a level of indirection between the DataView
+				Component and the data-aware controls. The decisions regarding which controls
+				are associated with what logical datasets is usually made when controls are
+				placed on the form, but the actual association of a dataset with the form may
+				not occur until runtime. The DataSource allows for forms to be easily "hooked
+				up" to a DataView without connecting each control individually.</para> 
+		  <sect1 id="DACDGAttachingDataView"> 
+				<title><indexterm><primary>Attaching to the
+								DataView</primary></indexterm>Attaching to the DataView</title> 
+				<para>The DataSource is associated with a single DataView instance
+					 through the <property>View</property> property. Any controls that are
+					 associated with the DataSource instance are then indirectly associated with the
+					 DataView instance.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGUsingDataSourceRuntime"> 
+				<title><indexterm><primary>Using the DataSource at
+								Runtime</primary></indexterm>Using the DataSource at Runtime</title> 
+				<para>DataSource instances are often associated with DataView
+					 instances at run time. This allows multiple forms to be attached to the same
+					 logical dataset at runtime. For example, if there is a "browse" form shown for
+					 the Customer table and the user selects "Edit..." to modify the currently
+					 select Customer row: the edit form's controls could be easily associated with
+					 the existing DataView instance on the browse form by attaching the DataSource
+					 instance on the edit form to the DataView instance on the browse form.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGDBGridControl"> 
+		  <title><indexterm><primary>DBGrid Control</primary></indexterm>DBGrid
+				Control</title> 
+		  <para>The DBGrid control visually represents data within the DataView
+				in a tabular fashion. The DBGrid not only displays the currently active row of
+				the DataView, but also as many other rows above or below the active row as
+				space allows. The DBGrid also provides mechanisms to navigate the DataView. The
+				DBGrid is a read-only control with the exception of boolean columns which can
+				be represented with toggleable check boxes embedded on the DBGrid.</para> 
+		  <sect1 id="DADCGDBGridAppearance"> 
+				<title><indexterm><primary>Appearance</primary></indexterm>Appearance</title>
+				
+				<para>The DBGrid draws a table of rows representing a subset (not
+					 necessarily proper) of the DataView's dataset. The first row of the DBGrid
+					 table is always the "header" containing the names of the columns whose values
+					 are represented below. If the DBGrid is unable to display all columns in the
+					 allotted space, it displays a horizontal scroll bar. A vertical scroll bar is
+					 presented for row navigation within the dataset. </para> 
+		  </sect1> 
+		  <sect1 id="DACDGDBGridDataSource"> 
+				<title><indexterm><primary>Attaching the Grid to the
+								DataSource</primary></indexterm>Attaching the Grid to the DataSource</title> 
+				<para>The DBGrid, like other data aware DAC controls, is associated
+					 with a 
+					 <classname>DataSource</classname> instance through the
+					 <property>Source</property> property. When the DBGrid is linked to a DataSource
+					 instance what is in turn linked to an active DataView instance, the DBGrid
+					 automatically becomes "live" with data (whether in the Visual Studio .NET
+					 designer or at runtime).</para> 
+		  </sect1> 
+		  <sect1 id="DACDGDBGridColumns"> 
+				<title><indexterm><primary>Setting the Grid
+								Columns</primary></indexterm>Setting the Grid Columns</title> 
+				<para>When attached to a live dataset, the DBGrid component
+					 displays the columns of information specified by the
+					 <property>Columns</property> collection property, and in the order they appear
+					 in that collection. If no columns are explicitly given when the DBGrid instance
+					 becomes active, the <property>Columns</property> collection is automatically
+					 populated with default values from the DataView's data type information.</para>
+				
+				<para>The GridColumn class represents an individual column in the
+					 <property>Columns</property> collection. The GridColumn class has several
+					 properties including the following: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry><property>ColumnName</property></entry><entry>Name
+												of the data column in the DataView to present. This does not have to be unique
+												across the collection, or in other words, the same data column can be displayed
+												multiple times.</entry> 
+									 </row> 
+									 <row><entry><property>Width</property></entry><entry>Width
+												in pixels of the presented data column.</entry> 
+									 </row> 
+									 <row><entry><property>Title</property></entry><entry>The
+												text displayed in the header row for the column.</entry> 
+									 </row> 
+									 <row><entry><property>TextAlign</property></entry><entry>The
+												horizontal alignment of data text displayed for the column of data.</entry> 
+									 </row> 
+									 <row><entry><property>Color</property></entry><entry>Background
+												color for data column.</entry> 
+									 </row> 
+									 <row><entry><property>Visible</property></entry><entry>Whether
+												or not the data column is currently visible.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+				<para>The GridColumn can also be descended from to provide unique
+					 functionality. One such descendant is the CheckBoxGridColumn that renders a
+					 check box control instead of the textual representation of the data. The
+					 CheckBoxGridColumn can be configured as read-only through the
+					 <property>ReadOnly</property> property.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGDBGridNavigation"> 
+				<title><indexterm><primary>Navigation</primary></indexterm>Navigation</title>
+				
+				<para>In addition to visual navigation capabilities, the DBGrid has
+					 extensive keyboard support. The following is a partial list of supported
+					 hotkeys: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Key</entry><entry>Description</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>Left</entry><entry>Scrolls to show the
+												column just prior to the leftmost visible column.</entry> 
+									 </row> 
+									 <row><entry>Right</entry><entry>Scrolls so that the
+												second-to-leftmost column becomes the leftmost column.</entry> 
+									 </row> 
+									 <row><entry>Ctrl-Left</entry><entry>Scrolls so that
+												the leftmost column becomes the rightmost one.</entry> 
+									 </row> 
+									 <row><entry>Ctrl-Right</entry><entry>Scrolls so
+												that the rightmost column becomes the leftmost one.</entry> 
+									 </row> 
+									 <row><entry>Ctrl-Alt-Left</entry><entry>Scrolls so
+												that the first column is the leftmost column.</entry> 
+									 </row> 
+									 <row><entry>Ctrl-Alt-Right</entry><entry>Scrolls so
+												that the last column is the leftmost column.</entry> 
+									 </row> 
+									 <row><entry>Up, Down</entry><entry>Navigates to the
+												prior or next row.</entry> 
+									 </row> 
+									 <row><entry>PgUp, PgDn</entry><entry>Navigates to
+												the prior or next page of rows.</entry> 
+									 </row> 
+									 <row><entry>Home, End</entry><entry>Navigates to
+												the topmost or bottommost visible row in the grid.</entry> 
+									 </row> 
+									 <row><entry>Ctrl-Home,
+												Ctrl-End</entry><entry>Navigates to the first or last row in the
+												dataset.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGIncrementalSearchControl"> 
+		  <title><indexterm><primary>Incremenatal Search
+						  Control</primary></indexterm>Incremental Search Control</title> 
+		  <para>The IncrementalSearch control facilitaties "find nearest" style
+				navigational searching of the DataView. The IncrementalSearch control searches
+				within one or more columns that make up the DataView's sort order. As the sort
+				order of the DataView changes, the available search criteria also
+				changes.</para> 
+		  <sect1 id="DACDGIncrementalAppearance"> 
+				<title><indexterm><primary>Appearance</primary></indexterm>Appearance</title>
+				
+				<para>There are several properties of the IncrementalSearch control
+					 that effect it's appearance: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>TitleVSpacing</entry><entry>The space
+												between the criteria controls and the vertically alligned titles.</entry> 
+									 </row> 
+									 <row><entry>TopMargin</entry><entry>The space
+												between the top of the control and the criteria controls.</entry> 
+									 </row> 
+									 <row><entry>NoValueBackColor</entry><entry>The
+												color used for criteria with no value (to differentiate between a blank value
+												and no value).</entry> 
+									 </row> 
+									 <row><entry>InvalidValueBackColor</entry><entry>The
+												color used for criteria to indicate that the search criteria is
+												invalid.</entry> 
+									 </row> 
+									 <row><entry>TitleAlignment</entry><entry>The
+												relative alignment of the criteria titles.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGIncrementalSearchDelay"> 
+				<title><indexterm><primary>Search Delay</primary></indexterm>Search
+					 Delay</title> 
+				<para>The IncrementalSearch control delays searching until a
+					 specified amount of time after the most recent keypress has occurred. This
+					 interval ensures that searching does not occur while the user is actively
+					 typing search criteria. The delay interval is configurable by setting the
+					 TimerInterval property to the number of desired milliseconds.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGIncrementalSearchColumns"> 
+				<title><indexterm><primary>Incremental Search
+								Columns</primary></indexterm>Incremental Search Columns</title> 
+				<para>When the DataView is activated, or the sort order changes,
+					 the IncrementalSearch control prepares search criteria for the columns of the
+					 sort order. The display information for the search criteria is automatically
+					 deduced from the DataView's column definitions or it can be specified through
+					 the <property>Columns</property> collection property. The Columns collection
+					 contains instances of the IncrementalSearchColumn class. It should be
+					 emphasized that the list of Columns does not specify the search criteria for
+					 the IncrementalSearch control; the search criteria is always tied to the sort
+					 order of the DataView. The IncrementalSearchControl instances merely specify
+					 formatting information for columns that <emphasis>may</emphasis> appear as
+					 search criteria.</para> 
+				<para>The IncrementalSearchControl contains the following
+					 properties: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>ColumnName</entry><entry>The associated
+												column name.</entry> 
+									 </row> 
+									 <row><entry>Title</entry><entry>The text to use for
+												the title of the search criteria.</entry> 
+									 </row> 
+									 <row><entry>TextAlign</entry><entry>The alignment
+												of text within the search criteria editor.</entry> 
+									 </row> 
+									 <row><entry>ControlWidth</entry><entry>The pixel
+												width to use for the search criteria sub-control.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGIncrementalOrderLookup"> 
+				<title><indexterm><primary>Order Lookup</primary></indexterm>Order
+					 Lookup</title> 
+				<para>The IncrementalSearch control contains a lookup "button" to
+					 allow the user to change search criteria. The behavior of this button must be
+					 specified by the control user and does nothing by default. To define specific
+					 behavior for this button, attach an event to the
+					 <property>OnOrderLookup</property> event.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGColumnControls"> 
+		  <title><indexterm><primary>Column-Level
+						  Controls</primary></indexterm>Column-Level Controls</title> 
+		  <para>Besides the DBGrid control, the other controls in the DAC are
+				column-level, in that they display the value of an individual column within the
+				active row of the DataView. Many of the DAC controls are data-aware extensions
+				of the regular Windows Forms controls included with the .NET Framework.</para> 
+		  <sect1 id="DACDGColumnControlsDataSource"> 
+				<title><indexterm><primary>Attaching Data Aware Controls to the
+								DataSource</primary></indexterm>Attaching Data Aware Controls to the
+					 DataSource</title> 
+				<para>Each column-level control not only has a
+					 <property>Source</property> property to associate the control with a 
+					 <classname>DataSource</classname> instance, but also a
+					 <property>ColumnName</property> property to designate the associated
+					 column.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsStaticText"> 
+				<title><indexterm><primary>Static Text</primary></indexterm>Static
+					 Text</title> 
+				<para>The DBText control displays the value of the column within
+					 the active row as static (non-editable) text. DBText inherits the properties of
+					 the 
+					 <classname>Label</classname> control, including the ability to
+					 align the text through the <property>TextAlign</property> property.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsTextBox"> 
+				<title><indexterm><primary>TextBox-style
+								Controls</primary></indexterm>TextBox-style Controls</title> 
+				<para>There are several controls that display information and allow
+					 the editing of data in a text box. Each text box control allows the user to
+					 uniquely edit data value as text. When focus leaves the control or when an
+					 explicit update request is made from the DataView, the text box controls update
+					 the field values of the DataView. The simplest such control is the 
+					 <classname>DBTextBox</classname> control which descends from
+					 the standard 
+					 <classname>TextBox</classname> control. The DBIntegerTextBox
+					 control is similar to the DBTextBox control except that it only accepts integer
+					 values. The DBDateTextBox is another DBTextBoxBase descendant control that
+					 facilitates editing dates.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsLookup"> 
+				<title><indexterm><primary>Lookup
+								Controls</primary></indexterm>Lookup Controls</title> 
+				<para>There are a few controls that appear similar to a TextBox,
+					 but also provide an elipsis button to allow the user to "look up" a value for
+					 the column. When the lookup button is triggered, the OnLookup event is
+					 raised.</para> 
+				<para>The DBLookupTextBox control can encapsulate a user specified
+					 control so long as it descends from DBTextBoxBase. By default, the
+					 DBLookupTextBox encapsulates a DBTextBox control. The encapsulated control
+					 class is specified through the <property>TextBoxClassName</property> property.
+					 The DBDateLookup control is like a DBLookupTextBox except that it houses a
+					 DBDateTextBox (by default) and provides a calendar lookup.</para> 
+				<para>The DBIntegerScrollBox control also encapsulates a control,
+					 but assumes that the edited value is integral and provides up and down
+					 scrolling buttons and a scrolling slider to alter the value.</para> 
+				<para>The DBLookupButton control provides an elipsis button for use
+					 in looking up values that cannot be edited directly (like they can be with the
+					 DBLookupTextBox). If the AutoNextControl property is True then focus is
+					 advanced to the next control after the lookup takes place.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsRadioGroup"> 
+				<title><indexterm><primary>Radio Group</primary></indexterm>Radio
+					 Group</title> 
+				<para>The DBRadioGroup provides a group box containing radio button
+					 from which the user can choose the value for the data column. The following
+					 properties are some that can be used to configure the behavior of the
+					 DBRadioGroup: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>Items</entry><entry>The list of items
+												to show as radio buttons.</entry> 
+									 </row> 
+									 <row><entry>Values</entry><entry>The associated
+												data values for each of the radio buttons.</entry> 
+									 </row> 
+									 <row><entry>ReadOnly</entry><entry>When
+												<literal>True</literal>, the control cannot be used to modify the data
+												value.</entry> 
+									 </row> 
+									 <row><entry>Enabled</entry><entry>When 
+												<literallayout>False</literallayout>, the control cannot be focused or the data modified.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsCheckBox"> 
+				<title><indexterm><primary>CheckBox</primary></indexterm>CheckBox</title>
+				
+				<para>The DBCheckBox control facilitates the editing of boolean
+					 data values. It's behavior is similar to the standard CheckBox control. The
+					 DBCheckBox features an <property>AutoUpdate</property> property that specifies
+					 whether changing the control's state in turn immediately updates the data
+					 value, or whether updating is deferred until the control loses focus. If
+					 AutoUpdate is <literal>False</literal>, changes made to the DBCheckBox's state
+					 will be posted when the control loses focus or when the DataView explicitly
+					 requests an update. If the DBCheckBox's state is updated and
+					 <property>AutoUpdate</property> is <literal>True</literal>, the changed state
+					 is posted after a possible delay (as specified by the
+					 <property>AutoUpdateInterval</property> property).</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsImage"> 
+				<title><indexterm><primary>Image</primary></indexterm>Image</title>
+				
+				<para>The DBImageAspect control displays an image from the database
+					 while maintaining that image's aspect ratio. A new image value can be set by
+					 the user through the clipboard keyboard shortcuts (Ctrl-V for paste) or
+					 programmaticly through the <property>Image</property> property.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGColumnControlsTreeView"> 
+				<title><indexterm><primary>Tree View</primary></indexterm>Tree
+					 View</title> 
+				<para>The DBTreeView control shows data in a hierarchical manner.
+					 The following properties are available to configure the DBTreeView: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>LookupKeyColumnNames</entry><entry>Must
+												be set to a key (column list string) that that identifies a node in the
+												tree.</entry> 
+									 </row> 
+									 <row><entry>LookupParentKeyColumnNames</entry><entry>Must
+												be set to a key that corresponds with a node's parent identity.</entry> 
+									 </row> 
+									 <row><entry>AutoRefresh</entry><entry>If
+												<literal>True</literal>, the DBTreeView rebuilds itself when the data
+												changes.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGNDAControls"> 
+		  <title><indexterm><primary>Non Data-Aware
+						  Controls</primary></indexterm>Non Data-Aware Controls</title> 
+		  <para>Although the Dataphor DAC are certainly focused on providing
+				complete and elegant data access and manipulation capabilites, there are also
+				several controls that are not directly data aware. Some of these non data aware
+				controls are in place to provide a base for a data aware counterpart.</para> 
+		  <sect1 id="DACDGNDAControlsImage"> 
+				<title><indexterm><primary>Image</primary></indexterm>Image</title>
+				
+				<para>The ImageAspect control displays an image similarly to the
+					 standard Image control features certain "stretching" and display capabilities.
+					 The ImageAspect control has a <property>StretchStyle</property> property that
+					 controls how the image is resized to fit the control's dimensions. A useful
+					 <property>StretchStyle</property> value is <literal>StretchRatio</literal>
+					 which sizes the image to use the largest amount of space while maintaining
+					 image's aspect ratio. The <property>Center</property> property specifies
+					 whether a displayed images is centered within any unused space available within
+					 the control. </para> 
+		  </sect1> 
+		  <sect1 id="DACDGNDAControlsLookupPanel"> 
+				<title><indexterm><primary>LookupPanel</primary></indexterm>Lookup
+					 Panel</title> 
+				<para>The LookupPanel is a control container which includes an
+					 elipsis button to allow the user to "look up" a valueÃƒÂ¢Ã‚Â€Ã‚Â‿presumably for
+					 the controls contained within the LookupPanel. The actual lookup behavior is
+					 determined by the developer by attaching a handler to the
+					 <property>OnLookup</property> event. This control is particularly useful for
+					 creating lookups for values of a compound key (key with more than one column).
+					 Keystokes made to controls placed in and isntance of the LookupPanel are
+					 intercepted by the LookupPanel and made to invoke the lookup. In this way, the
+					 LookupPanel makes child controls read-only except that they invoke a
+					 lookup.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGNDAControlsRadioButtonGroup"> 
+				<title><indexterm><primary>RadioButtonGroup</primary></indexterm>Radio
+					 Button Group</title> 
+				<para>The RadioButtonGroup control provides a group of radio box
+					 controls, each representing a specific data value. The following properties
+					 affect the behavior of the RadioButtonGroup: 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Property</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>Items</entry><entry>Used to determine
+												what radio button options are available within the group.</entry> 
+									 </row> 
+									 <row><entry>CheckAlign</entry><entry>Specifies the
+												position of the radio button sub-controls (left, center, or right).</entry> 
+									 </row> 
+									 <row><entry>Appearance</entry><entry>Specifies
+												whether or not the radio buttons show up as standard buttons or radio
+												buttons.</entry> 
+									 </row> 
+									 <row><entry>MarginWidth</entry><entry>The width of
+												the margin between the control's inside boundary and the sub-controls.</entry> 
+									 </row> 
+									 <row><entry>ButtonFlatStyle</entry><entry>Configures
+												the "flat style" of the radio buttons (see the RadioButton class)</entry> 
+									 </row> 
+									 <row><entry>TextAlign</entry><entry>Specifies the
+												alignment of the text protion of the radio buttons.</entry> 
+									 </row> 
+									 <row><entry>SelectedIndex</entry><entry>The index
+												of the currently selected radio button.</entry> 
+									 </row> 
+									 <row><entry>Columns</entry><entry>The number of
+												columns by which to align the radio buttons.</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGNDAControlsToolbar"> 
+				<title><indexterm><primary>ToolBar</primary></indexterm>ToolBar</title>
+				
+				<para>The ToolBar and ToolBarButton controls provide simple
+					 horizontally or vertically aligned tool bar support. The ToolBar container will
+					 accept any control as a child and will align it's child controls in a line (and
+					 to fit the "bar"). The ToolBar button is similar to a standard Button except
+					 that it does not accept focus.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DACDGDataLink"> 
+		  <title>DataLink</title> 
+		  <para><indexterm><primary>DataLink</primary></indexterm>The DataLink
+				control is the class used by the DAC to enable controls to become data aware.
+				The DataLink provides a connection to the DataView, specifies the buffering
+				requrements of the control (or other DataLink consumer), and provides event
+				sinks necessary to respond to the DataView's data and state changes. It should
+				be noted that although DataLinks are typically used for making controls data
+				aware, the DataLink does not necessarily have to be hosted by a control. For
+				example, the DataView itself uses a DataLink internally to connect to a master
+				DataView.</para> 
+		  <sect1 id="DACDGDataLinkPreparing"> 
+				<title><indexterm><primary>Preparing the
+								DataLink</primary></indexterm>Preparing the DataLink</title> 
+				<para>The following actions may be taken to prepare a DataLink: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Create an instance of a DataLink class. This is
+									 usually done in the constructor of the control.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>Source</property> property. The
+									 <property>Source</property> is usually configured as a pass through property of
+									 the control (i.e. the control has a <property>Source</property> property that
+									 gets and sets it's value from the DataLink instance's
+									 <property>Source</property> property.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the BufferCount property. This property is
+									 set to the number of rows that are concurrently accessed. For a grid-type
+									 control, this is the number of rows that are currently visible in the grid. For
+									 controls that only access the values of the currently active row this should be
+									 left to one (1). This property should also be maintained (if necessary) as the
+									 requirement for the number of buffered rows changes.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+		  </sect1> 
+		  <sect1 id="DACDGDataLinkAccessingData"> 
+				<title><indexterm><primary>Accessing
+								Data</primary></indexterm>Accessing Data</title> 
+				<para>The DataLink consumer may access the data of the active row
+					 of the DataView instance by directly reading values from the DataView's
+					 <property>Fields</property> collection. A reference the the DataView instance
+					 can be obtained from the <property>View</property> property of the DataLink. To
+					 determine if the DataView instance is obtainable and active, use the DataLink's
+					 <property>Active</property> property.</para> 
+				<para>A DataLink consumer that requires access to more than one row
+					 of the DataView can access the <property>Buffer</property> property. It is
+					 important that if the DataLink consumer requires access to more than one row,
+					 it sets the <property>BufferCount</property> appropriately. When accessing the
+					 Buffer, the first buffer visible to the current DataLink is determined by
+					 reading the <property>FirstOffset</property> property of the DataLink. The
+					 currently active row of the DataView instance can be determined by accessing
+					 the <property>ActiveOffset</property> property. The Buffer is a list of ViewRow
+					 instances from which Row instances can be obtained. From a Row instance a
+					 Scalar value can be obtained. From a Scalar value, a Conveyor can be used to
+					 get the value in terms of a .NET data type. 
+					 <programlisting>Alphora.Dataphor.DAE.Runtime.Data.Scalar LScalar = Link.Buffer[RowIndex].Row[ColumnIndex];
+Text = LScalar.DisplayConveyor.GetAsString(LScalar);</programlisting>See the Dataphor DAE Developer's Guide for more
+					 details.</para> 
+		  </sect1> 
+		  <sect1 id="DACDGDataLinkRespondingEvent"> 
+				<title><indexterm><primary>Responding to DataLink
+								Events</primary></indexterm>Responding to DataLink Events</title> 
+				<para>The DataLink receives notification when the state or data of
+					 the DataView changes. These events can be noticed by descending from the
+					 DataLink class and overriding certain methods or by hooking event handlers to
+					 certain events. The following is a list of events that are available through
+					 the DataLink. 
+					 <informaltable> 
+						  <tgroup cols="2"> 
+								<thead> 
+									 <row><entry>Method</entry><entry>Event</entry><entry>Description</entry>
+										  
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row><entry>UpdateRow</entry><entry>OnUpdateRow</entry><entry>Invoked
+												when the link should apply and changes that have not yet been posted to the
+												active row. Update row is most commonly invoked before the DataView posts the
+												data row to the dataset. Controls such as the DBTextBox allow changes to be
+												made that aren't immediately saved to the DataView. This event indicates that
+												such controls should immediately save such changes.</entry> 
+									 </row> 
+									 <row><entry>RowChanged</entry><entry>OnRowChanged</entry><entry>Invoked
+												when the active row has changes as a result of data edits (as opposed to
+												scrolling, activation, etc.)</entry> 
+									 </row> 
+									 <row><entry>DataChanged</entry><entry>OnDateChanged</entry><entry>Invoked
+												when the active row has changed as a result of anything other than data
+												edits.</entry> 
+									 </row> 
+									 <row><entry>FocusControl</entry><entry>OnFocusControl</entry><entry>Invoked
+												when a validation error has occurred and a control associated with the error
+												should be focused. The culprit field is passed as an argument.</entry> 
+									 </row> 
+									 <row><entry>StateChanged</entry><entry>OnStateChanged</entry><entry>Invoked
+												when the DataView changes edit states.</entry> 
+									 </row> 
+									 <row><entry>ActiveChanged</entry><entry>OnActiveChanged</entry><entry>Invoked
+												when the DataView goes between the active and inactive states. This and the
+												StateChanged events are also invoked in simulation, such as when the links
+												between this DataLink instance and the DataView instance are changed (i.e. the
+												DataSource instance is attached to another view).</entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable></para> 
+		  </sect1> 
+		  <sect1 id="DACDGDataLinkField"> 
+				<title><indexterm><primary>FieldDataLink</primary></indexterm>Field
+					 Data Link</title> 
+				<para>The FieldDataLink class descends from DataLink and provides
+					 features that are helpful when implementing controls that are associated with a
+					 particular column of the dataset.</para> 
+				<para>The constructor for the FieldDataLink takes a control
+					 instance reference to be associated with the link. The control associated with
+					 the FieldDataLink is obtainable through the <property>Control</property>
+					 property. The control will automatically be focused when a FocusControl event
+					 occurs.</para> 
+				<para>The FieldDataLink has a <property>ColumnName</property>
+					 property that, like the <property>Source</property> property, is typically used
+					 in a pass-through fashion by the control. If any change occurs that may affect
+					 the specific column specified by <property>ColumnName</property>, a
+					 FieldChanged (and therefore OnFieldChanged) invocation occurs.</para> 
+				<para>The FieldDataLink also has a <property>ReadOnly</property>
+					 property that allows the data link to operate in read only mode. If the state
+					 of the <property>ReadOnly</property> property changes, the UpdateReadOnly
+					 virtual method is invoked, which in turn invokes the OnUpdateReadOnly
+					 event.</para> 
+				<para>The FieldDataLink has a <property>Modified</property>
+					 property that can be used to trach whether or not the link has pending updates
+					 to be made. To indicated that a change has been made, call the 
+					 <methodname>Edit</methodname> method which will set the
+					 modified flag as well an ensure that the DataView is in an editable state. To
+					 undo the modified state, call 
+					 <methodname>Reset</methodname> which clears the modified flag
+					 an re-reads the links value from the DataView.</para> 
+		  </sect1> 
+	 </chapter> 
+</part> 

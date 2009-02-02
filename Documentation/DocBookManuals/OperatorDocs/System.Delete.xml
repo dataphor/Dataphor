@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 16:10:30</date>
+	 </sect2info>
+	 <title>System.Delete</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Deletes the current row from the specified cursor.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>begin
+	BeginTransaction();
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.First();
+	TempCursor.Next();
+	TempCursor.Insert( row { 16 ID, "Jed" Name});
+	TempCursor.Delete();
+	PrepareTransaction();
+	RollbackTransaction();
+end;</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

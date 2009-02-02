@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 27, 2004 11:01:52</date> 
+	 </sect2info> 
+	 <title>System.EnsureGenerators</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator ensures that the DAE knows where the Generators table
+		  is. If it does not, then the CreateGenerators is executed. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>EnsureGenerators();</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.CreateGenerators.html">System.CreateGenerators</ulink>
+<ulink url="D4LGUsingGenerators.html">Using Generators</ulink>
+<ulink url="D4LGUsingEventHandlers.html">Using Event Handlers, Examples</ulink>
+<ulink url="D4LGExamples1.html">Tables, Examples</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

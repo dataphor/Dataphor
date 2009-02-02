@@ -1,0 +1,710 @@
+<?xml version="1.0"?>
+<chapter> 
+	 <chapterinfo> 
+		  <date role="LastMod">Thursday, June 20, 2002 3:56:00 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 3:08:08 PM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </chapterinfo> 
+	 <title>Data Access Components(DAC) Tutorial</title> 
+	 <para><indexterm> 
+				<primary>DAC Tutorial</primary> 
+		  </indexterm><indexterm> 
+				<primary>How to</primary> 
+				<secondary>Use the Dataphor Data Access Components(DAC)</secondary>
+				
+		  </indexterm><indexterm> 
+				<primary>How to</primary> 
+				<secondary>Use data aware controls</secondary> 
+		  </indexterm>This tutorial demonstrates key concepts of the Dataphor
+		  DAC.</para> 
+	 <sect1 id="VNTVSNetTutIntroduction"> 
+		  <title>Introduction</title> 
+		  <para>In this chapter we create a simple database application using the
+				Dataphor DAC in the Visual Studio.NET Rapid Application Development(RAD)
+				enviornment. The application is a simple user interface to the Actor table of
+				the movie data-model that ships with Dataphor.</para> 
+		  <sect2> 
+				<title>Prerequisites</title> 
+				<para>Basic knowledge of:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Dataphor installed.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Programming in VB.NET, C#, or any .NET supported
+									 language within a RAD enviornment.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Visual Studio Forms Designer.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> 
+		  <sect2> 
+				<title>What You Will Learn</title> 
+				<para>Understanding the Data-binding Model</para> 
+				<para>Setting Up the Development Environment</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Installing the DAC</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Verifying the DAE Service</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>Building the Application</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Creating the Data Model</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Creating a New Application</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Building the Browse Form</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Connecting to the DAE Service</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Building the Edit Form</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Putting It All Together</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>Conclusion</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Requirements</title> 
+				<para>Active DAE Service</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="VNTUnderstandingtheData-bindingModel"> 
+		  <title>Understanding the Data-binding Model</title> 
+		  <para><indexterm> 
+					 <primary>Data-binding model</primary> 
+				</indexterm>Learn more about the Dataphor data-binding
+				model.</para> 
+		  <para>Before building the application a brief introduction to key
+				components will help. The following components are used to bind controls to a
+				data source.</para> 
+		  <para> 
+				<orderedlist continuation="restarts"> 
+					 <listitem> 
+						  <para>The <symbol>DataSession</symbol> component provides a
+								connection to the Dataphor Data Access Engine (DAE) server.  It encapsulates
+								session specific information such as user name and password.  Once a client
+								opens a session it can push and pull data through the Dataphor DAE
+								server.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The <symbol>DataView</symbol> component, given an
+								expression provides access to the result set.  Basically the
+								<symbol>DataView</symbol> encapsulates a cursor against a set of data defined
+								by the <symbol>Expression</symbol> property.  Access to the data is provided
+								through a collection of <symbol>DataFields</symbol>.  The
+								<symbol>First</symbol>, <symbol>Next</symbol>, <symbol>Prior</symbol>, and
+								<symbol>Last</symbol> methods navigate the cursor.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The <symbol>DataSource</symbol> component provides a
+								level of indirection between data-aware controls and a
+								<symbol>DataView</symbol>.</para> 
+					 </listitem> 
+				</orderedlist> </para> 
+		  <para><indexterm> 
+					 <primary>Dataphor Data-binding model hierarchy</primary> 
+				</indexterm>The overall connection hierarchy top down is,
+				<symbol>DAE Service</symbol>, <symbol>DataSession(s)</symbol>,
+				<symbol>DataView</symbol>(s), <symbol>DataSource</symbol>(s), Data-aware
+				control(s).  The <symbol>DataView</symbol> uses a <symbol>DataSession</symbol>
+				to communicate with the DAE.  The <symbol>DataSource</symbol> uses a
+				<symbol>DataView</symbol> to link data-aware controls to a result set.</para> 
+	 </sect1> 
+	 <sect1 id="VNTSettingUptheDevelopmentEnvironment"> 
+		  <title>Setting Up the Development Environment</title> 
+		  <para><indexterm> 
+					 <primary>DAC Controls</primary> 
+					 <secondary>Setting up the development environment</secondary> 
+				</indexterm><indexterm> 
+					 <primary>How to</primary> 
+					 <secondary>Install the DAC</secondary> 
+				</indexterm>Learn how to setup the development environment in
+				Visual Studio.NET.</para> 
+		  <para>To begin we need to do a few things to setup the development
+				environment.  First we demonstrate the installation of the Dataphor DAC
+				components into the Toolbox.  Finally we verify that there is an active DAE
+				Service running.</para> 
+		  <sect2 id="VNTInstallingData-awareComponents"> 
+				<title>Installing the Dataphor DAC</title> 
+				<para><indexterm> 
+						  <primary>Data-aware Components</primary> 
+						  <secondary>installing</secondary> 
+					 </indexterm>Learn how to install the Dataphor DAC components
+					 into the Toolbox.</para> 
+				<para>To install the DAC components into the Toolbox do the
+					 following.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Open Visual Studio.NET.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select Tools|Customize ToolBox...</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the .NET Framework Components tab.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Sort the component list by namespace by clicking
+									 the column title Namespace.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the ServerService component in the
+									 <symbol>Alphora.Dataphor.DAE</symbol> assembly.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select all components in the
+									 <symbol>Alphora.Dataphor.DAE.Client</symbol> assembly.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select all components in the
+									 <symbol>Alphora.Dataphor.DAE.Client.Controls</symbol> assembly.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the OK button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>If the Toolbox is not visible in Visual Studio
+									 then select View||Toolbox and locate the data-aware components.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="VNTVerifyingtheDAEService"> 
+				<title>Verifying the DAE Service</title> 
+				<para>Learn how to verify the status of the DAE Service.</para> 
+				<para>The application needs access to an active DAE Service to
+					 consume data from the DAE Server.  To verify that the DAE Service is running do
+					 one of the following.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Open the <symbol>Dataphor DAE Service
+									 Configuration Utility</symbol>.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open the Windows Services Manager and look for
+									 the <symbol>Alphora Dataphor Data Access Engine Server</symbol>.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>For help starting the service see 
+					 <link role="cref" linkend="DDGServiceConfigurationUtility">DAE
+						  Service</link>.</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="VNTBuildingtheApplication"> 
+		  <title>Building the Application</title> 
+		  <para><indexterm> 
+					 <primary>DAC data-aware components</primary> 
+					 <secondary>Using to build an application</secondary> 
+				</indexterm><indexterm> 
+					 <primary>How to</primary> 
+					 <secondary>Build an application using data-aware
+						  components</secondary> 
+				</indexterm>Learn how to use the DAC to build an
+				application.</para> 
+		  <para>The first step in building any application is to define the data
+				model.  Having a good data model is key to having a good application.  With
+				that data model we can then build the interface.  The interface is a simple
+				windows forms application with two forms, one to browse the Actor table,
+				another to edit an Actor.  Finally we bring it all together.</para> 
+		  <sect2 id="VNTCreatingtheDataModel"> 
+				<title>Creating the Data Model</title> 
+				<para><indexterm> 
+						  <primary>How to</primary> 
+						  <secondary>Build a data model</secondary> 
+					 </indexterm>Learn how to load a sample data model.</para> 
+				<para>The Actor table is defined in the sample "Movie.D4" script
+					 that ships with Dataphor. All we need to do is run the sample "Movie.D4" script
+					 in Dataphoria to create the Actor table.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Start Dataphoria.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open up a Query Script window.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Right-click on Servers and select Add
+									 Connection...</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change the <symbol>Uri</symbol> property to
+									 "tcp://localhost:8061/dataphor" or to whatever your DAE Service is configured
+									 to listen on.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Right-click on the server and select Query
+									 (Script).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open the "Movie.D4" script (File|Open).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Execute the script press (Ctrl-E). You should see
+									 a "Statement Executed Successfully!" message corresponding to each statement in
+									 the script. The "Movie.D4" script uses the default storage device called a
+									 MemoryDevice. Because the data is being stored in memory, the data is destroyed
+									 when the DAE services stops. To retain the data specify a different storage
+									 device in the script. Some of the more common devices are SQLServerDevice,
+									 OracleDevice, DB2Device, and LinterDevice. For more information on devices see 
+									 <link role="cref" linkend="D4LGUsingDevices">Storage
+										  Devices </link>.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="VNTCreatingaNewApplication"> 
+				<title>Creating a New Application</title> 
+				<para>Learn how to create a new Windows application.</para> 
+				<para>We will be creating a simple Windows Forms application that
+					 consumes data using the DAC. Do the following to create a new
+					 application.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Open Visual Studio.NET.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select "File|New Project..." select Visual C# or
+									 Visual Basic project and select Windows Application template. Change the
+									 application name to Actors.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select OK</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open Form1 in the designer. Right-click Form1 in
+									 the Solution Explorer and select "View Designer".</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="VNTBuildingtheBrowseForm"> 
+				<title>Building the Browse Form</title> 
+				<para><indexterm> 
+						  <primary>How to</primary> 
+						  <secondary>Build a browse form with the DAC</secondary> 
+					 </indexterm><indexterm> 
+						  <primary>DAC Controls</primary> 
+						  <secondary>Build a browse form</secondary> 
+					 </indexterm>Learn how to build a simple browse form.</para> 
+				<para>The browse is a simple form with a Grid, Search, and three
+					 buttons Add, Edit and Delete. The grid provides a two dimensional view of data
+					 and allows the consumer to navigate a result set.  The add button inserts an
+					 Actor. The edit button updates an Actor. The delete button deletes an Actor. 
+					 The search, given criteria will search the result finding the nearest Actor
+					 that matches the criteria.  Do the following to build the form.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Setup the development environment as described
+									 above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Make sure the Dataphor DAC components have been
+									 installed into the Toolbox as described above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change the forms <symbol>Text</symbol> property
+									 to "Actor Browse" by clicking on the form and editing the <symbol>Text</symbol>
+									 property in the properties window.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Find the <symbol>DataSource</symbol> component
+									 and place one in the designer. Change its name to dsActor.  The
+									 <symbol>View</symbol> property will be set later.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Find the <symbol>DBGrid</symbol> control in the
+									 Toolbox and place one in the designer.  Set the grids <symbol>Source</symbol>
+									 property to dsActor.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Find the <symbol>IncrementalSearch</symbol>
+									 control in the Toolbox and place one above the grid in the designer. </para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> property to
+									 "Search".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Source</symbol> property to
+									 dsActor.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Normally the <symbol>OnOrderLookup</symbol> event
+									 (Lookup button) is hooked to another form that allows changing the order of the
+									 result, which intern changes the available search criteria. But for simplicity
+									 we will not build that functionality.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add three buttons to the form.  Change their
+									 names to "btnAdd", "btnEdit", and "btnDelete". Set their <symbol>Text</symbol>
+									 properties to "&amp;Add", "&amp;Edit", and "&amp;Delete". </para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>Now the form should look something like:</para> 
+				<para/> 
+					 <para>
+						  <inlinegraphic fileref="images/VSNetTut002.jpg" width="368" depth="296"/>
+						  </para> 
+		  </sect2> 
+		  <sect2 id="VNTConnectingtotheDAEService."> 
+				<title>Connecting to the DAE Service.</title> 
+				<para>Learn how to connect to the DAE Service using the DAC.</para>
+				
+				<para>To show data in the form we need to connect to the
+					 <symbol>DAE Service</symbol> and create a data view. </para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Find the <symbol>DataSession</symbol> component
+									 in the ToolBox and place one in the designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>ServerUri</symbol> property to
+									 "tcp://localhost:8061/dataphor" or to whatever your DAE Service is configured
+									 to listen on.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Expand the SessionInfo section.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>UserID</symbol> to a valid user
+									 id or admin for default.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Leave the <symbol>Password</symbol> blank if you
+									 are using the default user id otherwise set it to the valid password.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Toggle the <symbol>Active</symbol> property to
+									 true. If you cannot activate the session check the <symbol>UserID</symbol>,
+									 <symbol>Password</symbol> and <symbol>ServerUri</symbol> properties.  Once the
+									 session is active we have a connection with the DAE service.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Find the <symbol>DataView</symbol> component in
+									 the Toolbox and place one in the designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change the name property to "ActorView".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Expression</symbol> property to
+									 "Actor".  "Actor" is the <symbol>D4</symbol> expression, the equivalent SQL
+									 expression is "Select * from Actor".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Edit the <symbol>OrderDefinition</symbol>
+									 property add the ID column in ascending order.  This describes the order of the
+									 result.  This property is not required and could be set in the expression as a
+									 D4 statement like "Actor order by {ID asc}" or SQL statement "select * from
+									 Actor order by ID asc".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Session</symbol> property to the
+									 session created above.  The <symbol>DataView</symbol> can only consume data
+									 when it has access to an active <symbol>DataSession</symbol>.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Active</symbol> property to
+									 true.  Setting the active property to true evaluates the expression against the
+									 DAE.  Once the view is active we have a valid result.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the
+									 <symbol>UseApplicationTransactions</symbol> property to false.  In this
+									 tutorial application transactions are not needed.  To learn more about using
+									 application transactions and views see ApplicationTransactions.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Now that we have a view we only need to link the
+									 <symbol>DataSource</symbol> to it.  To link the <symbol>DataSource</symbol>,
+									 click on the dsActor component in the designer and set the
+									 <symbol>View</symbol> property to the ActorView created above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The form should look something like:</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/VSNetTut004.jpg" width="368" depth="296"/>
+					 </para> 
+				<para> 
+					 <orderedlist numeration="arabic" continuation="continues"> 
+						  <listitem> 
+								<para>Save the form by pressing (Ctrl-S).</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="VNTBuildingtheEditForm"> 
+				<title>Building the Edit Form</title> 
+				<para><indexterm> 
+						  <primary>How to</primary> 
+						  <secondary>Build an edit form with the DAC</secondary> 
+					 </indexterm><indexterm> 
+						  <primary>DAC Controls</primary> 
+						  <secondary>Building an edit form</secondary> 
+					 </indexterm>Learn how to build a simple edit form.</para> 
+				<para>The edit form is a simple form with three edit boxes and two
+					 buttons.  The form simply allows editing of the ID, Name, and Gender
+					 columns.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Add a new form to the project.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Right-click the project and select Add|Add New
+									 Item...</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select Windows Form and set the name to
+									 ActorEdit.cs</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select "Open".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Text property of the form to "Actor
+									 Edit".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add a <symbol>ToolBar</symbol> control to the
+									 form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add a <symbol>ToolBarButton</symbol> to the
+									 ToolBar on the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> property of the
+									 first button to "&amp;Save".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>DialogResult</symbol> property to
+									 OK.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add another ToolBarButton to the ToolBar on the
+									 form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Text property of the second button to
+									 "&amp;Close".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the DialogResult property to Cancel.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Save button as the
+									 <symbol>AcceptButton</symbol> of the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the ActorEdit form in the designer and set
+									 its AcceptButton property to the save button in the ToolBar.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Cancel button as the
+									 <symbol>CancelButton</symbol> of the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the ActorEdit form in the designer and set
+									 its CancelButton property to the cancel button in the ToolBar.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add a <symbol>DataSource</symbol> component to
+									 the form.  Each edit box uses this datasource to link to the result set.</para>
+								
+						  </listitem> 
+						  <listitem> 
+								<para>Change the name property to "dsEdit".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Modifiers</symbol> property to
+									 public to allow the browse form to gain access to the View property later
+									 on.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add three <symbol>DBTextBox</symbol> controls to
+									 the form, one for each column represented.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set each of their <symbol>Source</symbol>
+									 properties to dsEdit.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set each <symbol>ColumnName</symbol> property to
+									 "ID", "Name", and "Gender" respectively.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Because the ID column has a key generator
+									 (operator) assigned to it, the key generator provides a default value for this
+									 column. Set the <symbol>ReadOnly</symbol> property to true on the DBTextBox
+									 that represents the ID column because there really is no need to edit this
+									 column.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add three labels to the form, one for each column
+									 represented.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> of label1 to
+									 "ID".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> of label2 to
+									 "Name".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> of label3 to
+									 "Gender".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Arrange the controls on the form to look
+									 something like this...</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/VSNetTut006.jpg" width="248" depth="216"/>
+					 </para> 
+				<para> 
+					 <orderedlist numeration="arabic" continuation="continues"> 
+						  <listitem> 
+								<para>Save the form by pressing (Ctrl-S).</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="VNTPuttingItAllTogether"> 
+				<title>Putting It All Together</title> 
+				<para><indexterm> 
+						  <primary>DAC Controls</primary> 
+						  <secondary>Build a browse to edit interface</secondary> 
+					 </indexterm><indexterm> 
+						  <primary>How to</primary> 
+						  <secondary>Build a browse to edit interface</secondary> 
+					 </indexterm>Learn how to complete the browse to edit
+					 interface.</para> 
+				<para>Now that we have both the browse and edit forms created we
+					 can define the interaction between the two.  The browse will instantiate the
+					 edit form whenever the Add or Edit buttons are pressed.  In this tutorial we
+					 are using C# but you can use VB.NET or any .NET supported language.</para> 
+				<para> 
+					 <orderedlist numeration="arabic"> 
+						  <listitem> 
+								<para>Design the Actor Browse form and double click the
+									 Add button.  The implementation for adding an Actor consists of three things. 
+									 First put the view in an insert state by invoking the <symbol>Insert</symbol>
+									 method of the view.  Second, show the edit form.  Third <symbol>Post</symbol>
+									 or <symbol>Cancel</symbol> changes when the form closes.  The click event of
+									 the Add button looks like</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting> using (ActorEdit LEditForm = new ActorEdit())
+{
+	LEditForm.dsEdit.View = ActorView; 
+	ActorView.Insert();
+	LEditForm.ShowDialog(this);
+	if (LEditForm.DialogResult == DialogResult.OK)
+		ActorView.Post();
+	else
+		ActorView.Cancel();
+}
+					 </programlisting> </para> 
+				<para> 
+					 <orderedlist continuation="continues" numeration="arabic"> 
+						  <listitem> 
+								<para>Design the Actor BrowseForm and double click the
+									 Edit button.  The implementation for editing an Actor is similar to adding
+									 one.  The only difference is in step one.  Instead of putting the view in
+									 insert state, put it into the edit state by invoking the <symbol>Edit</symbol>
+									 method of the view.  The click event of the Edit button looks like</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting> using (ActorEdit LEditForm = new ActorEdit())
+{
+	LEditForm.dsEdit.View = ActorView;
+	ActorView.Edit();
+	LEditForm.ShowDialog(this);
+	if (LEditForm.DialogResult ==  DialogResult.OK)
+		ActorView.Post();
+	else
+		ActorView.Cancel();
+}
+					 </programlisting> </para> 
+				<para> 
+					 <orderedlist numeration="arabic" continuation="continues"> 
+						  <listitem> 
+								<para>Design the Actor BrowseForm and double click the
+									 Delete button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The Delete method of the view deletes the current
+									 row.  To delete an Actor all we need to do is invoke the
+									 <symbol>Delete</symbol> method of the view.  The click event of the Delete
+									 button looks like</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting>ActorView.Delete(); </programlisting> </para> 
+				<para> 
+					 <orderedlist numeration="arabic" continuation="continues"> 
+						  <listitem> 
+								<para>Save your changes by pressing (Ctrl-S).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Run the application and try the Add, Edit,
+									 Delete, and Search.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/VSNetTut008.jpg" width="397" depth="392"/>
+					 </para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="VNTConclusion"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+		  </sect1info> 
+		  <title>Conclusion</title> 
+		  <para>Closing remarks...</para> 
+		  <para>In the tutorial we demonstrated key points of the Dataphor Data
+				Access Components(DAC) by creating a simple database application.  We
+				introduced the components that make the data-binding model work; however, this
+				was a brief introduction to the many capabilities of these components.  These
+				components are not only used in Rapid Application Development (RAD) but are
+				also used for Automated Application Development (AAD).  Try taking it to the
+				next level with AAD.</para> 
+	 </sect1> 
+</chapter> 

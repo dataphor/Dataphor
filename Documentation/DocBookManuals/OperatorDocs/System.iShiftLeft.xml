@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:47:54</date> 
+	 </sect2info> 
+	 <title>iShiftLeft</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>&lt;&lt;</symbol> is the parser recognized symbol for this
+		  operator. This operator performs a binary left bit shift on the given number.
+		  It takes the value on the left and shifts it to the left the number of bits
+		  indicated by the right value. In signed integers the far left bit is the
+		  negative place holder. If a bit is in that position then the number is
+		  negative. Signed integers have a two's complement implementation.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { 1 &lt;&lt; 2 BitShift };
+</programlisting> 
+		  <programlisting>BitShift 
+-------- 
+4</programlisting> 
+		  <programlisting>select TableDee add { 1 &lt;&lt; 31 BitShift };</programlisting> 
+		  <programlisting>BitShift    
+----------- 
+-2147483648</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRiShiftRight.html">iShiftRight (<symbol>&gt;&gt;</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

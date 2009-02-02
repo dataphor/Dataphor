@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:12:02</date> 
+	 </sect2info> 
+	 <title>iAnd</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>and</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>and</symbol> operator is a logical and. Both of the
+		  operands must be true for the result to be true.</para> 
+	 <note> 
+		  <para>Dataphor does not do short-circuit evaluation.</para> 
+	 </note> 
+	 <para> 
+		  <informaltable> 
+				<tgroup cols="3"><colspec colnum="1" colname="col1"
+					 colwidth="1.00*"/><colspec colnum="2" colname="col2" colwidth="1.04*"/><colspec
+					 colnum="3" colname="col3" colwidth="1.09*"/><tbody> 
+						  <row><entry colname="col1">Left Side</entry><entry
+								colname="col2">Right Side</entry><entry colname="col3">Result</entry> 
+						  </row> 
+						  <row><entry colname="col1">False</entry><entry
+								colname="col2">False</entry><entry colname="col3">False</entry> 
+						  </row> 
+						  <row><entry colname="col1">False</entry><entry
+								colname="col2">True</entry><entry colname="col3">False</entry> 
+						  </row> 
+						  <row><entry colname="col1">True</entry><entry
+								colname="col2">False</entry><entry colname="col3">False</entry> 
+						  </row> 
+						  <row><entry colname="col1">True</entry><entry
+								colname="col2">True</entry><entry colname="col3">True</entry> 
+						  </row></tbody> 
+				</tgroup> 
+		  </informaltable></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager where (Manager_ID % 2 == Employee_ID % 2) and (Employee_ID &gt; 2);</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

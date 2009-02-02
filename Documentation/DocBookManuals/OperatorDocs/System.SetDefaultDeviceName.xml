@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 13:50:25</date> 
+	 </sect2info> 
+	 <title>System.SetDefaultDeviceName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator sets the default device name (ADeviceName) for the
+		  current session of Dataphor. After executing
+		  <symbol>SetDefaultDeviceName</symbol>, all objects (tables, domains, etc) are
+		  created in the specified device unless another device is specified in the
+		  create statement. Because the device is specified by name, it does not have to
+		  exist when <symbol>SetDefaultDeviceName</symbol> is called. If the device does
+		  not exist when the default device is accessed, by a create or other operation,
+		  D4 raises an exception. Optionally the libarary (ALibraryName) name can be
+		  specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>SetDefaultDeviceName("MSSQL");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="D4LGDevices.html">Devices</ulink>
+<ulink url="SLRSystem.CreateDeviceUser.html">System.CreateDeviceUser</ulink>
+<ulink url="SLRSystem.CreateGroupDeviceUser.html">System.CreateGroupDeviceUser</ulink>
+<ulink url="SLRSystem.DeviceUserExists.html">System.DeviceUserExists</ulink>
+<ulink url="SLRSystem.GroupDeviceUserExists.html">System.GroupDeviceUserExists</ulink>
+<ulink url="SLRSystem.GetDefaultDeviceName.html">System.GetDefaultDeviceName</ulink>
+<ulink url="SLRSystem.SetDeviceUserID.html">System.SetDeviceUserID</ulink>
+<ulink url="SLRSystem.SetDeviceUserPassword.html">System.SetDeviceUserPassword</ulink>
+<ulink url="SLRSystem.SetGroupDeviceUserConnectionParameters.html">System.SetGroupDeviceUserConnectionParameters</ulink>
+<ulink url="SLRSystem.SetGroupDeviceUserID.html">System.SetGroupDeviceUserID</ulink>
+</literallayout> </para> 
+	 </formalpara> 
+</sect2> 

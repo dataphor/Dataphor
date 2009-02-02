@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:32:31</date> 
+	 </sect2info> 
+	 <title>iIn</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>in</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>in</symbol> operator is a binary operator that checks a
+		  column to see if a particular value is in that column. If the value is in the
+		  column, then the operator returns true, if it is not in the column, then the
+		  operator returns false.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee where ID in (Manager over {Manager_ID});</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+1  Joe  
+2  John 
+4  Jeff </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGMembershipOperators.html">Membership Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

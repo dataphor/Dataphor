@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 14:39:52</date> 
+	 </sect2info> 
+	 <title>System.ToGuid</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>String</symbol> types can be explicitly converted to
+		  <symbol>Guid</symbol> using this operator.</para> 
+	 <para>A Guid string must contain 32 digits and 4 dashs in the format
+		  xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select ToGuid("12345678-1234-1234-1234-123456789012");</programlisting> 
+		  <programlisting>12345678-1234-1234-1234-123456789012</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGTypes.html">Types</ulink>
+<ulink url="SLRSystem.Guid.html">System.Guid</ulink>
+<ulink url="SLRSystem.NewGuid.html">System.NewGuid</ulink>
+<ulink url="SLRSystem.NameFromGuid.html">System.NameFromGuid</ulink>
+<ulink url="SLRSystem.ToBoolean.html">System.ToBoolean</ulink>
+<ulink url="SLRSystem.ToByte.html">System.ToByte</ulink>
+<ulink url="SLRSystem.ToDate.html">System.ToDate</ulink>
+<ulink url="SLRSystem.ToDateTime.html">System.ToDateTime</ulink>
+<ulink url="SLRSystem.ToDecimal.html">System.ToDecimal</ulink>
+<ulink url="SLRSystem.ToInteger.html">System.ToInteger</ulink>
+<ulink url="SLRSystem.ToLong.html">System.ToLong</ulink>
+<ulink url="SLRSystem.ToMoney.html">System.ToMoney</ulink>
+<ulink url="SLRSystem.ToShort.html">System.ToShort</ulink>
+<ulink url="SLRSystem.ToString.html">System.ToString</ulink>
+<ulink url="SLRSystem.ToTime.html">System.ToTime</ulink>
+<ulink url="SLRSystem.ToTimeSpan.html">System.ToTimeSpan</ulink>
+<ulink url="SLRSystem.ToVersionNumber.html">System.ToVersionNumber</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<part id="DACDGExtending"> 
+	 <title>Extending the DAC</title><partintro> 
+		  <para><?xm-replace_text {para}?></para></partintro> 
+	 <chapter id="DACDGExtendingControl"> 
+		  <title>Extending an Existing Control</title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+	 <chapter id="DACDGExtendingDesigingControl"> 
+		  <title>Designing a Data Aware Control</title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+	 <chapter id="DACDGExtendingBuildingControl"> 
+		  <title>Building a Data Aware Control</title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+	 <chapter id="DACDGExtendingCustomDataSession"> 
+		  <title>Building a Custom DataSession</title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+</part>

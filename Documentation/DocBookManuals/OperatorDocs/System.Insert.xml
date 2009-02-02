@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:44:03</date> 
+	 </sect2info> 
+	 <title>System.Insert</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator adds the specified element to the specified list or
+		  cursor. In a cursor it adds it to the current location. In a list a location
+		  must be specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmpCursor : cursor(table{ID : Integer, Name: String });
+	var EmpList : list(String);
+	var EmpString : String := "";
+	EmpList := list(String){};
+	EmpCursor := cursor(Employee);
+	while EmpCursor.Next() do
+	begin
+		EmpList.Insert(Name from EmpCursor.Select(),0);
+	end;
+	for i : Integer := 0 to EmpList.Count() - 1 do
+	begin
+		EmpString := EmpString + Unicode({13}) + EmpList[i];
+	end;
+	raise Error(EmpString);
+end;</programlisting> 
+		  <programlisting>Jeff
+Jake
+Jeff
+Josh
+John
+Joe</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

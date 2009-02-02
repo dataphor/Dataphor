@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:45:27</date> 
+	 </sect2info> 
+	 <title>System.IsGenerated</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator checks to see if the specified object is a generated
+		  object. Objects that are generated include domain operators. They are not
+		  created by the user. They can be either system or non system.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Objects where IsGenerated(Name);</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.IsSystem.html">System.IsSystem</ulink>
+<ulink url="D4LGUsingGenerators.html">Using Generators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 20, 2004 09:33:26</date> 
+	 </sect2info> 
+	 <title>System.DayOfWeek</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns an Integer from 0 to 6 representing the day of
+		  the week. Sunday is 0, Monday 1, all the way to Saturday being 6.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { DateTime(2004,04,19).DayOfWeek() Day19,
+                      DateTime(2004,04,24).DayOfWeek() Day24 };</programlisting> 
+		  <programlisting>Day19 Day24
+----- -----
+0     6</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="SLRSystem.DayOfMonth.html">System.DayOfMonth</ulink>
+<ulink url="SLRSystem.DayOfYear.html">System.DayOfYear</ulink>
+<ulink url="SLRSystem.DaysInMonth.html">System.DaysInMonth</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

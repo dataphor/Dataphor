@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:40:28</date> 
+	 </sect2info> 
+	 <title>System.Any</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is an aggregate operator that checks to see if any of the rows
+		  have true on the column specified. It is the equivalent of performing an OR on
+		  all of the rows in the specified column.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee
+     add { (Name.Length() = 4) LengthIsFour };</programlisting> 
+		  <programlisting>ID  Name    LengthIsFour
+--  ----    -------------------
+1   Joe     False
+2   John    True
+3   Josh    True
+4   Jeff    True
+5   Jake    True
+6   Jeff    True</programlisting> 
+		  <programlisting>select Employee add { (Name.Length() = 4) Length4 }
+      group add {Any(Length4) AreAnyLengthOf4};</programlisting> 
+		  <programlisting>AreAnyLengthOf4  
+----- 
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGAny.html">Any</ulink>
+<ulink url="SLRSystem.All.html">System.All</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

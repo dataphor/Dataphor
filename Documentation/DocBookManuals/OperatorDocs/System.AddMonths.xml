@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 08, 2004 13:41:58</date> 
+	 </sect2info> 
+	 <title>System.AddMonths</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Adds the specified number of months to the given DateTime and returns
+		  it.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select
+	(TableDee add { Date().AddMonths(6) Months }) // returns the date 6 months from today.
+	union
+	(TableDee add { AddMonths(DateTime(),-1) Months}); // returns a the date represented by 1 month ago from now.</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

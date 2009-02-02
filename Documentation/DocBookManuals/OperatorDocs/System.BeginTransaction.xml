@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:40:18</date> 
+	 </sect2info> 
+	 <title>System.BeginTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This begins a traditional transaction. Traditional database
+		  transactions are pessimistic. To preserve data integrity, exclusive or shared
+		  locks are opened to prevent data from changing while it is being viewed.</para>
+	 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	BeginTransaction();
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.First();
+	TempCursor.Next();
+	TempCursor.Insert( row { 10 ID, "Juan" Name});
+	TempCursor.Delete();
+	PrepareTransaction();
+	RollbackTransaction();
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginApplicationTransaction.html">System.BeginApplicationTransaction</ulink>
+<ulink url="SLRSystem.PrepareTransaction.html">System.PrepareTransaction</ulink>
+<ulink url="SLRSystem.CommitTransaction.html">System.CommitTransaction</ulink>
+<ulink url="SLRSystem.RollbackTransaction.html">System.RollbackTransaction</ulink>
+<ulink url="SLRSystem.TransactionCount.html">System.TransactionCount</ulink>
+<ulink url="SLRSystem.InTransaction.html">System.InTransaction</ulink>
+<ulink url="DDGP2TransactionManager.html">Transaction Manager</ulink>
+<ulink url="DDGP1TransactionManagement.html">DBM Concepts Transaction Management</ulink>
+<ulink url="DDGP2TransactionManagement.html">Device Session Transaction Management</ulink>
+<ulink url="DDGP2TransactionalCallProtocol.html">Transaction Call Protocol</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

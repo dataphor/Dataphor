@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 30, 2004 15:44:42</date> 
+	 </sect2info> 
+	 <title>System.SetObjectOwner</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The owner of an object can be changed using the
+		  <symbol>SetObjectOwner</symbol> operator.</para> 
+	 <para> Catalog object ownership also follows the group hierarchy. Whenever
+		  a catalog object is created it is owned by the user that created it. All rights
+		  for the object are implicitly available to the owner of the object.</para> 
+	 <para> Objects owned by users in sub-groups are implicitly owned by users
+		  in the parent group. For example, if a user in the User group creates a table,
+		  the Admin user is implicitly granted all rights for the table. By contrast,
+		  rights must be explicitly granted to users in sub-groups of the owner of the
+		  object. For example, if the Admin user creates a table, a user in the User
+		  group must be explicitly granted access to that table in order to use
+		  it.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>// assuming current user is Admin
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "User");
+create table Example in Temp
+	 { UnTrimmed : String, Trimmed : String, key{} };
+
+select UserHasRight("Admin","Sample.ExampleAlter");
+select UserHasRight("JS1","Sample.ExampleAlter");
+
+SetObjectOwner("Sample.Example","JS1");
+select UserHasRight("Admin","Sample.ExampleAlter");
+select UserHasRight("JS1","Sample.ExampleAlter");
+
+drop table Example;
+DropUser("JS1");</programlisting> 
+		  <programlisting>True
+False
+
+True
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="D4LGObjects.html">Objects</ulink>
+<ulink url="SLRSystem.ObjectExists.html">System.ObjectExists</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

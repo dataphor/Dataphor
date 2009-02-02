@@ -1,0 +1,78 @@
+<project>
+    <assemblies>
+        <assembly location="C:\Src\Alphora\Dataphor\Base\bin\Release\Alphora.Dataphor.dll" documentation="C:\Src\Alphora\Dataphor\base\bin\Release\base.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\BOP\bin\Release\Alphora.Dataphor.BOP.dll" documentation="C:\Src\Alphora\Dataphor\BOP\bin\Release\bop.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE\bin\Release\Alphora.Dataphor.DAE.dll" documentation="C:\Src\Alphora\Dataphor\DAE\bin\Release\DAE.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client\bin\Release\Alphora.Dataphor.DAE.Client.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client\bin\Release\DAEClient.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.Controls\bin\Release\Alphora.Dataphor.DAE.Client.Controls.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.Controls\bin\Release\DaeClientControls.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.Provider\bin\Release\Alphora.Dataphor.DAE.Client.Provider.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.Provider\bin\Release\DaeClientProvider.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\Frontend.Client\bin\Release\Alphora.Dataphor.Frontend.Client.dll" documentation="C:\Src\Alphora\Dataphor\Frontend.Client\bin\Release\FrontendClient.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\Frontend.Client.Windows\bin\Release\Alphora.Dataphor.Frontend.Client.Windows.dll" documentation="C:\Src\Alphora\Dataphor\Frontend.Client.Windows\bin\Release\FrontendClientWindows.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\Frontend.Client.Web\bin\Alphora.Dataphor.Frontend.Client.Web.dll" documentation="C:\Src\Alphora\Dataphor\Frontend.Client.Web\bin\FrontendClientWeb.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\Frontend.Server\bin\Release\Alphora.Dataphor.Frontend.Server.dll" documentation="C:\Src\Alphora\Dataphor\Frontend.Server\bin\Release\FrontendServer.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAEDeviceDB2\bin\Release\AlphoraDB2Device.dll" documentation="C:\Src\Alphora\Dataphor\DAEDeviceDB2\bin\Release\DAEDeviceDB2.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Device.SQL\bin\Release\Alphora.Dataphor.DAE.Device.SQL.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Device.SQL\bin\Release\DAEDeviceSQL.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAEDeviceLinter\bin\Release\AlphoraLinterDevice.dll" documentation="C:\Src\Alphora\Dataphor\DAEDeviceLinter\bin\Release\DAEDeviceLinter.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAEDeviceOracle\bin\Release\AlphoraOracleDevice.dll" documentation="C:\Src\Alphora\Dataphor\DAEDeviceOracle\bin\Release\DAEDeviceOracle.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.DB2\bin\Release\Alphora.Dataphor.DAE.Client.DB2.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.DB2\bin\Release\DAEClientDB2.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.Linter\bin\Release\Alphora.Dataphor.DAE.Client.Linter.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.Linter\bin\Release\DAECientLinter.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.MSSQL\bin\Release\Alphora.Dataphor.DAE.Client.MSSQL.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.MSSQL\bin\Release\DAEClientMSSQL.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Client.Oracle\bin\Release\Alphora.Dataphor.DAE.Client.Oracle.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Client.Oracle\bin\Release\DAEClientOracle.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAEDeviceMSSQL\bin\Release\AlphoraMSSQLDevice.dll" documentation="C:\Src\Alphora\Dataphor\DAEDeviceMSSQL\bin\Release\DAEDeviceMSSQL.xml" />
+        <assembly location="C:\Src\Alphora\Dataphor\DAE.Connection.ADO\bin\Release\Alphora.Dataphor.DAE.Connection.ADO.dll" documentation="C:\Src\Alphora\Dataphor\DAE.Connection.ADO\bin\Release\DAEConnectionADO.xml" />
+    </assemblies>
+    <documenters>
+        <documenter name="JavaDoc">
+            <property name="OutputDirectory" value=".\docs\JavaDoc\" />
+            <property name="ShowMissingSummaries" value="False" />
+            <property name="ShowMissingRemarks" value="False" />
+            <property name="ShowMissingParams" value="False" />
+            <property name="ShowMissingReturns" value="False" />
+            <property name="ShowMissingValues" value="False" />
+            <property name="DocumentInternals" value="False" />
+            <property name="DocumentProtected" value="True" />
+            <property name="DocumentPrivates" value="False" />
+            <property name="DocumentEmptyNamespaces" value="False" />
+            <property name="IncludeAssemblyVersion" value="False" />
+            <property name="CopyrightText" value="" />
+            <property name="CopyrightHref" value="" />
+        </documenter>
+        <documenter name="MSDN">
+            <property name="OutputDirectory" value=".\docs\Msdn\" />
+            <property name="HtmlHelpName" value="Documentation" />
+            <property name="HtmlHelpCompilerFilename" value="C:\Program Files\HTML Help Workshop\hhc.exe" />
+            <property name="IncludeFavorites" value="False" />
+            <property name="Title" value="An NDoc Documented Class Library" />
+            <property name="SplitTOCs" value="False" />
+            <property name="DefaulTOC" value="" />
+            <property name="ShowVisualBasic" value="True" />
+            <property name="ShowMissingSummaries" value="False" />
+            <property name="ShowMissingRemarks" value="False" />
+            <property name="ShowMissingParams" value="False" />
+            <property name="ShowMissingReturns" value="False" />
+            <property name="ShowMissingValues" value="False" />
+            <property name="DocumentInternals" value="False" />
+            <property name="DocumentProtected" value="True" />
+            <property name="DocumentPrivates" value="False" />
+            <property name="DocumentEmptyNamespaces" value="False" />
+            <property name="IncludeAssemblyVersion" value="False" />
+            <property name="CopyrightText" value="" />
+            <property name="CopyrightHref" value="" />
+        </documenter>
+        <documenter name="XML">
+            <property name="OutputFile" value="c:\shared\AlphoraDocs\codedoc\DataphorRefndoc.xml" />
+            <property name="ShowMissingSummaries" value="False" />
+            <property name="ShowMissingRemarks" value="False" />
+            <property name="ShowMissingParams" value="False" />
+            <property name="ShowMissingReturns" value="False" />
+            <property name="ShowMissingValues" value="False" />
+            <property name="DocumentInternals" value="False" />
+            <property name="DocumentProtected" value="False" />
+            <property name="DocumentPrivates" value="False" />
+            <property name="DocumentEmptyNamespaces" value="False" />
+            <property name="IncludeAssemblyVersion" value="False" />
+            <property name="CopyrightText" value="" />
+            <property name="CopyrightHref" value="" />
+        </documenter>
+    </documenters>
+</project>

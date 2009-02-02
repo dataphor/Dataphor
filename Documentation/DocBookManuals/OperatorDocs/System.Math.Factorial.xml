@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 14:11:38</date>
+	 </sect2info>
+	 <title>System.Math.Factorial</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Computes the factorial of the specified number
+		  (<emphasis>n</emphasis>!). 
+		  <informalexample> 
+				<para><symbol>0! = 1</symbol></para> 
+				<para><symbol>n! = n * (n-1)!</symbol></para> 
+		  </informalexample></para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add { Math.Factorial(10) Fact};</programlisting> 
+		  <programlisting>Fact    
+------- 
+3628800</programlisting>
+	 </example> 
+</sect2> 

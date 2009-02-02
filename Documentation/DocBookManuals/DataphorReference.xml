@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="DocBookx.css" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "DocBookx.dtd" [
+	 <!ENTITY D4LanguageGuide SYSTEM "D4LanguageGuide.xml">
+	 <!ENTITY DILReference SYSTEM "DilReference.xml">
+	 <!ENTITY DerivationReference SYSTEM "DerivationReference.xml">
+	 <!ENTITY SystemLibrary SYSTEM "SystemLibrary.xml">
+	 <!ENTITY SystemTables SYSTEM "SystemTables.xml">
+]>
+<book id="DataphorReference"> 
+	 <title>Dataphor Reference</title> 
+	 <bookinfo> 
+		  <copyright><year>2002</year><holder>Alphora</holder> 
+		  </copyright> 
+		  <date role="LastMod">Monday, December 09, 2002 4:04:20 PM</date> 
+		  <abstract> 
+				<para>
+					 <inlinegraphic fileref="images/dataphor.jpg" width="300" depth="116"/> </para> 
+				<para>The <emphasis>Dataphor Reference</emphasis> provides
+					 information relating to the basic tools of Dataphor Toolset. It contains
+					 detailed listings for the D4 language and Derivation.</para></abstract> 
+	 </bookinfo> 
+	 <chapter> 
+		  <title>Introduction</title> 
+		  <para> The <emphasis>Dataphor Reference</emphasis> contains reference
+				documentation for the Alphora Dataphor Toolset which includes both the Alphora
+				Dataphor Data Access Engine (DAE) and the Alphora Dataphor Frontend.</para> 
+		  <sect1> 
+				<title>What's in This Manual</title> 
+				<para>This manuual contains the following four chapters:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para> 
+									 <citetitle>Chapter 1</citetitle> </para> 
+								<para>"D4 Language Guide" describes the D4 Language
+									 with syntax, description, and examples</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> 
+									 <citetitle>Chapter 2</citetitle> </para> 
+								<para> "Dataphor user Interface Language Reference"
+									 describes the markup used to define user interfaces using the Dataphor
+									 Frontend.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> 
+									 <citetitle>Chapter 3</citetitle> </para> 
+								<para> "System Library Reference" provides a detailed
+									 reference for "sytem" operators and tables.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> 
+									 <citetitle>Chapter 4</citetitle> </para> 
+								<para> "Derivation Tags Reference" provides a detailed
+									 reference for the tags used in the process of Derivation.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Additional Resources</title> 
+				<para>Additional information may be obtained from the following
+					 sources:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para> The on-line help.</para> 
+						  </listitem>
+						  <listitem> 
+								<para> <emphasis>Dataphor User's Guide</emphasis>
+									 contains information about the overall purpose of Dataphor and the role of the
+									 Dataphor Data Access Engine.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> <emphasis>Dataphor DAE Developers
+									 Guide</emphasis> contains information about the Dataphor Data Access
+									 Engine.</para> 
+						  </listitem>
+						  <listitem> 
+								<para> <emphasis>Dataphor Frontend Developers
+									 Guide</emphasis> contains information about the Dataphor Frontend.</para> 
+						  </listitem>
+						  <listitem> 
+								<para>Texts such as 
+									 <citetitle>An Introduction to Database
+										  Systems</citetitle> by C. J. Date (Addison Wesley Longman) contain information
+									 about the Relational Model and its significance.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The.NET Framework MSDN documentation, included
+									 with the .NET Framework SDK, provides information about the technology on which
+									 the Dataphor DAE is built.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect1> 
+	 </chapter>&D4LanguageGuide; 
+	 <chapter> 
+		  <title>Dataphor user Interface Language Reference</title> 
+		  <para>The following sections describe the Dataphor user Interface
+				Language (DIL) tags with their attributes. This markup is used to define
+				Frontend user interfaces.</para>&DILReference; 
+	 </chapter> 
+	 <chapter> 
+		  <title>System Library Reference</title> 
+		  <para>The following sections describe the D4 operators and system
+				tables provided in the Dataphor Catalog.</para>&SystemLibrary; &SystemTables; 
+	 </chapter> 
+	 <chapter> 
+		  <title>Derivation Tags Reference</title> 
+		  <para>The following sections describe the tags available to the
+				Derivation process. For more information about Derivation see the
+				<emphasis>Frontend Developers Guide</emphasis>.</para> 
+		  <sect1> 
+				<title>Derivation Reference</title> 
+				<para><?xm-replace_text {Paragraph}?></para> &DerivationReference; 
+		  </sect1> 
+	 </chapter> 
+</book> 

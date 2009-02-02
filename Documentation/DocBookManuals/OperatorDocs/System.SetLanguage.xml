@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 15:47:00</date>
+	 </sect2info>
+	 <title>System.SetLanguage</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator changes the current language of the DAE. There are only
+		  two possible languages that can be specified, <symbol>D4</symbol> and
+		  <symbol>RealSQL</symbol>. If another string is passed to the operator the DAE
+		  will give an error stating that the requested value was not found.</para> 
+	 <para>Clearly, this operator should be run on its own. Changing the
+		  language does not affect the script in which it is executed. The current
+		  language is a session level setting; it affects subsequent compilations.</para>
+	 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>SetLanguage("RealSQL");</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Execute.html">System.Execute</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

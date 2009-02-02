@@ -1,0 +1,1549 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/css" href="Display/DocBookx.css" ?>
+<!-- you must comment out the doctype declaration for external entities -->
+<!--<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "DocBookx.dtd">-->
+<chapter id="DUGApplicationTutorial"> 
+	 <chapterinfo> 
+		  <date role="LastMod">Thursday, April 08, 2004 15:09:20</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 9:47:52 AM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </chapterinfo> 
+	 <title><indexterm><primary>Dataphor Application
+					 Tutorial</primary></indexterm><indexterm><primary>How
+					 to</primary><secondary>Build a Dataphor Application
+					 (Tutorial)</secondary></indexterm>Dataphor Application Tutorial</title> 
+	 <para>This tutorial is designed to show walk through building an
+		  application in Dataphor, from choosing a database design to application
+		  completion. Although it does not cover every detail, it should provide a basic
+		  understanding of the Dataphor Toolset and enable you to begin developing your
+		  own applications.</para> 
+	 <para>As an example, this tutorial will show how to create a Database
+		  application designed to run a video rental store.</para> 
+	 <para>The tutorial is divided up into two major sections: Developing the
+		  Database and Developing the Frontend Application.</para> 
+	 <para>The Database Design will show how to setup a Dataphor Data Access
+		  Engine (DAE) instance and create the database. The Frontend section will walk
+		  through producing a Dataphor Application Server which will serve XML form
+		  designs to the clients.</para> 
+	 <sect1> 
+		  <title>Developing the Movie Database</title> 
+		  <para>The first part of this tutorial covers designing and setting up
+				the database. We will start with a clean DAE instance and add each of the
+				tables and other schema objects. This tutorial will also explain the syntax of
+				each D4 statement used.</para> 
+		  <para>For your convenience, a copy of the complete scripts and form
+				designs are available in <symbol>Alphora Dataphor\Sample Scripts\Example
+				Apps\Rental\</symbol> in the file <symbol>Rental.d4</symbol>. The source for
+				this section starts at the comment, 
+				<command>// Movie.D4</command>.</para> 
+		  <sect2> 
+				<title>Connect to a DAE</title> 
+				<para>The first thing we need to do is connect to a running DAE
+					 instance. This can be done through the Dataphoria server manager, which can
+					 connect to a running server or can create its own "in-process" server which
+					 will be stopped when Dataphoria closes. Either method is fine, but we should
+					 set a catalog filename if we want an in-process server, so that it keeps its
+					 catalog and all the table definitions when we restart the DAE.</para> 
+				<para>We will need to know the port number of a DAE when we try to
+					 connect to it from the Frontend Client and the Application Server.</para> 
+				<para>See Part II of the User's guide for more information on how
+					 to connect to the DAE with Dataphoria.</para> 
+				<para>Once we are connected, right click on the server and press
+					 Ctrl-O or select <symbol>Open Script</symbol> to open up a query window for the
+					 Movie.D4 script. Inside the new query window we can highlight a section of code
+					 and then press Control-E to execute the selected D4 code (or the entire script
+					 if nothing is highlighted).</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Device Setup</title> 
+				<para>The DAE stores and queries data through a storage device
+					 system. A device can be a SQL device which talks to a particular SQL server or
+					 it can be a memory device which stores data in RAM. Custom devices can also be
+					 created for any type of data source we may have. For more information on
+					 creating custom devices, see Part II of the Dataphor DAE Developer's
+					 Guide.</para> 
+				<para>Data inside of a memory device will be lost when the DAE
+					 shuts down, but the table definitions will be kept and restored as part of the
+					 DAE catalog. This makes it useful for tasks such as development. For production
+					 use, a persistent device such as MSSQL, Oracle, DB2, or Linter is used. The DAE
+					 will hand off entire queries to the device when it can to optimize
+					 performance.</para> 
+				<sect3> 
+					 <title>Using a Memory Device</title> 
+					 <para>Use the following code to create a memory device:</para> 
+					 <programlisting>create device RentalDevice
+	class "Alphora.Dataphor.DAE.Device.Memory.MemoryDevice,Alphora.Dataphor.DAE";</programlisting> 
+					 <para>Using a memory device is a quick and easy way to test out
+						  database designs and will work fine for the purpose of this tutorial. However,
+						  when the DAE is shut down, all data in the memory device are lost.</para> 
+				</sect3> 
+				<sect3> 
+					 <title>Using an MS SQL Device</title> 
+					 <para>Use the following code to create an MS SQL device:</para>
+					 
+					 <programlisting>create device RentalDevice
+	reconciliation { mode = { command }, master = device }
+	class "Alphora.Dataphor.DAE.Device.MSSQL.MSSQLDevice,AlphoraMSSQLDevice"
+		attributes
+		{
+			"ServerName" = ".",
+			"DatabaseName" = "Rental"
+		};</programlisting> 
+					 <para>The reconciliation settings control how the DAE will
+						  reconcile its catalog with the tables in the Device. In this case it is saying
+						  that the master copy will be on the device (when there are conflicting changes)
+						  and that the reconciliation will occur when a command uses a particular
+						  table.</para> 
+					 <para>The attributes specify the name of the server running the
+						  MS SQL server and the database name to connect to. Other attributes can also be
+						  specified.</para> 
+					 <para>For more information on the options available when
+						  creating a device, see Part II of the Dataphor DAE Developer's Guide.</para> 
+					 <para>After the device is created
+						  <symbol>CreateDeviceUser</symbol> is called to tell the DAE what MS SQL account
+						  to use for each DAE user, as shown here.</para> 
+					 <programlisting>CreateDeviceUser("Admin", Name("RentalDevice"), "sa", "");
+CreateDeviceUser("System", Name("RentalDevice"), "sa", "");</programlisting> 
+					 <para>The <symbol>Name</symbol> function we see above is a
+						  Selector Operator. It takes a string and returns a value of the data type
+						  <symbol>Name</symbol>, which represent a catalog identifier. It doesn't take a
+						  string because there are certain limits on the format of identifiers. They
+						  cannot start with a number and so forth.</para> 
+				</sect3> 
+				<sect3> 
+					 <title>Using Devices</title> 
+					 <para>To use a device, we add "<symbol>in DeviceName</symbol>"
+						  to the create table statement, as shown here.</para> 
+					 <programlisting>create table Test in RentalDevice
+{
+	ID: Integer,
+	key{ID}
+};</programlisting> 
+					 <para>If the "<symbol>in DeviceName</symbol>" part of the
+						  <symbol>create table</symbol> statement is left out, as is the case in this
+						  tutorial, then the default device as specified in the SessionInfo connection
+						  information is used. If the default device setting is not set, then the
+						  <symbol>System.Temp</symbol> memory device will be used. The
+						  <symbol>System.Temp</symbol> device is created and maintained by the
+						  DAE.</para> 
+					 <para>Also, the <symbol>SetDefaultDeviceName</symbol> operator
+						  can be called at runtime to specify the default device. Let's do this now, so
+						  that for the rest of the tutorial we don't have to specify the device.</para> 
+					 <programlisting>SetDefaultDeviceName(Name("RentalDevice"));</programlisting> 
+				</sect3> 
+		  </sect2> 
+		  <sect2> 
+				<title>Ensure Generators</title> 
+				<para>Dataphor handles auto-incrementing columns using maintained
+					 counters. Each counter contains the next value to be inserted for a particular
+					 identity generator.</para> 
+				<para>A special generation table must be created that contains an
+					 <symbol>ID</symbol> string column and a <symbol>NextValue</symbol> integer
+					 column. The DAE is told the name of this table by a call to the
+					 <symbol>SetGenerators</symbol> operator.</para> 
+				<para>Setting up the generators table can be done automatically by
+					 a call to the system <symbol>EnsureGenerators</symbol> operator. It will check
+					 if a generators table has already been created. If not, it will create a table
+					 called <symbol>System.Generators</symbol> and configure it as the generation
+					 table. The <symbol>System.Generators</symbol> table is created on the default
+					 device, or can optionally be passed a device name. Go ahead and create the
+					 generators table by executing the <symbol>EnsureGenerators</symbol> operator as
+					 shown below.</para> 
+				<programlisting>EnsureGenerators();</programlisting> 
+				<para>Then when we want to make a column auto-increment we set the
+					 default for the column to invoke <symbol>GetNextGenerator</symbol> and pass it
+					 a unique string. We will show and example of this when we get to the
+					 <symbol>Movie</symbol> table.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>MovieType Table</title> 
+				<para>The first table we need to create is a simple lookup. Run the
+					 following code:</para> 
+				<programlisting><indexterm><primary>Examples</primary><secondary>Creating a table</secondary></indexterm>create table MovieType
+{
+	ID : String tags { Frontend.Width = "3" },
+	Name : String,
+	key { ID }
+};</programlisting> 
+				<para>This will create a table that contains two columns. An
+					 <symbol>ID</symbol> column and a <symbol>Name</symbol> column. It will be used
+					 to contain the different genres of movies for our movie database and will be
+					 referenced in a lookup fashion.</para> 
+				<para>The tags part of the <symbol>ID</symbol> column is metadata
+					 which is attached to the column definition inside of the DAE. Programs using
+					 the DAE, such as the Frontend Clients and Servers, can use this metadata. In
+					 the case of the Frontend, metadata is used to control the way a form will look
+					 when it is derived from the tables and queries.</para> 
+				<para>The table above also has the <symbol>ID</symbol> column set
+					 as a key. A key is a column or set of columns in a table that can be used to
+					 uniquely identify every row in the table.</para> 
+				<para>Every table must always have a key. If some query excludes
+					 all keyed columns, then the key becomes all columns in our query result. Tables
+					 can have more than one key, but will always have at least one key. It is
+					 possible to create a key that has no columns, which restricts a table to the
+					 only row that has the same value for no columns, which will always contain zero
+					 or one row. </para> 
+				<para>The practical side effect of always having a key is that we
+					 never have exact duplicate rows in a table. Duplicate rows are not allowed,
+					 ever. If we select a data set and project it to contain a single column
+					 containing the same value more than one time, the extra rows will be removed
+					 from the data set. For more information on why this is done, see the Dataphor
+					 DAE Developer's Guide.</para> 
+				<para> The concept of a key does not imply any kind of order or
+					 indexing, though in practice, indexes are usually used to effeciently enforce
+					 them. The key concept merely indicates a uniqueness constraint, and as a
+					 result, an addressing mechanism for every table. </para> 
+				<para>Now, let's insert the movie types using the following
+					 code:</para> 
+				<programlisting><indexterm><primary>Examples</primary><secondary>Populating a table</secondary></indexterm>// Movie Types courtesy of IMDB (imdb.com)
+MovieType := table {
+	row{"ACT" ID, "Action" Name},
+	row{"ADV", "Adventure"},
+	row{"ANM", "Animation"},
+	row{"FAM", "Family"},
+	row{"COM", "Comedy"},
+	row{"CRI", "Crime"},
+	row{"DOC", "Documentary"},
+	row{"DRA", "Drama"},
+	row{"FAN", "Fantasy"},
+	row{"FNO", "Film-Noir"},
+	row{"HOR", "Horror"},
+	row{"IND", "Independent"},
+	row{"MUS", "Musical"},
+	row{"MYS", "Mystery"},
+	row{"ROM", "Romance"},
+	row{"SF",  "Science Fiction"},
+	row{"THR", "Thriller"},
+	row{"WAR", "War"},
+	row{"WST", "Western"}
+};</programlisting> 
+				<para>A couple of things are of note in the above code.</para> 
+				<para>The first is the assignment operator (:=), which is the
+					 equivalent of emptying the table followed by an 
+					 <command>insert table { row { .... } } into
+						  MovieType</command>.</para> 
+				<para>The table and row keywords are literal selectors. They create
+					 literal values of the types table and row, just as <symbol>5</symbol> is a
+					 literal selector of type integer. The constructed table value is then inserted
+					 into the table.</para> 
+				<para>The column names are only specified on the first row. After
+					 the first row the order of the values is assumed to follow the first row and
+					 the column specifiers are not needed but can still be placed if we so
+					 choose.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Basic Queries</title> 
+				<para>Once the data has been inserted, we can query it. Querying
+					 data in D4 is similar to SQL, but D4 queries do not have a from clause.
+					 Therefore, in SQL where we would query 
+					 <command>select * from MovieType</command>, in D4 we would use 
+					 <command>select MovieType;</command>.</para> 
+				<programlisting>select MovieType;</programlisting> 
+				<screen>ID  Name
+--- ---------------
+ACT Action
+ADV Adventure 
+ANM Animation 
+COM Comedy 
+CRI Crime 
+DOC Documentary 
+DRA Drama 
+FAM Family 
+FAN Fantasy
+FNO Film-Noir 
+HOR Horror 
+IND Independent 
+MUS Musical 
+MYS Mystery 
+ROM Romance 
+SF  Science Fiction 
+THR Thriller 
+WAR War 
+WST Western</screen> 
+				<para>If we want to restrict the columns of the result, we can use
+					 the query operators <symbol>over</symbol> (only the specified columns) and
+					 <symbol>remove</symbol> (all columns but the specified ones) in an algebraic
+					 fashion, as shown below.</para> 
+				<programlisting>select MovieType over {Name};</programlisting> 
+				<screen>Name 
+--------------- 
+Action 
+Adventure 
+Animation 
+Comedy
+Crime 
+Documentary 
+Drama 
+Family 
+Fantasy 
+Film-Noir 
+Horror 
+Independent 
+Musical
+Mystery 
+Romance 
+Science Fiction 
+Thriller 
+War 
+Western </screen> 
+				<para>The <symbol>where</symbol> clause behaves similarly to SQL's
+					 where clause in most cases, but can be used algebraically on the result of any
+					 other table expression.</para> 
+				<programlisting>select MovieType where ID &lt; "F" and ID &gt; "B";</programlisting> 
+				<screen>ID Name 
+--- ----------- 
+COM Comedy 
+CRI Crime 
+DOC Documentary 
+DRA Drama </screen> 
+				<programlisting>select (MovieType where ID &lt; "F") where ID &gt; "B";</programlisting> 
+				<screen>ID Name 
+--- ----------- 
+COM Comedy 
+CRI Crime 
+DOC Documentary 
+DRA Drama </screen> 
+				<para>The preceeding examples are equivalent. The latter example
+					 uses nesting of where operators, the former uses the logical
+					 <symbol>and</symbol> operator.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>MovieRating Table</title> 
+				<para>Let's run the following D4 statement to create a
+					 <symbol>MovieRating</symbol> table:</para> 
+				<programlisting>create table MovieRating
+{
+	ID : String,
+	Description : String,
+	Position: integer tags { Frontend.Visible = "False" },
+	key { ID },
+	key { Position },
+	order { Position } tags { Frontend.IsDefault = "True" }
+};
+
+MovieRating := table
+{
+	row{"G" ID, "General Audiences" Description, 1 Position},
+	row{"PG", "Parental Guidance Suggested", 2},
+	row{"PG-13", "Parents Strongly Cautioned", 3},
+	row{"R", "Restricted", 4},
+	row{"NC-17", "No One 17 and Under Admitted", 5},
+	row{"NR", "No Rating", 6}
+};</programlisting> 
+				<para>The <symbol>MovieRating</symbol> table has two keys, which
+					 means that both the <symbol>ID</symbol> and the <symbol>Position</symbol> must
+					 be unique.</para> 
+				<para>It also has an order. An order is logically just metadata. 
+					 Orders are a hint to the DAE, which can use them to optimize the tables with
+					 indexes. The are also used by the Frontend to suggest search criteria. Orders
+					 can contain multiple columns and an optional ascending or descending
+					 (<symbol>asc</symbol> or <symbol>desc</symbol>) specifier for each
+					 column.</para> 
+				<para>The metadata tag attached to the order above tells the
+					 Frontend to use the order as its default and the metadata tag attached to the
+					 <symbol>Position</symbol> column makes it so that it will, by default, never be
+					 shown in a derived user interface.</para> 
+				<para>The <symbol>Position</symbol> column exists to ensure that
+					 the ratings are presented in their commonly regarded order. The order of
+					 selected tables is undefined unless we specify an order with the <symbol>order
+					 by</symbol> clause of the <symbol>select</symbol> statement. Because tables are
+					 conceptually unordered, if the position were not retained as a column, then the
+					 insertion order would be lost. For a full explanation on why tables are
+					 conceptually unordered, see the Dataphor DAE Developer's Guide. </para> 
+				<programlisting>select MovieRating;</programlisting> 
+				<screen>ID    Description                  Position 
+----- ---------------------------- -------- 
+G     General Audiences            1 
+NC-17 No One 17 and Under Admitted 5 
+NR    No Rating                    6
+PG    Parental Guidance Suggested  2
+PG-13 Parents Strongly Cautioned   3
+R				 Restricted                   4 </screen> 
+				<programlisting>select MovieRating order by { Position };</programlisting> 
+				<screen>ID    Description                  Position 
+----- ---------------------------- --------
+G     General Audiences            1 
+PG    Parental Guidance Suggested  2 
+PG-13 Parents	Strongly Cautioned   3
+R     Restricted                   4
+NC-17 No One 17 and Under Admitted 5
+NR    No Rating                    6 </screen> 
+				<para>In the first example, the order of the results is arbitrary
+					 (we may even see a different order than is shown here) because the order by
+					 clause is not given. In the latter example, the results will always be
+					 retrieved as shown.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Movie Table</title> 
+				<para>The following code creates a <symbol>Movie</symbol> table and
+					 inserts some sample data:</para> 
+				<programlisting>create table Movie
+{
+	ID : Integer { default GetNextGenerator("Movie.ID") },
+	Name : String
+		tags
+		{
+			Frontend.Width = "30",
+			StaticByteSize = "40",
+			Frontend.Preview.Include = "true"
+		},
+	Type : String,
+	Rating : String,
+	Year : Integer
+		tags { Frontend.Width = "4" },
+	key { ID },
+	order { Name } tags { Frontend.IsDefault = "True" },
+	reference Movies_MovieType { Type } references MovieType { ID },
+	reference Movies_MovieRating { Rating } references MovieRating { ID }
+};
+
+Movie := table 
+{
+	row
+	{
+		GetNextGenerator("Movie.ID") ID,
+		"Episode II - Attack of the Clones" Name,
+		"SF" Type,
+		"PG-13" Rating,
+		2002 Year
+	},
+	row { GetNextGenerator("Movie.ID"), "Space Balls", "COM", "PG-13", 1985 },
+	row { GetNextGenerator("Movie.ID"), "The Matrix", "SF", "R", 1999 },
+	row { GetNextGenerator("Movie.ID"), "Ferris Beuler's Day Off", "COM", "PG", 1982 },
+	row { GetNextGenerator("Movie.ID"), "The Princess Bride", "COM", "PG", 1984 },
+	row { GetNextGenerator("Movie.ID"), "Crimson Tide", "ACT", "R", 1993 },
+	row { GetNextGenerator("Movie.ID"), "Toy Story", "ANM", "G", 1995 },
+	row { GetNextGenerator("Movie.ID"), "My Fair Laidy", "MUS", "G", 1976 },
+	row { GetNextGenerator("Movie.ID"), "Forget Paris", "ROM", "PG-13", 1987 }
+};</programlisting> 
+				<para>Notice that the <symbol>Movie</symbol> table has an
+					 auto-incremented <symbol>ID</symbol> column. The
+					 <symbol>GetNextGenerator</symbol> operator returns a new number each time it is
+					 called using the generation table discussed earlier. The default is used
+					 whenever a row is inserted that does not already contain a value for the
+					 column.</para> 
+				<para>In the test data insert, the <symbol>ID</symbol> column is
+					 specified as a <symbol>GetNextGenerator</symbol> call for each row. Usually
+					 this would not be necessary. The column value could be left out and each row
+					 would default to a <symbol>GetNextGenerator</symbol> invocation. We, however,
+					 need each ID to be matched to a specific movie so that they can be referenced
+					 by the sample data in the <symbol>MovieActor</symbol> table correctly. If the
+					 <symbol>ID</symbol> column was left out, then the undefined order of the rows
+					 would decide what ID each movie would get.</para> 
+				<para>The next thing of interest is the
+					 <symbol>StaticByteSize</symbol> metadata tag on the <symbol>Name</symbol>
+					 column. It tells the DAE how much memory to allocate for each value to be used
+					 before an overflow buffer is created. The length of strings is not reasonably
+					 limited, nor does the StaticByteSize impose any kind of a logical limit on
+					 length. The StaticByteSize merely informs the DAE what the length of a value
+					 will usually be so that it can optimize for it.</para> 
+				<para>In the case of strings, the <symbol>StaticByteSize</symbol>
+					 should be 4 bytes for a length counter plus two bytes per character in the
+					 string because they are Unicode strings. So the case above is optimized for
+					 names that are 18 characters or shorter.</para> 
+				<para>Lastly, we have the references. References are special cases
+					 of database-wide constraints. A reference sets up a relationship between two
+					 tables that is enforced by the DAE. </para> 
+				<para>Two references exist in the <symbol>Movie</symbol> table. 
+					 One links the <symbol>Rating</symbol> column of the <symbol>Movie</symbol>
+					 table to the <symbol>ID</symbol> column of the <symbol>MovieRating</symbol>
+					 table.  The <symbol>Type</symbol> column is linked to the
+					 <symbol>MovieType</symbol> table similarly. The reference constraint ensures
+					 that values of the <symbol>Type</symbol> column of the <symbol>Movie</symbol>
+					 table must be either a value within the <symbol>ID</symbol> column of the
+					 <symbol>MovieType</symbol> table, or be a value which has been marked
+					 <emphasis>special</emphasis>. See Creating Domains in the DAE Developer's Guide
+					 for more information on special values.</para> 
+				<para>Every row in the source table of the reference must either be
+					 set to a special or have a corresponding row in the target table for which the
+					 values in each column are equal.</para> 
+				<para>Following the reference keyword the name of the reference is
+					 given. The name is important in that it exists in the global namespace, next to
+					 the tables themselves. We could run the script 
+					 <command>drop reference Movie_MovieType;</command> on the DAE
+					 and it would remove the reference. In fact, we would need to drop the above
+					 reference before we could drop either table.</para> 
+				<para>After the reference name, a list of columns in the source
+					 table is present. The source table in this case is the <symbol>Movie</symbol>
+					 table.</para> 
+				<para>After that the keyword <symbol>references</symbol> is used,
+					 followed by the target table and then a list of columns which will be required
+					 to match the source columns. The target columns of a reference must always be a
+					 key.</para> 
+				<para>It is also important whether or not a source column is a
+					 <emphasis>key</emphasis>. If the source column is a key, then the reference
+					 describes a one to one or parent/extension relationship. If the source column
+					 is not a key, the reference describes a one to many or lookup/detail
+					 relationship. This is a natural byproduct of proper database design, but is
+					 especially relevant because the relationships of references are used by the
+					 Dataphor Frontend to derive appropriate interfaces for each table or
+					 view.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Actor Table</title> 
+				<para>Use the following D4 statement to create an
+					 <symbol>Actor</symbol> table and insert some test data:</para> 
+				<programlisting>create table Actor
+{
+	ID : Integer { default GetNextGenerator("Actor.ID") },
+	Name : String
+		tags { Frontend.Width = "25" },
+	Gender : String
+		tags
+		{
+			Frontend.ElementType = "Choice",
+			Frontend.Choice.Items = "Female=F,
+			Male=M"
+		},
+	key { ID },
+	order { Name } tags { Frontend.IsDefault = "True" }
+};
+
+Actor := table
+{
+	row { GetNextGenerator("Actor.ID") ID, "Liem Neeson" Name, "M" Gender },
+	row { GetNextGenerator("Actor.ID"), "Natalie Portman", "F" },
+	row { GetNextGenerator("Actor.ID"), "Ewan MacGrgor", "M" },
+	row { GetNextGenerator("Actor.ID"), "Frank Oz", "M" },
+	row { GetNextGenerator("Actor.ID"), "Christopher Lee", "M" },
+	row { GetNextGenerator("Actor.ID"), "Haden Christiansen", "M" },
+	row { GetNextGenerator("Actor.ID"), "Carie Elwes", "F" },
+	row { GetNextGenerator("Actor.ID"), "Mandy Patiken", "F" },
+	row { GetNextGenerator("Actor.ID"), "Andrae the Giant", "M" },
+	row { GetNextGenerator("Actor.ID"), "Billy Crystal", "M" }
+};</programlisting> 
+				<para>Of note in the above code is the metadata tags on the
+					 <symbol>Gender</symbol> column. When creating a form for this table, the
+					 Frontend Server will notice this tag and will use a radio box style control,
+					 with the options of Male or Female.</para> 
+				<para>The test data also includes the ID explicitly, even though
+					 the <symbol>ID</symbol> column is set to have auto-increment behavior. This is
+					 done for a similar reason it was done in the Movie table's sample data: to
+					 ensure a predictable ID for each of the rows. Alternatively, we could assign
+					 each row an explicit ID, then update the generator table to ensure that future
+					 IDs do not conflict.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Movie_Actor Table</title> 
+				<para>Run the following code in Dataphoria to create a
+					 <symbol>Movie_Actor</symbol> table and place some test data into it:</para> 
+				<programlisting>create table Movie_Actor
+{
+	Movie_ID : Integer,
+	Actor_ID : Integer,
+	key { Movie_ID, Actor_ID },
+	reference Movie_Actor_Movie { Movie_ID }
+		references Movie { ID },
+	reference Movie_Actor_Actor { Actor_ID }
+		references Actor { ID }
+			tags { Frontend.Detail.Embedded = "true" }
+} tags { Frontend.Title = "Movie Actor" };
+
+Movie_Actor := table
+{
+	row { 1 Actor_ID, 1 Movie_ID },
+	row { 2, 1 },
+	row { 3, 1 },
+	row { 4, 1 },
+	row { 5, 1 },
+	row { 6, 1 },
+	row { 7, 5 },
+	row { 8, 5 },
+	row { 9, 5 },
+	row { 10,5 },
+	row { 10,9 }
+};</programlisting> 
+				<para>The Dataphor Frontend Server will recognize the data
+					 manipulation pattern of the references above and will automatically create
+					 forms to handle the data input properly.</para> 
+				<para>By default, the references will be shown as items on the form
+					 menus, but with the <symbol>Frontend.Detail.Embedded</symbol> tag set to true,
+					 a browse form for the <symbol>Movie_Actor</symbol> table will be embedded
+					 within forms for the <symbol>Actor</symbol> table. So, whenever we access an
+					 actor list or row, we will also see and manipulate his or her movies.</para> 
+				<para>Note also that the key for the <symbol>Movie_Actor</symbol>
+					 has multiple columns. In this case, the individual values within each column do
+					 not necessarily have to be unique, but the combination of the both column
+					 values must be unique. As previously mentioned, the key concept applies to any
+					 number of columns, including zero.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Running the Reference Application</title> 
+				<para>Now is a good time to begin running the Frontend. See the
+					 <emphasis>Start Here Guide</emphasis> to learn how to run the reference
+					 application.</para> 
+				<para>It may be necessary to change the TCP port for the DAE,
+					 configured inside of the main.dfs and frontend.config files. These files are in
+					 the reference application directory, which is located in our web server root
+					 directory by default. After changing these files we may need to "kill" the 
+					 <command>aspnet_wp.exe</command> process (it will automatically
+					 restart) using the task manager. This will reset the ASP.NET Application and
+					 cause it to read the new settings.</para> 
+				<para>If trouble is encountered with the reference application,
+					 ensure that the application server is running and is connected to the DAE by
+					 opening up a browser and loading the page 
+					 <command>http://localhost/ReferenceApplication/derivation.dil?query=Objects</command>
+					 (adjust the URL as necessary for the paths). If an error is not shown then the
+					 application server is running correctly.</para> 
+				<para>From Dataphoria, select 
+					 <command>File|Open Session...</command>, enter
+					 <userinput>http://localhost/ReferenceApplication/main.dfs</userinput> as the
+					 session URI, then press 
+					 <command>OK</command>. After we press the 
+					 <command>Start...</command> button, the following form should
+					 be displayed.</para> 
+				<para><inlinegraphic fileref="images/RentalTut001.gif" width="326"
+					 depth="339"/></para> 
+				<para>The main.dil form contains a list of tables from the DAE.
+					 System tables and views, such as <symbol>Objects</symbol> and
+					 <symbol>TableDee</symbol> are excluded from the query that generates the above
+					 data set.</para> 
+				<programlisting>select objects
+	where IsSystem = false and Type = ObjectType("BaseTableVar")
+	over {Name};</programlisting> 
+				<screen>Name               
+------------------ 
+Actor              
+Movie              
+Movie_Actor        
+MovieRating        
+MovieType          
+System.Generators  </screen> 
+				<para>Note in the query the use of the <symbol>ObjectType</symbol>
+					 selector. It takes a string and returns a value of type
+					 <symbol>ObjectType</symbol> which is then compared with the
+					 <symbol>Type</symbol> column of the table. This is very similar to how the
+					 <symbol>Name</symbol> selector is used in previous examples.</para> 
+				<para>The grid on the main form of the reference application
+					 contains the results of a query similar to the one above. From this simple user
+					 interface, each table can be selected and a browse form or a report derived
+					 from it. The derived browse forms contain links to other derived formsm to view
+					 and edit various perspectives of the data in turn.</para> 
+				<para>Click on the <symbol>Movie</symbol> table, then click 
+					 <command>Browse...</command>. The following form will
+					 appear.</para> 
+				<para><inlinegraphic fileref="images/RentalTut002.gif" width="619"
+					 depth="401"/></para> 
+				<para>From here we can completely manipulate the movies in the
+					 movie table. The reference from the movie actors table causes a link under the
+					 details menu.</para> 
+				<para>Clicking on it brings up the following form. It is a browse
+					 on the <symbol>Movie_Actor</symbol> table, but it shows only rows associated
+					 with the current movie in the prior form. The browse also automatically
+					 includes the proper information from the <symbol>Actor</symbol> table.</para> 
+				<para><inlinegraphic fileref="images/RentalTut003.gif" width="438"
+					 depth="319"/></para> 
+				<para>If we were to click add on the above form we may expect it to
+					 give us a form to create a new actor, but it doesn't. We are still working with
+					 the <symbol>Movie_Actor</symbol> table so it creates a lookup to the actor
+					 table and defaults the movie to the current one being worked with, as shown
+					 below. If this seems confusing, browse on the <symbol>Movie_Actor</symbol>
+					 table back at the main form to get a better view of the
+					 <symbol>Movie_Actor</symbol> table and how the Application Server derives forms
+					 for it by default.</para> 
+				<para><inlinegraphic fileref="images/RentalTut004.gif" width="326"
+					 depth="285"/></para> 
+				<para> The light green background on the textbox controls means
+					 that no value has been entered into that field yet. A value must be entered
+					 into the field before it can be posted, since nulls are prohibited in the
+					 database.</para> 
+				<para>The dark green means that a field is Read Only as well as
+					 empty.</para> 
+				<para>The question mark next to the <symbol>Actor_ID</symbol> field
+					 indicates a lookup. We can enter the ID into the field or we can press the 
+					 <keysym>Insert</keysym> key or click on the question mark to
+					 select one. Selecting the lookup will display the following form.</para> 
+				<para><inlinegraphic fileref="images/RentalTut005.gif" width="517"
+					 depth="451"/></para> 
+				<para>This form is a browse on the actor table. Note, however, that
+					 the form has accept/reject toolbar buttons rather than just close.</para> 
+				<para>The <symbol>Actor</symbol> table has the same kind of
+					 relationship with the <symbol>Movie_Actor</symbol> table, except that it has
+					 the Embedded metadata tag on the reference, therefore the browse window for
+					 <symbol>Movie_Actor</symbol> is embedded inside of the actor browse.</para> 
+				<para>When 
+					 <command>Accept</command> is pressed, the lookup field from the
+					 previous form is set to the currently selected actor row, as shown
+					 below.</para> 
+				<para><inlinegraphic fileref="images/RentalTut006.gif" width="326"
+					 depth="285"/></para> 
+				<para>Then when we click accept again a row is inserted into the
+					 <symbol>Movie_Actor</symbol> table and according to the database, Billy Crystal
+					 was in Star Wars. Maybe he did a cameo....</para> 
+				<para><inlinegraphic fileref="images/RentalTut007.gif" width="405"
+					 depth="379"/></para> 
+				<para>If we go back to the main form and browse
+					 <symbol>Actors</symbol>, then select Billy Crystal, Star Wars will be listed as
+					 one of his movies.</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1> 
+		  <title>Developing a Video Rental Database</title> 
+		  <para>Now that we have a small movie database functioning, we can start
+				working on the tables for the rental application. The D4 code for this chapter
+				starts with the comment 
+				<command>// Rental</command>.</para> 
+		  <sect2> 
+				<title>Video Table</title> 
+				<para>The first table that is needed is a table for all the
+					 available videos. Each row in this table will represent a single video owned by
+					 the store which can be rented. There can be more than one video for each
+					 movie.</para> 
+				<para>Lets start by creating a <symbol>VideoStatus</symbol> table
+					 which will be used as a lookup.</para> 
+				<programlisting>create table VideoStatus
+{
+	ID : Integer
+		{ default GetNextGenerator("VideoStatus.ID") }
+		tags {Frontend.Visible = "False"},
+	Description : String,
+	key{ID}
+};
+
+VideoStatus := table
+{
+	row {"Available" Description, 1 ID},
+	row {"Rented", 2},
+	row {"Unavailable", 3}
+};</programlisting> 
+				<para>Then we will create the <symbol>Video</symbol> table
+					 itself.</para> 
+				<programlisting>create table Video
+{
+	ID : Integer { default GetNextGenerator("Video.ID") },
+	Movie_ID : Integer,
+	AquiredOn : DateTime { default DateTime() }
+		tags { Frontend.Preview.Visible = "false" },
+	TimesRented : Integer { default 0 }
+		tags { Frontend.Preview.Visible = "false" },
+	VideoStatus_ID : Integer { default 1 }
+		tags { Frontend.Visible = "false" },
+	reference Video_Movie { Movie_ID } references Movie { ID },
+	reference Video_VideoStatus { VideoStatus_ID } 
+		references VideoStatus { ID }
+		tags { Frontend.UseFullLookup = "True" },
+	key{ID}
+};
+
+Video := table
+{	
+	row {GetNextGenerator("Video.ID") ID, 1 Movie_ID},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},	
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 1},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 2},
+	row {GetNextGenerator("Video.ID"), 3},
+	row {GetNextGenerator("Video.ID"), 3},
+	row {GetNextGenerator("Video.ID"), 4},
+	row {GetNextGenerator("Video.ID"), 4},
+	row {GetNextGenerator("Video.ID"), 5},
+	row {GetNextGenerator("Video.ID"), 6},
+	row {GetNextGenerator("Video.ID"), 6},
+	row {GetNextGenerator("Video.ID"), 7},
+	row {GetNextGenerator("Video.ID"), 8},
+	row {GetNextGenerator("Video.ID"), 9}
+};</programlisting> 
+				<para>The <symbol>Now</symbol> operator returns a
+					 <symbol>DateTime</symbol> value. This is used as a default value for the
+					 <symbol>AquiredOn</symbol> column.</para> 
+				<para>The <symbol>VideoStatus_ID</symbol> column has a tag that
+					 keeps it from being shown on the Frontend. Since it won't be shown, we will
+					 provide another way for the user to select the status. The
+					 <symbol>Frontend.UseFullLookup</symbol> tag accomplishes this, allowing the
+					 user to lookup a status ID while only seeing the status'
+					 <symbol>Description</symbol>.</para> 
+				<para>Let's create a couple of views so that we can easily browse
+					 videos that are rented or unrented. We will link to browses on these views when
+					 browsing for videos to rent or videos to be returned.</para> 
+				<programlisting>create view RentedVideo
+	Video where VideoStatus_ID = 2;
+
+create view UnRentedVideo
+	Video where VideoStatus_ID = 1;</programlisting> 
+		  </sect2> 
+		  <sect2> 
+				<title>Account Table</title> 
+				<para>Next a table that keeps track of the customer accounts that
+					 the videos will be rented to.</para> 
+				<programlisting>create table Account
+{
+	ID : Integer { default GetNextGenerator("Account.ID") }
+		tags { Frontend.Add.Visible = "False" },
+	Name : String
+		tags { Frontend.Width = "20", Frontend.Preview.Include = "true" },
+	Phone : String,
+	Address : String
+		tags { Frontend.Group = "Address", Frontend.Title = "Line 1" },
+	Address2 : String
+		{ default "" }
+		tags { Frontend.Group = "Address", Frontend.Title = "Line 2" },
+	City : String
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true" },
+	State : String
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true", Frontend.Width = "5" },
+	Zip : String
+		tags { Frontend.Group = "Address", Frontend.FlowBreak = "true", Frontend.Width = "10" },
+	JoinedOn : DateTime { default DateTime() },
+	Balance : Money { default $0 },
+	key{ID}
+};
+
+Account := table 
+{
+	row
+	{
+		"Bryan" Name,
+		"Harvest Cove" Address,
+		"Provo" City,
+		"UT" State,
+		"84601" Zip,
+		"555-4444" Phone,
+		$132 Balance
+	}
+};</programlisting> 
+				<para>The <symbol>Frontend.Group</symbol>tags on the address
+					 columns tell the derivation engine to group them together in a group box, as
+					 shown.</para> 
+				<para><inlinegraphic fileref="images/rentaltut008.gif" width="326"
+					 depth="421"/></para> 
+				<para>Notice that the <symbol>JoinedOn</symbol> and
+					 <symbol>Balance</symbol> columns are both defaulted on a new row. The client is
+					 able to ask the DAE what a default row "looks like" without actually posting
+					 any data to database.</para> 
+				<para>Also note that the ID column is not visible on the add form
+					 (though it is still being generated trough it's default value), yet it is
+					 visible on the other forms. This is due to the <symbol>Frontend.Add.Visible =
+					 "false"</symbol> tag on the ID column. The <symbol>Add</symbol> qualification
+					 specifies that the tag applies more specifically to a particular type of
+					 "page".</para> 
+				<para>Note the <symbol>Preview.Include</symbol> tag on the
+					 <symbol>Name</symbol> column. This tag indicates what fields should be shown
+					 from a lookup (i.e. a form that looks up an Account). If this tag is not
+					 specified on at least one column, the default is all columns.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Sale Table</title> 
+				<para>Now let's create a table to track the video sales.</para> 
+				<programlisting>create table Sale
+{
+	ID : Integer { default GetNextGenerator("Sale.ID") }
+		tags { Frontend.Add.Visible = "false" },
+	Account_ID : Integer,
+	PurchasedOn : DateTime { default DateTime() },
+	reference Sale_Account { Account_ID } references Account { ID },
+	key { ID }
+};
+
+insert table { row { 1 Account_ID } } into Sale;</programlisting> 
+				<para>The insert statement inserts a complete row into the Sale
+					 table. It only contains a single column value because the rest of the columns
+					 have defaults.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>SaleItem</title> 
+				<para>Now let's create a <symbol>SaleItem</symbol> table which will
+					 keep track of each item sold for each sale.</para> 
+				<programlisting>create table SaleItem
+{
+	ID : Integer { default GetNextGenerator("SaleItem.ID") }
+		tags { Frontend.Visible = "false" },
+	Sale_ID : Integer,
+	Description : String,
+	Cost : Money,
+	reference SaleItem_Sale { Sale_ID } references Sale {ID}
+		tags {Frontend.Detail.Embedded = "True"},
+	key{ID}
+};</programlisting> 
+				<para>Note that the reference has an
+					 <symbol>Detail.Embedded</symbol> metadata tag. This tells the derivation engine
+					 to put a detailed browse on the referenced table's forms (which of can further
+					 be restricted to specific forms). If the <symbol>Detail</symbol> was not
+					 specified, then from the referencing table's perspective
+					 (<symbol>SaleItem</symbol>), the referenced table (<symbol>Sale</symbol>) would
+					 be embedded. See the Frontend Developer's Guide for more information about
+					 these tags.</para> 
+				<para>Let's create a view called <symbol>SaleView</symbol>, that
+					 adds a column called <symbol>Total</symbol> that automatically calculates the
+					 sum of all the <symbol>SaleItem</symbol> columns for the
+					 <symbol>Sale</symbol>.</para> 
+				<programlisting>create view SaleView
+	Sale add { Sum(Cost from SaleItem rename { ID SI_ID } where Sale_ID = ID) Total };</programlisting> 
+				<para>Here is a screenshot of the edit form for the
+					 <symbol>SaleView</symbol>. We will cover how to further customize (beyond tags)
+					 this form's presentation in the third section of this tutorial.</para> 
+				<para><inlinegraphic fileref="images/RentalTut009.gif" width="368"
+					 depth="441"/></para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Rental Table</title> 
+				<para>Now let's build a table to extend the
+					 <symbol>SaleItem</symbol> to track video rentals. In other words, let's create
+					 a "special kind" of sale item specifically for renting videos. We'll start by
+					 creating a lookup table for the rental status.</para> 
+				<programlisting>create table RentalStatus
+{
+	ID : Integer { default GetNextGenerator("RentalStatus.ID") }
+		tags { Frontend.Visible = "False" },
+	Status : String,
+	key{ID}
+};
+
+RentalStatus := table
+{
+	row {"Rented" Status, 1 ID},
+	row {"Returned", 2},
+	row {"ReturnedLate", 3},
+	row {"LateFeePaid", 4}
+};</programlisting> 
+				<para>We will next create the <symbol>Rental</symbol> table
+					 itself.</para> 
+				<programlisting>create table Rental
+{
+	SaleItem_ID : Integer,
+	Video_ID : Integer,
+	RentalStatus_ID : Integer { default 1 }
+		tags { Frontend.Add.Visible = "false", Frontend.Edit.Visible = "false" },
+	RentedOn : DateTime { default DateTime() },
+	DueOn : DateTime { default DateTime(DateTime() + Days(3)).DatePart() },
+	ReturnedOn : DateTime { default DateTime(Ticks(0)) }
+		tags { Frontend.Add.Visible = "false" },
+	LateFee : Money { default $0 },
+	reference Rental_Video { Video_ID } references Video { ID },
+	reference Rental_RentalStatus { RentalStatus_ID } references RentalStatus { ID }
+		tags { Frontend.UseFullLookup = "True" },
+	reference Rental_SaleItem { SaleItem_ID } references SaleItem { ID },
+	key { SaleItem_ID }
+};</programlisting> 
+				<para>Let's look at the default for the <symbol>DueOn</symbol>
+					 column. The default for <symbol>DueOn</symbol> calculates three days from today
+					 and <symbol>DateTime</symbol> is set to January 1st, 0 AD. In both cases the
+					 <symbol>DateTime</symbol> selector is called to create a
+					 <symbol>DateTime</symbol> value from a <symbol>TimeSpan</symbol> value. The
+					 <symbol>Days</symbol> selector returns a <symbol>TimeSpan</symbol> value which,
+					 when added to the <symbol>Now</symbol> <symbol>DateTime</symbol> value returns
+					 a <symbol>TimeSpan</symbol>. The <symbol>DatePart</symbol> call drops the time
+					 of day so that it will be due at midnight.</para> 
+				<para>The <symbol>ReturnedOn</symbol> default is interesting
+					 because it treats the beginning of time (according to the system's
+					 recollection) as a special value representing an unreturned Rental. There are
+					 of course many other, perhaps more desireable ways to accomplish the role of
+					 this column. For example, we could replace this column with another ("Returned
+					 Rental") table which would include a date. Rows in such a table would only
+					 exist for Rentals that are returned, at which time the returned date suddenly
+					 makes sense.</para> 
+				<para>Now let's create an operator (synonymous with procedure,
+					 function, routine) called <symbol>AddRental</symbol> that, given a row from the
+					 <symbol>Rental</symbol> table, updates the appropriate row of the
+					 <symbol>Video</symbol> table.</para> 
+				<programlisting>create operator AddRental(ARow : typeof(row from Rental))
+begin
+	update Video 
+		set 
+		{
+			VideoStatus_ID := 2, 
+			TimesRented := TimesRented + 1
+		}
+		where ID = (Video_ID from ARow);
+end;</programlisting> 
+				<para>Once this operator is executed, it can called anywhere in the
+					 code, given a row of the <symbol>Rental</symbol> table type as an
+					 argument.</para> 
+				<para>The <symbol>AddRental</symbol> operator can further be
+					 attached to the modification behavior of the <symbol>Rental</symbol> table, so
+					 that it is called after each insert.</para> 
+				<programlisting>attach operator AddRental(typeof(row from Rental))
+	to Rental on { after insert };</programlisting> 
+		  </sect2> 
+		  <sect2> 
+				<title>Users</title> 
+				<para>Let us now execute the portion of script starting with the
+					 comment 
+					 <command>\\ UserLogin.d4</command>.</para> 
+				<para>The user login portion of the script will create a
+					 <symbol>User</symbol> table and some triggers to facilitate management of users
+					 in the database. If we are using a storage device the script should be edited
+					 to enable appropriate access to the device for each user (or we could modify
+					 the script to make this an automatic part of adding a user). See the script for
+					 more information.</para> 
+				<para>After the script has been executed we can browse on the new
+					 <symbol>MaintainUser</symbol> table and manage the users of the DAE and of the
+					 Movie Rental application it hosts. Keep in mind, this script by no means
+					 provides solid application security. It does however provide a basic example,
+					 which is what we seek for the purposes of this tutorial.</para> 
+				<para>The operator <symbol>UserName()</symbol> can be called to
+					 return a string containing the login name of the current user. This is useful
+					 for defaulting a column to the currently logged in person, or verifying that
+					 the current user has sufficient rights to perform some operation.</para> 
+				<para>To prompt the user for login information when they start a
+					 Frontend application, edit the 
+					 <command>main.dfs</command> file and set ShowLoginForm to
+					 <symbol>True</symbol>. Otherwise, the login setting configured in the main.dfs
+					 file are used.</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1> 
+		  <title>Developing a custom Frontend Application</title> 
+		  <para>Now that the database design is essentially done, the rest of the
+				application logic can be built around it.</para> 
+		  <para>Frontend form designs consist of a set of nodes, called DIL
+				nodes, which are saved as XML files with a <symbol>.dil</symbol> extension.
+				Customized derived forms can be saved as their own DIL documents, or in terms
+				of their differences from the original form. Forms containing differences
+				(inherited forms) are saved with the <symbol>.dilx</symbol> extension. Requests
+				for DILX files are processed in the Frontend Server where changes are merged
+				with the original form and the customized result is sent to the client.</para> 
+		  <sect2> 
+				<title><indexterm><primary>Setting up an Application
+								Server</primary></indexterm><indexterm><primary>How to,</primary><secondary>Set
+								up a Frontend Application Server</secondary></indexterm>Setting up an
+					 Application Server</title> 
+				<para>Form descriptions are requested from an Application Server
+					 (generically called the Frontend Server) which runs under Microsoft Internet
+					 Information Services (IIS). The Frontend Server can derive forms to view and
+					 manipulate the data resulting from any expression. The customization engine
+					 (form inheritance) is also part of the server so that when a .dilx
+					 (customization) file is requested, the fully customized form is
+					 returned.</para> 
+				<para>To create a Frontend Server for our rental application, let's
+					 create a directory called <symbol>Rental</symbol> in the
+					 <filename>\Inetpub\wwwroot\</filename> directory, the usual source for web
+					 pages for IIS. Then let's copy the following list of files to the
+					 <filename>Rental</filename> directory from the
+					 <filename>ReferenceApplication</filename> directory.</para> 
+				<itemizedlist> 
+					 <listitem> 
+						  <para><filename>Global.asax</filename> (The ASPX
+								Application) - This file configures ASPX to use the Frontend Server application
+								logic for this web application. In particular, the master web application class
+								is configured as 
+								<classname>Alphora.Dataphor.Frontend.Server.ApplicationServer</classname>.
+								If we wished to descend our own application server via a .NET class, we would
+								specify that class here.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><filename>Web.config</filename> (ASPX Application
+								Configuration) - This file configures ASPX to use special page handler classes
+								for <filename>.dil</filename> files, and registers a special request handling
+								module to process <filename>.dilx</filename> files.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><filename>Frontend.config</filename> (Frontend
+								Application Configuration) - This file contains the configuration information
+								which the Application Server will use for derivation and customization
+								handling. One important setting within this file is the ServerUri. It indicates
+								the path (URL) of the DAE instance with which to connect to derive
+								forms.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><filename>Main.dfs</filename> (Dataphor Frontend
+								Client Session) - This is a session file which is the first document loaded by
+								the client. It contains a ServerUri which is used by the client to connect to
+								the DAE. It also contains a StartUri which will be the first page in the
+								application to be loaded and shown.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><filename>Main.dil</filename> (Initial Main Form) -
+								This is a simple form design, which will give us a place to start when
+								developing a main form for the application.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><filename>bin\*.*</filename> (Executable Files) -
+								This directory contains all the DLLs necessary to support the Frontend Server
+								behavior, such as derivation and customization.</para> 
+					 </listitem> 
+				</itemizedlist> 
+				<para>Once the listed files are copied, let's edit the Main.dfs and
+					 Frontend.config files and set the ServerUri to the URI of the appropriate
+					 running DAE (i.e. tcp://localhost:8061/dataphor).</para> 
+				<para> Next, let's configure IIS to treat the web directory as an
+					 ASPX application. To do so we need to go into the IIS configuration snap-in.
+					 Under the properties of the <filename>Rental</filename> directory, let's click
+					 on the Create button in the application settings, as shown below.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut010.gif" width="640"
+					 depth="479"/></para> 
+				<para>Once the customized <symbol>Rental</symbol> Frontend Server
+					 application is set up, we should be able to use the 
+					 <command>Open Session...</command> feature of Dataphoria to
+					 load the session file <filename>http://localhost/Rental/Main.dfs</filename>.
+					 From there, we have a working application that should behave just like the
+					 Reference Application.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title><indexterm><primary>Creating a Frontend Entry
+								Form</primary></indexterm>Creating an Entry Form</title> 
+				<para>From the Frontend Session form in Dataphoria, let's click on
+					 the 
+					 <command>From Designer...</command> button to bring up the form
+					 designer. The form designer is used to edit the DIL nodes in the form
+					 design.</para> 
+				<para>The left side of the designer consists of a list of all
+					 available nodes. In the center is a tree view representing the logical layout
+					 of the current document. On the right side is a property grid with the
+					 different settings listed for the currently selected node.</para> 
+				<para>When the designer opens, it creates a new empty form and
+					 shows it. The form which is currently being designed is always loaded and
+					 running, so that we can see exactly how it looks and works. Note that the
+					 designed form may be obscured by the designer.</para> 
+				<para>Under the file menu, let's select 
+					 <command>Open...</command>, then type in
+					 <filename>Main.dil</filename> as the file to open. The form will then be loaded
+					 and the designer will appear as follows. When the designer is active, we can
+					 press <keycode>F12</keycode> to activate the form being designed.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut011.gif" width="652"
+					 depth="436"/></para> 
+				<para>Before proceeding, study the design and familiarize yourself
+					 with each type of node.</para> 
+				<para>A root form node is of type <symbol>FormInterface</symbol>.
+					 Directly under the form are the non-visible elements and a single visible
+					 element. All visible elements (controls) are children of the first visible
+					 element, which in this case is a <symbol>Row</symbol>.</para> 
+				<para>The <symbol>Source</symbol> node, called
+					 <symbol>Tables</symbol> in the current form's case, has an expression property
+					 which represents the query used for the dataset. The <symbol>Source</symbol>
+					 represents the set of data to be used by other data aware nodes on the form.
+					 The <symbol>Source</symbol> maintains a currently selected row inside of the
+					 dataset and provides conventient features such as automatic buffering of data.
+					 Some elements like <symbol>Grid</symbol>, may show a "window" of rows within
+					 the dataset, while others like <symbol>Textbox</symbol> only show data from the
+					 currently active row.</para> 
+				<para>The various action nodes each perform a specific task when
+					 executed, depending on the type action node. For example, the
+					 <symbol>ShowFormAction</symbol> called <symbol>Browse</symbol> opens a new
+					 browse window when executed. Actions are executed from a <symbol>Menu</symbol>,
+					 <symbol>Trigger</symbol>, <symbol>Exposed</symbol>, or several other node
+					 types.</para> 
+				<para>Let's delete the <symbol>Row</symbol> with its children as
+					 well as the <symbol>Source</symbol>. Then let's drag a <symbol>Column</symbol>
+					 from the toolbox and drop it onto the root <symbol>FormInterface</symbol>. This
+					 adds the node to the end of the list of children. When we drag a node onto the
+					 tree it is added as a child if it is a valid child of that node, otherwise it
+					 is added as a peer. To force the designer to add a node as a peer hold down the
+					 <keycode>Control</keycode> key while dropping it into the tree.</para> 
+				<para>Beneith the new <symbol>Column</symbol> node, let's add two
+					 <symbol>StaticText</symbol> nodes and set the text of the first one to "Welcome
+					 to Alphora Video and Pizza" as shown in the following screen.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut012.gif" width="652"
+					 depth="430"/></para> 
+				<para>Next, we add other controls to the column, as shown in the
+					 sample screen. </para> 
+				<para>Let's update the <symbol>Text</symbol> property of each
+					 trigger to match the buttons shown in the screenshot below. Also, lets set the
+					 <symbol>Text</symbol> property of the form to match the caption of the
+					 screenshot, and delete the <symbol>TableSource</symbol> source,
+					 <symbol>Refresh</symbol>, and <symbol>Menu</symbol> nodes. Lastly, let's add a
+					 new <symbol>Menu</symbol> with the <symbol>Text</symbol> property of it set to
+					 "Reports". Our form should now look similar to this.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut013.gif" width="326"
+					 depth="233"/></para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Linking to Tables</title> 
+				<para>Now we have a simple menu set up, so let's add action nodes
+					 with which to hook the triggers (buttons).</para> 
+				<para> Let's delete all the existing action nodes, then add a
+					 <symbol>ShowFormAction</symbol> to the form and rename it to
+					 <symbol>ShowUsers</symbol>. Now let's set the <symbol>Uri</symbol> property of
+					 the new node to <filename>Derivation.dil?Query=MantainUser</filename> (The
+					 <symbol>Query</symbol> portion of the URI is case sensitive). When executed,
+					 the <symbol>ShowUsers</symbol> action will request a browse page from the
+					 Frontend Server, derived for the MaintainUser table. Let's go to the
+					 appropriate trigger ("Trigger4" in the previously shown design) and set the
+					 <symbol>Action</symbol> property to the <symbol>ShowUsers</symbol> node. Upon
+					 setting the action, the button will become enabled. When we now click the 
+					 <command>Edit Program Users</command> button in the form a
+					 browse form should be shown.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut014.gif" width="446"
+					 depth="319"/></para> 
+				<para>From this form we can see existing DAE users and can create
+					 and maintain users. In the example application we may want to track which
+					 employee did what. In this case would set the <symbol>ShowLogin</symbol>
+					 parameter inside of Main.dfs to have the application prompt for a login name
+					 and password at startup. We could then add a <symbol>User</symbol> column to
+					 any table with a default of 
+					 <command>UserName()</command>. This would cause the user name
+					 of whomever is logged in to be used when a row is inserted.</para> 
+				<para>Much more could be done for security, but the subject is
+					 outside the scope of this tutorial. For more information, please see the DAE
+					 Developers Guide.</para> 
+				<para>Let's now add two new <symbol>ShowFormAction</symbol> nodes
+					 to the form. We will rename them to <symbol>ShowVideos</symbol> and
+					 <symbol>ShowMovies</symbol>, then set their <symbol>Uri</symbol> properties to
+					 <filename>Derivation.dil?Query=Video</filename> and
+					 "Derivation.dil?Query=Movie" respectively. Let's set the
+					 <symbol>Action</symbol> properties of the appropriate triggers and we are done
+					 for now.</para> 
+				<para>The user can now update the movie database and can control
+					 the inventory of videos.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title><indexterm><primary>Customizing a Frontend
+								Form</primary></indexterm><indexterm><primary>How
+								to</primary><secondary>Customize a Frontend
+								Form</secondary></indexterm>Customizing a Form</title> 
+				<para>Sometimes we may want to change something on a derived form,
+					 but still desire the form to be derived from the data. We need the
+					 customization engine!</para> 
+				<para>We will start by enabling the 
+					 <command>View or Edit Account</command> trigger in the same
+					 fashion as the other trigggers, this time to
+					 <filename>Derivation.dil?Query=Account</filename>. Let's then open up the
+					 browse Account form and click on the 
+					 <command>Form|Customize...</command> menu item.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut015.gif" width="435"
+					 depth="295"/></para> 
+				<para>This will pull up the "live" designer shown below, which is
+					 attached to the form.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut016.gif" width="559"
+					 depth="399"/></para> 
+				<para>Let's make some changes to the form. We will start by hiding
+					 the address from the grid. Simply go to each <symbol>GridColumn</symbol> which
+					 is part of the address and set the <symbol>Visible</symbol> property to
+					 "False". One of the rules of the customization engine is that we cannot delete
+					 a node from the parent (inherited) form design, but we can change it's
+					 properties and position in the form.</para> 
+				<para>Next we make the <symbol>DeleteTrigger</symbol> and the
+					 <symbol>ViewTrigger</symbol> nodes invisible. Then add a
+					 <symbol>Trigger</symbol> to the <symbol>GridBar</symbol> column and set its
+					 <symbol>Action</symbol> to the node called "Main.ID.Sale_Account" which shows a
+					 form containing all the sales for the currently selected account in the grid.
+					 The form should now look like the next screenshot. Note that the new trigger
+					 button we created already has the text "Sale..." on it even though we didn't
+					 set the text on the <symbol>Trigger</symbol> node. If the text and image of a
+					 trigger node are not set then trigger uses the values from the attached action
+					 node. This is convenient when we use the same action node in multiple places,
+					 as we are doing in this case with the view sales option also available under
+					 the details menu.</para> 
+				<para>
+					 <inlinegraphic fileref="images/rentaltut017.gif" width="718"
+					 depth="385"/></para> 
+				<para>Let's now save the form by pressing
+					 <keycode>Control-S</keycode> inside the designer. A <symbol>Save As</symbol>
+					 dialog will be displayed prompting for a filename with either a
+					 <filename>.dil</filename> or <filename>.dilx</filename> (customization file)
+					 extension. Save the file as <filename>Account.dilx</filename>. Since this is a
+					 live designer, the customization engine will create an alias in a file called
+					 LinkTable.config (within the Frontend Server application directory) that will
+					 be used to automatically use the customized Account.dilx any time the original
+					 derived page (Derivation.dil?Query=Account) is requested. Our customization is
+					 now in place.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Creating a Sales Form</title> 
+				<para>Now let's connect the 
+					 <command>Enter New Sale</command> trigger to a new
+					 ShowFormAction we will call <symbol>NewSale</symbol>. We will set the URI to
+					 <filename>Derivation.dil?PageType=Add&amp;Query=SaleView</filename>. Let's also
+					 set the <symbol>Mode</symbol> property to <symbol>Insert</symbol>, which
+					 indicates that the shown form should insert a new row buffer into the dataset
+					 when shown.A form similar to the following will appear when the button is
+					 pressed. </para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut018.gif" width="368"
+					 depth="432"/></para> 
+				<para>If we click on the Add button next to the SaleItem grid, we
+					 should see the following.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut021.gif" width="326" depth="192"/>
+					 </para> 
+				<para>We now have the ability to put in new sales and items within
+					 the sale. Notice that the Rental information for a SaleItem is available from
+					 the 
+					 <command>Extensions</command> menu of the <symbol>Add
+					 SaleItem</symbol> form, but we certainly want an easier way to add movie
+					 rentals.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Renting Videos</title> 
+				<para>Let's now create an easy way to add movie rentals. We'll
+					 switch to Dataphoria and run the following code. This will create a new view
+					 which joins the <symbol>Rental</symbol> table to the
+					 <symbol>SaleItem</symbol>table. Note that we can use the <symbol>adorn</symbol>
+					 operator to add metadata to results of the view.</para> 
+				<programlisting>create view NewRental
+	(SaleItem rename { ID SaleItem_ID }) join Rental
+		remove { RentalStatus_ID, LateFee }
+		adorn { Description { default "Rental" } };
+</programlisting> 
+				<para>Now we need to customize the saleitem detail form so that the
+					 user can use our NewRental view to enter rentals. First, using a designer on
+					 the Add Sale form (select customize on that form), let's look at the URI
+					 property of the DetailFrame called <symbol>SaleItem_SaleFrame</symbol>. This is
+					 the actual URI of the embedded SaleItem form. We'll copy this URI to the
+					 clipboard by selecting the entire URI and pressing
+					 <keycode>Ctrl-C</keycode>.</para> 
+				<para><inlinegraphic fileref="images/RentalTut019.gif" width="624"
+					 depth="388"/></para> 
+				<para>Let's open this URI in a new designer and customize it. From
+					 the Frontend Session form in Dataphoria open a new Form Designer then select
+					 open (<keycode>Ctrl-O</keycode>). Paste the previously copied URI into the
+					 <symbol>Open</symbol> dialog box and press 
+					 <command>OK</command>. Now let's copy the ShowDetailAction node
+					 called <symbol>Add</symbol> by selecting it and pressing
+					 <keycode>Ctrl-C</keycode>. After selecting the FormInterface, press
+					 <keycode>Ctrl-V</keycode> to paste a copy of the node. Let's change the name of
+					 the node to <symbol>AddRental</symbol> and change the <symbol>Query=</symbol>
+					 parameter of the URI to <symbol>NewRental</symbol> rather than
+					 <symbol>SaleItem</symbol>. Finally, let's set the text of the new action to
+					 <symbol>Add Rental...</symbol>.</para> 
+				<para>Now let's add another trigger right after the
+					 <symbol>AddTrigger</symbol> by dragging a new trigger from the palette over
+					 <symbol>EditTrigger</symbol>, and letting go while the
+					 <keycode>Control</keycode> key is held (places the item as a sibling rather
+					 than as a child. Set the new trigger's <symbol>Action</symbol> property to the
+					 AddRental action. Pressing the new button should result in a form that looks
+					 like this.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut022.gif" width="326"
+					 depth="511"/></para> 
+				<para>When the user enters data in this form, they are actually
+					 inserting into the NewRental view. The ability to insert into views based on
+					 any expression is unique to Dataphor.</para> 
+				<para>Before we are done here, we need to save our customized
+					 <symbol>Browse SaleItem</symbol> form, go back to the <symbol>Add Sale</symbol>
+					 form design and change the <symbol>SaleItem_Sale</symbol> frame's URI to the
+					 name of our customized form.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Video Returns</title> 
+				<para>Now let's handle returned videos. Attach the Action property
+					 of the 
+					 <command>Return Videos</command> button on the main menu to a
+					 <symbol>ShowFormAction</symbol> with a URI of
+					 <filename>Derivation.dil?Query=RentedVideo</filename>.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut020.gif" width="1152"
+					 depth="420"/></para> 
+				<para>To handle the returning of the videos, we will go to
+					 Dataphoria and execute the following create operator statement. This operator
+					 will essentially update the database and assign a late fee if the video was
+					 turned in late.</para> 
+				<programlisting>create operator ReturnVideo(AVideoID : Integer)
+begin
+	// retrieve rental row
+	var LRentalRow: typeof(row from Rental);
+	LRentalRow := row from (Rental where Video_ID = AVideoID and RentalStatus_ID = 1);
+
+	// update tables
+	update Video set {VideoStatus_ID := 1} where ID = AVideoID;
+	update Rental set 
+	{
+		RentalStatus_ID := 2,
+		ReturnedOn := DateTime()
+	} 
+		where SaleItem_ID = SaleItem_ID from LRentalRow;
+
+	// handle late fees
+	if Date().ReadDay() &gt; (DueOn from LRentalRow).Days then
+	begin
+		update Rental set 
+		{
+			LateFee := Money((Date().ReadDay() - (DueOn from LRentalRow).Days) * 2),
+			RentalStatus_ID := 3
+		} 
+			where SaleItem_ID = SaleItem_ID from LRentalRow;
+		update Account set 
+		{
+			Balance := Balance + Money((Date().ReadDay() - (DueOn from LRentalRow).Days) * 2)
+		} 
+			where ID = Account_ID from 
+			(
+				row from
+					(Sale rename {ID SaleID}) join SaleItem by SaleID = Sale_ID
+					where ID = (SaleItem_ID from LRentalRow)
+			);
+	end;
+end;</programlisting> 
+				<para>Lets look at the operator and what it is doing. The first few
+					 lines retrieve a rental row. A row variable of the appropriate type is declared
+					 and then the rental record for the Video ID parameter is queried from the
+					 database and stored in the row variable LRentalRow.</para> 
+				<para>The video status is updated and the rental table is updated.
+					 The SaleItem_ID from LRentalRow pulls the SaleItem_ID scalar value out of the
+					 row variable for use in the expression.</para> 
+				<para>Then the check for late fees. If there is a late fee then the
+					 rental table is updated to apply a late fee to the account.</para> 
+				<para>Now, let's go into the designer for this form and make any
+					 unnecessary grid columns invisible. Make the Add and Delete buttons invisible
+					 so that they are not accidentally clicked.</para> 
+				<para>Next, we will place a <symbol>DataScriptAction</symbol> node
+					 on the form and rename it to <symbol>ReturnVideo</symbol>. Set the
+					 <symbol>Script</symbol> property of the new node to be
+					 "<symbol>ReturnVideo(Main.ID);</symbol>". Then add a new
+					 <symbol>DataScriptArgument</symbol> node as a child to the
+					 <symbol>ReturnVideo</symbol> node. Set the source of the
+					 <symbol>DataScriptArgument</symbol> node to the <symbol>Main</symbol> source
+					 and enter <symbol>Main.ID</symbol> in the <symbol>Columns</symbol> property.
+					 This tells the <symbol>DataScriptAction</symbol> to make the column values from
+					 the current row of the source available for use as arguments to the script,
+					 which is where the value for <symbol>Main.ID</symbol> comes from. So now, the
+					 currently selected video in the grid will get returned when the
+					 <symbol>ReturnVideo</symbol> action node is executed.</para> 
+				<para>Now we need to arrange things so that after we execute the
+					 <symbol>ReturnVideo</symbol> action, the data on the form is refreshed,
+					 otherwise the returned video will still be shown in the grid after it has been
+					 returned. To do this, we will drop on a <symbol>BlockAction</symbol>, which
+					 executes a set of child actions in turn. Drag the <symbol>ReturnVideo</symbol>
+					 action "under" the <symbol>BlockAction</symbol> and add a
+					 <symbol>SourceAction</symbol> immediately following the
+					 <symbol>ReturnVideo</symbol> action (under of the block action). Set the
+					 SourceAction's <property>Source</property> to the source node, and set the
+					 <property>Action</property> property to <symbol>Refresh</symbol>. that will
+					 refresh the main source, .</para> 
+				<para>Create a new trigger beneith the Edit and View triggers that
+					 is linked to the new <symbol>BlockAction</symbol>. Set the
+					 <symbol>Text</symbol> property of the action or the trigger to "Return Video"
+					 and then save the form customization as Returns.dilx. Then test it all out by
+					 renting and returning some videos.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Processing Late Fees</title> 
+				<para>To complete the sales process a method of paying the late
+					 fees is needed. The late fee total is stored in the <symbol>Balance</symbol>
+					 field of the <symbol>Account</symbol> table and should be applied as a line
+					 item when making a sale.</para> 
+				<para>The process of applying the late fees to a sale can easily be
+					 accomplished with an operator in the DAE. Since a new sale is stored inside of
+					 an application transaction until it is posted, the operator needs to be aware
+					 of the transaction ID (a GUID) in order to access the data that is being worked
+					 with in the client's transaction. </para> 
+				<para>For more detailed information on Application Transactions see
+					 the section regarding it in "The DAE as a Data Access Engine" chapter of the
+					 Dataphor DAE Developers Guide.</para> 
+				<para>Here is a listing of what <symbol>PayFees</symbol> would do
+					 if it did not need to be aware of the application transaction.</para> 
+				<programlisting>create operator PayFees(ASaleID: Integer)
+begin
+	// get accountid
+	var LAccountID: Integer := Account_ID from row from (Sale where ID = ASaleID);
+
+	// get account row
+	var LBalance: Money := Balance from row from (Account where ID = LAccountID);
+
+	// create saleitem
+	insert 
+		table { row { ASaleID Sale_ID, "Late Fee Payment" Description, LBalance Cost } } 
+		into SaleItem;
+
+	// clear account balance
+	update Account set { Balance := $0 } where ID = LAccountID;
+end;</programlisting> 
+				<para> The above code is fairly straight forward. Below is the
+					 version which is aware of the application transaction. It has to use cursors to
+					 query the transaction. For more information about cursors see the appropriate
+					 section of "The DAE as a Data Access Engine" chapter of the Dataphor DAE
+					 Developers Guide.</para> 
+				<para>JoinApplicationTransaction returns a string containing a
+					 transaction aware version of the query passed to it.</para> 
+				<programlisting>create operator PayFees(AAppTrans: Guid, ASaleID: Integer, AAccountID: Integer)
+begin
+	// get account row
+	var LAccountCursor: cursor(typeof(Account));
+	LAccountCursor := Open("cursor(" + JoinApplicationTransaction(AAppTrans, "Account where ID = " + AAccountID.ToString(), false) + " capabilities {Updateable})");
+	LAccountCursor.Next();
+	var LBalance: Money := Balance from (LAccountCursor.SelectRow() as typeof(row from Account));
+
+	// insert new late fee saleitem
+	var LSaleItemCursor: cursor(typeof(SaleItem));
+	LSaleItemCursor := Open("cursor(" + JoinApplicationTransaction(AAppTrans, "SaleItem", true) + " capabilities {Updateable})");
+	LSaleItemCursor.InsertRow(row {ASaleID Sale_ID, 'Late Fee Payment' Description, LBalance Cost} );
+	LSaleItemCursor.Close();
+
+ 	// clear account balance
+	LAccountCursor.UpdateRow(row{$0 Balance});
+	LAccountCursor.Close();
+end;</programlisting> 
+				<para>Both of these operators can exist at the same time since D4
+					 is a strongly typed language. The DAE will call the appropriate one based upon
+					 the arguments passed.</para> 
+				<para>In order to get the Application Transaction GUID at runtime a
+					 <symbol>ScriptAction</symbol>, which runs any C# or VB.Net code, is used to get
+					 it from the Frontend client and pass it to the DAE.</para> 
+				<para>Create a new <symbol>ScriptAction</symbol> on the Add Sale
+					 form and set the script property to the following C# code.</para> 
+				<programlisting>Action.HostNode.Session.ExecuteScript
+(
+	String.Format
+	(
+		"PayFees(Guid('{0}'), {1}, {2});",
+		((IFormInterface)Action.FindParent(typeof(IFormInterface))).MainSource.DataView.ApplicationTransactionID.ToString(),
+		((IFormInterface)Action.FindParent(typeof(IFormInterface))).MainSource.DataView["Main.ID"].AsString,
+		((IFormInterface)Action.FindParent(typeof(IFormInterface))).MainSource.DataView["Main.Account_ID"].AsString
+	)
+);</programlisting> 
+				<para>The <symbol>ExecuteScript</symbol> takes a C# string and
+					 executes it on the DAE. The <symbol>String.Format</symbol> method takes a
+					 string and replaces each instance of {n} with a string. The next three lines
+					 each find the source node object and extract some information from it: the
+					 Transaction ID, the <symbol>Main.ID</symbol> column value, and the
+					 <symbol>Main.Account_ID</symbol> column value. For more information on these
+					 objects, see the Frontend Developers Reference.</para> 
+				<para>Bind the new action to a button and then the Rental
+					 application is functionally complete.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title><indexterm><primary>Reports</primary></indexterm><indexterm><primary>How
+								to</primary><secondary>Add a Report to a Frontend
+								Application</secondary></indexterm>Reports</title> 
+				<para>To add a report to the system simply add a ReportAction node
+					 to any form and set the <symbol>DesignUri</symbol> property to
+					 "Derivation.dil?PageType=BrowseReport&amp;Query=Actor", where
+					 <symbol>Actor</symbol> could be replaced by the query we want to report from.
+					 Reports are rendered to Adobe .PDF format in both the windows and web
+					 clients.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut023.gif" width="734"
+					 depth="375"/></para> 
+				<para>To customize a report design launch the report designer from
+					 the Frontend Session form in Dataphoria.</para> 
+				<para>
+					 <inlinegraphic fileref="images/RentalTut024.gif" width="640"
+					 depth="491"/></para> 
+				<para>The report designer behaves very similarly to the form
+					 designer, except that it uses a different set of visible element nodes. Reports
+					 and report customizations are still saved as .dil and .dilx files. Reports can
+					 be derived using the same derivation engine, simply set the page type to
+					 <symbol>BrowseReport</symbol>.</para> 
+				<para>The report designer also has a test report button and menu
+					 item so that we can preview what the report will look like.</para> 
+				<para>If we wanted to parameterize a report, the
+					 <symbol>SessionID</symbol> operator provides an easy way to do this. We would
+					 create a table containing columns for arguments to the report query, then build
+					 a view based on references to this table that only shows rows for the current
+					 <symbol>SessionID</symbol>, which is set to the current users session returned
+					 from <symbol>SessionID()</symbol>. We then simply show an edit form for the
+					 parameterization table before the report (based on those values) is
+					 rendered.</para> 
+		  </sect2> 
+		  <sect2> 
+				<title>Running the Rental Application with the Web Client</title> 
+				<para>Now that the application has been developed, it can be
+					 utilized from the web client without changes. We simply open up a browser
+					 window and point it to the web client (usually installed to
+					 http://localhost/WebClient/) and specify the session file as that of the rental
+					 application's session file (http://localhost/Rental/Main.dfs) and click
+					 open.</para> 
+				<para>The following form should be shown and the application should
+					 be fully functional.</para> 
+				<para><inlinegraphic fileref="images/RentalTut025.gif" width="555"
+					 depth="357"/> </para> 
+		  </sect2> 
+	 </sect1> 
+</chapter> 

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 15:05:10</date> 
+	 </sect2info> 
+	 <title>System.UserExists</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns <symbol>true</symbol> if the specified <symbol>User</symbol>
+		  exists, otherwise it returns <symbol>false</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select UserExists("JS1");
+CreateUser("JS1", "John Smith", "Password");
+select UserExists("JS1");
+DropUser("JS1");</programlisting> 
+		  <programlisting>False
+True</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

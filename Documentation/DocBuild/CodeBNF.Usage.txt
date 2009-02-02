@@ -1,0 +1,15 @@
+CodeBNF usage:
+ -s<filename> source input file
+ -h<filename> html output file
+ -b<filename> text output file
+ -d<filename> docbook xml output file
+ -t"<title>" title for topic for html and docbook output
+ -l<filename> logfile for checks/errors
+ -c    perform checks, send to the console
+ -p    pause after execute/show help
+
+Returns:
+ 0 = Ok
+ 1 = no source file
+ 2 = some production errors
+ 3 = some punctuation errors

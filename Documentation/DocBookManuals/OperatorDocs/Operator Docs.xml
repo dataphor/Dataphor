@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:56:21</date> 
+	 </sect2info> 
+	 <title><?xm-replace_text {Operator Name}?></title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><?xm-replace_text {Remarks}?></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting><?xm-replace_text {Example}?></programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="SLRSystem.CreateUser.html"><?xm-replace_text {ULinks}?></ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

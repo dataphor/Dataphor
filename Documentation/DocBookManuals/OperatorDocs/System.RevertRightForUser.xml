@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 09:02:13</date> 
+	 </sect2info> 
+	 <title>System.RevertRightForUser</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator removes any reference (Grant or Revoke) to the
+		  specified <symbol>Right</symbol> from the specified
+		  <symbol>User</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateUser("JS1", "John Smith", "Password");
+
+GrantRightToUser("AddProgram", "JS1");
+select UserHasRight("JS1", "AddProgram");
+
+RevertRightForUser("AddProgram", "JS1");
+select UserHasRight("JS1", "AddProgram");
+
+DropUser("JS1");
+DropRight("AddProgram");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.RevokeRightFromUser.html">System.RevokeRightFromUser</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+<ulink url="SLRSystem.UserHasRight.html">System.UserHasRight</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="DRSystem.InternetLibrary">
+  <chapterinfo>
+    <date role="LastMod">Wednesday, August 25, 2004 14:52:29</date>
+  </chapterinfo>
+
+  <title><indexterm>
+      <primary>System.Internet</primary>
+    </indexterm> <indexterm>
+      <primary>System.Internet Library</primary>
+    </indexterm> <indexterm>
+      <primary>Libraries</primary>
+
+      <secondary>System.Internet</secondary>
+    </indexterm> System.Internet</title>
+
+  <para>This chapter provides reference material for working with and
+  understanding the Dataphor System.Internet Library.</para>
+
+  <section id="DRSystem.InternetLibrary-Definition">
+    <title><indexterm>
+        <primary>System.Internet Library</primary>
+
+        <secondary>Definition</secondary>
+      </indexterm> <indexterm>
+        <primary>Definitions</primary>
+
+        <secondary>System.Internet</secondary>
+      </indexterm> Definition</title>
+
+    <para>The following information describes the definition of the
+    System.Internet library.</para>
+
+    <formalpara>
+      <title>Version</title>
+
+      <para><?DocLib D4ExpressionField Version Libraries where Name = "System.Internet"?></para>
+    </formalpara>
+
+    <?DocLib D4ExpressionBlock row LibraryRequisites where Library_Name = "System.Internet"?>
+
+    <formalpara>
+      <title>Requisites</title>
+
+      <para><informaltable>
+          <tgroup cols="2">
+            <colspec colname="col1" colnum="1" colwidth="80*" />
+
+            <colspec colname="col2" colnum="2" colwidth="20*" />
+
+            <thead>
+              <row>
+                <entry colname="col1">Name</entry>
+
+                <entry colname="col2">Version</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry colname="col1"><?DocLib D4Field Required_Library_Name?></entry>
+
+                <entry colname="col2"><?DocLib D4Field Required_Library_Version?></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable></para>
+    </formalpara>
+
+    <?DocLib D4ExpressionBlock row LibraryFiles where Library_Name = "System.Internet"?>
+
+    <formalpara>
+      <title>System.Internet Files</title>
+
+      <para><informaltable>
+          <tgroup cols="2">
+            <colspec colname="col1" colnum="1" colwidth="80*" />
+
+            <colspec colname="col2" colnum="2" colwidth="20*" />
+
+            <thead>
+              <row>
+                <entry colname="col1">Name</entry>
+
+                <entry colname="col2">Is Assembly</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry colname="col1"><?DocLib D4Field FileName?></entry>
+
+                <entry colname="col2"><?DocLib D4Field IsAssembly?></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable></para>
+    </formalpara>
+
+    <bridgehead renderas="sect4">See Also</bridgehead>
+
+    <para><?xm-replace_text {para}?></para>
+
+    <?DocLib D4ExpressionBlock member RegisteredAssemblies where Library_Name = 'System.Internet' add { Name.SubString(0, Name.IndexOf(",")) SimpleName }?>
+
+    <section id="DRSystem.InternetLibrary-RegisteredAssemblies">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Registered Assemblies</secondary>
+        </indexterm> Registered Assemblies</title>
+
+      <para>The following lists the assemblies registered in the
+      System.Internet Library.</para>
+
+      <para><simplelist columns="2">
+          <member><?DocLib D4Field SimpleName?></member>
+        </simplelist></para>
+    </section>
+
+    <?DocLib D4ExpressionBlock member RegisteredClasses where Library_Name = 'System.Internet' add { Name.SubString(Name.IndexOf('.') + 1) SimpleName }?>
+
+    <section id="DRSystem.InternetLibrary-RegisteredClasses">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Registered Classes</secondary>
+        </indexterm> Registered Classes</title>
+
+      <para>The following lists the classes registered in the System.Internet
+      library.</para>
+
+      <para><simplelist columns="2">
+          <member><?DocLib D4Field SimpleName?></member>
+        </simplelist></para>
+    </section>
+  </section>
+
+  <!-- the below assumes a documentation database where the ObjectDocumentation table exists... -->
+
+  <!--DocLib D4ExpressionIf TableDee add{ Count(Objects join ObjectDocumentation where Objects.Name = System.Internet and (TextType = "DocSettings" or TextType = "DocConnectivity" or TextType = "DocExample") ) > 0  -->
+
+  <?DocLib D4ExpressionIf TableDee add{ 'False' Result} ?>
+
+  <section id="DRSystem.InternetLibrary-Documentation">
+    <title>Documentation</title>
+
+    <!--This contains all the human-written documentation-->
+
+    <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+
+    <section id="DRSystem.InternetLibrary-Settings">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Settings</secondary>
+        </indexterm> <indexterm>
+          <primary>Settings</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Settings</title>
+
+      <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+    </section>
+
+    <section id="DRSystem.InternetLibrary-Connectivity">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Connectivity</secondary>
+        </indexterm> <indexterm>
+          <primary>Connectivity</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Connectivity</title>
+
+      <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+    </section>
+
+    <section id="DRSystem.InternetLibrary-Translation">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Translation</secondary>
+        </indexterm> <indexterm>
+          <primary>Translations</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Translation</title>
+
+      <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+    </section>
+
+    <section id="DRSystem.InternetLibrary-Example">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Example</secondary>
+        </indexterm> <indexterm>
+          <primary>Examples</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Example</title>
+
+      <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+    </section>
+  </section>
+
+  <!--DocLib D4ExpressionIf TableDee add{  Result} -->
+
+  <!-- todo: figure out how to skip this section -->
+
+  <section id="DRSystem.InternetLibrary-Schema">
+    <title><indexterm>
+        <primary>System.Internet Library</primary>
+
+        <secondary>Schema</secondary>
+      </indexterm> <indexterm>
+        <primary>Schema</primary>
+
+        <secondary>System.Internet</secondary>
+      </indexterm> Schema</title>
+
+    <!--This contains forms and everything else extracted from the catalog-->
+
+    <para>The following sections list the schema elements defined in the
+    System.Internet library.</para>
+
+    <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "System.Internet" and Type_ID = 'dfd'?>
+
+    <section id="DRSystem.InternetLibrary-Schema-Forms">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Forms</secondary>
+        </indexterm> <indexterm>
+          <primary>Forms</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Forms</title>
+
+      <para>The following lists the forms defined in the System.Internet
+      library.</para>
+
+      <para><itemizedlist>
+          <listitem>
+            <para><?DocLib D4Field Name?></para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "System.Internet" and Type_ID = 'dfdx'?>
+
+    <section id="DRSystem.InternetLibrary-Schema-CustomizedForms">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Customized Forms</secondary>
+        </indexterm> <indexterm>
+          <primary>Customized Forms</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Customized Forms</title>
+
+      <para>The following lists the forms defined in the System.Internet
+      library.</para>
+
+      <para><itemizedlist>
+          <listitem>
+            <para><?DocLib D4Field Name?></para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <?DocLib D4ExpressionBlock listitem Roles where 'System.Internet.'.Pos(Name) = 0?>
+
+    <section id="DRSystem.InternetLibrary-Schema-Roles">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Roles</secondary>
+        </indexterm> <indexterm>
+          <primary>Roles</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Roles</title>
+
+      <para>The following lists the roles defined in the System.Internet
+      library.</para>
+
+      <para><itemizedlist>
+          <listitem>
+            <para><?DocLib D4Field Name?></para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <?DocLib D4ExpressionBlock listitem Devices where 'System.Internet.'.Pos(Name) = 0?>
+
+    <section id="DRSystem.InternetLibrary-Schema-Devices">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Devices</secondary>
+        </indexterm> <indexterm>
+          <primary>Devices</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Devices</title>
+
+      <para>The following lists the devices defined in the System.Internet
+      library.</para>
+
+      <para><itemizedlist>
+          <listitem>
+            <para><?DocLib D4Field Name?></para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <?DocLib D4ExpressionBlock section ScalarTypes where Name.StartsWith("System.Internet.") add { ObjectMetaData(Name, "Catalog.Comment", System.String(Name)) Comment, Name.SubString(Name.IndexOf('.') + 1) SimpleName }?>
+
+    <section id="DRSystem.InternetLibrary-Schema-Types">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Types</secondary>
+        </indexterm> <indexterm>
+          <primary>Types</primary>
+
+          <secondary>System.Internet</secondary>
+        </indexterm> Types</title>
+
+      <para>The following sections describe the types declared in the System
+      Library.</para>
+
+      <section>
+        <title><indexterm>
+            <primary>System.Internet Library</primary>
+
+            <secondary><?DocLib D4Field SimpleName?></secondary>
+          </indexterm> <indexterm>
+            <primary><?DocLib D4Field Name?></primary>
+          </indexterm> <indexterm>
+            <primary>Types</primary>
+
+            <secondary><?DocLib D4Field SimpleName?></secondary>
+          </indexterm> Type: <?DocLib D4Field SimpleName?></title>
+
+        <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+
+        <para><?DocLib D4Field Comment?></para>
+      </section>
+    </section>
+
+    <!--The following DocLib instruction includes the whole section level data of the System Operators-->
+
+    <?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\System.InternetOperators.xml?>
+
+    <?DocLib D4ExpressionBlock section TableVars where LibraryName(Name) = "System.Internet" add { Script(Name) Declaration, Name.SubString(Name.IndexOf('.') + 1) SimpleName  }?>
+
+    <section id="DRSystem.InternetLibrary-Schema-Tables">
+      <title><indexterm>
+          <primary>System.Internet Library</primary>
+
+          <secondary>Tables</secondary>
+        </indexterm> Tables</title>
+
+      <para>The following sections describe the tables declared in the
+      System.Internet Library.</para>
+
+      <section>
+        <title><indexterm>
+            <primary>System.Internet Library</primary>
+
+            <secondary><?DocLib D4Field Name?></secondary>
+          </indexterm> <indexterm>
+            <primary><?DocLib D4Field Name?></primary>
+          </indexterm> <indexterm>
+            <primary>Tables</primary>
+
+            <secondary><?DocLib D4Field SimpleName?></secondary>
+          </indexterm><?DocLib D4Field SimpleName?></title>
+
+        <para></para>
+
+        <?DocLib D4ExpressionBlock row Objects where Type = 'TableVarColumn' and Catalog_Object_ID = ObjectID(ATableName) add { "" SimpleTypeName };ATableName=Name?>
+
+        <formalpara>
+          <title>Columns</title>
+
+          <para><informaltable>
+              <tgroup cols="3">
+                <colspec colname="col1" colnum="1" colwidth="45*" />
+
+                <colspec colname="col2" colnum="2" colwidth="17*" />
+
+                <colspec colname="col3" colnum="3" colwidth="38*" />
+
+                <thead>
+                  <row>
+                    <entry colname="col1">Name</entry>
+
+                    <entry colname="col2">Type</entry>
+
+                    <entry colname="col2">Description</entry>
+                  </row>
+                </thead>
+
+                <tbody>
+                  <row>
+                    <entry colname="col1"><?DocLib D4Field Name?></entry>
+
+                    <entry colname="col2"><?DocLib D4Field SimpleTypeName?></entry>
+
+                    <!-- todo: get value for description -->
+
+                    <entry colname="col2"></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable></para>
+        </formalpara>
+
+        <?DocLib D4ExpressionBlock listitem Objects where Type = 'Key' and Catalog_Object_ID = ObjectID(ATableName) { Name, ID Object_ID };ATableName=Name?>
+
+        <formalpara>
+          <title>Keys</title>
+
+          <para><itemizedlist>
+              <listitem>
+                <para><?DocLib D4Field Name?></para>
+              </listitem>
+            </itemizedlist></para>
+        </formalpara>
+
+        <?DocLib D4ExpressionBlock listitem Objects where Type = 'Order' and Catalog_Object_ID = ObjectID(ATableName) { Name, ID Object_ID };ATableName=Name?>
+
+        <formalpara>
+          <title>Orders</title>
+
+          <para><itemizedlist>
+              <listitem>
+                <para><?DocLib D4Field Name?></para>
+              </listitem>
+            </itemizedlist></para>
+        </formalpara>
+
+        <?DocLib D4ExpressionBlock listitem Objects where (Type in { 'RowConstraint', 'TransitionConstraint' }) and not(IsGenerated) and (Catalog_Object_ID = ObjectID(ATableName)) { Name, ID Object_ID };ATableName=Name?>
+
+        <formalpara>
+          <title>Constraints</title>
+
+          <para><itemizedlist>
+              <listitem>
+                <para><?DocLib D4Field Name?></para>
+              </listitem>
+            </itemizedlist></para>
+        </formalpara>
+
+        <?DocLib D4ExpressionBlock row Objects where Type = 'Reference' and Name.StartsWith(ATableName) { Name, Name.SubString(Name.LastIndexOf('_') + 1) Target_TableVar_Name, false Source_IsUnique };ATableName=Name?>
+
+        <formalpara>
+          <title>References</title>
+
+          <para><informaltable>
+              <tgroup cols="2">
+                <colspec colname="col1" colnum="1" colwidth="*" />
+
+                <colspec colname="col2" colnum="2" colwidth="*" />
+
+                <thead>
+                  <row>
+                    <entry colname="col1">Name</entry>
+
+                    <entry colname="col2">Target</entry>
+                  </row>
+                </thead>
+
+                <tbody>
+                  <row>
+                    <entry colname="col1"><?DocLib D4Field Name?></entry>
+
+                    <entry colname="col2"><?DocLib D4Field Target_TableVar_Name?></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable></para>
+        </formalpara>
+      </section>
+    </section>
+  </section>
+</chapter>

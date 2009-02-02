@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 13:41:43</date> 
+	 </sect2info> 
+	 <title>System.ConstraintType</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is a selector for the Datatype ConstraintType Type.</para> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Constraints4.html">Constraints</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

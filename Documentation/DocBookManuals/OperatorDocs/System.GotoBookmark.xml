@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:43:45</date> 
+	 </sect2info> 
+	 <title>System.GotoBookmark</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator takes the cursor to the specified bookmark. If the row
+		  no longer exists, then this operator returns false, and it will leave the
+		  cursor where it was before the operator call. If it could find the bookmark,
+		  then it returns true and move the cursor to that row. This bookmark is one
+		  recieved from <symbol>Get</symbol><symbol>Bookmark</symbol>.</para>
+<!--
+	 <example>
+		  <title>Example</title>
+		  <programlisting>begin
+	var EmpCursor : cursor := cursor (Employee capabilities {Updateable});
+	var TempRow : row;
+	TempRow = row {"Jed" Name,45 ID};
+	EmpCursor.Insert(TempRow);
+end;</programlisting>
+	 </example>
+-->
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Bookmarkable.html">Cursor Capabilities, Bookmarkable</ulink>
+<ulink url="SLRSystem.FindKey.html">System.FindKey</ulink>
+<ulink url="SLRSystem.GetBookmark.html">System.GetBookmark</ulink>
+<ulink url="SLRSystem.CompareBookmarks.html">System.CompareBookmarks</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

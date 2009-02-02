@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:40:47</date> 
+	 </sect2info> 
+	 <title>System.Add</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Adds an element to a list. It returns the index of the new item. This
+		  index will be one less than the size of the list when finished.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmpList : list(String) := list(String){};
+	var EmpCur : cursor(table{ID: Integer, Name: String});
+	EmpCur := cursor(Employee);
+	EmpCur.Next();
+	while not EmpCur.EOF() do
+	begin
+		EmpList.Add(Name from EmpCur.Select());
+		EmpCur.Next();		
+	end;
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingLists.html">Using Lists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

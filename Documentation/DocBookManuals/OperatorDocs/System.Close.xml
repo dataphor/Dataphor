@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:39:54</date> 
+	 </sect2info> 
+	 <title>System.Close</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Closes the specified cursor.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmpCursor : cursor(table{ID : Integer, Name : String});
+	var Employees : String := "";
+	EmpCursor := cursor(Employee);
+	try
+		while EmpCursor.Next() do
+		begin
+			Employees := Employees + Unicode({13}) + (Name from EmpCursor.Select());
+		end;
+	finally
+		EmpCursor.Close();
+		raise Error(Employees);
+	end;
+end;</programlisting> 
+		  <programlisting>Joe
+John
+Josh
+Jeff
+Jake
+Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Cursors.html">Cursors, Developers Guide</ulink>
+<ulink url="DDGCLICursors.html">Cursor, Call Level Interface</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

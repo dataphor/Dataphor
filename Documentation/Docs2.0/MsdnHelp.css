@@ -1,0 +1,217 @@
+body
+{
+	width: 100%;
+	margin: 0px 5px 0px 5px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 70%;
+}
+
+h1, h3
+{
+	margin-bottom: .4em;
+	margin-top: 1em;
+}
+
+h1
+{
+	font-size: 120%;
+	margin-top: 0em;
+}
+
+h3
+{
+	font-size: 115%;
+	color: #164e93;
+}
+
+div.table
+{
+	text-align: center;
+}
+
+table
+{
+	font-size: 100%;
+	border-collapse: collapse;
+	width: 93%;
+}
+
+th
+{
+	background-color: #cccccc;
+	color: #000000;
+	font-weight: bolder;
+	padding: 5px;
+	border: 1px solid #164e93;
+}
+
+tr
+{
+	background-color: #ffffff;
+	padding: 5px;
+	text-align: left;
+	border: 1px solid #164e93;
+}
+
+td
+{
+	border: 1px solid #164e93;
+	padding: 5px;
+}
+
+p
+{
+	/*margin: 0px 0px 0px 0px;*/
+	margin: .5em 0em .5em 1em;
+}
+
+pre
+{
+    display: block;
+	margin-top: .5em;
+	margin-bottom: .5em;
+    white-space: pre;
+    font-family: monospace;
+	padding: 5px;
+	border: 1px solid #999999;
+}
+
+pre.programlisting
+{
+    display: block;
+	margin-top: .5em;
+	margin-bottom: .5em;
+    white-space: pre;
+    font-family: monospace;
+	padding: 5px;
+	border: 1px solid #999999;
+}
+
+i.c
+{
+    font-style: italic;
+    color:   #164e93;
+}
+
+i.symbol
+{
+    font-family: monospace;
+    font-style: italic;
+    color:   #164e93;
+}
+
+tt.methodname
+{
+    color:   #164e93;
+}
+
+tt.classname
+{
+    color:   #164e93;
+}
+
+.syntax
+{
+	font: Monospace, Courier New, Courier;
+	letter-spacing: .1em;
+	background-color: #efefef;
+	color:   #164e93;
+	font-size: 100%;
+	font-weight: bolder;
+	padding: 5px;
+	border: 1px solid #999999;
+	margin-left: 20px;
+	padding: 4px 8px;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.i1
+{
+	margin-left: 20px;
+}
+
+.i2
+{
+	margin-left: 40px;
+}
+
+.i3
+{
+	margin-left: 60px;
+}
+
+.missing
+{
+	color: Red;
+}
+
+div#banner
+{
+	width: 100%;
+	margin: 0px 0px 0px 0px;
+	border-width: 0px;
+	border-bottom: 1px solid #999999;
+	padding: 0px 0px 0px 0px;
+	background-color: #ff9900;
+}
+
+div#header
+{
+	margin: 0px 0px 0px 0px;
+	border-width: 0px;
+	padding: .4em .4em 0 .4em;
+	font-style: italic;
+	background-color: #0033cc;
+	color: White;
+}
+
+div#banner h1
+{
+	margin: 0px 0px 0px 0px;
+	border-width: 0px;
+	padding: 0 .4em .3em .4em;
+	background-color: #ff9900;
+}
+
+div.navheader
+{
+	margin: 0px 0px 0px 0px;
+	border-width: 0px;
+	padding: 0 .4em .3em .4em;
+	background-color: #ff9900;
+}
+div.navheader th
+{
+	margin: 0px 0px 0px 0px;
+	border-width: 0px;
+	padding: 0 .4em .3em .4em;
+	background-color: #ff9900;
+}
+div#content
+{
+	margin: 0px 0px 0px 0px;
+	padding: 4px 4px 4px 4px;
+}
+
+div#footer
+{
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-color: #164e93;
+	margin: 0px 0px 0px 0px;
+	padding: 4px 4px 4px 4px;
+}
+
+div.informalexample
+{
+	margin-left: 20px;
+	padding: 4px 8px;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+dl
+{
+    margin-left: 2em;
+}

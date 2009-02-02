@@ -1,0 +1,2104 @@
+<?xml version="1.0"?>
+<part id="DDGPart1"> 
+	 <partinfo> 
+		  <date role="LastMod">Wednesday, October 16, 2002 4:09:15 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 9:23:17 AM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </partinfo> 
+	 <title><indexterm><primary>Application
+					 Development</primary></indexterm>Part I - Application Development</title> 
+	 <partintro> 
+		  <para>This part introduces the concepts necessary to build software
+				applications based on the Dataphor Data Access Engine (DAE). It provides
+				detailed coverage of the constructs available to application developers and
+				database designers within the DAE, as well as an introductory level overview of
+				database concepts and techniques. Familiarity with database theory is helpful,
+				though not required. No assumptions are made about the level of understanding
+				of the reader, and all terms and concepts are defined and explained as they are
+				introduced.</para> 
+		  <para>This part is structured as follows: 
+				<itemizedlist> 
+					 <listitem> 
+						  <para>Database Management Concepts and Techniques</para> 
+						  <para>This chapter provides an overview of database
+								management principles and techinques. It covers topics in general database
+								management systems, as well as relational systems specifically, including a
+								brief overview of the relational model.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The DAE as a Database Management System</para> 
+						  <para>This chapter describes the architecture of the DAE
+								and its role as a Database Management System. It describes how users
+								communicate with the DAE, as well as a broad description of its data management
+								capabilities.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The DAE as a Data Access Engine</para> 
+						  <para>This chapter describes the application-targeted
+								features of the DAE including navigational access and application
+								transactions.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>D4 Language Guide</para> 
+						  <para>This chapter provides a complete reference and
+								programming guide for the D4 language, the native language of the DAE.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>RealSQL Language Guide</para> 
+						  <para>This chapter provides a complete reference for the
+								RealSQL language, an SQL-like data sublanguage which can also be used to
+								communicate with the DAE.</para> 
+					 </listitem> 
+				</itemizedlist></para></partintro> 
+	 <chapter id="DDGDBMConceptsAndTechniques"> 
+		  <title><indexterm><primary>Database Management Concepts and
+						  Techniques</primary></indexterm>Database Management Concepts and
+				Techniques</title> 
+		  <para>This chapter provides an overview of the database management
+				principles and techniques which form the foundation for the Dataphor Data
+				Access Engine. Understanding these principles is essential to understanding how
+				the DAE works and taking full advantage of the features and capabilities it
+				exposes.</para> 
+		  <para>Note: the material in this chapter is largely a summary of 
+				<citetitle>An Introduction to Database Systems</citetitle> by C. J.
+				Date [1]. Readers are encouraged to study this work, as it covers the topics
+				much more thouroughly. Even readers with some background in database theory
+				should review the material in this chapter to be certain that the concepts are
+				well understood.</para> 
+		  <sect1 id="DDGP1DatabaseManagementSystems"> 
+				<title><indexterm><primary>Database Management
+								Systems</primary></indexterm>Database Management Systems</title> 
+				<para>A Database Management System (DBMS) is a software system
+					 specifically designed to handle the class of problems that arise when software
+					 applications need to store and manipulate data. Any application that uses data
+					 inevitably encounters issues such as efficiently accessing and changing the
+					 data, dealing with concurrency, and ensuring the correctness, or integrity, of
+					 the data. This section describes the basic functionality that is desirable in
+					 database management systems in general.</para> 
+				<sect2 id="DDGP1Databases"> 
+					 <title><indexterm><primary>Databases</primary></indexterm><indexterm><primary>Database
+									 Management SystemsDatabase Management
+									 Systems</primary><secondary>Databases</secondary></indexterm>Databases</title> 
+					 <para>A database is an organized collection of facts. A
+						  database can be as simple as the list of settings for a particular application,
+						  or as complex as all the data for an entire enterprise including payroll,
+						  sales, accounting, human resources, and other information.</para> 
+					 <para>Regardless of the size or usage requirements of a given
+						  database, some fundamental characteristics emerge that are vital to the
+						  functionality of the application consuming the data. These include: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Persistence: The application must be able to
+										  ensure that the data in the database is available, or 'saved' to disk.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Efficiency: The application must be able to
+										  provide efficient access to the data.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Concurrency: If multiple requests are made to
+										  the same data, the application must be able to ensure that the results of each
+										  operation are correct.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Recovery: If the application crashes, or the
+										  environment becomes unstable, the application must be able to guarantee that
+										  the database can be recovered.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Integrity: The application must always be
+										  able to guarantee that the data in the database is correct, or conforms to all
+										  the business rules described by the application.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>Rather than solving these issues specifically within each
+						  application, it makes sense to build a software system that can solve these
+						  issues generically, and then make use of that system from the application. In
+						  the next section, we examine the benefits of using such a system.</para> 
+				</sect2> 
+				<sect2 id="DDGP1DatabaseSystems"> 
+					 <title><indexterm><primary>Database
+									 Systems</primary></indexterm><indexterm><primary>Database Management
+									 SystemsDatabase Management Systems</primary><secondary>Database
+									 Systems</secondary></indexterm>Database Systems</title> 
+					 <para>Clearly we can gain some advantages by implementing a
+						  system which handles these issues generically. Among these are: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Reusability: The solutions to data management
+										  issues are often quite complex. By providing a generic solution one time, we
+										  are able to leverage development time and stability from a system designed
+										  specifically to handle these issues.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Sharing: Different applications can access
+										  the same database. For example, the human resources application and the payroll
+										  application may both share the same list of employees.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Centralization: By maintaining all the data
+										  for a particular enterprise in a single system, an enterprise can gain greater
+										  control over the data. </para> 
+								</listitem> 
+								<listitem> 
+									 <para>Control: Because all the data is in a central
+										  location, the database management system can manage issues like security and
+										  policy or business rules enforcement.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Data Independence: Ideally, the database
+										  system will be capable of changing physical details about the database without
+										  affecting the applications that use it. This is known as Physical Data
+										  Independence (PDI) and is of critical importance in a database system.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+				</sect2> 
+				<sect2 id="DDGP1LevelsinaDatabaseSystem"> 
+					 <title><indexterm><primary>Levels in a Database
+									 System</primary></indexterm><indexterm><primary>Database Management
+									 SystemsDatabase Management Systems</primary><secondary>Levels in a Database
+									 System</secondary></indexterm>Levels in a Database System</title> 
+					 <para>In order to realize the objectives of a database
+						  management system, the architecture is layered to isolate the details of the
+						  system from the users of the system. This layering can loosely be categorized
+						  into three views of the system: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>The <emphasis>internal level</emphasis> (also
+										  called the physical level) is concerned with the physical storage of the
+										  data.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The <emphasis>external level</emphasis> is
+										  concerned with the user's perception of the data.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The <emphasis>conceptual level</emphasis>
+										  (also called the logical level) provides a level of indirection between the
+										  two.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>These three categories serve as a conceptual foundation
+						  for the architecture of a database system. In order to provide a basis for the
+						  design of these levels we make use of a data model, as described in the next
+						  section.</para> 
+				</sect2> 
+				<sect2 id="DDGP1DataModels"> 
+					 <title><indexterm><primary>Data
+									 Models</primary></indexterm>Data Models</title> 
+					 <para>Firstly, we note that the term <emphasis>data
+						  model</emphasis> has two distinct meanings. First, as a description of an
+						  abstraction for dealing with all data, and second, as a model of the particular
+						  data of interest to some organization. In this section we discuess the first of
+						  these definitions.</para> 
+					 <para>"A data model is an abstract, self-contained, logical
+						  definition of the objects, operators, and so forth, that together constitute
+						  the abstract machine with which users interact. The objects allow us to model
+						  the structure of the data. The operators allow us to model its behavior."
+						  [1]</para> 
+					 <para>The data model then allows us to describe the behavior of
+						  the system at the conceptual and external levels. A user who understands the
+						  data model will understand how to interact with the system. The conceptual
+						  level is then concerned with mapping between the implementation of the model on
+						  the internal level, and the perception of the model on the external
+						  level.</para> 
+					 <para>Loosely speaking, a logical model can be viewed as a
+						  simulated or actual environment of rules. Rules (or axioms) can be combined to
+						  form other rules (or theorems) based on the established principles of the
+						  formal system. Computer software is a set of rules built within the formal
+						  system defined by the capabilities of the hardware. In this case, the hardware
+						  provides the physical implementation, while the software executes within the
+						  resulting logical model.</para> 
+					 <para>Developing software that directly utilizes the logical
+						  model provided by the hardware is arduous and is prone to human error; so over
+						  the years, software engineers have built up layers of software to provide
+						  higher levels of <emphasis>abstraction</emphasis>. Today's high-level drawing
+						  programs, modeling tools, and programming languages provide highly abstracted,
+						  logical models aimed at enabling the user to accomplish more work with less
+						  effort. The hardware and software system that create an environment for a
+						  particular logical model is often called the physical implementation (or
+						  layer), because it directly or indirectly utilizes the hardware for its
+						  intended purposes. If the implementation is successful, i.e. it correctly
+						  abstracts the user from the physical implementation, the result is Physical
+						  Data Independence.</para> 
+					 <para>Physical Data Independence (PDI) is a term that describes
+						  the degree to which the user of a logical model is insulated from the physical
+						  implementation and its accompanying limitations. It should be noted that
+						  because computers are finite, PDI will always be a matter of degree, and not a
+						  black and white status. On the other hand, if the user of a provided logical
+						  model bumps into a physical limitation, that user will have to compromise the
+						  ideal logical design for one tainted by a particular implementation.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGP1TheRelationalModelofData"> 
+				<title><indexterm><primary>Relational Model of
+								Data</primary></indexterm>The Relational Model of Data</title> 
+				<para>Because a database management system must be able to solve
+					 the data management issues for a broad class of applications (namely all
+					 applications), we must be certain that it is capable of representing all data.
+					 Ideally, we would also like to be able to do this in the simplest manner
+					 possible.</para> 
+				<para>The relational model provides a data model which is perfectly
+					 suited to realizing these goals. It provides a simple, yet powerful framework
+					 within which all data can be described and manipulated. Loosely speaking, the
+					 relational model is a model in which data is represented as rows in tables, and
+					 operators are provided for manipulating these tables which also return tables.
+					 [1]</para> 
+				<para>Informally, the relational model can be described from three
+					 main viewpoints: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Structural Aspect</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Manipulative Aspect</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Integrity Aspect</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>Each of these aspects will be covered in detail in the
+					 following sections.</para> 
+				<sect2 id="DDGP1StructuralAspect"> 
+					 <title><indexterm><primary>Relational Model of
+									 Data</primary><secondary>Structure</secondary></indexterm>Structural
+						  Aspect</title> 
+					 <para>The structural aspect of the relational model describes
+						  how data is represented, namely as tables, or relations. The term
+						  <emphasis>relation</emphasis> is basically the mathemtical name for a table
+						  (speaking very loosely), and is the reason for the name <emphasis>relational
+						  model</emphasis> (as an aside, the relational model is very definitely
+						  <emphasis>not</emphasis> named for the idea of relationships between tables).
+						  Data in a relational database is represented by tables, and nothing but tables.
+						  This idea is known as <emphasis>The Information Principle</emphasis> and is one
+						  reason for the simplicity and power of the relational model.</para> 
+					 <para>A <emphasis>relation</emphasis> can be defined informally
+						  as consisting of a heading and a body:</para> 
+					 <para> 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>The <emphasis>heading</emphasis> of a
+										  relation is a set of <emphasis>attributes</emphasis>, or
+										  <emphasis>columns</emphasis>, each of which has a unique name and a
+										  <emphasis>domain</emphasis>, or <emphasis>type</emphasis>.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The <emphasis>body</emphasis> of a relation
+										  is a <emphasis>set</emphasis> of <emphasis>tuples</emphasis>, or
+										  <emphasis>rows</emphasis>, each with the same heading as the relation and
+										  containing a value for each attribute of that heading.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>There are several key observations which should be made
+						  in connection with this definition which are of critical importance in adhering
+						  to the relational model and have been largely ignored by existing
+						  products.</para> 
+					 <para>Firstly, the body of a relation is a
+						  <emphasis>set</emphasis> of rows which, by definition, has no order and no
+						  duplicates. These two facts have important consequences for the relational
+						  algebra, which will be discussed in the next section.</para> 
+					 <para>Secondly, the heading of a relation is a
+						  <emphasis>set</emphasis> of columns. Again, no order is assumed in the heading,
+						  and no duplicates are allowed. Additionally, no column is allowed to go
+						  unnamed, another fact which will turn out to be of crucial importance in the
+						  relational algebra.</para> 
+					 <para>Thirdly, note that the columns of a relation are defined
+						  on a type. This type is allowed to be any type whatsoever.</para> 
+					 <para>Lastly, the tuples of a relation contain a
+						  <emphasis>value</emphasis> for each attribute of the heading.</para> 
+					 <para>A relational database is then a database in which all the
+						  data is <emphasis>perceived</emphasis> as relations (relation variables more
+						  precisely), and nothing but relations. Relations may be base or derived. A
+						  <emphasis>base relation</emphasis> is a relation that is defined in terms of
+						  its attributes. A <emphasis>derived relation</emphasis> is a relation that is
+						  defined in terms of a relation-valued expression that is allowed to reference
+						  other relations. Regardless of whether a relation is base or derived, it should
+						  appear the same to a user of the database. In other words, the user should not
+						  have to be aware of how a given relation is defined, only that it exists. This
+						  concept is known as <emphasis>logical data independence</emphasis> and is one
+						  of the main factors in the ability of a data model to be transformed without
+						  affecting the applications which use it.</para> 
+				</sect2> 
+				<sect2 id="DDGP1ManipulativeAspect"> 
+					 <title><indexterm><primary>Relational Model of
+									 Data</primary><secondary>Data Manipulation</secondary></indexterm>Manipulative
+						  Aspect</title> 
+					 <para>The manipulative aspect of the relational model describes
+						  how operators can be applied to relations to produce new relations. The
+						  operators of the relational algebra provide the means to perform these
+						  manipulations. It should be noted that the result of any relational operator is
+						  itself a relation. Because of this, the results of any operation can in turn be
+						  used as the arguments to some other operator. This concept is known as
+						  <emphasis>closure</emphasis> and gives the relational algebra its expressive
+						  power. Closure is the reason that the definition of a relation must be adhered
+						  to. If a relational operator is allowed to return a value which does not fit
+						  the definition of a relation, we lose closure, and hence, expressive
+						  power.</para> 
+					 <para>The basic operators of the relational algebra are:</para>
+					 
+					 <para> 
+						  <itemizedlist> 
+								<listitem> 
+									 <para><emphasis>project</emphasis></para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>restrict</emphasis></para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>union</emphasis></para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>difference</emphasis></para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>join</emphasis></para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>Three other operators (<emphasis>intersection</emphasis>,
+						  <emphasis>product</emphasis>, and <emphasis>divide</emphasis>) are usually
+						  considered as basic operators as well, but they are not primitive, and so will
+						  be discussed in the context of the other operators. The following discussion
+						  briefly describes each operator. For a full discussion of the operators of the
+						  relational algebra, refer to the D4 Language Reference.</para> 
+					 <para>The <emphasis>project</emphasis> operator takes as input
+						  a single relation, and removes a given set of columns. The result is a relation
+						  with a heading which is a subset of the heading of the input relation. Note
+						  that projection will result in duplicate elimination, if necessary.</para> 
+					 <para>The <emphasis>restrict</emphasis> operator takes as input
+						  a single relation, and applies a condition, or filter, to the body of the
+						  relation. The result is a relation with the same heading, and the set of rows
+						  for which the condition evaluated true.</para> 
+					 <para>The <emphasis>union</emphasis> operator takes as input
+						  two relations, both with the same heading, and returns a relation with the same
+						  heading as the input relations, and a body that includes the rows from both
+						  input relations, with duplicates eliminated.</para> 
+					 <para>The <emphasis>difference</emphasis> operator takes as
+						  input two relations, both with the same heading, and returns a relation with
+						  the same heading as the input relations, and a body that includes a row for
+						  each row that is in the first relation, but not the second.</para> 
+					 <para>The <emphasis>join</emphasis> operator takes as input two
+						  relations, not necessarily with the same heading, and returns a relation with a
+						  heading that is the union (with duplicates eliminated) of the headings of the
+						  input relations, and a body that contains a row for each combination of rows in
+						  the input relations where the given rows have the same value for the common
+						  columns of the input relations, if any. The <emphasis>intersection</emphasis>
+						  and <emphasis>product</emphasis> operators are both special cases of this
+						  operator. The <emphasis>intersection</emphasis> is the case where the headings
+						  of the input relations have all columns in common, and the
+						  <emphasis>product</emphasis> is the case where the headings of the input
+						  relations have no columns in common. This operator is also called the
+						  <emphasis>natural join</emphasis> operator because it relies on the names of
+						  the columns in the headings to determine the join condition. Other forms of
+						  this operator exist, but are not important for present purposes.</para> 
+					 <para>These five operators make up the core of the relational
+						  algebra. Together they constitute a complete system for deriving relation
+						  values. This notion is known as <emphasis>relational completeness</emphasis>. A
+						  language is said to be <emphasis>relationally complete</emphasis> if it is at
+						  least as powerful as the algebra.</para> 
+					 <para>These manipulative aspects of the relational model
+						  provide the basis for the power and simplicity of relational systems. The
+						  purpose of the relational algebra is to allow the writing of relational
+						  expressions [1]. These expressions can then be used in a variety of important
+						  tasks including data retrieval, data manipulation, integrity constraint
+						  definition, view definition, and so on. </para> 
+				</sect2> 
+				<sect2 id="DDGP1IntegrityAspect"> 
+					 <title><indexterm><primary>Relational Model of
+									 Data</primary><secondary>Data Integrity</secondary></indexterm>Integrity
+						  Aspect</title> 
+					 <para>The integrity aspect of the relational model is concerned
+						  with what the data in a database means. <emphasis>Integrity</emphasis> refers
+						  to the accuracy or correctness of data in the database [1]. A
+						  <emphasis>constraint</emphasis> is a truth-valued expression which must
+						  evaluate to true for the data in the database. There are two types of
+						  constraints in a database, <emphasis>type constraints</emphasis> and
+						  <emphasis>database constraints</emphasis>. Type constraints are discussed as
+						  part of the Domains topic later in this part. In this section we will be
+						  concerned with database constraints specifically.</para> 
+					 <para>Integrity constraints, also called <emphasis>business
+						  rules</emphasis> are used in a database to inform the system what conditions
+						  must be satisfied. For example, an employees database might have the constraint
+						  that all salaries must be in the range $15,000 to $150,000. Such a constraint
+						  is expressed as a truth-valued relational expression. For example: 
+						  <programlisting>not exists Employees where Salary &lt; $15000 or Salary &gt; $150000</programlisting> Once the constraint has been declared, the system is
+						  responsible for enforcing it. Any modification statement which would cause this
+						  constraint to evaluate to false (or <emphasis>violates</emphasis> the
+						  constraint) would be rejected.</para> 
+					 <para>It is important to note that the expression for a given
+						  constraint is allowed to be arbitrarily complex. For example: 
+						  <programlisting>not exists ((Employees over { ID }) union (Users over { ID }))</programlisting>This constraint references multiple table variables in the
+						  system, and enforces the constraint that no employee is allowed to be a user,
+						  and vice-versa. Two types of integrity constraints are of such importance that
+						  they have their own declarative specification in most systems, including the
+						  DAE. They are <emphasis>key</emphasis> constraints and
+						  <emphasis>reference</emphasis> constraints.</para> 
+					 <para>A key constraint enforces that some subset, not
+						  necessarily proper and possibly empty, of the columns of a given table variable
+						  must be unique for all rows in the table variable. For example, the
+						  <symbol>Employees</symbol> table could have an <symbol>ID</symbol> column that
+						  serves as the unique identifier for each employee. It is important to note that
+						  this is just a special case of a database wide integrity constraint. For
+						  example: 
+						  <programlisting>Count(Employees) = Count(Employees over { ID })</programlisting>is an equivalent formulation of the constraint.</para> 
+					 <para>A reference constraint (also called a <emphasis>foreign
+						  key</emphasis>) enforces that all the values of some set of columns in one
+						  table exist as values for some set of columns in another table. For example,
+						  the <symbol>Employees</symbol> table could have a <symbol>Dept_ID</symbol>
+						  column that is required to be a department in the <symbol>Departments</symbol>
+						  table. This type of constraint enforces what is known as <emphasis>referential
+						  integrity</emphasis>, a very common special case of integrity in general. This
+						  constraint is equivalent to the expression: 
+						  <programlisting>not exists ((Employees over { Dept_ID }) minus 
+	(Departments over { ID } rename { ID Dept_ID }))</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1RelationalSystems"> 
+					 <title><indexterm><primary>Relational Model of
+									 Data</primary><secondary>Relational Systems</secondary></indexterm>Relational
+						  Systems</title> 
+					 <para>A <emphasis>relational system</emphasis> is one that is
+						  based on the relational model. In order to realize the full practical benefits
+						  predicted by the relational model, such a system must correctly and completely
+						  implement the model. Failure to do so results in drastic consequences, as we
+						  have seen in the database industry today. By returning to the foundations of
+						  the relational model, and building a system which completely adheres to its
+						  principles, we can provide a basis for solving the problems faced by the
+						  industry today, as well a platform for the development of the next generation
+						  of database applications.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGP1TransactionManagement"> 
+				<title><indexterm><primary>Transaction
+								Management</primary></indexterm>Transaction Management</title> 
+				<para><emphasis>Transaction management</emphasis> is concerned with
+					 ensuring that users of a system can perform the operations they request as
+					 though they were the only user of the system, and without fear of system
+					 failure. A <emphasis>transaction</emphasis> is the basic unit of work used in
+					 transaction management to accomplish these goals. Every transaction has the
+					 following fundamental properties, also known as the <emphasis>ACID</emphasis>
+					 properties: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Atomicity: The transaction is a single unit of
+									 work, so it is either completed, or rolled back as a whole.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Consistency: The transaction is guaranteed to
+									 transform the database from one consistent state to another.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Isolation: The transaction is guaranteed to
+									 perform as though it was the only transaction running.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Durability: The effects of a committed
+									 transaction are guaranteed to be permanent, even in the event of a system
+									 failure.</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>Ensuring that a transaction meets these requirements is a
+					 highly non-trivial undertaking. Any database application would ideally meet
+					 these requirements, but one written without the benefit of a DBMS with
+					 transaction support would be unlikely to do so. There are many complex and
+					 difficult issues to be addressed in transaction management. Thankfully, they
+					 can all be isolated and made transparent by the DBMS. Furthermore, because of
+					 The Information Principle, the relational model provides an ideal platform for
+					 implementing transaction support.</para> 
+				<sect2 id="DDGP1Atomicity"> 
+					 <title><indexterm><primary>Atomicity</primary></indexterm>Atomicity</title>
+					 
+					 <para>Atomicity means that the transaction is perceived as a
+						  single unit of work. The classic example is that of a bank transaction where
+						  one account is credited and another is debited. Clearly, both these updates
+						  must take place in order for the correct transformation to occur. By wrapping
+						  both updates inside a database transaction, the DBMS ensures that this is the
+						  case.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Consistency"> 
+					 <title><indexterm><primary>Consistency</primary></indexterm>Consistency</title>
+					 
+					 <para>Consistency means that the transaction is guaranteed to
+						  transform the database from one consistent state to another. The DBMS ensures
+						  that the transaction does not violate any integrity constraints at commit time.
+						  If a violation is detected, the entire transaction is rolled back as a
+						  whole.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Isolation"> 
+					 <title><indexterm><primary>Isoloation</primary></indexterm>Isolation</title>
+					 
+					 <para>Isolation gurantees that the transaction runs as though
+						  it was the only transaction running on the system. This concept is also known
+						  as <emphasis>concurrency</emphasis> and comes in two general flavors,
+						  <emphasis>optimistic</emphasis> and <emphasis>pessimistic</emphasis>.
+						  Pessimistic concurrency ensures that a transaction is isolated by protecting
+						  all the resources involved in the transaction with <emphasis>locks</emphasis>.
+						  Optimistic concurrency does not take locks on transaction resources, rather it
+						  ensures that the data has not been changed by another transaction before it is
+						  modified. Pessimistic concurrency is well understood and implemented by most
+						  systems. Optimistic concurrency is used mainly by client applications to ensure
+						  concurrency without involving the DBMS. In this section, we discuss pessimistic
+						  concurrency.</para> 
+					 <para>Isolation is usually acheived in transaction managers
+						  through the use of locking. The protocol a transaction uses to protect the
+						  resources it consumes determines the degree of isolation which is acheived by
+						  that transaction. There are three general kinds of problems which can occur as
+						  a result of transactions running concurrently: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para><emphasis>Lost update</emphasis></para> 
+									 <para>A transaction T1 changes the salary for an
+										  employee E1 to $15000. Another transaction T2 changes the salary for the same
+										  employee E1 to $20000. If there is no control on updates, one or the other of
+										  these updates will be lost.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Dirty read</emphasis></para> 
+									 <para>A transaction T1 changes the salary for an
+										  employee E1 to $15000. Another transaction T2 then reads the salary value for
+										  employee E1. If T1 subsequently rolls back, then any work done by T2 based on
+										  the salary value for the employee could be wrong. Transaction T2's read of the
+										  salary value was a dirty read.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Non-repeatable
+										  read</emphasis></para> 
+									 <para>A transaction T1 reads the salary for an
+										  employee E1. Another transaction T2 then updates the salary value for that same
+										  employee, and then transaction T1 attempts to read the salary value again.
+										  Transaction T1's read is a non-repeatable read, because it receives different
+										  values for subsequent reads.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>Clearly these behaviors will cause problems if not
+						  prevented. In order to prevent these problems, there are four degrees of
+						  isolation: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Degree 0, or chaos. This isolation level is
+										  reserved for certain system level processes such as recovery.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Degree 1, or browse. This isolation level has
+										  no lost updates.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Degree 2, or cursor stability. This isolation
+										  level has no lost updates and no dirty reads.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Degree 3, or isolated. This isolation level
+										  has no lost updates and has repeatable reads, which implies no dirty reads.
+										  This is the highest degree of isolation and provides complete isolation.</para>
+									 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>These isolation levels allow users of the system to
+						  control what level of concurrency a given transaction should use. Isolation is
+						  acheived at the cost of concurrency, in other words, a completely isolated
+						  transaction takes locks on every resource it consumes, and therefore causes
+						  more contention. It has been shown that if all transactions run at least degree
+						  1 isolation, then no transaction will violate the isolation of another. In
+						  other words, as long as all transactions run at browse or higher, each
+						  transaction is guaranteed to run at the isolation level it has selected
+						  [5].</para> 
+				</sect2> 
+				<sect2 id="DDGP1Durability"> 
+					 <title><indexterm><primary>Durability</primary></indexterm>Durability</title>
+					 
+					 <para>Durability guarantees that if a transaction commits, its
+						  changes are made permanent. In the event of system or hardware failure, a
+						  database system must ensure that the data is correct, and that committed
+						  changes to the database are still available on system recovery.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGP1Conclusion"> 
+				<title><indexterm><primary>Conclusion</primary></indexterm><indexterm><primary>Database
+								Management Concepts and TechniquesDatabase Management Concepts and
+								Techniques</primary><secondary>Conclusion</secondary></indexterm>Conclusion</title>
+				
+				<para>We have reviewed the fundamentals of database systems and the
+					 relational model. We have illustrated some of the benefits of using database
+					 systems in general, and relational systems in particular. Throughout the rest
+					 of this part, we will refer to the concepts covered in this chapter without
+					 explanation.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DDGDatabaseManagementSystem"> 
+		  <title><indexterm><primary>The DAE as a Database Management
+						  System</primary></indexterm>The DAE as a Database Management System</title> 
+		  <para>This chapter provides an overview of the Dataphor DAE as a
+				Database Management System. It discusses how the DAE accepts, processes and
+				responds to requests from the perspective of the user.</para> 
+		  <sect1 id="DDGP1Overview"> 
+				<title><indexterm><primary>Overview</primary></indexterm><indexterm><primary>The
+								DAE as a Database Management SystemThe DAE as a Database Management
+								System</primary><secondary>Overview</secondary></indexterm>Overview</title> 
+				<para>The Dataphor Data Access Engine (DAE) is designed to provide
+					 an application-targeted development environment for database applications. In
+					 order to achieve this goal, the DAE plays two major roles. Firstly, it acts as
+					 an insulating layer between the application and the data storage systems it
+					 uses. Secondly, it acts as an environment for application development by
+					 providing specific features which are unavailable in traditional DBMSs. In both
+					 of these roles, the DAE is used by the application in the same way that a DBMS
+					 is used.</para> 
+				<para>The DAE functions as a DBMS in that it must coordinate
+					 requests from multiple users to access the same data. Ensuring that each user
+					 request is fulfilled efficiently and correctly is a highly non-trivial task. In
+					 order to simplify the process, the functionality of the DAE is divided into
+					 subsystems: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Manager</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Catalog</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Compiler</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Query Processor</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Storage Integration Architecture</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>Each subsystem is responsible for a specific set of tasks in
+					 the overall system. The Manager coordinates the interaction between the
+					 different subsystems. The Catalog is the repository for the data structures
+					 which the DAE can access. The Compiler is responsible for translating user
+					 requests into efficient executable plans, which the Query Processor is then
+					 responsible for executing. The Storage Integration Architecture provides the
+					 abstraction layer through which all data in the DAE is accessed.</para> 
+				<para>Collectively, these subsystems reside in a .NET application
+					 domain hosted within an operating system process. This is known as a DAE
+					 <emphasis>instance</emphasis> and represents a single DAE providing data
+					 management services for a single database. A DAE instance can be hosted within
+					 any .NET application, or within a Windows Service. For more information on
+					 configuring the DAE as a Windows Service, see the DAE User's Guide. For more
+					 information on hosting a DAE within a .NET application, refer to Part II of
+					 this manual.</para> 
+				<sect2 id="DDGP1TheDAEandtheRelationalModel"> 
+					 <title><indexterm><primary>The DAE and the Relational
+									 Model</primary></indexterm>The DAE and the Relational Model</title> 
+					 <para>The DAE is a Relational Database Management System
+						  (RDBMS), meaning that it is based on the relational model of data as described
+						  in the first chapter of this manual. Many of the features available in the DAE
+						  are a direct result of this fact. For example, the DAE supports an
+						  unprecedented level of view updatability, which cannot be accomplished without
+						  strict adherence to the relational model.</para> 
+					 <para>It is worth noting that the primary motivations for the
+						  design and development of the Dataphor product in general, and the DAE in
+						  particular, were born out of frustration with development using existing
+						  systems. Most, if not all, of the problems solved by the DAE are the very
+						  problems faced by application developers using SQL-based DBMSs. As such, the
+						  DAE stands as a realization of the oft repeated statement by C. J. Date,
+						  "Theory Is Practical!"</para> 
+					 <para>The Dataphor DAE is largely based on the concepts
+						  portrayed in The Third Manifesto: Foundation for Future Database Systems by C.
+						  J. Date and Hugh Darwen. This book is the culmination of thirty years of
+						  reasearch and development in the relational model, and brings together in one
+						  volume the current state of the art in relational theory. For a complete list
+						  of the references used in building the DAE, refer to the Notices and References
+						  section of this manual. Alphora gratefully acknowledges all those who have
+						  contributed time and energy to the computer science field in general, and the
+						  relational field in particular.</para> 
+				</sect2> 
+				<sect2 id="DDGP1DBMSversusDataAccessEngine"> 
+					 <title><indexterm><primary>DBMS versus Data Access
+									 Engine</primary></indexterm>DBMS versus Data Access Engine?</title> 
+					 <para>A note on the terminology used to describe the DAE. The
+						  traditional name for a system which provides the functionality of the DAE is
+						  Database Management System, or DBMS. However, the DAE does not have a built-in
+						  storage engine, rather it uses existing database management systems as its
+						  storage engine. As such, we use the term <emphasis>Data Access
+						  Engine</emphasis> (DAE) to describe the product. The term <emphasis>Business
+						  Rules Engine</emphasis> would also accurately describe the functionality of the
+						  DAE.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGP1Manager"> 
+				<title><indexterm><primary>DAE
+								Manager</primary></indexterm>Manager</title> 
+				<para>The Manager controls the interaction between all the
+					 subsystems of the DAE. It manages running processes, routes user requests, and
+					 coordinates the actions of the different storage systems with which the DAE
+					 communicates. The tasks of the manager are divided into layers as follows: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Server</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Session</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Process</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Plan</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Cursor</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>The manager exposes the functionality of the DAE at these
+					 different layers through the Call-Level Interface (CLI), an Application
+					 Programming Interface (API) designed specifically for use with the DAE. The CLI
+					 is a set of .NET interfaces which allow programmatic access to the
+					 functionality of the DAE. Each layer of the manager architecture has a
+					 corresponding level in the CLI which exposes the functionality associated at
+					 that level. </para> 
+				<para>The CLI is the lowest level of access to the DAE. On top of
+					 the CLI, higher-level access mechanisms are available such as the Dataphor Data
+					 Access Components (DAC), and the Dataphor DAE ADO.NET Data Provider. For a
+					 complete reference for the CLI, refer to Part II of this manual. For more
+					 information on the Dataphor Data Access Components, refer to the Dataphor Data
+					 Access Components Developer's Guide. For more information on using the Dataphor
+					 DAE ADO.NET Data Provider, refer to the DAE User's Guide.</para> 
+				<para>Briefly, the server level controls all the global tasks such
+					 as system configuration and startup. The session manages the tasks associated
+					 with each user such as user configuration and starting and stopping processes.
+					 The process is the basic level of execution in the DAE, and coordinates the
+					 actions of the compiler and query processor to fulfill requests from the user.
+					 The plan manages tasks associated with prepared statements such as catalog
+					 description and cursor requests. And finally, the cursor level manages tasks
+					 associated with the retrieval of results. Each of these levels will be
+					 discussed in detail in the following sections.</para> 
+				<sect2 id="DDGP1Server"> 
+					 <title><indexterm><primary>DAE
+									 Server</primary></indexterm>Server</title> 
+					 <para>The server level of the architecture manages all the
+						  system-wide tasks of the DAE. This includes transaction management and global
+						  resource management such as device coordination. This level of the architecture
+						  is divided into the following categories: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>State Manager</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Transaction Manager</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Resource Managers</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Session Manager</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>The State Manager provides the global state management
+						  for the DAE. This includes system configuration settings such as server name
+						  and the running status of the server. Externally, the CLI exposes methods for
+						  starting and stopping the server instance, and reading its current state. A
+						  server must be running in order to process any user requests.</para> 
+					 <para>The DAE is configured with a server name which serves to
+						  identify this instance of the DAE. This name should be unique for a given
+						  environment in order to prevent naming conflicts among different instances of
+						  the DAE. The ServerName is exposed through the CLI, as well as through the
+						  <symbol>ServerName()</symbol> operator. For more information on how a server
+						  name is used to identify a server instance, refer to Part II of this
+						  manual.</para> 
+					 <para>The Transaction Manager coordinates the efforts of each
+						  running process in the DAE. All work in the DAE must be done within the context
+						  of a transaction. To ensure that this is the case, the DAE implements a
+						  Transactional Call Protocol which is enforced for all calls made on processes
+						  in the DAE. If a transaction is not in progress for the process on which the
+						  call occurs, one is automatically started. If the call completes successfully,
+						  the implicit transaction is committed. Otherwise, the implicit transaction is
+						  rolled back. In addition, any outstanding transactions initiated within the
+						  call are committed if the call completed successfully, and rolled back if an
+						  error occurred. This means that the nesting level of a given process is
+						  guaranteed to be at least as shallow after a given call as it is before (of
+						  course this does not apply to transaction control calls made through the CLI
+						  such as BeginTransaction).</para> 
+					 <para>Because of the DAE's open-ended storage architecture,
+						  transactions must also be coordinated with each system involved in a given
+						  operation. This type of transaction is known as a <emphasis>distributed
+						  transaction</emphasis>. The DAE can function as a distributed transaction
+						  coordinator, or it can employ the services of the Microsoft Distributed
+						  Transaction Coordinator (MSDTC). The DAE is also capable of participating in
+						  distributed transactions.</para> 
+					 <para>Transactions in the DAE can be started with an isolation
+						  level that specifies the level of concurrency required by the transaction. This
+						  isolation level is propogated as necessary to the different systems involved in
+						  the transaction. Additionally, a default isolation level can be configured
+						  which will be used when an isolation level is not explicitly specified.</para> 
+					 <para>The DAE supports a nested transaction model, meaning that
+						  a new transaction can be started within an active transaction. This nesting is
+						  supported to any degree, at least conceptually. In practice, the DAE is limited
+						  in its ability to provide nested transaction support by the target systems with
+						  which it communicates. If a target system cannot provide nested transactions,
+						  the DAE will attempt to simulate nested transactions by tracking the nesting
+						  level internally. Committed transactions are not actually committed until the
+						  final transaction commits. However, this approach has the undesirable side
+						  affect that a rollback of a nested transaction causes a rollback of all parent
+						  transactions. For more information on how the DAE implements transaction
+						  management, see Part II of this manual.</para> 
+					 <para>The DAE has several resource managers which coordinate
+						  access to specific server resources such as the catalog, cursors, locks, and
+						  memory. All these resources are requested and manipulated by processes in the
+						  DAE. For more information on the resource managers within the DAE, refer to
+						  Part II of this manual.</para> 
+					 <para>The Session Manager controls each user's interaction with
+						  the DAE. Sessions are opened and closed through this layer of the CLI.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Session"> 
+					 <title><indexterm><primary>DAE
+									 Session</primary></indexterm>Session</title> 
+					 <para>The session level of the architecture manages all the
+						  user-specific tasks of the DAE. These include starting and stopping processes,
+						  as well as user-specific configuration.</para> 
+					 <para>Each session within the DAE is assigned a unique session
+						  id which serves to identify the session throughout its life. This identifier is
+						  guaranteed to be unique across sessions, and stable as long as the session is
+						  open. This identifier is exposed through the CLI, as well as through the
+						  operator <symbol>SessionID()</symbol>.</para> 
+					 <para>The DAE uses the concept of a user to establish a
+						  security context within the system. Only known users may connect to the DAE.
+						  There are two system users provided which cannot be removed, the System user,
+						  and the Admin user. The System user is an internal security context which can
+						  only be used by the DAE to perform system level functions. The Admin user is
+						  the master security context and is the only user allowed to perform certain
+						  administrative functions such as adding users or resetting passwords. Initially
+						  the Admin user password is set to blank (''). Alphora recommends that this
+						  password be reset and guarded well.</para> 
+					 <para>A given session will always be associated with the user
+						  that first opened it. The current user for a given session is exposed through
+						  the CLI, as well as through the <symbol>UserID()</symbol> operator.</para> 
+					 <para>To establish a conversation with the DAE, the user must
+						  first request a session. The DAE uses the concept of a Session to represent an
+						  application or user's individual context with the DAE. To establish a session,
+						  valid credentials must be provided to the DAE. A user may open multiple
+						  sessions within the DAE, and of course, multiple users may be connected
+						  simultaneously.</para> 
+					 <para>Note: the session does not correspond to the concept of a
+						  CLI communications channel. Because they are unrelated, multiple sessions may
+						  be opened within a single communications channel.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Process"> 
+					 <title><indexterm><primary>DAE
+									 Process</primary></indexterm>Process</title> 
+					 <para>The process level of the architecture provides the actual
+						  execution environment of the DAE. This level can be thought of as a thread of
+						  execution within the DAE. When any task is performed in the DAE, it must be
+						  done on a process. The process is the locking context for the DAE. Any given
+						  session may have multiple processes associated with it.</para> 
+					 <para>Externally, the CLI exposes several types of
+						  functionality at this level: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Preparing Expressions and Statements</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Transaction Control</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Application Transaction Control</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>All communication with the DAE is performed through the
+						  CLI using a data access language. D4 is the native language of the DAE and all
+						  functionality is supported by this language. The DAE is also capable of
+						  receiving commands in a dialect of SQL called RealSQL. For more information on
+						  each of these languages, refer to their respective language guides.</para> 
+					 <para>In order to perform any work in the DAE, a statement or
+						  expression must be prepared for execution, and then executed. The prepare step
+						  involves ensuring that the given statement is a valid statement, and that it
+						  describes a valid action. The execution step then actually performs the desired
+						  action. The CLI exposes the calls necessary to perform the prepare step.
+						  Preparing a statement returns a valid plan, which can then be used to execute
+						  the desired action. A given process can have any number of plans associated
+						  with it, but only one plan may be actively executing at a time.</para> 
+					 <para>When a statement is prepared, the process is responsible
+						  for invoking the compiler subsystem and returning the results of that
+						  invocation as a prepared plan to the user. Refer to the section on the Compiler
+						  for a more detailed description of this process.</para> 
+					 <para>As described above, all work done in the DAE must be done
+						  within the context of a transaction. Because the process is the locking context
+						  for the DAE, all transaction control is initiated through this level of the
+						  CLI. Application transaction control is also exposed at this level. For a
+						  detailed description of application transactions, refer to The DAE as a Data
+						  Access Engine in this manual.</para> 
+					 <para>Each process within the DAE is assigned a unique process
+						  id which serves to identify the process throughout its life. This identifier is
+						  guaranteed to be unique across processes, and stable as long as the process is
+						  running. This identifier is exposed through the CLI, as well as through the
+						  operator <symbol>ProcessID()</symbol>.</para> 
+					 <para>Each process manages its own run-time state consisting of
+						  structures for local data storage such as a stack and heap. These structures
+						  are used by the query processor to implement the actions requested by a given
+						  instruction of D4.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Plan"> 
+					 <title><indexterm><primary>DAE
+									 Plan</primary></indexterm>Plan</title> 
+					 <para>The plan level of the architecture manages the state
+						  associated with a prepared statement of D4 such as the description of the
+						  result, if any, and the compile-time state of the statement such as the symbol
+						  table.</para> 
+					 <para>Each plan within the DAE is assigned a unique plan id
+						  which serves to identify the plan throughout its life. This number is
+						  guaranteed to be unique across plans and stable for the life of the plan. This
+						  identifier is exposed through the CLI.</para> 
+					 <para>There are three types of plans that can be prepared: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Expression</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Statement</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Script</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>A statement plan must be based on a single statement of
+						  D4 and is used to execute a statement which is not required to return a result.
+						  Note that it may return a result, but any such result will be ignored by the
+						  plan. A statement plan exposes facilities for executing the statement.</para> 
+					 <para>An expression plan must be based on a table-valued
+						  expresson of D4 and is used to return a result through the CLI. An expression
+						  plan provides a mechanism for describing the result set it will generate, and
+						  facilities for opening a cursor on that result set. Note that a plan need not
+						  be executed, it may be used solely to determine the description of the result
+						  set for a given expression. This facility is used extensively by the Dataphor
+						  Frontend to provide services such as query elaboration and user-interface
+						  derivation.</para> 
+					 <para>A script is actually a set of statement and expression
+						  plans in one. Any script is made up of a set of batches, each of which may be a
+						  single statement, or a table-valued expression returning a result set. For more
+						  information on how a script is processed, refer to the D4 Language
+						  Guide.</para> 
+					 <para>The prepared plan is created by the DAE compiler, and can
+						  be executed multiple times without the need to recompile the execution plan.
+						  This is especially useful when a plan is parameterized. Parameter names and
+						  data types can be specified as part of the prepare process. These parameters
+						  are then available as local variables within the execution context for the
+						  plan. When parameters are used by the plan, the arguments are specified as part
+						  of statement execution or cursor opening.</para> 
+				</sect2> 
+				<sect2 id="DDGP1Cursor"> 
+					 <title><indexterm><primary>DAE
+									 Cursor</primary></indexterm>Cursor</title> 
+					 <para>The cursor level of the architecture handles the tasks
+						  associated with retrieving and manipulating the data of a given result set.
+						  Cursors are used to navigate and fetch data resulting from the execution of
+						  expressions (or queries) against the DAE. A cursor represents a row position
+						  within an ordered list of data. It should be noted that cursors are part of the
+						  physical implementation, not the logical model. <emphasis>Tables</emphasis> in
+						  the DAE are relation variables, and relations, by definition, are
+						  <emphasis>sets</emphasis> of tuples (or rows). Sets, by definition, do not have
+						  an order; therefore, the concept of ordering is part of the cursor definition.
+						  The result of an expression against the DAE is explicitly or implicitly
+						  converted from a table value into a cursor definition.</para> 
+					 <para>Navigation of a cursor in the DAE occurs using relative
+						  operations, not absolute indexes. The functionality of a cursor is divided into
+						  categories called <emphasis>capabilities</emphasis>. Each capability represents
+						  a set of functionality exposed through the CLI. For example, the navigable
+						  capability indicates that the cursor is capable of forward movement. The
+						  absence of a given capability indicates that the cursor is not capable of the
+						  functionality included by that category. The DAE uses these same concepts
+						  internally as part of the query processor to optimize based on actual data
+						  usage. Capabilities can be requested as part of the cursor definition. For a
+						  complete description of cursor capabilities and behavior, refer to the D4
+						  Language Guide in this manual.</para> 
+					 <para>Cursors in the DAE are <emphasis>cracked</emphasis>
+						  meaning that there is a conceptual special row or crack before the first data
+						  row and after the last data row. Flags on the cursor are available to determine
+						  if the cursor is situated on one or both of these cracks. While on one or both
+						  cracks, data reading operations are invalid. When opened, a cursor is initially
+						  situated on the beginning crack, and, if there are no data rows, the ending
+						  crack as well.</para> 
+					 <para>Because the data that cursors are navigating is shared
+						  between users, the concept of <emphasis>isolation</emphasis> is used to ensure
+						  that the data read by each cursor is appropriately consistent. In some cases, a
+						  lower degree of isolation may be appropriate because the data is being
+						  "browsed" by a user who wants to see the latest updates that have occurred. In
+						  other cases, an automated process may be running that, in order to obtain
+						  accurate results, must perceive the data in an isolated, consistent manner. To
+						  this end, cursors have an isolation level that can be requested within the
+						  cursor definition. If no isolation level is specified, the isolation level
+						  defaults to that of the current transaction.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGP1Catalog"> 
+				<title><indexterm><primary>DAE
+								Catalog</primary></indexterm><indexterm><primary>Catalog</primary></indexterm>Catalog</title>
+				
+				<para>The catalog of the DAE is the central repository for the data
+					 model, or the description of the structure of the database. The catalog also
+					 contains such items as compiled operators, storage device descriptions, and
+					 user information. All this information is used by the various subsystems to
+					 provide the functionality exposed by the DAE. For example, the manager uses the
+					 catalog to ensure that a given connection request is made by a valid user of
+					 the system, the compiler uses the catalog to ensure that a given statement
+					 references valid objects in the database, and so on.</para> 
+				<para>The catalog is exposed through D4 as a set of system tables
+					 containing rows which describe the current contents of the system. For example,
+					 there is a table called <symbol>System.Objects</symbol> which has an entry for
+					 every object in the system. For a complete description of these tables, refer
+					 to the System Catalog Reference in Part III of this manual.</para> 
+				<para>Catalog objects can be created, altered, and destroyed
+					 through the use of Data Definition Language (DDL) statements of the D4
+					 language. For a complete description of each of these statements, refer to the
+					 D4 Language Guide in this manual.</para> 
+				<para>Each object in the catalog can have
+					 <emphasis>metadata</emphasis> associated with it, which is additional
+					 information that is ignored by the logical model. Metadata is used by specific
+					 applications to provide extra information about each object. For example, the
+					 Frontend uses a tag called <symbol>Frontend.Title</symbol> to determine the
+					 title for a given user-interface element.</para> 
+				<para>The DAE catalog contains the following types of objects: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Domains</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Tables</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Views</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Constraints</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>References</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Operators</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Devices</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Users</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Sorts</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>Domains, or scalar data types, are the fundamental unit of
+					 data in D4. They provide the building blocks from which all other data types
+					 are built. Domains are named sets of values which can then be used to define
+					 columns in rows and tables.</para> 
+				<para>Tables are base relation variables. They provide the basic
+					 unit of storage in the DAE. Tables are defined as a set of columns defined on
+					 domains, as well as keys and constraints to restrict the data that is allowed
+					 in the table.</para> 
+				<para>Views are derived relation variables. A view is defined in
+					 terms of some table-valued expression which is allowed to reference other
+					 tables in the database. Note that externally, a view and a base table behave in
+					 exactly the same way. In particular, views in the DAE are updatable just as
+					 base tables are.</para> 
+				<para>Constraints are arbitrary truth-valued expressions that are
+					 required to evaluate to true by the system. If a data modification is attempted
+					 which would cause a given constraint to evaluate to false, the modification is
+					 rejected. Note that these constraints are database-wide, meaning that the
+					 expressions are allowed to reference tables in the database.</para> 
+				<para>References are a special case of database-wide integrity
+					 constraints which are used to ensure that if a row exists in one table, than it
+					 must have a corresponding row in another table. The DAE also supports
+					 referential actions such as cascading deletes for references.</para> 
+				<para>Operators are compiled blocks of D4 statements. Operators
+					 which return a value can be used anywhere an expression can be used in the D4
+					 language. Operators that do not return a value can be used anywhere a statement
+					 can be used in the D4 language. D4 also supports a special calling convention
+					 for aggregate operators which allows user-defined operators to be executed
+					 efficiently.</para> 
+				<para>Devices provide the storage abstraction layer of the storage
+					 integration architecture. Each data source with which the DAE can communicate
+					 will have a device entry in the catalog.</para> 
+				<para>Users are the security context of D4. Users can be created,
+					 changed, and dropped using operators available in the DAE.</para> 
+				<para>Sorts provide a mechanism for describing the default sorting
+					 method to be used for a particular domain.</para> 
+				<para>For more information on each of these types of objects, see
+					 the Catalog Elements section of the D4 Language Guide.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1Compiler"> 
+				<title><indexterm><primary>DAE
+								Compiler</primary></indexterm>Compiler</title> 
+				<para>The compiler subsystem is responsible for ensuring the
+					 syntactic and semantic correctness of a given user request, and for producing
+					 an executable plan to fulfill that request. User requests can be made in terms
+					 of D4, the native language of the DAE, or RealSQL, a dialect of SQL built
+					 specifically for use with the DAE.</para> 
+				<para>The compilation process is divided up into the following
+					 phases: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Lexical Analysis</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Syntactic Analysis</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Semantic Analysis</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Optimization</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Binding</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>The output from one phase functions as the input to the next
+					 phase of the process. The input to the lexical analysis phase is the user
+					 request as a string of characters, and the output from the binding phase is a
+					 compiled plan ready for execution in the query processor.</para> 
+				<para>The lexical analysis phase is concerned with transforming a
+					 given string of characters into a sequence of tokens. This phase is also
+					 responsible for removing comments and whitespace from the input stream. Both D4
+					 and RealSQL statements use the same lexical analyzer to perform this
+					 process.</para> 
+				<para>The syntactic analysis phase is concerned with ensuring that
+					 a given stream of tokens forms a correct statement of the language. This
+					 process is handled by the parser. D4 and RealSQL each have a separate parser.
+					 The output of this phase is a syntactically correct representation of the user
+					 request.</para> 
+				<para>When accepting requests in RealSQL, the compiler must perform
+					 an additional translation step. The parsed representation of the RealSQL
+					 request is transformed by a RealSQL compiler into an equivalent D4 parse tree.
+					 This output is then fed as the input to the next phase of the compilation
+					 process.</para> 
+				<para>The semantic analysis phase is concerned with ensuring that a
+					 given user request is meaningful. This phase involves resolving identifiers and
+					 operator invocations, and performing type checking. During this phase, the
+					 compiler makes use of the catalog to perform identifier and operator
+					 resolution. The output of this phase is a direct translation of the user
+					 request into instructions for use in the query processor. This is a preliminary
+					 version of the plan that has not been bound to actual storage locations yet,
+					 but it is guaranteed to be semantically correct. Once the compiler reaches this
+					 phase, the user request is known to be a correct program of D4.</para> 
+				<para>The optimization phase is concerned with high-level
+					 transformations to the user request in an attempt to produce a more efficient
+					 execution plan. For example, if a user request contains a restrict followed
+					 immediately by a restrict, the two restricts can be combined into one without
+					 changing the semantics of the statement, and yielding better
+					 performance.</para> 
+				<para>The binding phase is concerned with access-path
+					 determination, and device selection. Device selection is done through a process
+					 called query chunking, in which the processor instructions are considered from
+					 the retrieval steps up. At each step of the query, the devices involved are
+					 asked to prepare an equivalent execution. If a device is capable of performing
+					 a particular step of the query, it is assigned to do so. Otherwise, the DAE
+					 must process the query. Access-path determination is concerned with finding an
+					 efficient method to the actual data. This involves such tactics as using an
+					 index to process a given where clause or recognizing that a join could be done
+					 more efficiently by sorting both sides prior to performing the join.</para> 
+				<para>Once all these phases of the compilation process have
+					 occurred, the plan is ready for actual execution within the query processor.
+					 The type of the result, if any, is known, and the request is known to be a
+					 semantically valid program of D4 instructions. Of course, this does not mean
+					 that run-time errors cannot occur, only that the system understands the request
+					 and is ready to attempt to perform it.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1QueryProcessing"> 
+				<title><indexterm><primary>DAE Query
+								Processor</primary></indexterm><indexterm><primary>Query
+								Processor</primary></indexterm>Query Processor</title> 
+				<para>The query processor is responsible for actually performing
+					 the operations requested by users. A compiled plan in the DAE consists of a
+					 hierarchical representation of the action to be performed. Each operation is a
+					 node in the tree, and the children of any given node are the operands to the
+					 operation. For a typical query, this means that the leaves of the tree end in
+					 retrieval from devices, and the root of the tree is the result. For table
+					 operations, each node in this tree is actually a cursor which performs the
+					 requested operation. In this way, results are only materialized as they are
+					 requested. This approach to query processing is called
+					 <emphasis>pipelining</emphasis> and means that if the results of a query are
+					 never requested, i.e., the cursor is never stepped through, the results may
+					 never be materialized (of course, they will be materialized if required, for
+					 example an order, but the DAE will only materialize intermediate results when
+					 necessary).</para> 
+				<para>Query updatability is also implemented using this approach.
+					 When a data modification request is made on the cursor, it is propogated
+					 through each node of the plan.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1StorageIntegrationArchitecture"> 
+				<title><indexterm><primary>DAE Storage Integration
+								Architecture</primary></indexterm><indexterm><primary>Storage Integration
+								Architecture</primary></indexterm>Storage Integration Architecture</title> 
+				<para>The Storage Integration Architecture (SIA) subsystem is
+					 concerned with providing an abstraction layer through which all data can be
+					 retrieved and manipulated. Data from this layer is presented to the DAE in the
+					 form of cursors, so the SIA can take over the execution of a node in the tree
+					 of a query plan at any point. This replacement forms the basis of the query
+					 distribution capabilities of the DAE, resulting in seamless access and
+					 manipulation capabilities to disparate sources.</para> 
+				<para>Because the SIA is abstracting other DBMSs, the division of
+					 tasks in the architecture closely mirrors that of a typical DBMS. Like the DAE
+					 itself, the functionality is layered into a hierarchy as follows: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para>Device</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Device Session</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Device Plan</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Device Cursor</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>The central abstraction mechanism of the SIA is the
+					 <emphasis>device</emphasis>. A device manages the instance level configuration
+					 and settings of a storage system with which the DAE can communicate. A device
+					 is also responsible for providing translation services between instructions of
+					 D4 and the appropriate instructions for the target system.</para> 
+				<para>Each process in the DAE can communicate with any number of
+					 devices, and each device can support multiple requests from different
+					 processes. This relationship is managed by the process using a <emphasis>device
+					 session</emphasis>. Each process will have one device session for each device
+					 with which it must communicate. This device session coordinates transaction
+					 management between the DAE and the target system, and allows for requests
+					 coming in from the process to be prepared against the device.</para> 
+				<para>Preparing a request from the DAE results in a
+					 <emphasis>device plan</emphasis>. Just as in the DAE, a device plan is a ready
+					 for execution within the device. For SQL devices, this means that the requested
+					 instructions of D4 have been translated into an equivalent statement of SQL. If
+					 the device does not support the requested operation, the compiler binds that
+					 step of the query to the DAE, rather than to the device.</para> 
+				<para>Once a request has been prepared, it can be executed against
+					 the device. If the request is a statement, no action is taken. Otherwise the
+					 operation opens a <emphasis>device cursor</emphasis> ranging over the result
+					 set produced by the device. This can either be returned directly to the user if
+					 the device was capable of performing the entire query, or it can be used as an
+					 argument to the next step in the process. In either case, a cursor is used, so
+					 the pipelined approach is still maintained, at least by the DAE.</para> 
+				<para>Manipulation is also propogated to devices where possible.
+					 Note that the chunking of a query for retrieval and update may be done at
+					 different levels. For example, a device may be able to process a join, but not
+					 be able to update through it.</para> 
+				<para>The translation process that occurs is specific to each
+					 device, however there are certain common facilities which can be provided to
+					 ease the task. For instance, every device must be capable of producing data in
+					 a format compatible with the types of the DAE. This gives rise to a mapping
+					 layer between the device and the data types in the catalog. For each type which
+					 the device supports, a <emphasis>domain map</emphasis> is specified on the
+					 device. This domain map implements the translation of values of a given type
+					 from the device representation into a host representation in the DAE.</para> 
+				<para>In addition, each device may be capable of performing many of
+					 the operators in the DAE. Again, this is facilitated by a mapping layer between
+					 the device and the operators in the catalog. For each operator which the device
+					 supports, a <emphasis>domain operator</emphasis> is provided which handles the
+					 task of translating a given statement of D4 into the appropriate commands for
+					 the target system. Note that the existence of a domain operator does not alone
+					 constitute support for a query containing the operator. The decision to support
+					 a particular query is based on several factors, of which supporting the
+					 operators and types referenced by the expression are only two.</para> 
+				<para>Each device may also provide a mapping between users of D4
+					 and users of the target system. This is accomplished using a <emphasis>device
+					 user</emphasis>. Device users can be created and manipulating using system
+					 provided operators in the DAE. If no device user is specified, the DAE will use
+					 the credentials of the D4 user. Otherwise, the DAE will use the credentials
+					 specified in the device user to connect to the target system.</para> 
+				<para>The result of this process is that both data access and data
+					 manipulation across devices is made completely transparent to users of the DAE.
+					 True logical data independence is achieved, as the results of any query, and
+					 hence any view, can be retrieved and updated without regard to the actual
+					 location of the data. A view can be defined which joins the data from a
+					 Microsoft SQL Server and an Oracle Server, and the view still behaves exactly
+					 as if it were a single base table.</para> 
+				<para>For more information on creating and manipulating devices,
+					 refer to the Catalog Elements section of the D4 Language Guide. For more
+					 information on how to build custom devices, refer to Part II of this
+					 manual.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DDGSpecialFeatures"> 
+		  <title><indexterm><primary>The DAE as a Data Access
+						  Engine</primary></indexterm>The DAE as a Data Access Engine</title> 
+		  <para>In addition to the capabilities expected of a traditional DBMS,
+				the Dataphor DAE has special features that are not common or are simply not
+				found in existing systems. Some of these features have been incorporated from
+				concepts presented by industry theorists [3], while others have arisen as
+				solutions to problems encountered in practice. This chapter briefly covers some
+				of the less typical aspects of the DAE.</para> 
+		  <sect1 id="DDGUserDefinedDataTypes"> 
+				<title><indexterm><primary>User Defined Data
+								Types</primary></indexterm><indexterm><primary>Data
+								Types</primary></indexterm>User Defined Data Types</title> 
+				<para>In order to accurately and completely represent the data
+					 required by any application, a database system must provide an open-ended type
+					 system capable of describing the types of data involved in the application.
+					 Many database systems support the creation of user defined data types, but most
+					 do not provide such support in a way that the created data types can be used in
+					 the same manner as the system (or built-in) types.</para> 
+				<para>In the Dataphor DAE, the developer is able to define:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Selectors and accessors to express and manipulate
+									 values of the type.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The operators available to manipulate the type,
+									 including the ability to overload system operators.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The physical representation of the type, or in
+									 other words, how values of that type are physically manifest in the
+									 implementation.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>The possible logical representations of the type.
+									 For example, Cartesian coordinates are one possible representation of a Point
+									 type.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>How the type maps to the physical storage
+									 device.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>By providing these operators, the developer is able to create
+					 data types that are identical in usability to the built-in system types.</para>
+				
+		  </sect1> 
+		  <sect1 id="DDGValue-basedInheritance"> 
+				<title><indexterm><primary>Value-based
+								Inheritance</primary></indexterm>Value-based Inheritance</title> 
+				<para>Dataphor implements a form of type inheritance based on
+					 domains. Powerful concepts like polymorphism can be employed within a framework
+					 that adheres to (and therefore reaps the benefits of) the relational
+					 model.</para> 
+				<para>A data type is declared as being a sub-type of one or more
+					 other domains, and in essence serves to constrain (or restrict) the
+					 intersection of the "inherited" domain values. There is one master type, known
+					 as the alpha type, from which all types implicitly or explicitly descend. The
+					 alpha type is the domain of all possible values that can be represented within
+					 the database. Conversely there is an omega type that is the empty
+					 domain.</para> 
+		  </sect1> 
+		  <sect1 id="DDGSpecialvalues"> 
+				<title><indexterm><primary>Special
+								Values</primary></indexterm>Special values</title> 
+				<para>When entering information into a database, sometimes all of
+					 the data may not be available, or perhaps some attributes are not applicable.
+					 The problem of dealing with "missing information" in a database has been the
+					 topic of much research and debate over the years. Early "solutions" to this
+					 problem, such as SQL's <emphasis>null</emphasis>, are still pervasive today,
+					 yet are fraught with problems. Too often this issue is ignored by vendors
+					 because it is considered a "philosophical" argument, yet practitioners are left
+					 to deal with the daily problems caused by poor solutions.</para> 
+				<para>Special values are a mechanism for dealing with the problem
+					 of missing information without departing from the relational model. Concepts
+					 such as "not specified", "unknown", or "not applicable" are represented as
+					 actual <emphasis>values</emphasis> within the domain. In other words, if a
+					 value is missing, the database explicitly states that fact instead of putting
+					 in a flag that can never be interpreted. With an SQL null, the answer to the
+					 question "does null = null" is unanswerable, this is not true with special
+					 values. Special values are "special" only because the creator of the data type
+					 identified them as interesting for use by the application.</para> 
+		  </sect1> 
+		  <sect1 id="DDGUserDefinedOperators"> 
+				<title><indexterm><primary>User Defined
+								Operators</primary></indexterm><indexterm><primary>Operators</primary></indexterm>User
+					 Defined Operators</title> 
+				<para>A Dataphor DAE <emphasis>operator</emphasis> is a subroutine,
+					 or block of parameterized executable code. An operator may or may not return a
+					 value, and can function as an overload for a language-defined operation such as
+					 <symbol>+</symbol> (plus). Basically, a DAE operator is the same as a function,
+					 procedure, stored procedure, method, subroutine, trigger, etc. </para> 
+				<para> The Dataphor DAE unifies this concept of a subroutine, and
+					 provides them with powerful capabilities like: </para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para> <symbol>Event attachment</symbol> </para> 
+								<para>Events (triggers) in the DAE are attached to
+									 operators, so the same operators that can respond to system events, can also be
+									 called directly.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para> <symbol>Flexible calling convention</symbol>
+									 </para> 
+								<para>Parameters can be passed by reference or by
+									 value.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect1> 
+		  <sect1 id="DDGAdvancedIntegrityEnforcement"> 
+				<title><indexterm><primary>Advanced Integrity
+								Enforcement</primary></indexterm><indexterm><primary>Integrity
+								Enforcement</primary></indexterm>Advanced Integrity Enforcement</title> 
+				<para>Integrity constraints constitute the "business rules" of an
+					 application, and are an essential part of the data model. The Dataphor DAE
+					 provides the ability to easily declare such constraints at different levels of
+					 the business model. Constraints can be declared which enforce rules for the
+					 entire database, down to rules which affect only a single column or domain.
+					 Declarative database-wide integrity constraints allow advanced rules to be
+					 easily expressed that would ordinarily require multiple "triggers" to be
+					 written.</para> 
+				<para>Another distinguishing feature of integrity support within
+					 the DAE is its orthogonality and therefore its ease of use. Constraints are
+					 allowed to be expressions of arbitrary complexity.</para> 
+		  </sect1> 
+		  <sect1 id="DDGLocalTableVariables"> 
+				<title><indexterm><primary>Local Table
+								Variables</primary></indexterm><indexterm><primary>Variables</primary></indexterm>Local
+					 Table Variables</title> 
+				<para>Tables in the Dataphor DAE can be created within both global
+					 and local scopes. This means that in addition to the ability to create tables
+					 that are visible to all users (security aside), table variables can also be
+					 declared within local execution blocks. This reduces potential naming
+					 conflicts, and avoids the need to use or manually manage temporary
+					 tables.</para> 
+		  </sect1> 
+		  <sect1 id="DDGBooleanSystemDataType"> 
+				<title><indexterm><primary>Boolean System Data
+								Type</primary></indexterm>Boolean System Data Type</title> 
+				<para>The boolean (or truth-valued) type is an important part of
+					 any language. Without it, a disparity exists between what types the system or
+					 built-in operators can support as arguments, and the variable and parameter
+					 types available to users of the language. The Dataphor DAE supports a boolean
+					 type as well as providing "true" and "false" literals to select the values of
+					 that type.</para> 
+		  </sect1> 
+		  <sect1 id="DDGNoDuplicateRows"> 
+				<title><indexterm><primary>No Duplicate
+								Rows</primary></indexterm><indexterm><primary>Duplicat
+								Rows</primary></indexterm>No Duplicate Rows</title> 
+				<para>A duplicate row is a row of data that is indistinguishable
+					 from the data of another row. Typical DBMSs allow duplicate rows to be stored
+					 as well as generated by the results of an operation. This is another area where
+					 the Dataphor DAE remains true to the relational model. Relation variables
+					 (tables) contain sets, not bags of rows, and a set by definition contains no
+					 duplicates. As with all "theoretical" issues, this has severe practical
+					 implications. Not only is a model based on bags more complex, it is unnecessary
+					 and can lead to unexpected or incorrect answers. Bags are also counterintuitive
+					 because in the "real world," every <emphasis>thing</emphasis> is in some way
+					 distinguishable from all other <emphasis>things</emphasis>. The DAE's query
+					 processor ensures that all results are indeed sets of rows.</para> 
+		  </sect1> 
+		  <sect1 id="DDGUpdatability"> 
+				<title><indexterm><primary>Updatability</primary></indexterm>Updatability</title>
+				
+				<para>The Dataphor DAE allows for updates against arbitrarily
+					 complex expressions (queries and views). The golden rule for updatability
+					 within the DAE is as follows:</para> 
+				<para>"No update operation must ever be allowed to leave any
+					 [table] in a state that violates its own predicate."[4]</para> 
+				<para>This updatability is possible because of the DAE's Type
+					 Inference mechanism. The result of this updatability is that the data consumer
+					 does not need to know the details of the logical model. To a consumer, the DAE
+					 appears as a set of table variables, which all behave the same way whether they
+					 are Tables or Views. This is known as Logical Data Independence, and allows the
+					 developer of the business model to rearrange the logical model underneath,
+					 without affecting the consumer's external view of that model.</para> 
+		  </sect1> 
+		  <sect1 id="DDGApplicationTransactions"> 
+				<title><indexterm><primary>Application
+								Transactions</primary></indexterm>Application Transactions</title> 
+				<para>In addition to typical pessimistic transaction support, the
+					 Dataphor DAE has Application Transactions, which are a type of optimistically
+					 concurrent transaction where concurrency control is not required, and
+					 consistency is checked at the time of commit.</para> 
+				<para>A common problem encountered when writing applications is
+					 dealing with data entry and modification in a database containing complex
+					 rules. For example, a master/detail relationship (one-to-many) between tables
+					 enforced by a referential integrity constraint is common in business models. In
+					 many cases, a master row may not be "complete" until the appropriate detail
+					 rows are in place. Because of the integrity constraint, the master row must be
+					 present in the database before the detail rows.</para> 
+				<para>Typical transaction support allows the rows to be entered
+					 simultaneously (although it should be noted that not all SQL-based DBMS
+					 products support this), but because transaction concurrency is handled
+					 pessimistically (i.e. by locking resources), transactions must be kept as short
+					 as possible to minimize resource contention. For this reason, most applications
+					 do not solve this problem using transaction support. Rather, it is typically
+					 handled by the developer within the data entry code. Even with the aid of
+					 development tools that help developers accomplish the tasks of caching, such
+					 caching is an unnecessary burden, and is not a general solution. Hard-coded
+					 caching only works for the manipulation patterns anticipated by the developer.
+					 Application Transactions handle these problems in a general way, without
+					 requiring special work by the developer.</para> 
+		  </sect1> 
+		  <sect1 id="DDGNavigationalAccess"> 
+				<title><indexterm><primary>Navigational
+								Access</primary></indexterm>Navigational Access</title> 
+				<para>One of the most difficult problems in any database
+					 application is the presentation of a natural and intuitive search. The Dataphor
+					 DAE solves this problem by providing navigational access to data using its
+					 <emphasis>browse</emphasis> capability. Using "browse" instead of "order" as
+					 part of the cursor definition provides this navigational access.</para> 
+				<para>Cursor operations such as backwards navigation and searching
+					 can be performed efficiently against relational data sources when using a
+					 browse based cursor. As the browse cursor is navigated and searched, it opens
+					 cursors underneath, based on appropriately transformed expressions. For
+					 example, when the user searches for the name "Karl", the underlying expression
+					 is modified to return all rows greater than or equal to the search value. This
+					 type of access is enabled against expressions of arbitrary complexity, not just
+					 simple table expressions.</para> 
+				<para>Because of the DAE's navigational access, user interfaces can
+					 be built based on browse cursors that are easy to search and navigate. The
+					 developer is not concerned with fetching data subsets, and the end user can see
+					 what they perceive as the entire table. In reality, only the data actually
+					 being presented is retrieved from the DAE.</para> 
+		  </sect1> 
+		  <sect1 id="DDGTypeInference"> 
+				<title><indexterm><primary>Type Inference</primary></indexterm>Type
+					 Inference</title> 
+				<para>Because the DAE's query processor is based on the relational
+					 algebra, it is capable of inferring the type of any expression through a
+					 mechanism called Type Inference. This means that not only are the columns of a
+					 query result known, but also its keys, constraints, references, metadata, and
+					 other information stored in the Catalog. All this information is made available
+					 along with the results of any request. Type Inference provides the foundation
+					 for the Dataphor Frontend's ability to automatically derive user
+					 interfaces.</para> 
+		  </sect1> 
+		  <sect1 id="DDGProposableInterface"> 
+				<title><indexterm><primary>Proposable
+								Interface</primary></indexterm>Proposable Interface</title> 
+				<para>The DAE is capable of answering questions about modification
+					 operations that are about to be performed. During data entry processes, rows
+					 are built a column at a time as the user enters data. The DAE provides a
+					 Proposable interface to allow the application to perform intermediate
+					 processing while this data entry is occurring. There are three types of
+					 proposable questions.</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para><emphasis role="strong">Default</emphasis> is
+									 designed to provide the initial state for a newly inserted row. When
+									 applications begin the process of data entry, this interface can be used to
+									 determine the default values for the columns of the table.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis role="strong">Validate</emphasis> is
+									 designed to provide a mechanism for immediate value validation on a column
+									 level. As values are entered, this interface can be used to determine whether
+									 they would violate any constraint of the column or domain.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis role="strong">Change</emphasis> is
+									 designed to provide a mechanism for displaying the predicted results of an
+									 operation. After a value has been entered, this interface can be used to
+									 request the affects of the change on the rest of the row.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect1> 
+	 </chapter> &D4LanguageGuide; 
+	 <chapter id="DDGP1RealSQLLanguage"> 
+		  <title><indexterm><primary>Real SQL Language
+						  Reference</primary></indexterm>RealSQL Language</title> 
+		  <para>In addition to its native language of D4, the DAE can accept user
+				commands in terms of RealSQL, a dialect of SQL designed specifically for use
+				with the DAE. This chapter provides a detailed description of the RealSQL
+				language.</para> 
+		  <sect1 id="DDGP1Introduction"> 
+				<title><indexterm><primary>Introduction</primary></indexterm><indexterm><primary>Real
+								SQL Language ReferenceRealSQL
+								Language</primary><secondary>Introduction</secondary></indexterm>Introduction</title>
+				
+				<para>RealSQL is only a data manipulation language. Data definition
+					 commands and imperative statements must be issued using D4. The RealSQL
+					 language is designed to allow users familiar with SQL to access data in the DAE
+					 without having to learn a new language. However, unlike traditional SQL,
+					 RealSQL conforms to the same data management principles as D4. For a complete
+					 discussion of these issues see the Data Management Differences section of the
+					 Comparison With SQL in this manual.</para> 
+				<para>This language guide uses a variation of Extended Backus-Naur
+					 Form (EBNF) notation to describe the syntax of RealSQL. For a complete
+					 description of this notation refer to the Syntactic Conventions section of the
+					 D4 Language Guide.</para> 
+				<para>Note that several of the non-terminals appearing in this
+					 grammar are not defined such as <emphasis>qualified identifier</emphasis> and
+					 <emphasis>literal</emphasis>. These non-terminals are borrowed from the D4
+					 grammar, and have the same interpretation.</para> 
+				<para>RealSQL also uses the same lexical analyzer as D4, so the
+					 lexical elements of the two languages are the same. For a complete description
+					 of these elements of RealSQL refer to the Lexical Elements section of the D4
+					 Language Guide.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1ScriptsandExecution"> 
+				<title><indexterm><primary>RealSQL Scripts and
+								Execution</primary></indexterm>Scripts and Execution</title> 
+				<para>A RealSQL script is a sequence of statements to perform a
+					 given task. Statements in the script must be separated by a semi-colon. Note
+					 that the semi-colon in RealSQL is a statement separator, not a statement
+					 terminator. Scripts in RealSQL have the following syntax: 
+					 <programlisting>&lt;script&gt; ::=
+	&lt;statement&gt;{; &lt;statement&gt;}</programlisting></para> 
+				<para>All statements in a RealSQL script are compiled into the same
+					 batch for execution.</para> 
+		  </sect1> 
+		  <sect1 id="DDGP1Statements"> 
+				<title><indexterm><primary>RealSQL</primary><secondary>Statements</secondary></indexterm>Statements</title>
+				
+				<para>The only statements available in RealSQL are data
+					 manipulation language statements such as select and insert, and operator
+					 invocations. RealSQL does not support any imperative constructs such as
+					 variable declaration or flow control. Statements of RealSQL have the following
+					 syntax: 
+					 <programlisting>&lt;statement&gt; ::=
+	&lt;select statement&gt; |
+	&lt;insert statement&gt; |
+	&lt;update statement&gt; |
+	&lt;delete statement&gt; |
+	&lt;expression&gt;</programlisting></para> 
+				<sect2 id="DDGP1SelectStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Select
+									 Statement</secondary></indexterm>Select Statement</title> 
+					 <para>Data retrieval in RealSQL is done using the select
+						  statement. This statement describes a result and, optionally, the order in
+						  which that result should be returned. The result to be returned is described
+						  using a <emphasis>query expression</emphasis>, which will be described in the
+						  next section. The order of the result is specified as a list of column
+						  identifiers which are allowed to be either ascending or descending.</para> 
+					 <para>The select statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;select statement&gt; ::=
+	&lt;query expression&gt;
+	[&lt;order by clause&gt;]
+
+&lt;order by clause&gt; ::=
+	order by &lt;order column expression commalist&gt;
+	
+&lt;order column expression&gt; ::=
+	&lt;column identifier&gt; [asc | desc]
+	
+&lt;column identifier&gt; ::=
+	&lt;qualified identifier&gt;</programlisting></para> 
+					 <sect3 id="DDGP1QueryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Query
+										  Expression</secondary></indexterm>Query Expression</title> 
+						  <para>Query expressions in RealSQL are made up of one or
+								more select expressions concatenated using one of the union-compatible table
+								operators union, intersect, or minus.</para> 
+						  <para>The union operator includes rows from both inputs in
+								the result. Note that the union operator has no optional <symbol>all</symbol>
+								keyword because duplicates are always eliminated from results.</para> 
+						  <para>The intersect operator only includes a row in the
+								result if it appears in both inputs.</para> 
+						  <para>The minus operator only includes a row in the result
+								if it appears in the first input and not in the second.</para> 
+						  <para>The query expression in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;query expression&gt; ::=
+	&lt;select expression&gt; [&lt;binary table expression&gt;]
+
+&lt;binary table expression&gt; ::=
+	[union | intersect | minus] &lt;select expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1SelectExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Select
+										  Expression</secondary></indexterm>Select Expression</title> 
+						  <para>Select expressions in RealSQL are made up of several
+								different clauses, each describing a different group of actions to be performed
+								on the result. These different clauses are: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Select Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>From Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Where Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Group By Clause</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Having Clause</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>Each of these clauses will be described in detail in
+								the following sections.</para> 
+						  <para>The select expression in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;select expression&gt; ::=
+	&lt;select clause&gt;
+		&lt;from clause&gt;
+		[&lt;where clause&gt;]
+		[&lt;group by clause&gt;]
+		[&lt;having clause&gt;]</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1SelectClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Select
+										  Clause</secondary></indexterm>Select Clause</title> 
+						  <para>The select clause performs four distinct operations
+								on the result: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Projection</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Extension</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Renaming</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Aggregate Extension</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>The select clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;select clause&gt; ::=
+	select (* | &lt;column expression commalist&gt;)
+
+&lt;column expression&gt; ::=
+	&lt;expression&gt; [as &lt;identifier&gt;]</programlisting></para> 
+						  <para>Projection involves selecting the columns to be
+								included in the result. Note that unlike SQL, the select list includes no
+								optional <symbol>distinct</symbol> keyword to specify duplicate elimination
+								should occur. This is because, like the union operator, duplicates are always
+								eliminated from a result.</para> 
+						  <para>Extension involves adding new columns to the result
+								based on computational expressions. For example, a new column Name could be
+								added based on the concatenation of the existing columns LastName and
+								FirstName. Values for the columns of the row being extended are accessible by
+								name within the expressions defining the new columns.</para> 
+						  <para>Renaming involves changing the name of a column in
+								the result. Renaming does not change the values in the column.</para> 
+						  <para>Aggregate extension involves adding new columns to
+								the result based on computational expressions involving aggregate functions
+								such as <symbol>Count</symbol> and <symbol>Sum</symbol>. If a given select
+								clause includes both aggregate and non-aggregate expressions, the group by
+								clause must be used to specify the non-aggregate expressions. The arguments to
+								the aggregation are allowed to be expressions themselves. Values for the
+								columns of the rows being aggregated are accessible by name within these
+								expressions.</para> 
+					 </sect3> 
+					 <sect3 id="DDGP1FromClause"> 
+						  <title><indexterm><primary>From
+										  Clause</primary></indexterm><indexterm><primary>RealSQLSelect StatementSelect
+										  Statement</primary><secondary>From Clause</secondary></indexterm>From
+								Clause</title> 
+						  <para>The from clause in RealSQL consists of a table
+								specifier followed by any number of join clauses. The table specifier describes
+								the initial result set, and each join clause specifies a join operation to be
+								used to join in additional results.</para> 
+						  <para>The from clause in D4 has the following syntax: 
+								<programlisting>&lt;from clause&gt; ::=
+	from &lt;table specifier&gt; [&lt;join clause list&gt;]
+
+&lt;table specifier&gt; ::=
+	(&lt;table identifier&gt; | "("&lt;query expression&gt;")") [as &lt;table identifier&gt;]
+	
+&lt;table identifier&gt; ::=
+	&lt;identifier&gt;
+
+&lt;join clause&gt; ::=
+	[cross | inner | ((left | right) [outer])] join &lt;table specifier&gt; [on &lt;expression&gt;]</programlisting></para> 
+						  <para>The table specifier is allowed to be a simple table
+								variable reference, or a nested query expression in its own right. The table
+								specifier also includes an optional table alias which can be used to resolve
+								ambiguous column names in the result.</para> 
+						  <para>The join clause specifies the type of join to be
+								performed (cross, inner, or left or right outer), and which columns are to be
+								used in the join. Note that unlike SQL, joins in RealSQL must be equi-joins. In
+								other words, the expression specifying the columns to be joined must consist of
+								one or more column equality comparisons between columns from opposite tables in
+								the join, concatenated with the and operator.</para> 
+						  <para>The cross join computes the cartesian product of the
+								inputs. In other words, for each row of the left table, for each row of the
+								right table, the result will include a row that is the concatenation of both
+								rows.</para> 
+						  <para>The inner join operator includes a row in the result
+								for every row in the left table, for every row in the right table for which the
+								specified join condition evaluates to true.</para> 
+						  <para>The left outer join operator includes a row in the
+								result for every row in the left table, for every row in the right table for
+								which the specified join condition evaluates to true, and includes a row for
+								every row in the left table for which no matching row in the right table is
+								found, with all the columns of the right table set to null.</para> 
+						  <para>The right outer join operator includes a row in the
+								result for every row in the left table, for every row in the right table for
+								which the specified join condition evaluates to true, and includes a row for
+								every row in the right table for which no matching row in the left table is
+								found, with all the columns of the left table set to null.</para> 
+						  <para>Note carefully that the outer join operators are not
+								relational operators. Because the result of an outer join may include rows in
+								which some of the columns have no values, the result is not a relation. For
+								more discussion on this topic, see the discussion for outer join operators in
+								the Table Expressions section of the D4 Language Guide.</para> 
+					 </sect3> 
+					 <sect3 id="DDGP1WhereClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Where
+										  Clause</secondary></indexterm>Where Clause</title> 
+						  <para>The where clause specifies a filter to be applied to
+								the result. Only rows for which the specified condition evaluates to true will
+								be included in the result. Values for the columns of the row being evaluated
+								are accessible by name within the filter expression.</para> 
+						  <para>The where clause in RealSQL has the following syntax:
+								
+								<programlisting>&lt;where clause&gt; ::=
+	where &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1GroupByClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Group
+										  By Clause</secondary></indexterm>Group By Clause</title> 
+						  <para>The group by clause specifies a grouping to be
+								applied to the result. The columns specified in the group clause must include
+								all the non-aggregate columns specified in the select clause.</para> 
+						  <para>The group by clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;group by clause&gt; ::=
+	group by &lt;expression commalist&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1HavingClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Having
+										  Clause</secondary></indexterm>Having Clause</title> 
+						  <para>The having clause specifies a filter to be applied to
+								the result after aggregation has been computed. The specified condition is
+								allowed to reference aggregate expressions. Only rows for which the specified
+								condition evaluates to true will be included in the result. Values for the
+								columns of the row being evaluated are accessible by name within the filter
+								expression.</para> 
+						  <para>The having clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;having clause&gt; ::=
+	having &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+				</sect2> 
+				<sect2 id="DDGP1InsertStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Insert
+									 Statement</secondary></indexterm>Insert Statement</title> 
+					 <para>The insert statement allows data to be inserted into a
+						  table. RealSQL supports two variations of the insert statement, one in which a
+						  single row is specified via the values clause, and one in which the data to be
+						  inserted is described by a query expression. Note that the values clause can be
+						  constructed from arbitrary expressions, unlike the values clause of typical SQL
+						  implementations.</para> 
+					 <para>The insert statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;insert statement&gt; ::=
+	insert into &lt;table identifier&gt;"("&lt;column identifier commalist&gt;")"
+		(&lt;values clause&gt; | &lt;query expression&gt;)
+		
+&lt;values clause&gt; ::=
+	values"("&lt;expression commalist&gt;")"</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1UpdateStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Update
+									 Statement</secondary></indexterm>Update Statement</title> 
+					 <para>The update statement allows the data in existing rows of
+						  a table to be changed. The current values of the row being changed are
+						  accessible by name within the expressions defining the new values. The update
+						  statement includes an optional where clause which specifies the rows for which
+						  the update should occur. Values for the columns of the row being updated are
+						  accessible within the where clause by name. If no where clause is specified,
+						  the update applies to all rows in the table.</para> 
+					 <para>The update statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;update statement&gt; ::=
+	update &lt;table identifier&gt; 
+		set &lt;update column expression commalist&gt;
+		[&lt;where clause&gt;]
+
+&lt;update column expression&gt; ::=
+	&lt;identifier&gt; = &lt;expression&gt;</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1DeleteStatement"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Delete
+									 Statement</secondary></indexterm>Delete Statement</title> 
+					 <para>The delete statement deletes the rows of a table. The
+						  delete statement includes an optional where clause which specifies which rows
+						  should be deleted. Values for the columns of the row being deleted are
+						  accessible within the where clause by name. If no where clause is specified,
+						  the delete applies to all rows in the table.</para> 
+					 <para>The delete statement in RealSQL has the following syntax:
+						  
+						  <programlisting>&lt;delete statement&gt; ::=
+	delete &lt;table identifier&gt;
+		[&lt;where clause&gt;]</programlisting></para> 
+				</sect2> 
+				<sect2 id="DDGP1Expression"> 
+					 <title><indexterm><primary>RealSQL</primary><secondary>Expressions</secondary></indexterm>Expression</title>
+					 
+					 <para>An expression of RealSQL is a combination of literals,
+						  identifiers, and operators which describe an operation to be performed. The
+						  result of evaluating any given expression is a value of some type. Expressions
+						  may be used anywhere the language requires a value to be specified.</para> 
+					 <para>Expressions in RealSQL have the following syntax: 
+						  <programlisting>&lt;expression&gt; ::=
+	&lt;binary expression&gt; &lt;between clause&gt;</programlisting></para> 
+					 <sect3 id="DDGP1BetweenClause"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Between
+										  Clause</secondary></indexterm>Between Clause</title> 
+						  <para>The between operator is a ternary operator that
+								returns true if the first operand is between the second and third operands,
+								inclusively. In other words, the expression: 
+								<programlisting>A between B and C</programlisting> is equivalent to the double comparison: 
+								<programlisting>A &gt;= B and A &lt;= C</programlisting></para> 
+						  <para>The between clause in RealSQL has the following
+								syntax: 
+								<programlisting>&lt;between clause&gt; ::=
+	between &lt;arithmetic expression&gt; and &lt;arithmetic expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1BinaryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Binary
+										  Expression</secondary></indexterm>Binary Expression</title> 
+						  <para>A binary expression consists of two operands
+								separated by one of the built-in binary operators of the language. Operator
+								precedence and associativity in RealSQL is the same as D4. For a description of
+								operator precedence and associativity in D4, as well as a complete description
+								of each built-in operator, refer to the D4 Language Guide.</para> 
+						  <para>Binary expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;binary expression&gt; ::=
+	&lt;arithmetic expression&gt; {&lt;binary operator&gt; &lt;arithmetic expression&gt;}
+
+&lt;binary operator&gt; ::=
+	and | or | xor | like | matches | in
+	^ | &amp; | "|" | "&lt;&lt;" | "&gt;&gt;" |
+	= | "&lt;&gt;" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" | ?=</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1ArithmeticExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Arithmetic
+										  Expression</secondary></indexterm>Arithmetic Expression</title> 
+						  <para>An arithmetic expression consists of two operands
+								separataed by one of the built-in arithmetic operators of the langauge. For a
+								complete description of these operators, refer to the D4 Language Guide.</para>
+						  
+						  <para>Arithmetic expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;arithmetic expression&gt; ::=
+	&lt;unary expression&gt; {&lt;arithmetic operator&gt; &lt;unary expression&gt;}
+
+&lt;arithmetic operator&gt; ::=
+	+ | - | * | / | div | mod | **</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1UnaryExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Unary
+										  Expression</secondary></indexterm>Unary Expression</title> 
+						  <para>A unary expression consists of one of the built-in
+								unary operators of the language, followed by an operand. For a complete
+								description of these operators, refer to the D4 Language Guide.</para> 
+						  <para>Unary expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;unary expression&gt; ::=
+	{&lt;unary operator&gt;} &lt;qualifier expression&gt;
+	
+&lt;unary operator&gt; ::=
+	+ | - | ~ | not | exists</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1QualifierExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Qualifier
+										  Expression</secondary></indexterm>Qualifier Expression</title> 
+						  <para>A qualifier expression consists of an optional
+								<symbol>.</symbol> followed by an expression qualified as many times as
+								desired. Qualification in RealSQL serves the same purposes as it does in D4,
+								with the addition that in RealSQL it also serves to qualify column names with
+								the appropriate table alias name. For a complete description of the qualifier
+								operator, refer to the D4 Language Guide.</para> 
+						  <para>Qualifier expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;qualifier expression&gt; ::=
+	[.]{&lt;indexer expression&gt;.}&lt;indexer expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1IndexerExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Indexer
+										  Expression</secondary></indexterm>Indexer Expression</title> 
+						  <para>Indexer expressions consist of an expression followed
+								by an indexing clause as many times as desired. Indexing in RealSQL serves the
+								same purposes as it does in D4. For a complete description of the indexer
+								operator, refer to the D4 Language Guide.</para> 
+						  <para>Indexer expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;indexer expression&gt; ::=
+	&lt;factor&gt;{"["&lt;expression&gt;"]"}</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1Factor"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Factor</secondary></indexterm>Factor</title>
+						  
+						  <para>A factor in RealSQL is the basic building block of
+								any expression. It may be a literal, an identifier, an operator invocation, a
+								case expression, or another expression nested within parentheses. Each of these
+								possibilities will be discussed in detail in the following sections.</para> 
+						  <para>Factors in RealSQL have the following syntax: 
+								<programlisting>&lt;factor&gt; ::= 
+	"("&lt;expression&gt;")" |
+	"("&lt;query expression&gt;")" |
+	&lt;literal&gt; |
+	&lt;identifier&gt; |
+	&lt;operator invocation&gt; |
+	&lt;aggregate operator invocation&gt; |
+	&lt;case expression&gt;</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1OperatorInvocation"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Operational
+										  Invocation</secondary></indexterm>Operator Invocation</title> 
+						  <para>An operator invocation in RealSQL consists of the
+								name of the operator to be invoked followed by a comma separated list of
+								arguments to the operator in parentheses. These arguments may be expressions in
+								themselves. Note that unlike D4, operators which take variable arguments may
+								not be invoked, because RealSQL has no imperative mechanism for declaring a
+								variable. Besides this restriction, any operator of D4 which returns a value
+								may be invoked within a RealSQL expression.</para> 
+						  <para>Operator invocations in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;operator invocation&gt; ::=
+	&lt;identifier&gt;"("&lt;expression commalist&gt;")"</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1AggregateOperatorInvocation"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Aggregate
+										  Operator Invocation</secondary></indexterm>Aggregate Operator
+								Invocation</title> 
+						  <para>An aggregate operator invocation in RealSQL consists
+								of the name of the aggregate operator to be invoked followed by the argument to
+								be aggregated in parentheses. The argument may include an optional
+								<symbol>distinct</symbol> specification which indicates that duplicates should
+								be eliminated from the column being aggregated prior to performing the
+								aggregation. RealSQL only supports the following aggregate operators: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Sum</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Min</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Max</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Avg</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Count</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>Aggregate operator invocations in RealSQL have the
+								following syntax: 
+								<programlisting>&lt;aggregate operator invocation&gt; ::=
+	&lt;identifier&gt;"("[distinct] &lt;expression&gt;")"</programlisting></para> 
+					 </sect3> 
+					 <sect3 id="DDGP1CaseExpression"> 
+						  <title><indexterm><primary>RealSQL</primary><secondary>Case
+										  Expression</secondary></indexterm>Case Expression</title> 
+						  <para>A case expression in RealSQL allows a particular
+								value to be selected based on the result of evaluating a specified condition or
+								set of conditions. There are two flavors of the case expression, one in which a
+								single expression is used as the comparison target for each case item, and one
+								in which no comparison target is given, rather each case item condition is a
+								boolean comparison in itself. In both versions of the expression, the final
+								unsatisfied condition is given by the else expression, and the results of all
+								case items and the else expression must return values of compatible
+								types.</para> 
+						  <para>Case expressions in RealSQL have the following
+								syntax: 
+								<programlisting>&lt;case expression&gt; ::=
+	case [&lt;expression&gt;]
+		&lt;ne case item expression commalist&gt;
+		else &lt;expression&gt;
+	end
+    
+&lt;case item expression&gt; ::=
+	when &lt;expression&gt; then &lt;expression&gt;</programlisting></para> 
+					 </sect3> 
+				</sect2> 
+		  </sect1> 
+	 </chapter> 
+</part> 

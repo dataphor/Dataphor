@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 13:35:49</date> 
+	 </sect2info> 
+	 <title>System.ExecuteWithTimeout</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator compiles and executes the code in the string specified
+		  in AString. It is executed as if it were normal code and, optionally, is run on
+		  the specified process AProcessID. If AProcessID is not specified, execution
+		  will be in the current process. The string can be typed in as literals or built
+		  and placed as variable. ATimeout is the number of milliseconds to wait for the
+		  code to execute. If the code does not finish in the specified time an error
+		  will occur.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table Example in Temp
+	 { TString : String, key{} };
+insert table { row { "" TString } } into Example;
+ExecuteWithTimeout( "for I : Integer := 0 to 9 do
+ update Example set { TString := TString + ToString(I) };", 100 );
+select Example;
+drop table Example;</programlisting> 
+		  <programlisting>TString
+----------
+0123456789</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRFrontend.ExecuteScript.html">Frontend.ExecuteScript</ulink>
+<ulink url="SLRSystem.Evaluate.html">System.Evaluate</ulink>
+<ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+<ulink url="SLRSystem.ExecuteAs.html">System.ExecuteAs</ulink>
+<ulink url="SLRSystem.ExecuteAsync.html">System.ExecuteAsync</ulink>
+<ulink url="SLRSystem.ExecuteMultiple.html">System.ExecuteMultiple</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

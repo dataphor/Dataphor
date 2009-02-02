@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:46:33</date> 
+	 </sect2info> 
+	 <title>iRetrieve</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Provides table variable access.</para> 
+	 <bridgehead renderas="sect3">Example</bridgehead> 
+	 <programlisting>Employees;</programlisting> 
+	 <para>Stating a table implicitly calls the <symbol>iRetrieve</symbol>
+		  operator. This code returns the table named Employees, and could be used
+		  anywhere a table was called. This code will not output anything to the output
+		  window except for stating that it executed successfully. To output the contents
+		  of the table, the select operator will have to be used. For more information
+		  about the select statement, see its listing in the D4 Language guide.</para> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGSelectStatement.html">Select Statement</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

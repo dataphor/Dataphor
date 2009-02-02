@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 13:57:07</date> 
+	 </sect2info> 
+	 <title>System.Count</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is an aggregate operator that returns the number of rows in the
+		  current group.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee group add {Count() Count};</programlisting> 
+		  <programlisting>Count
+-----
+6</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGAggregate.html">Aggregate Operators</ulink>
+<ulink url="D4LGCount.html">Count</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 15:20:46</date> 
+	 </sect2info> 
+	 <title>System.NewGuid</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>NameFromGuid</symbol> takes a <symbol>Guid</symbol> type and
+		  returns valid <symbol>Name</symbol> type. It is formed by taking the Guid, as a
+		  string, changing all the dashs to underscores, and prepending "Object_" to
+		  it.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select NameFromGuid(Guid("12345678-1234-1234-1234-123456789012"));</programlisting> 
+		  <programlisting>Object_12345678_1234_1234_1234_123456789012</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Guid.html">System.Guid</ulink>
+<ulink url="SLRSystem.ToGuid.html">System.ToGuid</ulink>
+<ulink url="SLRSystem.NewGuid.html">System.NewGuid</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGConveyors.html">Domains, Conveyors</ulink>
+<ulink url="DDGP2Identity.html">Schema Objects, Identity</ulink>
+<ulink url="D4LGObjects.html">Objects, ID</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversion</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

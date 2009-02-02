@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:46:15</date> 
+	 </sect2info> 
+	 <title>iRestrict</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>where</symbol> is the parser recognized symbol for this
+		  operator is . This is a very common SQL clause. This clause restricts the rows
+		  based on a query that can be evaluated as a boolean value.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee where ID &lt; 5;</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+1  Joe  
+2  John 
+3  Josh 
+4  Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGRestrict.html">Where</ulink>
+<ulink url="D4LGWhereClause.html">Where Clause</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

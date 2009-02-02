@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 14, 2004 16:01:02</date> 
+	 </sect2info> 
+	 <title>System.GroupExists</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator tests for the existance of the specified group.
+		  <symbol>GroupExists</symbol> return a boolean true or false, true if the
+		  specified group exists, false if it does not.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+if not GroupExists("Developers") then
+    CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+if GroupExists("Developers") then
+    SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+if GroupExists("Developers") then
+    DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");
+</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

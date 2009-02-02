@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:49:01</date> 
+	 </sect2info> 
+	 <title>System.Time</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Time
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	}selector  class "System.SystemTimeTicksSelectorNode", 
+	representation Time
+	{
+		Hour : System.Integer, 
+		Minute : System.Integer,
+		Second : System.Integer
+	}selector  class "System.SystemTimeTimeSecondsSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.TimeAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Time", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>Time</symbol> is an operator and the selector for the
+		  <symbol>Time</symbol> Datatype.</para> 
+	 <para><symbol>Time</symbol> returns a <symbol>DateTime</symbol>
+		  representing the current time. Unlike the <symbol>DateTime</symbol> operator,
+		  this operator does not return the Date. Only the time portion is
+		  returned.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { Time() Time };</programlisting> 
+		  <programlisting>Time
+--------
+14:28:56</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.TimeSpan.html">System.TimeSpan</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+<ulink url="SLRSystem.ToTime.html">System.ToTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

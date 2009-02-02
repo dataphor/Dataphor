@@ -1,0 +1,1077 @@
+<?xml version="1.0"?>
+<glossary id="DUGGlossary"> 
+	 <glossaryinfo> 
+		  <date role="LastMod">Tuesday, September 05, 2006 3:35:08 PM</date> 
+	 </glossaryinfo> 
+	 <title>Dataphor Glossary</title> 
+	 <glossdiv> 
+		  <title>A</title> 
+		  <glossentry><glossterm>AAD</glossterm> 
+				<glossdef> 
+					 <para>Automated Application Development. The name given to the
+						  paradigm of development enabled by the Dataphor Platform. AAD focuses on
+						  describing "what" an application needs to do, rather than "how" it does
+						  it.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Accessor</glossterm> 
+				<glossdef> 
+					 <para> An operator used to access the individual components, or
+						  properties, of a given logical representation.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>ACID</glossterm> 
+				<glossdef> 
+					 <para> A mnemonic device for the basic characteristics of a
+						  transaction: Atomicity, Consistency, Isolation, Durability.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Action</glossterm> 
+				<glossdef> 
+					 <para> The name given to the category of components that are
+						  used to execute various commands within definition of forms within the
+						  Frontend. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Aggregate Operator</glossterm> 
+				<glossdef> 
+					 <para> An operator with a specialized calling convention that
+						  allows aggregate operations to be computed efficiently.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Application Schema</glossterm> 
+				<glossdef> 
+					 <para> The structure and metadata definitions of a Dataphor
+						  application. This information is used by the Frontend Server to derive
+						  user-interfaces.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry><glossterm>Application Transaction</glossterm> 
+				<glossdef> 
+					 <para>A long-running optimistically concurrent transaction
+						  which is managed by the Dataphor Server. Updates are maintained in a
+						  transparent data cache until the transaction is committed.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Atomicity</glossterm> 
+				<glossdef> 
+					 <para> The idea that a transaction must behave as a single unit
+						  of work. It must either all be applied, or all be rolled back.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>B</title> 
+		  <glossentry> 
+				<glossterm>Base Table Variable</glossterm> 
+				<glossdef> 
+					 <para>A table variable defined in terms of its structure, i.e.
+						  columns, keys, etc.,. This is in constrast to a derived table variable, which
+						  is defined in terms of a table-valued expression.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>BOP</glossterm> 
+				<glossdef> 
+					 <para> Basic Object Persistence. A serialization mechanism used
+						  internally by the Dataphor toolset to persist object state.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Business Rules</glossterm> 
+				<glossdef> 
+					 <para> A general term describing the requirements of a
+						  particular business. In other words, the constraints which must be enforced on
+						  the database.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>C</title> 
+		  <glossentry> 
+				<glossterm>Catalog</glossterm> 
+				<glossdef> 
+					 <para> The structures describing the schema that is available
+						  within a Dataphor Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>CLI</glossterm> 
+				<glossdef> 
+					 <para> Call-Level Interface. An Application Programming
+						  Interface (API) designed specifically for use in accessing a database
+						  management system. The Dataphor Server exposes all functionality through the
+						  CLI.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Commit</glossterm> 
+				<glossdef> 
+					 <para> The successful completion of a transaction. The
+						  transaction manager ensures that the resources used by the transaction are
+						  released as part of the commit, and that the changes made by the transaction
+						  are made permanent in the database.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Component</glossterm> 
+				<glossdef> 
+					 <para> The name given to all components and controls used in
+						  the definition of forms in the Frontend. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Concurrency</glossterm> 
+				<glossdef> 
+					 <para> The ability of a system to service multiple requests to
+						  the same resources at the same time. A high degree of concurrency is desirable
+						  in database systems.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Consistency</glossterm> 
+				<glossdef> 
+					 <para> The idea that a transaction transforms a database from
+						  one consistent state to another, without necessarily maintaining consistency
+						  within the transaction. A consistent state means specifically that all
+						  integrity constraints are satisfied.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry><glossterm>Constraint</glossterm> 
+				<glossdef> 
+					 <para>A component of the logical data model consisting of an
+						  arbitrary truth-valued expression which must evaluate to true at transaction
+						  boundaries.</para> 
+					 <para>Also, a truth-valued expression used to describe the set
+						  of legal values for a scalar type.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Control</glossterm> 
+				<glossdef> 
+					 <para> The name given to all visual components used in the
+						  definition of forms in the Frontend. All controls are components, but not all
+						  components are controls. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Conveyor</glossterm> 
+				<glossdef> 
+					 <para> A host-implementation construct used to translate values
+						  between their physical representation and their host representation.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Cursor</glossterm> 
+				<glossdef> 
+					 <para> An implementation construct used to provide
+						  row-at-a-time access to the result set of a given table-valued expression.
+						  Cursors are used extensively within the Dataphor Server, and provide the basic
+						  mechanism for data retrieval through the CLI.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Cursor Capabilities</glossterm> 
+				<glossdef> 
+					 <para> The groups of behavior available for a cursor such as
+						  navigable, backwards navigable, and updatable. For a complete description of
+						  cursor capabilities, see the D4 Language Guide.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Cursor Isolation Level</glossterm> 
+				<glossdef> 
+					 <para> The isolation level associated with a given cursor. In
+						  conjunction with the isolation level for the transaction in which the cursor is
+						  participating, determines how the cursor should interact with other cursors and
+						  transactions running on the system. For a complete list of available cursor
+						  isolation levels, see the D4 Language Guide. </para> 
+					 <para>See Isolation Level.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Cursor Type</glossterm> 
+				<glossdef> 
+					 <para> A desription of the characteristics of a cursor with
+						  respect to changes made to the database since the cursor was opened. A static
+						  cursor is immune to changes in the database, while a dynamic cursor can see
+						  updates made to the database, so long as the cursor and transaction isolation
+						  levels allow it.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>D</title> 
+		  <glossentry> 
+				<glossterm>D4</glossterm> 
+				<glossdef> 
+					 <para> D4 is the database access language used to communicate
+						  with the Dataphor Server. D4 provides a complete relational algebra for
+						  manipulating data, as well as a rich type system for describing even the most
+						  complex data. D4 is also computationally complete, and supports a full
+						  complement of flow control constructs, including exception handling, to provide
+						  a complete development language with data manipulation capabilities.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>DAE</glossterm> 
+				<glossdef> 
+					 <para> Data Access Engine. The name given to the query
+						  processor subsystem of the Dataphor Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Definition Language (DDL)</glossterm> 
+				<glossdef> 
+					 <para>A category of statements in a database language which
+						  allow data structures to be defined and manipulated.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Integrity</glossterm> 
+				<glossdef> 
+					 <para> See Integrity.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Manipulation Language (DML)</glossterm> 
+				<glossdef> 
+					 <para> A category of statements in a database language which
+						  allow data to be retrieved and manipulated.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Mining</glossterm> 
+				<glossdef> 
+					 <para> The act of probing a database searching for information
+						  which may be manifested as trends in the data.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Model</glossterm> 
+				<glossdef> 
+					 <para> 
+						  <orderedlist> 
+								<listitem> 
+									 <para>A logical abstraction of data which allows
+										  the modeling of general characteristics of all data.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>The logical abstraction of all the data of
+										  interest to a particular enterprise or entity. Also called a business model
+										  when used in this sense.</para> 
+								</listitem> 
+						  </orderedlist> </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Data Warehousing</glossterm> 
+				<glossdef> 
+					 <para> The act of gathering data from distributed locations in
+						  a single store, usually in some aggregated form for further analysis.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Database</glossterm> 
+				<glossdef> 
+					 <para>An organized collection of facts.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Database Management System (DBMS)</glossterm> 
+				<glossdef> 
+					 <para>A computer system specifically designed to store and
+						  maintain data.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Dataphoria</glossterm> 
+				<glossdef> 
+					 <para>The Integrated Development Environment (IDE) for the
+						  Dataphor platform. Dataphoria is used to develop, maintain, and administer
+						  Dataphor applications.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Dataphor Server</glossterm> 
+				<glossdef> 
+					 <para>The DBMS portion of the Dataphor toolset. An instance of
+						  a Dataphor Server can be hosted within a running Dataphoria, or as a
+						  service.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Derivation</glossterm> 
+				<glossdef> 
+					 <para> The process of constructing a user-interface based on
+						  the structural information available in the application schema for particular
+						  table, view, or table-valued expression. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Derived Table Variable</glossterm> 
+				<glossdef> 
+					 <para>A table variable which is defined in terms of an
+						  expression involving other table variables. Also called a view. This is in
+						  contrast to a base table variable which is defined in terms of its
+						  structure.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Device</glossterm> 
+				<glossdef> 
+					 <para>The Dataphor Server utilizes a highly abstracted storage
+						  model that allows virtually any data source to be used as a storage device. A
+						  storage device may wrap a popular SQL-based industry DBMS, or simply wrap a
+						  comma delimited text file.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>DIL</glossterm> 
+				<glossdef> 
+					 <para>Dataphor Interface Language. An XML format for describing
+						  user-interfaces independent of the platform on which they will be
+						  realized.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>DILX</glossterm> 
+				<glossdef> 
+					 <para>DIL Transform Language. An XML format used to store the
+						  difference between two DIL documents.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Durability</glossterm> 
+				<glossdef> 
+					 <para> The idea that once a transaction has been committed to
+						  the database, the results of that transaction are permanent. In other words,
+						  the effects of the transaction will persist even in the event of a system
+						  failure or other catastrophe.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>E</title> 
+		  <glossentry> 
+				<glossterm>Elaboration</glossterm> 
+				<glossdef> 
+					 <para> The process of using the business model to derive a
+						  meaningful expression to manipulate the contents of a given query. Elaboration
+						  is used by the Frontend Server to derive user-interfaces from the application
+						  schema.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Event</glossterm> 
+				<glossdef> 
+					 <para>System or user event that fires in response to some
+						  occurrence such as a data modification or proposable call.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Event Handler</glossterm> 
+				<glossdef> 
+					 <para>An operator which is assigned to be invoked when a
+						  particular event is fired.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Execution Plan</glossterm> 
+				<glossdef> 
+					 <para> The general term for a prepared plan in the Dataphor
+						  Server containing the executable code necessary to perform the operations
+						  specified in a D4 request. Plans are created in response to user requests
+						  coming in through the CLI.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Expression</glossterm> 
+				<glossdef> 
+					 <para> A statement of D4 that evaluates to a value of some
+						  type. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Expression Plan</glossterm> 
+				<glossdef> 
+					 <para> A prepared plan in the Dataphor Server containing the
+						  executable code necessary to evaluate a single expression of D4.</para> 
+					 <para>See Execution Plan</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>F</title> 
+		  <glossentry> 
+				<glossterm>Frontend</glossterm> 
+				<glossdef> 
+					 <para>The Dataphor Frontend is an Interface Abstraction Layer
+						  that provides a uniform view of presentation. The Frontend describes interfaces
+						  using an XML based language called Dataphor Interface Language (DIL).</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Frontend Server</glossterm> 
+				<glossdef> 
+					 <para> The server-side components of the Dataphor Frontend
+						  responsible for the application layer extensions to the Dataphor Server such as
+						  documents, query elaboration, and user-interface derivation. </para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>H</title> 
+		  <glossentry> 
+				<glossterm>Host-Implemented Operator</glossterm> 
+				<glossdef> 
+					 <para> An operator of D4 whose implementation is provided by a
+						  .NET class. For more information on host-implemented operators, see the DAE
+						  Developer's Guide, Part II.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>I</title> 
+		  <glossentry> 
+				<glossterm>Impedance Mismatch</glossterm> 
+				<glossdef> 
+					 <para>A term typically used to describe the disparity arising
+						  between the language used to query the database, (normally SQL) and the
+						  language used to code the business processes in the layers above the database,
+						  such as C, C++, Pascal, etc. Dataphor applications do not suffer from this type
+						  of impedance mismatch because the language used to query the data is also used
+						  to code the business processes.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Integrity</glossterm> 
+				<glossdef> 
+					 <para> The correctness, or accuracy, of the data in the
+						  database. The tables in a relational database can be viewed as having a
+						  predicate where each column is a placeholder. This predicate represents the
+						  meaning of the data in the table. Each row in the table can then be viewed as a
+						  proposition by substituting each placeholder with the value for the
+						  corresponding column in that row. The resulting proposition is considered true.
+						  Therefore, a relational database is quite literally a collection of true
+						  propositions, or facts. Integrity refers to this concept of truth in the
+						  database.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Integrity Constraint</glossterm> 
+				<glossdef> 
+					 <para>See Constraint.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Isolation</glossterm> 
+				<glossdef> 
+					 <para> The idea that a given process runs as though it is the
+						  only one in a given system, even though there may be multiple processes
+						  actually running. Isolation is typically enforced by locking.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Isolation Level</glossterm> 
+				<glossdef> 
+					 <para> The degree of isolation associated with a particular
+						  transaction. The degree of isolation is inversely proportional to the degree of
+						  concurrency. In other words, the higher the isolation level, the lower the
+						  concurrency, and vice versa. An important result of isolation theory states
+						  that if all transactions run at least Degree 1 isolation (also called browse,
+						  or read uncommitted) then no transaction running at a lower isolation level
+						  will interfere with transactions running at higher isolation levels.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>K</title> 
+		  <glossentry> 
+				<glossterm>Key</glossterm> 
+				<glossdef> 
+					 <para> A set of columns in a table variable which constitute a
+						  unique identifier for every row in the table. Note that a key may contain no
+						  columns, as well as multiple columns. In effect, a key states that no two rows
+						  in the table variable for which it is defined are allowed to have the same
+						  values for all the columns of the key. Note also that keys are inferred for
+						  derived table variables.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Key Inference</glossterm> 
+				<glossdef> 
+					 <para> The process by which the compiler determines the set of
+						  keys that hold within the result of a given table-valued expression. This
+						  information is used by the compiler and distributed query processor to perform
+						  semantic optimization, as well as by the Frontend to perform query elaboration
+						  and user-interface derivation.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>L</title> 
+		  <glossentry> 
+				<glossterm>List (Value)</glossterm> 
+				<glossdef> 
+					 <para>A list in the Dataphor Server is an ordered collection of
+						  values, all of the same type.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Logical Data Independence</glossterm> 
+				<glossdef> 
+					 <para>The idea that an external user's perception of the
+						  database can remain unaffected by changes in the logical model, largely due to
+						  the interchangeability of base and derived relations.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Logical Model</glossterm> 
+				<glossdef> 
+					 <para> An abstract construction used to describe the
+						  characteristics and behavior of some system.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>M</title> 
+		  <glossentry> 
+				<glossterm>Metadata</glossterm> 
+				<glossdef> 
+					 <para>Data or information about the data contained in a
+						  database.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Metadata Inference</glossterm> 
+				<glossdef> 
+					 <para> The process by which the compiler determines the
+						  metadata that applies to the result set of a given table-valued expression.
+						  This information is used by the Dataphor Server, as well as the Frontend Server
+						  to perform functions such as query elaboration and user-interface derivation.
+						  </para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>N</title> 
+		  <glossentry> 
+				<glossterm>Native Accessor</glossterm> 
+				<glossdef> 
+					 <para>A host-implementation mechanism used to retrieve and
+						  specify values in the host-implementation language. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Native Representation</glossterm> 
+				<glossdef> 
+					 <para> See Representation </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Navigational Access</glossterm> 
+				<glossdef> 
+					 <para> A service exposed by the Dataphor Server that enables
+						  efficient searching and navigation against data in a relational database.
+						  </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Nested Transaction</glossterm> 
+				<glossdef> 
+					 <para> A transaction which is running within some other
+						  transaction.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Nil</glossterm> 
+				<glossdef> 
+					 <para> A marker used to indicate that a given variable does not
+						  currently have a value.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Normalization</glossterm> 
+				<glossdef> 
+					 <para>Normalization refers to the process of decomposing a set
+						  of relations using projection to eliminate potential redundancy.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>O</title> 
+		  <glossentry> 
+				<glossterm>Operator</glossterm> 
+				<glossdef> 
+					 <para>A component of the logical data model describing how data
+						  of arbitrary types should be manipulated.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Orthogonality</glossterm> 
+				<glossdef> 
+					 <para> The property of a language that describes how well
+						  different concepts in the language interact with each other. Orthogonality in a
+						  language helps to eliminate special-case scenarios, making the language easier
+						  to learn and use, as well as more flexible and powerful.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>P</title> 
+		  <glossentry> 
+				<glossterm>Physical Data Independence</glossterm> 
+				<glossdef> 
+					 <para>The idea that the logical data model can remain
+						  unaffected by changes at the physical level.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Plan</glossterm> 
+				<glossdef> 
+					 <para> See Execution Plan.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Predicate Logic</glossterm> 
+				<glossdef> 
+					 <para> A system of logic in which a proposition is allowed to
+						  contain placeholders. These parameterized propositions are called predicates.
+						  Each place holder is allowed to range over a domain (or type) of values.
+						  Substituting values for these domains in each placeholder results in a
+						  truth-valued proposition.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Property</glossterm> 
+				<glossdef> 
+					 <para> An individual component of a logical representation of a
+						  scalar type. Each property has an associated read and write accessor which
+						  allows the value of the property to be accessed and manipulated
+						  independently.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Proposable Interface</glossterm> 
+				<glossdef> 
+					 <para>The Proposable interface allows the application to
+						  perform intermediate processing while data entry is occurring, where rows are
+						  built a column at a time as the user enters data.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>Q</title> 
+		  <glossentry> 
+				<glossterm>Query Processor</glossterm> 
+				<glossdef> 
+					 <para> That portion of a Database Management System which is
+						  responsible for producing the results of a given query.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>R</title> 
+		  <glossentry> 
+				<glossterm>Reconciliation</glossterm> 
+				<glossdef> 
+					 <para> The process by which the Dataphor Server synchronizes
+						  catalog objects with a given device. For more information on this process see
+						  Part IV of the Dataphor Developer's Guide.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Reference</glossterm> 
+				<glossdef> 
+					 <para> A component of the logical data model used to enforce
+						  referential integrity. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Reference Inference</glossterm> 
+				<glossdef> 
+					 <para> The process by which the compiler determines the
+						  references that apply to the result of a given table-valued expression. This
+						  information is used by the Frontend Server during query elaboration and
+						  user-interface derivation.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Referential Integrity</glossterm> 
+				<glossdef> 
+					 <para> A special type of integrity referring to the
+						  relationships between tables. Specifically, a referential integrity constraint
+						  says that if a given row is in some table, it must have a corresponding row in
+						  some table (not necessarily a different table). A reference (also called a
+						  foreign key) is used to enforce referential integrity.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relation Type</glossterm> 
+				<glossdef> 
+					 <para> A relation type defines the type of relation values. It
+						  consists of a heading, which is a set of attributes of the form &lt;name :
+						  type&gt;.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relation (Value)</glossterm> 
+				<glossdef> 
+					 <para>A relation consists of a heading: a set of attributes of
+						  the form &lt;name : type&gt; of which &lt;name&gt; must be unique in the set,
+						  and a body: a set of tuples, containing a component for each attribute of the
+						  body of the form &lt;name : value&gt; in which &lt;value&gt; is a value of the
+						  type for attribute &lt;name&gt;. Relation is the formal name for the data
+						  structure used in the relational model. Table is the informal name used by the
+						  DAE.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relation Variable</glossterm> 
+				<glossdef> 
+					 <para> A variable whose value is a relation value. Tables and
+						  views are both relation variables. Tables are base relation variables, where
+						  views are derived relation variables.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relational Algebra</glossterm> 
+				<glossdef> 
+					 <para> A set of manipulative operators used to derive new
+						  relations from existing ones. The five primitive operators of the relational
+						  algebra are restriction, projection, union, difference, and either intersection
+						  or join. Each of these operators is closed over relations, meaning that the
+						  result of each operator is a relation, and can therefore be used as the
+						  argument to the next operator.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relational Calculus</glossterm> 
+				<glossdef> 
+					 <para> A computational system for manipulating relations which
+						  is equivalent to the relational algebra. Queries in a relational calculus are
+						  formulated by describing the desired result set, rather than describing the
+						  steps to construct it.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Relational Model</glossterm> 
+				<glossdef> 
+					 <para>A formal theory of data consisting of three major
+						  components: (a) A structural aspect, meaning that data in the database is
+						  perceived as tables, and only tables, (b) An integrity aspect, meaning that
+						  those tables satisfy certain integrity constraints, and (c) A manipulative
+						  aspect, meaning that the tables can be operated upon by means of operators
+						  which derive tables from tables.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Representation</glossterm> 
+				<glossdef> 
+					 <para> A general term used to describe the representation of
+						  values of types. There are several categories of representations within the
+						  Dataphor Platform: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Physical Representation</para> 
+									 <para>The physical representation of a value is the
+										  byte encoding of that value suitable for storage in the physical layer of the
+										  DAE.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Device Representation</para> 
+									 <para>The device representation of a value is the
+										  value as it appears at the connectivity implementation boundary. This is the
+										  way a value appears as it is first presented to the DAE from a device. This is
+										  also the representation as it appears when it is handed back to the device
+										  through the connectivity implementation.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Native Representation</para> 
+									 <para>The native representation of a value in the
+										  host implementation language of the Dataphor Server, namely a .NET
+										  representation of the value. For example, the native representation of values
+										  of type <symbol>System.Integer</symbol> is as a value of type
+										  <symbol>Int32</symbol> in the .NET Framework.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Logical Representation</para> 
+									 <para>The logical representation of a value in D4.
+										  A given type may have multiple logical representations exposed through
+										  accessors in the D4 language.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Presentation Representation</para> 
+									 <para>The representation of a value of some type in
+										  a user interface (also called the Frontend representation). A given type may
+										  also have multiple presentation representations such as a display
+										  representation, and an edit representation. Note that any given presentation
+										  representation is always a logical representation, but not every logical
+										  representation is available as a presentation representation.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Rollback</glossterm> 
+				<glossdef> 
+					 <para> The unsuccessful completion of a transaction. The
+						  transaction manager ensures that all changes made by the transaction are undone
+						  during this process.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Row (Value)</glossterm> 
+				<glossdef> 
+					 <para> A row value is a set of named columns, where each column
+						  describes the type of values that may appear in the column, and has a value
+						  from that type.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>S</title> 
+		  <glossentry> 
+				<glossterm>Scalar Type</glossterm> 
+				<glossdef> 
+					 <para>A named set of values having no user-visible components.
+						  Scalar types are a component of the logical data model used to describe the
+						  type of data to be stored.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Scalar (Value)</glossterm> 
+				<glossdef> 
+					 <para> A value with no user-visible components.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Schema</glossterm> 
+				<glossdef> 
+					 <para>The system definition of the structure of the objects
+						  contained within the database, including types, operators, constraints, tables,
+						  views, devices, etc.,.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Script</glossterm> 
+				<glossdef> 
+					 <para> A program of D4 usually contained in a text file. A
+						  script specifies a sequence of operations to be performed. For example, a
+						  script may contain the data definition language statements necessary to create
+						  a particular business model.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Selector</glossterm> 
+				<glossdef> 
+					 <para> An operator which 'selects' a value of some domain. Each
+						  logical representation of a scalar type has an associated selector which allows
+						  values of the domain to be constructed based on the values for the components,
+						  or properties, of the representation.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>SIA</glossterm> 
+				<glossdef> 
+					 <para>Storage Integration Architecture. The name given to the
+						  technology which provides the storage abstraction layer in the Dataphor
+						  Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Sparse Key</glossterm> 
+				<glossdef> 
+					 <para> A key which is defined to ignore columns that do not
+						  contain values for all the columns of the key. This is in contrast to a normal
+						  key, in which rows that do not contain values for the columns of the key are
+						  considered equivalent.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Special Value</glossterm> 
+				<glossdef> 
+					 <para> A value of a domain which is assigned special
+						  significance by the type designer. This special value can then be used by the
+						  application to specify that a given piece of information is missing, or
+						  unknown.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Statement</glossterm> 
+				<glossdef> 
+					 <para> The basic unit of execution within the D4 language. All
+						  programs of D4 are built using blocks of statements. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Statement Plan</glossterm> 
+				<glossdef> 
+					 <para> A prepared plan in the Dataphor Server containing the
+						  executable code for a single statement of the D4 language.</para> 
+					 <para>See Execution Plan.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Storage Device</glossterm> 
+				<glossdef> 
+					 <para> See Device.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Storage Integration Architecture (SIA)</glossterm> 
+				<glossdef> 
+					 <para> A subsystem of the Dataphor Server designed to allow
+						  data from any source to be accessed and manipulated from the Dataphor
+						  Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>System-Provided Operator</glossterm> 
+				<glossdef> 
+					 <para>An operator whose definition is provided by the system.
+						  This term is used to refer both to operators that are built-in as part of the
+						  system libraries, and to operators whose definition is provided as part of the
+						  compilation process, such as selectors and accessors for system-provided
+						  representations. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>System-Provided Representation</glossterm> 
+				<glossdef> 
+					 <para> The logical representation of a scalar type that is
+						  provided automatically by the compiler. When a representation is
+						  system-provided, it also corresponds to the physical representation for the
+						  type.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>T</title> 
+		  <glossentry> 
+				<glossterm>Table</glossterm> 
+				<glossdef> 
+					 <para> A base table variable in the catalog of the DAE. Note
+						  that the term table is often used very loosely to mean a table variable in some
+						  contexts, and a table value in others.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Table (Value)</glossterm> 
+				<glossdef> 
+					 <para> A table value in the DAE consists of a set of named
+						  columns, where each column defines the domain of values that may appear within
+						  the column, and a set of rows where each row has the same columns as the table,
+						  and a value for each column from the column domain.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Table Variable</glossterm> 
+				<glossdef> 
+					 <para> A variable whose value is a table value specifically.
+						  The term is used to refer to both base and derived table variables. </para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Tags</glossterm> 
+				<glossdef> 
+					 <para> Pieces of metadata that can be associated with objects
+						  in the catalog. These tags have no meaning within the logical model, but are
+						  interpreted by applications using the Dataphor Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Transaction</glossterm> 
+				<glossdef> 
+					 <para> The basic unit of work in a database management system.
+						  Transactions are used to ensure that user requests are handled fairly,
+						  effectively, and consistently throughout the system. In order to ensure the
+						  correctness of each transaction, transactions must have the ACID properties.
+						  See ACID.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Transaction Management</glossterm> 
+				<glossdef> 
+					 <para> The process by which transactions from multiple users
+						  are coordinated within a single system. Transaction management involves
+						  scheduling access to shared resources to ensure that all actions taken against
+						  the system have consistent effects.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Tuple (Value)</glossterm> 
+				<glossdef> 
+					 <para>A tuple consists of a heading: a set of attributes of the
+						  form &lt;name : domain&gt; of which &lt;name&gt; must be unique in the set, and
+						  a value for each attribute where the value must be a member of the domain of
+						  the attribute. Tuple is the formal name for the row concept in the relational
+						  model. Row is the informal name used within the Dataphor Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Type</glossterm> 
+				<glossdef> 
+					 <para> A type is a named set of values. The Dataphor Server
+						  uses types to ensure the correctness of the operations requested in D4. For
+						  more information on types, refer to the D4 Language Guide.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Type Inference</glossterm> 
+				<glossdef> 
+					 <para> The mechanism by which the Dataphor Server is able to
+						  determine the result type of a given expression.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>U</title> 
+		  <glossentry> 
+				<glossterm>User-Interface Derivation</glossterm> 
+				<glossdef> 
+					 <para>See Derivation</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+	 <glossdiv> 
+		  <title>V</title> 
+		  <glossentry> 
+				<glossterm>Value</glossterm> 
+				<glossdef> 
+					 <para>A value is a constant with no location in space or time.
+						  Values, by definition, are immutable.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>Variable</glossterm> 
+				<glossdef> 
+					 <para>A variable is a placeholder for a value. A variable does
+						  have a location in space and time. Variables are mutable, in that the current
+						  value of the variable may be changed to a new value.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>View</glossterm> 
+				<glossdef> 
+					 <para> A derived table variable in the logical model of the
+						  Dataphor Server.</para> 
+				</glossdef> 
+		  </glossentry> 
+		  <glossentry> 
+				<glossterm>View Updatability</glossterm> 
+				<glossdef> 
+					 <para> The name given to the problem of determining how a given
+						  modification statement targeting a view should be propagated to the table
+						  variables involved in that view definition.</para> 
+				</glossdef> 
+		  </glossentry> 
+	 </glossdiv> 
+</glossary> 
