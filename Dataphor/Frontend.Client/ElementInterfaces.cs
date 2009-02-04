@@ -449,7 +449,13 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// property of the parent interface (found in the Root Form Node)
 		/// will be used. </remarks>
 		IAction OnDoubleClick { get; set; }
-	}
+
+        /// <summary> Use Natural Width as the Max Width. </summary> <doc/>
+		/// <value> <para>Boolean</para>
+		/// <para>Default: (false)</para></value>  		
+        bool UseNaturalMaxWidth { get; set; }
+                                                    
+    }
 
 	public interface ILookupElement : IElement, ILookup, IReadOnly
 	{ 

@@ -990,9 +990,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected override Size InternalMaxSize
 		{
-			get { return WinForms.Screen.FromControl(Control).WorkingArea.Size; }
+            get { return FUseNaturalMaxWidth ? new Size(InternalNaturalSize.Width, WinForms.Screen.FromControl(Control).WorkingArea.Size.Width) : WinForms.Screen.FromControl(Control).WorkingArea.Size; }
 		}
-		
+
+        [DefaultValue(false)]
+        [Description("Use Natural Width as the Max Width.")]
+        private bool FUseNaturalMaxWidth;
+        public bool UseNaturalMaxWidth
+        {
+            get { return FUseNaturalMaxWidth; }
+            set { FUseNaturalMaxWidth = value; }
+        }
+
 		protected override Size InternalNaturalSize
 		{
 			get
