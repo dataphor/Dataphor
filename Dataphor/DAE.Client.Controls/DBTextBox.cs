@@ -315,7 +315,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				catch
 				{
 					SelectAll();
-					Focus();
 					throw;
 				}
 				ResetCursor();
