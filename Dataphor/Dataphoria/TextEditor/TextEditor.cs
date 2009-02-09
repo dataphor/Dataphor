@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			InitializeComponent();
 		}
 
-		public TextEditor(Dataphoria ADataphoria, string ADesignerID)
+		public TextEditor(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
 
@@ -480,7 +480,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		// Dataphoria
 
-		protected Dataphoria Dataphoria
+		protected IDataphoria Dataphoria
 		{
 			get { return (FService == null ? null : FService.Dataphoria); }
 		}

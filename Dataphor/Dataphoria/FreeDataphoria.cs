@@ -1,6 +1,6 @@
 /*
 	Alphora Dataphor
-	Â© Copyright 2000-2008 Alphora
+	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
@@ -28,19 +28,19 @@ using Alphora.Dataphor.Dataphoria.Services;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 
-using Syncfusion.Windows.Forms.Tools;
-using Syncfusion.Windows.Forms.Tools.XPMenus;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-	/// <summary> Dataphoria Server Manager Form. </summary>
-    public partial class Dataphoria : System.Windows.Forms.Form, IErrorSource, IServiceProvider, IDataphoria
-	{
-		public const string CConfigurationFileName = "Dataphoria{0}.config";
-		
-		
+    public partial class FreeDataphoria : Form, IDataphoria
+    {
+       
 
-		public Dataphoria()
+        public const string CConfigurationFileName = "Dataphoria{0}.config";
+
+       
+
+
+        public FreeDataphoria()
 		{
 			InitializeComponent();
 
@@ -55,8 +55,8 @@ namespace Alphora.Dataphor.Dataphoria
 			FErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
 			FErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
 
-			FTabbedMDIManager = new TabbedMDIManager();
-			FTabbedMDIManager.AttachToMdiContainer(this);
+			//FTabbedMDIManager = new TabbedMDIManager();
+			//FTabbedMDIManager.AttachToMdiContainer(this);
 
 			LoadSettings();
 		}
@@ -228,9 +228,9 @@ namespace Alphora.Dataphor.Dataphoria
 								{
 									FServerNode.Expand();
 									
-									FDockingManager.SetDockVisibility(FExplorer, true);
-									FConnectMenuItem.Visible = false;
-									FDisconnectMenuItem.Visible = true;
+									//FDockingManager.SetDockVisibility(FExplorer, true);
+									//FConnectMenuItem.Visible = false;
+									//FDisconnectMenuItem.Visible = true;
 									Text = Strings.Get("DataphoriaTitle") + " - " + FDataSession.Alias.ToString();
 								}
 								catch
@@ -279,17 +279,17 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("Disconnecting")))
 			{
-				if (FTabbedMDIManager != null)
-					DisposeChildren();		// Don't CloseChildren(), we already did that in Disconnect()
+				//if (FTabbedMDIManager != null)
+				//	DisposeChildren();		// Don't CloseChildren(), we already did that in Disconnect()
 
 				if (FDataSession != null)
 				{
 					try
 					{
 						Text = Strings.Get("DataphoriaTitle");
-						FConnectMenuItem.Visible = true;
-						FDisconnectMenuItem.Visible = false;
-						FDockingManager.SetDockVisibility(FExplorer, false);
+						//FConnectMenuItem.Visible = true;
+						//FDisconnectMenuItem.Visible = false;
+						//FDockingManager.SetDockVisibility(FExplorer, false);
 					
 						FExplorer.Nodes.Clear();
 						FServerNode = null;
@@ -330,13 +330,13 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void Disconnect()
 		{
-			if (FTabbedMDIManager != null)
-			{
+			//if (FTabbedMDIManager != null)
+			//{
 				// Make sure we can safely disconnect
 				CloseChildren();
-				if (FTabbedMDIManager.MdiChildren.Length > 0)
-					throw new AbortException();
-			}
+			//	if (FTabbedMDIManager.MdiChildren.Length > 0)
+			//		throw new AbortException();
+			//}
 
 			InternalDisconnect();
 		}
@@ -429,20 +429,13 @@ namespace Alphora.Dataphor.Dataphoria
 			ADesigner.Disposed += new EventHandler(DesignerDisposed);
 		}
 
-		/// <summary> Gets a new document expression for a given expression string. </summary>
-		public static DocumentExpression GetDocumentExpression(string AExpression)
-		{
-			DocumentExpression LExpression = new DocumentExpression(AExpression);
-			if (LExpression.Type != DocumentType.Document)
-				throw new DataphoriaException(DataphoriaException.Codes.CanOnlyLiveEditDocuments);
-			return LExpression;
-		}
+		
 
 		private void EditForm(IFormInterface AInterface)
 		{
 			CheckExclusiveDesigner(AInterface);
 
-			DocumentExpression LExpression = GetDocumentExpression(AInterface.HostNode.Document);
+			DocumentExpression LExpression = Program.GetDocumentExpression(AInterface.HostNode.Document);
 			string LDocumentType;
 			using 
 			(
@@ -565,7 +558,8 @@ namespace Alphora.Dataphor.Dataphoria
 		public IDesigner NewDesigner()
 		{
 			DesignerInfo LInfo = new DesignerInfo();
-			Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", Strings.Get("SelectDesigner")));
+			string LSelectDesigner = Strings.Get("SelectDesigner");
+            Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
 			try
 			{
 				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
@@ -812,13 +806,13 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void SaveAll()
 		{
-			IDesigner LDesigner;
-			foreach (Form LForm in FTabbedMDIManager.MdiChildren)
-			{
-				LDesigner = LForm as IDesigner;
-				if ((LDesigner != null) && LDesigner.Service.IsModified)
-					LDesigner.Service.Save();
-			}
+			//IDesigner LDesigner;
+			//foreach (Form LForm in FTabbedMDIManager.MdiChildren)
+			//{
+				//LDesigner = LForm as IDesigner;
+				//if ((LDesigner != null) && LDesigner.Service.IsModified)
+				//	LDesigner.Service.Save();
+			//}
 		}
 
 		#endregion
@@ -841,13 +835,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region File Support
 
-		public static string DocumentTypeFromFileName(string AFileName)
-		{
-			string LResult = Path.GetExtension(AFileName).ToLower();
-			if (LResult.Length > 0)
-				LResult = LResult.Substring(1);
-			return LResult;
-		}
+		
 
 		private string GetOpenFilter()
 		{
@@ -946,7 +934,7 @@ namespace Alphora.Dataphor.Dataphoria
 			for (int i = 0; i < AFileNames.Length; i++)
 			{
 				LFileName = AFileNames[i];
-				DesignerInfo LInfo = GetDefaultDesigner(DocumentTypeFromFileName(LFileName));
+				DesignerInfo LInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
 				LBuffer = new FileDesignBuffer(this, LFileName);
 				try
 				{
@@ -973,7 +961,7 @@ namespace Alphora.Dataphor.Dataphoria
 			string[] LFileNames = FileOpenPrompt(false);
 			string LFileName = LFileNames[0];
 
-			DesignerInfo LInfo = ChooseDesigner(DocumentTypeFromFileName(LFileName));
+			DesignerInfo LInfo = ChooseDesigner(Program.DocumentTypeFromFileName(LFileName));
 
 			FileDesignBuffer LBuffer = new FileDesignBuffer(this, LFileName);
 
@@ -999,7 +987,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Child Forms
 
-		private TabbedMDIManager FTabbedMDIManager;
+		//private TabbedMDIManager FTabbedMDIManager;
 
 		public void AttachForm(Form AForm) 
 		{
@@ -1009,16 +997,16 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void CloseChildren()
 		{
-			Form[] LForms = FTabbedMDIManager.MdiChildren;
-			foreach (Form LForm in LForms)
-				LForm.Close();
+			//Form[] LForms = FTabbedMDIManager.MdiChildren;
+			//foreach (Form LForm in LForms)
+			//	LForm.Close();
 		}
 
 		private void DisposeChildren()
 		{
-			Form[] LForms = FTabbedMDIManager.MdiChildren;
-			foreach (Form LForm in LForms)
-				LForm.Dispose();
+			//Form[] LForms = FTabbedMDIManager.MdiChildren;
+			//foreach (Form LForm in LForms)
+			//	LForm.Dispose();
 		}
 
 		private IStatusBarClient FCurrentStatusBarClient;
@@ -1033,13 +1021,13 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					if (FCurrentStatusBarClient != null)
 					{
-						FCurrentStatusBarClient.Unmerge(FStatusBar);
+						//FCurrentStatusBarClient.Unmerge(FStatusBar);
 						FCurrentStatusBarClient = null;
 					}
 					IStatusBarClient LClient = ActiveMdiChild as IStatusBarClient;
 					if (LClient != null)
 					{
-						LClient.Merge(FStatusBar);
+						//LClient.Merge(FStatusBar);
 						FCurrentStatusBarClient = LClient;
 					}
 				}
@@ -1266,8 +1254,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void ShowWarnings()
 		{
-			FDockingManager.SetDockVisibility(FErrorListView, true);
-			FDockingManager.ActivateControl(FErrorListView);
+			//FDockingManager.SetDockVisibility(FErrorListView, true);
+			//FDockingManager.ActivateControl(FErrorListView);
 		}
 
 		private void WarningsAdded(object ASender, EventArgs AArgs)
@@ -1278,7 +1266,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void ErrorsAdded(object ASender, EventArgs AArgs)
 		{
 			ShowWarnings();
-			FDockingManager.ActivateControl(FErrorListView);
+			//FDockingManager.ActivateControl(FErrorListView);
 		}
 
 		private void ClearWarnings()
@@ -1302,16 +1290,13 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Commands
 
-        private EventHandler FOnFormDesignerLibrariesChanged;
+		private EventHandler FOnFormDesignerLibrariesChanged;
 
-        public event EventHandler OnFormDesignerLibrariesChanged
-        {
-            add
-            {
+        public event EventHandler OnFormDesignerLibrariesChanged {
+            add {
                 this.FOnFormDesignerLibrariesChanged += value;
             }
-            remove
-            {
+            remove {
                 this.FOnFormDesignerLibrariesChanged -= value;
             }
         }
@@ -1391,8 +1376,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void ShowDataphorExplorer()
 		{
-			FDockingManager.SetDockVisibility(FExplorer, true);
-			FDockingManager.ActivateControl(FExplorer);
+			//FDockingManager.SetDockVisibility(FExplorer, true);
+			//FDockingManager.ActivateControl(FExplorer);
 		}
 
 		public void LaunchAlphoraWebsite()
@@ -1408,40 +1393,62 @@ namespace Alphora.Dataphor.Dataphoria
 		public void LaunchAlphoraGroups()
 		{
 			System.Diagnostics.Process.Start(@"http://news.alphora.com/");
-		}
+        }
 
-		private void FrameBarManagerItemClicked(object ASender, BarItemClickedEventArgs AArgs)
-		{
-			try
-			{
-				switch (AArgs.ClickedBarItem.ID)
-				{
-					case "ClearWarnings" : ClearWarnings(); break;
-					case "Connect" : EnsureServerConnection(); break;
-					case "Disconnect" : Disconnect(); break;
-					case "New" : NewDesigner(); break;
-					case "NewScript" : NewEditor(String.Empty, "d4"); break;
-					case "Open" : OpenFile(); break;
-					case "OpenWith" : OpenFileWith(); break;
-					case "SaveAll" : SaveAll(); break;
-					case "LaunchForm" : LaunchForm(); break;
-					case "Exit" : Close(); break;
-					case "ShowExplorer" : ShowDataphorExplorer(); break;
-					case "ShowWarnings" : ShowWarnings(); break;
-					case "DesignerLibraries" : BrowseDesignerLibraries(); break;
-					case "Documentation" : Documentation(); break;
-					case "About" : About(); break;
-					case "Website" : LaunchAlphoraWebsite(); break;
-					case "WebDocumentation" : LaunchWebDocumentation(); break;
-					case "Groups" : LaunchAlphoraGroups(); break;
-					case "DocumentTypes" : BrowseDocumentTypes(); break;
-				}
-			}
-			catch (Exception LException)
-			{
+       
+
+
+     
+        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+        {            
+            try
+            {
+                if (ASender == FClearWarningsToolStripMenuItem)
+                            ClearWarnings();
+                else if (ASender == FConnectToolStripMenuItem)
+                        EnsureServerConnection();
+                else if (ASender == FDisconnectToolStripMenuItem)
+                        Disconnect();
+                else if (ASender == FNewToolStripMenuItem)
+                        NewDesigner();
+                else if (ASender == FNewScriptToolStripMenuItem)                        
+                        NewEditor(String.Empty, "d4");
+                else if (ASender == FOpenFileToolStripMenuItem)
+                        OpenFile();
+                else if (ASender == FOpenFileWithToolStripMenuItem)
+                        OpenFileWith();
+                else if (ASender == FSaveAllToolStripMenuItem)
+                        SaveAll();
+                else if (ASender == FLaunchFormToolStripMenuItem)
+                        LaunchForm();
+                else if (ASender == FExitToolStripMenuItem)
+                        Close();
+                else if (ASender == FDataphorExplorerToolStripMenuItem)
+                        ShowDataphorExplorer();
+                else if (ASender == FWarningsErrorsToolStripMenuItem)
+                        ShowWarnings();
+                else if (ASender == FDesignerLibrariesToolStripMenuItem)
+                        BrowseDesignerLibraries();
+                else if (ASender == FDataphorDocumentationToolStripMenuItem)
+                        Documentation();
+                else if (ASender == FAboutToolStripMenuItem)
+                        About();
+                else if (ASender == FAlphoraWebSiteToolStripMenuItem)
+                        LaunchAlphoraWebsite();
+                else if (ASender == FWebDocumentationToolStripMenuItem)
+                        LaunchWebDocumentation();
+                else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
+                        LaunchAlphoraGroups();
+                else if (ASender == FDocumentTypesToolStripMenuItem)
+                        BrowseDocumentTypes(); 
+                
+            }
+            catch (Exception LException)
+            {
                 Program.HandleException(LException);
-			}
-		}
+            }
+        }
+
 
 		private void ClearWarningsClicked(object sender, System.EventArgs e)
 		{
@@ -1487,8 +1494,13 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#endregion
 
-		
-	}
+       
+        
+       
 
-	
+        
+
+
+
+    }
 }

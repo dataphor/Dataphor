@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			InitializeComponent();
 		}
 
-		public CustomFormDesigner(Dataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
+		public CustomFormDesigner(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
 		}

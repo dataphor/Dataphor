@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public static string Execute(DocumentExpression ADocumentExpression)
 		{
-			Dataphoria LDataphoria = Dataphoria.DataphoriaInstance;
+            IDataphoria LDataphoria = Program.DataphoriaInstance;
 			Frontend.Client.Windows.IWindowsFormInterface LForm = LDataphoria.FrontendSession.LoadForm(null, ".Frontend.Form('Frontend', 'DocumentExpressionEditor')", new Frontend.Client.FormInterfaceHandler(SetEditOpenState));
 			try
 			{

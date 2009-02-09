@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			InitializeComponent();
 		}
 
-		public Analyzer(Dataphoria ADataphoria, string ADesignerID)
+		public Analyzer(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
 
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		// Dataphoria
 
 		[Browsable(false)]
-		public Dataphoria Dataphoria
+		public IDataphoria Dataphoria
 		{
 			get { return (FService == null ? null : FService.Dataphoria); }
 		}
@@ -311,7 +311,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 		#region Service
 
-		public void InitializeService(Dataphoria ADataphoria)
+		public void InitializeService(IDataphoria ADataphoria)
 		{
 			FService = new DesignService(ADataphoria, this);
 			FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);

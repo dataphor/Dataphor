@@ -25,7 +25,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Alphora.Dataphor.Dataphoria</RootNamespace>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-    <StartupObject>Alphora.Dataphor.Dataphoria.Dataphoria</StartupObject>
+    <StartupObject>Alphora.Dataphor.Dataphoria.Program</StartupObject>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <SccAuxPath>
@@ -36,7 +36,7 @@
     <ManifestCertificateThumbprint>BAB73A918AEDFF9C1D1884B99CFF2A38162A40A8</ManifestCertificateThumbprint>
     <ManifestKeyFile>Dataphoria_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <OldToolsVersion>2.0</OldToolsVersion>
     <PublishUrl>\\ibas\Dataphoria\</PublishUrl>
     <Install>true</Install>
@@ -266,6 +266,9 @@
     <Compile Include="Dataphoria.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Dataphoria.Designer.cs">
+      <DependentUpon>Dataphoria.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataphoriaException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -293,6 +296,14 @@
     <Compile Include="FormDesigner\FormDesigner.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FreeDataphoria.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FreeDataphoria.Designer.cs">
+      <DependentUpon>FreeDataphoria.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IDataphoria.cs" />
+    <Compile Include="IStatusBarClient.cs" />
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -339,6 +350,7 @@
     <Compile Include="ObjectTree\UserNode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="Services\PropertyTextEditor.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -421,6 +433,10 @@
       <DependentUpon>FormDesigner.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="FreeDataphoria.resx">
+      <DependentUpon>FreeDataphoria.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Customize.bmp" />
     <EmbeddedResource Include="Images\Edit.bmp" />
     <EmbeddedResource Include="Images\EditCopy.bmp" />
@@ -483,6 +499,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>copy $(ProjectDir)TextEditor\Modes\*.xshd $(OutDir) /Y</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

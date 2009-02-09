@@ -12,7 +12,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public interface IDesignService
 	{
-		Dataphoria Dataphoria { get; }
+		IDataphoria Dataphoria { get; }
 		IDesigner Designer { get; }
 		void RegisterDesigner(DesignBuffer ABuffer);
 		void UnregisterDesigner(DesignBuffer ABuffer);
@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class DesignService : IDesignService
 	{
-		public DesignService(Dataphoria ADataphoria, IDesigner ADesigner)
+		public DesignService(IDataphoria ADataphoria, IDesigner ADesigner)
 		{
 			FDataphoria = ADataphoria;
 			FDesigner = ADesigner;
@@ -50,8 +50,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		// Dataphoria
 
-		private Dataphoria FDataphoria;
-		public Dataphoria Dataphoria
+		private IDataphoria FDataphoria;
+		public IDataphoria Dataphoria
 		{
 			get { return FDataphoria; }
 		}

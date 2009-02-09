@@ -17,15 +17,15 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public abstract class DesignBuffer
 	{
-		public DesignBuffer(Dataphoria ADataphoria)
+		public DesignBuffer(IDataphoria ADataphoria)
 		{
 			FDataphoria = ADataphoria;
 		}
 
 		// Dataphoria
 
-		private Dataphoria FDataphoria;
-		public Dataphoria Dataphoria
+		private IDataphoria FDataphoria;
+		public IDataphoria Dataphoria
 		{
 			get { return FDataphoria; }
 		}
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class FileDesignBuffer : DesignBuffer
 	{
-		public FileDesignBuffer(Dataphoria ADataphoria, string AFileName) : base(ADataphoria) 
+		public FileDesignBuffer(IDataphoria ADataphoria, string AFileName) : base(ADataphoria) 
 		{
 			FFileName = ( AFileName == null ? String.Empty : AFileName );
 		}
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class DocumentDesignBuffer : DesignBuffer
 	{
-		public DocumentDesignBuffer(Dataphoria ADataphoria, string ALibraryName, string ADocumentName) : base(ADataphoria) 
+		public DocumentDesignBuffer(IDataphoria ADataphoria, string ALibraryName, string ADocumentName) : base(ADataphoria) 
 		{
 			FLibraryName = (ALibraryName == null ? String.Empty : ALibraryName);
 			FDocumentName = (ADocumentName == null ? String.Empty : ADocumentName);
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class PropertyDesignBuffer : DesignBuffer
 	{
-		public PropertyDesignBuffer(Dataphoria ADataphoria, object AInstance, PropertyDescriptor ADescriptor) : base(ADataphoria) 
+		public PropertyDesignBuffer(IDataphoria ADataphoria, object AInstance, PropertyDescriptor ADescriptor) : base(ADataphoria) 
 		{
 			FInstance = AInstance;
 			FDescriptor = ADescriptor;

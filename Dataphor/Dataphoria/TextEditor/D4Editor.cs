@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			InitializeComponent();
 		}
 
-		public D4Editor(Dataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
+		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
 

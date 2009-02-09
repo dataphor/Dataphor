@@ -146,7 +146,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			{
 				LBuffer = new DocumentDesignBuffer(Dataphoria, LibraryName, Path.GetFileNameWithoutExtension(LFileName));
 				Dataphoria.CheckDocumentOverwrite(LBuffer.LibraryName, LBuffer.DocumentName);
-				LBuffer.DocumentType = Dataphoria.DocumentTypeFromFileName(LFileName);
+				LBuffer.DocumentType = Program.DocumentTypeFromFileName(LFileName);
 				LStream = new FileStream(LFileName, FileMode.Open, FileAccess.Read);
 				try
 				{

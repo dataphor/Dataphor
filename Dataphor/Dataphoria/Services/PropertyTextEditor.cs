@@ -34,15 +34,15 @@ namespace Alphora.Dataphor.Dataphoria.Services
 			}
 
 			// Create a buffer for this property
-			PropertyDesignBuffer LBuffer = new PropertyDesignBuffer(Dataphoria.DataphoriaInstance, AInstance, ADescriptor);
+            PropertyDesignBuffer LBuffer = new PropertyDesignBuffer(Program.DataphoriaInstance, AInstance, ADescriptor);
 
 			// Look for an existing buffer
-			IDesigner LDesigner = Dataphoria.DataphoriaInstance.GetDesigner(LBuffer);
+            IDesigner LDesigner = Program.DataphoriaInstance.GetDesigner(LBuffer);
 			if (LDesigner != null)
 				LDesigner.Select();		// activate existing designer
 			else
 				// Construct a new designer to manage the events between these objects
-				new PropertyDesignerManager(AInstance, ADescriptor, Dataphoria.DataphoriaInstance.OpenDesigner(Dataphoria.DataphoriaInstance.GetDefaultDesigner(LDocumentTypeID), LBuffer));
+                new PropertyDesignerManager(AInstance, ADescriptor, Program.DataphoriaInstance.OpenDesigner(Program.DataphoriaInstance.GetDefaultDesigner(LDocumentTypeID), LBuffer));
 		}
 	}
 

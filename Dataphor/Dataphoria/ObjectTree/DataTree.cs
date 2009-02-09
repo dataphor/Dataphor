@@ -17,10 +17,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public DataTree() {}
 
-		private Dataphoria FDataphoria;
+		private IDataphoria FDataphoria;
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public Dataphoria Dataphoria
+		public IDataphoria Dataphoria
 		{
 			get { return FDataphoria; }
 			set { FDataphoria = value; }
@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 
 	public class DataNode : BaseNode
 	{
-		public Dataphoria Dataphoria
+		public IDataphoria Dataphoria
 		{
 			get
 			{

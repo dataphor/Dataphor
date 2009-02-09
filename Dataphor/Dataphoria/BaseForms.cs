@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 			catch (Exception LException)
 			{
-				Dataphoria.HandleException(LException);
+				Program.HandleException(LException);
 				return true;
 			}
 			return LResult;
@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 			catch (Exception LException)
 			{
-				Dataphoria.HandleException(LException);
+                Program.HandleException(LException);
 				return true;
 			}
 		}

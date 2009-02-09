@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			InitializeComponent();
 		}
 
-		public FormDesigner(Dataphoria ADataphoria, string ADesignerID)
+		public FormDesigner(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
 
@@ -137,7 +137,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		// Dataphoria
 
 		[Browsable(false)]
-		public Dataphoria Dataphoria
+		public IDataphoria Dataphoria
 		{
 			get { return (FService == null ? null : FService.Dataphoria); }
 		}
@@ -591,7 +591,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		#region Service
 
-		public void InitializeService(Dataphoria ADataphoria)
+		public void InitializeService(IDataphoria ADataphoria)
 		{
 			FService = new DesignService(ADataphoria, this);
 			FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
@@ -1009,7 +1009,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		protected DocumentDesignBuffer BufferFromHost(IHost AHost)
 		{
-			DocumentExpression LExpression = Dataphoria.GetDocumentExpression(AHost.Document);
+            DocumentExpression LExpression = Program.GetDocumentExpression(AHost.Document);
 			DocumentDesignBuffer LBuffer = new DocumentDesignBuffer(Dataphoria, LExpression.DocumentArgs.LibraryName, LExpression.DocumentArgs.DocumentName);
 			return LBuffer;
 		}
