@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			(
 				String.Format
 				(
-					Strings.Get("ScriptInjected"), 
+					Strings.ScriptInjected, 
 					Dataphoria.EvaluateQuery("System.LibraryName();").AsString,
 					Dataphoria.EvaluateQuery
 					(
@@ -593,7 +593,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			ErrorList LErrors = new ErrorList();
 			try
 			{
-				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("ProcessingQuery")))
+				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.ProcessingQuery))
 				{
 					bool LAttemptExecute = true;
 					try
@@ -620,7 +620,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 													LAttemptExecute &= ScriptExecutionUtility.ConvertCompilerErrors(LPlan.Messages, LErrors);
 													if (LAttemptExecute)
 													{
-														LResult.AppendFormat(Strings.Get("PrepareSuccessful"), new object[]{LPlan.Statistics.PrepareTime.ToString(), LPlan.Statistics.CompileTime.ToString(), LPlan.Statistics.OptimizeTime.ToString(), LPlan.Statistics.BindingTime.ToString()});
+														LResult.AppendFormat(Strings.PrepareSuccessful, new object[]{LPlan.Statistics.PrepareTime.ToString(), LPlan.Statistics.CompileTime.ToString(), LPlan.Statistics.OptimizeTime.ToString(), LPlan.Statistics.BindingTime.ToString()});
 														LResult.Append("\r\n");
 													}
 												}
@@ -637,7 +637,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 													LAttemptExecute &= ScriptExecutionUtility.ConvertCompilerErrors(LPlan.Messages, LErrors);
 													if (LAttemptExecute)
 													{
-														LResult.AppendFormat(Strings.Get("PrepareSuccessful"), new object[]{LPlan.Statistics.PrepareTime.ToString(), LPlan.Statistics.CompileTime.ToString(), LPlan.Statistics.OptimizeTime.ToString(), LPlan.Statistics.BindingTime.ToString()});
+														LResult.AppendFormat(Strings.PrepareSuccessful, new object[]{LPlan.Statistics.PrepareTime.ToString(), LPlan.Statistics.CompileTime.ToString(), LPlan.Statistics.OptimizeTime.ToString(), LPlan.Statistics.BindingTime.ToString()});
 														LResult.Append("\r\n");
 													}
 												}
@@ -669,13 +669,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 						}
 
 						if (LAttemptExecute)
-							SetStatus(Strings.Get("ScriptPrepareSuccessful"));
+							SetStatus(Strings.ScriptPrepareSuccessful);
 						else
-							SetStatus(Strings.Get("ScriptPrepareFailed"));
+							SetStatus(Strings.ScriptPrepareFailed);
 					}
 					catch (Exception LException)
 					{
-						SetStatus(Strings.Get("ScriptFailed"));
+						SetStatus(Strings.ScriptFailed);
 						LErrors.Add(LException);
 					}
 				}
@@ -700,7 +700,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			ErrorList LErrors = new ErrorList();
 			try
 			{
-				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("ProcessingQuery")))
+				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.ProcessingQuery))
 				{
 					DateTime LStartTime = DateTime.Now;
 					try
@@ -720,11 +720,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			{
 				LErrors.Add(LException);
 				ProcessErrors(LErrors);
-				SetStatus(Strings.Get("ScriptAnalyzeFailed"));
+				SetStatus(Strings.ScriptAnalyzeFailed);
 				return;
 			}
 
-			SetStatus(Strings.Get("ScriptAnalyzeSuccessful"));
+			SetStatus(Strings.ScriptAnalyzeSuccessful);
 
 			Analyzer.Analyzer LAnalyzer = (Analyzer.Analyzer)Dataphoria.OpenDesigner(Dataphoria.GetDefaultDesigner("pla"), null);
 			LAnalyzer.LoadPlan(LPlan);
@@ -807,9 +807,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// Handler Error/Warnings
 			ProcessErrors(AMessages);
 			if (ScriptExecutionUtility.ContainsError(AMessages))
-				SetStatus(Strings.Get("ScriptFailed"));
+				SetStatus(Strings.ScriptFailed);
 			else
-				SetStatus(Strings.Get("ScriptSuccessful"));
+				SetStatus(Strings.ScriptSuccessful);
 
 			// Handle execution time
 			FExecutionTimeStatus.Text = AElapsedTime.ToString();
@@ -828,9 +828,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				}
 				finally
 				{
-					AppendResultPanel(Strings.Get("UserAbort"));
+					AppendResultPanel(Strings.UserAbort);
 					ExecutorFinished(new ErrorList(), TimeSpan.Zero);
-					SetStatus(Strings.Get("UserAbort"));
+					SetStatus(Strings.UserAbort);
 				}
 			}
 		}
@@ -869,7 +869,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			base.OnClosing(AArgs);
 			if (FExecutor != null)
 			{
-				if (MessageBox.Show(Strings.Get("AttemptingToCloseWhileExecuting"), Strings.Get("AttemptingToCloseWhileExecutingCaption"), MessageBoxButtons.OKCancel) == DialogResult.OK)
+				if (MessageBox.Show(Strings.AttemptingToCloseWhileExecuting, Strings.AttemptingToCloseWhileExecutingCaption, MessageBoxButtons.OKCancel) == DialogResult.OK)
 					CancelExecute();
 				else
 					AArgs.Cancel = true;
@@ -884,7 +884,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			using (SaveFileDialog LSaveDialog = new SaveFileDialog())
 			{
-				LSaveDialog.Title = Strings.Get("ExportSaveDialogTitle");
+				LSaveDialog.Title = Strings.ExportSaveDialogTitle;
 				LSaveDialog.Filter = "XML Schema (*.xsd)|*.xsd|XML File (*.xml)|*.xml|All Files (*.*)|*.*";
 				if (ATypes == ExportType.Schema)	// schema only
 				{
@@ -923,7 +923,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// Make sure our server is connected...
 			Dataphoria.EnsureServerConnection();
 
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("Exporting")))
+			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Exporting))
 			{
 				using (DAEConnection LConnection = new DAEConnection())
 				{

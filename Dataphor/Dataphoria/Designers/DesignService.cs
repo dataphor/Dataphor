@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public void CheckModified()
 		{
 			if (AnyModified)
-				switch (MessageBox.Show(Strings.Get("DocumentModifiedText", GetDescription()), Strings.Get("DocumentModifiedCaption"), MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1))
+				switch (MessageBox.Show(String.Format(Strings.DocumentModifiedText, GetDescription()), Strings.DocumentModifiedCaption, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1))
 				{
 					case DialogResult.Yes : Save(); break;
 					case DialogResult.Cancel : throw new AbortException();
@@ -179,7 +179,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public string GetDescription()
 		{
 			if (FBuffer == null)
-				return Strings.Get("UntitledDocumentDescription");
+				return Strings.UntitledDocumentDescription;
 			else
 				return FBuffer.GetDescription();
 		}

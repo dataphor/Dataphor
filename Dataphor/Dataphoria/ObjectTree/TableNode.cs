@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public TableListNode(string ALibraryName) : base (ALibraryName)
 		{
-			Text = Strings.Get("ObjectTree.TableListNodeText");
+			Text = Strings.ObjectTree_TableListNodeText;
 			ImageIndex = 13;
 			SelectedImageIndex = ImageIndex;
 		}
@@ -56,10 +56,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			ContextMenu LMenu = base.GetContextMenu();
 			LMenu.MenuItems.Add(0, new MenuItem("-"));
-			MenuItem LBrowseMenuItem = new MenuItem(Strings.Get("ObjectTree.BrowseMenuText"), new EventHandler(BrowseClicked));
+			MenuItem LBrowseMenuItem = new MenuItem(Strings.ObjectTree_BrowseMenuText, new EventHandler(BrowseClicked));
 			LBrowseMenuItem.DefaultItem = true;
 			LMenu.MenuItems.Add(0, LBrowseMenuItem);
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.Get("ObjectTree.DeriveMenuText"), new EventHandler(DeriveClicked)));
+			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_DeriveMenuText, new EventHandler(DeriveClicked)));
 			return LMenu;
 		}
 

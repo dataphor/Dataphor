@@ -54,13 +54,26 @@ namespace Alphora.Dataphor.Dataphoria
             this.FWebDocumentationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FErrorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
+            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.FExplorer = new Alphora.Dataphor.Dataphoria.ObjectTree.DataTree();
+            this.FileToolStrip = new System.Windows.Forms.ToolStrip();
+            this.FNewToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FNewScriptToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FOpenFileToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FOpenFileWithToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FLaunchFormToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FMainMenuStrip.SuspendLayout();
+            this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
+            this.toolStripContainer1.ContentPanel.SuspendLayout();
+            this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
+            this.toolStripContainer1.SuspendLayout();
+            this.FileToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // FStatusStrip
             // 
-            this.FStatusStrip.Location = new System.Drawing.Point(0, 485);
+            this.FStatusStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.FStatusStrip.Location = new System.Drawing.Point(0, 0);
             this.FStatusStrip.Name = "FStatusStrip";
             this.FStatusStrip.Size = new System.Drawing.Size(664, 22);
             this.FStatusStrip.TabIndex = 2;
@@ -68,6 +81,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FMainMenuStrip
             // 
+            this.FMainMenuStrip.Dock = System.Windows.Forms.DockStyle.None;
             this.FMainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FFileToolStripMenuItem,
             this.FViewToolStripMenuItem,
@@ -97,6 +111,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FConnectToolStripMenuItem
             // 
+            this.FConnectToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Connect;
             this.FConnectToolStripMenuItem.Name = "FConnectToolStripMenuItem";
             this.FConnectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FConnectToolStripMenuItem.Text = "Connect";
@@ -264,10 +279,34 @@ namespace Alphora.Dataphor.Dataphoria
             // FErrorListView
             // 
             this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.FErrorListView.Location = new System.Drawing.Point(0, 321);
+            this.FErrorListView.Location = new System.Drawing.Point(121, 272);
             this.FErrorListView.Name = "FErrorListView";
-            this.FErrorListView.Size = new System.Drawing.Size(664, 164);
+            this.FErrorListView.Size = new System.Drawing.Size(543, 164);
             this.FErrorListView.TabIndex = 4;
+            // 
+            // toolStripContainer1
+            // 
+            // 
+            // toolStripContainer1.BottomToolStripPanel
+            // 
+            this.toolStripContainer1.BottomToolStripPanel.Controls.Add(this.FStatusStrip);
+            // 
+            // toolStripContainer1.ContentPanel
+            // 
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.FErrorListView);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.FExplorer);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(664, 436);
+            this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
+            this.toolStripContainer1.Name = "toolStripContainer1";
+            this.toolStripContainer1.Size = new System.Drawing.Size(664, 507);
+            this.toolStripContainer1.TabIndex = 6;
+            this.toolStripContainer1.Text = "toolStripContainer1";
+            // 
+            // toolStripContainer1.TopToolStripPanel
+            // 
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FMainMenuStrip);
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FileToolStrip);
             // 
             // FExplorer
             // 
@@ -276,29 +315,98 @@ namespace Alphora.Dataphor.Dataphoria
             this.FExplorer.CausesValidation = false;
             this.FExplorer.Dock = System.Windows.Forms.DockStyle.Left;
             this.FExplorer.HideSelection = false;
-            this.FExplorer.Location = new System.Drawing.Point(0, 24);
+            this.FExplorer.Location = new System.Drawing.Point(0, 0);
             this.FExplorer.Name = "FExplorer";
             this.FExplorer.ShowRootLines = false;
-            this.FExplorer.Size = new System.Drawing.Size(121, 297);
+            this.FExplorer.Size = new System.Drawing.Size(121, 436);
             this.FExplorer.TabIndex = 5;
+            // 
+            // FileToolStrip
+            // 
+            this.FileToolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.FileToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FNewToolStripButton,
+            this.FNewScriptToolStripButton,
+            this.FOpenFileToolStripButton,
+            this.FOpenFileWithToolStripButton,
+            this.FLaunchFormToolStripButton});
+            this.FileToolStrip.Location = new System.Drawing.Point(3, 24);
+            this.FileToolStrip.Name = "FileToolStrip";
+            this.FileToolStrip.Size = new System.Drawing.Size(127, 25);
+            this.FileToolStrip.TabIndex = 4;
+            // 
+            // FNewToolStripButton
+            // 
+            this.FNewToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FNewToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.New;
+            this.FNewToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FNewToolStripButton.Name = "FNewToolStripButton";
+            this.FNewToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FNewToolStripButton.Text = "toolStripButton1";
+            this.FNewToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+            // 
+            // FNewScriptToolStripButton
+            // 
+            this.FNewScriptToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FNewScriptToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.NewScript;
+            this.FNewScriptToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FNewScriptToolStripButton.Name = "FNewScriptToolStripButton";
+            this.FNewScriptToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FNewScriptToolStripButton.Text = "toolStripButton2";
+            this.FNewScriptToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+            // 
+            // FOpenFileToolStripButton
+            // 
+            this.FOpenFileToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FOpenFileToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Open;
+            this.FOpenFileToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FOpenFileToolStripButton.Name = "FOpenFileToolStripButton";
+            this.FOpenFileToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FOpenFileToolStripButton.Text = "toolStripButton3";
+            this.FOpenFileToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+            // 
+            // FOpenFileWithToolStripButton
+            // 
+            this.FOpenFileWithToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FOpenFileWithToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.OpenWith;
+            this.FOpenFileWithToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FOpenFileWithToolStripButton.Name = "FOpenFileWithToolStripButton";
+            this.FOpenFileWithToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FOpenFileWithToolStripButton.Text = "toolStripButton4";
+            this.FOpenFileWithToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+            // 
+            // FLaunchFormToolStripButton
+            // 
+            this.FLaunchFormToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FLaunchFormToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.LaunchForm;
+            this.FLaunchFormToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FLaunchFormToolStripButton.Name = "FLaunchFormToolStripButton";
+            this.FLaunchFormToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FLaunchFormToolStripButton.Text = "toolStripButton5";
+            this.FLaunchFormToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FreeDataphoria
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(664, 507);
-            this.Controls.Add(this.FExplorer);
-            this.Controls.Add(this.FErrorListView);
-            this.Controls.Add(this.FStatusStrip);
-            this.Controls.Add(this.FMainMenuStrip);
+            this.Controls.Add(this.toolStripContainer1);
             this.MainMenuStrip = this.FMainMenuStrip;
             this.Name = "FreeDataphoria";
             this.Text = "FreeDataphoria";
             this.Shown += new System.EventHandler(this.Dataphoria_Shown);
             this.FMainMenuStrip.ResumeLayout(false);
             this.FMainMenuStrip.PerformLayout();
+            this.toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer1.BottomToolStripPanel.PerformLayout();
+            this.toolStripContainer1.ContentPanel.ResumeLayout(false);
+            this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer1.TopToolStripPanel.PerformLayout();
+            this.toolStripContainer1.ResumeLayout(false);
+            this.toolStripContainer1.PerformLayout();
+            this.FileToolStrip.ResumeLayout(false);
+            this.FileToolStrip.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -331,5 +439,12 @@ namespace Alphora.Dataphor.Dataphoria
         private System.Windows.Forms.ToolStripMenuItem FAlphoraDiscussionGroupsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FWebDocumentationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FAboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripContainer toolStripContainer1;
+        private System.Windows.Forms.ToolStrip FileToolStrip;
+        private System.Windows.Forms.ToolStripButton FNewToolStripButton;
+        private System.Windows.Forms.ToolStripButton FNewScriptToolStripButton;
+        private System.Windows.Forms.ToolStripButton FOpenFileToolStripButton;
+        private System.Windows.Forms.ToolStripButton FOpenFileWithToolStripButton;
+        private System.Windows.Forms.ToolStripButton FLaunchFormToolStripButton;
     }
 }

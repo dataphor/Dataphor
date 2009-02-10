@@ -31,9 +31,9 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = base.GetContextMenu();
-			FAttachMenuItem = new MenuItem(Strings.Get("ObjectTree.AttachMenuText"), new EventHandler(AttachClicked));
+			FAttachMenuItem = new MenuItem(Strings.ObjectTree_AttachMenuText, new EventHandler(AttachClicked));
 			LMenu.MenuItems.Add(1, FAttachMenuItem);
-			FAttachLibrariesMenuItem = new MenuItem(Strings.Get("ObjectTree.AttachLibrariesMenuText"), new EventHandler(AttachLibrariesClicked));
+			FAttachLibrariesMenuItem = new MenuItem(Strings.ObjectTree_AttachLibrariesMenuText, new EventHandler(AttachLibrariesClicked));
 			LMenu.MenuItems.Add(2, FAttachLibrariesMenuItem);
 			return LMenu;
 		}
@@ -318,24 +318,24 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			
 			LMenu.MenuItems.Add(new MenuItem("-"));	
 
-			FRegisterMenuItem = new MenuItem(Strings.Get("ObjectTree.RegisterMenuText"), new EventHandler(RegisterToggleClicked));
+			FRegisterMenuItem = new MenuItem(Strings.ObjectTree_RegisterMenuText, new EventHandler(RegisterToggleClicked));
 			LMenu.MenuItems.Add(FRegisterMenuItem);
 			
-			FLoadMenuItem = new MenuItem(Strings.Get("ObjectTree.LoadMenuText"), new EventHandler(LoadToggleClicked));
+			FLoadMenuItem = new MenuItem(Strings.ObjectTree_LoadMenuText, new EventHandler(LoadToggleClicked));
 			LMenu.MenuItems.Add(FLoadMenuItem);
 			
-			FDetachMenuItem = new MenuItem(Strings.Get("ObjectTree.DetachMenuText"), new EventHandler(DetachClicked));
+			FDetachMenuItem = new MenuItem(Strings.ObjectTree_DetachMenuText, new EventHandler(DetachClicked));
 			LMenu.MenuItems.Add(FDetachMenuItem);
 
-			FSetAsCurrentMenuItem = new MenuItem(Strings.Get("ObjectTree.SetAsCurrentMenuText"), new EventHandler(SetAsCurrentClicked));
+			FSetAsCurrentMenuItem = new MenuItem(Strings.ObjectTree_SetAsCurrentMenuText, new EventHandler(SetAsCurrentClicked));
 			FSetAsCurrentMenuItem.DefaultItem = true;
 			LMenu.MenuItems.Add(FSetAsCurrentMenuItem);
 
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.OpenRegisterScriptMenuText"), new EventHandler(OpenRegisterScriptClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_OpenRegisterScriptMenuText, new EventHandler(OpenRegisterScriptClicked)));
 			LMenu.MenuItems.Add(new MenuItem("-"));	
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.UpgradesMenuText"), new EventHandler(UpgradesClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_UpgradesMenuText, new EventHandler(UpgradesClicked)));
 			
-			FUpgradeLibraryMenuItem = new MenuItem(Strings.Get("ObjectTree.UpgradeLibraryMenuText"), new EventHandler(UpgradeLibraryClicked));
+			FUpgradeLibraryMenuItem = new MenuItem(Strings.ObjectTree_UpgradeLibraryMenuText, new EventHandler(UpgradeLibraryClicked));
 			LMenu.MenuItems.Add(FUpgradeLibraryMenuItem);
 
 			//FScriptChangesMenuItem = new MenuItem(Strings.Get("ObjectTree.ScriptChangesText"), new EventHandler(ScriptChangesClicked));
@@ -347,8 +347,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override void UpdateContextMenu(ContextMenu AMenu)
 		{
 			FSetAsCurrentMenuItem.Enabled = Registered && !Current;
-			FRegisterMenuItem.Text = Registered ? Strings.Get("ObjectTree.UnregisterMenuText") : Strings.Get("ObjectTree.RegisterMenuText");
-			FLoadMenuItem.Text = Registered ? Strings.Get("ObjectTree.UnloadMenuText") : Strings.Get("ObjectTree.LoadMenuText");
+			FRegisterMenuItem.Text = Registered ? Strings.ObjectTree_UnregisterMenuText : Strings.ObjectTree_RegisterMenuText;
+			FLoadMenuItem.Text = Registered ? Strings.ObjectTree_UnloadMenuText : Strings.ObjectTree_LoadMenuText;
 			FDetachMenuItem.Enabled = !Registered;
 			FRegisterMenuItem.Enabled = !((LibraryName == "System") || (LibraryName == "General") || (LibraryName == "Frontend") || (LibraryName == "SimpleDevice"));
 			FLoadMenuItem.Enabled = FRegisterMenuItem.Enabled && (Registered || CanLoad);
@@ -548,7 +548,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			string LCatalogDirectory = FolderUtility.GetDirectory(String.Empty);
 
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("ComparingSchema")))
+			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.ComparingSchema))
 			{
 				Dataphoria.EvaluateAndEdit(String.Format(".System.ScriptLibraryChanges('{0}', '{1}')", LCatalogDirectory.Replace("'", "''"), LibraryName), "d4");
 			}
@@ -584,7 +584,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			Dataphoria.ExecuteScript(String.Format(".System.UpgradeLibrary('{0}');", LibraryName));
 			UpgradeRequired = false;
-			MessageBox.Show(Strings.Get("UpgradeLibrarySuccess"));
+			MessageBox.Show(Strings.UpgradeLibrarySuccess);
 		}
 
 		private RootSchemaNode FRootSchemaNode;
@@ -622,7 +622,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			{
 				Frontend.Client.ITextBox LTextBox = ((Frontend.Client.ITextBox)AForm.FindNode("MainColumnMain.Name"));
 				LTextBox.ReadOnly = true;
-				LTextBox.Title = LTextBox.Title + Strings.Get("LibraryNode.CannotEditWhileRegistered");
+				LTextBox.Title = LTextBox.Title + Strings.LibraryNode_CannotEditWhileRegistered;
 			}
 		}
 
@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public RootSchemaNode(string ALibraryName)
 		{
-			Text = Strings.Get("ObjectTree.SchemaNodeText");
+			Text = Strings.ObjectTree_SchemaNodeText;
 			FLibraryName = ALibraryName;
 			ImageIndex = 15;
 			SelectedImageIndex = ImageIndex;
@@ -674,8 +674,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.EmitCreateScriptMenuText"), new EventHandler(EmitCreateLibraryScriptClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.EmitDropScriptMenuText"), new EventHandler(EmitDropLibraryScriptClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateLibraryScriptClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropLibraryScriptClicked)));
 			return LMenu;
 		}
 
@@ -706,4 +706,5 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		}
 	}
 }
+
 

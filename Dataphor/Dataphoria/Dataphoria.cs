@@ -203,7 +203,7 @@ namespace Alphora.Dataphor.Dataphoria
 					LConfiguration.Aliases.Add(LAlias);
 				}
 				Alphora.Dataphor.Frontend.Client.Windows.ServerConnectForm.Execute(LConfiguration);
-				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("Connecting")))
+				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Connecting))
 				{
 					FDataSession = new DataSession();
 					try
@@ -231,7 +231,7 @@ namespace Alphora.Dataphor.Dataphoria
 									FDockingManager.SetDockVisibility(FExplorer, true);
 									FConnectMenuItem.Visible = false;
 									FDisconnectMenuItem.Visible = true;
-									Text = Strings.Get("DataphoriaTitle") + " - " + FDataSession.Alias.ToString();
+									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias.ToString();
 								}
 								catch
 								{
@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void InternalDisconnect()
 		{
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Get("Disconnecting")))
+			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Disconnecting))
 			{
 				if (FTabbedMDIManager != null)
 					DisposeChildren();		// Don't CloseChildren(), we already did that in Disconnect()
@@ -286,7 +286,7 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					try
 					{
-						Text = Strings.Get("DataphoriaTitle");
+						Text = Strings.DataphoriaTitle;
 						FConnectMenuItem.Visible = true;
 						FDisconnectMenuItem.Visible = false;
 						FDockingManager.SetDockVisibility(FExplorer, false);
@@ -394,14 +394,14 @@ namespace Alphora.Dataphor.Dataphoria
 			if (LExpression.Type != DocumentType.None)
 				LForm.AddCustomAction
 				(
-					Strings.Get("CustomizeMenuText"), 
+					Strings.CustomizeMenuText, 
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Customize.bmp"), 
 					new FormInterfaceHandler(CustomizeForm)
 				);
 
 			LForm.AddCustomAction
 			(
-				Strings.Get("EditCopyMenuText"), 
+				Strings.EditCopyMenuText, 
 				LoadBitmap("Alphora.Dataphor.Dataphoria.Images.EditCopy.bmp"), 
 				new FormInterfaceHandler(EditCopyForm)
 			);
@@ -410,7 +410,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
                 LForm.AddCustomAction
 				(
-					Strings.Get("EditMenuText"),  
+					Strings.EditMenuText,  
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"), 
 					new FormInterfaceHandler(EditForm)
 				);
@@ -565,7 +565,7 @@ namespace Alphora.Dataphor.Dataphoria
 		public IDesigner NewDesigner()
 		{
 			DesignerInfo LInfo = new DesignerInfo();
-			Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", Strings.Get("SelectDesigner")));
+			Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", Strings.SelectDesigner));
 			try
 			{
 				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
@@ -636,7 +636,7 @@ namespace Alphora.Dataphor.Dataphoria
 				);
 			try
 			{
-				LForm.Text = Strings.Get("SelectDesigner");
+				LForm.Text = Strings.SelectDesigner;
 				if (LForm.MainSource.DataView.IsEmpty())
 					throw new DataphoriaException(DataphoriaException.Codes.NoDesignersForDocumentType, ADocumentTypeID);
 				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
@@ -728,7 +728,7 @@ namespace Alphora.Dataphor.Dataphoria
 				Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('NewDocument', 'Add')", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
 				try
 				{
-					LForm.Text = Strings.Get("SaveAsDocumentFormTitle");
+					LForm.Text = Strings.SaveAsDocumentFormTitle;
 					LForm.MainSource.DataView.Edit();
 					if (ADefaultLibraryName != String.Empty)
 						LForm.MainSource.DataView["Main.Library_Name"].AsString = ADefaultLibraryName;
@@ -783,7 +783,7 @@ namespace Alphora.Dataphor.Dataphoria
 				LDialog.Filter = GetSaveFilter(ADesigner);
 				LDialog.FilterIndex = 0;
 				LDialog.RestoreDirectory = false;
-				LDialog.Title = Strings.Get("SaveDialogTitle");
+				LDialog.Title = Strings.SaveDialogTitle;
 				LDialog.AddExtension = true;
 				if (ADefaultFileName != String.Empty)
 					LDialog.DefaultExt = Path.GetExtension(ADefaultFileName);
@@ -852,7 +852,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private string GetOpenFilter()
 		{
 			StringBuilder LFilter = new StringBuilder();
-			LFilter.Append(Strings.Get("AllFilesFilter"));
+			LFilter.Append(Strings.AllFilesFilter);
 			DAE.IServerCursor LCursor = OpenCursor("DocumentTypes over { ID, Description }");
 			try
 			{
@@ -913,7 +913,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 			if (LFilter.Length > 0)
 				LFilter.Append('|');
-			LFilter.Append(Strings.Get("AllFilesFilter"));
+			LFilter.Append(Strings.AllFilesFilter);
 			return LFilter.ToString();
 		}
 
@@ -925,7 +925,7 @@ namespace Alphora.Dataphor.Dataphoria
 				LDialog.Filter = GetOpenFilter();
 				LDialog.FilterIndex = 0;
 				LDialog.RestoreDirectory = false;
-				LDialog.Title = Strings.Get("FileOpenTitle");
+				LDialog.Title = Strings.FileOpenTitle;
 				LDialog.Multiselect = AAllowMultiple;
 				LDialog.CheckFileExists = true;
 
@@ -1179,11 +1179,11 @@ namespace Alphora.Dataphor.Dataphoria
 					(
 						String.Format
 						(
-							Strings.Get("SaveAsDialogReplaceText"),
+							Strings.SaveAsDialogReplaceText,
 							ALibraryName,
 							ADocumentName
 						), 
-						Strings.Get("SaveAsDocumentFormTitle"), 
+						Strings.SaveAsDocumentFormTitle, 
 						MessageBoxButtons.YesNo, 
 						MessageBoxIcon.Warning, 
 						MessageBoxDefaultButton.Button1

@@ -124,11 +124,11 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			ContextMenu LMenu = base.GetContextMenu();
 			LMenu.MenuItems.Add(0, new MenuItem("-"));
 
-			MenuItem LStartMenuItem = new MenuItem(Strings.Get("ObjectTree.StartMenuText"), new EventHandler(StartClicked));
+			MenuItem LStartMenuItem = new MenuItem(Strings.ObjectTree_StartMenuText, new EventHandler(StartClicked));
 			LStartMenuItem.DefaultItem = true;
 			LMenu.MenuItems.Add(0, LStartMenuItem);
 
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.Get("ObjectTree.EmitCreateScriptMenuText"), new EventHandler(EmitCreateScriptClicked)));
+			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
 
 			return LMenu;
 		}

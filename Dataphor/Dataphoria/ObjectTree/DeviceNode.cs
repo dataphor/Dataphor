@@ -51,20 +51,20 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = base.GetContextMenu();
-			LNone = new MenuItem(Strings.Get("ObjectTree.ReconciliationModeNoneMenuText"), new EventHandler(NoneClicked));
+			LNone = new MenuItem(Strings.ObjectTree_ReconciliationModeNoneMenuText, new EventHandler(NoneClicked));
 			LNone.Checked = FReconciliationMode == DAE.Language.D4.ReconcileMode.None;
-			LStartup = new MenuItem(Strings.Get("ObjectTree.ReconciliationModeStartupMenuText"), new EventHandler(StartupClicked));
+			LStartup = new MenuItem(Strings.ObjectTree_ReconciliationModeStartupMenuText, new EventHandler(StartupClicked));
 			LStartup.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Startup) != 0;
-			LCommand = new MenuItem(Strings.Get("ObjectTree.ReconciliationModeCommandMenuText"), new EventHandler(CommandClicked));
+			LCommand = new MenuItem(Strings.ObjectTree_ReconciliationModeCommandMenuText, new EventHandler(CommandClicked));
 			LCommand.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Command) != 0;
-			LAutomatic = new MenuItem(Strings.Get("ObjectTree.ReconciliationModeAutomaticMenuText"), new EventHandler(AutomaticClicked));
+			LAutomatic = new MenuItem(Strings.ObjectTree_ReconciliationModeAutomaticMenuText, new EventHandler(AutomaticClicked));
 			LAutomatic.Checked = (FReconciliationMode & DAE.Language.D4.ReconcileMode.Automatic) != 0;
 			LMenu.MenuItems.Add
 			(
 				0,
 				new MenuItem
 				(
-					Strings.Get("ObjectTree.ReconciliationModeMenuText"), 
+					Strings.ObjectTree_ReconciliationModeMenuText, 
 					new MenuItem[]
 					{
 						LNone,

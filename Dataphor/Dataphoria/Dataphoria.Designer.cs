@@ -566,19 +566,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// 
 			this.FMenuImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FMenuImageList.ImageStream")));
 			this.FMenuImageList.TransparentColor = System.Drawing.Color.Transparent;
-			this.FMenuImageList.Images.SetKeyName(0, "");
-			this.FMenuImageList.Images.SetKeyName(1, "");
-			this.FMenuImageList.Images.SetKeyName(2, "");
-			this.FMenuImageList.Images.SetKeyName(3, "");
-			this.FMenuImageList.Images.SetKeyName(4, "");
-			this.FMenuImageList.Images.SetKeyName(5, "");
-			this.FMenuImageList.Images.SetKeyName(6, "");
-			this.FMenuImageList.Images.SetKeyName(7, "");
-			this.FMenuImageList.Images.SetKeyName(8, "");
-			this.FMenuImageList.Images.SetKeyName(9, "");
-			this.FMenuImageList.Images.SetKeyName(10, "");
-			this.FMenuImageList.Images.SetKeyName(11, "");
-			this.FMenuImageList.Images.SetKeyName(12, "");
+		
 			// 
 			// FClearWarningsContextMenuItem
 			// 

@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.RefreshMenuText"), new EventHandler(RefreshClicked), Shortcut.F5));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_RefreshMenuText, new EventHandler(RefreshClicked), Shortcut.F5));
 			return LMenu;
 		}
 
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			ContextMenu LMenu = base.GetContextMenu();
 			FAddSeparator = new MenuItem("-");
 			LMenu.MenuItems.Add(0, FAddSeparator);
-			FAddMenuItem = new MenuItem(Strings.Get("ObjectTree.AddMenuText"), new EventHandler(AddClicked), Shortcut.Ins);
+			FAddMenuItem = new MenuItem(Strings.ObjectTree_AddMenuText, new EventHandler(AddClicked), Shortcut.Ins);
 			LMenu.MenuItems.Add(0, FAddMenuItem);
 			return LMenu;
 		}
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.ViewMenuText"), new EventHandler(ViewClicked), Shortcut.CtrlF2));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewMenuText, new EventHandler(ViewClicked), Shortcut.CtrlF2));
 			return LMenu;
 		}
 
@@ -226,8 +226,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.Get("ObjectTree.EditMenuText"), new EventHandler(EditClicked), Shortcut.F2));
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.Get("ObjectTree.DeleteMenuText"), new EventHandler(DeleteClicked), Shortcut.Del));
+			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_EditMenuText, new EventHandler(EditClicked), Shortcut.F2));
+			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_DeleteMenuText, new EventHandler(DeleteClicked), Shortcut.Del));
 			return LMenu;
 		}
 
@@ -327,10 +327,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = base.GetContextMenu();
-			MenuItem LMenuItem = new MenuItem(Strings.Get("ObjectTree.ShowGeneratedObjects"), new EventHandler(ShowGeneratedObjectsClicked));
+			MenuItem LMenuItem = new MenuItem(Strings.ObjectTree_ShowGeneratedObjects, new EventHandler(ShowGeneratedObjectsClicked));
 			LMenuItem.Checked = false;
 			LMenu.MenuItems.Add(0, LMenuItem);
-			LMenuItem = new MenuItem(Strings.Get("ObjectTree.ShowSystemObjects"), new EventHandler(ShowSystemObjectsClicked));
+			LMenuItem = new MenuItem(Strings.ObjectTree_ShowSystemObjects, new EventHandler(ShowSystemObjectsClicked));
 			LMenuItem.Checked = true;
 			LMenu.MenuItems.Add(1, LMenuItem);
 			LMenu.MenuItems.Add(2, new MenuItem("-"));
@@ -396,12 +396,12 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = base.GetContextMenu();
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.DropMenuText"), new EventHandler(DropClicked), Shortcut.Del));
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.ViewDependencies"), new EventHandler(ViewDependenciesClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.ViewDependents"), new EventHandler(ViewDependentsClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_DropMenuText, new EventHandler(DropClicked), Shortcut.Del));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependencies, new EventHandler(ViewDependenciesClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_ViewDependents, new EventHandler(ViewDependentsClicked)));
 			LMenu.MenuItems.Add(new MenuItem("-"));
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.EmitCreateScriptMenuText"), new EventHandler(EmitCreateScriptClicked)));
-			LMenu.MenuItems.Add(new MenuItem(Strings.Get("ObjectTree.EmitDropScriptMenuText"), new EventHandler(EmitDropScriptClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitCreateScriptMenuText, new EventHandler(EmitCreateScriptClicked)));
+			LMenu.MenuItems.Add(new MenuItem(Strings.ObjectTree_EmitDropScriptMenuText, new EventHandler(EmitDropScriptClicked)));
 			return LMenu;
 		}
 
@@ -545,7 +545,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 							)
 						",
 						ObjectName,
-						Strings.Get("DependentObjects")
+						Strings.DependentObjects
 					)
 				);
 			try
@@ -587,7 +587,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 							)
 						",
 						ObjectName,
-						Strings.Get("RequiredObjects")
+						Strings.RequiredObjects
 					)
 				);
 			try

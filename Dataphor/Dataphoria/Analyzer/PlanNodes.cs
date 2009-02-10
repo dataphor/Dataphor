@@ -183,11 +183,11 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			FProperties.ForeColor = ForeColor;
 			TableColumn LColumn = new TableColumn(FProperties);
 			LColumn.Name = "Attribute";
-			LColumn.Title = Strings.Get("Analyzer.AttributeTable.AttributeTitle");
+			LColumn.Title = Strings.Analyzer_AttributeTable_AttributeTitle;
 			FProperties.Columns.Add(LColumn);
 			LColumn = new TableColumn(FProperties);
 			LColumn.Name = "Value";
-			LColumn.Title = Strings.Get("Analyzer.AttributeTable.ValueTitle");
+			LColumn.Title = Strings.Analyzer_AttributeTable_ValueTitle;
 			FProperties.Columns.Add(LColumn);
 			FProperties.OnGetValue += new GetTableValueHandler(PropertiesGetValue);
 			FProperties.OnGetDesignerRequired += new GetTableDesignerRequiredHandler(PropertiesGetDesignerRequired);
@@ -333,7 +333,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 					{
 						LColumn = new TableColumn(LGroupTable);
 						LColumn.Name = "InternalDetails";
-						LColumn.Title = Strings.Get("Analyzer.DetailsColumnTitle");
+						LColumn.Title = Strings.Analyzer_DetailsColumnTitle;
 						LGroupTable.Columns.Add(LColumn);
 					}
 				}
@@ -428,7 +428,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		{
 			SuspendLayout();
 			FElement = AElement;
-			Text = Strings.Get("Analyzer.DetailsColumnTitle");
+			Text = Strings.Analyzer_DetailsColumnTitle;
 			MaxDepth = 3;
 			NormalDepth = 1;
 			ForeColor = Color.White;
@@ -458,10 +458,10 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			{
 				PlanTree LSurface = new PlanTree();
 				LSurface.Set(FElement);
-				DesignerControl.GetDesigner(this).Push(LSurface, Strings.Get("Analyzer.PlanNodeTitle", FElement.LocalName));
+				DesignerControl.GetDesigner(this).Push(LSurface, String.Format(Strings.Analyzer_PlanNodeTitle, FElement.LocalName));
 			}
 			else
-				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(FElement, new DetailedPlanNodeBox(FElement)), Strings.Get("Analyzer.DetailNodeTitle", FElement.LocalName));
+				DesignerControl.GetDesigner(this).Push(new SingleElementSurface(FElement, new DetailedPlanNodeBox(FElement)), String.Format(Strings.Analyzer_DetailNodeTitle, FElement.LocalName));
 		}
 
 		public override bool CanZoomIn()
@@ -488,7 +488,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			CellDetailBox LBox = new CellDetailBox(Text);
 			SingleElementSurface LSurface = new SingleElementSurface(null, LBox);
 			DesignerControl LControl = DesignerControl.GetDesigner(this);
-			LControl.Push(LSurface, Strings.Get("Analyzer.TextDetailTitle"));
+			LControl.Push(LSurface, Strings.Analyzer_TextDetailTitle);
 		}
 
 		public override bool CanZoomIn()

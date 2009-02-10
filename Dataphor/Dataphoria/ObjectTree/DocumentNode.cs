@@ -251,11 +251,11 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			ContextMenu LMenu = base.GetContextMenu();
 			
-			MenuItem LOpenMenuItem = new MenuItem(Strings.Get("ObjectTree.OpenMenuText"), new EventHandler(OpenClicked));
+			MenuItem LOpenMenuItem = new MenuItem(Strings.ObjectTree_OpenMenuText, new EventHandler(OpenClicked));
 			LOpenMenuItem.DefaultItem = true;
 			LMenu.MenuItems.Add(0, LOpenMenuItem);
 
-			LMenu.MenuItems.Add(1, new MenuItem(Strings.Get("ObjectTree.OpenWithMenuText"), new EventHandler(OpenWithClicked)));
+			LMenu.MenuItems.Add(1, new MenuItem(Strings.ObjectTree_OpenWithMenuText, new EventHandler(OpenWithClicked)));
 			LMenu.MenuItems.Add(2, new MenuItem("-"));
 
 			return LMenu;
@@ -336,8 +336,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 						(
 							MessageBox.Show
 							(
-								Strings.Get("OtherDesignerOpen"), 
-								Strings.Get("OtherDesignerOpenTitle"), 
+								Strings.OtherDesignerOpen, 
+								Strings.OtherDesignerOpenTitle, 
 								MessageBoxButtons.YesNo, 
 								MessageBoxIcon.Question, 
 								MessageBoxDefaultButton.Button1
@@ -398,7 +398,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			ContextMenu LMenu = base.GetContextMenu();
 			
-			LMenu.MenuItems.Add(2, new MenuItem(Strings.Get("ObjectTree.ExecuteMenuText"), new EventHandler(ExecuteClicked), Shortcut.F9));
+			LMenu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_ExecuteMenuText, new EventHandler(ExecuteClicked), Shortcut.F9));
 
 			return LMenu;
 		}
@@ -436,8 +436,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		{
 			ContextMenu LMenu = base.GetContextMenu();
 			
-			LMenu.MenuItems.Add(2, new MenuItem(Strings.Get("ObjectTree.CustomizeMenuText"), new EventHandler(CustomizeClicked)));
-			LMenu.MenuItems.Add(3, new MenuItem(Strings.Get("ObjectTree.ShowMenuText"), new EventHandler(StartClicked), Shortcut.F9));
+			LMenu.MenuItems.Add(2, new MenuItem(Strings.ObjectTree_CustomizeMenuText, new EventHandler(CustomizeClicked)));
+			LMenu.MenuItems.Add(3, new MenuItem(Strings.ObjectTree_ShowMenuText, new EventHandler(StartClicked), Shortcut.F9));
 
 			return LMenu;
 		}
@@ -551,10 +551,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			FSource = ASource;
 			FTarget = ATarget;
 
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Copy"), new EventHandler(CopyClick)));
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Move"), new EventHandler(MoveClick)));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
 			MenuItems.Add(new MenuItem("-"));
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Cancel")));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
 		}
 
 		private DocumentData FSource;
@@ -579,10 +579,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 			FSource = ASource;
 			FTarget = ATarget;
 
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Copy"), new EventHandler(CopyClick)));
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Move"), new EventHandler(MoveClick)));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
 			MenuItems.Add(new MenuItem("-"));
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Cancel")));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
 		}
 
 		private Array FSource;

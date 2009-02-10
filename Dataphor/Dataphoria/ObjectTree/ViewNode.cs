@@ -15,7 +15,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		public ViewListNode(string ALibraryName)
 			: base(ALibraryName)
 		{
-			Text = Strings.Get("ObjectTree.ViewListNodeText");
+			Text = Strings.ObjectTree_ViewListNodeText;
 			ImageIndex = 29;
 			SelectedImageIndex = ImageIndex;
 		}

@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Alphora.Dataphor.Dataphoria
 {
 	[Serializable]
-	public class DataphoriaException : DataphorException
+	public partial class DataphoriaException : DataphorException
 	{
 		public enum Codes : int
 		{

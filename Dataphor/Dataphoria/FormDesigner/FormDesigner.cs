@@ -723,7 +723,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			if (LCategory != null) 
 				return LCategory.Category;
 			else
-				return Strings.Get("UnspecifiedCategory");
+				return Strings.UnspecifiedCategory;
 		}
 
 		private Hashtable FImageIndex = new Hashtable();
@@ -1099,7 +1099,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 				String.Format
 				(
 					"{0} - {1}{2}",
-					(FIsDesignHostOwner ? Strings.Get("Designer") : Strings.Get("LiveDesigner") ),
+					(FIsDesignHostOwner ? Strings.Designer : Strings.LiveDesigner ),
 					FService.GetDescription(),
 					(FService.IsModified ? "*" : String.Empty)
 				);

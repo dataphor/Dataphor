@@ -18,8 +18,6 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.BOP;
 
-using Syncfusion.Windows.Forms.Tools;
-
 namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
 	// Don't put any definitions above the Analyzer class
@@ -27,22 +25,11 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 	public class Analyzer : DataphoriaForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner
 	{
 		private System.ComponentModel.IContainer components;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager FFrameBarManager;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSaveAsFile;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSaveAsDocumentMenuItem;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FCloseMenuItem;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FFileMenu;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSaveMenuItem;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.Bar FMainMenu;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.Bar FFileBar;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FViewMenu;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu FNodesPopupMenu;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FZoomIn;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FZoomOut;
 		private AnalyzerControl FAnalyzerControl;
-		private System.Windows.Forms.ImageList ToolBarImageList;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FExpandOnDemand;
-		private Syncfusion.Windows.Forms.Tools.XPMenus.Bar FView;
+		private MenuStrip MenuStip;
+		private ToolStrip ToolStrip;
+		private ToolStripButton toolStripButton1;
+		private ToolStripButton FExpandOnDemand;
 
 		public Analyzer()	// dummy constructor for SyncFusion's MDI menu merging
 		{
@@ -98,199 +85,249 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(Analyzer));
-			this.FFrameBarManager = new Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager(this.components, this);
-			this.FMainMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "MainMenu");
-			this.FFileMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
-			this.FSaveMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FSaveAsFile = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FSaveAsDocumentMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FCloseMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FViewMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
-			this.FZoomIn = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FZoomOut = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FFileBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "FileBar");
-			this.FView = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "ViewBar");
-			this.ToolBarImageList = new System.Windows.Forms.ImageList(this.components);
-			this.FNodesPopupMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu(this.components);
+			System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+			System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem saveAsFileToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem saveAsDocumentToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem zoomInToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem zoomOutToolStripMenuItem;
+			System.Windows.Forms.ToolStripMenuItem expandOnDemandToolStripMenuItem;
+			System.Windows.Forms.ToolStripButton toolStripButton2;
+			System.Windows.Forms.ToolStripButton toolStripButton3;
+			System.Windows.Forms.ToolStripButton toolStripButton4;
+			System.Windows.Forms.ToolStripButton toolStripButton5;
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Analyzer));
+			this.FExpandOnDemand = new System.Windows.Forms.ToolStripButton();
 			this.FAnalyzerControl = new Alphora.Dataphor.Dataphoria.Analyzer.AnalyzerControl();
-			this.FExpandOnDemand = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
+			this.MenuStip = new System.Windows.Forms.MenuStrip();
+			this.ToolStrip = new System.Windows.Forms.ToolStrip();
+			this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+			toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+			saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			saveAsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			saveAsDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			zoomInToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			zoomOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			expandOnDemandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			toolStripButton2 = new System.Windows.Forms.ToolStripButton();
+			toolStripButton3 = new System.Windows.Forms.ToolStripButton();
+			toolStripButton4 = new System.Windows.Forms.ToolStripButton();
+			toolStripButton5 = new System.Windows.Forms.ToolStripButton();
+			this.MenuStip.SuspendLayout();
+			this.ToolStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// FFrameBarManager
+			// toolStripMenuItem1
 			// 
-			this.FFrameBarManager.BarPositionInfo = ((System.IO.MemoryStream)(resources.GetObject("FFrameBarManager.BarPositionInfo")));
-			this.FFrameBarManager.Bars.Add(this.FMainMenu);
-			this.FFrameBarManager.Bars.Add(this.FFileBar);
-			this.FFrameBarManager.Bars.Add(this.FView);
-			this.FFrameBarManager.Categories.Add("File");
-			this.FFrameBarManager.Categories.Add("View");
-			this.FFrameBarManager.CurrentBaseFormType = "Alphora.Dataphor.Dataphoria.DataphoriaForm";
-			this.FFrameBarManager.Form = this;
-			this.FFrameBarManager.FormName = "Form Designer";
-			this.FFrameBarManager.ImageList = this.ToolBarImageList;
-			this.FFrameBarManager.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																										  this.FSaveAsFile,
-																										  this.FSaveAsDocumentMenuItem,
-																										  this.FCloseMenuItem,
-																										  this.FFileMenu,
-																										  this.FSaveMenuItem,
-																										  this.FViewMenu,
-																										  this.FZoomIn,
-																										  this.FZoomOut,
-																										  this.FExpandOnDemand});
-			this.FFrameBarManager.LargeImageList = null;
-			this.FFrameBarManager.UsePartialMenus = false;
-			this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
+			toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            saveToolStripMenuItem,
+            saveAsFileToolStripMenuItem,
+            saveAsDocumentToolStripMenuItem,
+            closeToolStripMenuItem});
+			toolStripMenuItem1.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+			toolStripMenuItem1.MergeIndex = 1;
+			toolStripMenuItem1.Name = "toolStripMenuItem1";
+			toolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
+			toolStripMenuItem1.Text = "&File";
 			// 
-			// FMainMenu
+			// saveToolStripMenuItem
 			// 
-			this.FMainMenu.BarName = "MainMenu";
-			this.FMainMenu.BarStyle = ((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle)(((((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.AllowQuickCustomizing | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.IsMainMenu) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.Visible) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.UseWholeRow) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.DrawDragBorder)));
-			this.FMainMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FFileMenu,
-																								   this.FViewMenu});
-			this.FMainMenu.Manager = this.FFrameBarManager;
+			saveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
+			saveToolStripMenuItem.MergeIndex = 20;
+			saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+			saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+			saveToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			saveToolStripMenuItem.Text = "&Save";
+			saveToolStripMenuItem.Click += new System.EventHandler(this.SaveClicked);
 			// 
-			// FFileMenu
+			// saveAsFileToolStripMenuItem
 			// 
-			this.FFileMenu.CategoryIndex = 0;
-			this.FFileMenu.ID = "File";
-			this.FFileMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FSaveMenuItem,
-																								   this.FSaveAsFile,
-																								   this.FSaveAsDocumentMenuItem,
-																								   this.FCloseMenuItem});
-			this.FFileMenu.MergeOrder = 1;
-			this.FFileMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
-			this.FFileMenu.Text = "&File";
+			saveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
+			saveAsFileToolStripMenuItem.MergeIndex = 20;
+			saveAsFileToolStripMenuItem.Name = "saveAsFileToolStripMenuItem";
+			saveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+						| System.Windows.Forms.Keys.F)));
+			saveAsFileToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			saveAsFileToolStripMenuItem.Text = "Save As File...";
+			saveAsFileToolStripMenuItem.Click += new System.EventHandler(this.SaveAsFileClicked);
 			// 
-			// FSaveMenuItem
+			// saveAsDocumentToolStripMenuItem
 			// 
-			this.FSaveMenuItem.CategoryIndex = 0;
-			this.FSaveMenuItem.ID = "Save";
-			this.FSaveMenuItem.ImageIndex = 1;
-			this.FSaveMenuItem.MergeOrder = 20;
-			this.FSaveMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
-			this.FSaveMenuItem.Text = "&Save";
+			saveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
+			saveAsDocumentToolStripMenuItem.MergeIndex = 20;
+			saveAsDocumentToolStripMenuItem.Name = "saveAsDocumentToolStripMenuItem";
+			saveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+						| System.Windows.Forms.Keys.D)));
+			saveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			saveAsDocumentToolStripMenuItem.Text = "Save As &Document...";
+			saveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.SaveAsDocumentClicked);
 			// 
-			// FSaveAsFile
+			// closeToolStripMenuItem
 			// 
-			this.FSaveAsFile.CategoryIndex = 0;
-			this.FSaveAsFile.ID = "SaveAsFile";
-			this.FSaveAsFile.ImageIndex = 3;
-			this.FSaveAsFile.MergeOrder = 20;
-			this.FSaveAsFile.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftF;
-			this.FSaveAsFile.Text = "Save As &File...";
+			closeToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
+			closeToolStripMenuItem.MergeIndex = 20;
+			closeToolStripMenuItem.Name = "closeToolStripMenuItem";
+			closeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
+			closeToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			closeToolStripMenuItem.Text = "&Close";
+			closeToolStripMenuItem.Click += new System.EventHandler(this.CloseClicked);
 			// 
-			// FSaveAsDocumentMenuItem
+			// viewToolStripMenuItem
 			// 
-			this.FSaveAsDocumentMenuItem.CategoryIndex = 0;
-			this.FSaveAsDocumentMenuItem.ID = "SaveAsDocument";
-			this.FSaveAsDocumentMenuItem.ImageIndex = 2;
-			this.FSaveAsDocumentMenuItem.MergeOrder = 20;
-			this.FSaveAsDocumentMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftD;
-			this.FSaveAsDocumentMenuItem.Text = "Save As &Document...";
+			viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            zoomInToolStripMenuItem,
+            zoomOutToolStripMenuItem,
+            expandOnDemandToolStripMenuItem});
+			viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+			viewToolStripMenuItem.MergeIndex = 10;
+			viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+			viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+			viewToolStripMenuItem.Text = "&View";
 			// 
-			// FCloseMenuItem
+			// zoomInToolStripMenuItem
 			// 
-			this.FCloseMenuItem.CategoryIndex = 0;
-			this.FCloseMenuItem.ID = "Close";
-			this.FCloseMenuItem.ImageIndex = 0;
-			this.FCloseMenuItem.MergeOrder = 20;
-			this.FCloseMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF4;
-			this.FCloseMenuItem.Text = "&Close";
+			zoomInToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Zoom_In;
+			zoomInToolStripMenuItem.Name = "zoomInToolStripMenuItem";
+			zoomInToolStripMenuItem.ShortcutKeyDisplayString = "+";
+			zoomInToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			zoomInToolStripMenuItem.Text = "Zoom &In";
+			zoomInToolStripMenuItem.Click += new System.EventHandler(this.ZoomInClicked);
 			// 
-			// FViewMenu
+			// zoomOutToolStripMenuItem
 			// 
-			this.FViewMenu.CategoryIndex = 1;
-			this.FViewMenu.ID = "View";
-			this.FViewMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FZoomIn,
-																								   this.FZoomOut,
-																								   this.FExpandOnDemand});
-			this.FViewMenu.MergeOrder = 10;
-			this.FViewMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
-			this.FViewMenu.SeparatorIndices.AddRange(new int[] {
-																   0});
-			this.FViewMenu.Text = "&View";
+			zoomOutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Zoom_Out;
+			zoomOutToolStripMenuItem.Name = "zoomOutToolStripMenuItem";
+			zoomOutToolStripMenuItem.ShortcutKeyDisplayString = "-";
+			zoomOutToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			zoomOutToolStripMenuItem.Text = "Zoom &Out";
+			zoomOutToolStripMenuItem.Click += new System.EventHandler(this.ZoomOutClicked);
 			// 
-			// FZoomIn
+			// expandOnDemandToolStripMenuItem
 			// 
-			this.FZoomIn.CategoryIndex = 1;
-			this.FZoomIn.ID = "ZoomIn";
-			this.FZoomIn.ImageIndex = 4;
-			this.FZoomIn.MergeOrder = 20;
-			this.FZoomIn.ShortcutText = "+";
-			this.FZoomIn.Text = "Zoom In";
+			expandOnDemandToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.ExpandOnDemand;
+			expandOnDemandToolStripMenuItem.Name = "expandOnDemandToolStripMenuItem";
+			expandOnDemandToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+			expandOnDemandToolStripMenuItem.Text = "&Expand On Demand";
+			expandOnDemandToolStripMenuItem.Click += new System.EventHandler(this.ExpandOnDemandClicked);
 			// 
-			// FZoomOut
+			// toolStripButton2
 			// 
-			this.FZoomOut.CategoryIndex = 1;
-			this.FZoomOut.ID = "ZoomOut";
-			this.FZoomOut.ImageIndex = 5;
-			this.FZoomOut.MergeOrder = 20;
-			this.FZoomOut.ShortcutText = "-";
-			this.FZoomOut.Text = "Zoom Out";
+			toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			toolStripButton2.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
+			toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+			toolStripButton2.Name = "toolStripButton2";
+			toolStripButton2.Size = new System.Drawing.Size(23, 22);
+			toolStripButton2.Text = "Save As &File";
+			toolStripButton2.ToolTipText = "Save As File...";
+			toolStripButton2.Click += new System.EventHandler(this.SaveAsFileClicked);
 			// 
-			// FFileBar
+			// toolStripButton3
 			// 
-			this.FFileBar.BarName = "FileBar";
-			this.FFileBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								  this.FSaveMenuItem,
-																								  this.FSaveAsFile,
-																								  this.FSaveAsDocumentMenuItem});
-			this.FFileBar.Manager = this.FFrameBarManager;
+			toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			toolStripButton3.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
+			toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
+			toolStripButton3.Name = "toolStripButton3";
+			toolStripButton3.Size = new System.Drawing.Size(23, 22);
+			toolStripButton3.Text = "Save As &Document";
+			toolStripButton3.ToolTipText = "Save As Document...";
+			toolStripButton3.Click += new System.EventHandler(this.SaveAsDocumentClicked);
 			// 
-			// FView
+			// toolStripButton4
 			// 
-			this.FView.BarName = "ViewBar";
-			this.FView.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																							   this.FZoomIn,
-																							   this.FZoomOut,
-																							   this.FExpandOnDemand});
-			this.FView.Manager = this.FFrameBarManager;
+			toolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			toolStripButton4.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Zoom_In;
+			toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
+			toolStripButton4.Name = "toolStripButton4";
+			toolStripButton4.Size = new System.Drawing.Size(23, 22);
+			toolStripButton4.Text = "Zoom &In";
+			toolStripButton4.Click += new System.EventHandler(this.ZoomInClicked);
 			// 
-			// ToolBarImageList
+			// toolStripButton5
 			// 
-			this.ToolBarImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-			this.ToolBarImageList.ImageSize = new System.Drawing.Size(16, 16);
-			this.ToolBarImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ToolBarImageList.ImageStream")));
-			this.ToolBarImageList.TransparentColor = System.Drawing.Color.Transparent;
+			toolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			toolStripButton5.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Zoom_Out;
+			toolStripButton5.ImageTransparentColor = System.Drawing.Color.Magenta;
+			toolStripButton5.Name = "toolStripButton5";
+			toolStripButton5.Size = new System.Drawing.Size(23, 22);
+			toolStripButton5.Text = "Zoom &Out";
+			toolStripButton5.Click += new System.EventHandler(this.ZoomOutClicked);
+			// 
+			// FExpandOnDemand
+			// 
+			this.FExpandOnDemand.Checked = true;
+			this.FExpandOnDemand.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.FExpandOnDemand.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FExpandOnDemand.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.ExpandOnDemand;
+			this.FExpandOnDemand.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FExpandOnDemand.Name = "FExpandOnDemand";
+			this.FExpandOnDemand.Size = new System.Drawing.Size(23, 22);
+			this.FExpandOnDemand.Text = "Expand On &Demand";
+			this.FExpandOnDemand.Click += new System.EventHandler(this.ExpandOnDemandClicked);
 			// 
 			// FAnalyzerControl
 			// 
 			this.FAnalyzerControl.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FAnalyzerControl.Location = new System.Drawing.Point(0, 0);
+			this.FAnalyzerControl.Location = new System.Drawing.Point(0, 24);
 			this.FAnalyzerControl.Name = "FAnalyzerControl";
-			this.FAnalyzerControl.Size = new System.Drawing.Size(687, 518);
+			this.FAnalyzerControl.Size = new System.Drawing.Size(687, 494);
 			this.FAnalyzerControl.TabIndex = 4;
 			// 
-			// FExpandOnDemand
+			// MenuStip
 			// 
-			this.FExpandOnDemand.CategoryIndex = 1;
-			this.FExpandOnDemand.Checked = true;
-			this.FExpandOnDemand.ID = "ExpandOnDemand";
-			this.FExpandOnDemand.ImageIndex = 6;
-			this.FExpandOnDemand.MergeOrder = 20;
-			this.FExpandOnDemand.Text = "&Expand On Demand";
+			this.MenuStip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            toolStripMenuItem1,
+            viewToolStripMenuItem});
+			this.MenuStip.Location = new System.Drawing.Point(0, 0);
+			this.MenuStip.Name = "MenuStip";
+			this.MenuStip.Size = new System.Drawing.Size(687, 24);
+			this.MenuStip.TabIndex = 9;
+			// 
+			// ToolStrip
+			// 
+			this.ToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton1,
+            toolStripButton2,
+            toolStripButton3,
+            toolStripButton4,
+            toolStripButton5,
+            this.FExpandOnDemand});
+			this.ToolStrip.Location = new System.Drawing.Point(0, 24);
+			this.ToolStrip.Name = "ToolStrip";
+			this.ToolStrip.Size = new System.Drawing.Size(687, 25);
+			this.ToolStrip.TabIndex = 10;
+			// 
+			// toolStripButton1
+			// 
+			this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripButton1.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
+			this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolStripButton1.Name = "toolStripButton1";
+			this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+			this.toolStripButton1.Text = "&Save";
+			this.toolStripButton1.ToolTipText = "Save";
+			this.toolStripButton1.Click += new System.EventHandler(this.SaveClicked);
 			// 
 			// Analyzer
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.CausesValidation = false;
 			this.ClientSize = new System.Drawing.Size(687, 518);
+			this.Controls.Add(this.ToolStrip);
 			this.Controls.Add(this.FAnalyzerControl);
+			this.Controls.Add(this.MenuStip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MainMenuStrip = this.MenuStip;
 			this.Name = "Analyzer";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
+			this.MenuStip.ResumeLayout(false);
+			this.MenuStip.PerformLayout();
+			this.ToolStrip.ResumeLayout(false);
+			this.ToolStrip.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 		#endregion
@@ -453,59 +490,39 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			
 		}
 
-		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
+		private void SaveClicked(object sender, EventArgs e)
 		{
-			switch (AArgs.ClickedBarItem.ID)
-			{
-				case "Save" : Save(); break;
-				case "SaveAsFile" : SaveAsFile(); break;
-				case "SaveAsDocument" : SaveAsDocument(); break;
-				case "Close" : Close(); break;
-				case "ZoomIn" : ZoomIn(); break;
-				case "ZoomOut" : ZoomOut(); break;
-				case "ExpandOnDemand" : ToggleExpandOnDemand(); break;
-			}
+			Save();
 		}
 
-		#endregion
-
-		#region StatusBar
-
-		protected Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel FPositionStatus;
-
-		protected override void InitializeStatusBar()
+		private void SaveAsFileClicked(object sender, EventArgs e)
 		{
-			base.InitializeStatusBar();
-
-			FPositionStatus = new Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel();
-			FPositionStatus.Text = "0:0";
-			FPositionStatus.SizeToContent = true;
-			FPositionStatus.HAlign = Syncfusion.Windows.Forms.Tools.HorzFlowAlign.Right;
-			FPositionStatus.Alignment = System.Windows.Forms.HorizontalAlignment.Center;
-			FPositionStatus.BorderStyle = BorderStyle.FixedSingle;
-			FPositionStatus.BorderColor = Color.Gray;
+			SaveAsFile();
 		}
 
-		protected override void DisposeStatusBar()
+		private void SaveAsDocumentClicked(object sender, EventArgs e)
 		{
-			FPositionStatus.Dispose();
-			FPositionStatus = null;
-
-			base.DisposeStatusBar();
+			SaveAsDocument();
 		}
 
-		public override void Merge(Control AStatusBar)
+		private void CloseClicked(object sender, EventArgs e)
 		{
-			base.Merge(AStatusBar);
-
-			AStatusBar.Controls.Add(FPositionStatus);
+			Close();
 		}
 
-		public override void Unmerge(Control AStatusBar)
+		private void ZoomInClicked(object sender, EventArgs e)
 		{
-			base.Unmerge(AStatusBar);
+			ZoomIn();
+		}
 
-			AStatusBar.Controls.Remove(FPositionStatus);
+		private void ZoomOutClicked(object sender, EventArgs e)
+		{
+			ZoomOut();
+		}
+
+		private void ExpandOnDemandClicked(object sender, EventArgs e)
+		{
+			ToggleExpandOnDemand();
 		}
 
 		#endregion

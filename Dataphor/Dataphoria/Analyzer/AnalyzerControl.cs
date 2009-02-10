@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		public AnalyzerControl()
 		{
 			FMainSurface = new PlanTree();
-			Push(FMainSurface, Strings.Get("Analyzer.MainSurfaceTitle"));
+			Push(FMainSurface, Strings.Analyzer_MainSurfaceTitle);
 		}
 
 		private PlanTree FMainSurface;

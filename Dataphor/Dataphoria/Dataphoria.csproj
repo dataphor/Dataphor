@@ -269,8 +269,9 @@
     <Compile Include="Dataphoria.Designer.cs">
       <DependentUpon>Dataphoria.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataphoriaException.cs">
-      <SubType>Code</SubType>
+    <Compile Include="DataphoriaException.cs" />
+    <Compile Include="DataphoriaException.Designer.cs">
+      <DependentUpon>DataphoriaException.cs</DependentUpon>
     </Compile>
     <Compile Include="Designers\DesignBuffer.cs">
       <SubType>Code</SubType>
@@ -302,8 +303,18 @@
     <Compile Include="FreeDataphoria.Designer.cs">
       <DependentUpon>FreeDataphoria.cs</DependentUpon>
     </Compile>
+    <Compile Include="General.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>General.resx</DependentUpon>
+    </Compile>
     <Compile Include="IDataphoria.cs" />
     <Compile Include="IStatusBarClient.cs" />
+    <Compile Include="MenuImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MenuImages.resx</DependentUpon>
+    </Compile>
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -354,8 +365,9 @@
     <Compile Include="Services\PropertyTextEditor.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Strings.cs">
-      <SubType>Code</SubType>
+    <Compile Include="Strings.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <DependentUpon>Strings.cs</DependentUpon>
     </Compile>
     <Compile Include="TextEditor\D4Editor.cs">
       <SubType>Form</SubType>
@@ -418,7 +430,12 @@
       <DependentUpon>Dataphoria.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Strings.resx">
+      <DependentUpon>Strings.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="DataphoriaException.resx">
+      <DependentUpon>DataphoriaException.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\CustomFormDesigner.resx">
@@ -437,13 +454,20 @@
       <DependentUpon>FreeDataphoria.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="General.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>General.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Customize.bmp" />
     <EmbeddedResource Include="Images\Edit.bmp" />
     <EmbeddedResource Include="Images\EditCopy.bmp" />
     <EmbeddedResource Include="Images\Rider.gif" />
     <EmbeddedResource Include="licenses.licx" />
-    <EmbeddedResource Include="Strings.resx">
+    <EmbeddedResource Include="MenuImages.resx">
       <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MenuImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="TextEditor\D4Editor.resx">
       <DependentUpon>D4Editor.cs</DependentUpon>

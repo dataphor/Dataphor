@@ -619,12 +619,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		protected void ReplacementsPerformed(object ASender, int ACount)
 		{
-			SetStatus(Strings.Get("ReplacementsPerformed", ACount));
+			SetStatus(String.Format(Strings.ReplacementsPerformed, ACount));
 		}
 
 		protected void TextNotFound(object sender, EventArgs e)
 		{
-			SetStatus(Strings.Get("FindTextNotFound"));
+			SetStatus(Strings.FindTextNotFound);
 		}
 
 		private void Replace()
@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void ShowSaved()
 		{
-			SetStatus(Strings.Get("Saved"));
+			SetStatus(Strings.Saved);
 		}
 
 		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)

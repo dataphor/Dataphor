@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public SecurityListNode()
 		{
-			Text = Strings.Get("ObjectTree.SecurityNodeText");
+			Text = Strings.ObjectTree_SecurityNodeText;
 			ImageIndex = 11;
 			SelectedImageIndex = ImageIndex;
 		}
@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 		protected override ContextMenu GetContextMenu()
 		{
 			ContextMenu LMenu = new ContextMenu();
-			LMenu.MenuItems.Add(0, new MenuItem(Strings.Get("ObjectTree.ManageUsersText"), new EventHandler(ManageUsersClicked)));
+			LMenu.MenuItems.Add(0, new MenuItem(Strings.ObjectTree_ManageUsersText, new EventHandler(ManageUsersClicked)));
 			return LMenu;
 		}
 

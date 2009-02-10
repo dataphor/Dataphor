@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 	{
 		public RoleListNode(string ALibraryName) : base (ALibraryName)
 		{
-			Text = Strings.Get("ObjectTree.RolesNodeText");
+			Text = Strings.ObjectTree_RolesNodeText;
 			ImageIndex = 4;
 			SelectedImageIndex = ImageIndex;
 		}

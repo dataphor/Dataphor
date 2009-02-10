@@ -767,11 +767,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			FPosition = APosition;
 
 			if ((ASupportedOperations & DropOperation.Copy) != 0)
-				MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Copy"), new EventHandler(CopyClick)));
+				MenuItems.Add(new MenuItem(Strings.DropMenu_Copy, new EventHandler(CopyClick)));
 			if ((ASupportedOperations & DropOperation.Move) != 0)
-				MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Move"), new EventHandler(MoveClick)));
+				MenuItems.Add(new MenuItem(Strings.DropMenu_Move, new EventHandler(MoveClick)));
 			MenuItems.Add(new MenuItem("-"));
-			MenuItems.Add(new MenuItem(Strings.Get("DropMenu.Cancel")));
+			MenuItems.Add(new MenuItem(Strings.DropMenu_Cancel));
 		}
 
 		private DesignerNode FSource;
