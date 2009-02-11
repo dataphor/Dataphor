@@ -49,11 +49,11 @@ namespace Alphora.Dataphor.Dataphoria
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
 			// Configure tree
-			FExplorer.Dataphoria = this;
-			FExplorer.Select();
+			FDataphoriaMainControl.Explorer.Dataphoria = this;
+            FDataphoriaMainControl.Explorer.Select();
 
-			FErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
-			FErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
+            FDataphoriaMainControl.ErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
+            FDataphoriaMainControl.ErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
 
 			//FTabbedMDIManager = new TabbedMDIManager();
 			//FTabbedMDIManager.AttachToMdiContainer(this);
@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.Dataphoria
 								FFrontendSession.OnDeserializationErrors += new DeserializationErrorsHandler(FrontendSessionDeserializationErrors);
 								FServerNode = new ObjectTree.ServerNode(FDataSession.Server != null);
 								FServerNode.Text = FDataSession.Alias.ToString();
-								FExplorer.AddBaseNode(FServerNode);
+                                FDataphoriaMainControl.Explorer.AddBaseNode(FServerNode);
 								try
 								{
 									FServerNode.Expand();
@@ -236,7 +236,7 @@ namespace Alphora.Dataphor.Dataphoria
 								catch
 								{
 									FServerNode = null;
-									FExplorer.Nodes.Clear();
+                                    FDataphoriaMainControl.Explorer.Nodes.Clear();
 									throw;
 								}
 							}
@@ -290,8 +290,8 @@ namespace Alphora.Dataphor.Dataphoria
 						//FConnectMenuItem.Visible = true;
 						//FDisconnectMenuItem.Visible = false;
 						//FDockingManager.SetDockVisibility(FExplorer, false);
-					
-						FExplorer.Nodes.Clear();
+
+                        FDataphoriaMainControl.Explorer.Nodes.Clear();
 						FServerNode = null;
 					}
 					finally
@@ -1249,7 +1249,10 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Provides access to the warnings / errors list pane. </summary>
 		public ErrorListView Warnings
 		{
-			get { return FErrorListView; }
+            get
+            {
+                return FDataphoriaMainControl.ErrorListView; 
+            }
 		}
 
 		private void ShowWarnings()
@@ -1271,7 +1274,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void ClearWarnings()
 		{
-			FErrorListView.ClearErrors();
+            FDataphoriaMainControl.ErrorListView.ClearErrors();
 		}
 
 		// IErrorSource
@@ -1480,7 +1483,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FErrorListView_HelpRequested(object ASender, HelpEventArgs AArgs)
 		{
 			string LKeyword = "Errors and Warnings";
-			DataphorException LException = FErrorListView.SelectedError as DataphorException;
+            DataphorException LException = FDataphoriaMainControl.ErrorListView.SelectedError as DataphorException;
 			if (LException != null)
 				LKeyword = LException.Code.ToString();
 

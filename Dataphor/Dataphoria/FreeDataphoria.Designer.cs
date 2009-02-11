@@ -53,9 +53,8 @@ namespace Alphora.Dataphor.Dataphoria
             this.FAlphoraDiscussionGroupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FWebDocumentationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.FErrorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
-            this.FExplorer = new Alphora.Dataphor.Dataphoria.ObjectTree.DataTree();
+            this.FDataphoriaMainControl = new Alphora.Dataphor.Dataphoria.DataphoriaMainControl();
             this.FileToolStrip = new System.Windows.Forms.ToolStrip();
             this.FNewToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FNewScriptToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -276,14 +275,6 @@ namespace Alphora.Dataphor.Dataphoria
             this.FAboutToolStripMenuItem.Text = "About";
             this.FAboutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
-            // FErrorListView
-            // 
-            this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.FErrorListView.Location = new System.Drawing.Point(121, 272);
-            this.FErrorListView.Name = "FErrorListView";
-            this.FErrorListView.Size = new System.Drawing.Size(543, 164);
-            this.FErrorListView.TabIndex = 4;
-            // 
             // toolStripContainer1
             // 
             // 
@@ -293,8 +284,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // toolStripContainer1.ContentPanel
             // 
-            this.toolStripContainer1.ContentPanel.Controls.Add(this.FErrorListView);
-            this.toolStripContainer1.ContentPanel.Controls.Add(this.FExplorer);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.FDataphoriaMainControl);
             this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(664, 436);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
@@ -308,18 +298,13 @@ namespace Alphora.Dataphor.Dataphoria
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FMainMenuStrip);
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FileToolStrip);
             // 
-            // FExplorer
+            // FDataphoriaMainControl
             // 
-            this.FExplorer.AllowDrop = true;
-            this.FExplorer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.FExplorer.CausesValidation = false;
-            this.FExplorer.Dock = System.Windows.Forms.DockStyle.Left;
-            this.FExplorer.HideSelection = false;
-            this.FExplorer.Location = new System.Drawing.Point(0, 0);
-            this.FExplorer.Name = "FExplorer";
-            this.FExplorer.ShowRootLines = false;
-            this.FExplorer.Size = new System.Drawing.Size(121, 436);
-            this.FExplorer.TabIndex = 5;
+            this.FDataphoriaMainControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FDataphoriaMainControl.Location = new System.Drawing.Point(0, 0);
+            this.FDataphoriaMainControl.Name = "FDataphoriaMainControl";
+            this.FDataphoriaMainControl.Size = new System.Drawing.Size(664, 436);
+            this.FDataphoriaMainControl.TabIndex = 0;
             // 
             // FileToolStrip
             // 
@@ -414,8 +399,6 @@ namespace Alphora.Dataphor.Dataphoria
 
         private System.Windows.Forms.StatusStrip FStatusStrip;
         private System.Windows.Forms.MenuStrip FMainMenuStrip;
-        private Alphora.Dataphor.Frontend.Client.Windows.ErrorListView FErrorListView;
-        private Alphora.Dataphor.Dataphoria.ObjectTree.DataTree FExplorer;
         private System.Windows.Forms.ToolStripMenuItem FFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FConnectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FDisconnectToolStripMenuItem;
@@ -446,5 +429,6 @@ namespace Alphora.Dataphor.Dataphoria
         private System.Windows.Forms.ToolStripButton FOpenFileToolStripButton;
         private System.Windows.Forms.ToolStripButton FOpenFileWithToolStripButton;
         private System.Windows.Forms.ToolStripButton FLaunchFormToolStripButton;
+        private DataphoriaMainControl FDataphoriaMainControl;
     }
 }

@@ -240,6 +240,10 @@
     <Reference Include="Syncfusion.Core">
       <Name>Syncfusion.Core</Name>
     </Reference>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, Culture=neutral, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Libraries\DockPanel_2_2_Bin\Release\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutForm.cs">
@@ -272,6 +276,12 @@
     <Compile Include="DataphoriaException.cs" />
     <Compile Include="DataphoriaException.Designer.cs">
       <DependentUpon>DataphoriaException.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataphoriaMainControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DataphoriaMainControl.Designer.cs">
+      <DependentUpon>DataphoriaMainControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Designers\DesignBuffer.cs">
       <SubType>Code</SubType>
@@ -428,6 +438,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dataphoria.resx">
       <DependentUpon>Dataphoria.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataphoriaMainControl.resx">
+      <DependentUpon>DataphoriaMainControl.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
