@@ -242,7 +242,7 @@
     </Reference>
     <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, Culture=neutral, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Libraries\DockPanel_2_2_Bin\Release\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <HintPath>.\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -537,7 +537,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)TextEditor\Modes\*.xshd" "$(TargetDir)" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
