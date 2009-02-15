@@ -991,8 +991,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void AttachForm(Form AForm) 
 		{
-			AForm.MdiParent = this;
-			AForm.Show();
+            this.FDataphoriaMainControl.AttachForm(AForm);
 		}
 
 		private void CloseChildren()
@@ -1404,8 +1403,8 @@ namespace Alphora.Dataphor.Dataphoria
      
         private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
         {            
-            try
-            {
+            /*try
+            {*/
                 if (ASender == FClearWarningsToolStripMenuItem)
                             ClearWarnings();
                 else if (ASender == FConnectToolStripMenuItem)
@@ -1445,11 +1444,11 @@ namespace Alphora.Dataphor.Dataphoria
                 else if (ASender == FDocumentTypesToolStripMenuItem)
                         BrowseDocumentTypes(); 
                 
-            }
+            /*}
             catch (Exception LException)
             {
                 Program.HandleException(LException);
-            }
+            }*/
         }
 
 

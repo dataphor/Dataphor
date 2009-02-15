@@ -63,5 +63,22 @@ namespace Alphora.Dataphor.Dataphoria
                 return FErrorListView;
             }
         }
+
+        private void AttachDockContent(DockContent ADockContent)
+        {
+
+            ADockContent.MdiParent = this.ParentForm;
+            ADockContent.Show(this.FDockPanel);
+        }
+
+        internal void AttachForm(Form AForm)
+        {
+            if (AForm is DockContent)
+                AttachDockContent((DockContent)AForm);
+            else
+            {
+                throw new ArgumentException("Most be " + typeof(DockContent), "AForm");
+            }
+        }
     }
 }
