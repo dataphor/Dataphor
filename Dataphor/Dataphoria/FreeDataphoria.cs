@@ -27,6 +27,7 @@ using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Dataphoria.Services;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using WeifenLuo.WinFormsUI.Docking;
 
 
 namespace Alphora.Dataphor.Dataphoria
@@ -37,7 +38,11 @@ namespace Alphora.Dataphor.Dataphoria
 
         public const string CConfigurationFileName = "Dataphoria{0}.config";
 
-       
+        private DataTree FExplorer;
+        private ErrorListView FErrorListView;
+
+        private DockContent FDockContentFExplorer;
+        private DockContent FDockContentErrorListView;
 
 
         public FreeDataphoria()
@@ -48,12 +53,38 @@ namespace Alphora.Dataphor.Dataphoria
 
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
-			// Configure tree
-			FDataphoriaMainControl.Explorer.Dataphoria = this;
-            FDataphoriaMainControl.Explorer.Select();
+            FExplorer = new DataTree();
+            FErrorListView = new ErrorListView();
 
-            FDataphoriaMainControl.ErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
-            FDataphoriaMainControl.ErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
+			// Configure tree
+			FExplorer.Dataphoria = this;
+            FExplorer.Select();
+
+            FErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
+            FErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
+
+            FExplorer = new DataTree();
+            FErrorListView = new ErrorListView();
+
+            FDockContentFExplorer = new DockContent();
+
+            FExplorer.Dock = DockStyle.Fill;
+            FDockContentFExplorer.Controls.Add(FExplorer);
+            FDockContentFExplorer.TabText = "Dataphoria Explorer";
+            FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
+            FDockContentFExplorer.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockLeft;
+
+
+            FDockContentErrorListView = new DockContent();
+
+            FErrorListView.Dock = DockStyle.Fill;
+            FDockContentErrorListView.Controls.Add(FErrorListView);
+            FDockContentErrorListView.TabText = "Dataphoria Error List";
+            FDockContentErrorListView.Text = "Error List - Dataphoria";
+            FDockContentErrorListView.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottomAutoHide;
+
+            FDockContentFExplorer.Show(this.FDockPanel);
+            FDockContentErrorListView.Show(this.FDockPanel);
 
 			//FTabbedMDIManager = new TabbedMDIManager();
 			//FTabbedMDIManager.AttachToMdiContainer(this);
@@ -223,7 +254,7 @@ namespace Alphora.Dataphor.Dataphoria
 								FFrontendSession.OnDeserializationErrors += new DeserializationErrorsHandler(FrontendSessionDeserializationErrors);
 								FServerNode = new ObjectTree.ServerNode(FDataSession.Server != null);
 								FServerNode.Text = FDataSession.Alias.ToString();
-                                FDataphoriaMainControl.Explorer.AddBaseNode(FServerNode);
+                                FExplorer.AddBaseNode(FServerNode);
 								try
 								{
 									FServerNode.Expand();
@@ -236,7 +267,7 @@ namespace Alphora.Dataphor.Dataphoria
 								catch
 								{
 									FServerNode = null;
-                                    FDataphoriaMainControl.Explorer.Nodes.Clear();
+                                    FExplorer.Nodes.Clear();
 									throw;
 								}
 							}
@@ -291,7 +322,7 @@ namespace Alphora.Dataphor.Dataphoria
 						//FDisconnectMenuItem.Visible = false;
 						//FDockingManager.SetDockVisibility(FExplorer, false);
 
-                        FDataphoriaMainControl.Explorer.Nodes.Clear();
+                        FExplorer.Nodes.Clear();
 						FServerNode = null;
 					}
 					finally
@@ -989,9 +1020,9 @@ namespace Alphora.Dataphor.Dataphoria
 
 		//private TabbedMDIManager FTabbedMDIManager;
 
-		public void AttachForm(Form AForm) 
+		public void AttachForm(BaseForm AForm) 
 		{
-            this.FDataphoriaMainControl.AttachForm(AForm);
+            AForm.Show(this.FDockPanel);
 		}
 
 		private void CloseChildren()
@@ -1250,7 +1281,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
             get
             {
-                return FDataphoriaMainControl.ErrorListView; 
+                return FErrorListView; 
             }
 		}
 
@@ -1273,7 +1304,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void ClearWarnings()
 		{
-            FDataphoriaMainControl.ErrorListView.ClearErrors();
+            FErrorListView.ClearErrors();
 		}
 
 		// IErrorSource
@@ -1482,7 +1513,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FErrorListView_HelpRequested(object ASender, HelpEventArgs AArgs)
 		{
 			string LKeyword = "Errors and Warnings";
-            DataphorException LException = FDataphoriaMainControl.ErrorListView.SelectedError as DataphorException;
+            DataphorException LException = FErrorListView.SelectedError as DataphorException;
 			if (LException != null)
 				LKeyword = LException.Code.ToString();
 

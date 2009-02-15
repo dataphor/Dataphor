@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.Dataphoria
 
         Alphora.Dataphor.DAE.Client.DataSession DataSession { get; }
 
-        void AttachForm(Form AForm);
+        void AttachForm(BaseForm AForm);
 
         void InvokeHelp(string p);
 

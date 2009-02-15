@@ -1001,7 +1001,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private TabbedMDIManager FTabbedMDIManager;
 
-		public void AttachForm(Form AForm) 
+        public void AttachForm(BaseForm AForm) 
 		{
 			AForm.MdiParent = this;
 			AForm.Show();
