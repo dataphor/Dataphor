@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
 	// Don't put any definitions above the Analyzer class
 
-	public class Analyzer : BaseForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner
+	public class Analyzer : DataphoriaForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner
 	{
 		private System.ComponentModel.IContainer components;
 		private AnalyzerControl FAnalyzerControl;

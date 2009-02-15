@@ -7,17 +7,19 @@ using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.Dataphoria.ObjectTree;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Darwen.Windows.Forms.Controls.Docking;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria
-{
-
-    public partial class DataphoriaMainControl : Darwen.Windows.Forms.Controls.Docking.DockingManagerControl
+{    
+    
+    public partial class DataphoriaMainControl : UserControl
     {
 
         private DataTree FExplorer;
         private ErrorListView FErrorListView;
 
+        private DockContent FDockContentFExplorer;
+        private DockContent FDockContentErrorListView;
 
 
         public DataphoriaMainControl()
@@ -27,12 +29,25 @@ namespace Alphora.Dataphor.Dataphoria
             FExplorer = new DataTree();
             FErrorListView = new ErrorListView();
 
-            IDockingPanel LLeftPanel = this.Panels[DockingType.Left].InsertPanel(0);
-            LLeftPanel.DockedControls.Add("Explorer", FExplorer);
+            FDockContentFExplorer= new DockContent();
 
-            IDockingPanel LBottomPanel = this.Panels[DockingType.Bottom].InsertPanel(0);
-            LBottomPanel.DockedControls.Add("Error List", FErrorListView);
+            FExplorer.Dock = DockStyle.Fill;
+            FDockContentFExplorer.Controls.Add(FExplorer);
+            FDockContentFExplorer.TabText = "Dataphoria Explorer";
+            FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
+            FDockContentFExplorer.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockLeft;
+
+
+            FDockContentErrorListView = new DockContent();
+
+            FErrorListView.Dock = DockStyle.Fill;
+            FDockContentErrorListView.Controls.Add(FErrorListView);
+            FDockContentErrorListView.TabText = "Dataphoria Error List";
+            FDockContentErrorListView.Text = "Error List - Dataphoria";
+            FDockContentErrorListView.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottomAutoHide;
             
+            FDockContentFExplorer.Show(this.FDockPanel);
+            FDockContentErrorListView.Show(this.FDockPanel);
         }
 
 
@@ -49,10 +64,21 @@ namespace Alphora.Dataphor.Dataphoria
             }
         }
 
+        private void AttachDockContent(DockContent ADockContent)
+        {
+
+            ADockContent.MdiParent = this.ParentForm;
+            ADockContent.Show(this.FDockPanel);
+        }
 
         internal void AttachForm(Form AForm)
         {
-            FTabbedDocumentControl.Items.Add(AForm);
+            if (AForm is DockContent)
+                AttachDockContent((DockContent)AForm);
+            else
+            {
+                throw new ArgumentException("Most be " + typeof(DockContent), "AForm");
+            }
         }
     }
 }

@@ -28,39 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ToolStripProfessionalRenderer toolStripProfessionalRenderer1 = new System.Windows.Forms.ToolStripProfessionalRenderer();
-            this.FTabbedDocumentControl = new Darwen.Windows.Forms.Controls.TabbedDocuments.TabbedDocumentControl();
+            this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.SuspendLayout();
             // 
-            // FTabbedDocumentControl
+            // FDockPanel
             // 
-            this.FTabbedDocumentControl.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.FTabbedDocumentControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FTabbedDocumentControl.Location = new System.Drawing.Point(30, 24);
-            this.FTabbedDocumentControl.Name = "FTabbedDocumentControl";
-            toolStripProfessionalRenderer1.RoundedEdges = true;
-            this.FTabbedDocumentControl.Renderer = toolStripProfessionalRenderer1;
-            this.FTabbedDocumentControl.SelectedControl = null;
-            this.FTabbedDocumentControl.Size = new System.Drawing.Size(309, 307);
-            this.FTabbedDocumentControl.TabIndex = 14;
+            this.FDockPanel.ActiveAutoHideContent = null;
+            this.FDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FDockPanel.Location = new System.Drawing.Point(0, 0);
+            this.FDockPanel.Name = "FDockPanel";
+            this.FDockPanel.Size = new System.Drawing.Size(369, 355);
+            this.FDockPanel.TabIndex = 0;
             // 
             // DataphoriaMainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.FTabbedDocumentControl);
+            this.Controls.Add(this.FDockPanel);
             this.Name = "DataphoriaMainControl";
             this.Size = new System.Drawing.Size(369, 355);
-            this.Controls.SetChildIndex(this.FTabbedDocumentControl, 0);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private Darwen.Windows.Forms.Controls.TabbedDocuments.TabbedDocumentControl FTabbedDocumentControl;
-
-
+        private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
     }
 }

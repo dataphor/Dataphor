@@ -5,15 +5,15 @@
 */
 using System;
 using System.Windows.Forms;
-
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria
 {
 	/// <summary> Base form for all Dataphoria child forms. </summary>
 	/// <remarks> This form does not paint it's background (ancestors must completely cover the background). </remarks>
-    public class BaseForm : Form, IStatusBarClient
+    public class DataphoriaForm : DockContent, IStatusBarClient
 	{
-		public BaseForm() : base()
+		public DataphoriaForm() : base()
 		{
 			AutoScaleMode = AutoScaleMode.None;
 			InitializeStatusBar();

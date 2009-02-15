@@ -130,10 +130,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DockingControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\DockingControls.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.TextEditor, Version=2.1.0.2429, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Frontend.Client.Windows\ICSharpCode.TextEditor.dll</HintPath>
@@ -244,6 +240,10 @@
     <Reference Include="Syncfusion.Core">
       <Name>Syncfusion.Core</Name>
     </Reference>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.2.2864.18696, Culture=neutral, PublicKeyToken=d481317c817cec47, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutForm.cs">
@@ -261,17 +261,11 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BaseForm.cs">
+    <Compile Include="BaseForms.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="BaseTree.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="BaseUserControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="BaseUserControl.Designer.cs">
-      <DependentUpon>BaseUserControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Dataphoria.cs">
       <SubType>Form</SubType>
@@ -438,8 +432,8 @@
       <DependentUpon>Analyzer.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="BaseForm.resx">
-      <DependentUpon>BaseForm.cs</DependentUpon>
+    <EmbeddedResource Include="BaseForms.resx">
+      <DependentUpon>BaseForms.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dataphoria.resx">
