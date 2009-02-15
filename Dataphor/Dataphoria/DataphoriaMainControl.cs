@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.Dataphoria
 
         internal void AttachForm(Form AForm)
         {
-            throw new NotImplementedException("Not Implemented");
+            FTabbedDocumentControl.Items.Add(AForm);
         }
     }
 }

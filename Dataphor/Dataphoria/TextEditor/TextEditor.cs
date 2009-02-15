@@ -19,7 +19,7 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
 	/// <summary> Text Editor form for Dataphoria. </summary>
-	public class TextEditor : DataphoriaForm, IDesigner
+	public class TextEditor : BaseForm, IDesigner
 	{
 		private System.ComponentModel.IContainer components = null;
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager FFrameBarManager;

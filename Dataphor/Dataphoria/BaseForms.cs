@@ -11,9 +11,9 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	/// <summary> Base form for all Dataphoria child forms. </summary>
 	/// <remarks> This form does not paint it's background (ancestors must completely cover the background). </remarks>
-    public class DataphoriaForm : Form, IStatusBarClient
+    public class BaseForm : Form, IStatusBarClient
 	{
-		public DataphoriaForm() : base()
+		public BaseForm() : base()
 		{
 			AutoScaleMode = AutoScaleMode.None;
 			InitializeStatusBar();

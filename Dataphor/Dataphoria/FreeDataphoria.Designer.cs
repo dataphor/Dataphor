@@ -28,6 +28,7 @@ namespace Alphora.Dataphor.Dataphoria
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.ToolStripProfessionalRenderer toolStripProfessionalRenderer1 = new System.Windows.Forms.ToolStripProfessionalRenderer();
             this.FStatusStrip = new System.Windows.Forms.StatusStrip();
             this.FMainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.FFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -303,6 +304,8 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDataphoriaMainControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FDataphoriaMainControl.Location = new System.Drawing.Point(0, 0);
             this.FDataphoriaMainControl.Name = "FDataphoriaMainControl";
+            toolStripProfessionalRenderer1.RoundedEdges = true;
+            this.FDataphoriaMainControl.Renderer = toolStripProfessionalRenderer1;
             this.FDataphoriaMainControl.Size = new System.Drawing.Size(664, 436);
             this.FDataphoriaMainControl.TabIndex = 0;
             // 
@@ -376,7 +379,6 @@ namespace Alphora.Dataphor.Dataphoria
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(664, 507);
             this.Controls.Add(this.FToolStripContainer);
-            this.IsMdiContainer = true;
             this.MainMenuStrip = this.FMainMenuStrip;
             this.Name = "FreeDataphoria";
             this.Text = "FreeDataphoria";
