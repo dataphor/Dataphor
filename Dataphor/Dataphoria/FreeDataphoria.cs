@@ -1442,17 +1442,17 @@ namespace Alphora.Dataphor.Dataphoria
                         EnsureServerConnection();
                 else if (ASender == FDisconnectToolStripMenuItem)
                         Disconnect();
-                else if (ASender == FNewToolStripMenuItem)
+                else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
                         NewDesigner();
-                else if (ASender == FNewScriptToolStripMenuItem)                        
+                else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)                        
                         NewEditor(String.Empty, "d4");
-                else if (ASender == FOpenFileToolStripMenuItem)
+                else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
                         OpenFile();
-                else if (ASender == FOpenFileWithToolStripMenuItem)
+                else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
                         OpenFileWith();
                 else if (ASender == FSaveAllToolStripMenuItem)
                         SaveAll();
-                else if (ASender == FLaunchFormToolStripMenuItem)
+                else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
                         LaunchForm();
                 else if (ASender == FExitToolStripMenuItem)
                         Close();
