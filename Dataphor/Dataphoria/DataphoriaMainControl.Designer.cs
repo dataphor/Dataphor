@@ -28,23 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.SuspendLayout();
-            // 
-            // FDockPanel
-            // 
-            this.FDockPanel.ActiveAutoHideContent = null;
-            this.FDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.FDockPanel.Location = new System.Drawing.Point(0, 0);
-            this.FDockPanel.Name = "FDockPanel";
-            this.FDockPanel.Size = new System.Drawing.Size(369, 355);
-            this.FDockPanel.TabIndex = 0;
             // 
             // DataphoriaMainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.FDockPanel);
             this.Name = "DataphoriaMainControl";
             this.Size = new System.Drawing.Size(369, 355);
             this.ResumeLayout(false);
@@ -53,6 +42,5 @@
 
         #endregion
 
-        private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
     }
 }

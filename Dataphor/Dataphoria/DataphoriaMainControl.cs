@@ -7,7 +7,6 @@ using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.Dataphoria.ObjectTree;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria
 {    
@@ -18,8 +17,6 @@ namespace Alphora.Dataphor.Dataphoria
         private DataTree FExplorer;
         private ErrorListView FErrorListView;
 
-        private DockContent FDockContentFExplorer;
-        private DockContent FDockContentErrorListView;
 
 
         public DataphoriaMainControl()
@@ -29,25 +26,6 @@ namespace Alphora.Dataphor.Dataphoria
             FExplorer = new DataTree();
             FErrorListView = new ErrorListView();
 
-            FDockContentFExplorer= new DockContent();
-
-            FExplorer.Dock = DockStyle.Fill;
-            FDockContentFExplorer.Controls.Add(FExplorer);
-            FDockContentFExplorer.TabText = "Dataphoria Explorer";
-            FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
-            FDockContentFExplorer.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockLeft;
-
-
-            FDockContentErrorListView = new DockContent();
-
-            FErrorListView.Dock = DockStyle.Fill;
-            FDockContentErrorListView.Controls.Add(FErrorListView);
-            FDockContentErrorListView.TabText = "Dataphoria Error List";
-            FDockContentErrorListView.Text = "Error List - Dataphoria";
-            FDockContentErrorListView.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottomAutoHide;
-            
-            FDockContentFExplorer.Show(this.FDockPanel);
-            FDockContentErrorListView.Show(this.FDockPanel);
         }
 
 
@@ -64,21 +42,10 @@ namespace Alphora.Dataphor.Dataphoria
             }
         }
 
-        private void AttachDockContent(DockContent ADockContent)
-        {
-
-            ADockContent.MdiParent = this.ParentForm;
-            ADockContent.Show(this.FDockPanel);
-        }
 
         internal void AttachForm(Form AForm)
         {
-            if (AForm is DockContent)
-                AttachDockContent((DockContent)AForm);
-            else
-            {
-                throw new ArgumentException("Most be " + typeof(DockContent), "AForm");
-            }
+            throw new NotImplementedException("Not Implemented");
         }
     }
 }
