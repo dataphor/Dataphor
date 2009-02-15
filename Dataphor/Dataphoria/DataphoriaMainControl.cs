@@ -7,11 +7,12 @@ using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.Dataphoria.ObjectTree;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Darwen.Windows.Forms.Controls.Docking;
 
 namespace Alphora.Dataphor.Dataphoria
-{    
-    
-    public partial class DataphoriaMainControl : UserControl
+{
+
+    public partial class DataphoriaMainControl : Darwen.Windows.Forms.Controls.Docking.DockingManagerControl
     {
 
         private DataTree FExplorer;
@@ -26,6 +27,12 @@ namespace Alphora.Dataphor.Dataphoria
             FExplorer = new DataTree();
             FErrorListView = new ErrorListView();
 
+            IDockingPanel LLeftPanel = this.Panels[DockingType.Left].InsertPanel(0);
+            LLeftPanel.DockedControls.Add("Explorer", FExplorer);
+
+            IDockingPanel LBottomPanel = this.Panels[DockingType.Bottom].InsertPanel(0);
+            LBottomPanel.DockedControls.Add("Error List", FErrorListView);
+            
         }
 
 

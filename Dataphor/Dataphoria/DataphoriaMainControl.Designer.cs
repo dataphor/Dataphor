@@ -28,19 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.ToolStripProfessionalRenderer toolStripProfessionalRenderer1 = new System.Windows.Forms.ToolStripProfessionalRenderer();
+            this.FTabbedDocumentControl = new Darwen.Windows.Forms.Controls.TabbedDocuments.TabbedDocumentControl();
             this.SuspendLayout();
+            // 
+            // FTabbedDocumentControl
+            // 
+            this.FTabbedDocumentControl.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.FTabbedDocumentControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FTabbedDocumentControl.Location = new System.Drawing.Point(30, 24);
+            this.FTabbedDocumentControl.Name = "FTabbedDocumentControl";
+            toolStripProfessionalRenderer1.RoundedEdges = true;
+            this.FTabbedDocumentControl.Renderer = toolStripProfessionalRenderer1;
+            this.FTabbedDocumentControl.SelectedControl = null;
+            this.FTabbedDocumentControl.Size = new System.Drawing.Size(309, 307);
+            this.FTabbedDocumentControl.TabIndex = 14;
             // 
             // DataphoriaMainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.FTabbedDocumentControl);
             this.Name = "DataphoriaMainControl";
             this.Size = new System.Drawing.Size(369, 355);
+            this.Controls.SetChildIndex(this.FTabbedDocumentControl, 0);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
+
+        private Darwen.Windows.Forms.Controls.TabbedDocuments.TabbedDocumentControl FTabbedDocumentControl;
+
 
     }
 }
