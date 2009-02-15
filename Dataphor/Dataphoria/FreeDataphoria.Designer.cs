@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FLaunchFormToolStripMenuItem,
             this.FExitToolStripMenuItem});
             this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
-            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(94, 20);
             this.FFileToolStripMenuItem.Text = "File";
             // 
             // FConnectToolStripMenuItem
@@ -111,6 +111,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FDisconnectToolStripMenuItem
             // 
+            this.FDisconnectToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Disconnect;
             this.FDisconnectToolStripMenuItem.Name = "FDisconnectToolStripMenuItem";
             this.FDisconnectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FDisconnectToolStripMenuItem.Text = "Disconnect";
@@ -118,6 +119,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FNewToolStripMenuItem
             // 
+            this.FNewToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.New;
             this.FNewToolStripMenuItem.Name = "FNewToolStripMenuItem";
             this.FNewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FNewToolStripMenuItem.Text = "New";
@@ -125,6 +127,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FNewScriptToolStripMenuItem
             // 
+            this.FNewScriptToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.NewScript;
             this.FNewScriptToolStripMenuItem.Name = "FNewScriptToolStripMenuItem";
             this.FNewScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FNewScriptToolStripMenuItem.Text = "New Script";
@@ -132,6 +135,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FOpenFileToolStripMenuItem
             // 
+            this.FOpenFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Open;
             this.FOpenFileToolStripMenuItem.Name = "FOpenFileToolStripMenuItem";
             this.FOpenFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FOpenFileToolStripMenuItem.Text = "Open File";
@@ -139,12 +143,14 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FOpenFileWithToolStripMenuItem
             // 
+            this.FOpenFileWithToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.OpenWith;
             this.FOpenFileWithToolStripMenuItem.Name = "FOpenFileWithToolStripMenuItem";
             this.FOpenFileWithToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FOpenFileWithToolStripMenuItem.Text = "Open File With";
             // 
             // FSaveAllToolStripMenuItem
             // 
+            this.FSaveAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveAll;
             this.FSaveAllToolStripMenuItem.Name = "FSaveAllToolStripMenuItem";
             this.FSaveAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSaveAllToolStripMenuItem.Text = "Save All";
@@ -152,6 +158,7 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             // FLaunchFormToolStripMenuItem
             // 
+            this.FLaunchFormToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.LaunchForm;
             this.FLaunchFormToolStripMenuItem.Name = "FLaunchFormToolStripMenuItem";
             this.FLaunchFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FLaunchFormToolStripMenuItem.Text = "Launch Form";
