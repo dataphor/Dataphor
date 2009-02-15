@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
 	// Don't put any definitions above the FormDesiger class
 
-	public class FormDesigner : DataphoriaForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer
+	public class FormDesigner : BaseForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer
 	{
 		private System.ComponentModel.IContainer components;
 		private System.Windows.Forms.ImageList ToolBarImageList;
