@@ -376,6 +376,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(664, 507);
             this.Controls.Add(this.toolStripContainer1);
+            this.IsMdiContainer = true;
             this.MainMenuStrip = this.FMainMenuStrip;
             this.Name = "FreeDataphoria";
             this.Text = "FreeDataphoria";
