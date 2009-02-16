@@ -115,8 +115,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.FShowResultsMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
 			this.FScriptBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "ScriptBar");
 			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
-			this.FEditorPanel.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.FDockingManager)).BeginInit();
+			
 			((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -195,10 +194,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             0,
             1,
             2});
-			// 
-			// FEditorPanel
-			// 
-			this.FEditorPanel.Size = new System.Drawing.Size(455, 138);
+			
 			// 
 			// FViewMenu
 			// 
@@ -216,12 +212,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             0,
             1,
             2});
-			// 
-			// FDockingManager
-			// 
-			this.FDockingManager.DockLayoutStream = ((System.IO.MemoryStream)(resources.GetObject("FDockingManager.DockLayoutStream")));
-			this.FDockingManager.SetDockLabel(this.FResultPanel, "Results");
-			this.FDockingManager.SetHiddenOnLoad(this.FResultPanel, true);
+			
 			// 
 			// FTextEdit
 			// 
@@ -230,8 +221,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// FResultPanel
 			// 
 			this.FResultPanel.BackColor = System.Drawing.SystemColors.Control;
-			this.FResultPanel.CausesValidation = false;
-			this.FDockingManager.SetEnableDocking(this.FResultPanel, true);
+			this.FResultPanel.CausesValidation = false;			
 			this.FResultPanel.EnableFolding = false;
 			this.FResultPanel.Encoding = ((System.Text.Encoding)(resources.GetObject("FResultPanel.Encoding")));
 			this.FResultPanel.IndentStyle = ICSharpCode.TextEditor.Document.IndentStyle.Auto;
@@ -435,10 +425,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// 
 			this.ClientSize = new System.Drawing.Size(455, 376);
 			this.Name = "D4Editor";
-			this.Controls.SetChildIndex(this.FEditorPanel, 0);
+			
 			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
-			this.FEditorPanel.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.FDockingManager)).EndInit();
+			
+			
 			((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).EndInit();
 			this.ResumeLayout(false);
 
@@ -456,7 +446,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void ShowResults()
 		{
-			FDockingManager.SetDockVisibility(FResultPanel, true);
+			//FDockingManager.SetDockVisibility(FResultPanel, true);
 			// TODO: There is a problem with Syncfusion that crashes the whole app if the FResultPanel is pinned and the following code runs
 //			FDockingManager.ActivateControl(FResultPanel);
 		}
@@ -501,7 +491,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void HideResultPanel()
 		{
 			FResultPanel.Clear();
-			FDockingManager.SetDockVisibility(FResultPanel, false);
+			//FDockingManager.SetDockVisibility(FResultPanel, false);
 		}
 
 		private string GetTextToExecute() 
