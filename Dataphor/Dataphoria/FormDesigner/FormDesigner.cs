@@ -78,14 +78,32 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		public FormDesigner()	// dummy constructor for SyncFusion's MDI menu merging
 		{
 			InitializeComponent();
+            InitializeDocking();
 		}
 
 		public FormDesigner(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
-                        
+
+
+
+            InitializeDocking();
+
             
-                     
+            FDesignerID = ADesignerID;
+
+			FNodesTree.FormDesigner = this;
+
+			InitializeService(ADataphoria);
+
+
+
+			PrepareSession();
+			ADataphoria.OnFormDesignerLibrariesChanged += new EventHandler(FormDesignerLibrariesChanged);
+		}
+
+        private void InitializeDocking()
+        {
             // 
             // FPaletteGroupBar
             // 
@@ -175,7 +193,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FNodesTree.TabIndex = 0;
             this.FNodesTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FNodesTree_AfterSelect);
             this.FNodesTree.Dock = DockStyle.Fill;
-            
+
 
             FDockContentNodesTree = new DockContent();
             FDockContentNodesTree.Controls.Add(FNodesTree);
@@ -214,19 +232,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentPropertyGrid.Text = "Properties Grid";
             FDockContentPropertyGrid.ShowHint = DockState.DockRight;
             FDockContentPropertyGrid.Show(FDockPanel);
-
-            
-            FDesignerID = ADesignerID;
-
-			FNodesTree.FormDesigner = this;
-
-			InitializeService(ADataphoria);
-
-
-
-			PrepareSession();
-			ADataphoria.OnFormDesignerLibrariesChanged += new EventHandler(FormDesignerLibrariesChanged);
-		}
+        }
 
 		protected override void Dispose(bool ADisposed)
 		{
