@@ -132,12 +132,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FPalettePanel.Name = "FPalettePanel";
             this.FPalettePanel.Size = new System.Drawing.Size(163, 187);
             this.FPalettePanel.TabIndex = 1;
+            this.FPalettePanel.Dock = DockStyle.Fill;
 
             FDockContentPalettePanel = new DockContent();
             FDockContentPalettePanel.Controls.Add(FPalettePanel);
             FDockContentPalettePanel.TabText = "Forms Palette";
             FDockContentPalettePanel.Text = "Palette";
-            FDockContentPalettePanel.ShowHint = DockState.DockLeftAutoHide;
+            FDockContentPalettePanel.ShowHint = DockState.DockLeft;
             FDockContentPalettePanel.Show(FDockPanel);
 
             // 
@@ -150,9 +151,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FFormPanel.Name = "FFormPanel";
             this.FFormPanel.Size = new System.Drawing.Size(685, 283);
             this.FFormPanel.TabIndex = 3;
+            this.FFormPanel.Dock = DockStyle.Fill;
 
             FDockContentFormPanel = new DockContent();
             FDockContentFormPanel.Controls.Add(FFormPanel);
+            FDockContentFormPanel.ShowHint = DockState.Document;
             FDockContentFormPanel.Show(this.FDockPanel);
 
             // 
@@ -171,14 +174,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FNodesTree.Size = new System.Drawing.Size(283, 209);
             this.FNodesTree.TabIndex = 0;
             this.FNodesTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FNodesTree_AfterSelect);
-
+            this.FNodesTree.Dock = DockStyle.Fill;
             
 
             FDockContentNodesTree = new DockContent();
             FDockContentNodesTree.Controls.Add(FNodesTree);
             FDockContentNodesTree.TabText = "Forms Nodes Tree";
             FDockContentNodesTree.Text = "Nodes Tree";
-            FDockContentNodesTree.ShowHint = DockState.DockLeftAutoHide;
+            FDockContentNodesTree.ShowHint = DockState.DockRight;
             FDockContentNodesTree.Show(FDockPanel);
 
 
@@ -203,13 +206,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FPropertyGrid.ViewBackColor = System.Drawing.SystemColors.Window;
             this.FPropertyGrid.ViewForeColor = System.Drawing.SystemColors.WindowText;
             this.FPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.NodePropertyGrid_PropertyValueChanged);
-
+            this.FPropertyGrid.Dock = DockStyle.Fill;
 
             FDockContentPropertyGrid = new DockContent();
             FDockContentPropertyGrid.Controls.Add(FPropertyGrid);
             FDockContentPropertyGrid.TabText = "Forms Properties Grid";
             FDockContentPropertyGrid.Text = "Properties Grid";
-            FDockContentPropertyGrid.ShowHint = DockState.DockRightAutoHide;
+            FDockContentPropertyGrid.ShowHint = DockState.DockRight;
             FDockContentPropertyGrid.Show(FDockPanel);
 
             
