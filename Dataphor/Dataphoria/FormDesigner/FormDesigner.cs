@@ -27,6 +27,7 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.BOP;
 
 using Syncfusion.Windows.Forms.Tools;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
@@ -63,9 +64,16 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		private Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu FNodesPopupMenu;
 		protected Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree FNodesTree;
 		private Alphora.Dataphor.Dataphoria.FormDesigner.FormPanel FFormPanel;
-		protected Syncfusion.Windows.Forms.Tools.DockingManager FDockingManager;
-		private Syncfusion.Windows.Forms.Tools.DockingClientPanel FDockingPanel;
+        private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
+		//protected Syncfusion.Windows.Forms.Tools.DockingManager FDockingManager;
+		//private Syncfusion.Windows.Forms.Tools.DockingClientPanel FDockingPanel;
 		private System.Windows.Forms.ImageList FNodesImageList;
+
+
+        protected DockContent FDockContentPalettePanel;
+        protected DockContent FDockContentFormPanel;
+        protected DockContent FDockContentNodesTree;
+        protected DockContent FDockContentPropertyGrid;
 
 		public FormDesigner()	// dummy constructor for SyncFusion's MDI menu merging
 		{
@@ -75,12 +83,143 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		public FormDesigner(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
+                        
+            
+                     
+            // 
+            // FPaletteGroupBar
+            // 
+            this.FPaletteGroupBar = new Syncfusion.Windows.Forms.Tools.GroupBar();
+            this.FPaletteGroupBar.AllowDrop = true;
+            this.FPaletteGroupBar.BackColor = System.Drawing.SystemColors.Control;
+            this.FPaletteGroupBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.FPaletteGroupBar.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FPaletteGroupBar.Location = new System.Drawing.Point(0, 24);
+            this.FPaletteGroupBar.Name = "FPaletteGroupBar";
+            this.FPaletteGroupBar.SelectedItem = 0;
+            this.FPaletteGroupBar.Size = new System.Drawing.Size(163, 163);
+            this.FPaletteGroupBar.TabIndex = 1;
+            // 
+            // FPointerGroupView
+            // 
+            this.FPointerGroupView = new Syncfusion.Windows.Forms.Tools.GroupView();
+            this.FPointerGroupView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.FPointerGroupView.ButtonView = true;
+            this.FPointerGroupView.Dock = System.Windows.Forms.DockStyle.Top;
+            this.FPointerGroupView.GroupViewItems.AddRange(new Syncfusion.Windows.Forms.Tools.GroupViewItem[] {
+																												  new Syncfusion.Windows.Forms.Tools.GroupViewItem("Pointer", 0)});
+            this.FPointerGroupView.IntegratedScrolling = true;
+            this.FPointerGroupView.ItemYSpacing = 2;
+            this.FPointerGroupView.LargeImageList = null;
+            this.FPointerGroupView.Location = new System.Drawing.Point(0, 0);
+            this.FPointerGroupView.Name = "FPointerGroupView";
+            this.FPointerGroupView.SelectedItem = 0;
+            this.FPointerGroupView.Size = new System.Drawing.Size(163, 24);
+            this.FPointerGroupView.SmallImageList = this.FPointerImageList;
+            this.FPointerGroupView.SmallImageView = true;
+            this.FPointerGroupView.TabIndex = 0;
+            this.FPointerGroupView.Text = "groupView2";
+            this.FPointerGroupView.GroupViewItemSelected += new System.EventHandler(this.FPointerGroupView_GroupViewItemSelected);
 
-			FDesignerID = ADesignerID;
+            // 
+            // FPalettePanel
+            // 
+            this.FPalettePanel = new System.Windows.Forms.Panel();
+            this.FPalettePanel.Controls.Add(this.FPaletteGroupBar);
+            this.FPalettePanel.Controls.Add(this.FPointerGroupView);
+            //this.FDockingManager.SetEnableDocking(this.FPalettePanel, true);
+            this.FPalettePanel.Location = new System.Drawing.Point(1, 21);
+            this.FPalettePanel.Name = "FPalettePanel";
+            this.FPalettePanel.Size = new System.Drawing.Size(163, 187);
+            this.FPalettePanel.TabIndex = 1;
+
+            FDockContentPalettePanel = new DockContent();
+            FDockContentPalettePanel.Controls.Add(FPalettePanel);
+            FDockContentPalettePanel.TabText = "Forms Palette";
+            FDockContentPalettePanel.Text = "Palette";
+            FDockContentPalettePanel.ShowHint = DockState.DockLeftAutoHide;
+            FDockContentPalettePanel.Show(FDockPanel);
+
+            // 
+            // FFormPanel
+            // 
+            this.FFormPanel = new Alphora.Dataphor.Dataphoria.FormDesigner.FormPanel();
+            this.FFormPanel.BackColor = System.Drawing.SystemColors.ControlDark;
+            //this.FDockingManager.SetEnableDocking(this.FFormPanel, true);
+            this.FFormPanel.Location = new System.Drawing.Point(1, 21);
+            this.FFormPanel.Name = "FFormPanel";
+            this.FFormPanel.Size = new System.Drawing.Size(685, 283);
+            this.FFormPanel.TabIndex = 3;
+
+            FDockContentFormPanel = new DockContent();
+            FDockContentFormPanel.Controls.Add(FFormPanel);
+            FDockContentFormPanel.Show(this.FDockPanel);
+
+            // 
+            // FNodesTree
+            // 
+            this.FNodesTree = new Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree();
+            this.FNodesTree.AllowDrop = true;
+            this.FNodesTree.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.FNodesTree.CausesValidation = false;
+            this.FNodesTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FNodesTree.HideSelection = false;
+            this.FNodesTree.ImageList = this.FNodesImageList;
+            this.FNodesTree.Location = new System.Drawing.Point(0, 0);
+            this.FNodesTree.Name = "FNodesTree";
+            this.FNodesTree.ShowRootLines = false;
+            this.FNodesTree.Size = new System.Drawing.Size(283, 209);
+            this.FNodesTree.TabIndex = 0;
+            this.FNodesTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FNodesTree_AfterSelect);
+
+            
+
+            FDockContentNodesTree = new DockContent();
+            FDockContentNodesTree.Controls.Add(FNodesTree);
+            FDockContentNodesTree.TabText = "Forms Nodes Tree";
+            FDockContentNodesTree.Text = "Nodes Tree";
+            FDockContentNodesTree.ShowHint = DockState.DockLeftAutoHide;
+            FDockContentNodesTree.Show(FDockPanel);
+
+
+            this.FPropertyGrid = new System.Windows.Forms.PropertyGrid();
+            // 
+            // FPropertyGrid
+            // 
+            this.FPropertyGrid.BackColor = System.Drawing.SystemColors.Control;
+            this.FPropertyGrid.CausesValidation = false;
+            this.FPropertyGrid.CommandsVisibleIfAvailable = true;
+            this.FPropertyGrid.Cursor = System.Windows.Forms.Cursors.HSplit;
+            //this.FDockingManager.SetEnableDocking(this.FPropertyGrid, true);
+            this.FPropertyGrid.LargeButtons = false;
+            this.FPropertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
+            this.FPropertyGrid.Location = new System.Drawing.Point(1, 21);
+            this.FPropertyGrid.Name = "FPropertyGrid";
+            this.FPropertyGrid.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
+            this.FPropertyGrid.Size = new System.Drawing.Size(229, 187);
+            this.FPropertyGrid.TabIndex = 2;
+            this.FPropertyGrid.Text = "Properties of the Currently Selected Node";
+            this.FPropertyGrid.ToolbarVisible = false;
+            this.FPropertyGrid.ViewBackColor = System.Drawing.SystemColors.Window;
+            this.FPropertyGrid.ViewForeColor = System.Drawing.SystemColors.WindowText;
+            this.FPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.NodePropertyGrid_PropertyValueChanged);
+
+
+            FDockContentPropertyGrid = new DockContent();
+            FDockContentPropertyGrid.Controls.Add(FPropertyGrid);
+            FDockContentPropertyGrid.TabText = "Forms Properties Grid";
+            FDockContentPropertyGrid.Text = "Properties Grid";
+            FDockContentPropertyGrid.ShowHint = DockState.DockRightAutoHide;
+            FDockContentPropertyGrid.Show(FDockPanel);
+
+            
+            FDesignerID = ADesignerID;
 
 			FNodesTree.FormDesigner = this;
 
 			InitializeService(ADataphoria);
+
+
 
 			PrepareSession();
 			ADataphoria.OnFormDesignerLibrariesChanged += new EventHandler(FormDesignerLibrariesChanged);
@@ -149,400 +288,301 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(FormDesigner));
-			this.FFormPanel = new Alphora.Dataphor.Dataphoria.FormDesigner.FormPanel();
-			this.FPalettePanel = new System.Windows.Forms.Panel();
-			this.FPaletteGroupBar = new Syncfusion.Windows.Forms.Tools.GroupBar();
-			this.FPointerGroupView = new Syncfusion.Windows.Forms.Tools.GroupView();
-			this.FPointerImageList = new System.Windows.Forms.ImageList(this.components);
-			this.FPropertyGrid = new System.Windows.Forms.PropertyGrid();
-			this.FNodesImageList = new System.Windows.Forms.ImageList(this.components);
-			this.ToolBarImageList = new System.Windows.Forms.ImageList(this.components);
-			this.FFrameBarManager = new Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager(this.components, this);
-			this.FMainMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "MainMenu");
-			this.FFileMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
-			this.FSaveMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FSaveAsFile = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FSaveAsDocumentMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FCloseMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FEditMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
-			this.FCutMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FCopyMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FPasteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FDeleteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FRenameMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FViewMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
-			this.FShowPaletteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FShowPropertiesMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FShowFormMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-			this.FFileBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "FileBar");
-			this.FEditBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "EditBar");
-			this.FNodesPopupMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu(this.components);
-			this.FNodesTree = new Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree();
-			this.FDockingManager = new Syncfusion.Windows.Forms.Tools.DockingManager(this.components);
-			this.FDockingPanel = new Syncfusion.Windows.Forms.Tools.DockingClientPanel();
-			this.FPalettePanel.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.FDockingManager)).BeginInit();
-			this.FDockingPanel.SuspendLayout();
-			this.SuspendLayout();
-			// 
-			// FFormPanel
-			// 
-			this.FFormPanel.BackColor = System.Drawing.SystemColors.ControlDark;
-			this.FDockingManager.SetEnableDocking(this.FFormPanel, true);
-			this.FFormPanel.Location = new System.Drawing.Point(1, 21);
-			this.FFormPanel.Name = "FFormPanel";
-			this.FFormPanel.Size = new System.Drawing.Size(685, 283);
-			this.FFormPanel.TabIndex = 3;
-			// 
-			// FPalettePanel
-			// 
-			this.FPalettePanel.Controls.Add(this.FPaletteGroupBar);
-			this.FPalettePanel.Controls.Add(this.FPointerGroupView);
-			this.FDockingManager.SetEnableDocking(this.FPalettePanel, true);
-			this.FPalettePanel.Location = new System.Drawing.Point(1, 21);
-			this.FPalettePanel.Name = "FPalettePanel";
-			this.FPalettePanel.Size = new System.Drawing.Size(163, 187);
-			this.FPalettePanel.TabIndex = 1;
-			// 
-			// FPaletteGroupBar
-			// 
-			this.FPaletteGroupBar.AllowDrop = true;
-			this.FPaletteGroupBar.BackColor = System.Drawing.SystemColors.Control;
-			this.FPaletteGroupBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.FPaletteGroupBar.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FPaletteGroupBar.Location = new System.Drawing.Point(0, 24);
-			this.FPaletteGroupBar.Name = "FPaletteGroupBar";
-			this.FPaletteGroupBar.SelectedItem = 0;
-			this.FPaletteGroupBar.Size = new System.Drawing.Size(163, 163);
-			this.FPaletteGroupBar.TabIndex = 1;
-			// 
-			// FPointerGroupView
-			// 
-			this.FPointerGroupView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.FPointerGroupView.ButtonView = true;
-			this.FPointerGroupView.Dock = System.Windows.Forms.DockStyle.Top;
-			this.FPointerGroupView.GroupViewItems.AddRange(new Syncfusion.Windows.Forms.Tools.GroupViewItem[] {
-																												  new Syncfusion.Windows.Forms.Tools.GroupViewItem("Pointer", 0)});
-			this.FPointerGroupView.IntegratedScrolling = true;
-			this.FPointerGroupView.ItemYSpacing = 2;
-			this.FPointerGroupView.LargeImageList = null;
-			this.FPointerGroupView.Location = new System.Drawing.Point(0, 0);
-			this.FPointerGroupView.Name = "FPointerGroupView";
-			this.FPointerGroupView.SelectedItem = 0;
-			this.FPointerGroupView.Size = new System.Drawing.Size(163, 24);
-			this.FPointerGroupView.SmallImageList = this.FPointerImageList;
-			this.FPointerGroupView.SmallImageView = true;
-			this.FPointerGroupView.TabIndex = 0;
-			this.FPointerGroupView.Text = "groupView2";
-			this.FPointerGroupView.GroupViewItemSelected += new System.EventHandler(this.FPointerGroupView_GroupViewItemSelected);
-			// 
-			// FPointerImageList
-			// 
-			this.FPointerImageList.ImageSize = new System.Drawing.Size(16, 16);
-			this.FPointerImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FPointerImageList.ImageStream")));
-			this.FPointerImageList.TransparentColor = System.Drawing.Color.Lime;
-			// 
-			// FPropertyGrid
-			// 
-			this.FPropertyGrid.BackColor = System.Drawing.SystemColors.Control;
-			this.FPropertyGrid.CausesValidation = false;
-			this.FPropertyGrid.CommandsVisibleIfAvailable = true;
-			this.FPropertyGrid.Cursor = System.Windows.Forms.Cursors.HSplit;
-			this.FDockingManager.SetEnableDocking(this.FPropertyGrid, true);
-			this.FPropertyGrid.LargeButtons = false;
-			this.FPropertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
-			this.FPropertyGrid.Location = new System.Drawing.Point(1, 21);
-			this.FPropertyGrid.Name = "FPropertyGrid";
-			this.FPropertyGrid.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
-			this.FPropertyGrid.Size = new System.Drawing.Size(229, 187);
-			this.FPropertyGrid.TabIndex = 2;
-			this.FPropertyGrid.Text = "Properties of the Currently Selected Node";
-			this.FPropertyGrid.ToolbarVisible = false;
-			this.FPropertyGrid.ViewBackColor = System.Drawing.SystemColors.Window;
-			this.FPropertyGrid.ViewForeColor = System.Drawing.SystemColors.WindowText;
-			this.FPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.NodePropertyGrid_PropertyValueChanged);
-			// 
-			// FNodesImageList
-			// 
-			this.FNodesImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-			this.FNodesImageList.ImageSize = new System.Drawing.Size(16, 16);
-			this.FNodesImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FNodesImageList.ImageStream")));
-			this.FNodesImageList.TransparentColor = System.Drawing.Color.LimeGreen;
-			// 
-			// ToolBarImageList
-			// 
-			this.ToolBarImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-			this.ToolBarImageList.ImageSize = new System.Drawing.Size(16, 16);
-			this.ToolBarImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ToolBarImageList.ImageStream")));
-			this.ToolBarImageList.TransparentColor = System.Drawing.Color.Transparent;
-			// 
-			// FFrameBarManager
-			// 
-			this.FFrameBarManager.Bars.Add(this.FMainMenu);
-			this.FFrameBarManager.Bars.Add(this.FFileBar);
-			this.FFrameBarManager.Bars.Add(this.FEditBar);
-			this.FFrameBarManager.Categories.Add("File");
-			this.FFrameBarManager.Categories.Add("Edit");
-			this.FFrameBarManager.Categories.Add("View");
-			this.FFrameBarManager.Categories.Add("Status");
-			this.FFrameBarManager.CurrentBaseFormType = "Alphora.Dataphor.Dataphoria.DataphoriaForm";
-			this.FFrameBarManager.Form = this;
-			this.FFrameBarManager.FormName = "Form Designer";
-			this.FFrameBarManager.ImageList = this.ToolBarImageList;
-			this.FFrameBarManager.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																										  this.FSaveAsFile,
-																										  this.FSaveAsDocumentMenuItem,
-																										  this.FCloseMenuItem,
-																										  this.FFileMenu,
-																										  this.FSaveMenuItem,
-																										  this.FEditMenuItem,
-																										  this.FCutMenuItem,
-																										  this.FCopyMenuItem,
-																										  this.FPasteMenuItem,
-																										  this.FDeleteMenuItem,
-																										  this.FRenameMenuItem,
-																										  this.FViewMenu,
-																										  this.FShowPaletteMenuItem,
-																										  this.FShowPropertiesMenuItem,
-																										  this.FShowFormMenuItem});
-			this.FFrameBarManager.LargeImageList = null;
-			this.FFrameBarManager.UsePartialMenus = false;
-			this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
-			// 
-			// FMainMenu
-			// 
-			this.FMainMenu.BarName = "MainMenu";
-			this.FMainMenu.BarStyle = ((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle)(((((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.AllowQuickCustomizing | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.IsMainMenu) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.Visible) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.UseWholeRow) 
-				| Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.DrawDragBorder)));
-			this.FMainMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FFileMenu,
-																								   this.FEditMenuItem,
-																								   this.FViewMenu});
-			this.FMainMenu.Manager = this.FFrameBarManager;
-			// 
-			// FFileMenu
-			// 
-			this.FFileMenu.CategoryIndex = 0;
-			this.FFileMenu.ID = "File";
-			this.FFileMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FSaveMenuItem,
-																								   this.FSaveAsFile,
-																								   this.FSaveAsDocumentMenuItem,
-																								   this.FCloseMenuItem});
-			this.FFileMenu.MergeOrder = 1;
-			this.FFileMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
-			this.FFileMenu.Text = "&File";
-			// 
-			// FSaveMenuItem
-			// 
-			this.FSaveMenuItem.CategoryIndex = 0;
-			this.FSaveMenuItem.ID = "Save";
-			this.FSaveMenuItem.ImageIndex = 9;
-			this.FSaveMenuItem.MergeOrder = 20;
-			this.FSaveMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
-			this.FSaveMenuItem.Text = "&Save";
-			// 
-			// FSaveAsFile
-			// 
-			this.FSaveAsFile.CategoryIndex = 0;
-			this.FSaveAsFile.ID = "SaveAsFile";
-			this.FSaveAsFile.ImageIndex = 11;
-			this.FSaveAsFile.MergeOrder = 20;
-			this.FSaveAsFile.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftF;
-			this.FSaveAsFile.Text = "Save As &File...";
-			// 
-			// FSaveAsDocumentMenuItem
-			// 
-			this.FSaveAsDocumentMenuItem.CategoryIndex = 0;
-			this.FSaveAsDocumentMenuItem.ID = "SaveAsDocument";
-			this.FSaveAsDocumentMenuItem.ImageIndex = 10;
-			this.FSaveAsDocumentMenuItem.MergeOrder = 20;
-			this.FSaveAsDocumentMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftD;
-			this.FSaveAsDocumentMenuItem.Text = "Save As &Document...";
-			// 
-			// FCloseMenuItem
-			// 
-			this.FCloseMenuItem.CategoryIndex = 0;
-			this.FCloseMenuItem.ID = "Close";
-			this.FCloseMenuItem.ImageIndex = 0;
-			this.FCloseMenuItem.MergeOrder = 20;
-			this.FCloseMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF4;
-			this.FCloseMenuItem.Text = "&Close";
-			// 
-			// FEditMenuItem
-			// 
-			this.FEditMenuItem.CategoryIndex = 1;
-			this.FEditMenuItem.ID = "Edit";
-			this.FEditMenuItem.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																									   this.FCutMenuItem,
-																									   this.FCopyMenuItem,
-																									   this.FPasteMenuItem,
-																									   this.FDeleteMenuItem,
-																									   this.FRenameMenuItem});
-			this.FEditMenuItem.MergeOrder = 5;
-			this.FEditMenuItem.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
-			this.FEditMenuItem.Text = "&Edit";
-			// 
-			// FCutMenuItem
-			// 
-			this.FCutMenuItem.CategoryIndex = 1;
-			this.FCutMenuItem.ID = "Cut";
-			this.FCutMenuItem.ImageIndex = 6;
-			this.FCutMenuItem.MergeOrder = 10;
-			this.FCutMenuItem.ShortcutText = "Ctrl+X";
-			this.FCutMenuItem.Text = "C&ut";
-			// 
-			// FCopyMenuItem
-			// 
-			this.FCopyMenuItem.CategoryIndex = 1;
-			this.FCopyMenuItem.ID = "Copy";
-			this.FCopyMenuItem.ImageIndex = 7;
-			this.FCopyMenuItem.MergeOrder = 10;
-			this.FCopyMenuItem.ShortcutText = "Ctrl+C";
-			this.FCopyMenuItem.Text = "&Copy";
-			// 
-			// FPasteMenuItem
-			// 
-			this.FPasteMenuItem.CategoryIndex = 1;
-			this.FPasteMenuItem.ID = "Paste";
-			this.FPasteMenuItem.ImageIndex = 8;
-			this.FPasteMenuItem.MergeOrder = 10;
-			this.FPasteMenuItem.ShortcutText = "Ctrl+V";
-			this.FPasteMenuItem.Text = "&Paste";
-			// 
-			// FDeleteMenuItem
-			// 
-			this.FDeleteMenuItem.CategoryIndex = 1;
-			this.FDeleteMenuItem.ID = "Delete";
-			this.FDeleteMenuItem.ImageIndex = 4;
-			this.FDeleteMenuItem.MergeOrder = 10;
-			this.FDeleteMenuItem.ShortcutText = "Delete";
-			this.FDeleteMenuItem.Text = "&Delete";
-			// 
-			// FRenameMenuItem
-			// 
-			this.FRenameMenuItem.CategoryIndex = 1;
-			this.FRenameMenuItem.ID = "Rename";
-			this.FRenameMenuItem.ImageIndex = 5;
-			this.FRenameMenuItem.MergeOrder = 10;
-			this.FRenameMenuItem.ShortcutText = "F2";
-			this.FRenameMenuItem.Text = "&Rename";
-			// 
-			// FViewMenu
-			// 
-			this.FViewMenu.CategoryIndex = 2;
-			this.FViewMenu.ID = "View";
-			this.FViewMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								   this.FShowPaletteMenuItem,
-																								   this.FShowPropertiesMenuItem,
-																								   this.FShowFormMenuItem});
-			this.FViewMenu.MergeOrder = 10;
-			this.FViewMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
-			this.FViewMenu.SeparatorIndices.AddRange(new int[] {
-																   0});
-			this.FViewMenu.Text = "&View";
-			// 
-			// FShowPaletteMenuItem
-			// 
-			this.FShowPaletteMenuItem.CategoryIndex = 2;
-			this.FShowPaletteMenuItem.ID = "ShowPalette";
-			this.FShowPaletteMenuItem.MergeOrder = 20;
-			this.FShowPaletteMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF11;
-			this.FShowPaletteMenuItem.Text = "P&alette";
-			// 
-			// FShowPropertiesMenuItem
-			// 
-			this.FShowPropertiesMenuItem.CategoryIndex = 2;
-			this.FShowPropertiesMenuItem.ID = "ShowProperties";
-			this.FShowPropertiesMenuItem.MergeOrder = 20;
-			this.FShowPropertiesMenuItem.Shortcut = System.Windows.Forms.Shortcut.F11;
-			this.FShowPropertiesMenuItem.Text = "&Properties";
-			// 
-			// FShowFormMenuItem
-			// 
-			this.FShowFormMenuItem.CategoryIndex = 2;
-			this.FShowFormMenuItem.ID = "ShowForm";
-			this.FShowFormMenuItem.MergeOrder = 20;
-			this.FShowFormMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF12;
-			this.FShowFormMenuItem.Text = "&Form";
-			// 
-			// FFileBar
-			// 
-			this.FFileBar.BarName = "FileBar";
-			this.FFileBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								  this.FSaveMenuItem,
-																								  this.FSaveAsFile,
-																								  this.FSaveAsDocumentMenuItem});
-			this.FFileBar.Manager = this.FFrameBarManager;
-			// 
-			// FEditBar
-			// 
-			this.FEditBar.BarName = "EditBar";
-			this.FEditBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-																								  this.FCutMenuItem,
-																								  this.FCopyMenuItem,
-																								  this.FPasteMenuItem,
-																								  this.FDeleteMenuItem,
-																								  this.FRenameMenuItem});
-			this.FEditBar.Manager = this.FFrameBarManager;
-			// 
-			// FNodesPopupMenu
-			// 
-			this.FNodesPopupMenu.ParentBarItem = this.FEditMenuItem;
-			// 
-			// FNodesTree
-			// 
-			this.FNodesTree.AllowDrop = true;
-			this.FNodesTree.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.FNodesTree.CausesValidation = false;
-			this.FNodesTree.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FNodesTree.HideSelection = false;
-			this.FNodesTree.ImageList = this.FNodesImageList;
-			this.FNodesTree.Location = new System.Drawing.Point(0, 0);
-			this.FNodesTree.Name = "FNodesTree";
-			this.FNodesTree.ShowRootLines = false;
-			this.FNodesTree.Size = new System.Drawing.Size(283, 209);
-			this.FNodesTree.TabIndex = 0;
-			this.FNodesTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.FNodesTree_AfterSelect);
-			// 
-			// FDockingManager
-			// 
-			this.FDockingManager.DockLayoutStream = ((System.IO.MemoryStream)(resources.GetObject("FDockingManager.DockLayoutStream")));
-			this.FDockingManager.HostControl = this;
-			this.FDockingManager.PersistState = false;
-			this.FDockingManager.SetDockLabel(this.FFormPanel, "Form Design");
-			this.FDockingManager.SetDockLabel(this.FPalettePanel, "Palette");
-			this.FDockingManager.SetDockLabel(this.FPropertyGrid, "Properties");
-			// 
-			// FDockingPanel
-			// 
-			this.FDockingPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.FDockingPanel.Controls.Add(this.FNodesTree);
-			this.FDockingPanel.Location = new System.Drawing.Point(169, 0);
-			this.FDockingPanel.Name = "FDockingPanel";
-			this.FDockingPanel.Size = new System.Drawing.Size(283, 209);
-			this.FDockingPanel.SizeToFit = true;
-			this.FDockingPanel.TabIndex = 35;
-			// 
-			// FormDesigner
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.CausesValidation = false;
-			this.ClientSize = new System.Drawing.Size(687, 518);
-			this.Controls.Add(this.FDockingPanel);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Name = "FormDesigner";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-			this.FPalettePanel.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.FDockingManager)).EndInit();
-			this.FDockingPanel.ResumeLayout(false);
-			this.ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDesigner));
+            this.FPointerImageList = new System.Windows.Forms.ImageList(this.components);
+            this.FNodesImageList = new System.Windows.Forms.ImageList(this.components);
+            this.ToolBarImageList = new System.Windows.Forms.ImageList(this.components);
+            this.FFrameBarManager = new Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager(this);
+            this.FMainMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "MainMenu");
+            this.FFileMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
+            this.FSaveMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FSaveAsFile = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FSaveAsDocumentMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FCloseMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FEditMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
+            this.FCutMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FCopyMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FPasteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FDeleteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FRenameMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FViewMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
+            this.FShowPaletteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FShowPropertiesMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FShowFormMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
+            this.FFileBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "FileBar");
+            this.FEditBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "EditBar");
+            this.FNodesPopupMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu(this.components);
+            this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
+            ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // FPointerImageList
+            // 
+            this.FPointerImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FPointerImageList.ImageStream")));
+            this.FPointerImageList.TransparentColor = System.Drawing.Color.Lime;
+            this.FPointerImageList.Images.SetKeyName(0, "");
+            // 
+            // FNodesImageList
+            // 
+            this.FNodesImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FNodesImageList.ImageStream")));
+            this.FNodesImageList.TransparentColor = System.Drawing.Color.LimeGreen;
+            this.FNodesImageList.Images.SetKeyName(0, "");
+            // 
+            // ToolBarImageList
+            // 
+            this.ToolBarImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ToolBarImageList.ImageStream")));
+            this.ToolBarImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.ToolBarImageList.Images.SetKeyName(0, "");
+            this.ToolBarImageList.Images.SetKeyName(1, "");
+            this.ToolBarImageList.Images.SetKeyName(2, "");
+            this.ToolBarImageList.Images.SetKeyName(3, "");
+            this.ToolBarImageList.Images.SetKeyName(4, "");
+            this.ToolBarImageList.Images.SetKeyName(5, "");
+            this.ToolBarImageList.Images.SetKeyName(6, "");
+            this.ToolBarImageList.Images.SetKeyName(7, "");
+            this.ToolBarImageList.Images.SetKeyName(8, "");
+            this.ToolBarImageList.Images.SetKeyName(9, "");
+            this.ToolBarImageList.Images.SetKeyName(10, "");
+            this.ToolBarImageList.Images.SetKeyName(11, "");
+            // 
+            // FFrameBarManager
+            // 
+            this.FFrameBarManager.BarPositionInfo = ((System.IO.MemoryStream)(resources.GetObject("FFrameBarManager.BarPositionInfo")));
+            this.FFrameBarManager.Bars.Add(this.FMainMenu);
+            this.FFrameBarManager.Bars.Add(this.FFileBar);
+            this.FFrameBarManager.Bars.Add(this.FEditBar);
+            this.FFrameBarManager.Categories.Add("File");
+            this.FFrameBarManager.Categories.Add("Edit");
+            this.FFrameBarManager.Categories.Add("View");
+            this.FFrameBarManager.Categories.Add("Status");
+            this.FFrameBarManager.CurrentBaseFormType = "Alphora.Dataphor.Dataphoria.BaseForm";
+            this.FFrameBarManager.Form = this;
+            this.FFrameBarManager.FormName = "Form Designer";
+            this.FFrameBarManager.ImageList = this.ToolBarImageList;
+            this.FFrameBarManager.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FSaveAsFile,
+            this.FSaveAsDocumentMenuItem,
+            this.FCloseMenuItem,
+            this.FFileMenu,
+            this.FSaveMenuItem,
+            this.FEditMenuItem,
+            this.FCutMenuItem,
+            this.FCopyMenuItem,
+            this.FPasteMenuItem,
+            this.FDeleteMenuItem,
+            this.FRenameMenuItem,
+            this.FViewMenu,
+            this.FShowPaletteMenuItem,
+            this.FShowPropertiesMenuItem,
+            this.FShowFormMenuItem});
+            this.FFrameBarManager.LargeImageList = null;
+            this.FFrameBarManager.UsePartialMenus = false;
+            this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
+            // 
+            // FMainMenu
+            // 
+            this.FMainMenu.BarName = "MainMenu";
+            this.FMainMenu.BarStyle = ((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle)(((((Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.AllowQuickCustomizing | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.IsMainMenu)
+                        | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.Visible)
+                        | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.UseWholeRow)
+                        | Syncfusion.Windows.Forms.Tools.XPMenus.BarStyle.DrawDragBorder)));
+            this.FMainMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FFileMenu,
+            this.FEditMenuItem,
+            this.FViewMenu});
+            this.FMainMenu.Manager = this.FFrameBarManager;
+            // 
+            // FFileMenu
+            // 
+            this.FFileMenu.CategoryIndex = 0;
+            this.FFileMenu.ID = "File";
+            this.FFileMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FSaveMenuItem,
+            this.FSaveAsFile,
+            this.FSaveAsDocumentMenuItem,
+            this.FCloseMenuItem});
+            this.FFileMenu.MergeOrder = 1;
+            this.FFileMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
+            this.FFileMenu.Text = "&File";
+            // 
+            // FSaveMenuItem
+            // 
+            this.FSaveMenuItem.CategoryIndex = 0;
+            this.FSaveMenuItem.ID = "Save";
+            this.FSaveMenuItem.ImageIndex = 9;
+            this.FSaveMenuItem.MergeOrder = 20;
+            this.FSaveMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
+            this.FSaveMenuItem.Text = "&Save";
+            // 
+            // FSaveAsFile
+            // 
+            this.FSaveAsFile.CategoryIndex = 0;
+            this.FSaveAsFile.ID = "SaveAsFile";
+            this.FSaveAsFile.ImageIndex = 11;
+            this.FSaveAsFile.MergeOrder = 20;
+            this.FSaveAsFile.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftF;
+            this.FSaveAsFile.Text = "Save As &File...";
+            // 
+            // FSaveAsDocumentMenuItem
+            // 
+            this.FSaveAsDocumentMenuItem.CategoryIndex = 0;
+            this.FSaveAsDocumentMenuItem.ID = "SaveAsDocument";
+            this.FSaveAsDocumentMenuItem.ImageIndex = 10;
+            this.FSaveAsDocumentMenuItem.MergeOrder = 20;
+            this.FSaveAsDocumentMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftD;
+            this.FSaveAsDocumentMenuItem.Text = "Save As &Document...";
+            // 
+            // FCloseMenuItem
+            // 
+            this.FCloseMenuItem.CategoryIndex = 0;
+            this.FCloseMenuItem.ID = "Close";
+            this.FCloseMenuItem.ImageIndex = 0;
+            this.FCloseMenuItem.MergeOrder = 20;
+            this.FCloseMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF4;
+            this.FCloseMenuItem.Text = "&Close";
+            // 
+            // FEditMenuItem
+            // 
+            this.FEditMenuItem.CategoryIndex = 1;
+            this.FEditMenuItem.ID = "Edit";
+            this.FEditMenuItem.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FCutMenuItem,
+            this.FCopyMenuItem,
+            this.FPasteMenuItem,
+            this.FDeleteMenuItem,
+            this.FRenameMenuItem});
+            this.FEditMenuItem.MergeOrder = 5;
+            this.FEditMenuItem.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
+            this.FEditMenuItem.Text = "&Edit";
+            // 
+            // FCutMenuItem
+            // 
+            this.FCutMenuItem.CategoryIndex = 1;
+            this.FCutMenuItem.ID = "Cut";
+            this.FCutMenuItem.ImageIndex = 6;
+            this.FCutMenuItem.MergeOrder = 10;
+            this.FCutMenuItem.ShortcutText = "Ctrl+X";
+            this.FCutMenuItem.Text = "C&ut";
+            // 
+            // FCopyMenuItem
+            // 
+            this.FCopyMenuItem.CategoryIndex = 1;
+            this.FCopyMenuItem.ID = "Copy";
+            this.FCopyMenuItem.ImageIndex = 7;
+            this.FCopyMenuItem.MergeOrder = 10;
+            this.FCopyMenuItem.ShortcutText = "Ctrl+C";
+            this.FCopyMenuItem.Text = "&Copy";
+            // 
+            // FPasteMenuItem
+            // 
+            this.FPasteMenuItem.CategoryIndex = 1;
+            this.FPasteMenuItem.ID = "Paste";
+            this.FPasteMenuItem.ImageIndex = 8;
+            this.FPasteMenuItem.MergeOrder = 10;
+            this.FPasteMenuItem.ShortcutText = "Ctrl+V";
+            this.FPasteMenuItem.Text = "&Paste";
+            // 
+            // FDeleteMenuItem
+            // 
+            this.FDeleteMenuItem.CategoryIndex = 1;
+            this.FDeleteMenuItem.ID = "Delete";
+            this.FDeleteMenuItem.ImageIndex = 4;
+            this.FDeleteMenuItem.MergeOrder = 10;
+            this.FDeleteMenuItem.ShortcutText = "Delete";
+            this.FDeleteMenuItem.Text = "&Delete";
+            // 
+            // FRenameMenuItem
+            // 
+            this.FRenameMenuItem.CategoryIndex = 1;
+            this.FRenameMenuItem.ID = "Rename";
+            this.FRenameMenuItem.ImageIndex = 5;
+            this.FRenameMenuItem.MergeOrder = 10;
+            this.FRenameMenuItem.ShortcutText = "F2";
+            this.FRenameMenuItem.Text = "&Rename";
+            // 
+            // FViewMenu
+            // 
+            this.FViewMenu.CategoryIndex = 2;
+            this.FViewMenu.ID = "View";
+            this.FViewMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FShowPaletteMenuItem,
+            this.FShowPropertiesMenuItem,
+            this.FShowFormMenuItem});
+            this.FViewMenu.MergeOrder = 10;
+            this.FViewMenu.MergeType = System.Windows.Forms.MenuMerge.MergeItems;
+            this.FViewMenu.SeparatorIndices.AddRange(new int[] {
+            0});
+            this.FViewMenu.Text = "&View";
+            // 
+            // FShowPaletteMenuItem
+            // 
+            this.FShowPaletteMenuItem.CategoryIndex = 2;
+            this.FShowPaletteMenuItem.ID = "ShowPalette";
+            this.FShowPaletteMenuItem.MergeOrder = 20;
+            this.FShowPaletteMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF11;
+            this.FShowPaletteMenuItem.Text = "P&alette";
+            // 
+            // FShowPropertiesMenuItem
+            // 
+            this.FShowPropertiesMenuItem.CategoryIndex = 2;
+            this.FShowPropertiesMenuItem.ID = "ShowProperties";
+            this.FShowPropertiesMenuItem.MergeOrder = 20;
+            this.FShowPropertiesMenuItem.Shortcut = System.Windows.Forms.Shortcut.F11;
+            this.FShowPropertiesMenuItem.Text = "&Properties";
+            // 
+            // FShowFormMenuItem
+            // 
+            this.FShowFormMenuItem.CategoryIndex = 2;
+            this.FShowFormMenuItem.ID = "ShowForm";
+            this.FShowFormMenuItem.MergeOrder = 20;
+            this.FShowFormMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF12;
+            this.FShowFormMenuItem.Text = "&Form";
+            // 
+            // FFileBar
+            // 
+            this.FFileBar.BarName = "FileBar";
+            this.FFileBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FSaveMenuItem,
+            this.FSaveAsFile,
+            this.FSaveAsDocumentMenuItem});
+            this.FFileBar.Manager = this.FFrameBarManager;
+            // 
+            // FEditBar
+            // 
+            this.FEditBar.BarName = "EditBar";
+            this.FEditBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
+            this.FCutMenuItem,
+            this.FCopyMenuItem,
+            this.FPasteMenuItem,
+            this.FDeleteMenuItem,
+            this.FRenameMenuItem});
+            this.FEditBar.Manager = this.FFrameBarManager;
+            // 
+            // FNodesPopupMenu
+            // 
+            this.FNodesPopupMenu.ParentBarItem = this.FEditMenuItem;
+            // 
+            // FDockPanel
+            // 
+            this.FDockPanel.ActiveAutoHideContent = null;
+            this.FDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FDockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingSdi;
+            this.FDockPanel.Location = new System.Drawing.Point(0, 0);
+            this.FDockPanel.Name = "FDockPanel";
+            this.FDockPanel.Size = new System.Drawing.Size(687, 518);
+            this.FDockPanel.TabIndex = 4;
+            // 
+            // FormDesigner
+            // 
+            this.CausesValidation = false;
+            this.ClientSize = new System.Drawing.Size(687, 518);
+            this.Controls.Add(this.FDockPanel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "FormDesigner";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
+            this.ResumeLayout(false);
 
 		}
 		#endregion
@@ -1292,17 +1332,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		private void ShowPalette()
 		{
-			FDockingManager.ActivateControl(FPalettePanel);
+			//FDockingManager.ActivateControl(FPalettePanel);
 		}
 
 		private void ShowProperties()
 		{
-			FDockingManager.ActivateControl(FPropertyGrid);
+			//FDockingManager.ActivateControl(FPropertyGrid);
 		}
 
 		private void ShowForm()
 		{
-			FDockingManager.ActivateControl(FFormPanel);
+			//FDockingManager.ActivateControl(FFormPanel);
 		}
 
 		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
