@@ -15,6 +15,7 @@ using ICSharpCode.TextEditor.Document;
 
 using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -41,14 +42,15 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.Bar FMainMenu;
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.Bar FFileBar;
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.Bar FEditBar;
-        protected Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FEditMenu;
+		protected Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FEditMenu;
+		
 		private System.Windows.Forms.ImageList FToolbarImageList;
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSelectAllMenuItem;
         protected Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FViewMenu;
         protected WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
-		protected Alphora.Dataphor.Frontend.Client.Windows.TextEdit FTextEdit;
+        protected DockContent FDockContentTextEdit;
 
-        
+		protected Alphora.Dataphor.Frontend.Client.Windows.TextEdit FTextEdit;
 
 		public TextEditor()	// for the designer
 		{
@@ -59,13 +61,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			InitializeComponent();
 
-
-            this.FTextEdit = new Alphora.Dataphor.Frontend.Client.Windows.TextEdit();
             // 
             // FTextEdit
             // 
-            this.FTextEdit.CausesValidation = false;
-            this.FTextEdit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FTextEdit = new Alphora.Dataphor.Frontend.Client.Windows.TextEdit();
+            this.FTextEdit.CausesValidation = false;            
             this.FTextEdit.EnableFolding = false;
             this.FTextEdit.IndentStyle = ICSharpCode.TextEditor.Document.IndentStyle.Auto;
             this.FTextEdit.Location = new System.Drawing.Point(0, 0);
@@ -75,10 +75,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FTextEdit.ShowVRuler = true;
             this.FTextEdit.Size = new System.Drawing.Size(455, 376);
             this.FTextEdit.TabIndent = 3;
-            this.FTextEdit.TabIndex = 0;
+            
             this.FTextEdit.VRulerRow = 100;
+            this.FTextEdit.Dock = DockStyle.Fill;
 
-            this.FDockPanel.Controls.Add(this.FTextEdit);
+            FDockContentTextEdit = new DockContent();
+            FDockContentTextEdit.Controls.Add(FTextEdit);
+            FDockContentTextEdit.ShowHint = DockState.Document;
+            FDockContentTextEdit.Show(FDockPanel);
 
 			FDesignerID = ADesignerID;
 
@@ -97,7 +101,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FTextEdit.BeginningFind += new EventHandler(BeginningFind);
 			FTextEdit.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
 			FTextEdit.TextNotFound += new EventHandler(TextNotFound);
-			
+			//FEditorPanel.Controls.Add(FTextEdit);
 
 			UpdateLineNumberStatus();
 			UpdateTitle();
@@ -148,6 +152,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFileBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "FileBar");
             this.FEditBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "EditBar");
             this.FToolbarImageList = new System.Windows.Forms.ImageList(this.components);
+            
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
             this.SuspendLayout();
@@ -434,11 +439,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FToolbarImageList.Images.SetKeyName(12, "");
             this.FToolbarImageList.Images.SetKeyName(13, "");
             this.FToolbarImageList.Images.SetKeyName(14, "");
+            
             // 
             // FDockPanel
             // 
             this.FDockPanel.ActiveAutoHideContent = null;
             this.FDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FDockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingSdi;
             this.FDockPanel.Location = new System.Drawing.Point(0, 0);
             this.FDockPanel.Name = "FDockPanel";
             this.FDockPanel.Size = new System.Drawing.Size(455, 376);
