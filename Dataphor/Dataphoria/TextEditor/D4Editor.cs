@@ -24,6 +24,7 @@ using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client.Windows;
 
 using Syncfusion.Windows.Forms.Tools;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -51,6 +52,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private System.Windows.Forms.ImageList FD4EditorImageList;
 		private Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FCancelMenuItem;
 		private Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel FResultPanel;
+        protected DockContent FDockContentResultPanel;
 
 
 		public D4Editor() : base()	// dummy constructor for SyncFusion's MDI menu merging
@@ -61,6 +63,38 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
+
+            this.FResultPanel = new Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel();
+
+            // 
+            // FResultPanel
+            // 
+            this.FResultPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.FResultPanel.CausesValidation = false;
+            this.FResultPanel.EnableFolding = false;
+            //this.FResultPanel.Encoding = ((System.Text.Encoding)(resources.GetObject("FResultPanel.Encoding")));
+            this.FResultPanel.IndentStyle = ICSharpCode.TextEditor.Document.IndentStyle.Auto;
+            this.FResultPanel.IsIconBarVisible = false;
+            this.FResultPanel.Location = new System.Drawing.Point(1, 21);
+            this.FResultPanel.Name = "FResultPanel";
+            this.FResultPanel.ShowInvalidLines = false;
+            this.FResultPanel.ShowLineNumbers = false;
+            this.FResultPanel.ShowVRuler = true;
+            this.FResultPanel.Size = new System.Drawing.Size(453, 212);
+            this.FResultPanel.TabIndent = 3;
+            this.FResultPanel.TabIndex = 1;
+            this.FResultPanel.TabStop = false;
+            this.FResultPanel.VRulerRow = 100;
+            this.FResultPanel.Dock = DockStyle.Fill;
+
+            FDockContentResultPanel = new DockContent();
+            FDockContentResultPanel.Controls.Add(FResultPanel);
+            FDockContentResultPanel.Text = "Results";
+            FDockContentResultPanel.TabText="D4 Results";
+            FDockContentResultPanel.ShowHint = DockState.DockBottomAutoHide;
+            FDockContentResultPanel.Show(this.FDockPanel);
+
+
 
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
 			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
@@ -94,7 +128,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(D4Editor));
-			this.FResultPanel = new Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel();
+			
 			this.FScriptMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
 			this.FExecuteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
 			this.FD4EditorImageList = new System.Windows.Forms.ImageList(this.components);
@@ -217,25 +251,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// FTextEdit
 			// 
 			this.FTextEdit.Size = new System.Drawing.Size(455, 138);
-			// 
-			// FResultPanel
-			// 
-			this.FResultPanel.BackColor = System.Drawing.SystemColors.Control;
-			this.FResultPanel.CausesValidation = false;			
-			this.FResultPanel.EnableFolding = false;
-			this.FResultPanel.Encoding = ((System.Text.Encoding)(resources.GetObject("FResultPanel.Encoding")));
-			this.FResultPanel.IndentStyle = ICSharpCode.TextEditor.Document.IndentStyle.Auto;
-			this.FResultPanel.IsIconBarVisible = false;
-			this.FResultPanel.Location = new System.Drawing.Point(1, 21);
-			this.FResultPanel.Name = "FResultPanel";
-			this.FResultPanel.ShowInvalidLines = false;
-			this.FResultPanel.ShowLineNumbers = false;
-			this.FResultPanel.ShowVRuler = true;
-			this.FResultPanel.Size = new System.Drawing.Size(453, 212);
-			this.FResultPanel.TabIndent = 3;
-			this.FResultPanel.TabIndex = 1;
-			this.FResultPanel.TabStop = false;
-			this.FResultPanel.VRulerRow = 100;
+			
 			// 
 			// FScriptMenu
 			// 
