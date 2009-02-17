@@ -58,12 +58,30 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		public D4Editor() : base()	// dummy constructor for SyncFusion's MDI menu merging
 		{
 			InitializeComponent();
+            InitializeDocking();
 		}
 
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
 
+            InitializeDocking();
+
+
+
+			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
+			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
+			FTextEdit.EditActions[Keys.Control | Keys.OemPeriod] = new NextBlock();
+			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.Oemcomma] = new SelectPriorBlock();
+			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemPeriod] = new SelectNextBlock();
+
+			FResultPanel.BeginningFind += new EventHandler(BeginningFind);
+			FResultPanel.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
+			FResultPanel.TextNotFound += new EventHandler(TextNotFound);
+		}
+
+        private void InitializeDocking()
+        {
             this.FResultPanel = new Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel();
 
             // 
@@ -90,22 +108,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDockContentResultPanel = new DockContent();
             FDockContentResultPanel.Controls.Add(FResultPanel);
             FDockContentResultPanel.Text = "Results";
-            FDockContentResultPanel.TabText="D4 Results";
+            FDockContentResultPanel.TabText = "D4 Results";
             FDockContentResultPanel.ShowHint = DockState.DockBottomAutoHide;
             FDockContentResultPanel.Show(this.FDockPanel);
-
-
-
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
-			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
-			FTextEdit.EditActions[Keys.Control | Keys.OemPeriod] = new NextBlock();
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.Oemcomma] = new SelectPriorBlock();
-			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemPeriod] = new SelectNextBlock();
-
-			FResultPanel.BeginningFind += new EventHandler(BeginningFind);
-			FResultPanel.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
-			FResultPanel.TextNotFound += new EventHandler(TextNotFound);
-		}
+        }
 
 		protected override void Dispose( bool disposing )
 		{
