@@ -55,17 +55,45 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		public TextEditor()	// for the designer
 		{
 			InitializeComponent();
+            InitializeDocking();
 		}
 
 		public TextEditor(IDataphoria ADataphoria, string ADesignerID)
 		{
 			InitializeComponent();
 
+            InitializeDocking();
+
+            FDesignerID = ADesignerID;
+
+            FService = new DesignService(ADataphoria, this);
+            FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
+            FService.OnNameChanged += new EventHandler(NameOrModifiedChanged);
+            FService.OnRequestLoad += new RequestHandler(LoadData);
+            FService.OnRequestSave += new RequestHandler(SaveData);
+
+            FTextEdit.HelpRequested += new HelpEventHandler(FTextArea_HelpRequested);
+
+            FTextEdit.Document.HighlightingStrategy = GetHighlightingStrategy();
+            FTextEdit.Document.DocumentChanged += new SD.Document.DocumentEventHandler(DocumentChanged);
+            TextEditInitialized(FTextEdit, FTextEdit.ActiveTextAreaControl);
+            FTextEdit.OnInitializeTextAreaControl += new InitializeTextAreaControlHandler(TextEditInitialized);
+            FTextEdit.BeginningFind += new EventHandler(BeginningFind);
+            FTextEdit.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
+            FTextEdit.TextNotFound += new EventHandler(TextNotFound);
+			//FEditorPanel.Controls.Add(FTextEdit);
+
+			UpdateLineNumberStatus();
+			UpdateTitle();
+		}
+
+        private void InitializeDocking()
+        {
             // 
             // FTextEdit
             // 
             this.FTextEdit = new Alphora.Dataphor.Frontend.Client.Windows.TextEdit();
-            this.FTextEdit.CausesValidation = false;            
+            this.FTextEdit.CausesValidation = false;
             this.FTextEdit.EnableFolding = false;
             this.FTextEdit.IndentStyle = ICSharpCode.TextEditor.Document.IndentStyle.Auto;
             this.FTextEdit.Location = new System.Drawing.Point(0, 0);
@@ -75,7 +103,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FTextEdit.ShowVRuler = true;
             this.FTextEdit.Size = new System.Drawing.Size(455, 376);
             this.FTextEdit.TabIndent = 3;
-            
+
             this.FTextEdit.VRulerRow = 100;
             this.FTextEdit.Dock = DockStyle.Fill;
 
@@ -84,28 +112,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDockContentTextEdit.ShowHint = DockState.Document;
             FDockContentTextEdit.Show(FDockPanel);
 
-			FDesignerID = ADesignerID;
-
-			FService = new DesignService(ADataphoria, this);
-			FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
-			FService.OnNameChanged += new EventHandler(NameOrModifiedChanged);
-			FService.OnRequestLoad += new RequestHandler(LoadData);
-			FService.OnRequestSave += new RequestHandler(SaveData);
-
-			FTextEdit.HelpRequested += new HelpEventHandler(FTextArea_HelpRequested);
-
-			FTextEdit.Document.HighlightingStrategy = GetHighlightingStrategy();
-			FTextEdit.Document.DocumentChanged += new SD.Document.DocumentEventHandler(DocumentChanged);
-			TextEditInitialized(FTextEdit, FTextEdit.ActiveTextAreaControl);
-			FTextEdit.OnInitializeTextAreaControl += new InitializeTextAreaControlHandler(TextEditInitialized);
-			FTextEdit.BeginningFind += new EventHandler(BeginningFind);
-			FTextEdit.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
-			FTextEdit.TextNotFound += new EventHandler(TextNotFound);
-			//FEditorPanel.Controls.Add(FTextEdit);
-
-			UpdateLineNumberStatus();
-			UpdateTitle();
-		}
+          
+        }
 
 		/// <summary> Clean up any resources being used. </summary>
 		protected override void Dispose( bool disposing )
