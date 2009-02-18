@@ -862,7 +862,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.Controls.Add(this.FMenuStrip);
             this.Controls.Add(this.FDockPanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.FMenuStrip;
             this.Name = "TextEditor";
             this.TabText = "Untitled";
             this.Text = "Untitled";
@@ -1202,7 +1201,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         public void MergeWith(ToolStrip AParentToolStrip)
         {
-            throw new NotImplementedException();
+            ToolStripManager.Merge(this.FToolStrip, AParentToolStrip);
         }
 
         #endregion
