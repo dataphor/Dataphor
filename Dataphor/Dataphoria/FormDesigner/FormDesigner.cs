@@ -73,6 +73,31 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         protected DockContent FDockContentPalettePanel;
         protected DockContent FDockContentFormPanel;
         protected DockContent FDockContentNodesTree;
+        private MenuStrip FMenuStrip;
+        private ToolStripMenuItem FFileToolStripMenuItem;
+        private ToolStripMenuItem FSaveAsFileToolStripMenuItem;
+        private ToolStripMenuItem FSaveAsDocumentToolStripMenuItem;
+        private ToolStripMenuItem FCloseToolStripMenuItem;
+        private ToolStripMenuItem FEditToolStripMenuItem;
+        private ToolStripMenuItem FCutToolStripMenuItem;
+        private ToolStripMenuItem FCopyToolStripMenuItem;
+        private ToolStripMenuItem FPasteToolStripMenuItem;
+        private ToolStripMenuItem FDeleteToolStripMenuItem;
+        private ToolStripMenuItem FRenameToolStripMenuItem;
+        private ToolStripMenuItem FViewToolStripMenuItem;
+        private ToolStripMenuItem FPaletteToolStripMenuItem;
+        private ToolStripMenuItem FPropertiesToolStripMenuItem;
+        private ToolStripMenuItem FFormToolStripMenuItem;
+        private ToolStrip FToolStrip;
+        private ToolStripButton FSaveToolStripButton;
+        private ToolStripButton FSaveAsFileToolStripButton;
+        private ToolStripButton FSaveAsDocumentToolStripButton;
+        private ToolStripSeparator FToolStripSeparator;
+        private ToolStripButton FCutToolStripButton;
+        private ToolStripButton FCopyToolStripButton2;
+        private ToolStripButton FPasteToolStripButton3;
+        private ToolStripButton FDeleteToolStripButton4;
+        private ToolStripButton FRenameToolStripButton1;
         protected DockContent FDockContentPropertyGrid;
 
 		public FormDesigner()	// dummy constructor for SyncFusion's MDI menu merging
@@ -323,7 +348,34 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FEditBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "EditBar");
             this.FNodesPopupMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.PopupMenu(this.components);
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
+            this.FMenuStrip = new System.Windows.Forms.MenuStrip();
+            this.FFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FSaveAsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FSaveAsDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FCloseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FEditToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FCutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FCopyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FPasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FDeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FRenameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FPaletteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FToolStrip = new System.Windows.Forms.ToolStrip();
+            this.FSaveToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FSaveAsFileToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FSaveAsDocumentToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FToolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.FCutToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.FCopyToolStripButton2 = new System.Windows.Forms.ToolStripButton();
+            this.FPasteToolStripButton3 = new System.Windows.Forms.ToolStripButton();
+            this.FDeleteToolStripButton4 = new System.Windows.Forms.ToolStripButton();
+            this.FRenameToolStripButton1 = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
+            this.FMenuStrip.SuspendLayout();
+            this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // FPointerImageList
@@ -582,16 +634,229 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FDockPanel.Size = new System.Drawing.Size(687, 518);
             this.FDockPanel.TabIndex = 4;
             // 
+            // FMenuStrip
+            // 
+            this.FMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FFileToolStripMenuItem,
+            this.FEditToolStripMenuItem,
+            this.FViewToolStripMenuItem});
+            this.FMenuStrip.Location = new System.Drawing.Point(0, 0);
+            this.FMenuStrip.Name = "FMenuStrip";
+            this.FMenuStrip.Size = new System.Drawing.Size(687, 24);
+            this.FMenuStrip.TabIndex = 9;
+            this.FMenuStrip.Text = "menuStrip1";
+            // 
+            // FFileToolStripMenuItem
+            // 
+            this.FFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSaveAsFileToolStripMenuItem,
+            this.FSaveAsDocumentToolStripMenuItem,
+            this.FCloseToolStripMenuItem});
+            this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
+            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.FFileToolStripMenuItem.Text = "File";
+            // 
+            // FSaveAsFileToolStripMenuItem
+            // 
+            this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
+            this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
+            // 
+            // FSaveAsDocumentToolStripMenuItem
+            // 
+            this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
+            this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
+            // 
+            // FCloseToolStripMenuItem
+            // 
+            this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
+            this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FCloseToolStripMenuItem.Text = "Close";
+            // 
+            // FEditToolStripMenuItem
+            // 
+            this.FEditToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FCutToolStripMenuItem,
+            this.FCopyToolStripMenuItem,
+            this.FPasteToolStripMenuItem,
+            this.FDeleteToolStripMenuItem,
+            this.FRenameToolStripMenuItem});
+            this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
+            this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
+            this.FEditToolStripMenuItem.Text = "Edit";
+            // 
+            // FCutToolStripMenuItem
+            // 
+            this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FCutToolStripMenuItem.Text = "Cut";
+            // 
+            // FCopyToolStripMenuItem
+            // 
+            this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FCopyToolStripMenuItem.Text = "Copy";
+            // 
+            // FPasteToolStripMenuItem
+            // 
+            this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPasteToolStripMenuItem.Text = "Paste";
+            // 
+            // FDeleteToolStripMenuItem
+            // 
+            this.FDeleteToolStripMenuItem.Name = "FDeleteToolStripMenuItem";
+            this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FDeleteToolStripMenuItem.Text = "Delete";
+            // 
+            // FRenameToolStripMenuItem
+            // 
+            this.FRenameToolStripMenuItem.Name = "FRenameToolStripMenuItem";
+            this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FRenameToolStripMenuItem.Text = "Rename";
+            // 
+            // FViewToolStripMenuItem
+            // 
+            this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FPaletteToolStripMenuItem,
+            this.FPropertiesToolStripMenuItem,
+            this.FFormToolStripMenuItem});
+            this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
+            this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.FViewToolStripMenuItem.Text = "View";
+            // 
+            // FPaletteToolStripMenuItem
+            // 
+            this.FPaletteToolStripMenuItem.Name = "FPaletteToolStripMenuItem";
+            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPaletteToolStripMenuItem.Text = "Palette";
+            // 
+            // FPropertiesToolStripMenuItem
+            // 
+            this.FPropertiesToolStripMenuItem.Name = "FPropertiesToolStripMenuItem";
+            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPropertiesToolStripMenuItem.Text = "Properties";
+            // 
+            // FFormToolStripMenuItem
+            // 
+            this.FFormToolStripMenuItem.Name = "FFormToolStripMenuItem";
+            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FFormToolStripMenuItem.Text = "Form";
+            // 
+            // FToolStrip
+            // 
+            this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSaveToolStripButton,
+            this.FSaveAsFileToolStripButton,
+            this.FSaveAsDocumentToolStripButton,
+            this.FToolStripSeparator,
+            this.FCutToolStripButton,
+            this.FCopyToolStripButton2,
+            this.FPasteToolStripButton3,
+            this.FDeleteToolStripButton4,
+            this.FRenameToolStripButton1});
+            this.FToolStrip.Location = new System.Drawing.Point(0, 24);
+            this.FToolStrip.Name = "FToolStrip";
+            this.FToolStrip.Size = new System.Drawing.Size(687, 25);
+            this.FToolStrip.TabIndex = 10;
+            this.FToolStrip.Text = "toolStrip1";
+            // 
+            // FSaveToolStripButton
+            // 
+            this.FSaveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FSaveToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveToolStripButton.Image")));
+            this.FSaveToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FSaveToolStripButton.Name = "FSaveToolStripButton";
+            this.FSaveToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FSaveToolStripButton.Text = "toolStripButton1";
+            // 
+            // FSaveAsFileToolStripButton
+            // 
+            this.FSaveAsFileToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FSaveAsFileToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveAsFileToolStripButton.Image")));
+            this.FSaveAsFileToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FSaveAsFileToolStripButton.Name = "FSaveAsFileToolStripButton";
+            this.FSaveAsFileToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FSaveAsFileToolStripButton.Text = "toolStripButton2";
+            // 
+            // FSaveAsDocumentToolStripButton
+            // 
+            this.FSaveAsDocumentToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FSaveAsDocumentToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveAsDocumentToolStripButton.Image")));
+            this.FSaveAsDocumentToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FSaveAsDocumentToolStripButton.Name = "FSaveAsDocumentToolStripButton";
+            this.FSaveAsDocumentToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FSaveAsDocumentToolStripButton.Text = "toolStripButton3";
+            // 
+            // FToolStripSeparator
+            // 
+            this.FToolStripSeparator.Name = "FToolStripSeparator";
+            this.FToolStripSeparator.Size = new System.Drawing.Size(6, 25);
+            // 
+            // FCutToolStripButton
+            // 
+            this.FCutToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FCutToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FCutToolStripButton.Image")));
+            this.FCutToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FCutToolStripButton.Name = "FCutToolStripButton";
+            this.FCutToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.FCutToolStripButton.Text = "toolStripButton1";
+            // 
+            // FCopyToolStripButton2
+            // 
+            this.FCopyToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FCopyToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("FCopyToolStripButton2.Image")));
+            this.FCopyToolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FCopyToolStripButton2.Name = "FCopyToolStripButton2";
+            this.FCopyToolStripButton2.Size = new System.Drawing.Size(23, 22);
+            this.FCopyToolStripButton2.Text = "toolStripButton2";
+            // 
+            // FPasteToolStripButton3
+            // 
+            this.FPasteToolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FPasteToolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("FPasteToolStripButton3.Image")));
+            this.FPasteToolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FPasteToolStripButton3.Name = "FPasteToolStripButton3";
+            this.FPasteToolStripButton3.Size = new System.Drawing.Size(23, 22);
+            this.FPasteToolStripButton3.Text = "toolStripButton3";
+            // 
+            // FDeleteToolStripButton4
+            // 
+            this.FDeleteToolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FDeleteToolStripButton4.Image = ((System.Drawing.Image)(resources.GetObject("FDeleteToolStripButton4.Image")));
+            this.FDeleteToolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FDeleteToolStripButton4.Name = "FDeleteToolStripButton4";
+            this.FDeleteToolStripButton4.Size = new System.Drawing.Size(23, 22);
+            this.FDeleteToolStripButton4.Text = "toolStripButton4";
+            // 
+            // FRenameToolStripButton1
+            // 
+            this.FRenameToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FRenameToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("FRenameToolStripButton1.Image")));
+            this.FRenameToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.FRenameToolStripButton1.Name = "FRenameToolStripButton1";
+            this.FRenameToolStripButton1.Size = new System.Drawing.Size(23, 22);
+            this.FRenameToolStripButton1.Text = "toolStripButton1";
+            // 
             // FormDesigner
             // 
             this.CausesValidation = false;
             this.ClientSize = new System.Drawing.Size(687, 518);
+            this.Controls.Add(this.FToolStrip);
+            this.Controls.Add(this.FMenuStrip);
             this.Controls.Add(this.FDockPanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.FMenuStrip;
             this.Name = "FormDesigner";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
+            this.FMenuStrip.ResumeLayout(false);
+            this.FMenuStrip.PerformLayout();
+            this.FToolStrip.ResumeLayout(false);
+            this.FToolStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion
