@@ -1023,6 +1023,9 @@ namespace Alphora.Dataphor.Dataphoria
 		public void AttachForm(BaseForm AForm) 
 		{
             AForm.Show(this.FDockPanel);
+            if (AForm is IChildFormWithToolBar) {
+                ((IChildFormWithToolBar)AForm).MergeWith(this.FToolStrip);
+            }
 		}
 
 		private void CloseChildren()

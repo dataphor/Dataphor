@@ -20,7 +20,7 @@ using WeifenLuo.WinFormsUI.Docking;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
 	/// <summary> Text Editor form for Dataphoria. </summary>
-	public class TextEditor : BaseForm, IDesigner
+    public class TextEditor : BaseForm, IDesigner, IChildFormWithToolBar
 	{
 		private System.ComponentModel.IContainer components = null;
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.ChildFrameBarManager FFrameBarManager;
@@ -794,5 +794,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		}
 
 		#endregion
-	}
+
+        #region IChildFormWithToolBar Members
+
+        public void MergeWith(ToolStrip AParentToolStrip)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+    }
 }

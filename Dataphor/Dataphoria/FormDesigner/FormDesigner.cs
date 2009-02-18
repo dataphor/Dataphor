@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
 	// Don't put any definitions above the FormDesiger class
 
-	public class FormDesigner : BaseForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer
+    public class FormDesigner : BaseForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer, IChildFormWithToolBar
 	{
 		private System.ComponentModel.IContainer components;
 		private System.Windows.Forms.ImageList ToolBarImageList;
@@ -732,19 +732,19 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FPaletteToolStripMenuItem
             // 
             this.FPaletteToolStripMenuItem.Name = "FPaletteToolStripMenuItem";
-            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPaletteToolStripMenuItem.Text = "Palette";
             // 
             // FPropertiesToolStripMenuItem
             // 
             this.FPropertiesToolStripMenuItem.Name = "FPropertiesToolStripMenuItem";
-            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPropertiesToolStripMenuItem.Text = "Properties";
             // 
             // FFormToolStripMenuItem
             // 
             this.FFormToolStripMenuItem.Name = "FFormToolStripMenuItem";
-            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFormToolStripMenuItem.Text = "Form";
             // 
             // FToolStrip
@@ -1720,7 +1720,16 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 		}
 
 		#endregion
-	}
+
+        #region IChildFormWithToolBar Members
+
+        public void MergeWith(ToolStrip AParentToolStrip)
+        {
+            ToolStripManager.Merge(this.FToolStrip,AParentToolStrip);            
+        }
+
+        #endregion
+    }
 
 	public class PaletteItem : GroupViewItem
 	{

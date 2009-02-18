@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FAlphoraDiscussionGroupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FWebDocumentationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FAboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.FileToolStrip = new System.Windows.Forms.ToolStrip();
+            this.FToolStrip = new System.Windows.Forms.ToolStrip();
             this.FNewToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FNewScriptToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FOpenFileToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -61,7 +61,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FLaunchFormToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.FMainMenuStrip.SuspendLayout();
-            this.FileToolStrip.SuspendLayout();
+            this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // FStatusStrip
@@ -98,7 +98,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FLaunchFormToolStripMenuItem,
             this.FExitToolStripMenuItem});
             this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
-            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(94, 20);
+            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.FFileToolStripMenuItem.Text = "File";
             // 
             // FConnectToolStripMenuItem
@@ -275,18 +275,18 @@ namespace Alphora.Dataphor.Dataphoria
             this.FAboutToolStripMenuItem.Text = "About";
             this.FAboutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
-            // FileToolStrip
+            // FToolStrip
             // 
-            this.FileToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FNewToolStripButton,
             this.FNewScriptToolStripButton,
             this.FOpenFileToolStripButton,
             this.FOpenFileWithToolStripButton,
             this.FLaunchFormToolStripButton});
-            this.FileToolStrip.Location = new System.Drawing.Point(0, 24);
-            this.FileToolStrip.Name = "FileToolStrip";
-            this.FileToolStrip.Size = new System.Drawing.Size(664, 25);
-            this.FileToolStrip.TabIndex = 4;
+            this.FToolStrip.Location = new System.Drawing.Point(0, 24);
+            this.FToolStrip.Name = "FToolStrip";
+            this.FToolStrip.Size = new System.Drawing.Size(664, 25);
+            this.FToolStrip.TabIndex = 4;
             // 
             // FNewToolStripButton
             // 
@@ -353,7 +353,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(664, 507);
             this.Controls.Add(this.FDockPanel);
-            this.Controls.Add(this.FileToolStrip);
+            this.Controls.Add(this.FToolStrip);
             this.Controls.Add(this.FMainMenuStrip);
             this.Controls.Add(this.FStatusStrip);
             this.IsMdiContainer = true;
@@ -363,8 +363,8 @@ namespace Alphora.Dataphor.Dataphoria
             this.Shown += new System.EventHandler(this.Dataphoria_Shown);
             this.FMainMenuStrip.ResumeLayout(false);
             this.FMainMenuStrip.PerformLayout();
-            this.FileToolStrip.ResumeLayout(false);
-            this.FileToolStrip.PerformLayout();
+            this.FToolStrip.ResumeLayout(false);
+            this.FToolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -397,7 +397,7 @@ namespace Alphora.Dataphor.Dataphoria
         private System.Windows.Forms.ToolStripMenuItem FAlphoraDiscussionGroupsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FWebDocumentationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FAboutToolStripMenuItem;
-        private System.Windows.Forms.ToolStrip FileToolStrip;
+        private System.Windows.Forms.ToolStrip FToolStrip;
         private System.Windows.Forms.ToolStripButton FNewToolStripButton;
         private System.Windows.Forms.ToolStripButton FNewScriptToolStripButton;
         private System.Windows.Forms.ToolStripButton FOpenFileToolStripButton;
