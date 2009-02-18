@@ -202,16 +202,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FToolbarImageList = new System.Windows.Forms.ImageList(this.components);
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.FMenuStrip = new System.Windows.Forms.MenuStrip();
-            this.FToolStrip = new System.Windows.Forms.ToolStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.FEditToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveAsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveAsDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FCloseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.FPrintToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FEditToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FUndoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FRedoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
@@ -224,7 +222,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FReplaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FFindNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSplitWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
@@ -551,31 +551,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FMenuStrip.TabIndex = 9;
             this.FMenuStrip.Text = "menuStrip1";
             // 
-            // FToolStrip
-            // 
-            this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1,
-            this.toolStripButton2,
-            this.toolStripButton3,
-            this.toolStripSeparator1,
-            this.toolStripButton4,
-            this.toolStripSeparator2,
-            this.toolStripButton5,
-            this.toolStripButton6,
-            this.toolStripButton7,
-            this.toolStripSeparator3,
-            this.toolStripButton8,
-            this.toolStripButton9,
-            this.toolStripButton10,
-            this.toolStripSeparator4,
-            this.toolStripButton11,
-            this.toolStripButton12});
-            this.FToolStrip.Location = new System.Drawing.Point(0, 24);
-            this.FToolStrip.Name = "FToolStrip";
-            this.FToolStrip.Size = new System.Drawing.Size(455, 25);
-            this.FToolStrip.TabIndex = 10;
-            this.FToolStrip.Text = "toolStrip1";
-            // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -585,36 +560,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FCloseToolStripMenuItem,
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
+            this.fileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
-            // 
-            // FEditToolStripMenuItem
-            // 
-            this.FEditToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FUndoToolStripMenuItem,
-            this.FRedoToolStripMenuItem,
-            this.toolStripMenuItem2,
-            this.FCutToolStripMenuItem,
-            this.FCopyToolStripMenuItem,
-            this.FPasteToolStripMenuItem,
-            this.toolStripMenuItem3,
-            this.FSelectAllToolStripMenuItem,
-            this.toolStripMenuItem4,
-            this.FFindToolStripMenuItem,
-            this.FReplaceToolStripMenuItem,
-            this.FFindNextToolStripMenuItem});
-            this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
-            this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-            this.FEditToolStripMenuItem.Text = "Edit";
-            // 
-            // viewToolStripMenuItem
-            // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FSplitWindowToolStripMenuItem});
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.viewToolStripMenuItem.Text = "View";
             // 
             // FSaveToolStripMenuItem
             // 
@@ -650,6 +599,25 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FPrintToolStripMenuItem.Name = "FPrintToolStripMenuItem";
             this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FPrintToolStripMenuItem.Text = "Print";
+            // 
+            // FEditToolStripMenuItem
+            // 
+            this.FEditToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FUndoToolStripMenuItem,
+            this.FRedoToolStripMenuItem,
+            this.toolStripMenuItem2,
+            this.FCutToolStripMenuItem,
+            this.FCopyToolStripMenuItem,
+            this.FPasteToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.FSelectAllToolStripMenuItem,
+            this.toolStripMenuItem4,
+            this.FFindToolStripMenuItem,
+            this.FReplaceToolStripMenuItem,
+            this.FFindNextToolStripMenuItem});
+            this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
+            this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
+            this.FEditToolStripMenuItem.Text = "Edit";
             // 
             // FUndoToolStripMenuItem
             // 
@@ -720,11 +688,45 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFindNextToolStripMenuItem.Text = "Find Next";
             // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSplitWindowToolStripMenuItem});
+            this.viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
             // FSplitWindowToolStripMenuItem
             // 
             this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
             this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSplitWindowToolStripMenuItem.Text = "Split Window";
+            // 
+            // FToolStrip
+            // 
+            this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton1,
+            this.toolStripButton2,
+            this.toolStripButton3,
+            this.toolStripSeparator1,
+            this.toolStripButton4,
+            this.toolStripSeparator2,
+            this.toolStripButton5,
+            this.toolStripButton6,
+            this.toolStripButton7,
+            this.toolStripSeparator3,
+            this.toolStripButton8,
+            this.toolStripButton9,
+            this.toolStripButton10,
+            this.toolStripSeparator4,
+            this.toolStripButton11,
+            this.toolStripButton12});
+            this.FToolStrip.Location = new System.Drawing.Point(0, 24);
+            this.FToolStrip.Name = "FToolStrip";
+            this.FToolStrip.Size = new System.Drawing.Size(455, 25);
+            this.FToolStrip.TabIndex = 10;
+            this.FToolStrip.Text = "toolStrip1";
             // 
             // toolStripButton1
             // 

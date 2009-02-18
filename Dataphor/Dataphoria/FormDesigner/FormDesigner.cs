@@ -683,7 +683,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FPasteToolStripMenuItem,
             this.FDeleteToolStripMenuItem,
             this.FRenameToolStripMenuItem});
-            this.FEditToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
             this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.FEditToolStripMenuItem.Text = "Edit";
@@ -691,31 +690,31 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FCutToolStripMenuItem
             // 
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
             // 
             // FCopyToolStripMenuItem
             // 
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
             // 
             // FPasteToolStripMenuItem
             // 
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
             // 
             // FDeleteToolStripMenuItem
             // 
             this.FDeleteToolStripMenuItem.Name = "FDeleteToolStripMenuItem";
-            this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FDeleteToolStripMenuItem.Text = "Delete";
             // 
             // FRenameToolStripMenuItem
             // 
             this.FRenameToolStripMenuItem.Name = "FRenameToolStripMenuItem";
-            this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRenameToolStripMenuItem.Text = "Rename";
             // 
             // FViewToolStripMenuItem
@@ -732,19 +731,19 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FPaletteToolStripMenuItem
             // 
             this.FPaletteToolStripMenuItem.Name = "FPaletteToolStripMenuItem";
-            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FPaletteToolStripMenuItem.Text = "Palette";
             // 
             // FPropertiesToolStripMenuItem
             // 
             this.FPropertiesToolStripMenuItem.Name = "FPropertiesToolStripMenuItem";
-            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FPropertiesToolStripMenuItem.Text = "Properties";
             // 
             // FFormToolStripMenuItem
             // 
             this.FFormToolStripMenuItem.Name = "FFormToolStripMenuItem";
-            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FFormToolStripMenuItem.Text = "Form";
             // 
             // FToolStrip
