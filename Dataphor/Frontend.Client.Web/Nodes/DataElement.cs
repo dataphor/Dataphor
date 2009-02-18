@@ -890,10 +890,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
+		private IImageSource FImageSource;
+		public IImageSource ImageSource
+		{
+			get { return FImageSource; }
+		}
+
 		public void SetImageAccepted(IFormInterface AForm)
 		{
-			SetImageForm LForm = (SetImageForm)AForm;
-			if (LForm.Stream == null)
+			FImageSource = (IImageSource)AForm;
+			if (ImageSource.Stream == null)
 				DataField.ClearValue();
 			else
 			{
@@ -902,8 +908,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					Stream LStream = LNewValue.OpenStream();
 					try
 					{
-						LForm.Stream.Position = 0;
-						StreamUtility.CopyStream(LForm.Stream, LStream);
+						ImageSource.Stream.Position = 0;
+						StreamUtility.CopyStream(ImageSource.Stream, LStream);
 					}
 					finally
 					{
@@ -952,17 +958,36 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		}
 	}
 
-	public class SetImageForm : FormInterface, IWebPrehandler
+	public class SetImageForm : FormInterface, IWebPrehandler, IImageSource
 	{
 		public SetImageForm(string ATitle)
 		{
 			Text = String.Format(Strings.Get("SetImageFormTitle"), ATitle);
 		}
 
-		// Stream
+		// IImageSource
 
 		private Stream FStream;
 		public Stream Stream { get { return FStream; } }
+
+		private bool FLoading;
+		public bool Loading
+		{
+			get { return FLoading; }
+		}
+
+		private HtmlTextWriter FWriter;
+		public void LoadImage()
+		{
+			FWriter.WriteLine(HttpUtility.HtmlEncode(Strings.Get("ImageUpload")));
+			FWriter.RenderBeginTag(HtmlTextWriterTag.Br);
+			FWriter.RenderEndTag();
+
+			FWriter.AddAttribute(HtmlTextWriterAttribute.Type, "file");
+			FWriter.AddAttribute(HtmlTextWriterAttribute.Name, "InputFile");
+			FWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+			FWriter.RenderEndTag();
+		}
 
 		// IWebPrehandler
 
@@ -970,6 +995,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			if (AContext.Request.Files.Count > 0)
 			{
+				FLoading = true;
 				Stream LStream = new MemoryStream();
 				StreamUtility.CopyStream(AContext.Request.Files[0].InputStream, LStream);
 				FStream = LStream;
@@ -982,16 +1008,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected override void InternalRender(HtmlTextWriter AWriter)
 		{
 			base.InternalRender(AWriter);
-
-			AWriter.WriteLine(HttpUtility.HtmlEncode(Strings.Get("ImageUpload")));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Br);
-			AWriter.RenderEndTag();
-
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "file");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, "InputFile");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
-		}
-
+			FWriter = AWriter;
+			LoadImage();
+		} 
 	}
 }

@@ -10,6 +10,7 @@ using System.ComponentModel;
 using WinForms = System.Windows.Forms;
 using System.Windows.Forms;
 using System.Drawing.Design;
+using System.IO;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
@@ -121,28 +122,28 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
-        // TrueFirst
+		// TrueFirst
 
-        private bool FTrueFirst = true;
-        [DefaultValue(true)]
-        [Description("Determines the CheckState transition sequence for CheckBoxes with three-states.")]
-        public bool TrueFirst
-        {
-            get { return FTrueFirst; }
-            set
-            {
-                    FTrueFirst = value;
-                    if (Active)
-                        InternalUpdateTrueFirst();
-            }
-        }
+		private bool FTrueFirst = true;
+		[DefaultValue(true)]
+		[Description("Determines the CheckState transition sequence for CheckBoxes with three-states.")]
+		public bool TrueFirst
+		{
+			get { return FTrueFirst; }
+			set
+			{
+					FTrueFirst = value;
+					if (Active)
+						InternalUpdateTrueFirst();
+			}
+		}
 
-        private void InternalUpdateTrueFirst()
-        {
-            CheckBoxControl.TrueFirst = FTrueFirst;
-        }
+		private void InternalUpdateTrueFirst()
+		{
+			CheckBoxControl.TrueFirst = FTrueFirst;
+		}
 
-        private void InternalUpdateAutoUpdate()
+		private void InternalUpdateAutoUpdate()
 		{
 			CheckBoxControl.AutoUpdate = FAutoUpdate;
 		}
@@ -190,7 +191,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			CheckBoxControl.AutoEllipsis = true;
 			InternalUpdateAutoUpdate();
 			InternalUpdateAutoUpdateInterval();
-            InternalUpdateTrueFirst();
+			InternalUpdateTrueFirst();
 			base.InitializeControl();
 		}
 
@@ -365,10 +366,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		// Element
 
-        protected override Size InternalMinSize
-        {
-            get { return RadioControl.MinimumSize; }
-        }
+		protected override Size InternalMinSize
+		{
+			get { return RadioControl.MinimumSize; }
+		}
 
 		protected override Size InternalNaturalSize
 		{
@@ -492,6 +493,51 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			return new DAE.Client.Controls.DBImageAspect();
 		}
 
+		private IImageSource FImageSource;
+		public IImageSource ImageSource
+		{
+			get 
+			{ 
+				if (FImageSource == null)
+					FImageSource = new ImageCaptureForm();
+				return FImageSource; 
+			}
+			set { FImageSource = value; }
+		}
+
+		protected void LoadImage()
+		{          
+			 if (!ImageSource.Loading)
+			 {
+				 try
+				 {						 
+					 ImageSource.LoadImage();
+					 if (ImageSource.Stream != null)
+					 {
+						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
+						 {
+							 Stream LStream = LNewValue.OpenStream();
+							 try
+							 {
+								 ImageSource.Stream.Position = 0;
+								 StreamUtility.CopyStream(ImageSource.Stream, LStream);
+							 }
+							 finally
+							 {
+								 LStream.Close();
+							 }
+							 ImageControl.DataField.Value = LNewValue;
+						 }
+					 } 						                       
+				 }
+				 finally
+				 {
+					 if (ImageSource.GetType() == typeof(ImageCaptureForm))
+						 ImageSource = null;
+				 }
+			}             
+		}
+
 		protected override void InitializeControl()
 		{
 			ImageControl.BackColor = ((Session)HostNode.Session).Theme.ContainerColor;
@@ -500,7 +546,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			ImageControl.Width = CDefaultImageWidth;
 			InternalUpdateStretchStyle();
 			InternalUpdateCenter();
-			base.InitializeControl();
+			ImageControl.OnImageRequested += LoadImage;
+			base.InitializeControl();             
 		}
 		
 		// TitledElement
@@ -523,6 +570,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return FImageWidth;
 			else
 				return CDefaultImageWidth;
+		}
+
+		protected override void Dispose(bool ADisposing)
+		{
+			if (ImageControl != null)
+				ImageControl.OnImageRequested -= new Alphora.Dataphor.DAE.Client.Controls.RequestImageHandler(LoadImage);
+			base.Dispose(ADisposing);
 		}
 	}
 }
