@@ -899,7 +899,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public void SetImageAccepted(IFormInterface AForm)
 		{
 			FImageSource = (IImageSource)AForm;
-			if (ImageSource.Stream == null)
+			if (FImageSource.Stream == null)
 				DataField.ClearValue();
 			else
 			{
@@ -908,8 +908,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					Stream LStream = LNewValue.OpenStream();
 					try
 					{
-						ImageSource.Stream.Position = 0;
-						StreamUtility.CopyStream(ImageSource.Stream, LStream);
+						FImageSource.Stream.Position = 0;
+						StreamUtility.CopyStream(FImageSource.Stream, LStream);
 					}
 					finally
 					{
