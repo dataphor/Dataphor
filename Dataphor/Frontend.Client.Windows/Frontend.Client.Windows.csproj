@@ -231,6 +231,12 @@
     <Compile Include="Forms\ExceptionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\ImageCaptureForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImageCaptureForm.Designer.cs">
+      <DependentUpon>ImageCaptureForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ServerConnectForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -356,15 +362,16 @@
     <EmbeddedResource Include="WinClient.ico" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Forms\ImageCaptureForm.resx">
+      <DependentUpon>ImageCaptureForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Collapse.png" />
     <EmbeddedResource Include="Images\Expand.png" />
     <EmbeddedResource Include="TextEditor\FindReplaceForm.resx">
       <DependentUpon>FindReplaceForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -382,6 +389,12 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\NoPhoto.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
