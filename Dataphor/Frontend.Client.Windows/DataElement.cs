@@ -516,17 +516,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					 {
 						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
 						 {
-							 Stream LStream = LNewValue.OpenStream();
-							 try
+							 using (Stream LStream = LNewValue.OpenStream())
 							 {
-								 ImageSource.Stream.Position = 0;
-								 StreamUtility.CopyStream(ImageSource.Stream, LStream);
-							 }
-							 finally
-							 {
-								 LStream.Close();
-							 }
-							 ImageControl.DataField.Value = LNewValue;
+								 using (ImageSource.Stream)
+								 {
+									 ImageSource.Stream.Position = 0;
+									 StreamUtility.CopyStream(ImageSource.Stream, LStream);
+									 ImageControl.DataField.Value = LNewValue;
+									 ImageControl.LoadImage();
+								 }
+							 }						 
 						 }
 					 } 						                       
 				 }

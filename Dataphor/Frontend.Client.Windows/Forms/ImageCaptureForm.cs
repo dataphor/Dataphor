@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private const int WM_CAP_SET_PREVIEW = 0x432;
 		private const int WM_CAP_SET_PREVIEWRATE = 0x434;
 
-		private int FCaptureWindow = Int32.MinValue;
+		private int FVideoHandle = Int32.MinValue;
 		private int FCurrentDevice = Int32.MinValue;
 		private string FWindowName = CCaptureWindowName;            
 		private void FDevices_SelectedIndexChanged(object sender, EventArgs e)
@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (FDevices.SelectedIndex > -1)
 			{
 				Disconnect();
-				FCaptureWindow =
+				FVideoHandle =
 					capCreateCaptureWindowA
 					(
 						ref FWindowName,
@@ -129,13 +129,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						CCaptureWindowID
 					 );
 
-				if (SendMessage(FCaptureWindow, WM_CAP_DRIVER_CONNECT, FDevices.SelectedIndex, CSendMessagenNullParameter) > 0)
+				if (SendMessage(FVideoHandle, WM_CAP_DRIVER_CONNECT, FDevices.SelectedIndex, CSendMessagenNullParameter) > 0)
 				{
 					FCurrentDevice = FDevices.SelectedIndex;
-					SendMessage(FCaptureWindow, WM_CAP_SET_SCALE, -1, CSendMessagenNullParameter);
-					SendMessage(FCaptureWindow, WM_CAP_SET_PREVIEWRATE, CPreviewRate, CSendMessagenNullParameter);
-					SendMessage(FCaptureWindow, WM_CAP_SET_PREVIEW, -1, CSendMessagenNullParameter);
-					SetWindowPos(FCaptureWindow, CSetWindowInsertAfter, CSetWindowX, CSetWindowY, FPreviewImage.Width, FPreviewImage.Height, CSetWindowFlag);
+					SendMessage(FVideoHandle, WM_CAP_SET_SCALE, -1, CSendMessagenNullParameter);
+					SendMessage(FVideoHandle, WM_CAP_SET_PREVIEWRATE, CPreviewRate, CSendMessagenNullParameter);
+					SendMessage(FVideoHandle, WM_CAP_SET_PREVIEW, -1, CSendMessagenNullParameter);
+					SetWindowPos(FVideoHandle, CSetWindowInsertAfter, CSetWindowX, CSetWindowY, FPreviewImage.Width, FPreviewImage.Height, CSetWindowFlag);
 					FCaptureFrame.Enabled = true;
 					FSettings.Enabled = true;
 					SetHintText(Strings.CConnectedText);
@@ -149,29 +149,35 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		private MemoryStream FStream;
 		public Stream Stream
 		{
-			get { return null; }// FCaptureImage.Image; } 
+			get	 { return FStream; }
 		}
 
 		private const int WM_CAP_FILE_SAVEDIB = 0x419;        
 		private void FCapture_Click(object sender, EventArgs e)
 		{
 			String LTempFileName = Application.LocalUserAppDataPath + @"\" + Strings.CTempFileName;
-			SendMessage(FCaptureWindow, WM_CAP_FILE_SAVEDIB, CSendMessagenNullParameter, LTempFileName);
+			SendMessage(FVideoHandle, WM_CAP_FILE_SAVEDIB, CSendMessagenNullParameter, LTempFileName);
 			using (FileStream LImageFile = new FileStream(LTempFileName, FileMode.Open, FileAccess.Read))
 			{
-				MemoryStream LCopy = new MemoryStream();
-				StreamUtility.CopyStream(LImageFile, LCopy);
-				LCopy.Position = 0;
-				FCaptureImage.Image = System.Drawing.Image.FromStream(LCopy);
+				if (FStream != null)
+				{
+					FStream.Close();
+					FStream = null;
+				}
+				FStream = new MemoryStream();
+				StreamUtility.CopyStream(LImageFile, FStream);
+				FStream.Position = 0;
+				FCaptureImage.Image = System.Drawing.Image.FromStream(FStream);
 			}                
 		}
 
 		const int WM_CAP_DLG_VIDEOSOURCE = 0x42a;
 		private void FSettings_Click(object sender, EventArgs e)
 		{
-			SendMessage(FCaptureWindow, WM_CAP_DLG_VIDEOSOURCE, CSendMessagenNullParameter, CSendMessagenNullParameter);
+			SendMessage(FVideoHandle, WM_CAP_DLG_VIDEOSOURCE, CSendMessagenNullParameter, CSendMessagenNullParameter);
 		} 
 
 		[DllImport("user32")]
@@ -183,22 +189,22 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{                
 				try
 				{
-					SendMessage(FCaptureWindow, WM_CAP_DRIVER_DISCONNECT, FCurrentDevice, CSendMessagenNullParameter);                     
+					SendMessage(FVideoHandle, WM_CAP_DRIVER_DISCONNECT, FCurrentDevice, CSendMessagenNullParameter);                     
 				}
 				finally
 				{
 					FCurrentDevice = Int32.MinValue;
 				}
 			}
-			if (FCaptureWindow != Int32.MinValue)
+			if (FVideoHandle != Int32.MinValue)
 			{
 				try
 				{
-					DestroyWindow(FCaptureWindow);
+					DestroyWindow(FVideoHandle);
 				}
 				finally
 				{
-					FCaptureWindow = Int32.MinValue;
+					FVideoHandle = Int32.MinValue;
 				}
 			}
 			SetHintText(String.Empty);
@@ -234,7 +240,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			finally
 			{
 				Disconnect();
-				FLoading = false;
+				FLoading = false;			
 			}
 		}
 
@@ -257,6 +263,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			base.OnShown(e);
 			// HACK: The first control doesn't have focus when this form is shown (???) so we have to explicitly focus it.
 			FDevices.Focus();
-		}                                             
+		}                             
 	}
 }
