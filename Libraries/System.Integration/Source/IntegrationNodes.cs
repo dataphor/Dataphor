@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			try
 			{
 				// Have the target process use the main process' context
-				((ServerProcess)LTargetProcess).SwitchContext(AProcess.Context);
+				Context LOldTargetContext = ((ServerProcess)LTargetProcess).SwitchContext(AProcess.Context);
 				try
 				{
 					LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 					try
 					{
 						// Have the source process use the main process' context
-						((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
+						Context LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
 						try
 						{
 							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess).Value;
@@ -219,7 +219,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 						}
 						finally
 						{
-							((ServerProcess)LSourceProcess).SwitchContext(null);	// Don't let the source process cleanup the main context
+							((ServerProcess)LSourceProcess).SwitchContext(LOldSourceContext);	// Don't let the source process cleanup the main context
 						}
 					}
 					finally
@@ -232,7 +232,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 				}
 				finally
 				{
-					((ServerProcess)LTargetProcess).SwitchContext(null);	// Don't let the target process cleanup the main context
+					((ServerProcess)LTargetProcess).SwitchContext(LOldTargetContext);	// Don't let the target process cleanup the main context
 				}
 			}
 			finally
