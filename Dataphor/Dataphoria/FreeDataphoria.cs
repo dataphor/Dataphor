@@ -63,9 +63,6 @@ namespace Alphora.Dataphor.Dataphoria
             FErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
             FErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
 
-            FExplorer = new DataTree();
-            FErrorListView = new ErrorListView();
-
             FDockContentFExplorer = new DockContent();
 
             FExplorer.Dock = DockStyle.Fill;
