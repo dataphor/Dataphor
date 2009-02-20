@@ -1022,10 +1022,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void AttachForm(BaseForm AForm) 
 		{
-            AForm.Show(this.FDockPanel);
-            if (AForm is IChildFormWithToolBar) {
-                ((IChildFormWithToolBar)AForm).MergeWith(this.FToolStrip);
-            }
+            AForm.Show(this.FDockPanel);            
 		}
 
 		private void CloseChildren()
@@ -1529,6 +1526,16 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#endregion
+
+        private void FreeDataphoria_MdiChildActivate(object ASender, EventArgs AArgs)
+        {
+            ToolStripManager.RevertMerge(this.FToolStrip);
+            IChildFormWithToolBar LChildForm = ActiveMdiChild as IChildFormWithToolBar;
+            if (LChildForm != null)
+            {
+                LChildForm.MergeWith(this.FToolStrip);           
+            }                       
+        }
 
        
         

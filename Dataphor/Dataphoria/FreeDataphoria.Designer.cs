@@ -361,6 +361,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.Name = "FreeDataphoria";
             this.Text = "FreeDataphoria";
             this.Shown += new System.EventHandler(this.Dataphoria_Shown);
+            this.MdiChildActivate += new System.EventHandler(this.FreeDataphoria_MdiChildActivate);
             this.FMainMenuStrip.ResumeLayout(false);
             this.FMainMenuStrip.PerformLayout();
             this.FToolStrip.ResumeLayout(false);
