@@ -567,24 +567,28 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FSaveToolStripMenuItem
             // 
+            this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
             this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
             this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FSaveToolStripMenuItem.Text = "Save";
             // 
             // FSaveAsFileToolStripMenuItem
             // 
+            this.FSaveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
             this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
             this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
             // 
             // FSaveAsDocumentToolStripMenuItem
             // 
+            this.FSaveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
             this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
             this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
             // 
             // FCloseToolStripMenuItem
             // 
+            this.FCloseToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
             this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
             this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FCloseToolStripMenuItem.Text = "Close";
@@ -596,6 +600,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FPrintToolStripMenuItem
             // 
+            this.FPrintToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Print;
             this.FPrintToolStripMenuItem.Name = "FPrintToolStripMenuItem";
             this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FPrintToolStripMenuItem.Text = "Print";
@@ -621,71 +626,80 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FUndoToolStripMenuItem
             // 
+            this.FUndoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Undo;
             this.FUndoToolStripMenuItem.Name = "FUndoToolStripMenuItem";
-            this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FUndoToolStripMenuItem.Text = "Undo";
             // 
             // FRedoToolStripMenuItem
             // 
+            this.FRedoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Redo;
             this.FRedoToolStripMenuItem.Name = "FRedoToolStripMenuItem";
-            this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRedoToolStripMenuItem.Text = "Redo";
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // FCutToolStripMenuItem
             // 
+            this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
             // 
             // FCopyToolStripMenuItem
             // 
+            this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
             // 
             // FPasteToolStripMenuItem
             // 
+            this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
             // 
             // FSelectAllToolStripMenuItem
             // 
+            this.FSelectAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SelectAll;
             this.FSelectAllToolStripMenuItem.Name = "FSelectAllToolStripMenuItem";
-            this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSelectAllToolStripMenuItem.Text = "Select All";
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(149, 6);
             // 
             // FFindToolStripMenuItem
             // 
+            this.FFindToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Find;
             this.FFindToolStripMenuItem.Name = "FFindToolStripMenuItem";
-            this.FFindToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FFindToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFindToolStripMenuItem.Text = "Find";
             // 
             // FReplaceToolStripMenuItem
             // 
+            this.FReplaceToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Replace;
             this.FReplaceToolStripMenuItem.Name = "FReplaceToolStripMenuItem";
-            this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FReplaceToolStripMenuItem.Text = "Replace";
             // 
             // FFindNextToolStripMenuItem
             // 
+            this.FFindNextToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.FindNext;
             this.FFindNextToolStripMenuItem.Name = "FFindNextToolStripMenuItem";
-            this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFindNextToolStripMenuItem.Text = "Find Next";
             // 
             // viewToolStripMenuItem
@@ -699,8 +713,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FSplitWindowToolStripMenuItem
             // 
+            this.FSplitWindowToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SplitWindow;
             this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
-            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSplitWindowToolStripMenuItem.Text = "Split Window";
             // 
             // FToolStrip
@@ -731,7 +746,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FSaveToolStripButton
             // 
             this.FSaveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FSaveToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveToolStripButton.Image")));
+            this.FSaveToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
             this.FSaveToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FSaveToolStripButton.Name = "FSaveToolStripButton";
             this.FSaveToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -740,7 +755,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FSaveAsFileToolStripButton
             // 
             this.FSaveAsFileToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FSaveAsFileToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveAsFileToolStripButton.Image")));
+            this.FSaveAsFileToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
             this.FSaveAsFileToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FSaveAsFileToolStripButton.Name = "FSaveAsFileToolStripButton";
             this.FSaveAsFileToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -749,7 +764,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FSaveAsDocumentToolStripButton
             // 
             this.FSaveAsDocumentToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FSaveAsDocumentToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FSaveAsDocumentToolStripButton.Image")));
+            this.FSaveAsDocumentToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
             this.FSaveAsDocumentToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FSaveAsDocumentToolStripButton.Name = "FSaveAsDocumentToolStripButton";
             this.FSaveAsDocumentToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -763,7 +778,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FPrintToolStripButton
             // 
             this.FPrintToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FPrintToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FPrintToolStripButton.Image")));
+            this.FPrintToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Print;
             this.FPrintToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FPrintToolStripButton.Name = "FPrintToolStripButton";
             this.FPrintToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -777,7 +792,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FCutToolStripButton
             // 
             this.FCutToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FCutToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FCutToolStripButton.Image")));
+            this.FCutToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FCutToolStripButton.Name = "FCutToolStripButton";
             this.FCutToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -786,7 +801,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FCopyToolStripButton
             // 
             this.FCopyToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FCopyToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FCopyToolStripButton.Image")));
+            this.FCopyToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FCopyToolStripButton.Name = "FCopyToolStripButton";
             this.FCopyToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -795,7 +810,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FPasteToolStripButton
             // 
             this.FPasteToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FPasteToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FPasteToolStripButton.Image")));
+            this.FPasteToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FPasteToolStripButton.Name = "FPasteToolStripButton";
             this.FPasteToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -809,7 +824,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FFindToolStripButton
             // 
             this.FFindToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FFindToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FFindToolStripButton.Image")));
+            this.FFindToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Find;
             this.FFindToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FFindToolStripButton.Name = "FFindToolStripButton";
             this.FFindToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -818,7 +833,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FReplaceToolStripButton
             // 
             this.FReplaceToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FReplaceToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FReplaceToolStripButton.Image")));
+            this.FReplaceToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Replace;
             this.FReplaceToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FReplaceToolStripButton.Name = "FReplaceToolStripButton";
             this.FReplaceToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -827,7 +842,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FFindNextToolStripButton
             // 
             this.FFindNextToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FFindNextToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FFindNextToolStripButton.Image")));
+            this.FFindNextToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.FindNext;
             this.FFindNextToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FFindNextToolStripButton.Name = "FFindNextToolStripButton";
             this.FFindNextToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -841,7 +856,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FUndoToolStripButton
             // 
             this.FUndoToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FUndoToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FUndoToolStripButton.Image")));
+            this.FUndoToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Undo;
             this.FUndoToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FUndoToolStripButton.Name = "FUndoToolStripButton";
             this.FUndoToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -850,7 +865,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FRedoToolStripButton
             // 
             this.FRedoToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FRedoToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FRedoToolStripButton.Image")));
+            this.FRedoToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Redo;
             this.FRedoToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FRedoToolStripButton.Name = "FRedoToolStripButton";
             this.FRedoToolStripButton.Size = new System.Drawing.Size(23, 22);
