@@ -161,9 +161,21 @@
         sgsIugab4oE3AJImIOFAUhgQpZgaigAncDpiGXKGlwAAAABJRU5ErkJggg==
 </value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Delete.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Delete" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAK6gAA
+        CuoBUMzvvgAAAjZJREFUOE+lk99LU3EYxp/tqHN6NLTttHWWrv3AMdmxLkIQIpAoSiIiwsugoOif6Kpu
+        YgsK7Re6hYmEkfTDVlAZHu2AjCwvtIsVMY1FNSpKMUrP23s2G3OtEPrC9+IL5/m87/O87zEREf779AFS
+        Yqv79NOg6xTDTP8CDsm2PffdtpGogN3Z4jHAnfKb3y3tD9KPY3tJC7nDpSCXAee44hnUApI+XIOFmICD
+        WcCTeoQXW0ALCmh+h4O+H9lFY4rnbCEk7hSPTirOT6qjnO6IyESBNqPLLIDJVVMuaJ+bQe8DoLRipa+d
+        baS1eMLcXeVoQ210yifqI+tBt0SkeoHgb4v5/BhieyFjZtYPeuUBvXSbaK69iTRv3dyzRgutiGcvst3C
+        fFYNwMgi4cTb6QbQcxk04QCN2UGP60G3q5G5AjQXh/vHBPvLsWXcjvlCcXwdqNeME6UmUwwwPfBtPJkI
+        2JZVrvyIKxti9k0DFfjINkN/7eAQIKiKryt9uENXpZz4Xi3oZhWWBq2g/gpQjxnpC0BTyQxG/Rsii8f3
+        0YSnJi/mqlFOvPWqgGm2QJd4ahxi6jywedUU4pL1wLeOkJ7c5qKHdbnK1y1QzwEW48MIYGVhhAE/DQjf
+        JL/l/B68aW18/aXdm698oxIfjK0r9svtb2dhcqWTGX5L2RAnA/Zrmmyh4ZxnvUcAR1L6dAEiA7r5LjPs
+        TBZgzJeFmaFqUF8ZBtbyZ3L1nd3ApsJN9MbKcJd929cCKAzxF+OaBp/yWOn/AAAAAElFTkSuQmCC
+</value>
   </data>
   <data name="Disconnect" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -336,8 +348,16 @@
         MgFJQQFKEKD7DsRH8R2MQzCc8EUN6dGCyzSiTAIA/kxJK4NacPUAAAAASUVORK5CYII=
 </value>
   </data>
-  <data name="Rename" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Rename.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Rename" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAXEQAA
+        FxEByibzPwAAAO9JREFUOE9jYCAAysqm/AdhZGXYxHAaA1J8586d/xEREWBDQPxDh87B+YQcANYA0gzS
+        VF09E64ZZiBBA2AKcNq8bMup/8RgZAOQ1TOAOITAz5+/wQEJ8/v9J2//37z38r+he+Z/ggaANH/68gPF
+        AJDmyYu2oxoQufrzf1z4zbsvKAZcuvkM0wBkb/z58/f/t++//r//+O0/SPPTlx9QDDhz+RFuA5A1v3jz
+        6f+jZ+/+33n4GsWAo+fuYRoA8hM+jByIMHXwQAQxCGFkA5DVUp6QCJkAyziwpLxjxxFw0iY6KaNnptj4
+        UvIyE7JLkV0AAN018SFJwR8gAAAAAElFTkSuQmCC
+</value>
   </data>
   <data name="Replace" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
