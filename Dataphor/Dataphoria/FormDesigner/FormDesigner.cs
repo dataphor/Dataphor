@@ -694,31 +694,33 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
             // 
             // FCopyToolStripMenuItem
             // 
             this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
             // 
             // FPasteToolStripMenuItem
             // 
             this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
             // 
             // FDeleteToolStripMenuItem
             // 
+            this.FDeleteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Delete;
             this.FDeleteToolStripMenuItem.Name = "FDeleteToolStripMenuItem";
             this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FDeleteToolStripMenuItem.Text = "Delete";
             // 
             // FRenameToolStripMenuItem
             // 
+            this.FRenameToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Rename;
             this.FRenameToolStripMenuItem.Name = "FRenameToolStripMenuItem";
             this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRenameToolStripMenuItem.Text = "Rename";
@@ -737,19 +739,19 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FPaletteToolStripMenuItem
             // 
             this.FPaletteToolStripMenuItem.Name = "FPaletteToolStripMenuItem";
-            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FPaletteToolStripMenuItem.Text = "Palette";
             // 
             // FPropertiesToolStripMenuItem
             // 
             this.FPropertiesToolStripMenuItem.Name = "FPropertiesToolStripMenuItem";
-            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FPropertiesToolStripMenuItem.Text = "Properties";
             // 
             // FFormToolStripMenuItem
             // 
             this.FFormToolStripMenuItem.Name = "FFormToolStripMenuItem";
-            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
             this.FFormToolStripMenuItem.Text = "Form";
             // 
             // FToolStrip
@@ -832,7 +834,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FDeleteToolStripButton
             // 
             this.FDeleteToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FDeleteToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FDeleteToolStripButton.Image")));
+            this.FDeleteToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Delete;
             this.FDeleteToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FDeleteToolStripButton.Name = "FDeleteToolStripButton";
             this.FDeleteToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -841,7 +843,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FRenameToolStripButton
             // 
             this.FRenameToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FRenameToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("FRenameToolStripButton.Image")));
+            this.FRenameToolStripButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Rename;
             this.FRenameToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FRenameToolStripButton.Name = "FRenameToolStripButton";
             this.FRenameToolStripButton.Size = new System.Drawing.Size(23, 22);
