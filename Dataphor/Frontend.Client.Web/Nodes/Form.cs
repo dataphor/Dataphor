@@ -94,6 +94,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get { return FMainMenu.Items; }
 		}
 
+		private bool FForceAcceptReject;
+
+		public bool ForceAcceptReject
+		{
+			get { return FForceAcceptReject; }
+			set { FForceAcceptReject = value; }
+		}
+
 		// IsAcceptReject
 
 		public bool IsAcceptReject
@@ -101,14 +109,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get 
 			{ 
 				return
-					(FMode != FormMode.None) ||
-					(
-						(MainSource != null) &&
+					ForceAcceptReject
+						|| (FMode != FormMode.None) 
+						||
 						(
-							(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
-							(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
-						)
-					);
+							(MainSource != null) &&
+							(
+								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
+								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
+							)
+						);
 			}
 		}
 

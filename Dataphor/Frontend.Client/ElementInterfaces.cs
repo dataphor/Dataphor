@@ -206,7 +206,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: (None)</para> </value>
 		IAction OnBeforeDeactivate { get; set; }
 
-		/// <summary> Dictionary of non-persisted miscellenious data. </summary>
+		/// <summary> Dictionary of non-persisted miscellenious data. </summary> <doc/>
 		System.Collections.Specialized.HybridDictionary UserState { get; }
 	}
 
@@ -994,6 +994,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		bool GetEnabled();
 
 		event EventHandler OnClosed;
+
+		// Published
+
+		/// <summary> If true, the accept/reject state is forced. </summary> <doc/>
+		/// <value>Default: False</value>
+		bool ForceAcceptReject { get; set; }
 	}
 
 	/// <summary> A Frame control embeds a user interface document as an element. </summary> <doc/>

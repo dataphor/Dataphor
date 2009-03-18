@@ -472,8 +472,11 @@ namespace Alphora.Dataphor.Frontend.Client
 					{
 						LForm.OnClosed += new EventHandler(OnClosedHandler);
 						InternalAfterActivateForm(LForm);
-						if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || (FOnFormAccepted != null) || (FOnFormRejected != null))
+						bool LForceAcceptReject = (FOnFormAccepted != null) || (FOnFormRejected != null);
+						if ((FMode != FormMode.None) || (SourceLinkType != SourceLinkType.None) || LForceAcceptReject)
 						{
+							if (LForceAcceptReject)
+								LForm.ForceAcceptReject = true;
 							LForm.Show
 							(
 								(IFormInterface)FindParent(typeof(IFormInterface)),
