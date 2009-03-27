@@ -310,6 +310,7 @@ namespace Alphora.Dataphor.DAE.Connection
 				SQLIndex LIndex = new SQLIndex("");
 				LIndex.IsUnique = true;
 				
+				bool LContainsIsHidden = LDataTable.Columns.Contains("IsHidden");
 				int LColumnIndex = 0;
 				foreach (System.Data.DataRow LRow in LDataTable.Rows)
 				{
@@ -338,8 +339,12 @@ namespace Alphora.Dataphor.DAE.Connection
 					LValue = LRow["IsLong"];
 					bool LIsLong = IsNull(LValue) ? false : (bool)LValue;
 
-                    LValue = LRow["IsHidden"];
-                    bool LIsHidden = IsNull(LValue) ? false : (bool)LValue;
+					bool LIsHidden = false;
+					if (LContainsIsHidden)
+					{
+						LValue = LRow["IsHidden"];
+						LIsHidden = IsNull(LValue) ? false : (bool)LValue;
+					}
 
                     if (!LIsHidden)
     					LSchema.Columns.Add(new SQLColumn(LColumnName, new SQLDomain(LDataType, LLength, LPrecision, LScale, LIsLong)));
