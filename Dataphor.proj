@@ -46,6 +46,14 @@
 		<Copy SourceFiles="@(WebClientImageFiles)" DestinationFolder="Deploy\WebClient\images" />
 	</Target>
 
-	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient">
+	<ItemGroup>
+		<DocumentationFiles Include="Documentation\*.chm;Documentation\*.pdf" />
+	</ItemGroup>
+	<Target Name="CopyDocumentation">
+		<Message Text="Copying Documentation files into deploy..." />
+		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
+	</Target>
+
+	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient; DocumentationFiles">
 	</Target>
 </Project>
