@@ -54,6 +54,6 @@
 		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
 	</Target>
 
-	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient; DocumentationFiles">
+	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
 	</Target>
 </Project>
