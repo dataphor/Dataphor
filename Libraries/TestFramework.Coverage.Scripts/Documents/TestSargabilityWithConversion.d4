@@ -1,0 +1,47 @@
+/*
+	Test Sargability w/ Conversion
+	(c) Copyright 2009, Alphora
+	
+	This test verifies that when a conversion appears in a column-referencing condition of
+	a potentially sargable restriction, the conversion is pushed to the argument of the condition
+	for execution.
+	
+	Note that this introduces a minor semantic difference between the widening conversion that
+	would normally be used to evaluate the expression, and the narrowing conversion that results
+	from converting the other side of the condition, in that a narrowing conversion will potentially
+	result in a run-time error, where the widening conversion would have resulted in a value of 
+	false for the restriction condition.
+	
+	In the case that an alternate conversion path cannot be found, the compiler will issue a warning
+	and regard the condition as not sargable.
+	
+	In addition, the test verifies that the internal index created to support an unenforced key
+	is created non-unique, and that deferred transition constraints can be used to enforce an
+	alternate key at transaction boundaries.
+*/
+
+create table RV
+{
+                ID : Short,
+                OrderNo : Short,
+                key { ID },
+                key { OrderNo } tags { DAE.Enforced = "false" },
+                transition constraint OrderNo_Unique
+                	on insert not exists (RV where OrderNo = new.OrderNo and ID <> new.ID)
+                	on update not exists (RV where OrderNo = new.OrderNo and ID <> new.ID)
+};
+
+RV := table {
+                row {1 ID, 1 OrderNo},
+                row {2, 2},
+                row {3, 3}
+};
+
+try
+update RV
+                set {OrderNo := 3}
+                where ID = 2;
+update RV
+                set {OrderNo := 2}
+                where ID = 3;
+commit;

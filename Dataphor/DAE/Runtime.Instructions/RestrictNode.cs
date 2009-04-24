@@ -651,13 +651,49 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		private bool ConvertSargableArguments(Plan APlan)
+		{
+			// For each comparison,
+				// if the column referencing branch contains conversions, attempt to push the conversion to the context literal branch
+				// if successful, the comparison is still sargable, and a conversion is placed on the argument node for the condition
+				// otherwise, the comparison is not sargable, and a warning should be produced indicating the failure
+				// note that the original argument node is still participating in the condition expression
+				// this is acceptable because for sargable restrictions, the condition expression is only used
+				// for statement emission and device compilation, not for execution of the actual restriction.
+			bool LCanConvert = true;
+			for (int LColumnIndex = 0; LColumnIndex < FConditions.Count; LColumnIndex++)
+			{
+				Schema.TableVarColumn LColumn = FConditions[LColumnIndex].Column;
+				for (int LConditionIndex = 0; LConditionIndex < FConditions[LColumnIndex].Count; LConditionIndex++)
+				{
+					ColumnCondition LCondition = FConditions[LColumnIndex][LConditionIndex];
+					if (!LCondition.ColumnReference.DataType.Equals(LColumn.DataType))
+					{
+						// Find a conversion path to convert the type of the argument to the type of the column
+						ConversionContext LConversionContext = Compiler.FindConversionPath(APlan, LCondition.Argument.DataType, LColumn.DataType);
+						if (LConversionContext.CanConvert)
+						{
+							LCondition.Argument = Compiler.ConvertNode(APlan, LCondition.Argument, LConversionContext);
+						}
+						else
+						{
+							APlan.Messages.Add(new CompilerException(CompilerException.Codes.CouldNotConvertSargableArgument, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LColumn.Name, LConversionContext.SourceType.Name, LConversionContext.TargetType.Name));
+							LCanConvert = false;
+						}
+					}
+				}
+			}
+			
+			return LCanConvert;
+		}
+		
 		private void DetermineSargability(Plan APlan)
 		{
 			FIsSeekable = false;
 			FIsScanable = false;
 			FConditions = new Conditions();			
 			
-			if (IsSargable(APlan, Nodes[1]))
+			if (IsSargable(APlan, Nodes[1]) && ConvertSargableArguments(APlan))
 			{
 				FIsSeekable = DetermineIsSeekable();
 				if (!FIsSeekable)
