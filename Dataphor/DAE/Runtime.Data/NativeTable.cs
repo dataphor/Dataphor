@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			// Create non clustered indexes for each key and order (unique sets)
 			Schema.Order LKey;
 			foreach (Schema.Key LNonClusteredKey in TableVar.Keys)
-				if (!LNonClusteredKey.IsSparse)
+				if (!LNonClusteredKey.IsSparse && LNonClusteredKey.Enforced)
 				{
 					if (!ClusteredIndex.Key.Includes(AProcess.Plan, LNonClusteredKey))
 					{
