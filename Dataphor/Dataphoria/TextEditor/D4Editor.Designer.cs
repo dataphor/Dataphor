@@ -98,87 +98,26 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FPriorBlockMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
             this.FNextBlockMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
             this.FShowResultsMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-            this.FScriptBar = new Syncfusion.Windows.Forms.Tools.XPMenus.Bar(this.FFrameBarManager, "ScriptBar");
-            ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).BeginInit();
 
             ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).BeginInit();
             this.SuspendLayout();
             // 
             // FFrameBarManager
             // 
-            this.FFrameBarManager.BarPositionInfo = ((System.IO.MemoryStream)(resources.GetObject("FFrameBarManager.BarPositionInfo")));
-            this.FFrameBarManager.Bars.Add(this.FScriptBar);
-            this.FFrameBarManager.Categories.Add("Script");
-            this.FFrameBarManager.CategoriesToIgnoreInCustDialog.AddRange(new int[] {
-            3});
-            this.FFrameBarManager.CurrentBaseFormType = "Alphora.Dataphor.Dataphoria.TextEditor.TextEditor";
-            this.FFrameBarManager.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-            this.FScriptMenu,
-            this.FSelectBlockMenuItem,
-            this.FPriorBlockMenuItem,
-            this.FNextBlockMenuItem,
-            this.FExecuteMenuItem,
-            this.FExecuteLineMenuItem,
-            this.FPrepareMenuItem,
-            this.FPrepareLineMenuItem,
-            this.FAnalyzeMenuItem,
-            this.FAnalyzeLineMenuItem,
-            this.FExportMenu,
-            this.FInjectMenuItem,
-            this.FExecuteSchemaMenuItem,
-            this.FExportDataMenuItem,
-            this.FExecuteBothMenuItem,
-            this.FShowResultsMenuItem,
-            this.FCancelMenuItem});
-            this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
-            // 
-            // FFileMenu
-            // 
-            this.FFileMenu.UpdatedBarItemPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0,
-            1,
-            2,
-            3,
-            4});
-            this.FFileMenu.UpdatedSeparatorPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0});
-            // 
-            // FMainMenu
-            // 
-            this.FMainMenu.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-            this.FScriptMenu});
-            this.FMainMenu.UpdatedBarItemPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0,
-            1,
-            2,
-            3});
+
             // 
             // FFileBar
             // 
-            this.FFileBar.UpdatedSeparatorPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0});
+            
             // 
             // FEditBar
             // 
-            this.FEditBar.UpdatedSeparatorPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0});
+
+
             // 
             // FEditMenu
             // 
-            this.FEditMenu.UpdatedBarItemPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8});
-            this.FEditMenu.UpdatedSeparatorPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            0,
-            1,
-            2});
+
 
             // 
             // FViewMenu
@@ -374,27 +313,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FShowResultsMenuItem.MergeOrder = 10;
             this.FShowResultsMenuItem.Shortcut = System.Windows.Forms.Shortcut.F7;
             this.FShowResultsMenuItem.Text = "&Results";
-            // 
-            // FScriptBar
-            // 
-            this.FScriptBar.BarName = "ScriptBar";
-            this.FScriptBar.Items.AddRange(new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem[] {
-            this.FPrepareMenuItem,
-            this.FAnalyzeMenuItem,
-            this.FExecuteMenuItem,
-            this.FCancelMenuItem,
-            this.FInjectMenuItem});
-            this.FScriptBar.Manager = this.FFrameBarManager;
-            this.FScriptBar.SeparatorIndices.AddRange(new int[] {
-            3});
+            
             // 
             // D4Editor
             // 
             this.ClientSize = new System.Drawing.Size(455, 376);
             this.Name = "D4Editor";
-
-            ((System.ComponentModel.ISupportInitialize)(this.FFrameBarManager)).EndInit();
-
+            
 
             ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).EndInit();
             this.ResumeLayout(false);

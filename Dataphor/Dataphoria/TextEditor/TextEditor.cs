@@ -312,23 +312,23 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             try
             {
-                if (ASender == FCloseMenuItem || ASender == FCloseToolStripMenuItem)
+                if (ASender == FCloseToolStripMenuItem)
                 {
                     Close();
                 }
-                else if(ASender==FPrintMenuItem || ASender==FPrintToolStripButton)
+                else if(ASender==FPrintToolStripMenuItem || ASender==FPrintToolStripButton)
                 {
                     Print();
                 }
-                else if(ASender==FCutMenuItem || ASender==FCutToolStripButton)
+                else if(ASender==FCutToolStripMenuItem || ASender==FCutToolStripButton)
                 {
                     new SD.Actions.Cut().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
                 }
-                else if(ASender==FCopyMenuItem || ASender==FCopyToolStripButton)
+                else if(ASender==FCopyToolStripMenuItem || ASender==FCopyToolStripButton)
                 {
                     new SD.Actions.Copy().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
                 }
-                else if (ASender == FPasteMenuItem || ASender == FPasteToolStripButton)
+                else if (ASender == FPasteToolStripButton || ASender == FPasteToolStripButton)
                 {
                     new SD.Actions.Paste().Execute(FTextEdit.ActiveTextAreaControl.TextArea); 
                 }
@@ -377,44 +377,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 // nothing
             }
         }
-
-		/*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
-		{
-			try
-			{
-				switch (AArgs.ClickedBarItem.ID)
-				{
-					case "Close" : Close(); break;
-					case "Print" : Print(); break;
-					case "Cut" : new SD.Actions.Cut().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "Copy" : new SD.Actions.Copy().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "Paste" : new SD.Actions.Paste().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "SelectAll" : new SD.Actions.SelectWholeDocument().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "SaveAsDocument" : 			
-						FService.SaveAsDocument();
-						ShowSaved();
-						break;
-					case "SaveAsFile" :
-						FService.SaveAsFile();
-						ShowSaved();
-						break;
-					case "Save" :
-						FService.Save();
-						ShowSaved();
-						break;
-					case "Find" : Find(); break;
-					case "Replace" : Replace(); break;
-					case "FindNext" : FindNext(); break;
-					case "Undo" : Undo(); break;
-					case "Redo" : Redo(); break;
-					case "Split" : Split(); break;
-				}
-			}
-			catch (AbortException)
-			{
-				// nothing
-			}
-		}*/
+		
 
 		private void FTextArea_HelpRequested(object ASender, HelpEventArgs AArgs)
 		{
