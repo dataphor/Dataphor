@@ -973,7 +973,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			//FDockingManager.ActivateControl(FFormPanel);
 		}
 
-		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
+		/*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
 		{
 			switch (AArgs.ClickedBarItem.ID)
 			{
@@ -990,7 +990,51 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 				case "ShowProperties" : ShowProperties(); break;
 				case "ShowForm" : ShowForm(); break;
 			}
-		}
+		}*/
+
+        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+        {          
+            if (ASender == FSaveToolStripButton) {
+                Save();
+            }
+            else if (ASender == FSaveAsFileToolStripMenuItem || ASender == FSaveAsFileToolStripButton) 
+            {
+                SaveAsFile();
+            }
+            else if (ASender ==FSaveAsDocumentToolStripMenuItem || ASender == FSaveAsDocumentToolStripButton){
+                SaveAsDocument();
+            }
+            else if (ASender == FCloseToolStripMenuItem) {
+                Close();
+            }
+            else if (ASender == FCutToolStripMenuItem || ASender == FCutToolStripButton) {
+                CutNode();
+            }
+            else if (ASender == FCopyToolStripMenuItem || ASender == FCopyToolStripButton)
+            {
+                CopyNode();
+            }
+            else if (ASender == FPasteToolStripMenuItem || ASender == FPasteToolStripButton)
+            {
+                PasteNode();
+            }
+            else if (ASender == FDeleteToolStripMenuItem || ASender == FDeleteToolStripButton) {
+                DeleteNode();
+            }
+            else if (ASender == FRenameToolStripMenuItem || ASender == FRenameToolStripButton) {
+                RenameNode();
+            }
+            else if (ASender == FShowPaletteMenuItem) {
+                ShowPalette();
+            }
+            else if (ASender == FShowPropertiesMenuItem)
+            {
+                ShowProperties();
+            }
+            else if (ASender == FShowFormMenuItem) {
+                ShowForm();
+            }
+        }
 
 		#endregion
 
@@ -1082,10 +1126,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         #endregion
 
-        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
-        { 
-        
-        }
+      
     }
 
 	public class PaletteItem : GroupViewItem
