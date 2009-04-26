@@ -79,7 +79,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(D4Editor));
-
             this.FScriptMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
             this.FExecuteMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
             this.FD4EditorImageList = new System.Windows.Forms.ImageList(this.components);
@@ -98,27 +97,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FPriorBlockMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
             this.FNextBlockMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
             this.FShowResultsMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-
+            this.FDockContentTextEdit.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).BeginInit();
             this.SuspendLayout();
-            // 
-            // FFrameBarManager
-            // 
-
-            // 
-            // FFileBar
-            // 
-            
-            // 
-            // FEditBar
-            // 
-
-
-            // 
-            // FEditMenu
-            // 
-
-
             // 
             // FViewMenu
             // 
@@ -129,19 +110,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             1,
             2});
             this.FViewMenu.UpdatedBarItemPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
-            2,
-            1,
             0});
             this.FViewMenu.UpdatedSeparatorPositions = new Syncfusion.Collections.IntListDesignTime(new int[] {
             0,
             1,
             2});
-
-            // 
-            // FTextEdit
-            // 
-            this.FTextEdit.Size = new System.Drawing.Size(455, 138);
-
             // 
             // FScriptMenu
             // 
@@ -313,19 +286,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FShowResultsMenuItem.MergeOrder = 10;
             this.FShowResultsMenuItem.Shortcut = System.Windows.Forms.Shortcut.F7;
             this.FShowResultsMenuItem.Text = "&Results";
-            
             // 
             // D4Editor
             // 
             this.ClientSize = new System.Drawing.Size(455, 376);
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "D4Editor";
-            
-
+            this.FDockContentTextEdit.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion
+
 
     }
 }

@@ -29,17 +29,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		protected Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSelectAllMenuItem;
         protected Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FViewMenu;
         protected WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
-        
-        private ToolStrip FToolStrip;
-        private MenuStrip FMenuStrip;
-        private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem FSaveToolStripMenuItem;
         private ToolStripMenuItem FSaveAsFileToolStripMenuItem;
         private ToolStripMenuItem FSaveAsDocumentToolStripMenuItem;
         private ToolStripMenuItem FCloseToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem FPrintToolStripMenuItem;
-        private ToolStripMenuItem FEditToolStripMenuItem;
         private ToolStripMenuItem FUndoToolStripMenuItem;
         private ToolStripMenuItem FRedoToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem2;
@@ -52,7 +47,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         private ToolStripMenuItem FFindToolStripMenuItem;
         private ToolStripMenuItem FReplaceToolStripMenuItem;
         private ToolStripMenuItem FFindNextToolStripMenuItem;
-        private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripButton FSaveToolStripButton;
         private ToolStripButton FSaveAsFileToolStripButton;
         private ToolStripButton FSaveAsDocumentToolStripButton;
@@ -102,7 +96,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FToolbarImageList = new System.Windows.Forms.ImageList(this.components);
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.FMenuStrip = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveAsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSaveAsDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,7 +116,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FReplaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FFindNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FSplitWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FToolStrip = new System.Windows.Forms.ToolStrip();
             this.FSaveToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -140,11 +134,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindNextToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.FUndoToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.FRedoToolStripButton = new System.Windows.Forms.ToolStripButton();            
+            this.FRedoToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FMenuStrip.SuspendLayout();
             this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
-           
+            // 
+            // FSelectAllMenuItem
+            // 
+            this.FSelectAllMenuItem.CategoryIndex = -1;
+            this.FSelectAllMenuItem.ID = "";
+            // 
+            // FViewMenu
+            // 
+            this.FViewMenu.CategoryIndex = -1;
+            this.FViewMenu.ID = "";
             // 
             // FToolbarImageList
             // 
@@ -179,28 +182,28 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FMenuStrip
             // 
             this.FMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
+            this.FFileToolStripMenuItem,
             this.FEditToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.FViewToolStripMenuItem});
             this.FMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.FMenuStrip.Name = "FMenuStrip";
             this.FMenuStrip.Size = new System.Drawing.Size(455, 24);
             this.FMenuStrip.TabIndex = 9;
             this.FMenuStrip.Text = "menuStrip1";
             // 
-            // fileToolStripMenuItem
+            // FFileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FSaveToolStripMenuItem,
             this.FSaveAsFileToolStripMenuItem,
             this.FSaveAsDocumentToolStripMenuItem,
             this.FCloseToolStripMenuItem,
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
-            this.fileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-            this.fileToolStripMenuItem.Text = "File";
+            this.FFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+            this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
+            this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.FFileToolStripMenuItem.Text = "File";
             // 
             // FSaveToolStripMenuItem
             // 
@@ -353,14 +356,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindNextToolStripMenuItem.Text = "Find Next";
             this.FFindNextToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
-            // viewToolStripMenuItem
+            // FViewToolStripMenuItem
             // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FSplitWindowToolStripMenuItem});
-            this.viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.viewToolStripMenuItem.Text = "View";
+            this.FViewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+            this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
+            this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.FViewToolStripMenuItem.Text = "View";
             // 
             // FSplitWindowToolStripMenuItem
             // 
@@ -545,7 +548,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TextEditor";
             this.TabText = "Untitled";
-            this.Text = "Untitled";            
+            this.Text = "Untitled";
             this.FMenuStrip.ResumeLayout(false);
             this.FMenuStrip.PerformLayout();
             this.FToolStrip.ResumeLayout(false);
@@ -555,6 +558,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		}
 		#endregion
+
+        protected ToolStrip FToolStrip;
+        protected MenuStrip FMenuStrip;
+        protected ToolStripMenuItem FFileToolStripMenuItem;
+        protected ToolStripMenuItem FEditToolStripMenuItem;
+        protected ToolStripMenuItem FViewToolStripMenuItem;
 
 		
     }

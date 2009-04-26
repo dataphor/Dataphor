@@ -694,6 +694,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		}
 
 		#endregion
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
 	}
 
 	public class ToggleBlockDelimiter : SD.Actions.AbstractEditAction
