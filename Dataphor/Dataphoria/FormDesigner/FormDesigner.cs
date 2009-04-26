@@ -1081,6 +1081,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         }
 
         #endregion
+
+        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+        { 
+        
+        }
     }
 
 	public class PaletteItem : GroupViewItem

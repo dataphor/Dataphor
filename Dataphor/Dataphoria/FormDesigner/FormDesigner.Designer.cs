@@ -497,6 +497,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
             this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
+            this.FSaveAsFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FSaveAsDocumentToolStripMenuItem
             // 
@@ -504,6 +505,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
             this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
+            this.FSaveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FCloseToolStripMenuItem
             // 
@@ -511,6 +513,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
             this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.FCloseToolStripMenuItem.Text = "Close";
+            this.FCloseToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FEditToolStripMenuItem
             // 
@@ -528,22 +531,25 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
+            this.FCutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FCopyToolStripMenuItem
             // 
             this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
+            this.FCopyToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FPasteToolStripMenuItem
             // 
             this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
+            this.FPasteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FDeleteToolStripMenuItem
             // 
@@ -551,6 +557,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FDeleteToolStripMenuItem.Name = "FDeleteToolStripMenuItem";
             this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FDeleteToolStripMenuItem.Text = "Delete";
+            this.FDeleteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FRenameToolStripMenuItem
             // 
@@ -558,6 +565,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FRenameToolStripMenuItem.Name = "FRenameToolStripMenuItem";
             this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRenameToolStripMenuItem.Text = "Rename";
+            this.FRenameToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FViewToolStripMenuItem
             // 
@@ -573,20 +581,23 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // FPaletteToolStripMenuItem
             // 
             this.FPaletteToolStripMenuItem.Name = "FPaletteToolStripMenuItem";
-            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FPaletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPaletteToolStripMenuItem.Text = "Palette";
+            this.FPaletteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FPropertiesToolStripMenuItem
             // 
             this.FPropertiesToolStripMenuItem.Name = "FPropertiesToolStripMenuItem";
-            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FPropertiesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPropertiesToolStripMenuItem.Text = "Properties";
+            this.FPropertiesToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FFormToolStripMenuItem
             // 
             this.FFormToolStripMenuItem.Name = "FFormToolStripMenuItem";
-            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.FFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFormToolStripMenuItem.Text = "Form";
+            this.FFormToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FToolStrip
             // 
@@ -614,6 +625,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FSaveToolStripButton.Name = "FSaveToolStripButton";
             this.FSaveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FSaveToolStripButton.Text = "toolStripButton1";
+            this.FSaveToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FSaveAsFileToolStripButton
             // 
@@ -623,6 +635,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FSaveAsFileToolStripButton.Name = "FSaveAsFileToolStripButton";
             this.FSaveAsFileToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FSaveAsFileToolStripButton.Text = "toolStripButton2";
+            this.FSaveAsFileToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FSaveAsDocumentToolStripButton
             // 
@@ -632,6 +645,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FSaveAsDocumentToolStripButton.Name = "FSaveAsDocumentToolStripButton";
             this.FSaveAsDocumentToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FSaveAsDocumentToolStripButton.Text = "toolStripButton3";
+            this.FSaveAsDocumentToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FToolStripSeparator
             // 
@@ -646,6 +660,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FCutToolStripButton.Name = "FCutToolStripButton";
             this.FCutToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FCutToolStripButton.Text = "toolStripButton1";
+            this.FCutToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FCopyToolStripButton
             // 
@@ -655,6 +670,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FCopyToolStripButton.Name = "FCopyToolStripButton";
             this.FCopyToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FCopyToolStripButton.Text = "toolStripButton2";
+            this.FCopyToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FPasteToolStripButton
             // 
@@ -664,6 +680,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FPasteToolStripButton.Name = "FPasteToolStripButton";
             this.FPasteToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FPasteToolStripButton.Text = "toolStripButton3";
+            this.FPasteToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FDeleteToolStripButton
             // 
@@ -673,6 +690,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FDeleteToolStripButton.Name = "FDeleteToolStripButton";
             this.FDeleteToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FDeleteToolStripButton.Text = "toolStripButton4";
+            this.FDeleteToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FRenameToolStripButton
             // 
@@ -682,6 +700,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FRenameToolStripButton.Name = "FRenameToolStripButton";
             this.FRenameToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.FRenameToolStripButton.Text = "toolStripButton1";
+            this.FRenameToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FormDesigner
             // 
