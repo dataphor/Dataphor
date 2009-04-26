@@ -329,9 +329,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 				ANode.Node.Disposed += new EventHandler(SelectedNodeDisposed);
 				LEditsAllowed = !ANode.ReadOnly;
 			}
-			FDeleteMenuItem.Enabled = LEditsAllowed;
-			FRenameMenuItem.Enabled = LEditsAllowed;
-			FCutMenuItem.Enabled = LEditsAllowed;
+			FDeleteToolStripMenuItem.Enabled = LEditsAllowed;
+            FRenameToolStripMenuItem.Enabled = LEditsAllowed;
+            FCutToolStripMenuItem.Enabled = LEditsAllowed;
 		}
 
 		private void SelectedNodeDisposed(object ASender, EventArgs AArgs)
@@ -1024,14 +1024,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             else if (ASender == FRenameToolStripMenuItem || ASender == FRenameToolStripButton) {
                 RenameNode();
             }
-            else if (ASender == FShowPaletteMenuItem) {
+            else if (ASender == FPaletteToolStripMenuItem) {
                 ShowPalette();
             }
-            else if (ASender == FShowPropertiesMenuItem)
+            else if (ASender == FPropertiesToolStripMenuItem)
             {
                 ShowProperties();
             }
-            else if (ASender == FShowFormMenuItem) {
+            else if (ASender == FFormToolStripMenuItem) {
                 ShowForm();
             }
         }
