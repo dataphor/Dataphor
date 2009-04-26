@@ -308,7 +308,77 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			SetStatus(Strings.Saved);
 		}
 
-		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
+        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+        {
+            try
+            {
+                if (ASender == FCloseMenuItem || ASender == FCloseToolStripMenuItem)
+                {
+                    Close();
+                }
+                else if(ASender==FPrintMenuItem || ASender==FPrintToolStripButton)
+                {
+                    Print();
+                }
+                else if(ASender==FCutMenuItem || ASender==FCutToolStripButton)
+                {
+                    new SD.Actions.Cut().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if(ASender==FCopyMenuItem || ASender==FCopyToolStripButton)
+                {
+                    new SD.Actions.Copy().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FPasteMenuItem || ASender == FPasteToolStripButton)
+                {
+                    new SD.Actions.Paste().Execute(FTextEdit.ActiveTextAreaControl.TextArea); 
+                }
+                else if (ASender == FSelectAllToolStripMenuItem) 
+                {
+                    new SD.Actions.SelectWholeDocument().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FSaveAsDocumentToolStripMenuItem || ASender == FSaveAsDocumentToolStripButton) {
+                    FService.SaveAsDocument();
+                    ShowSaved();
+                }
+                else if (ASender == FSaveAsFileToolStripMenuItem || ASender == FSaveAsFileToolStripButton) {
+                    FService.SaveAsFile();
+                    ShowSaved();
+                }
+                else if (ASender == FSaveToolStripMenuItem || ASender == FSaveToolStripButton)
+                {
+                    FService.Save();
+                    ShowSaved();
+                }
+                else if (ASender == FFindToolStripMenuItem || ASender == FFindToolStripButton)
+                {
+                    Find();
+                }
+                else if (ASender == FReplaceToolStripMenuItem || ASender == FReplaceToolStripButton) 
+                {
+                    Replace();
+                }
+                else if (ASender == FFindNextToolStripMenuItem || ASender == FFindNextToolStripButton)
+                {
+                    FindNext();
+                }
+                else if (ASender == FUndoToolStripMenuItem || ASender == FUndoToolStripButton) {
+                    Undo();
+                }
+                else if(ASender == FRedoToolStripMenuItem || ASender== FRedoToolStripButton)
+                {
+                    Redo();
+                }
+                else if (ASender == FSplitWindowToolStripMenuItem) {
+                    Split();
+                }
+            }
+            catch (AbortException)
+            {
+                // nothing
+            }
+        }
+
+		/*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
 		{
 			try
 			{
@@ -344,7 +414,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			{
 				// nothing
 			}
-		}
+		}*/
 
 		private void FTextArea_HelpRequested(object ASender, HelpEventArgs AArgs)
 		{
@@ -422,9 +492,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #endregion
 
-        private void FMainMenuStrip_ItemClicked(object sender, EventArgs e)
-        {
-
-        }
+       
     }
 }

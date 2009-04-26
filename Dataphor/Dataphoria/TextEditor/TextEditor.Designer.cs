@@ -220,7 +220,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FViewMenu});
             this.FFrameBarManager.LargeImageList = null;
             this.FFrameBarManager.UsePartialMenus = false;
-            this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
+            //this.FFrameBarManager.ItemClicked += new Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventHandler(this.FrameBarManagerItemClicked);
             // 
             // FMainMenu
             // 
