@@ -421,5 +421,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         }
 
         #endregion
+
+        private void FMainMenuStrip_ItemClicked(object sender, EventArgs e)
+        {
+
+        }
     }
 }
