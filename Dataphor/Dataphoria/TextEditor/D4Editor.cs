@@ -59,6 +59,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			InitializeComponent();
             InitializeDocking();
+            InitializeExtendendMenu();
 		}
 
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
@@ -67,7 +68,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
             InitializeDocking();
 
-
+            InitializeExtendendMenu();
 
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
 			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
