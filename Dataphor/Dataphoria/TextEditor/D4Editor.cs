@@ -138,8 +138,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FViewMenu
             // 
             this.FMenuStrip.Items.AddRange(new ToolStripMenuItem[] {
-            this.FShowResultsMenuItem});
-            ;
+            this.FScriptMenu});
+
+            //
+            //FViewToolStripMenuItem
+            //
+            this.FViewToolStripMenuItem.DropDownItems.Add(this.FShowResultsMenuItem);
             // 
             // FScriptMenu
             // 
