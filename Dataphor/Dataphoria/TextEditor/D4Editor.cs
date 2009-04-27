@@ -275,36 +275,75 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
         {
+            try
+            {
+                if (ASender == FSelectBlockMenuItem)
+                {
+                    new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FPriorBlockMenuItem)
+                {
+                    new PriorBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FNextBlockMenuItem)
+                {
+                    new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FExecuteMenuItem)
+                {
+                    new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                }
+                else if (ASender == FExecuteLineMenuItem)
+                {
+                    Execute();
+                }
+                else if (ASender == FCancelMenuItem)
+                {
+                    CancelExecute();
+                }
+                else if (ASender == FPrepareMenuItem)
+                {
+                    Prepare();
+                }
+                else if (ASender == FPrepareLineMenuItem)
+                {
+                    PrepareLine();
+                }
+                else if (ASender == FAnalyzeMenuItem)
+                {
+                    Analyze();
+                }
+                else if (ASender == FAnalyzeLineMenuItem)
+                {
+                    AnalyzeLine();
+                }
+                else if (ASender == FInjectMenuItem)
+                {
+                    Inject();
+                }
+                else if (ASender == FExportDataMenuItem)
+                {
+                    PromptAndExport(ExportType.Data);
+                }
+                else if (ASender == FExecuteBothMenuItem)
+                {
+                    PromptAndExport(ExportType.Data | ExportType.Schema);
+                }
+                else if (ASender == FExecuteSchemaMenuItem)
+                {
+                    PromptAndExport(ExportType.Schema);
+                }
+                else if (ASender == FShowResultsMenuItem)
+                {
+                    ShowResults();
+                }
+            }
+            catch (AbortException)
+            {
+                // do nothing
+            }
         }
-
-		/*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
-		{
-			try
-			{
-				switch (AArgs.ClickedBarItem.ID)
-				{
-					case "SelectBlock" : new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "PriorBlock": new PriorBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "NextBlock" : new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea); break;
-					case "Execute" : Execute(); break;
-					case "ExecuteLine" : ExecuteLine(); break;
-					case "Cancel" : CancelExecute(); break;
-					case "Prepare" : Prepare(); break;
-					case "PrepareLine" : PrepareLine(); break;
-					case "Analyze" : Analyze(); break;
-					case "AnalyzeLine" : AnalyzeLine(); break;
-					case "Inject" : Inject(); break;
-					case "ExportData" : PromptAndExport(ExportType.Data); break;
-					case "ExportBoth" : PromptAndExport(ExportType.Data | ExportType.Schema); break;
-					case "ExportSchema" : PromptAndExport(ExportType.Schema); break;
-					case "ShowResults" : ShowResults(); break;
-				}
-			}
-			catch (AbortException)
-			{
-				// do nothing
-			}
-		}*/
+		
 
 		#region Execution
 
