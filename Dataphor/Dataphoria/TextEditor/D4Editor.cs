@@ -33,6 +33,25 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	{
 
 		private Alphora.Dataphor.Dataphoria.TextEditor.ResultPanel FResultPanel;
+
+        private ToolStripMenuItem FScriptMenu;
+        private ToolStripMenuItem FExecuteMenuItem;
+        private ToolStripMenuItem FExecuteLineMenuItem;
+        private ToolStripMenuItem FPrepareLineMenuItem;
+        private ToolStripMenuItem FSelectBlockMenuItem;
+        private ToolStripMenuItem FPriorBlockMenuItem;
+        private ToolStripMenuItem FNextBlockMenuItem;
+        private ToolStripMenuItem FPrepareMenuItem;
+        private ToolStripMenuItem FAnalyzeMenuItem;
+        private ToolStripMenuItem FAnalyzeLineMenuItem;
+        private ToolStripMenuItem FInjectMenuItem;
+        private ToolStripMenuItem FExecuteSchemaMenuItem;
+        private ToolStripMenuItem FExportDataMenuItem;
+        private ToolStripMenuItem FExecuteBothMenuItem;
+        private ToolStripMenuItem FShowResultsMenuItem;
+        private ToolStripMenuItem FExportMenu;
+        private ToolStripMenuItem FCancelMenuItem;
+
         protected DockContent FDockContentResultPanel;
 
 
@@ -94,7 +113,129 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDockContentResultPanel.Show(this.FDockPanel);
         }
 
-	
+
+        private void InitializeExtendendMenu() {
+            this.FScriptMenu = new ToolStripMenuItem();
+            this.FExecuteMenuItem = new ToolStripMenuItem();            
+            this.FCancelMenuItem = new ToolStripMenuItem();
+            this.FPrepareMenuItem = new ToolStripMenuItem();
+            this.FAnalyzeMenuItem = new ToolStripMenuItem();
+            this.FInjectMenuItem = new ToolStripMenuItem();
+            this.FExportMenu = new ToolStripMenuItem();
+            this.FExecuteSchemaMenuItem = new ToolStripMenuItem();
+            this.FExportDataMenuItem = new ToolStripMenuItem();
+            this.FExecuteBothMenuItem = new ToolStripMenuItem();
+            this.FExecuteLineMenuItem = new ToolStripMenuItem();
+            this.FPrepareLineMenuItem = new ToolStripMenuItem();
+            this.FAnalyzeLineMenuItem = new ToolStripMenuItem();
+            this.FSelectBlockMenuItem = new ToolStripMenuItem();
+            this.FPriorBlockMenuItem = new ToolStripMenuItem();
+            this.FNextBlockMenuItem = new ToolStripMenuItem();
+            this.FShowResultsMenuItem = new ToolStripMenuItem();
+
+            // 
+            // FViewMenu
+            // 
+            this.FMenuStrip.Items.AddRange(new ToolStripMenuItem[] {
+            this.FShowResultsMenuItem});
+            ;
+            // 
+            // FScriptMenu
+            // 
+            this.FScriptMenu.DropDownItems.AddRange(new ToolStripMenuItem[] {
+            this.FExecuteMenuItem,
+            this.FCancelMenuItem,
+            this.FPrepareMenuItem,
+            this.FAnalyzeMenuItem,
+            this.FInjectMenuItem,
+            this.FExportMenu});
+            this.FScriptMenu.Text = "&Script";
+            // 
+            // FExecuteMenuItem
+            // 
+
+            this.FExecuteMenuItem.ImageIndex = 0;
+
+            this.FExecuteMenuItem.Text = "&Execute";           
+            // 
+            // FCancelMenuItem
+            // 
+
+            this.FCancelMenuItem.Enabled = false;
+            this.FCancelMenuItem.Text = "&Cancel Execute";
+            // 
+            // FPrepareMenuItem
+            //                                     
+            this.FPrepareMenuItem.Text = "&Prepare";
+            // 
+            // FAnalyzeMenuItem
+            // 
+
+            this.FAnalyzeMenuItem.ImageIndex = 4;
+            this.FAnalyzeMenuItem.Text = "&Analyze";
+            // 
+            // FInjectMenuItem
+            // 
+
+            this.FInjectMenuItem.ImageIndex = 3;
+            this.FInjectMenuItem.Text = "&Inject As Upgrade";
+            // 
+            // FExportMenu
+            // 
+
+            this.FExportMenu.DropDownItems.AddRange(new ToolStripMenuItem[] {
+            this.FExecuteSchemaMenuItem,
+            this.FExportDataMenuItem,
+            this.FExecuteBothMenuItem});
+            this.FExportMenu.Text = "E&xport";
+            this.FExportMenu.Visible = false;
+            // 
+            // FExecuteSchemaMenuItem
+            // 
+
+            this.FExecuteSchemaMenuItem.Text = "&Schema Only...";
+            // 
+            // FExportDataMenuItem
+            // 
+            this.FExportDataMenuItem.Text = "&Data Only...";
+            // 
+            // FExecuteBothMenuItem
+            // 
+
+
+            this.FExecuteBothMenuItem.Text = "S&chema and Data...";
+            // 
+            // FExecuteLineMenuItem
+            // 
+            this.FExecuteLineMenuItem.Text = "E&xecute Line";
+            // 
+            // FPrepareLineMenuItem
+            // 
+            this.FPrepareLineMenuItem.Text = "P&repare Line";
+            // 
+            // FAnalyzeLineMenuItem
+            // 
+            this.FAnalyzeLineMenuItem.Text = "A&nalyze Line";
+            // 
+            // FSelectBlockMenuItem
+            // 
+            this.FSelectBlockMenuItem.Text = "Select &Block";
+            // 
+            // FPriorBlockMenuItem
+            // 
+            this.FPriorBlockMenuItem.Text = "&Prior Block";
+            // 
+            // FNextBlockMenuItem
+            // 
+            this.FNextBlockMenuItem.Text = "&Next Block";
+            // 
+            // FShowResultsMenuItem
+            // 
+            this.FShowResultsMenuItem.Text = "&Results";
+            // 
+            // D4Editor
+            // 
+        }
 
 		protected override SD.Document.IHighlightingStrategy GetHighlightingStrategy()
 		{

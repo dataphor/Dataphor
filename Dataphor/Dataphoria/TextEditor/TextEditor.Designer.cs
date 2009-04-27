@@ -25,9 +25,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private System.ComponentModel.IContainer components = null;
 		
 		
-		private System.Windows.Forms.ImageList FToolbarImageList;
-		protected Syncfusion.Windows.Forms.Tools.XPMenus.BarItem FSelectAllMenuItem;
-        protected Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem FViewMenu;
+		private System.Windows.Forms.ImageList FToolbarImageList;		
         protected WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
         private ToolStripMenuItem FSaveToolStripMenuItem;
         private ToolStripMenuItem FSaveAsFileToolStripMenuItem;
@@ -91,8 +89,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TextEditor));
-            this.FSelectAllMenuItem = new Syncfusion.Windows.Forms.Tools.XPMenus.BarItem();
-            this.FViewMenu = new Syncfusion.Windows.Forms.Tools.XPMenus.ParentBarItem();
             this.FToolbarImageList = new System.Windows.Forms.ImageList(this.components);
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.FMenuStrip = new System.Windows.Forms.MenuStrip();
@@ -138,16 +134,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FMenuStrip.SuspendLayout();
             this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // FSelectAllMenuItem
-            // 
-            this.FSelectAllMenuItem.CategoryIndex = -1;
-            this.FSelectAllMenuItem.ID = "";
-            // 
-            // FViewMenu
-            // 
-            this.FViewMenu.CategoryIndex = -1;
-            this.FViewMenu.ID = "";
+           
             // 
             // FToolbarImageList
             // 
