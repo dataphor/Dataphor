@@ -149,36 +149,40 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FAnalyzeMenuItem,
             this.FInjectMenuItem,
             this.FExportMenu});
-            this.FScriptMenu.Text = "&Script";
+            this.FScriptMenu.Text = "&Script";            
             // 
             // FExecuteMenuItem
             // 
 
             this.FExecuteMenuItem.ImageIndex = 0;
-
-            this.FExecuteMenuItem.Text = "&Execute";           
+            this.FExecuteMenuItem.Text = "&Execute";
+            this.FExecuteMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FCancelMenuItem
             // 
 
             this.FCancelMenuItem.Enabled = false;
             this.FCancelMenuItem.Text = "&Cancel Execute";
+            this.FCancelMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FPrepareMenuItem
             //                                     
             this.FPrepareMenuItem.Text = "&Prepare";
+            this.FPrepareMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FAnalyzeMenuItem
             // 
 
             this.FAnalyzeMenuItem.ImageIndex = 4;
             this.FAnalyzeMenuItem.Text = "&Analyze";
+            this.FAnalyzeMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FInjectMenuItem
             // 
 
             this.FInjectMenuItem.ImageIndex = 3;
             this.FInjectMenuItem.Text = "&Inject As Upgrade";
+            this.FInjectMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FExportMenu
             // 
@@ -188,50 +192,60 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FExportDataMenuItem,
             this.FExecuteBothMenuItem});
             this.FExportMenu.Text = "E&xport";
-            this.FExportMenu.Visible = false;
+            this.FExportMenu.Visible = false;            
             // 
             // FExecuteSchemaMenuItem
             // 
 
             this.FExecuteSchemaMenuItem.Text = "&Schema Only...";
+            this.FExecuteSchemaMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FExportDataMenuItem
             // 
             this.FExportDataMenuItem.Text = "&Data Only...";
+            this.FExportDataMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FExecuteBothMenuItem
             // 
 
 
             this.FExecuteBothMenuItem.Text = "S&chema and Data...";
+            this.FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FExecuteLineMenuItem
             // 
             this.FExecuteLineMenuItem.Text = "E&xecute Line";
+            this.FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FPrepareLineMenuItem
             // 
             this.FPrepareLineMenuItem.Text = "P&repare Line";
+            this.FPrepareLineMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FAnalyzeLineMenuItem
             // 
             this.FAnalyzeLineMenuItem.Text = "A&nalyze Line";
+            this.FAnalyzeLineMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FSelectBlockMenuItem
             // 
             this.FSelectBlockMenuItem.Text = "Select &Block";
+            this.FSelectBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FPriorBlockMenuItem
             // 
             this.FPriorBlockMenuItem.Text = "&Prior Block";
+            this.FPriorBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FNextBlockMenuItem
             // 
             this.FNextBlockMenuItem.Text = "&Next Block";
+            this.FNextBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // FShowResultsMenuItem
             // 
             this.FShowResultsMenuItem.Text = "&Results";
+            this.FShowResultsMenuItem.Click += FMainMenuStrip_ItemClicked;
             // 
             // D4Editor
             // 
@@ -253,7 +267,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 //			FDockingManager.ActivateControl(FResultPanel);
 		}
 
-		private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
+
+        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+        {
+        }
+
+		/*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
 		{
 			try
 			{
@@ -280,7 +299,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			{
 				// do nothing
 			}
-		}
+		}*/
 
 		#region Execution
 
