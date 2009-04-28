@@ -60,6 +60,20 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap Analyze {
+            get {
+                object obj = ResourceManager.GetObject("Analyze", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap CancelExecute {
+            get {
+                object obj = ResourceManager.GetObject("CancelExecute", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap Close {
             get {
                 object obj = ResourceManager.GetObject("Close", resourceCulture);
@@ -102,6 +116,13 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap Execute {
+            get {
+                object obj = ResourceManager.GetObject("Execute", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ExpandOnDemand {
             get {
                 object obj = ResourceManager.GetObject("ExpandOnDemand", resourceCulture);
@@ -126,6 +147,13 @@ namespace Alphora.Dataphor.Dataphoria {
         internal static System.Drawing.Bitmap Help {
             get {
                 object obj = ResourceManager.GetObject("Help", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Inject {
+            get {
+                object obj = ResourceManager.GetObject("Inject", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -168,6 +196,13 @@ namespace Alphora.Dataphor.Dataphoria {
         internal static System.Drawing.Bitmap Paste {
             get {
                 object obj = ResourceManager.GetObject("Paste", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Prepare {
+            get {
+                object obj = ResourceManager.GetObject("Prepare", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
