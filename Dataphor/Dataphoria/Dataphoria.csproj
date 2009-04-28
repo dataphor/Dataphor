@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{AF54209E-0687-4C10-9784-487B1006E0BD}</ProjectGuid>
     <SccProjectName>
@@ -301,6 +301,9 @@
     <Compile Include="FormDesigner\FormDesigner.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FormDesigner\FormDesigner.Designer.cs">
+      <DependentUpon>FormDesigner.cs</DependentUpon>
+    </Compile>
     <Compile Include="FreeDataphoria.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -377,11 +380,17 @@
     <Compile Include="TextEditor\D4Editor.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="TextEditor\D4Editor.Designer.cs">
+      <DependentUpon>D4Editor.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextEditor\ResultPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TextEditor\TextEditor.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TextEditor\TextEditor.Designer.cs">
+      <DependentUpon>TextEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="TreeView.cs">
       <SubType>Component</SubType>
@@ -522,6 +531,7 @@
     <Content Include="Dataphoria.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Resources\" />
     <Folder Include="SchemaDesigner\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
