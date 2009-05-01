@@ -602,9 +602,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void CloseCursor(SQLStoreCursor ACursor)
 		{
+			#if USECURSORCACHE
 			if (!FCursorCache.ContainsKey(ACursor.CursorName))
 				FCursorCache.Add(ACursor.CursorName, ACursor);
 			else
+			#endif
 				ACursor.Dispose();
 		}
 		
@@ -612,12 +614,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			string LCursorName = AIndexName + AIsUpdatable.ToString();
 			SQLStoreCursor LCursor;
+			#if USECURSORCACHE
 			if (FCursorCache.TryGetValue(LCursorName, out LCursor))
 			{
 				FCursorCache.Remove(LCursorName);
 				LCursor.SetRange(null, null);
 			}
 			else
+			#endif
 			{
 				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(AIndexName);
 				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LIndexHeader.SQLIndex, AIsUpdatable);

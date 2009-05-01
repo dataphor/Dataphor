@@ -6620,7 +6620,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			FConnection = Session.Device.Store.GetSQLConnection();
 
 			// Start a read-committed transaction
-			FConnection.BeginTransaction(SQLIsolationLevel.ReadCommitted);
+			//FConnection.BeginTransaction(SQLIsolationLevel.ReadCommitted);
 			
 			// Create a command using DevicePlanNode.Statement
 			FCommand = FConnection.CreateCommand(true);
