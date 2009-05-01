@@ -29,13 +29,10 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using WeifenLuo.WinFormsUI.Docking;
 
-
 namespace Alphora.Dataphor.Dataphoria
 {
     public partial class FreeDataphoria : Form, IDataphoria
     {
-       
-
         public const string CConfigurationFileName = "Dataphoria{0}.config";
 
         private DataTree FExplorer;
@@ -43,7 +40,6 @@ namespace Alphora.Dataphor.Dataphoria
 
         private DockContent FDockContentFExplorer;
         private DockContent FDockContentErrorListView;
-
 
         public FreeDataphoria()
 		{
@@ -71,7 +67,6 @@ namespace Alphora.Dataphor.Dataphoria
             FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
             FDockContentFExplorer.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockLeft;
 
-
             FDockContentErrorListView = new DockContent();
 
             FErrorListView.Dock = DockStyle.Fill;
@@ -89,8 +84,6 @@ namespace Alphora.Dataphor.Dataphoria
 			LoadSettings();
 		}
 
-		
-
 		protected override void OnClosing(CancelEventArgs AArgs)
 		{
 			// HACK: Something in the WinForms validation process is returning false.  We don't care so always make sure Cancel is false at the beginning of OnClosing
@@ -98,7 +91,6 @@ namespace Alphora.Dataphor.Dataphoria
 			base.OnClosing(AArgs);
 		}
 
-		
 		#region Settings
 
 		private Settings FSettings;
@@ -1425,10 +1417,6 @@ namespace Alphora.Dataphor.Dataphoria
 			System.Diagnostics.Process.Start(@"http://news.alphora.com/");
         }
 
-       
-
-
-     
         private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
         {            
             /*try
@@ -1478,7 +1466,6 @@ namespace Alphora.Dataphor.Dataphoria
                 Program.HandleException(LException);
             }*/
         }
-
 
 		private void ClearWarningsClicked(object sender, System.EventArgs e)
 		{
@@ -1533,14 +1520,5 @@ namespace Alphora.Dataphor.Dataphoria
                 LChildForm.MergeWith(this.FToolStrip);           
             }                       
         }
-
-       
-        
-       
-
-        
-
-
-
     }
 }

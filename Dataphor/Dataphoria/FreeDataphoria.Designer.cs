@@ -13,11 +13,37 @@ namespace Alphora.Dataphor.Dataphoria
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
+			try
+			{
+				if (!IsDisposed)
+				{
+					try
+					{
+						SaveSettings();
+					}
+					finally
+					{
+						try
+						{
+							InternalDisconnect();
+						}
+						finally
+						{
+							if( disposing )
+							{
+								if(components != null)
+								{
+									components.Dispose();
+								}
+							}
+						}
+					}
+				}
+			}
+			finally
+			{	
+				base.Dispose( disposing );
+			}
         }
 
         #region Windows Form Designer generated code

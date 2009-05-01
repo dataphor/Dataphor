@@ -36,8 +36,6 @@ namespace Alphora.Dataphor.Dataphoria
 	/// <summary> Dataphoria Server Manager Form. </summary>
 	partial class Dataphoria : System.Windows.Forms.Form, IErrorSource, IServiceProvider
 	{
-	
-		
 		private Alphora.Dataphor.Dataphoria.ObjectTree.DataTree FExplorer;
 		private Syncfusion.Windows.Forms.Tools.DockingManager FDockingManager;
 		private Syncfusion.Windows.Forms.Tools.XPMenus.MainFrameBarManager FFrameBarManager;
@@ -77,8 +75,6 @@ namespace Alphora.Dataphor.Dataphoria
 		private Syncfusion.Windows.Forms.Tools.CommandBar FStatusCommandBar;
 		private Syncfusion.Windows.Forms.Tools.StatusBarAdv FStatusBar;
 
-		
-
 		protected override void Dispose( bool disposing )
 		{
 			try
@@ -113,8 +109,6 @@ namespace Alphora.Dataphor.Dataphoria
 				base.Dispose( disposing );
 			}
 		}
-
-		
 
 		#region Windows Form Designer generated code
 		/// <summary>

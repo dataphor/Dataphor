@@ -38,8 +38,6 @@ namespace Alphora.Dataphor.Dataphoria
 	{
 		public const string CConfigurationFileName = "Dataphoria{0}.config";
 		
-		
-
 		public Dataphoria()
 		{
 			InitializeComponent();
@@ -61,15 +59,12 @@ namespace Alphora.Dataphor.Dataphoria
 			LoadSettings();
 		}
 
-		
-
 		protected override void OnClosing(CancelEventArgs AArgs)
 		{
 			// HACK: Something in the WinForms validation process is returning false.  We don't care so always make sure Cancel is false at the beginning of OnClosing
 			AArgs.Cancel = false;
 			base.OnClosing(AArgs);
 		}
-
 		
 		#region Settings
 
@@ -142,7 +137,6 @@ namespace Alphora.Dataphor.Dataphoria
 					FSettings = new Settings();
 					throw;
 				}
-
 			}
 			catch (Exception LException)
 			{
@@ -1486,9 +1480,5 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#endregion
-
-		
 	}
-
-	
 }

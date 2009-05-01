@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Dataphoria
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();
 
-            //Application.ThreadException += new ThreadExceptionEventHandler(ThreadException);
+            Application.ThreadException += new ThreadExceptionEventHandler(ThreadException);
             try
             {
                 try
@@ -81,12 +81,10 @@ namespace Alphora.Dataphor.Dataphoria
 
         public static void HandleException(System.Exception AException)
         {
-            /*if (AException is ThreadAbortException)
+            if (AException is ThreadAbortException)
                 Thread.ResetAbort();
-            Frontend.Client.Windows.Session.HandleException(AException);*/
-            throw new Exception("Handled Exception" + AException, AException);
+            Frontend.Client.Windows.Session.HandleException(AException);
+            //throw new Exception("Handled Exception" + AException, AException);
         }
-
-        
     }
 }
