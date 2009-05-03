@@ -3465,88 +3465,99 @@ namespace Alphora.Dataphor.DAE.Server
 			// Creates and registers the core system objects required to compile and execute any D4 statements
 			// This will only be called if this is a repository, or if this is a first-time startup for a new server
 			
-			// Create the Admin user
-			FAdminUser = new Schema.User(CAdminUserID, "Administrator", String.Empty);
-
-			// Register the System and Admin users
-			FSystemProcess.CatalogDeviceSession.InsertUser(FSystemUser);
-			FSystemProcess.CatalogDeviceSession.InsertUser(FAdminUser);
-			
-			FUserRole = new Schema.Role(CUserRoleName);
-			FUserRole.Owner = FSystemUser;
-			FUserRole.Library = FSystemLibrary;
-			FSystemProcess.CatalogDeviceSession.InsertRole(FUserRole);
-			
-			// Register the Catalog device
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
-			
-			// Create the Temp Device
-			FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName, CTempDeviceManagerID);
-			RegisterResourceManager(CTempDeviceManagerID, FTempDevice);
-			FTempDevice.Owner = FSystemUser;
-			FTempDevice.Library = FSystemLibrary;
-			FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
-			FTempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CTempDeviceMaxRowCount.ToString()));
-			FTempDevice.MaxRowCount = CTempDeviceMaxRowCount;
-			FTempDevice.MetaData = new MetaData();
-			FTempDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CTempDeviceManagerID.ToString()));
-			FTempDevice.Start(FSystemProcess);			
-			FTempDevice.Register(FSystemProcess);
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
-			
-			// Create the A/T Device
-			FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName, CATDeviceManagerID);
-			RegisterResourceManager(CATDeviceManagerID, FATDevice);
-			FATDevice.Owner = FSystemUser;
-			FATDevice.Library = FSystemLibrary;
-			FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
-			FATDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CATDeviceMaxRowCount.ToString()));
-			FATDevice.MaxRowCount = CATDeviceMaxRowCount;
-			FATDevice.MetaData = new MetaData();
-			FATDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CATDeviceManagerID.ToString()));
-			FATDevice.Start(FSystemProcess);			
-			FATDevice.Register(FSystemProcess);
-			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FATDevice);
-
-			if (!IsRepository)
+			FSystemProcess.BeginTransaction(IsolationLevel.Isolated);
+			try
 			{
-				// Grant usage rights on the Temp and A/T devices to the User role
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+				// Create the Admin user
+				FAdminUser = new Schema.User(CAdminUserID, "Administrator", String.Empty);
+
+				// Register the System and Admin users
+				FSystemProcess.CatalogDeviceSession.InsertUser(FSystemUser);
+				FSystemProcess.CatalogDeviceSession.InsertUser(FAdminUser);
+				
+				FUserRole = new Schema.Role(CUserRoleName);
+				FUserRole.Owner = FSystemUser;
+				FUserRole.Library = FSystemLibrary;
+				FSystemProcess.CatalogDeviceSession.InsertRole(FUserRole);
+				
+				// Register the Catalog device
+				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
+				
+				// Create the Temp Device
+				FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName, CTempDeviceManagerID);
+				RegisterResourceManager(CTempDeviceManagerID, FTempDevice);
+				FTempDevice.Owner = FSystemUser;
+				FTempDevice.Library = FSystemLibrary;
+				FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
+				FTempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CTempDeviceMaxRowCount.ToString()));
+				FTempDevice.MaxRowCount = CTempDeviceMaxRowCount;
+				FTempDevice.MetaData = new MetaData();
+				FTempDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CTempDeviceManagerID.ToString()));
+				FTempDevice.Start(FSystemProcess);			
+				FTempDevice.Register(FSystemProcess);
+				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
+				
+				// Create the A/T Device
+				FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName, CATDeviceManagerID);
+				RegisterResourceManager(CATDeviceManagerID, FATDevice);
+				FATDevice.Owner = FSystemUser;
+				FATDevice.Library = FSystemLibrary;
+				FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
+				FATDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CATDeviceMaxRowCount.ToString()));
+				FATDevice.MaxRowCount = CATDeviceMaxRowCount;
+				FATDevice.MetaData = new MetaData();
+				FATDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CATDeviceManagerID.ToString()));
+				FATDevice.Start(FSystemProcess);			
+				FATDevice.Register(FSystemProcess);
+				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FATDevice);
+
+				if (!IsRepository)
+				{
+					// Grant usage rights on the Temp and A/T devices to the User role
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
+						
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
 					
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
-				
-				// Create and register the system rights
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
-				FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
-				
-				// Grant create rights to the User role
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
-				FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
+					// Create and register the system rights
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
+					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
+					
+					// Grant create rights to the User role
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
+					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
+				}
+
+				FSystemProcess.CommitTransaction();
+			}
+			catch
+			{
+				FSystemProcess.RollbackTransaction();
+				throw;
 			}
 		}
 		

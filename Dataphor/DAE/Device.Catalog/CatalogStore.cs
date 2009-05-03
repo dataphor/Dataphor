@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define REQUIRECASEMATCHONRESOLVE // Use this to require a case match when resolving identifiers (see IBAS Proposal #26889)
+#define USECURSORCACHE
 
 using System;
 using System.IO;
@@ -603,7 +604,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void CloseCursor(SQLStoreCursor ACursor)
 		{
 			#if USECURSORCACHE
-			if (!FCursorCache.ContainsKey(ACursor.CursorName))
+			if ((FConnection.TransactionCount > 0) && !FCursorCache.ContainsKey(ACursor.CursorName))
 				FCursorCache.Add(ACursor.CursorName, ACursor);
 			else
 			#endif
