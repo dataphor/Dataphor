@@ -1,17 +1,21 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
-using System.Threading;
-using Alphora.Dataphor.Frontend.Client.Windows;
 using System.IO;
+using System.Threading;
+using System.Windows.Forms;
+using Alphora.Dataphor.Frontend.Client.Windows;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-    class Program
+    internal class Program
     {
+        private static IDataphoria SDataphoriaInstance;
 
-        static void AppDomainException(object sender, UnhandledExceptionEventArgs e)
+        public static IDataphoria DataphoriaInstance
+        {
+            get { return SDataphoriaInstance; }
+        }
+
+        private static void AppDomainException(object ASender, UnhandledExceptionEventArgs AArgs)
         {
         }
 
@@ -26,7 +30,7 @@ namespace Alphora.Dataphor.Dataphoria
         /// <summary> Gets a new document expression for a given expression string. </summary>
         public static DocumentExpression GetDocumentExpression(string AExpression)
         {
-            DocumentExpression LExpression = new DocumentExpression(AExpression);
+            var LExpression = new DocumentExpression(AExpression);
             if (LExpression.Type != DocumentType.Document)
                 throw new DataphoriaException(DataphoriaException.Codes.CanOnlyLiveEditDocuments);
             return LExpression;
@@ -34,27 +38,27 @@ namespace Alphora.Dataphor.Dataphoria
 
         /// <summary> The main entry point for the application. </summary>
         [STAThread]
-        static void Main(string[] AArgs)
+        private static void Main(string[] AArgs)
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(AppDomainException);
+            AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();
 
-            Application.ThreadException += new ThreadExceptionEventHandler(ThreadException);
+            Application.ThreadException += ThreadException;
             try
             {
                 try
                 {
-                    FDataphoriaInstance = new FreeDataphoria();
+                    SDataphoriaInstance = new FreeDataphoria();
                     try
                     {
-                        FDataphoriaInstance.OpenFiles(AArgs);
-                        Application.Run((Form)FDataphoriaInstance);
+                        SDataphoriaInstance.OpenFiles(AArgs);
+                        Application.Run((Form) SDataphoriaInstance);
                     }
                     finally
                     {
-                        FDataphoriaInstance.Dispose();
-                        FDataphoriaInstance = null;
+                        SDataphoriaInstance.Dispose();
+                        SDataphoriaInstance = null;
                     }
                 }
                 catch (Exception LException)
@@ -64,14 +68,8 @@ namespace Alphora.Dataphor.Dataphoria
             }
             finally
             {
-                Application.ThreadException -= new ThreadExceptionEventHandler(ThreadException);
+                Application.ThreadException -= ThreadException;
             }
-        }
-
-        private static IDataphoria FDataphoriaInstance;
-        public static IDataphoria DataphoriaInstance
-        {
-            get { return FDataphoriaInstance; }
         }
 
         protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
@@ -79,11 +77,11 @@ namespace Alphora.Dataphor.Dataphoria
             HandleException(AArgs.Exception);
         }
 
-        public static void HandleException(System.Exception AException)
+        public static void HandleException(Exception AException)
         {
             if (AException is ThreadAbortException)
                 Thread.ResetAbort();
-            Frontend.Client.Windows.Session.HandleException(AException);
+            Session.HandleException(AException);
             //throw new Exception("Handled Exception" + AException, AException);
         }
     }
