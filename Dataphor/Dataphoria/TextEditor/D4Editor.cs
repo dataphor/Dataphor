@@ -162,6 +162,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FExecuteMenuItem.ImageIndex = 0;
             this.FExecuteMenuItem.Text = "&Execute";
             this.FExecuteMenuItem.Click += FMainMenuStrip_ItemClicked;
+            this.FExecuteMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Execute;
             // 
             // FCancelMenuItem
             // 
@@ -778,7 +779,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// Make sure our server is connected...
 			Dataphoria.EnsureServerConnection();
 
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Exporting))
+			using (StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Exporting))
 			{
 				using (DAEConnection LConnection = new DAEConnection())
 				{
@@ -899,10 +900,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		#endregion
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
+        
 	}
 
 	public class ToggleBlockDelimiter : SD.Actions.AbstractEditAction
@@ -946,8 +944,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		protected int GetNextBlockOffset(SD.TextArea ATextArea)
 		{
-			bool AAtBlockStart;
-			return GetNextBlockOffset(ATextArea, out AAtBlockStart);
+			bool LAtBlockStart;
+			return GetNextBlockOffset(ATextArea, out LAtBlockStart);
 		}
 
 		protected int GetNextBlockOffset(SD.TextArea ATextArea, out bool AAtBlockStart)
@@ -980,10 +978,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			if (!ATextArea.SelectionManager.HasSomethingSelected && (ATextArea.Document.TextLength > 0))
 			{
 				int LCurrentOffset = ATextArea.Caret.Offset;
-				bool AAtBlockStart;
-				int LEndOffset = GetNextBlockOffset(ATextArea, out AAtBlockStart);
+				bool LAtBlockStart;
+				int LEndOffset = GetNextBlockOffset(ATextArea, out LAtBlockStart);
 				int LStartOffset;
-				if (AAtBlockStart)
+				if (LAtBlockStart)
 					LStartOffset = LCurrentOffset;
 				else
 					LStartOffset = GetPriorBlockOffset(ATextArea);
@@ -1148,7 +1146,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
 				FProcessID = FProcess.ProcessID;
 				FIsRunning = true;
-				FAsyncThread = new Thread(new ThreadStart(ExecuteAsync));
+				FAsyncThread = new Thread(ExecuteAsync);
 				FAsyncThread.Start();
 			}
 		}
@@ -1190,7 +1188,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			IServerProcess LProcess = ASession.StartProcess(new ProcessInfo(FSession.SessionInfo));
 			try
 			{
-				LProcess.Execute("StopProcess(" + AProcessID.ToString() + ")", null);
+				LProcess.Execute("StopProcess(" + AProcessID + ")", null);
 			}
 			finally
 			{
