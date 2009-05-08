@@ -29,7 +29,7 @@ using WeifenLuo.WinFormsUI.Docking;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
 	/// <summary> D4 text editor. </summary>
-    partial class D4Editor : TextEditor, IErrorSource
+    partial class D4Editor : TextEditor
     {
         private System.ComponentModel.IContainer components;
         
