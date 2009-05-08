@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.Dataphoria
 									//FDockingManager.SetDockVisibility(FExplorer, true);
 									//FConnectMenuItem.Visible = false;
 									//FDisconnectMenuItem.Visible = true;
-									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias.ToString();
+									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
 								}
 								catch
 								{
@@ -278,19 +278,16 @@ namespace Alphora.Dataphor.Dataphoria
 						}
 					}
 					catch
-					{
-						if (FDataSession != null)
-						{
-							FDataSession.Dispose();
-							FDataSession = null;
-						}
+					{						
+						FDataSession.Dispose();
+						FDataSession = null;						
 						throw;
 					}
 				}
 			}
 		}
 
-		private void Dataphoria_Shown(object sender, EventArgs e)
+		private void Dataphoria_Shown(object ASender, EventArgs AArgs)
 		{
 			EnsureServerConnection();
 		}
@@ -416,14 +413,14 @@ namespace Alphora.Dataphor.Dataphoria
 				(
 					Strings.CustomizeMenuText, 
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Customize.bmp"), 
-					new FormInterfaceHandler(CustomizeForm)
+					CustomizeForm
 				);
 
 			LForm.AddCustomAction
 			(
 				Strings.EditCopyMenuText, 
 				LoadBitmap("Alphora.Dataphor.Dataphoria.Images.EditCopy.bmp"), 
-				new FormInterfaceHandler(EditCopyForm)
+				EditCopyForm
 			);
 
 			if (LExpression.Type == DocumentType.Document)
@@ -432,7 +429,7 @@ namespace Alphora.Dataphor.Dataphoria
 				(
 					Strings.EditMenuText,  
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"), 
-					new FormInterfaceHandler(EditForm)
+					EditForm
 				);
 			}
 		}
@@ -446,7 +443,7 @@ namespace Alphora.Dataphor.Dataphoria
 		public void AddDesignerForm(IFormInterface AInterface, IDesigner ADesigner)
 		{
 			FDesignedForms.Add(AInterface, ADesigner);
-			ADesigner.Disposed += new EventHandler(DesignerDisposed);
+			ADesigner.Disposed += DesignerDisposed;
 		}
 
 		
@@ -1467,7 +1464,7 @@ namespace Alphora.Dataphor.Dataphoria
             }*/
         }
 
-		private void ClearWarningsClicked(object sender, System.EventArgs e)
+		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
 		{
 			ClearWarnings();
 		}
@@ -1504,7 +1501,7 @@ namespace Alphora.Dataphor.Dataphoria
 			InvokeHelp(LKeyword);
 		}
 
-		private void FExplorer_HelpRequested(object sender, HelpEventArgs hlpevent)
+		private void FExplorer_HelpRequested(object ASender, HelpEventArgs AHlpEvent)
 		{
 			InvokeHelp("Dataphor Explorer");
 		}
