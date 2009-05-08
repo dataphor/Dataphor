@@ -1,56 +1,56 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Alphora.Dataphor.Frontend.Client.Windows;
-using System.ComponentModel.Design;
-using Alphora.Dataphor.Dataphoria.Designers;
-using System.Windows.Forms;
-using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.BOP;
+using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Client;
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.Dataphoria.Designers;
+using Alphora.Dataphor.Frontend.Client;
+using Alphora.Dataphor.Frontend.Client.Windows;
+using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
 
 namespace Alphora.Dataphor.Dataphoria
 {
     public interface IDataphoria : IErrorSource, IServiceProvider, IDisposable
     {
-        Alphora.Dataphor.Dataphoria.Designers.FileDesignBuffer PromptForFileBuffer(Alphora.Dataphor.Dataphoria.Designers.IDesigner ADesigner, string AFileName);
+        Session FrontendSession { get; }
+        IServerProcess UtilityProcess { get; }
+        DataSession DataSession { get; }
+        ErrorListView Warnings { get; }
+        Settings Settings { get; }
+        FileDesignBuffer PromptForFileBuffer(IDesigner ADesigner, string AFileName);
 
-        Alphora.Dataphor.Dataphoria.Designers.DocumentDesignBuffer PromptForDocumentBuffer(Alphora.Dataphor.Dataphoria.Designers.IDesigner ADesigner, string ALibraryName, string ADocumentName);
+        DocumentDesignBuffer PromptForDocumentBuffer(IDesigner ADesigner, string ALibraryName, string ADocumentName);
 
         void RefreshDocuments(string ALibraryName);
 
         void OpenFiles(string[] AArgs);
-        
-        Frontend.Client.Windows.Session FrontendSession { get; }
 
-        Alphora.Dataphor.Dataphoria.Designers.IDesigner GetDesigner(DesignBuffer ABuffer);
+        IDesigner GetDesigner(DesignBuffer ABuffer);
 
-        Alphora.Dataphor.Dataphoria.Designers.IDesigner OpenDesigner(DesignerInfo AInfo, DesignBuffer ABuffer);
+        IDesigner OpenDesigner(DesignerInfo AInfo, DesignBuffer ABuffer);
 
         DesignerInfo GetDefaultDesigner(string ADocumentTypeID);
 
-        DAE.IServerCursor OpenCursor(string AQuery);
+        IServerCursor OpenCursor(string AQuery);
 
-        Alphora.Dataphor.DAE.IServerCursor OpenCursor(String AQuery, DAE.Runtime.DataParams AParams);
+        IServerCursor OpenCursor(String AQuery, DataParams AParams);
 
-        void CloseCursor(Alphora.Dataphor.DAE.IServerCursor ACursor);
+        void CloseCursor(IServerCursor ACursor);
 
-        DAE.IServerProcess UtilityProcess { get; }
-        
-        DAE.Runtime.Data.DataValue EvaluateQuery(string AQuery);
+        DataValue EvaluateQuery(string AQuery);
 
-        DAE.Runtime.Data.DataValue EvaluateQuery(string AQuery, DAE.Runtime.DataParams AParams);
+        DataValue EvaluateQuery(string AQuery, DataParams AParams);
 
         void ExecuteScript(string AScript);
 
         TextEditor.TextEditor EvaluateAndEdit(string AExpression, string ADocumentTypeID);
 
-        Frontend.Client.Windows.Session GetLiveDesignableFrontendSession();
+        Session GetLiveDesignableFrontendSession();
 
         void RefreshLibraries();
 
         void EnsureSecurityRegistered();
-
-        Alphora.Dataphor.DAE.Client.DataSession DataSession { get; }
 
         void AttachForm(BaseForm AForm);
 
@@ -59,12 +59,12 @@ namespace Alphora.Dataphor.Dataphoria
         bool DocumentExists(string ALibraryName, string ADocumentName);
 
         void CheckDocumentOverwrite(string LibraryName, string ADocumentName);
-        
+
         void EnsureServerConnection();
 
         void Disconnect();
 
-        Alphora.Dataphor.Dataphoria.Designers.IDesigner NewDesigner();
+        IDesigner NewDesigner();
 
         void OpenFile();
 
@@ -78,24 +78,16 @@ namespace Alphora.Dataphor.Dataphoria
 
         string GetCurrentLibraryName();
 
-        ErrorListView Warnings
-        {
-            get;
-        }
-
         event EventHandler OnFormDesignerLibrariesChanged;
 
-        void AddDesignerForm(IFormInterface AInterface, Alphora.Dataphor.Dataphoria.Designers.IDesigner ADesigner);
+        void AddDesignerForm(IFormInterface AInterface, IDesigner ADesigner);
 
         DesignerInfo ChooseDesigner(string ADocumentTypeID);
 
-        void RegisterDesigner(DesignBuffer ABuffer, Alphora.Dataphor.Dataphoria.Designers.IDesigner ADesigner);
+        void RegisterDesigner(DesignBuffer ABuffer, IDesigner ADesigner);
 
         void UnregisterDesigner(DesignBuffer ABuffer);
 
         void CheckNotRegistered(DesignBuffer ABuffer);
-
-        Settings Settings { get; }
-       
     }
 }
