@@ -652,7 +652,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             return base.ProcessDialogKey(AKey);
         }
 
-        private void FPointerGroupView_GroupViewItemSelected(object sender, EventArgs e)
+        private void FPointerGroupView_GroupViewItemSelected(object ASender, EventArgs AArgs)
         {
             SelectPaletteItem(null, false);
         }
