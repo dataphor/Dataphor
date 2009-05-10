@@ -578,7 +578,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                     LItem.Text = LType.Name;
                     LItem.Description = GetDescription(LType);
                     LItem.ImageIndex = GetDesignerImage(LType);
-                    EnsureCategory(GetDesignerCategory(LType)).GroupViewItems.Add(LItem);
+                    GroupView LCategory = EnsureCategory(GetDesignerCategory(LType));
+                    LCategory.GroupViewItems.Add(LItem);
                 }
             }
         }
