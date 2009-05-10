@@ -43,20 +43,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDesignerID = ADesignerID;
 
             FService = new DesignService(ADataphoria, this);
-            FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
-            FService.OnNameChanged += new EventHandler(NameOrModifiedChanged);
-            FService.OnRequestLoad += new RequestHandler(LoadData);
-            FService.OnRequestSave += new RequestHandler(SaveData);
+            FService.OnModifiedChanged += NameOrModifiedChanged;
+            FService.OnNameChanged += NameOrModifiedChanged;
+            FService.OnRequestLoad += LoadData;
+            FService.OnRequestSave += SaveData;
 
-            FTextEdit.HelpRequested += new HelpEventHandler(FTextArea_HelpRequested);
+            FTextEdit.HelpRequested += FTextArea_HelpRequested;
 
             FTextEdit.Document.HighlightingStrategy = GetHighlightingStrategy();
-            FTextEdit.Document.DocumentChanged += new DocumentEventHandler(DocumentChanged);
+            FTextEdit.Document.DocumentChanged += DocumentChanged;
             TextEditInitialized(FTextEdit, FTextEdit.ActiveTextAreaControl);
-            FTextEdit.OnInitializeTextAreaControl += new InitializeTextAreaControlHandler(TextEditInitialized);
-            FTextEdit.BeginningFind += new EventHandler(BeginningFind);
-            FTextEdit.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
-            FTextEdit.TextNotFound += new EventHandler(TextNotFound);
+            FTextEdit.OnInitializeTextAreaControl += TextEditInitialized;
+            FTextEdit.BeginningFind += BeginningFind;
+            FTextEdit.ReplacementsPerformed += ReplacementsPerformed;
+            FTextEdit.TextNotFound += TextNotFound;
             //FEditorPanel.Controls.Add(FTextEdit);
 
             UpdateLineNumberStatus();
