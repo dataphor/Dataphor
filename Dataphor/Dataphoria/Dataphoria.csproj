@@ -304,6 +304,10 @@
     <Compile Include="FormDesigner\FormDesigner.Designer.cs">
       <DependentUpon>FormDesigner.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormDesigner\FormPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\PaletteItem.cs" />
     <Compile Include="FreeDataphoria.cs">
       <SubType>Form</SubType>
     </Compile>
