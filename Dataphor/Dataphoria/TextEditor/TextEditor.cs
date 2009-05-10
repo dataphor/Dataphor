@@ -143,20 +143,21 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FTextEdit
             // 
-            FTextEdit = new TextEdit();
-            FTextEdit.CausesValidation = false;
-            FTextEdit.EnableFolding = false;
-            FTextEdit.IndentStyle = IndentStyle.Auto;
-            FTextEdit.Location = new Point(0, 0);
-            FTextEdit.Name = "FTextEdit";
-            FTextEdit.ShowInvalidLines = false;
-            FTextEdit.ShowLineNumbers = false;
-            FTextEdit.ShowVRuler = true;
-            FTextEdit.Size = new Size(455, 376);
-            FTextEdit.TabIndent = 3;
-
-            FTextEdit.VRulerRow = 100;
-            FTextEdit.Dock = DockStyle.Fill;
+            FTextEdit = new TextEdit
+                            {
+                                CausesValidation = false,
+                                EnableFolding = false,
+                                IndentStyle = IndentStyle.Auto,
+                                Location = new Point(0, 0),
+                                Name = "FTextEdit",
+                                ShowInvalidLines = false,
+                                ShowLineNumbers = false,
+                                ShowVRuler = true,
+                                Size = new Size(455, 376),
+                                TabIndent = 3,
+                                VRulerRow = 100,
+                                Dock = DockStyle.Fill
+                            };
 
             FDockContentTextEdit = new DockContent();
             FDockContentTextEdit.Controls.Add(FTextEdit);
@@ -182,8 +183,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         private void TextEditInitialized(object ASender, TextAreaControl ANewControl)
         {
-            ANewControl.TextArea.Caret.PositionChanged += new EventHandler(CaretPositionChanged);
-            ANewControl.TextArea.Enter += new EventHandler(TextAreaEnter);
+            ANewControl.TextArea.Caret.PositionChanged += CaretPositionChanged;
+            ANewControl.TextArea.Enter += TextAreaEnter;
         }
 
         // EditorText
@@ -428,13 +429,15 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             base.InitializeStatusBar();
 
-            FPositionStatus = new StatusBarAdvPanel();
-            FPositionStatus.Text = "0:0";
-            FPositionStatus.SizeToContent = true;
-            FPositionStatus.HAlign = HorzFlowAlign.Right;
-            FPositionStatus.Alignment = HorizontalAlignment.Center;
-            FPositionStatus.BorderStyle = BorderStyle.FixedSingle;
-            FPositionStatus.BorderColor = Color.Gray;
+            FPositionStatus = new StatusBarAdvPanel
+                                  {
+                                      Text = "0:0",
+                                      SizeToContent = true,
+                                      HAlign = HorzFlowAlign.Right,
+                                      Alignment = HorizontalAlignment.Center,
+                                      BorderStyle = BorderStyle.FixedSingle,
+                                      BorderColor = Color.Gray
+                                  };
         }
 
         protected override void DisposeStatusBar()
