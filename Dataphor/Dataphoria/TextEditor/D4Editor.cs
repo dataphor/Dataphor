@@ -175,11 +175,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FCancelMenuItem.Enabled = false;
             FCancelMenuItem.Text = "&Cancel Execute";
             FCancelMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FCancelMenuItem.Image = MenuImages.CancelExecute;
             // 
             // FPrepareMenuItem
             //                                     
             FPrepareMenuItem.Text = "&Prepare";
             FPrepareMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FPrepareMenuItem.Image = MenuImages.Prepare;
             // 
             // FAnalyzeMenuItem
             // 
@@ -187,6 +189,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FAnalyzeMenuItem.ImageIndex = 4;
             FAnalyzeMenuItem.Text = "&Analyze";
             FAnalyzeMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FAnalyzeMenuItem.Image = MenuImages.Analyze;
             // 
             // FInjectMenuItem
             // 
@@ -194,6 +197,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FInjectMenuItem.ImageIndex = 3;
             FInjectMenuItem.Text = "&Inject As Upgrade";
             FInjectMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FInjectMenuItem.Image = MenuImages.Inject;
             // 
             // FExportMenu
             // 
@@ -205,13 +209,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                        FExecuteBothMenuItem
                                                    });
             FExportMenu.Text = "E&xport";
-            FExportMenu.Visible = false;
+            FExportMenu.Visible = false;            
             // 
             // FExecuteSchemaMenuItem
             // 
 
             FExecuteSchemaMenuItem.Text = "&Schema Only...";
-            FExecuteSchemaMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FExecuteSchemaMenuItem.Click += FMainMenuStrip_ItemClicked;            
             // 
             // FExportDataMenuItem
             // 
@@ -243,7 +247,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FSelectBlockMenuItem
             // 
             FSelectBlockMenuItem.Text = "Select &Block";
-            FSelectBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FSelectBlockMenuItem.Click += FMainMenuStrip_ItemClicked;            
             // 
             // FPriorBlockMenuItem
             // 
