@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 
             PrepareSession();
-            ADataphoria.OnFormDesignerLibrariesChanged += new EventHandler(FormDesignerLibrariesChanged);
+            ADataphoria.OnFormDesignerLibrariesChanged += FormDesignerLibrariesChanged;
         }
 
 
@@ -96,14 +96,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         {
             if (AServiceType == typeof (IDesignService))
                 return Service;
-            else
-            {
-                object LResult = base.GetService(AServiceType);
-                if (LResult != null)
-                    return LResult;
-                else
-                    return Dataphoria.GetService(AServiceType);
-            }
+            object LResult = base.GetService(AServiceType);
+            if (LResult != null)
+                return LResult;
+            return Dataphoria.GetService(AServiceType);
         }
 
         #endregion
@@ -175,11 +171,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             // FPointerGroupView
             // 
-            FPointerGroupView = new GroupView();
-            FPointerGroupView.BorderStyle = BorderStyle.None;
-            FPointerGroupView.ButtonView = true;
-            FPointerGroupView.Dock = DockStyle.Top;
-            FPointerGroupView.GroupViewItems.AddRange(new GroupViewItem[]
+            FPointerGroupView = new GroupView
+                                    {
+                                        BorderStyle = BorderStyle.None,
+                                        ButtonView = true,
+                                        Dock = DockStyle.Top
+                                    };
+            FPointerGroupView.GroupViewItems.AddRange(new[]
                                                           {
                                                               new GroupViewItem("Pointer", 0)
                                                           });
@@ -194,7 +192,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPointerGroupView.SmallImageView = true;
             FPointerGroupView.TabIndex = 0;
             FPointerGroupView.Text = "groupView2";
-            FPointerGroupView.GroupViewItemSelected += new EventHandler(FPointerGroupView_GroupViewItemSelected);
+            FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
 
             // 
             // FPalettePanel
@@ -248,7 +246,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FNodesTree.ShowRootLines = false;
             FNodesTree.Size = new Size(283, 209);
             FNodesTree.TabIndex = 0;
-            FNodesTree.AfterSelect += new TreeViewEventHandler(FNodesTree_AfterSelect);
+            FNodesTree.AfterSelect += FNodesTree_AfterSelect;
             FNodesTree.Dock = DockStyle.Fill;
 
 
@@ -280,8 +278,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPropertyGrid.ToolbarVisible = false;
             FPropertyGrid.ViewBackColor = SystemColors.Window;
             FPropertyGrid.ViewForeColor = SystemColors.WindowText;
-            FPropertyGrid.PropertyValueChanged +=
-                new PropertyValueChangedEventHandler(NodePropertyGrid_PropertyValueChanged);
+            FPropertyGrid.PropertyValueChanged +=NodePropertyGrid_PropertyValueChanged;
             FPropertyGrid.Dock = DockStyle.Fill;
 
             FDockContentPropertyGrid = new DockContent();
@@ -349,10 +346,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         public void InitializeService(IDataphoria ADataphoria)
         {
             FService = new DesignService(ADataphoria, this);
-            FService.OnModifiedChanged += new EventHandler(NameOrModifiedChanged);
-            FService.OnNameChanged += new EventHandler(NameOrModifiedChanged);
-            FService.OnRequestLoad += new RequestHandler(RequestLoad);
-            FService.OnRequestSave += new RequestHandler(RequestSave);
+            FService.OnModifiedChanged += NameOrModifiedChanged;
+            FService.OnNameChanged += NameOrModifiedChanged;
+            FService.OnRequestLoad += RequestLoad;
+            FService.OnRequestSave += RequestSave;
         }
 
         private void NameOrModifiedChanged(object ASender, EventArgs AArgs)
@@ -394,7 +391,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         public void ActivateNode(DesignerNode ANode)
         {
             if ((FPropertyGrid.SelectedObject != null) && (FPropertyGrid.SelectedObject is IDisposableNotify))
-                ((IDisposableNotify) FPropertyGrid.SelectedObject).Disposed -= new EventHandler(SelectedNodeDisposed);
+                ((IDisposableNotify) FPropertyGrid.SelectedObject).Disposed -= SelectedNodeDisposed;
 
             bool LEditsAllowed;
             if (ANode == null)
@@ -405,7 +402,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             else
             {
                 FPropertyGrid.SelectedObject = ANode.Node;
-                ANode.Node.Disposed += new EventHandler(SelectedNodeDisposed);
+                ANode.Node.Disposed += SelectedNodeDisposed;
                 LEditsAllowed = !ANode.ReadOnly;
             }
             FDeleteToolStripMenuItem.Enabled = LEditsAllowed;
@@ -468,8 +465,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                 (ListInDesignerAttribute) ReflectionUtility.GetAttribute(AType, typeof (ListInDesignerAttribute));
             if (LListIn != null)
                 return LListIn.IsListed;
-            else
-                return true;
+            return true;
         }
 
         private string GetDescription(Type AType)
@@ -478,8 +474,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                 (DescriptionAttribute) ReflectionUtility.GetAttribute(AType, typeof (DescriptionAttribute));
             if (LDescription != null)
                 return LDescription.Description;
-            else
-                return String.Empty;
+            return String.Empty;
         }
 
         private string GetDesignerCategory(Type AType)
@@ -488,8 +483,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                 (DesignerCategoryAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerCategoryAttribute));
             if (LCategory != null)
                 return LCategory.Category;
-            else
-                return Strings.UnspecifiedCategory;
+            return Strings.UnspecifiedCategory;
         }
 
         private Image LoadImage(string AImageExpression)
@@ -538,8 +532,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                         FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
                         return LIndex;
                     }
-                    else
-                        FImageIndex.Add(LImageAttribute.ImageExpression, 0);
+                    FImageIndex.Add(LImageAttribute.ImageExpression, 0);
                 }
                 else
                     return (int) LIndexResult;
@@ -571,13 +564,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private void LoadPalette()
         {
-            PaletteItem LItem;
-            NodeTypeEntry LNodeTypeEntry;
+            PaletteItem LItem;            
             Type LType;
 
             foreach (String LName in FrontendSession.NodeTypeTable.Keys)
-            {
-                LNodeTypeEntry = FrontendSession.NodeTypeTable[LName];
+            {                
                 LType = FrontendSession.NodeTypeTable.GetClassType(LName);
 
                 if (IsTypeListed(LType))
@@ -658,8 +649,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                 SelectPaletteItem(null, false);
                 return true;
             }
-            else
-                return base.ProcessDialogKey(AKey);
+            return base.ProcessDialogKey(AKey);
         }
 
         private void FPointerGroupView_GroupViewItemSelected(object sender, EventArgs e)
@@ -864,8 +854,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             var LBuffer = ABuffer as DocumentDesignBuffer;
             if (LBuffer == null)
                 return String.Empty;
-            else
-                return String.Format(".Frontend.Form('{0}', '{1}')", LBuffer.LibraryName, LBuffer.DocumentName);
+            return String.Format(".Frontend.Form('{0}', '{1}')", LBuffer.LibraryName, LBuffer.DocumentName);
         }
 
         protected void UpdateHostsDocument(DesignBuffer ABuffer)
@@ -898,7 +887,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         {
             var LForm = FDesignHost.Children[0] as IWindowsFormInterface;
             if (LForm != null)
-                LForm.Form.Closing -= new CancelEventHandler(DesignFormClosing);
+                LForm.Form.Closing -= DesignFormClosing;
             FFormPanel.ClearHostedForm();
         }
 
@@ -907,7 +896,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             var LForm = AHost.Children[0] as IWindowsFormInterface;
             if (LForm != null)
             {
-                LForm.Form.Closing += new CancelEventHandler(DesignFormClosing);
+                LForm.Form.Closing += DesignFormClosing;
                 FFormPanel.SetHostedForm(LForm, FIsDesignHostOwner);
             }
         }
@@ -1170,13 +1159,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FHScrollBar = new HScrollBar();
             FHScrollBar.Dock = DockStyle.Bottom;
             FHScrollBar.SmallChange = 5;
-            FHScrollBar.Scroll += new ScrollEventHandler(HScrollBarScroll);
+            FHScrollBar.Scroll += HScrollBarScroll;
             Controls.Add(FHScrollBar);
 
             FVScrollBar = new VScrollBar();
             FVScrollBar.Dock = DockStyle.Right;
             FVScrollBar.SmallChange = 5;
-            FVScrollBar.Scroll += new ScrollEventHandler(VScrollBarScroll);
+            FVScrollBar.Scroll += VScrollBarScroll;
             Controls.Add(FVScrollBar);
 
             ResumeLayout(false);
@@ -1292,12 +1281,12 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         protected override void OnControlAdded(ControlEventArgs AArgs)
         {
             base.OnControlAdded(AArgs);
-            AArgs.Control.Move += new EventHandler(ControlMove);
+            AArgs.Control.Move += ControlMove;
         }
 
         protected override void OnControlRemoved(ControlEventArgs AArgs)
         {
-            AArgs.Control.Move -= new EventHandler(ControlMove);
+            AArgs.Control.Move -= ControlMove;
             base.OnControlRemoved(AArgs);
         }
 
