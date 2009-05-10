@@ -3,28 +3,11 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-using System;
-using System.Threading;
-using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml;
-using System.Data;
-using System.Text;
+
 
 using SD = ICSharpCode.TextEditor;
 
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Client;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Client.Provider;
-using Alphora.Dataphor.Dataphoria.Designers;
-using Alphora.Dataphor.Frontend.Client.Windows;
 
-using Syncfusion.Windows.Forms.Tools;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -33,14 +16,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
     {
         private System.ComponentModel.IContainer components;
         
-        
-        
-        
-
-
-
-
-
 
         protected override void Dispose(bool disposing)
         {
