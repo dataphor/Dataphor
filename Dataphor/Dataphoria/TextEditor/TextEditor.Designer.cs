@@ -134,7 +134,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FMenuStrip.SuspendLayout();
             this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
-           
             // 
             // FToolbarImageList
             // 
@@ -187,7 +186,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FCloseToolStripMenuItem,
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
-            this.FFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
             this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.FFileToolStripMenuItem.Text = "File";
@@ -347,7 +345,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FSplitWindowToolStripMenuItem});
-            this.FViewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
             this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.FViewToolStripMenuItem.Text = "View";
