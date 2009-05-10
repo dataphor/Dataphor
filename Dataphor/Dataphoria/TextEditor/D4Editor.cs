@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -54,7 +55,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         private ToolStripMenuItem FShowResultsMenuItem;
 
 
-        public D4Editor() : base() // dummy constructor for SyncFusion's MDI menu merging
+        public D4Editor() // dummy constructor for SyncFusion's MDI menu merging
         {
             InitializeComponent();
             InitializeDocking();
@@ -75,9 +76,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.Oemcomma] = new SelectPriorBlock();
             FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemPeriod] = new SelectNextBlock();
 
-            FResultPanel.BeginningFind += new EventHandler(BeginningFind);
-            FResultPanel.ReplacementsPerformed += new ReplacementsPerformedHandler(ReplacementsPerformed);
-            FResultPanel.TextNotFound += new EventHandler(TextNotFound);
+            FResultPanel.BeginningFind += BeginningFind;
+            FResultPanel.ReplacementsPerformed += ReplacementsPerformed;
+            FResultPanel.TextNotFound += TextNotFound;
         }
 
         private void InitializeDocking()
@@ -137,7 +138,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FViewMenu
             // 
-            FMenuStrip.Items.AddRange(new ToolStripMenuItem[]
+            FMenuStrip.Items.AddRange(new[]
                                           {
                                               FScriptMenu
                                           });
@@ -149,7 +150,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FScriptMenu
             // 
-            FScriptMenu.DropDownItems.AddRange(new ToolStripMenuItem[]
+            FScriptMenu.DropDownItems.AddRange(new[]
                                                    {
                                                        FExecuteMenuItem,
                                                        FCancelMenuItem,
@@ -197,7 +198,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FExportMenu
             // 
 
-            FExportMenu.DropDownItems.AddRange(new ToolStripMenuItem[]
+            FExportMenu.DropDownItems.AddRange(new[]
                                                    {
                                                        FExecuteSchemaMenuItem,
                                                        FExportDataMenuItem,
@@ -408,8 +409,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
                 return FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
-            else
-                return Point.Empty;
+            return Point.Empty;
         }
 
         private void ProcessErrors(ErrorList AErrors)
@@ -666,8 +666,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FWorkingAnimation.Visible = true;
 
             FExecutor = new ScriptExecutor(DataSession.ServerSession, GetTextToExecute(),
-                                           new ReportScriptProgressHandler(ExecutorProgress),
-                                           new ExecuteFinishedHandler(ExecutorFinished));
+                                           ExecutorProgress,
+                                           ExecutorFinished);
             FExecutor.Start();
         }
 
@@ -889,26 +889,33 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             base.InitializeStatusBar();
 
-            FExecutionTimeStatus = new StatusBarAdvPanel();
-            FExecutionTimeStatus.Text = "0:00:00";
-            FExecutionTimeStatus.SizeToContent = true;
-            FExecutionTimeStatus.HAlign = HorzFlowAlign.Right;
-            FExecutionTimeStatus.Alignment = HorizontalAlignment.Center;
-            FExecutionTimeStatus.BorderStyle = BorderStyle.FixedSingle;
-            FExecutionTimeStatus.BorderColor = Color.Yellow;
+            FExecutionTimeStatus = new StatusBarAdvPanel
+                                       {
+                                           Text = "0:00:00",
+                                           SizeToContent = true,
+                                           HAlign = HorzFlowAlign.Right,
+                                           Alignment = HorizontalAlignment.Center,
+                                           BorderStyle = BorderStyle.FixedSingle,
+                                           BorderColor = Color.Yellow
+                                       };
 
-            FWorkingAnimation = new PictureBox();
-            FWorkingAnimation.Image =
-                Image.FromStream(
-                    GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.Dataphoria.Images.Rider.gif"));
-            FWorkingAnimation.SizeMode = PictureBoxSizeMode.AutoSize;
-            FWorkingAnimation.Visible = false;
+            Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(
+                "Alphora.Dataphor.Dataphoria.Images.Rider.gif");
+            FWorkingAnimation = new PictureBox
+                                    {
+                                        Image = Image.FromStream(
+                                            LManifestResourceStream),
+                                        SizeMode = PictureBoxSizeMode.AutoSize,
+                                        Visible = false
+                                    };
 
-            FWorkingStatus = new StatusBarAdvPanel();
-            FWorkingStatus.Text = "";
-            FWorkingStatus.HAlign = HorzFlowAlign.Right;
-            FWorkingStatus.Alignment = HorizontalAlignment.Center;
-            FWorkingStatus.BorderStyle = BorderStyle.None;
+            FWorkingStatus = new StatusBarAdvPanel
+                                 {
+                                     Text = "",
+                                     HAlign = HorzFlowAlign.Right,
+                                     Alignment = HorizontalAlignment.Center,
+                                     BorderStyle = BorderStyle.None
+                                 };
             FWorkingStatus.Controls.Add(FWorkingAnimation);
             FWorkingStatus.Size = FWorkingAnimation.Size;
         }
@@ -1261,11 +1268,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                         ScriptExecuteOption.All,
                         out LErrors,
                         out LElapsed,
-                        delegate(PlanStatistics AStatistics, string AResults)
-                            {
-                                Session.SafelyInvoke(new ReportScriptProgressHandler(AsyncProgress),
-                                                     new object[] {AStatistics, AResults});
-                            }
+                        (AStatistics, AResults) => Session.SafelyInvoke(new ReportScriptProgressHandler(AsyncProgress),
+                                                                        new object[] {AStatistics, AResults})
                         );
                 }
                 finally
