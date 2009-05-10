@@ -292,7 +292,12 @@
     <Compile Include="FormDesigner\CustomFormDesigner.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FormDesigner\DesignerTree\DesignerNode.cs" />
+    <Compile Include="FormDesigner\DesignerTree\DesignerNodeData.cs" />
     <Compile Include="FormDesigner\DesignerTree\DesignerTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\DesignerTree\DesignerTreeDropMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="FormDesigner\DropHightlightDrawFilter.cs">
