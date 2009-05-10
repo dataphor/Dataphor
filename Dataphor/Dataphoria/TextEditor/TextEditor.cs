@@ -302,10 +302,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             }
         }
 
-        protected override void OnActivated(EventArgs e)
+        protected override void OnActivated(EventArgs AArgs)
         {
             ActiveControl = FTextEdit; // always focus on the editor control
-            base.OnActivated(e);
+            base.OnActivated(AArgs);
         }
 
         protected override void OnClosing(CancelEventArgs AArgs)
