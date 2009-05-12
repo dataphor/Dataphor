@@ -313,6 +313,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="FormDesigner\PaletteItem.cs" />
+    <Compile Include="FormDesigner\ToolBox\ToolBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FormDesigner\ToolBox\ToolBox.Designer.cs">
+      <DependentUpon>ToolBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="FreeDataphoria.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -451,6 +457,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dataphoria.resx">
       <DependentUpon>Dataphoria.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDesigner\ToolBox\ToolBox.resx">
+      <DependentUpon>ToolBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">

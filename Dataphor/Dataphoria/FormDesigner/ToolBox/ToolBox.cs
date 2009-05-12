@@ -1,36 +1,45 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Frontend.Client;
-using Syncfusion.Windows.Forms.Tools;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Syncfusion.Windows.Forms.Tools;
 using Image=System.Drawing.Image;
+using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 {
-
     public partial class ToolBox : UserControl, IErrorSource
     {
-
-        private Syncfusion.Windows.Forms.Tools.GroupBar FPaletteGroupBar;
-        private Syncfusion.Windows.Forms.Tools.GroupView FPointerGroupView;
+        private GroupBar FPaletteGroupBar;
+        private GroupView FPointerGroupView;
         //private System.Windows.Forms.ImageList FNodesImageList;
-        
-        
+
+
         public ToolBox()
         {
             InitializeComponent();
-            //InitializeGroupView();
+            InitializeGroupView();
         }
 
-        /*private void InitializeGroupView()
+        #region IErrorSource Members
+
+        public void ErrorHighlighted(Exception AException)
+        {
+        }
+
+        public void ErrorSelected(Exception AException)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        private void InitializeGroupView()
         {
             // 
             // FPaletteGroupBar
@@ -49,11 +58,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             // FPointerGroupView
             // 
             FPointerGroupView = new GroupView
-            {
-                BorderStyle = BorderStyle.None,
-                ButtonView = true,
-                Dock = DockStyle.Top
-            };
+                                    {
+                                        BorderStyle = BorderStyle.None,
+                                        ButtonView = true,
+                                        Dock = DockStyle.Top
+                                    };
             FPointerGroupView.GroupViewItems.AddRange(new[]
                                                           {
                                                               new GroupViewItem("Pointer", 0)
@@ -71,9 +80,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             FPointerGroupView.Text = "groupView2";
             FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
 
-            this.Controls.Add(FPaletteGroupBar);
-            this.Controls.Add(FPointerGroupView);
-
+            Controls.Add(FPaletteGroupBar);
+            Controls.Add(FPointerGroupView);
         }
 
         internal void ClearPalette()
@@ -100,7 +108,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 LItem.Text = ACategoryName;
                 FPaletteGroupBar.GroupBarItems.Add(LItem);
             }
-            return (GroupView)LItem.Client;
+            return (GroupView) LItem.Client;
         }
 
         internal void LoadPalette()
@@ -206,18 +214,20 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         private void CategoryGroupViewItemSelected(object ASender, EventArgs AArgs)
         {
-            var LView = (GroupView)ASender;
+            var LView = (GroupView) ASender;
             SelectPaletteItem
                 (
-                (PaletteItem)LView.GroupViewItems[LView.SelectedItem],
+                (PaletteItem) LView.GroupViewItems[LView.SelectedItem],
                 ModifierKeys == Keys.Shift
                 );
         }
 
         #region Palette
 
+        private Session FFrontendSession;
         private Hashtable FImageIndex = new Hashtable();
         private bool FIsMultiDrop;
+        protected DesignerTree FNodesTree;
         private PaletteItem FSelectedPaletteItem;
 
         [Browsable(false)]
@@ -232,12 +242,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             get { return FIsMultiDrop; }
         }
 
+        [Browsable(false)]
+        public Session FrontendSession
+        {
+            get { return FFrontendSession; }
+        }
 
 
         private bool IsTypeListed(Type AType)
         {
             var LListIn =
-                (ListInDesignerAttribute)ReflectionUtility.GetAttribute(AType, typeof(ListInDesignerAttribute));
+                (ListInDesignerAttribute) ReflectionUtility.GetAttribute(AType, typeof (ListInDesignerAttribute));
             if (LListIn != null)
                 return LListIn.IsListed;
             return true;
@@ -246,7 +261,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         private string GetDescription(Type AType)
         {
             var LDescription =
-                (DescriptionAttribute)ReflectionUtility.GetAttribute(AType, typeof(DescriptionAttribute));
+                (DescriptionAttribute) ReflectionUtility.GetAttribute(AType, typeof (DescriptionAttribute));
             if (LDescription != null)
                 return LDescription.Description;
             return String.Empty;
@@ -255,7 +270,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         private string GetDesignerCategory(Type AType)
         {
             var LCategory =
-                (DesignerCategoryAttribute)ReflectionUtility.GetAttribute(AType, typeof(DesignerCategoryAttribute));
+                (DesignerCategoryAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerCategoryAttribute));
             if (LCategory != null)
                 return LCategory.Category;
             return Strings.UnspecifiedCategory;
@@ -291,7 +306,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         public int GetDesignerImage(Type AType)
         {
             var LImageAttribute =
-                (DesignerImageAttribute)ReflectionUtility.GetAttribute(AType, typeof(DesignerImageAttribute));
+                (DesignerImageAttribute) ReflectionUtility.GetAttribute(AType, typeof (DesignerImageAttribute));
             if (LImageAttribute != null)
             {
                 object LIndexResult = FImageIndex[LImageAttribute.ImageExpression];
@@ -301,47 +316,21 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                     if (LImage != null)
                     {
                         if (LImage is Bitmap)
-                            ((Bitmap)LImage).MakeTransparent();
+                            ((Bitmap) LImage).MakeTransparent();
                         //FNodesImageList.Images.Add(LImage);
-                       // int LIndex = FNodesImageList.Images.Count - 1;
-                       // FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
-                       // return LIndex;
+                        // int LIndex = FNodesImageList.Images.Count - 1;
+                        // FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
+                        // return LIndex;
                         return 0;
                     }
                     FImageIndex.Add(LImageAttribute.ImageExpression, 0);
                 }
                 else
-                    return (int)LIndexResult;
+                    return (int) LIndexResult;
             }
             return 0; // Zero is the reserved index for the default image
         }
 
-
-        private Alphora.Dataphor.Frontend.Client.Windows.Session FFrontendSession;
-
-        [Browsable(false)]
-        public Alphora.Dataphor.Frontend.Client.Windows.Session FrontendSession
-        {
-            get { return FFrontendSession; }
-        }
-
-
-
-        protected Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree FNodesTree;
-
-
-        #endregion*/
-
-        public void ErrorHighlighted(Exception AException)
-        {
-            
-        }
-
-        public void ErrorSelected(Exception AException)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
-
-    
 }
