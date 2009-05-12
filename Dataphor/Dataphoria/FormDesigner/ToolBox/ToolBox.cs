@@ -39,6 +39,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         #endregion
 
+        private void SetStatus(string ADescription)
+        {
+            throw new NotImplementedException();
+        }
+
         private void InitializeGroupView()
         {
             // 
@@ -170,11 +175,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 FNodesTree.Select();
             }
         }
-
-        private void SetStatus(string ADescription)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         public void PaletteItemDropped()
         {
@@ -317,11 +318,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                     {
                         if (LImage is Bitmap)
                             ((Bitmap) LImage).MakeTransparent();
-                        //FNodesImageList.Images.Add(LImage);
-                        // int LIndex = FNodesImageList.Images.Count - 1;
-                        // FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
-                        // return LIndex;
-                        return 0;
+                        FNodesImageList.Images.Add(LImage);
+                        int LIndex = FNodesImageList.Images.Count - 1;
+                        FImageIndex.Add(LImageAttribute.ImageExpression, LIndex);
+                        return LIndex;                        
                     }
                     FImageIndex.Add(LImageAttribute.ImageExpression, 0);
                 }
