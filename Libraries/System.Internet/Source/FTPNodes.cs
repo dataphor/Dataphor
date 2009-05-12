@@ -79,6 +79,8 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				LRequest.Credentials = new NetworkCredential(AArguments[2].Value.AsString, AArguments[3].Value.AsString);
 			LRequest.Method = WebRequestMethods.Ftp.UploadFile;
 			LRequest.Proxy = null;
+			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
+			LRequest.UsePassive = false;
 			Stream LRequestStream = LRequest.GetRequestStream();
 			try
 			{
