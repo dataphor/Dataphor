@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
     // Don't put any definitions above the FormDesiger class
 
-    public partial class FormDesigner : ILiveDesigner
+    public partial class FormDesigner : BaseForm, ILiveDesigner, IErrorSource, IServiceProvider, IContainer, IChildFormWithToolBar
     {
         protected DockContent FDockContentFormPanel;
         protected DockContent FDockContentNodesTree;
