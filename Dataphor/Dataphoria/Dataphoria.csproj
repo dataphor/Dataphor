@@ -313,6 +313,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="FormDesigner\PaletteItem.cs" />
+    <Compile Include="FormDesigner\ToolBox\StatusEventArgs.cs" />
     <Compile Include="FormDesigner\ToolBox\ToolBox.cs">
       <SubType>UserControl</SubType>
     </Compile>

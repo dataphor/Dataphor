@@ -39,10 +39,20 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         #endregion
 
+        private EventHandler<EventArgs> FStatusChanged;
+        
         private void SetStatus(string ADescription)
         {
-            throw new NotImplementedException();
+            EventHandler<EventArgs> LChanged = FStatusChanged;
+            if (LChanged != null) LChanged(this, new StatusEventArgs(ADescription));
         }
+
+        public event EventHandler<EventArgs> StatusChanged
+        {
+            add { FStatusChanged += value; }
+            remove { FStatusChanged -= value; }
+        }        
+
 
         private void InitializeGroupView()
         {
@@ -248,6 +258,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         {
             get { return FFrontendSession; }
         }
+
+       
 
 
         private bool IsTypeListed(Type AType)
