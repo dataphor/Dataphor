@@ -235,8 +235,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         #region Palette
 
-        private Session FFrontendSession;
-        private Hashtable FImageIndex = new Hashtable();
+        private readonly Hashtable FImageIndex = new Hashtable();
         private bool FIsMultiDrop;
         protected DesignerTree FNodesTree;
         private PaletteItem FSelectedPaletteItem;
@@ -254,12 +253,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         }
 
         [Browsable(false)]
-        public Session FrontendSession
-        {
-            get { return FFrontendSession; }
-        }
-
-       
+        public Session FrontendSession { get; set; }
 
 
         private bool IsTypeListed(Type AType)
