@@ -3,15 +3,23 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+//#define USETAGNAMECACHE
+// This define uses a tag name cache for the names of all tags.
+// The idea is to try to reduce the amount of memory used for tags by using
+// the same string reference for each tag of a given name.
+// However, early indications are that the amount of memory saved is not significant,
+// even when dealing with large catalogs such as IBAS.
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+using Alphora.Dataphor;
+using Alphora.Dataphor.DAE.Schema;
+
 namespace Alphora.Dataphor.DAE.Language.D4
 {
-	using System;
-	using System.Collections;
-
-	using Alphora.Dataphor;
-	
-	using Alphora.Dataphor.DAE.Schema;
-	
     /// <remarks> Tag </remarks>
     public class Tag : System.Object
     {
@@ -20,14 +28,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			if ((AName == null) || (AName == String.Empty))
 				throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			#if USETAGNAMECACHE
+			FName = TagNames.GetTagName(AName);
+			#else
 			FName = AName;
+			#endif
 		}
 		
 		public Tag(string AName, string AValue) : base()
 		{
 			if ((AName == null) || (AName == String.Empty))
 				throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			#if USETAGNAMECACHE
+			FName = TagNames.GetTagName(AName);
+			#else
 			FName = AName;
+			#endif
 			FValue = AValue == null ? String.Empty : AValue;
 		}
 		
@@ -35,7 +51,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			if ((AName == null) || (AName == String.Empty))
 				throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			#if USETAGNAMECACHE
+			FName = TagNames.GetTagName(AName);
+			#else
 			FName = AName;
+			#endif
 			FValue = AValue;
 			FIsInherited = AIsInherited;
 		}
@@ -44,7 +64,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			if ((AName == null) || (AName == String.Empty))
 				throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			#if USETAGNAMECACHE
+			FName = TagNames.GetTagName(AName);
+			#else
 			FName = AName;
+			#endif
 			FValue = AValue;
 			FIsInherited = AIsInherited;
 			FIsStatic = AIsStatic;
@@ -902,6 +926,33 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string CIsSystem = @"DAE.IsSystem";
 		#if !NATIVEROW
 		public const string CStaticByteSize = @"DAE.StaticByteSize";
+		#endif
+		
+		#if USETAGNAMECACHE
+		private static object FDictionarySyncHandle = new object();
+
+		private static Dictionary<string, string> FTagNameCache = new Dictionary<string, string>();
+		
+		public static void ClearTagNameCache()
+		{
+			lock (FDictionarySyncHandle)
+			{
+				FTagNameCache.Clear();
+			}
+		}
+
+		public static string GetTagName(string AName)
+		{
+			lock (FDictionarySyncHandle)
+			{
+				string LName;
+				if (FTagNameCache.TryGetValue(AName, out LName))
+					return LName;
+					
+				FTagNameCache.Add(AName, AName);
+				return AName;
+			}
+		}
 		#endif
     }
     

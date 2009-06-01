@@ -3,15 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 #define NILPROPOGATION
 
-// TODO: foreach
-// TODO: case
-// TODO: selected case
-// TODO: condition
-// TODO: conditioned case
-// TODO: selected conditioned case
-// TODO: try except
 // TODO: don't use exceptions for flow control at run-time
 // TODO: don't push frames unless it is necessary
 // TODO: optimize application transaction calls in the CallNode
