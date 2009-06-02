@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 13:53:49</date> 
+	 </sect2info> 
+	 <title>System.GetDefaultDeviceName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator gets the default device name for the current session of
+		  Dataphor. All objects (tables, domains, etc) are created in the default device
+		  unless another device is specified in the create statement. Because the device
+		  is specified by name, it does not have to exist when
+		  <symbol>SetDefaultDeviceName</symbol> is called. If the device does not exist
+		  when the default device is accessed, by a create or other operation, D4 raises
+		  an exception. Optionally the libarary (ALibraryName) name can be
+		  specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select GetDefaultDeviceName("Sample.Common");</programlisting> 
+		  <programlisting>SampleDevice</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGDevices.html">Devices</ulink>
+<ulink url="SLRSystem.CreateUser.html">SetDefaultDeviceName</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

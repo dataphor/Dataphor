@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:43:22</date> 
+	 </sect2info> 
+	 <title>iPower</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>**</symbol> is the parser recognized symbol for this
+		  operator. This is a binary operator that takes the left value and raises it to
+		  the power of the right value.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager add { Manager_ID ** Employee_ID Power };</programlisting> 
+		  <programlisting>Manager_ID Employee_ID Power 
+---------- ----------- ----- 
+1          2           1     
+1          3           1     
+2          4           16    
+2          6           64    
+4          5           1024</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

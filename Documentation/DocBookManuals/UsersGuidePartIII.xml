@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<part id="DUGPartIII"> 
+	 <partinfo> 
+		  <date role="LastMod">Saturday, March 02, 2002 2:18:45 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 3:10:51 PM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </partinfo> 
+	 <title>Part III - Using Dataphor</title> 
+	 <preface> 
+		  <title>Part III - Using Dataphor</title> 
+		  <para> 
+				<citetitle>Part III</citetitle> of this manual provides broad steps
+				necessary to create, build, and deploy an application using Dataphor.</para> 
+	 </preface> 
+</part> 

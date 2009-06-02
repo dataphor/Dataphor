@@ -85,10 +85,45 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			set { Text = InternalConvertDateTimeToString(value); }
 		}
 
+        private bool FHideDate = false;
+        /// <summary> Do not display the date part. </summary>
+        /// <remarks> Could result in nothing being displayed. </remarks>
+        [DefaultValue(false)]
+        [Category("Behavior")]
+        [Description("Do not display the date part.")]
+        public bool HideDate
+        {
+            get { return FHideDate; }
+            set { FHideDate = value; }
+        }
+
+        private bool FHideTime = true;
+        /// <summary> Do not display the time part. </summary>
+        /// <remarks> Could result in nothing being displayed. </remarks>
+        [DefaultValue(true)]
+        [Category("Behavior")]
+        [Description("Do not display the time part.")]
+        public bool HideTime
+        {
+            get { return FHideTime; }
+            set { FHideTime = value; }
+        }
+
 		private string InternalConvertDateTimeToString(DateTime ADateTime)
 		{
 			if (EditByCell)
-				return ADateTime.TimeOfDay.Ticks == 0 ? ADateTime.ToString(ShortDatePattern) : ADateTime.ToString(String.Format("{0} {1}", ShortDatePattern, LongTimePattern));
+				return 
+                    ADateTime.TimeOfDay.Ticks == 0 ? 
+                        FHideDate ? String.Empty : ADateTime.ToString(ShortDatePattern) 
+                        : ADateTime.ToString
+                        (
+                            String.Format
+                            (
+                                "{0} {1}", 
+                                FHideDate ? String.Empty : ShortDatePattern, 
+                                FHideTime ? String.Empty : LongTimePattern
+                            ).Trim()
+                        );
 			else
 				return ADateTime.ToString("G");
 		}

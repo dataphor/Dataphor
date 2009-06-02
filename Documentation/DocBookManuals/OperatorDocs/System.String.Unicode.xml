@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:48:15</date> 
+	 </sect2info> 
+	 <title>System.String.Unicode</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<ulink url="SLRSystem.String.html">See System.String</ulink></para>
+		  
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the <symbol>Unicode</symbol> representation
+		  of the <symbol>String</symbol> DataType. This can be used to return a native
+		  string given a list of Integers. It can also be used to return a list of
+		  Integers for a given String.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example { UnicodeString : String, key{} };
+begin
+	var LString : String;
+	LString.Unicode := { 65, 108, 112, 104, 111, 114, 97 };
+	insert table { row { LString UnicodeString } } into Example;
+end;
+select Example
+	add { "Fun".Unicode[0] F, "Fun".Unicode[1] u, "Fun".Unicode[2] n };
+drop table Example;</programlisting> 
+		  <programlisting>UnicodeString F  u   n
+------------- -- --- ---
+Alphora       70 117 110</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.String.html">System.String</ulink>
+<ulink url="SLRSystem.String.UTF8.html">System.String.UTF8</ulink>
+<ulink url="SLRSystem.String.ASCII.html">System.String.ASCII</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGParserLiterals.html">Parser Literals</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToString.html">System.ToString</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

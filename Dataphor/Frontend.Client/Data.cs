@@ -1823,6 +1823,10 @@ namespace Alphora.Dataphor.Frontend.Client
 						if (Surrogate == null)
 							DataView.Open();
 						break;
+                    case SourceActions.PostIfModified:
+                        if (DataView.IsModified)
+                            DataView.Post();
+                        break;
 				}
 			}
 			base.HandleEvent(AEvent);

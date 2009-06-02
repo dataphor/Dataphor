@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<part id="DUGP3Administration"> 
+	 <partinfo><date role="LastMod">Tuesday, November 16, 2004 11:53:29
+				AM</date> 
+	 </partinfo> 
+	 <title><indexterm><primary>Administration</primary></indexterm>Administration</title>
+	 
+	 <partintro> 
+		  <para>This part discusses administrative concepts and techniques for
+				the Dataphor platform. This part is intended for Dataphor administrators,
+				although much of the material will be useful to developers wishing to gain a
+				better understanding of the concrete elements of the Dataphor environment.
+				Developers that understand the production environment completely are more
+				likely to produce applications that function efficiently and effectively in a
+				deployment scenario.</para></partintro> 
+	 <chapter id="DUGP3SoftwareEnvironment"> 
+		  <title><indexterm><primary>Software
+						  Environment</primary></indexterm><indexterm><primary>Administration</primary><secondary>Software
+						  Environment</secondary></indexterm><indexterm><primary>Dataphor</primary><secondary>Software
+						  Environment</secondary></indexterm>Software Environment</title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+	 <chapter id="DUGP3DeploymentandMaintenance"> 
+		  <title><indexterm><primary>Deployment and
+						  Maintenance</primary></indexterm><indexterm><primary>Administration</primary><secondary>Deployment
+						  and Maintenance</secondary></indexterm>Deployment and Maintenance</title> 
+		  <para><?xm-replace_text {Chapter Introductory Paragraph}?></para> 
+	 </chapter> 
+	 <chapter id="DUGP3Troubleshooting"> 
+		  <title><indexterm><primary>Troubleshooting</primary></indexterm><indexterm><primary>Administration</primary><secondary>Troubleshooting</secondary></indexterm>Troubleshooting</title>
+		  
+		  <para><?xm-replace_text {Chapter Introductory Paragraph}?></para> 
+	 </chapter>
+</part>

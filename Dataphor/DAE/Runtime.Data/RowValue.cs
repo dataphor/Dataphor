@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false);
+									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
 									FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
 									FRow.Values[LIndex] = LConveyor.Read(LStream);
 									AOffset += LElementSize;
@@ -490,7 +490,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false);
+									LStream = new MemoryStream(ABuffer, AOffset, LElementSize, false, true);
 									FRow.DataTypes[LIndex] = LScalarType;
 									FRow.Values[LIndex] = LConveyor.Read(LStream);
 									AOffset += LElementSize;
@@ -714,23 +714,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (Object.ReferenceEquals(DataType, ADataType))
 			{
 				NativeRow LNewRow = new NativeRow(DataType.Columns.Count);
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				{
-					LNewRow.DataTypes[LIndex] = FRow.DataTypes[LIndex];
-					LNewRow.Values[LIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
-				}
+				if (FRow != null)
+					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+					{
+						LNewRow.DataTypes[LIndex] = FRow.DataTypes[LIndex];
+						LNewRow.Values[LIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+					}
 				return LNewRow;
 			}
 			else
 			{
 				NativeRow LNewRow = new NativeRow(DataType.Columns.Count);
 				Schema.IRowType LNewRowType = (Schema.IRowType)ADataType;
-				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				{
-					int LNewIndex = LNewRowType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
-					LNewRow.DataTypes[LNewIndex] = FRow.DataTypes[LIndex];
-					LNewRow.Values[LNewIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
-				}
+				if (FRow != null)
+					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
+					{
+						int LNewIndex = LNewRowType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
+						LNewRow.DataTypes[LNewIndex] = FRow.DataTypes[LIndex];
+						LNewRow.Values[LNewIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+					}
 				return LNewRow;
 			}
 		}

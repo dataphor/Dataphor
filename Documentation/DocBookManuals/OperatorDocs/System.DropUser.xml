@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 14:21:56</date> 
+	 </sect2info> 
+	 <title>System.DropUser</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Drops the specified Dataphor User. This user will no longer be able
+		  to login to Dataphor. This Operator can only be used by the Admin users.</para>
+	 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.RemoveUserFromRole.html">System.RemoveUserFromRole</ulink>
+<ulink url="SLRSystem.RevertRightForUser.html">System.RevertRightForUser</ulink> 
+<ulink url="SLRSystem.RevokeRightFromUser.html">System.RevokeRightFromUser</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.SetUserGroup.html">System.SetUserGroup</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+<ulink url="SLRSystem.UserHasRight.html">System.UserHasRight</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

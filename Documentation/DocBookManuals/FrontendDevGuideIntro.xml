@@ -1,0 +1,20 @@
+<chapter id="FDGIntroduction"> 
+  <chapterinfo> 
+	 <date role="LastMod">Friday, June 07, 2002 9:48:22 AM</date> 
+	 <revhistory> 
+		<revision> 
+		  <revnumber>1</revnumber> 
+		  <date>Friday, June 07, 2002 9:47:52 AM</date> 
+		  <revdescription> 
+			 <para>DXC to DocBook</para> 
+		  </revdescription> 
+		</revision> 
+	 </revhistory> 
+  </chapterinfo> 
+  <title>Introduction</title> 
+  <para>The Frontend Developer's Guide focuses on the user interface and
+	 interaction capabilities of the toolset. It includes a detailed view of the
+	 server and client architectures, an analysis of the mechanisms involved in
+	 application automation, as well as complete reference and extensibility
+	 information.</para> 
+</chapter>

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:33:02</date> 
+	 </sect2info> 
+	 <title>iIndexer</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>[]</symbol> is the parser recognized symbol for this
+		  operator. D4 includes two built in types that allow the use of the indexer:
+		  String and List. Variables of both of these types can be indexed to access an
+		  individual value. For a list, the indexer will return the element of the list
+		  specified by the index. For a string, the indexer returns the character in the
+		  position specified by the index. An <symbol>iIndexer</symbol> operator may be
+		  created to handle any user defined types. </para> 
+	 <note> 
+		  <para>D4's lists and strings are zero-based.</para> 
+	 </note> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee over {Name} add {Name[1] Second};</programlisting> 
+		  <programlisting>Name Second 
+---- ------ 
+Jake a      
+Jeff e      
+Joe  o      
+John o      
+Josh o</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="D4LGUsingLists.html">Using Lists</ulink>
+<ulink url="D4LGIndexerExpression.html">Indexer Expression</ulink>
+<ulink url="DDGP2Indexes.html">Table Values, Indexes</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

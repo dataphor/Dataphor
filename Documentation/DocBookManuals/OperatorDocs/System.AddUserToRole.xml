@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:07:04</date> 
+	 </sect2info> 
+	 <title>System.AddUserToRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator adds the user to the role</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+CreateGroup("Developers", "User");
+
+CreateUser("JS1", "John Smith", "Password", "Developers");
+AddUserToRole("JS1", "SoftwareDeveloper");
+
+DropUser("JS1");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.RemoveUserFromRole.html">System.RemoveUserFromRole</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.RoleHasRight.html">System.RoleHasRight</ulink>
+<ulink url="SLRSystem.SetUserGroup.html">System.SetUserGroup</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

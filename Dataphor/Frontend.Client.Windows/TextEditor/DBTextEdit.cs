@@ -135,6 +135,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void DocumentChanged(object sender, ICSharpCode.TextEditor.Document.DocumentEventArgs e)
 		{
+			SetHasValue((Document.TextContent != String.Empty) || !NilIfBlank);
 			EnsureEdit();
 		}
 

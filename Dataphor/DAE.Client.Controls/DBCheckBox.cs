@@ -85,7 +85,18 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private int FAutoUpdateInterval;
+        private bool FTrueFirst = true;
+        /// <summary> Determines the CheckState transition sequence for CheckBoxes with three-states. </summary>
+        /// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBCheckBox.dxd"/>
+        [DefaultValue(true)]
+        [Category("Behavior")]
+        public bool TrueFirst
+        {
+            get { return FTrueFirst; }
+            set { FTrueFirst = value; }
+        }
+        
+        private int FAutoUpdateInterval;
 		/// <summary> Determines the amount of time to wait before updating a DataField's value. </summary>
 		/// <extdoc href="..\..\..\..\Docs\DAE.Client.Controls\DBCheckBox.dxd"/>
 		[DefaultValue(200)]
@@ -200,16 +211,19 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				switch (base.CheckState)
 				{
 					case CheckState.Indeterminate :
-						base.CheckState = CheckState.Checked;
+						base.CheckState = FTrueFirst ? CheckState.Checked : CheckState.Unchecked;
 						break; 
 					case CheckState.Checked :
-						if (base.ThreeState)
+						if (base.ThreeState && FTrueFirst)
 							base.CheckState = CheckState.Indeterminate;
 						else
 							base.CheckState = CheckState.Unchecked;
 						break;
 					case CheckState.Unchecked :
-						base.CheckState = CheckState.Checked;
+                        if (base.ThreeState && !FTrueFirst)
+                            base.CheckState = CheckState.Indeterminate;
+                        else
+                            base.CheckState = CheckState.Checked;
 						break;
 				}
 			}

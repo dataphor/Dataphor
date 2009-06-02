@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 10:55:43</date> 
+	 </sect2info> 
+	 <title>System.TransactionCount</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns the current level of nested transactions. The transaction
+		  count returned includes implicit transactions, but does not include Application
+		  Transactions.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {TransactionCount() Transactions};</programlisting> 
+		  <programlisting>Transactions
+------------
+1</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginTransaction.html">System.BeginTransaction</ulink>
+<ulink url="DDGP2TransactionManager.html">Transaction Manager</ulink>
+<ulink url="DDGP2TransactionManagement.html">Transaction Management</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

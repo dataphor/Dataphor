@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:53:15</date> 
+	 </sect2info> 
+	 <title>iUnion</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>union</symbol> is the parser recognized symbol for this
+		  operator. This operator is a relational binary operator, that returns all of
+		  the rows in both of the specified tables (or presentations), removing
+		  duplicates. A duplicate is if two rows have the same data in all columns. The
+		  resulting table has one key containing all of the columns.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select
+	(Employee over {Name} rename { Name NameOrPhone})
+	union
+	(EmployeePhone over { Phone } rename { Phone NameOrPhone });</programlisting> 
+		  <programlisting>NameOrPhone 
+----------- 
+411         
+555-1000    
+555-1234    
+555-4321    
+555-4444    
+555-5678    
+911         
+Jake        
+Jeff        
+Joe         
+John        
+Josh</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGUnion.html">Union</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

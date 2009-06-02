@@ -1,0 +1,15 @@
+      <div class="navfooter"><hr>
+        <table width="100%" summary="Navigation footer">
+            <tr><td width="40%" align="left">
+            <a accesskey="p" href="{%link-prev-href%}">Prev</a>&nbsp;</td>
+            <td width="20%" align="center">
+            <a accesskey="u" href="{%link-up-href%}">Up</a>
+            </td><td width="40%" align="right">&nbsp;
+            <a accesskey="n" href="{%link-next-href%}">Next</a>
+            </td></tr>
+            <tr><td width="40%" align="left" valign="top">{%link-previous-title%}</td><td width="20%" align="center">
+            <a accesskey="h" href="{%link-home-href%}">Home</a></td>
+            <td width="40%" align="right" valign="top">&nbsp;
+            {%link-next-title%}</td></tr></table>
+        </div>
+

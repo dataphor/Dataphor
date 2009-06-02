@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:32:39</date> 
+	 </sect2info> 
+	 <title>iInclusiveGreater</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>&gt;=</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>Inclusive Greater than</symbol> operator is a comparison
+		  operator. D4 compares the left and right values. If the left value is greater
+		  than or equal to the right value, the operator returns true, otherwise it
+		  returns false.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Manager add { Manager_ID &gt;= Employee_ID Greater};</programlisting> 
+		  <programlisting>Manager_ID Employee_ID Greater
+---------- ----------- -------
+1          2           False
+1          3           False
+2          4           False
+2          6           False
+4          5           False</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGComparisonOperators.html">Comparison Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

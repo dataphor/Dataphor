@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<part> 
+	 <partinfo> 
+		  <date role="LastMod">Thursday, July 17, 2003 11:07:41 AM</date> 
+	 </partinfo>
+	 <title><indexterm><primary>Tutorials</primary></indexterm>Tutorials</title>
+	 
+	 <partintro> 
+		  <para> 
+				<citetitle>Part II</citetitle> of this manual steps the reader
+				through the process of building basic applications using different
+				methodologies.</para> 
+		  <para>Due to the broad scope of the Dataphor Toolset, it can be used in
+				many different ways. We support application development paradigms ranging from
+				low-level integration solutions to completely automated development. The
+				tutorials in this part introduce some of these different paradigms: 
+				<itemizedlist> 
+					 <listitem> 
+						  <para>Data Access Components</para> 
+						  <para>This tutorial provides an introduction to the
+								Dataphor Data Access Components and using them in a classic Rapid Application
+								Development paradigm.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>Dataphor Development</para> 
+						  <para>This tutorial provides a complete application
+								walk-through which illustrates the use of the Dataphor Toolset in the Automated
+								Application Development paradigm.</para> 
+					 </listitem> 
+				</itemizedlist></para></partintro> 
+	 <chapter> 
+		  <title><?xm-replace_text {title}?></title> 
+		  <para><?xm-replace_text {para}?></para> 
+	 </chapter> 
+</part> 

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 15:02:49</date>
+	 </sect2info>
+	 <title>System.Math.Log</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Calculates the logarithm to the specified base. The number that
+		  results is the number needed to raise the specified base to, to make it equal
+		  the number of the the logarithm.
+		  <informalexample> 
+				<para><emphasis>2<superscript>4.75488750216347</superscript> =
+					 27</emphasis></para> 
+		  </informalexample></para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add { Math.Log(27, 2) log };</programlisting> 
+		  <programlisting>log 
+----------------
+4.75488750216347</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Math.Log10.html">System.Math.Log10</ulink>
+<ulink url="SLRSystem.Math.Ln.html">System.Math.Ln</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

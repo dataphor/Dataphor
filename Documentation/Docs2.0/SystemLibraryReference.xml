@@ -1,0 +1,314 @@
+<?xml version="1.0" ?>
+<chapter id="DRSystemLibrary"> 
+	 <chapterinfo><date role="LastMod">Friday, December 01, 2006 11:56:20
+				AM</date> 
+	 </chapterinfo> 
+	 <title> 
+		  <indexterm><primary>System</primary></indexterm> 
+		  <indexterm><primary>System Library</primary></indexterm> 
+		  <indexterm><primary>Libraries</primary><secondary>System</secondary></indexterm>
+		  System </title> 
+	 <para>This chapter provides reference material for working with and
+		  understanding the Dataphor System Library.</para> 
+	 <section id="DRSystemLibrary-Definition"> 
+		  <title> 
+				<indexterm><primary>System
+						  Library</primary><secondary>Definition</secondary></indexterm> 
+				<indexterm><primary>Definitions</primary><secondary>System</secondary></indexterm>
+				Definition </title> 
+		  <para>The following information describes the definition of the System
+				library.</para> 
+		  <formalpara> 
+				<title>Version</title> 
+				<para><?DocLib D4ExpressionField Version Libraries where Name = "System"?></para>
+				
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryRequisites where Library_Name = "System"?>
+		  <formalpara> 
+				<title>Requisites</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry> 
+										  <entry colname="col2">Version</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field Required_Library_Name?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field Required_Library_Version?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryFiles where Library_Name = "System"?>
+		  <formalpara> 
+				<title>System Files</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry><entry
+										  colname="col2">Is Assembly</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field FileName?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field IsAssembly?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect4">See Also</bridgehead> 
+		  <para><?xm-replace_text {para}?></para> <?DocLib D4ExpressionBlock member RegisteredAssemblies where Library_Name = 'System' add { Name.SubString(0, Name.IndexOf(",")) SimpleName }?>
+		  <section id="DRSystemLibrary-RegisteredAssemblies"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Registered Assemblies</secondary></indexterm>
+					 Registered Assemblies </title> 
+				<para>The following lists the assemblies registered in the System
+					 Library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </section> <?DocLib D4ExpressionBlock member RegisteredClasses where Library_Name = 'System' add { Name.SubString(Name.IndexOf('.') + 1) SimpleName }?>
+		  <section id="DRSystemLibrary-RegisteredClasses"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Registered Classes</secondary></indexterm>
+					 Registered Classes </title> 
+				<para>The following lists the classes registered in the System
+					 library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </section> 
+	 </section>
+	<!-- the below assumes a documentation database where the ObjectDocumentation table exists... -->
+<!--DocLib D4ExpressionIf TableDee add{ Count(Objects join ObjectDocumentation where Objects.Name = System and (TextType = "DocSettings" or TextType = "DocConnectivity" or TextType = "DocExample") ) > 0  -->
+<?DocLib D4ExpressionIf TableDee add{ 'False' Result} ?>
+	 <section id="DRSystemLibrary-Documentation"> 
+		  <title>Documentation</title>
+		<!--This contains all the human-written documentation-->
+		  <para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  <section id="DRSystemLibrary-Settings"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Settings</secondary></indexterm> 
+					 <indexterm><primary>Settings</primary><secondary>System</secondary></indexterm>
+					 Settings </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+		  <section id="DRSystemLibrary-Connectivity"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Connectivity</secondary></indexterm> 
+					 <indexterm><primary>Connectivity</primary><secondary>System</secondary></indexterm>
+					 Connectivity </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+		  <section id="DRSystemLibrary-Translation"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Translation</secondary></indexterm> 
+					 <indexterm><primary>Translations</primary><secondary>System</secondary></indexterm>
+					 Translation </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+		  <section id="DRSystemLibrary-Example"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Example</secondary></indexterm> 
+					 <indexterm><primary>Examples</primary><secondary>System</secondary></indexterm>
+					 Example </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+	 </section>
+	<!--DocLib D4ExpressionIf TableDee add{  Result} --><!-- todo: figure out how to skip this section -->
+	 <section id="DRSystemLibrary-Schema"> 
+		  <title> 
+				<indexterm><primary>System
+						  Library</primary><secondary>Schema</secondary></indexterm> 
+				<indexterm><primary>Schema</primary><secondary>System</secondary></indexterm>
+				Schema </title>
+		<!--This contains forms and everything else extracted from the catalog-->
+		  <para>The following sections list the schema elements defined in the
+				System library.</para> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "System" and Type_ID = 'dfd'?>
+		  <section id="DRSystemLibrary-Schema-Forms"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Forms</secondary></indexterm> 
+					 <indexterm><primary>Forms</primary><secondary>System</secondary></indexterm>
+					 Forms </title> 
+				<para>The following lists the forms defined in the System
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "System" and Type_ID = 'dfdx'?>
+		  <section id="DRSystemLibrary-Schema-CustomizedForms"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Customized Forms</secondary></indexterm> 
+					 <indexterm><primary>Customized
+								Forms</primary><secondary>System</secondary></indexterm> Customized Forms
+					 </title> 
+				<para>The following lists the forms defined in the System
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Roles where 'System.'.Pos(Name) = 0?>
+		  <section id="DRSystemLibrary-Schema-Roles"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Roles</secondary></indexterm> 
+					 <indexterm><primary>Roles</primary><secondary>System</secondary></indexterm>
+					 Roles </title> 
+				<para>The following lists the roles defined in the System
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Devices where 'System.'.Pos(Name) = 0?>
+		  <section id="DRSystemLibrary-Schema-Devices"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Devices</secondary></indexterm> 
+					 <indexterm><primary>Devices</primary><secondary>System</secondary></indexterm>
+					 Devices </title> 
+				<para>The following lists the devices defined in the System
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section>
+		<!--The following DocLib instruction includes the whole section level data of the System Scalar Types-->
+<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SystemTypes.xml?>
+<!--The following DocLib instruction includes the whole section level data of the System Operators-->
+<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SystemOperators.xml?>
+<?DocLib D4ExpressionBlock section TableVars where LibraryName(Name) = "System" add { Script(Name) Declaration, Name.SubString(Name.IndexOf('.') + 1) SimpleName  }?>
+		  <section id="DRSystemLibrary-Schema-Tables"> 
+				<title> 
+					 <indexterm><primary>System
+								Library</primary><secondary>Tables</secondary></indexterm> Tables </title> 
+				<para>The following sections describe the tables declared in the
+					 System Library.</para> 
+				<section> 
+					 <title> 
+						  <indexterm><primary>System Library</primary><secondary><?DocLib D4Field Name?></secondary></indexterm>
+						  
+						  <indexterm><primary><?DocLib D4Field Name?></primary></indexterm>
+						  
+						  <indexterm><primary>Tables</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm><?DocLib
+						  D4Field SimpleName?></title> 
+					 <para></para> <?DocLib D4ExpressionBlock row Objects where Type = 'TableVarColumn' and Catalog_Object_ID = ObjectID(ATableName) add { "" SimpleTypeName };ATableName=Name?>
+					 <formalpara> 
+						  <title>Columns</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="3">
+										  <colspec colnum="1" colname="col1" colwidth="45*"/>
+										  <colspec colnum="2" colname="col2" colwidth="17*"/>
+										  <colspec colnum="3" colname="col3" colwidth="38*"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Name</entry> 
+													 <entry colname="col2">Type</entry> 
+													 <entry
+													  colname="col2">Description</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry colname="col1"><?DocLib D4Field Name?></entry>
+													 
+													 <entry colname="col2"><?DocLib D4Field SimpleTypeName?></entry>
+									<!-- todo: get value for description -->
+													 <entry colname="col2"></entry> 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem Objects where Type = 'Key' and Catalog_Object_ID = ObjectID(ATableName) { Name, ID Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Keys</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem Objects where Type = 'Order' and Catalog_Object_ID = ObjectID(ATableName) { Name, ID Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Orders</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock listitem Objects where (Type in { 'RowConstraint', 'TransitionConstraint' }) and not(IsGenerated) and (Catalog_Object_ID = ObjectID(ATableName)) { Name, ID Object_ID };ATableName=Name?>
+					 <formalpara> 
+						  <title>Constraints</title> 
+						  <para> 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><?DocLib D4Field Name?></para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </formalpara> <?DocLib D4ExpressionBlock row Objects where Type = 'Reference' and Name.StartsWith(ATableName) { Name, Name.SubString(Name.LastIndexOf('_') + 1) Target_TableVar_Name, false Source_IsUnique };ATableName=Name?>
+					 <formalpara> 
+						  <title>References</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="2">
+										  <colspec colnum="1" colname="col1" colwidth="*"/>
+										  <colspec colnum="2" colname="col2" colwidth="*"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Name</entry> 
+													 <entry colname="col2">Target</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry colname="col1"><?DocLib D4Field Name?></entry>
+													 
+													 <entry colname="col2"><?DocLib D4Field Target_TableVar_Name?></entry>
+													 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </formalpara> 
+				</section> 
+		  </section> 
+	 </section>
+</chapter>

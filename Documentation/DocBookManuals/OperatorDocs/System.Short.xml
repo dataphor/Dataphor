@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:47:14</date> 
+	 </sect2info> 
+	 <title>System.Short</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Short
+{
+	representation Short
+	{
+		Value : System.Short
+	}selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.ShortAsStringSelectorNode"
+} class "System.Int16Conveyor" static tags { Catalog.Comment = "System Signed 16-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>Short</symbol>.</para> 
+	 <para><symbol>System.Short</symbol> is the set of all integer values in the
+		  range negative 32768 (-2<superscript>15</superscript>) through positive 32767
+		  (2<superscript>15</superscript>-1). The physical representation of this type is
+		  a signed 16-bit integer.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Short(1753 - 23);</programlisting> 
+		  <programlisting>1730</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGParserLiterals.html">Parser Literals</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToShort.html">System.ToShort</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

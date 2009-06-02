@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 11:24:38</date> 
+	 </sect2info> 
+	 <title>System.Update</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator changes the row pointed at by the specified cursor. Any
+		  of the columns in the row specified as a parameter, will become the new columns
+		  of the cursor's row.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var LCursor : cursor( table{ID: Integer, Name: String} );
+	LCursor := cursor(Employee capabilities {Updateable});
+	LCursor.Next();
+	LCursor.Update(row{"Jim" Name});
+	LCursor.Close();
+end;
+select Employee;</programlisting> 
+		  <programlisting>Statement Executed Successfully!
+
+ID Name
+-- ----
+1  Jim
+2  John
+3  Josh
+4  Jeff
+5  Jake
+6  Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="D4LGCursorCapabilities.html">Cursor Capabilities</ulink>
+<ulink url="DDGP2CursorCapabilities.html">Cursors, Cursor Capabilities</ulink>
+<ulink url="DDGP2CursorType.html">Cursor Type</ulink>
+<ulink url="bk02apas02.html">D4 Parser BNF</ulink>
+<ulink url="DDGUpdatability.html">Updatability</ulink>
+<ulink url="D4LGDataManipulation.html">Data Manipulation</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

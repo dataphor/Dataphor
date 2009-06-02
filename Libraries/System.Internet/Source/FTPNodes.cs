@@ -13,7 +13,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
-using Schema=Alphora.Dataphor.DAE.Schema;
+using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.Libraries.System.Internet
 {
@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			return null;
 		}
 	}
-	
+
 	// TODO: Add a detailed list that includes types, sizes, dates and such.  I think this requires parsing Windows and Unix style directory listings.
 
 	// operator FTPList(AURL : String) : table { Name : String }
@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				try
 				{
 					LRow.ValuesOwned = false;
-					
+
 					int LOffset = 0;
 					while (LOffset < LListing.Length)
 					{
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 							LNextOffset = LListing.Length;
 						LRow[0].AsString = LListing.Substring(LOffset, LNextOffset - LOffset).Trim(new char[] { '\r', '\n', ' ' });
 						LOffset = LNextOffset;
-						
+
 						if (LRow[0].AsString.Trim() != "")
 							try
 							{

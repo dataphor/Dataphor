@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	</PropertyGroup>
+	
+	<Target Name="BuildDataphor">
+		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" />
+	</Target>
+
+	<PropertyGroup>
+		<LibrariesConfiguration>$(Configuration)</LibrariesConfiguration>
+		<LibrariesConfiguration Condition=" '$(LibrariesConfiguration)' == 'Debug' ">BaseDebug</LibrariesConfiguration>
+	</PropertyGroup>
+	<Target Name="BuildLibraries">
+		<MSBuild Projects="Libraries\Libraries.sln" Properties="Configuration=$(LibrariesConfiguration)" />
+	</Target>
+	
+	<ItemGroup>
+		<BinFiles Include="Dataphor\bin\*.*" Exclude="**\*.pdb" />
+	</ItemGroup>
+	<Target Name="CopyDataphor">
+		<Message Text="Copying bin files into deploy..." />
+		<Copy SourceFiles="@(BinFiles)" DestinationFolder="Deploy\Dataphor" />
+	</Target>
+
+	<ItemGroup>
+		<LibraryBinFiles Include="Libraries\**\*.dll;Libraries\**\*.d4l" Exclude="**\obj\**\*.*" />
+		<LibraryDocumentFiles Include="Libraries\**\Documents\*.*" />
+	</ItemGroup>
+	<Target Name="CopyLibraries">
+		<Message Text="Copying library files into deploy..." />
+		<Copy SourceFiles="@(LibraryBinFiles)" DestinationFolder="Deploy\Libraries\%(RecursiveDir)" />
+		<Copy SourceFiles="@(LibraryDocumentFiles)" DestinationFolder="Deploy\Libraries\%(RecursiveDir)" />
+	</Target>
+
+	<ItemGroup>
+		<WebClientBinFiles Include="Dataphor\Frontend.Client.Web\bin\*.dll" />
+		<WebClientImageFiles Include="Dataphor\Frontend.Client.Web\images\*.*" />
+		<WebClientMainFiles Include="Dataphor\Frontend.Client.Web\*.aspx;Dataphor\Frontend.Client.Web\*.asax;Dataphor\Frontend.Client.Web\*.config;Dataphor\Frontend.Client.Web\*.js;Dataphor\Frontend.Client.Web\*.css" />
+	</ItemGroup>
+	<Target Name="CopyWebClient">
+		<Message Text="Copying web client files into deploy..." />
+		<Copy SourceFiles="@(WebClientMainFiles)" DestinationFolder="Deploy\WebClient" />
+		<Copy SourceFiles="@(WebClientBinFiles)" DestinationFolder="Deploy\WebClient\bin" />
+		<Copy SourceFiles="@(WebClientImageFiles)" DestinationFolder="Deploy\WebClient\images" />
+	</Target>
+
+	<ItemGroup>
+		<DocumentationFiles Include="Documentation\*.chm;Documentation\*.pdf" />
+	</ItemGroup>
+	<Target Name="CopyDocumentation">
+		<Message Text="Copying Documentation files into deploy..." />
+		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
+	</Target>
+
+	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	</Target>
+</Project>

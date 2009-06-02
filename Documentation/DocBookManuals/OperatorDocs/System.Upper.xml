@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 11:33:50</date>
+	 </sect2info>
+	 <title>System.Upper</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the upper case equivalent of the specified
+		  string. This is useful when performing a case insensitive comparison on case
+		  sensitive strings.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select Employee add {Name.Upper() UpperName};</programlisting> 
+		  <programlisting>ID Name UpperName 
+-- ---- --------- 
+1  Joe  JOE
+2  John JOHN
+3  Josh JOSH
+4  Jeff JEFF
+5  Jake JAKE
+6  Jeff JEFF</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Lower.html">System.Lower</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

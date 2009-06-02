@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:11:14</date> 
+	 </sect2info> 
+	 <title>System.DropRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator deletes the specified role.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.AddUserToRole.html">System.AddUserToRole</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.GroupRoleIsInherited.html">System.GroupRoleIsInherited</ulink>
+<ulink url="SLRSystem.RemoveGroupFromRole.html">System.RemoveGroupFromRole</ulink>
+<ulink url="SLRSystem.RemoveUserFromRole.html">System.RemoveUserFromRole</ulink>
+<ulink url="SLRSystem.RevertRightForRole.html">System.RevertRightForRole</ulink>
+<ulink url="SLRSystem.RevokeRightFromRole.html">System.RevokeRightFromRole</ulink>
+<ulink url="SLRSystem.SetGroupRoleInherited.html">System.SetGroupRoleInherited</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

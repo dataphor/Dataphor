@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<book id="DACDevGuide"> 
+	 <title>Dataphor DAC Developer's Guide</title> 
+	 <bookinfo> 
+		  <abstract> 
+				<para><inlinegraphic fileref="images/dac.jpg" width="300"
+					 depth="107"/></para>
+				<para>The Dataphor Data Access Components Developer's Guide
+					 contains the documentation for the Data Access Components including usage and
+					 class information.</para></abstract> 
+		  <copyright><year>2002</year><holder>Alphora</holder> 
+		  </copyright> 
+		  <date role="LastMod">Wednesday, October 30, 2002 12:33:44 PM</date> 
+	 </bookinfo>&DACDevPreface; &DACDevPart1Using; &DACDevPart2Extending; 
+	 <part id="DACDGReference"> 
+		  <title>DAC Reference</title> 
+		  <partintro> 
+				<para>The following chapters and references document elements of
+					 the DAC.</para> 
+				<bridgehead renderas="sect3">See Also</bridgehead> 
+				<para><ulink url="Alphora.Dataphor.DAE.Client.Controls.html">DAE
+						  Client Controls</ulink>, 
+					 <ulink url="D4LGD4LanguageGuide.html">D4 Language
+						  Reference</ulink>, 
+					 <ulink url="RealSQLLanguageRef.html">RealSQL Language
+						  Reference</ulink></para></partintro> 
+		  <chapter id="DACDGSessions"> 
+				<title>Sessions</title> 
+				<para>The following sections document the classes that are part of
+					 sessions.</para>
+				&DAEClientDB2;&DAEClientLinter;&DAEClientMSSQL;&DAEClientOracle; 
+		  </chapter> 
+	 </part> 
+</book> 

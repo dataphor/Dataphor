@@ -1,0 +1,1597 @@
+<?xml version="1.0"?>
+<part id="DUGPartI"> 
+	 <partinfo> 
+		  <date role="LastMod">Saturday, October 29, 2005 9:02:12 AM</date> 
+	 </partinfo> 
+	 <title>Introducing Dataphor</title> 
+	 <chapter id="DUGWhatisDataphor"> 
+		  <title>Background</title> 
+		  <para><!--Put all index "see"s here:--><indexterm><primary>Constraints</primary><see>Integrity
+						  Constraints</see></indexterm><indexterm><primary>Dataphor</primary><secondary>Introduction</secondary></indexterm>This
+				chapter provides an overview of the motives and history of Dataphor.</para> 
+		  <sect1> 
+				<title>What is Dataphor?</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="1"><tbody> 
+									 <row><entry>Dataphor is a toolset designed to
+												streamline the process of designing, implementing, and maintaining software
+												applications.</entry> 
+									 </row></tbody> 
+						  </tgroup> 
+					 </informaltable>A software application is a computer program
+					 that attempts to model some real-world concept using digital information.
+					 Software applications are the net product of all of the layers of hardware and
+					 software technology that exist in the computer field. Computer programs that do
+					 not directly provide an application purpose are generally called systems,
+					 libraries, engines, or servers 
+					 <footnote> 
+						  <para>The term "server" is used here to refer to
+								<emphasis>software</emphasis> designed to run on a shared computer in a
+								networked environment, not the hardware upon which the software runs.</para> 
+					 </footnote>. Such systems programs exist to facilitate
+					 applications. Applications utilize these systems to accomplish the following: 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><emphasis>Reuse</emphasis> — It would be highly
+									 expensive and impractical if each application had to provide the computer's
+									 entire software environment. By exploiting programs such as Operating Systems,
+									 an application can reuse years of complex programming.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Insulation</emphasis> — If the software
+									 environment is carefully constructed it can present an interface to the
+									 application which allows the same application to operate in changing or
+									 different hardware and software environments without the application itself
+									 needing to change.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>As an analogy, picture an application as a building. The
+					 building (application) is made by properly configuring the materials (the
+					 systems software). Without prefabricated materials such as beams and panes of
+					 glass, consider the difficulty of constructing the building. `Think of Dataphor
+					 as an unprecedentedly malleable material, useful for building virtually any
+					 building.</para> 
+		  </sect1> 
+		  <sect1> 
+				<title>The Problem</title> 
+				<para>Software applications, for industries ranging from Graphics
+					 Design to Health Care, share a common theme: data management. Every application
+					 must address at least a few of the following data management issues: 
+					 <itemizedlist> 
+						  <title>Data Management Issues</title> 
+						  <listitem> 
+								<para><emphasis>Storage</emphasis> — persisting
+									 information in long-term storage</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Manipulation</emphasis> — performing
+									 simple or complex data transformations</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Queries</emphasis> — finding or
+									 searching for information</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Shared access</emphasis> — making data
+									 available to concurrent users or systems</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Integrity</emphasis> — ensuring that
+									 data conforms to certain rules</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Security</emphasis> — restricting data
+									 manipulation and analysis to only those authorized</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Scale</emphasis> — ensuring that
+									 demands for data volume and concurrency are met</para> 
+						  </listitem> 
+						  <listitem> 
+								<para><emphasis>Presentation</emphasis> — providing
+									 representations of data to the user</para> 
+						  </listitem> 
+					 </itemizedlist></para> 
+				<para>Consider a very common type of application: the Word
+					 Processor, held against these criteria. Clearly
+					 <wordasword>storage</wordasword> applies, usually handled by serializing the
+					 document information and saving it as a file.
+					 <wordasword>Manipulation</wordasword> happens, both by automated processes and
+					 by application users. <wordasword>Querying</wordasword> is a common practice,
+					 both for published works as well as works in progress. <wordasword>Shared
+					 access</wordasword> is clearly important, especially in some environments.
+					 <wordasword>Integrity</wordasword> is certainly applicable at many levels, from
+					 basic document structure (cannot bold where already bold) to higher levels
+					 (document must conform to certain template). <wordasword>Security</wordasword>
+					 is important for Word Processor documents. Word Processors must
+					 <wordasword>scale</wordasword>, both in terms of document size as well as
+					 supported concurrency. Data <wordasword>presentation</wordasword> is also an
+					 issue, as there are many different ways to visualize document data. Actual Word
+					 Processing products handle some of these criteria better then others. Where
+					 they are weak, user discontentment is likely to exist. Shared access is an
+					 example of a weakness common for Word Processors, though there often is a need.
+					 Another example is scalability, as many Word Processors do not work effectively
+					 with huge documents.</para> 
+				<para>Consider the sheer number of different solutions provided by
+					 the industry to the data management problems, some in the form of different
+					 DBMSs, others in the form of applications that handle their own data
+					 management. Handling data management issues elegantly, or even adequately, is
+					 not a trivial matter. It would be inefficient if every application had to
+					 resolve each of these issues. For reuse and insulation (abstraction) of these
+					 tasks, systems level software is needed. Database Management Systems (DBMSs)
+					 are such systems; designed exactly for this purpose.</para> 
+				<sect2> 
+					 <title>Data Management Problems</title> 
+					 <para>Interestingly, not all applications are built using
+						  DBMSs. The Word Processor, used in the previous example, is in fact not
+						  typically constructed over a DBMS. Other types of applications, such as Contact
+						  Managers, usually <emphasis>are</emphasis> constructed over a DBMS. Recognizing
+						  the need to abstract data management tasks, it is clear why today's DBMSs are
+						  so pervasive; but why are these systems used in implementing some applications,
+						  while other applications are deemed "too complex" or "too specialized" for
+						  their use? Here are several possible answers; each relating to shortcomings of
+						  today's DBMSs: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para><emphasis>Limited data type
+										  support</emphasis> — A typical DBMS has strong support for a few types, such as
+										  numbers, strings, and date/times. Other types are treated as little more than
+										  binary streams. Real applications often deal with more types then just strings,
+										  dates, and numbers. For example, a mapping application deals with geographical
+										  information. For such an application, types such as 
+										  <type>coordinate</type>, and 
+										  <type>line</type> are used. Queries on such
+										  data will need to invoke operators such as <function>Distance()</function> and
+										  <function>Equal()</function> ("="). Columns of these types should also be
+										  usable in keys and constraints. For a database system to apply generally, it
+										  must support types of arbitrary complexity, and support them as completely as
+										  it does intrinsic types.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Limited integrity
+										  support</emphasis> — Integrity constraints (also called <firstterm>business
+										  rules</firstterm>) determine what data are allowed in a database. Real-world
+										  integrity constraint requirements may be of arbitrary complexity. For example,
+										  a point-of-sale application may have a requirement that, if a sale transaction
+										  includes a liquor product, the customer must be at least 21 years of age. In
+										  order to apply generally, a database system must be capable of enforcing
+										  <emphasis>any</emphasis> integrity constraint. Pervasive database systems,
+										  however, provide only limited integrity capabilities.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Limited control over the
+										  implementation of logical concepts</emphasis> — Consider an application that
+										  manipulates bitmap images. One possibly useful <emphasis>logical</emphasis>
+										  representation of bitmap image data might be a table of color values
+										  corresponding with <wordasword>X</wordasword> and <wordasword>Y</wordasword>
+										  coordinates. Though such a table representation may be useful logically (for
+										  manipulation and querying), such a representation is probably not the most
+										  desirable for <emphasis>actually</emphasis> storing the data. Without an
+										  adequate level of indirection between logical concepts and implementation, a
+										  database system cannot practically be applied universally.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Expense and bloat</emphasis> —
+										  Today's most pervasive database systems are licensed for a relatively narrow
+										  range of usage scenarios. Not only are they cost prohibitive for many
+										  application domains and target markets, they are also bloated with regard to
+										  features, size, and complexity. For a system to appeal to the entire range of
+										  application domains, it must be licensed and modularized flexibly.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Undefined <firstterm>data
+										  model</firstterm> 
+										  <footnote> 
+												<para>The term <wordasword>data
+													 model</wordasword>, is commonly used with two different meanings. One usage
+													 describes a specific database schema, the other meaning, refers to an abstract
+													 logic system upon which a data management system is based. Unless otherwise
+													 specified, this document's usage of the term refers to the latter
+													 meaning.</para> 
+										  </footnote></emphasis> — A database system
+										  based on an incomplete or undefined data model is analogous to a calculator
+										  that is not based on mathematics. Such a calculator may be useful for whatever
+										  ad-hoc purpose is intended by its inventor, but will almost certainly not be
+										  universally applicable. A data model is to a DBMS, what mathematics is to a
+										  calculator.</para> 
+									 <para>There are several purported data models in
+										  the database field: hierarchic, network, object, object/relational,
+										  associative, and relational. Though argument over the superiority of one data
+										  model over another will probably always rage, the relational model
+										  unquestionably stands out from the rest<citation>5</citation>. This is due to
+										  its power, elegant simplicity, but most of all: completeness. As a result, a
+										  DBMS that faithfully implements the relational model appeals generally.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Restrictive Outer Limits</emphasis>
+										  — Today's pervasive database systems have many relatively low outer limits.
+										  Database systems all have limits on facets such as: numbers of columns in a
+										  table, columns in a key, keys in a table, foreign keys in a table, nested calls
+										  for stored procedures, characters in a string, bytes per "order by", tables per
+										  "select" statement. If such limitations are not sufficiently large, problems
+										  are sure to arise for some applications, hindering the general appeal of the
+										  system. For example, a Computer Aided Design (CAD) application may require
+										  thousands of recursive procedure calls to perform certain operations on a
+										  figure, but many database systems would not support this.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Weak Languages</emphasis> — Many
+										  DBMS designers did not originally catch on to the idea that all of the (non
+										  user interface) application logic could execute within the DBMS. As a result,
+										  many of the languages supported by today's DBMSs are weak extensions of a query
+										  language.</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+					 <para>These limitations are problematic for any type of
+						  application, not just those that aren't traditionally built around a DBMS. When
+						  faced with such limitations, applications developers are forced to: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Work around the issue—consuming effort and
+										  hampering the usefulness of using the system.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Abandon usage of the system
+										  altogether—requiring the complete redevelopment of solutions to the data
+										  management problems.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Augment the database system by constructing
+										  other systems layers.</para> 
+								</listitem> 
+						  </itemizedlist> To avoid partly or entirely forgoing the
+						  benefits provided by DBMSs, several types of peripheral systems have arisen to
+						  <emphasis>augment</emphasis> them. Such systems always introduce added
+						  complexity. These systems would be unneeded if database systems themselves were
+						  more completely able to address data management issues. Here are some examples
+						  of some system types that were (not always concienteously) designed for the
+						  purpose of augmenting DBMSs: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para><emphasis>Business Rule Engines</emphasis> —
+										  These engines typically reside between the front-end application logic and the
+										  database system, ensuring that data modifications conform to the integrity
+										  constraints defined by the developer. So called "exception management systems"
+										  provide another technique used to verify business rules. This type of rules
+										  engine runs periodically and reports (or performs operations on) data that does
+										  not conform to the rules.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Data Warehousing Systems</emphasis>
+										  — Data warehousing products aim to provide data analysis capabilities not
+										  present in "regular" database systems. Some such systems are architected
+										  themselves like database systems, but with emphasized analysis capabilities.
+										  Other warehousing systems work within existing database systems to create
+										  summarized data snapshots. </para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Data Integration Engines</emphasis>
+										  — Data integration engines attempt to share information across otherwise
+										  autonomous systems. Most data integration systems are based on an architecture
+										  commonly called Extract, Transform, Load (ETL). As the name implies, the engine
+										  reads data from a source system, then inserts a transformed version of that
+										  data into a target system. This batch process is typically scheduled to occur
+										  periodically. To accomplish two-way synchronization, a second ETL scheme is
+										  implemented.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Collaboration Systems</emphasis> —
+										  These systems provide concurrency services for applications and systems that
+										  otherwise do not share information adequately.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Transaction Management
+										  Systems</emphasis> — Transaction management involves ensuring that the
+										  integrity of the database is safeguarded in the presence of change. Many data
+										  sources, and even database systems, lack certain important transaction
+										  management capabilities. Furthermore, some transactions necessarily must take
+										  place across multiple data sources. Transaction management systems aim to
+										  provide some of the missing transaction functionality.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Other "middleware"
+										  products</emphasis> — There are hosts of other systems aimed at easing the
+										  burden of the application developer. These systems and tools are often called
+										  middleware because they are placed between the application front-end (user
+										  interface) and the database back-end.</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+					 <para>Clearly, abstracting data management is fundamental to
+						  automating and accelerating application developement. A development platform
+						  that overcomes the previously mentioned limitations would provide an invaluable
+						  tool for application development. Namely it would: reduce complexity, maximize
+						  reuse, maximize insulation, and eliminate the need for scores of work-around
+						  products.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Development Tool Deficiencies</title> 
+					 <para>RAD tools such as Delphi, Visual Basic, Java, and .NET
+						  provide unprecedented productivity gains over previous generations of
+						  development tools; however, they still demand a tremendous amount of
+						  development effort in order to build and maintain even the simplest complete
+						  applications.</para> 
+					 <sect3> 
+						  <title><indexterm><primary>RAD</primary></indexterm>RAD:
+								not rapid enough</title> 
+						  <para> A RAD tool typically consists of a form designer for
+								laying out user interface controls, and basic database connectivity components.
+								Little guidance is given on actually combining these elements into a complete
+								application that is: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Usable/Consistent</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Scalable</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Secure</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Maintainable</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Extensible</para> 
+									 </listitem> 
+								</itemizedlist>As a result, this task is left mostly to
+								the experience (or experimentation) of programmers. Experienced developers
+								usually recognize patterns that arise when creating applications, and will
+								often build a tool layer on top of the one provided by the development
+								platform. Such tool layers, however, are usually designed specifically for each
+								application, and do not generalize well to other applications.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Too much application data managment code</title> 
+						  <para>Deficiencies in database systems, such as those
+								previously mentioned, are compensated for in the application specific logic.
+								This entails performing data management functions outside the context of a
+								database management system. Though this can be accomplished, it comes at a
+								heavy price. Development tools such as RAD tools are based on
+								3<superscript>rd</superscript> generation programming languages suited
+								primarily for systems development. Data manipulation, integrity enforcement,
+								querying, and other data management tasks are tedious in these environments.
+								There are many problems faced by those constructing external data management
+								layers. Here are a few: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para><emphasis>Language
+												non-uniformity</emphasis> — When one language is intermingled (or nested)
+												within another, the result is sometimes called an "impedence mismatch" (a term
+												borrowed from electronics). Not only must the developer be familiar with both
+												languages, they must also juggle the mechanisms of interaction between them.
+												For example, if a developer is building an application in
+												<wordasword>C</wordasword> over a SQL-based system, the developer must not only
+												know both C and SQL, but must also know how to reconcile the data between
+												them.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para><emphasis>Lack of set
+												operators</emphasis> — Development tool languages do not have high-level
+												mechanisms for performing operations or analysis on sets of data.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para><emphasis>Poor scalability</emphasis> —
+												Data operations in a development tool language take place in memory, whereas
+												database systems can efficiently handle large datasets by handling the paging
+												of data to and from the disk.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para><emphasis>Lack of query
+												language</emphasis> — Database systems feature query languages, with automatic
+												optimizers.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para><emphasis>Manual transaction
+												management</emphasis> — For the requirements of most applications, ensuring
+												database integrity through proper transaction management is an extremely
+												complex task. The automation of transaction management is one of the primary
+												benefits provided by complete DBMS. Code developed outside the context of the
+												DBMS must provide such capabilities manually.</para> 
+									 </listitem> 
+								</itemizedlist></para> 
+						  <para>To illustrate the problem, consider a geographical
+								mapping application. Such an application could be built upon one of today's
+								pervasive database systems, but many of the data management operations would
+								necessarily be performed outside of the system, in an external layer of
+								application code. Not only is this layer time consuming and complex to
+								construct, the resulting application is significantly more limited then it
+								would have been if it were built within the context of a DBMS. Also consider
+								the implications for maintenance and portability.</para> 
+					 </sect3> 
+				</sect2> 
+		  </sect1> 
+		  <sect1> 
+				<title><indexterm><primary>Dataphor</primary><secondary>Origins</secondary></indexterm>Origins</title>
+				
+				<para>Dataphor technology evolved from lessons learned over years
+					 of experience developing applications. The architects originally built the
+					 tools to streamline the process of building applications using Rapid
+					 Application Development (RAD) technologies. It is from such a tools layer that
+					 Dataphor evolved, with the aim to provide a completely general, high-level
+					 application development toolset.</para> 
+				<sect2> 
+					 <title><indexterm><primary>Patterns</primary></indexterm>Application
+						  development patterns</title> 
+					 <para>The recognition of common patterns in application
+						  development contributed greatly to the design of Dataphor. Some patterns are
+						  obvious, and are considered part of data management. For example, all but the
+						  most trivial applications must deal with security. But even such commonly
+						  needed abstractions are poorly addressed by most development platforms. Though
+						  some low-level security APIs may be provided to the developer, integrating
+						  those APIs into an application, and making usage and administration reasonably
+						  easy for the intended users requires a lot of work for the application
+						  developer.</para> 
+					 <para>Many application development patterns were recognized,
+						  which contributed to the design of Dataphor. Here are a few examples: 
+						  <itemizedlist> 
+								<listitem> 
+									 <indexterm><primary>Browse</primary></indexterm> 
+									 <para><emphasis>Browse-to-edit user
+										  interfaces</emphasis> — User interfaces that separate the process of searching
+										  and navigating from the process of adding or editing the data are easier to
+										  understand than those that attempt to do both.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Browse usage for lookups</emphasis>
+										  — Most applications have user interfaces for navigating and searching various
+										  data sets (called "browse" forms from here). These browse forms are useful for
+										  allowing the user to maintain data, but they can also be used for "looking up"
+										  data from other data editing user interfaces. Doing so reduces the number of UI
+										  elements, provides consistent search mechanisms, and allows adding and editing
+										  of looked up data.</para> 
+								</listitem> 
+								<listitem> 
+									 <indexterm><primary>Data</primary><secondary>Buffering</secondary></indexterm>
+									 
+									 <para><emphasis>Master/Detail data relationships
+										  involve transactional issues</emphasis> — Detail rows must be inserted at the
+										  same <emphasis>logical</emphasis> time as their respective master rows.
+										  Canceling the insert/edit of a master row should cancel the changes to the
+										  detail rows.</para> 
+								</listitem> 
+								<listitem> 
+									 <para><emphasis>Detail rows can (and should) always
+										  hide their mastered component</emphasis> — When looking at sales for a
+										  particular customer, there is no need to repeat who the customer is for each
+										  sale.</para> 
+								</listitem> 
+								<listitem> 
+									 <indexterm><primary>Exists
+												flag</primary></indexterm> 
+									 <para><emphasis>"Exists" flag for extension
+										  relationships</emphasis> — When presenting extension relationships (one to
+										  zero-or-one) to users, it is usually important to indicate the existence of the
+										  extension row via an "exists" indicator. For example, when presenting a user
+										  interface for a product and optional sales price, it is important to allow the
+										  user to explicitly specify that the product is not for sale (and hence does not
+										  have a sales price) rather than just leaving the column empty.</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <para>Hundreds of such observations can be made when producing
+						  a large scale application. To successfully complete and maintain such an
+						  application, the intrinsic complexities must be mitigated. To accomplish this,
+						  it is critical to observe patterns and to automate them.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Database system discontent</title> 
+					 <para> Dataphor's architects were not content to continue
+						  working around the problems created by today's pervasive database systems. The
+						  architects discovered the work of theoreticians such as C. J. Date and Hugh
+						  Darwen, who also had recognized many of the same problems and have devised
+						  elegant theoretical solutions<citation>3</citation>. Ironically, these
+						  theoreticians have had little success convincing the database systems vendors
+						  to act on the problems.</para> 
+					 <para>The central tenet of their argument is that the industry
+						  needs to <emphasis>correctly</emphasis> and <emphasis>completely</emphasis>
+						  implement the relational model, not look for an alternative. Many of the
+						  problems with today's (SQL) systems are not a result of the systems being based
+						  on the relational model, rather they are a result of departure from the
+						  relational model.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1> 
+				<title><indexterm><primary>Dataphor</primary><secondary>Design
+								Goals</secondary></indexterm>Dataphor Design Goals</title> 
+				<para>The discontentment with existing technologies spurred a
+					 desire to create a significantly better solution. Due to the scope of the
+					 problem, the new technology was bound to be ambitious, encompassing many
+					 goals.</para> 
+				<sect2> 
+					 <title>The golden goal</title> 
+					 <para>Application design, like painting, involves a complex
+						  interaction between the right brain (creative thinking) and the left
+						  (analytical thinking). A painter visualizes an image, then renders that image
+						  as accurately as possible. Visualization is a highly creative process wherein
+						  the artist interprets some facet of reality, accentuating it in a way that is
+						  interesting or useful. The rendering process is a mechanical skill involving
+						  the application of tool know-how in an attempt to capture the vision. An
+						  artist's available tools have a significant impact on their rendering ability.
+						  For example, a painter may have a limited amount of red paint, only tiny
+						  brushes, and a rough canvas. These limitations will affect the speed and
+						  accuracy of the painter, and in fact will almost certainly cause them to
+						  metamorphose their vision to suit their tools.</para> 
+					 <para> Just as concern for brushes, paint consistency, and
+						  other such material issues distracts a painter, concern for monotonous
+						  implementation details distracts an application developer. The overlying goal
+						  of Dataphor is to provide a highly efficient development tool that lets the
+						  developer compose application logic, maximally unencumbered by irrelevant
+						  implementation details.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Better database technology</title> 
+					 <para>One of the primary goals for Dataphor was to provide a
+						  more general, complete, and elegant data management abstraction. The product
+						  was intended to solve the previously listed issues with today's database
+						  systems, as well as provide the following: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Storage independence</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Multiple data source transparency</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Declarative business rules support</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Updateable views</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <sect3> 
+						  <title><indexterm><primary>Physical Data
+										  Independence</primary></indexterm>Storage independence</title> 
+						  <para>It is desirable for an application to be able to
+								utilize varying data stores. This allows for applications to fit into existing
+								environments where an existing data source may already exist, even if that
+								source wasn't used to initially develop the application. This insulation also
+								allows applications to adapt to <emphasis>changing</emphasis> back-end data
+								sources.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Multiple data source transparency</title> 
+						  <para><indexterm><primary>Data</primary><secondary>Integration</secondary></indexterm><indexterm><primary>Heterogeneous
+										  Data Sources</primary></indexterm>Virtually all computing environments have
+								more than one information system for storing and manipulating data 
+								<footnote> 
+									 <para>Organizations which have standardized on some
+										  database system are no exception. There is sure to be the presence of a file
+										  system, backup system, "data directory" or some other means for data storage
+										  and manipulation in the enterprise.</para> 
+								</footnote>. As a design goal for Dataphor, it was seen
+								as imperative for application development and data management to be possible
+								over multiple, disparate data sources. Many application development products
+								require data to be moved into a particular system in order to be dealt with.
+								Unfortunately, moving data in such a manner introduces obligatory copy and
+								synchronization issues. Dataphor's authors wished to provide a uniform means
+								for managing data, regardless of the heterogeneity of the data.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Business
+										  Rules</primary></indexterm><indexterm><primary>Integrity
+										  Constraints</primary></indexterm>Declarative business rules support</title> 
+						  <para>Business rules are the integrity constraints and
+								processes associated with a database schema. A
+								<firstterm>declarative</firstterm> integrity constraint is constructed as an
+								expression (condition) that must always hold true. A procedural constraint is
+								defined by "hooking" one or more system events, then raising exceptions for
+								violations. A declarative constraint can be thought of as telling the system
+								"what" the rules is and letting it enforce it. A procedural constraint is
+								analogous to telling the system "how" to check integrity. Declarative
+								constraints require less coding, are implementation independent, allow
+								automated system optimizations, and function properly in a transactional
+								environment. It was desired that Dataphor allow developers to specify most (if
+								not all) of their business rules declaratively, regardless of rule
+								complexity.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Updateable views</title> 
+						  <para>The purpose of user interfaces is to allow
+								application users to view and interact with data from varying perspectives.
+								These perspectives often involve complex "views" (queries) of data, not just
+								base tables. Industry SQL database systems, however, only allow updates to the
+								simplest views. As a result, developers must perform extra work to provide
+								update semantics. A goal for Dataphor was to overcome these limitations by
+								providing unprecedented view updateability 
+								<footnote> 
+									 <para>The relational model allows the reading of
+										  data from arbitrary perspectives via queries, but it also opens up
+										  possibilities for automatically updating data "through" those
+										  queries<citation>1</citation>.</para> 
+								</footnote>.</para> 
+					 </sect3> 
+				</sect2> 
+				<sect2> 
+					 <title>Beyond database technology</title> 
+					 <para>Beyond base data management solutions, Dataphor was also
+						  intended to provide some high-level application development supporting
+						  features: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Server-side application logic</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Automated search and navigation</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Automated data "buffering"</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <sect3> 
+						  <title>Server-side application logic</title> 
+						  <para>For security, integrity, and maintainability reasons,
+								it was desired that it be easy to consolidate an application's essential logic
+								into one back-end system.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Searching</primary></indexterm><indexterm><primary>Data</primary><secondary>Navigation</secondary></indexterm>Automated
+								search and navigation</title> 
+						  <para>"Flat-file" (or ISAM) database systems (such as
+								DBase) provided a highly successful approach to data navigation and searching,
+								despite their inability to perform ad-hoc queries. Data navigation took place
+								by scanning bidirectionally along a B-Tree index, so navigating large datasets
+								was virtually instantaneous. As a result, the user had the impression that they
+								were working with the entire logical data set. Searching (at least for indexed
+								criteria) was so fast that it was performed incrementally; As the user typed
+								the search criteria, the nearest matching row was continually located (not
+								filtered to).</para> 
+						  <para>In some ways, applications based on SQL database
+								systems have taken a step back in terms of search and navigation capabilities.
+								A typical user interface for searching a SQL system consists of a form for the
+								user to specify a set of filter criteria. The user then submits the query and
+								is presented with a "results" dataset to scan through. There are several
+								disadvantages to this approach in comparison to the flat-file approach, such
+								as: 
+								<itemizedlist> 
+									 <listitem> 
+										  <para>Significant developer intervention is
+												required to scale this approach from small to large datasets.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>The end-user largely determines the
+												nature of queries that are executing, which leads to performance and hence
+												concurrency-based scaling problems</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>The user is limited to browsing results
+												that match the criteria, and cannot browse through "near" matches 
+												<footnote> 
+													 <para>Even "like" and other near
+														  matching techniques yield exact datasets; the user cannot see rows that are
+														  "near" the result set.</para> 
+												</footnote>.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>The size of the result dataset is
+												unpredictable. This is especially a problem because: a) SQL database systems
+												typically optimize queries as though the entire result set is needed, and b)
+												the dataset is going to be transmitted to the client. One work-around for this
+												problem is to ensure that the query includes a "quota" specification in order
+												to retrieve only the top <wordasword>n</wordasword> results. Unfortunately, any
+												approach that limits the rows of the result set, also has the undesirable
+												effect of possibly excluding the very row the user intends to find.</para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+						  <para>A goal for Dataphor was to provide navigational
+								access and incremental searching capabilities comparable to flat-file systems,
+								but for arbitrarily complex queries, not just base tables.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Data</primary><secondary>Buffering</secondary></indexterm>Automated
+								data "buffering"</title> 
+						  <para>It is a non-trivial task to provide a means for users
+								to add and update data in a database, while maintaining the (potentially
+								complex) integrity of that database. A goal for Dataphor was to automate the
+								task of batching updates for the developer. The desired result would allow
+								users to add and update data freely, regardless of the complexity of the
+								database integrity constraints.</para> 
+					 </sect3> 
+				</sect2> 
+				<sect2> 
+					 <title>Beyond RAD</title> 
+					 <para>Dataphor was designed to surpass RAD technology through
+						  improved data management capabilities, but also by providing the following: 
+						  <itemizedlist> 
+								<listitem> 
+									 <para>Minimal maintenance points</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Form (user interface) layout
+										  automation</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Multi-client support</para> 
+								</listitem> 
+								<listitem> 
+									 <para>No coding for common user interface
+										  tasks</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Conscientious use of network and server
+										  resources</para> 
+								</listitem> 
+						  </itemizedlist></para> 
+					 <sect3> 
+						  <title><indexterm><primary>Schema
+										  Duplication</primary></indexterm>Minimal maintenance points</title> 
+						  <para>It is undesirable to repeating the same schema
+								definitions (for things like attribute names and display lengths) throughout
+								the various layers of the application. Not only does such duplicated schema
+								take extra effort to create, it becomes especially problematic to maintain when
+								the application must change. Dataphor was to derive as much as possible from a
+								central schema definition, and automatically maintain any copies of that
+								data.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>User
+										  Interface</primary><secondary>Automation</secondary></indexterm>Form (user
+								interface) layout automation</title> 
+						  <para>User interface creation is the process of providing a
+								means for user interaction with some view of data. This form layout is mostly a
+								mundane task, and therefore can be highly automated by a system. The goal was
+								for Dataphor's user interface automation system to always produce an "adequate"
+								user interface for any view of data, yet allow the developer to guide the
+								process in whatever detail desired. This "guidance" provided by the developer
+								should not entail completely taking over layout. In other words, it was felt
+								that automated layout shouldn't be "all or nothing", but should be steered as
+								much or as little as the developer desires.</para> 
+						  <para>Since form layout information also corresponds
+								closely with the schema, it was also anticipated that layout "guidance" would
+								be centralized with the rest of the schema. For example, when a
+								<wordasword>Name</wordasword> column is being defined within the
+								<wordasword>Customer</wordasword> table, the developer should be given the
+								chance to specify the display title of the column 
+								<footnote> 
+									 <para>This additional schema information should
+										  not, however, be required by the data management system, or otherwise be
+										  treated as anything other then metadata. In other words, meta-data should never
+										  "break" the data management system.</para> 
+								</footnote>.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Multi-client support</title> 
+						  <para>Most modern applications require, or would benefit
+								from supporting multiple client user interfaces. It was desired that Dataphor
+								support Windows and Web clients based on a single user interface definition.
+								The resulting abstractions could also serve as a basis for supporting other
+								clients as well.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Events</primary></indexterm>No
+								coding for common user interface tasks</title> 
+						  <para>RAD development tools usually provide an event
+								handling mechanism for responding to events such as button or menu clicks. Most
+								of such these events, however, are handled with very similar code; to display
+								another form for example. Dataphor's architects wished to re-use common event
+								actions and have event coding be the exception rather than the rule.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Network
+										  utilization</primary></indexterm><indexterm><primary>Integrity
+										  Constraints</primary></indexterm>Conscientious use of network and server
+								resources</title> 
+						  <para>It was desired that application clients be able to
+								function effectively over low bandwidth or high-latency network situations. It
+								was also desired that Dataphor offload as much integrity constraint checking to
+								the client as possible; to reduce network utilization, but also to offload
+								processing from where computing resources are so valuable. Further, it seemed
+								that this offloading should be automatic, so that the developer would not have
+								to duplicate schema logic, or otherwise be concerned with the process.</para> 
+						  <para>As an example, imagine there is a constraint on the 
+								<varname>Age</varname> column of the 
+								<varname>Employee</varname> table that looked like
+								this: 
+								<programlisting>value &gt;= 14 and value &lt;= 100</programlisting>By examining the dependencies of this constraint, a system
+								could determine that it can be evaluated on the client 
+								<footnote> 
+									 <para>Even if the system determines that a
+										  particular constraint can be evaluated on the client, the system should not
+										  depend on this and should still always check the constraint.</para> 
+								</footnote>.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title><indexterm><primary>Code
+										  generation</primary></indexterm><indexterm><primary>Integration</primary></indexterm>No
+								code generation</title> 
+						  <para>Automatically generating code is one mechanism
+								commonly used to automate development tasks. Dataphor's architects wished to
+								avoid this type of code generation and its accompanying disadvantages by
+								building layers of tool infrastructure rather than generate code 
+								<footnote> 
+									 <para>In a sense, a compiler is a type of code
+										  generator. In the case of a compiler, however, the generated code is
+										  transparent to the developer. The type of code generation the Dataphor
+										  architects wished to avoid is the type where the developer is expected to
+										  maintain or otherwise manage the generated code.</para> 
+								</footnote>.</para> 
+						  <para>To illustrate the difference between these two
+								approaches, consider the problem of multiplying two matrices. One solution
+								would be a code "template" that performs the operation. When the developer
+								needs to multiply two matrices, they would "paste" the template into their
+								code. Another solution is the creation of a function (or subroutine) to perform
+								the operation. Once created, the developer would invoke (call) the function
+								where needed. The latter technique is more implementation independent and
+								maintainable.</para> 
+					 </sect3> 
+				</sect2> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter> 
+		  <title>Dataphor Technology</title> 
+		  <para> 
+				<figure id="DataphorOverall"> 
+					 <title>Dataphor Overall Architecture</title> 
+					 <mediaobject><imageobject><imagedata
+								fileref="images\Dataphor Overall - Simplified.svg" width="1023" depth="1200"
+								scalefit="1"/></imageobject> 
+					 </mediaobject> 
+				</figure></para> 
+		  <sect1> 
+				<title>Overview</title> 
+				<para><!--Revise:-->This goal is realized through two main
+					 components, the Dataphor Data Access Engine (DAE), and the Dataphor Frontend.
+					 The DAE provides a uniform environment for data definition, manipulation, and
+					 access. The Frontend provides a highly automated environment for data
+					 presentation and user interaction.</para> 
+		  </sect1> 
+		  <sect1> 
+				<title>Data Access Engine</title> 
+				<para>The core of Dataphor technology is the 
+					 <indexterm><primary>Data Access Engine
+								Tour</primary></indexterm><indexterm><primary>DAE
+								Tour</primary></indexterm>Data Access Engine (DAE). The DAE is a virtual
+					 database management system which provides a layer between data consumers and
+					 any data source. By providing homogenous data access, the DAE frees the
+					 developer and the end user from the idiosyncrasies of industry data sources.
+					 This insulation enables an ideal environment for the definition of data (or
+					 business) models.</para> 
+				<para>In general, a database application is a data (or business)
+					 model, together with the information about how it is to be presented and
+					 maintained. The business model is all the data of interest to a particular
+					 enterprise or entity organized in a useful manner. This business model is then
+					 manipulated and analyzed by users of the database application. One key goal of
+					 the DAE is to centralize the definition of the business model, and extend it
+					 with enough information to make the process of presentation as automatic as
+					 possible.</para> 
+				<sect2> 
+					 <title>Windows Service</title> 
+					 <para>The Dataphor DAE Windows Service, as the name implies,
+						  hosts a Dataphor DAE instance as a Windows Service. This service can be started
+						  and stopped from the Windows service control manager (services snap-in), or by
+						  using the DAE Service Configuration Utility. See the 
+						  <citetitle>DAE Developer's Guide</citetitle> for
+						  details.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Service Configuration Utility</title> 
+					 <para>Dataphor Service Configuration Utility is a program for
+						  configuring and maintaining the Dataphor Service instance on a particular
+						  machine.  It can stop and start the DAE service as well as change configuration
+						  options for the service.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Dataphoria</title> 
+					 <para>Dataphoria provides an integrated development environment
+						  for Dataphor. Dataphoria connects with instances of the DAE for administration,
+						  and can host an in-process DAE instance for testing and development. D4 code
+						  can be written and executed within the integrated environment's editor.
+						  Dataphoria also acts as a Frontend Windows client for development purposes.
+						  Dataphoria includes an integrated form and report designer for building and
+						  customizing Frontend documents.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>DAE Client Access</title> 
+					 <para>At the lowest level, all communication to the DAE is
+						  performed through the Call Level Interface (CLI). Although programmers can
+						  communicate directly with the Data Access Engine through this CLI, it is
+						  usually advantageous to utilize the high-level Data Access Component or ADO.NET
+						  support provided with Dataphor.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>ADO.NET Provider</title> 
+					 <para>The ADO.NET Provider allows for the retrieval and
+						  manipulation of data in the DAE using the data access capabilities provided
+						  with the .NET Framework. The provided ADO.NET "Client" can execute commands,
+						  retrieve result sets and fill DataSet components with those results. With data
+						  in an ADO.NET DataSet, it can be interchanged with external XML sources, or
+						  used to data-bind to visual controls.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Data Access Components</title> 
+					 <para>In the Rapid Application Development tradition, these
+						  components and controls make building user interfaces almost entirely a visual
+						  process. These components can be configured and manipulated manually or using
+						  the Visual Studio .NET visual designer. For more information about these
+						  components, see the 
+						  <citetitle>DAE Developer's Guide</citetitle> and the 
+						  <citetitle>Tutorials</citetitle> part of this
+						  manual.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1> 
+				<title>Frontend Tour</title> 
+				<para>The Dataphor Frontend builds on the foundation provided by
+					 the DAE to provide automated user interface support. The Frontend technologies
+					 depart from tradition by eliminating UI development legwork and help to produce
+					 more agile applications that can be readily maintained. The Frontend clients
+					 are highly dynamic because their user interface layout structures are read from
+					 an HTTP (or web) server. The resulting user interfaces benefit from the dynamic
+					 aspects of the web technologies, yet the user interfaces are much better suited
+					 for database related applications.</para> 
+				<para>One of the key benefits of the Frontend is its ability to
+					 dynamically derive user interfaces that are completely in line with the logical
+					 structure provided by the DAE Catalog. This derivation allows useful and often
+					 complete user interfaces from only a data model (or schema).</para> 
+				<sect2> 
+					 <title>Frontend Server</title> 
+					 <para>The Frontend Server is the framework from which Dataphor
+						  applications are built. A complete application can be built by simply utilizing
+						  the dynamic user interface derivation and customization capabilities of the
+						  Frontend Server. The functionality of the Frontend Server is exposed through an
+						  ASP.NET web application. Dataphor Frontend Clients request user interface
+						  descriptions (or Dataphor user Interface Language (DIL) documents) in the same
+						  way that a web browser requests HTML documents. This gives a Dataphor
+						  Application the same deployment capabilities as an n-tier web solution.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Windows Client</title> 
+					 <para>The Windows Client is a Windows executable program that
+						  communicates with the Frontend Server to request user-interface descriptions,
+						  and with the Data Access Engine to retrieve and manipulate the data in the
+						  database. The Windows Client makes use of the Dataphor Data Access Components
+						  to provide access to the DAE. These components take full advantage of the
+						  application targeted features exposed by the DAE.</para> 
+				</sect2> 
+				<sect2> 
+					 <title>Web Client</title> 
+					 <para>The Web Client is a web application that provides HTML
+						  based user interface pages to browser clients. These pages are produced by
+						  combining the DIL documents retrieved from the Frontend Server with data from
+						  an instance of the DAE. The user interfaces produced are ver similar to those
+						  provided by the Windows client because both clients consume the same user
+						  interface description. This also means that customizations to the user
+						  interface descriptions appear across clients.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1> 
+				<title>Dataphor and the .NET Framework</title> 
+				<para>Dataphor is built atop the Microsoft .NET Framework. The .NET
+					 Framework provides a component library, a set of compilers, and an execution
+					 runtime. The Dataphor toolset can be readily altered and extended by using
+					 capabilities of the .NET Framework such as dynamic class loading.</para> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DDGDAEInstances"> 
+		  <title><indexterm><primary>Running the DAE as a Windows
+						  Service</primary></indexterm><indexterm><primary>How to</primary><secondary>Run
+						  the DAE as a Windows Service</secondary></indexterm>Running the DAE as a
+				Windows Service</title> 
+		  <para>A Dataphor Data Access Engine Instance is a single instance of
+				the DAE providing access and manipulation for a single catalog.</para> 
+		  <sect1 id="DDGDAEWindowsService"> 
+				<title>DAE Windows Service</title> 
+				<para>The Dataphor DAE Windows Service hosts a Dataphor DAE Server
+					 instance as a Windows Service. The service listens on a configurable TCP port
+					 for requests made through the .NET remoting infrastructure.</para> 
+				<sect2 id="DDGStartingtheDataphorDAEWindowsService"> 
+					 <title><indexterm><primary>Starting the DAE Windows
+									 Service</primary></indexterm>Starting the Dataphor DAE Windows Service</title> 
+					 <para>The Dataphor DAE Windows Service can be started from
+						  within the Windows service configuration manager snap-in, or from the DAE
+						  Service Configuration Utility. Information about errors that occur while
+						  starting the DAE service appear in the "System" or "Dataphor" windows event
+						  logs.</para> 
+					 <para>If the service doesn't start, it is usually for one of
+						  the following reasons:</para> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>Problem</para> </entry> 
+												<entry colname="col2"> 
+													 <para>Reason/Suggestions</para>
+													 </entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>Port is already in use</para>
+													 </entry> 
+												<entry colname="col2"> 
+													 <para>If the DAE Service is configured
+														  to use a TCP port that is used by another process, or a previous instance has
+														  not yet released the port, you will receive an error. You can either:</para> 
+													 <para> 
+														  <itemizedlist mark="bullet"> 
+																<listitem> 
+																	 <para>Change the port using
+																		  the DAE Service Configuration Utility or</para> 
+																</listitem> 
+																<listitem> 
+																	 <para>Wait for the port to
+																		  become available.</para> 
+																</listitem> 
+														  </itemizedlist> </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>Parser or Compiler error</para>
+													 </entry> 
+												<entry colname="col2"> 
+													 <para>A compiler or parser error upon
+														  service startup is a result of a failed attempt by the DAE to read either the
+														  catalog file or the startup script. The catalog file name can be changed or
+														  removed using the DAE Service Configuration Utility. If you remove or change
+														  the catalog file name, than the state of the catalog that existed when the
+														  service was last stopped will not be restored; however, you can start the
+														  service, open the previous catalog script and discover the problem. This is
+														  possible because the catalog file is basically a D4 script file. A similar
+														  procedure can be used to fix problems in the startup script.</para> </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect2> 
+				<sect2 id="DDGInstallingtheServiceManually"> 
+					 <title>Installing the Service Manually</title> 
+					 <para><indexterm><primary>Dataphor
+									 Service</primary><secondary>Installing manually</secondary></indexterm>The DAE
+						  Windows Service is installed automatically by the Dataphor installer, but if
+						  needs be, it can also be installed manually by executing
+						  <symbol>DAEService.exe</symbol> with a parameter of <symbol>-i</symbol> as in
+						  the following.</para> 
+					 <para> 
+						  <programlisting>DAEService.exe -i</programlisting> </para> 
+					 <para>Once the service is installed, it should appear in the
+						  list of items visible from the Windows service configuration snap-in in
+						  Windows.  It can be started and stopped from there, or using the DAE Service
+						  Configuration Utility.</para> 
+					 <para>Installing the Dataphor service creates the files in the
+						  following table.</para> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>File</para> </entry> 
+												<entry colname="col2"> 
+													 <para>Description</para> </entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>DAEService.InstallLog</para>
+													 </entry> 
+												<entry colname="col2"> 
+													 <para>Contains the results of
+														  attempting to install or uninstall the Dataphor Service. If there are errors,
+														  this information may help in correcting problems with the Dataphor service
+														  installation.</para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>DAEService.InstallState</para>
+													 </entry> 
+												<entry colname="col2"> 
+													 <para>Contains information used by the
+														  Dataphor service. This file should not be modified.</para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1"> 
+													 <para>InstallUtil.InstallLog</para>
+													 </entry> 
+												<entry colname="col2"> 
+													 <para>Contains the log of actions
+														  performed during the Dataphor Service install or uninstall process.</para>
+													 </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect2> 
+				<sect2 id="DDGUninstallingtheServiceManually"> 
+					 <title>Uninstalling the Service Manually</title> 
+					 <para><indexterm><primary>Dataphor
+									 service</primary><secondary>Uninstalling manually</secondary></indexterm>The
+						  DAE Windows Service can be manually uninstalled from the Windows services list
+						  by running <symbol>DAEService.exe</symbol> with the <symbol>-u</symbol>
+						  parameter as in the following.</para> 
+					 <para> 
+						  <programlisting>DAEService.exe -u </programlisting> </para> 
+					 <para>If there is an error during the install or uninstall
+						  process, the message will be displayed to the standard output.</para> 
+				</sect2> 
+		  </sect1> 
+		  <sect1 id="DDGServiceConfigurationUtility"> 
+				<title>Service Configuration Utility</title> 
+				<para/> 
+					 <sect2 id="DUGConfiguringDataphorService"> 
+						  <title>Configuring the Dataphor Service</title> 
+						  <para> 
+								<indexterm><primary>Dataphor
+										  Service</primary><secondary>Configuration
+										  utility</secondary></indexterm><indexterm><primary>Dataphor Service
+										  Configuration Utility</primary></indexterm>Learn how to configure and start the
+								Dataphor Service. </para> 
+						  <para> Once the Dataphor Service has been installed the
+								Dataphor Service can be configured using the Configuration Utility. </para> 
+						  <sect3> 
+								<title>Configuring the Dataphor Service</title> 
+								<para> Run the
+									 <symbol>DAE.Service.ConfigurationUtility.exe</symbol>. The following screen
+									 appears. </para> 
+								<para><inlinemediaobject><imageobject><imagedata
+												fileref="images/ConfigurationUtilityMainScreen.gif" width="250"
+												depth="183"/></imageobject></inlinemediaobject> </para> 
+								<para> Click on the <symbol>Configure</symbol> button
+									 to set the properties. The following screen appears. </para> 
+								<para> 
+									 <inlinemediaobject><imageobject><imagedata
+												fileref="images/ConfigurationUtilityConfigScreen.gif" width="320"
+												depth="201"/></imageobject></inlinemediaobject> </para> 
+								<para> The following table describes the configuration
+									 options on the DAE Configuration Screen. </para> 
+								<para> 
+									 <informaltable> 
+										  <tgroup cols="2">
+												<colspec colwidth="*" colname="col1" colnum="1"/>
+												<colspec colwidth="*" colname="col2" colnum="2"/> 
+												<thead> 
+													 <row> 
+														  <entry
+														  colname="col1">Property</entry> 
+														  <entry
+														  colname="col2">Description</entry> 
+													 </row> 
+												</thead> 
+												<tbody> 
+													 <row> 
+														  <entry colname="col1">Server
+																Name</entry> 
+														  <entry colname="col2"> 
+																<para> Defines the name of the
+																	 server. </para> 
+																<para> Because there may be
+																	 multiple servers used by a Dataphor client, each server must have a unique
+																	 name. </para> </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1">Port
+																#</entry> 
+														  <entry colname="col2"> 
+																<para> Defines the port used by
+																	 the server. </para> 
+																<para> Because there may be
+																	 multiple servers used by a Dataphor client, each server must listen on a unique
+																	 port. </para> 
+																<para> When you have an
+																	 application, such as the ReferenceApplication, its setup must match the server
+																	 settings or it will not connect. The critical settings are found in the
+																	 main.dfs and frontend.config files. The Web server reads the frontend.config
+																	 file only when it is restarted. </para> 
+																<para> In order to stop the web
+																	 application and restart it, you may kill the aspnet_wp.exe process. This
+																	 effectively stops the web application allows it to restart and reread the
+																	 frontent.config file. </para> </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1">Catalog File
+																Name</entry> 
+														  <entry colname="col2"> 
+																<para> Defines where the server
+																	 will look for and store its catalog information. </para> 
+																<para> Running the server with
+																	 no Catalog File Name allows you to run several scripts on the DAE without
+																	 preserving the state of the Catalog. This option is useful when testing, as
+																	 each time the server is restarted it has a fresh Catalog with no clutter of
+																	 unwanted user-defined objects (domains, tables, etc). </para> 
+																<para> The server automatically
+																	 writes the current state of the Catalog to the Catalog File when it is stopped.
+																	 It may also be instructed to save the current state of the Catalog at any time.
+																	 </para> 
+																<para> The Catalog File
+																	 consists of D4 langauge statements which reconstruct the Catalog when the
+																	 server is started. So, if there are errors, you could run the script in
+																	 Dataphoria to pinpoint errors with the Catalog File. </para> 
+																<para> The
+																	 <symbol>ClearCatalog();</symbol> operator clears the saved state of the
+																	 catalog. You can also start with an empty catalog by clearing the Catalog File
+																	 Name. </para> 
+																<para> Note that the Catalog
+																	 File is not removed when you uninstall the product. </para> </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1">Startup
+																Script File</entry> 
+														  <entry colname="col2"> 
+																<para> Defines a script file
+																	 that the server will run whenever it starts up. </para> </entry> 
+													 </row> 
+												</tbody> 
+										  </tgroup> 
+									 </informaltable> </para> 
+								<para> Even if you want to use a default configuration,
+									 it is a good idea to at least look at the configuration as it shows the values
+									 to use when connecting Dataphoria or another Dataphor client to the server.
+									 </para> 
+								<para> Accepting the configuration by clicking OK saves
+									 the configuration information. You you are ready to start the server by
+									 clicking the start button. 
+									 <note> 
+										  <para> See <symbol>readme.txt</symbol> in the
+												Dataphoria section for issues with a "well known service" and in-process DAE
+												instances. </para> 
+									 </note></para> 
+								<para> In order to stop the server and change the
+									 configuration click the stop radio button. </para> 
+						  </sect3> 
+						  <sect3> 
+								<title>Other Options</title> 
+								<para> The following table lists the options available
+									 for the Server. 
+									 <informaltable> 
+										  <tgroup cols="2">
+												<colspec colwidth="*" colname="col1" colnum="1"/>
+												<colspec colwidth="*" colname="col2" colnum="2"/> 
+												<thead> 
+													 <row> 
+														  <entry
+														  colname="col1">Option</entry> 
+														  <entry
+														  colname="col2">Description</entry> 
+													 </row> 
+												</thead> 
+												<tbody> 
+													 <row> 
+														  <entry colname="col1">Auto
+																Start</entry> 
+														  <entry colname="col2"> Selects
+																whether the server starts automatically. </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1">Show Icon in
+																the System Tray (Options Menu)</entry> 
+														  <entry colname="col2"> Selects
+																whether to display the Dataphor Configuration Utility icon in the system tray.
+																</entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1">Start
+																Configuration Manager When Windows Starts (Options Menu)</entry> 
+														  <entry colname="col2"> Selects
+																whether to start the Dataphor Configuration Manager when Windows starts.
+																</entry> 
+													 </row> 
+												</tbody> 
+										  </tgroup> 
+									 </informaltable> </para> 
+						  </sect3> 
+						  <sect3> 
+								<title>Troubleshooting</title> 
+								<para> The following table lists some common problems
+									 and remedies. </para> 
+								<para> 
+									 <indexterm><primary>Dataphor
+												Service</primary><secondary>Troubleshooting</secondary></indexterm> 
+									 <informaltable> 
+										  <tgroup cols="2">
+												<colspec colwidth="*" colname="col1" colnum="1"/>
+												<colspec colwidth="*" colname="col2" colnum="2"/> 
+												<thead> 
+													 <row> 
+														  <entry
+														  colname="col1">Problem</entry> 
+														  <entry
+														  colname="col2">Reason/Suggestions</entry> 
+													 </row> 
+												</thead> 
+												<tbody> 
+													 <row> 
+														  <entry colname="col1"> 
+																<para>
+																	 <inlinegraphic fileref="images/Unavailable.gif" width="48" depth="48"/> Start,
+																	 Stop, and Auto Start options are grayed and cannot be selected. </para>
+																</entry> 
+														  <entry colname="col2"> 
+																<para> The Dataphor service has
+																	 not been installed. </para> 
+																<para> Install the Dataphor
+																	 Service, see 
+																	 <ulink
+																	 url="DDGInstallingtheServiceManually.html">Installing the Dataphor
+																		  Service</ulink>. </para> </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1"> 
+																<para>
+																	 <inlinegraphic fileref="images/Stopped.gif" width="48" depth="48"/> Dataphor
+																	 clients cannot connect to the server. </para> </entry> 
+														  <entry colname="col2"> 
+																<para> Server is stopped.
+																	 </para> 
+																<para> Start the server.
+																	 </para> 
+																<para> If the server is running
+																	 and clients still cannot connect, see the next item. </para> 
+																<para> If the server cannot be
+																	 started (request times out) try changing the port setting of the server.
+																	 </para> </entry> 
+													 </row> 
+													 <row> 
+														  <entry colname="col1"> 
+																<para>
+																	 <inlinegraphic fileref="images/Running.gif" width="48" depth="48"/> Dataphor
+																	 clients cannot connect to the server. </para> </entry> 
+														  <entry colname="col2"> 
+																<para> Server configuration
+																	 does not match connect request from client. </para> 
+																<para> Verify the configuration
+																	 of the server and that the client request matches. </para> 
+																<para> Verify that the server
+																	 has not been stopped and restarted introducing the "well known service"
+																	 problem. See the readme file for details. </para> </entry> 
+													 </row> 
+												</tbody> 
+										  </tgroup> 
+									 </informaltable> </para> 
+						  </sect3> 
+					 </sect2> 
+		  </sect1> 
+	 </chapter> 
+	 <chapter id="DDGDataphoria"> 
+		  <title>Dataphoria</title> 
+		  <para><indexterm><primary>Dataphoria</primary></indexterm>Dataphoria is
+				a utility that provides a means to manage and administer Dataphor DAE
+				instances. It provides facilities for instantiating an in-process DAE instance,
+				as well as connecting to an out-of-process one. It also provides an interactive
+				D4 script execution environment.</para> 
+		  <para>Dataphoria is a .NET Windows executable, accessible from the
+				start-menu icon created by the Dataphor installer, or using the command line as
+				follows: <symbol>Dataphoria [&lt;filename&gt;.d4]</symbol>. Passing a D4 script
+				file as an argument to Dataphoria will cause it to automatically bring that
+				script file up in the script execution editor.</para> 
+		  <sect1 id="DUGUsingDataphoria"> 
+				<title>Dataphoria User Interface Elements</title> 
+				<sect2 id="DUGDataphoriaIntro"> 
+					 <title>The Main Interface</title> 
+					 <para> The following image is Dataphoria's full screen without
+						  a Script Editor. </para> 
+					 <para>
+						  <inlinegraphic fileref="images/DataphoriaIntroductionScreen.gif" width="442"
+							depth="303"/> </para> 
+					 <para> On the left is the Object Tree and Property Editor. On
+						  the right is where the Script Editor and the Results Display are displayed. The
+						  following sections describe each of these tools. </para> 
+					 <sect3> 
+						  <title>The Object Tree</title> 
+						  <para> The following image is Dataphoria's Object tree.
+								</para> 
+						  <para>
+								<inlinegraphic fileref="images/DataphoriaObjectsPanel.gif" width="312"
+								depth="72"/> </para> 
+						  <para> The object tree provides a way to work with and
+								manage Dataphor servers. There are two popup menus connected to the Object
+								Tree. 
+								<itemizedlist mark="bullet"> 
+									 <listitem> 
+										  <para>The first displays when you right click
+												on the Servers object. This menu allows you to <symbol>Add Connection</symbol>
+												or <symbol>Add In-process</symbol>.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>The second displays when you right click
+												on a single server object. This menu allows you to <symbol>Remove</symbol>,
+												<symbol>Connect</symbol>, <symbol>Disconnect</symbol>, or <symbol>Query
+												(Script)</symbol> the selected Dataphor Server.</para> 
+									 </listitem> 
+								</itemizedlist> </para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>The Property Editor</title> 
+						  <para> The following image is Dataphoria's Property Editor.
+								</para> 
+						  <para>
+								<inlinegraphic fileref="images/DataphoriaProperties.gif" width="313"
+								 depth="184"/> </para> 
+						  <para> The Property Editor displays and allows you to
+								change the properties of the selected Dataphor Server. </para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>The Script Editor/Results Display</title> 
+						  <para> The Script Editor allows you to type and execute D4
+								statements and scripts on the selected Dataphor Server. </para> 
+						  <para> The Results Display will display results of D4
+								statements and scripts and will also display errors when they occur in the D4
+								statements or scripts. </para> 
+						  <para> The Results Display may be either embedded in the
+								Script Editor or separate from it. The following image demonstrates embedded
+								results. </para> 
+						  <para>
+								<inlinegraphic fileref="images/DataphoriaWithScriptResults.gif" width="593"
+								 depth="335"/> </para> 
+						  <para> The following image demonstrates non-embedded
+								results. </para> 
+						  <para>
+								<inlinegraphic fileref="images/DataphoriaScriptResultsNotEmbedded.gif"
+								 width="593" depth="335"/> </para> 
+					 </sect3> 
+				</sect2> 
+				<sect2 id="DUGConnectingToServer"> 
+					 <title>Connecting To a Server</title> 
+					 <para>Dataphoria is capable of connecting to out-of-process DAE
+						  instances, as well as hosting a DAE in-process.</para> 
+					 <sect3> 
+						  <title>Connecting to an Out of Process</title> 
+						  <para><indexterm><primary>Dataphoria</primary><secondary>Connecting
+										  to an out of process server</secondary></indexterm> The following process
+								describes connecting to a local server. This is a Dataphor Server running on
+								the same machine as the Dataphoria application. The steps are valid for any out
+								of process Dataphor Server, including on that is running on a machine other
+								than where Dataphoria is running. </para> 
+						  <para> Click on the <symbol>Servers/Connect menu</symbol>
+								item. This will place a server under the Servers item in the Tree View. </para>
+						  
+						  <para> Or, right click on the Servers and click on
+								<symbol>Add Connection</symbol> in the popup menu. </para> 
+						  <para> Select the localhost DAE Server in the list of
+								servers. In the properties pane modify the URI and/or other properties to make
+								the connection. </para> 
+						  <para>
+								<inlinegraphic fileref="images/DataphoriaProperties.gif" width="313"
+								 depth="184"/> </para> 
+						  <para> The format for the URI of localhost is: 
+								<programlisting> tcp://localhost:&lt;port number&gt;/&lt;Datphor
+				  Server name&gt; </programlisting> </para> 
+						  <para> The format for the URI of a remote server is: 
+								<programlisting> tcp://&lt;hostname&gt;:&lt;port
+				  number&gt;/&lt;Dataphor Server name&gt; </programlisting> </para> 
+						  <para> Once you have the URI and other connection
+								properties set for the local host, change the <symbol>connected</symbol>
+								property in the properties pane to <symbol>true</symbol> to connect to the out
+								of process server. </para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Connecting to an In Process Server</title> 
+						  <para> Click on the <symbol>Servers/In Process</symbol>
+								menu item. This will place a server under the Servers item in the Tree View.
+								</para> 
+						  <para> Or, right click on the Servers and click on
+								<symbol>Add In-Process</symbol> in the popup menu. </para> 
+						  <para> Select the DAE Server in the list of servers. In the
+								properties pane modify the PortNumber, ServerName, and/or other properties to
+								make the connection. </para> 
+						  <para> Once you have the PortNumber, ServerName, and other
+								connection properties set for the local host, change the
+								<symbol>connected</symbol> property in the properties pane to
+								<symbol>true</symbol> to connect to the server. </para> 
+					 </sect3> 
+				</sect2> 
+				<sect2 id="DUGExecuteScript"> 
+					 <title>Executing a Script</title> 
+					 <sect3> 
+						  <title>Opening a Script Editor on a Server</title> 
+						  <para> A blank (new) Script Editor can be evoked, or an
+								existing script opened from a file. To create a new script: 
+								<orderedlist> 
+									 <listitem> 
+										  <para>Select a server.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Press <symbol>Ctrl-N</symbol> or
+												right-click on the server then click on the <symbol>New Script</symbol> menu
+												item.</para> 
+									 </listitem> 
+								</orderedlist> To open an existing script from a file: 
+								<orderedlist> 
+									 <listitem> 
+										  <para>Select a server.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Press <symbol>Ctrl-O</symbol> or
+												right-click on the server then click on the <symbol>Open Script</symbol> menu
+												item.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Locate the file from the Open File dialog
+												box.</para> 
+									 </listitem> 
+								</orderedlist></para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Executing a Script</title> 
+						  <para> To execute the script contained in the current
+								editor: 
+								<orderedlist> 
+									 <listitem> 
+										  <para>Ensure that nothing is selected.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Press <symbol>Ctrl-E</symbol> or select
+												the <symbol>Script/Execute</symbol> menu item.</para> 
+									 </listitem> 
+								</orderedlist> To execute a portion of the script
+								contained in the current editor: 
+								<orderedlist> 
+									 <listitem> 
+										  <para>Select the portion of text you wish to
+												execute.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Press <symbol>Ctrl-E</symbol> or select
+												the <symbol>Script/Execute</symbol> menu item.</para> 
+									 </listitem> 
+								</orderedlist> </para> 
+						  <para>To see the results of a D4 expression in Dataphoria,
+								precede the expression with 
+								<command>select </command>. The results will be
+								displayed in a pane of the current editor or in a separate window (depending on
+								the setting of <symbol>Embed Results</symbol> on the <symbol>Script</symbol>
+								menu).</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>See Also</title> 
+						  <para> 
+								<ulink url="D4LGD4LanguageGuide.html">D4 Language
+									 Reference</ulink> </para> 
+					 </sect3> 
+				</sect2> 
+				<sect2> 
+					 <title>Starting a Frontend Session</title> 
+					 <sect3> 
+						  <title>Open the Session</title> 
+						  <para>Open a Frontend Session by: 
+								<orderedlist> 
+									 <listitem> 
+										  <para>Select <symbol>File|Open
+												Session...</symbol> from the menu.</para> 
+									 </listitem> 
+									 <listitem> 
+										  <para>Specify a URI (URL) of a session file
+												located on a Frontend server and select <symbol>OK</symbol>. This is usually
+												called main.dfs (i.e. 
+												<command>http://localhost/frontend.referenceapplication/main.dfs</command>).</para>
+										  
+									 </listitem> 
+								</orderedlist></para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Starting the Session</title> 
+						  <para>The session is started by pressing the
+								<symbol>Start...</symbol> button on the Session form. The main form of the
+								Frontend application should appear.</para> 
+					 </sect3> 
+					 <sect3> 
+						  <title>Opening the form or report designer</title> 
+						  <para>The form or report designer is opened by selecting
+								either the <symbol>Form Designer...</symbol> or <symbol>Report
+								Designer...</symbol> button on the Session form.</para> 
+						  <para>Another way to bring up the form designer is from the
+								<symbol>Form</symbol> menu of each Frontend form. Select either
+								<symbol>Edit...</symbol> or <symbol>Customize...</symbol> depending on whether
+								you wish to modify the displayed document, or create a new customized
+								(descendant) document. The <symbol>Edit...</symbol> menu item will not show for
+								forms that are dynamic (have one or more "arguments" in the CGI line).</para> 
+					 </sect3> 
+				</sect2> 
+				<sect2> 
+					 <title>See Also</title> 
+					 <para> 
+						  <ulink url="D4LGD4LanguageGuide.html">D4 Language
+								Reference</ulink>, 
+						  <ulink url="DDGInstallingtheServiceManually.html">
+								Installing the Dataphor Service</ulink>, 
+						  <ulink url="DUGConfiguringDataphorService.html">
+								Configuring the Dataphor Service</ulink> </para> 
+				</sect2> 
+		  </sect1> 
+	 </chapter> 
+</part> 

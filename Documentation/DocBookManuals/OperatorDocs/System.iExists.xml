@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:32:06</date> 
+	 </sect2info> 
+	 <title>iExists</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>exists</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>exists</symbol> operator returns true if the table
+		  specified has any rows in it.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>if (not exists Employee) then
+begin
+	insert table { row { "Jed" Name, 1 ID } } into Employee;
+end
+else
+begin
+	insert table { row { "Jed" Name, 42 ID } } into Employee;
+end;
+select Employee;</programlisting> 
+		  <programlisting>Statement Executed Successfully!
+
+ID Name 
+-- ---- 
+1  Joe  
+2  John 
+3  Josh 
+4  Jeff 
+5  Jake 
+6  Jeff 
+42 Jed</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRSystem.Execute.html">System.Execute</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

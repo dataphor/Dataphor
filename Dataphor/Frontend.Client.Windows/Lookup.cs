@@ -280,7 +280,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 				// Assign the field values
 				for (int i = 0; i < LSourceColumns.Length; i++)
-					Source.DataView.Fields[LSourceColumns[i].Trim()].Value = AForm.MainSource.DataView.Fields[LLookupColumns[i].Trim()].Value;
+				{
+					DAE.Client.DataField LField = AForm.MainSource.DataView.Fields[LLookupColumns[i].Trim()];
+					Source.DataView.Fields[LSourceColumns[i].Trim()].Value = LField.HasValue() ? LField.Value : null;
+				}
 
 				// Move to the next control
 				FindParent(typeof(IWindowsFormInterface)).HandleEvent(new AdvanceFocusEvent(true));

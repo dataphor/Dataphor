@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 15:08:41</date>
+	 </sect2info>
+	 <title>System.Math.Seed</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator sets the seed value for generating pseudo-random
+		  numbers. If no arguments are specified, then a number from the system clock
+		  will be used. If a value is passed to the operator, then that number will be
+		  used for the seed.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>Math.Seed();</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Math.Random.html">System.Math.Random</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

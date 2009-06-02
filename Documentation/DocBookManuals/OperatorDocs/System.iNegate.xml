@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:37:55</date> 
+	 </sect2info> 
+	 <title>iNegate</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>-</symbol> is the parser recognized symbol for this operator.
+		  This is a unary operator that returns the negative equivalent (additive
+		  inverse) of a given positive value. It has the same effect as taking a positive
+		  number and multiplying it by negative one, except for the fact that this
+		  operator has a higher precedence than the multiplicative operators.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee where ID &gt; Abs(-2);</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+3  Josh 
+4  Jeff 
+5  Jake 
+6  Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRiSubtraction.html">iSubtraction (<symbol>-</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

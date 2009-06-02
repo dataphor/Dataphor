@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 13:08:26</date> 
+	 </sect2info> 
+	 <title>System.RollbackApplicationTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator rolls back the specified application transaction. All
+		  changes that were made under this application transaction get undone and the
+		  application transaction is ended. For more information about application
+		  transactions, see the corresponding entry in the Dataphor Developers
+		  guide.</para> 
+	 <note> 
+		  <para>A rollback of a nested transaction causes a rollback of all
+				parent transactions.</para> 
+	 </note> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginApplicationTransaction.html">System.BeginApplicationTransaction</ulink>
+<ulink url="DDGApplicationTransactions.html">Application Transactions</ulink>
+<ulink url="DDGP2DistributedTransactions.html">Distributed Transactions</ulink>
+<ulink url="DDGP1Server.html">Server, nested transactions</ulink>
+<ulink url="DDGP2TraceEvents.html">Trace Events</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

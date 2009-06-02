@@ -690,7 +690,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		Close,
 
 		/// <summary> Opens the data Source. </summary>
-		Open
+		Open,
+
+        /// <summary> Posts and added/edited details of the current data set if it has been modified. </summary>
+        PostIfModified
 	}
 
 	/// <summary> Search methods that can be used by <see cref="FindAction"/>. </summary>

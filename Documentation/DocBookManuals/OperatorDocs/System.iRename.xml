@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:45:38</date> 
+	 </sect2info> 
+	 <title>iRename</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>rename</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>rename</symbol> clause changes the name of columns in a
+		  table. There are two main ways columns are renamed: either renaming a list of
+		  columns individually, or renaming all of the columns at once.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee rename {ID Identification} rename Emp;</programlisting> 
+		  <programlisting>Emp.Identification Emp.Name
+------------------ --------
+1                  Joe
+2                  John
+3                  Josh
+4                  Jeff
+5                  Jake
+6                  Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGRename.html">Rename</ulink>
+<ulink url="D4LGRenamingColumns.html">Renaming Columns</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

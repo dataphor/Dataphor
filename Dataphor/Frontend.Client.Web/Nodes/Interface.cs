@@ -331,6 +331,11 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			BroadcastEvent(new ViewActionEvent(SourceActions.Post));
 		}
 
+        public void PostChangesIfModified()
+        {
+            BroadcastEvent(new ViewActionEvent(SourceActions.PostIfModified));
+        }
+
 		public void CancelChanges()
 		{
 			BroadcastEvent(new ViewActionEvent(SourceActions.Cancel));

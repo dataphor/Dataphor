@@ -83,6 +83,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 	}
 
+	public delegate void RequestImageHandler();
+
 	/// <summary> Data-aware image control. </summary>
 	[ToolboxItem(true)]
 	[ToolboxBitmap(typeof(Alphora.Dataphor.DAE.Client.Controls.DBImageAspect),"Icons.DBImageAspect.bmp")]
@@ -351,6 +353,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			return base.IsInputKey(AKeyData);
 		}
 
+		public event RequestImageHandler OnImageRequested;
+		private void CaptureClicked(object ASender, EventArgs AArgs)
+		{
+			if (OnImageRequested != null)
+			{
+				FLink.Edit();
+				OnImageRequested();
+			}
+		}   
+		
 		protected override void OnKeyDown(KeyEventArgs AArgs)
 		{
 			switch (AArgs.KeyData)
@@ -362,6 +374,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 						AArgs.Handled = true;
 					}
 					break;
+				case Keys.Delete:
+					FLink.Edit();
+					Image = null;
+					AArgs.Handled = true;
+					break;
 				case Keys.Control | Keys.H :
 				case Keys.Control | Keys.V :
 				case Keys.Control | Keys.X :
@@ -371,6 +388,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			base.OnKeyDown(AArgs);
 		}
 
+		const int WM_CONTEXTMENU = 0x007B;
 		protected override void WndProc(ref Message AMessage)
 		{
 			switch (AMessage.Msg)
@@ -378,10 +396,16 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				case NativeMethods.WM_CUT:
 				case NativeMethods.WM_PASTE:
 				case NativeMethods.WM_UNDO:
-				case NativeMethods.WM_CLEAR:
 					EnsureEdit();
 					break;
-			}
+				case NativeMethods.WM_CLEAR:
+					FLink.Edit();
+					Image = null;                  
+					break;   					
+				case NativeMethods.WM_CONTEXTMENU:
+					BuildContextMenu();
+					break;
+			}                         
 			base.WndProc(ref AMessage);	
 		}
 
@@ -389,6 +413,178 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			if (AField == DataField)
 				Focus();
+		}
+
+		#region Menu
+
+		private void BuildContextMenu()
+		{
+			if (ContextMenu == null)
+			{
+				ContextMenu = new ContextMenu();
+
+				InternalBuildContextMenu();
+
+				UpdateMenuItems();
+			}
+		}
+
+		public event EventHandler OnBuildContextMenu;
+
+		private void SendWndProc(int NativeMethod)
+		{             
+			Message LMessage = new Message();
+			LMessage.Msg = NativeMethod;
+			WndProc(ref LMessage);
+		}
+
+		protected void PasteClicked(object ASender, EventArgs AArgs)
+		{
+			SendWndProc(NativeMethods.WM_PASTE);
+		}
+
+		protected void CopyClicked(object ASender, EventArgs AArgs)
+		{
+			SendWndProc(NativeMethods.WM_COPY);
+		}
+
+		protected void ClearClicked(object ASender, EventArgs AArgs)
+		{
+			SendWndProc(NativeMethods.WM_CLEAR);
+		}
+
+		protected void LoadClicked(object sender, EventArgs AArgs)
+		{               
+			OpenFileDialog LOpenFileDialog = new OpenFileDialog();
+			LOpenFileDialog.Filter = Strings.Get("DBImageAspect.OpenFileDialog.Filter"); 
+			if (LOpenFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				using (FileStream LImageFile = new FileStream(LOpenFileDialog.FileName, FileMode.Open, FileAccess.Read))
+				{
+					MemoryStream LCopy = new MemoryStream();
+					StreamUtility.CopyStream(LImageFile, LCopy);
+					LCopy.Position = 0;
+					Image = System.Drawing.Image.FromStream(LCopy);
+				}
+			}                                                           
+		}
+
+		protected void SaveAsClicked(object sender, EventArgs AArgs)
+		{
+			SaveFileDialog LSaveFileDialog = new SaveFileDialog();
+			LSaveFileDialog.Filter = Strings.Get("DBImageAspect.SaveFileDialog.Filter");
+			if (LSaveFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				Image.Save(LSaveFileDialog.FileName);
+			} 
+		}
+
+		protected virtual void InternalBuildContextMenu()
+		{
+			DBImageAspectMenuItem LItem;
+
+			// Capture...
+			LItem = new DBImageAspectMenuItem(this, false, true);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.CaptureText");
+			LItem.Click += new EventHandler(CaptureClicked);
+			LItem.DefaultItem = true;
+			ContextMenu.MenuItems.Add(LItem);
+
+			// -
+			ContextMenu.MenuItems.Add(new MenuItem("-"));
+
+			//  Load...
+			LItem = new DBImageAspectMenuItem(this, false, true);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.LoadText");
+			LItem.Click += new EventHandler(LoadClicked);	 			
+			ContextMenu.MenuItems.Add(LItem); 
+		   
+			// Save As...
+			LItem = new DBImageAspectMenuItem(this, true, false);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.SaveAsText");
+			LItem.Click += new EventHandler(SaveAsClicked);
+			ContextMenu.MenuItems.Add(LItem);
+
+			// -
+			ContextMenu.MenuItems.Add(new MenuItem("-"));   
+					
+			// Copy
+			LItem = new DBImageAspectMenuItem(this, true, false);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.CopyText");
+			LItem.Click += new EventHandler(CopyClicked);
+			LItem.Shortcut = Shortcut.CtrlC;
+			ContextMenu.MenuItems.Add(LItem);
+
+			// Paste
+			LItem = new DBImageAspectMenuItem(this, false, true);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.PasteText");
+			LItem.Click += new EventHandler(PasteClicked);
+			LItem.Shortcut = Shortcut.CtrlV;
+			ContextMenu.MenuItems.Add(LItem);
+
+			// Clear
+			LItem = new DBImageAspectMenuItem(this, true, false);
+			LItem.Text = Strings.Get("DBImageAspect.Menu.ClearText");
+			LItem.Click += new EventHandler(ClearClicked);
+			ContextMenu.MenuItems.Add(LItem);
+
+			if (OnBuildContextMenu != null)
+				OnBuildContextMenu(this, EventArgs.Empty);
+		}
+
+		public event EventHandler OnUpdateMenuItems;
+
+		private void UpdateMenuItems()
+		{
+			if (ContextMenu != null)
+			{
+				foreach (MenuItem LItem in ContextMenu.MenuItems)
+				{
+					DBImageAspectMenuItem LFileItem = LItem as DBImageAspectMenuItem;
+					if (LFileItem != null)
+						LFileItem.UpdateEnabled();
+				}
+
+				if (OnUpdateMenuItems != null)
+					OnUpdateMenuItems(this, EventArgs.Empty);
+			}
+		}
+
+		#endregion           
+	}
+
+	public class DBImageAspectMenuItem : MenuItem
+	{
+		public DBImageAspectMenuItem(DBImageAspect AFileControl, bool AReadsData, bool AWritesData)
+		{
+			FFileControl = AFileControl;
+			FReadsData = AReadsData;
+			FWritesData = AWritesData;
+		}
+
+		private DBImageAspect FFileControl;
+		public DBImageAspect FileControl
+		{
+			get { return FFileControl; }
+		}
+
+		private bool FReadsData;
+		public bool ReadsData
+		{
+			get { return FReadsData; }
+		}
+
+		private bool FWritesData;
+		public bool WritesData
+		{
+			get { return FWritesData; }
+		}
+
+		internal protected virtual void UpdateEnabled()
+		{
+			Enabled =
+				(!FWritesData || !FFileControl.ReadOnly)
+					&& (!FReadsData || FFileControl.HasValue);
 		}
 	}
 }

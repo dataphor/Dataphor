@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 15:35:55</date> 
+	 </sect2info> 
+	 <title>System.IsLeapYear</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator specifies whether or not the specified year is a leap
+		  year. Leap years are years that are divisible by 4, unless they are divisible
+		  by 100. If a year is divisible by 100 then it is only a leap year if it is
+		  divisible by 400.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { IsLeapYear(2000) Leap };</programlisting> 
+		  <programlisting>Leap
+----
+True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

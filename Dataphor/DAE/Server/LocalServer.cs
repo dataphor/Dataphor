@@ -803,7 +803,8 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			if (FInternalProcess != null)
 			{
-				FSession.FInternalSession.StopProcess(FInternalProcess);
+				if ((FSession != null) && (FSession.FInternalSession != null))
+					FSession.FInternalSession.StopProcess(FInternalProcess);
 				FInternalProcess = null;
 			}
 			

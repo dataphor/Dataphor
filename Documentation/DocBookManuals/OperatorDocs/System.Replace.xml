@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, August 26, 2005 5:12:36 PM</date> 
+	 </sect2info> 
+	 <title>System.Replace</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>Replace</symbol> replaces all occurrences of
+		  <symbol>AOldString</symbol> with <symbol>ANewString</symbol> in
+		  <symbol>AString</symbol>. <symbol>AOldString</symbol> and
+		  <symbol>ANewString</symbol> are not required to be the same length. If
+		  <symbol>AOldString</symbol> is an empty string, <symbol>Replace</symbol> always
+		  returns <symbol>AString</symbol> (the empty string is not found in any
+		  string).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select "Let's play leap bunny.".Replace("bunny","frog");</programlisting> 
+		  <programlisting>Let's play leap frog.</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

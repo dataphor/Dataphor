@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:10:51</date> 
+	 </sect2info> 
+	 <title>System.DropRight</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator deletes the specified right.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.GrantRightToGroup.html">System.GrantRightToGroup</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.GroupHasRight.html">System.GroupHasRight</ulink>
+<ulink url="SLRSystem.GroupRightIsInherited.html">System.GroupRightIsInherited</ulink>
+<ulink url="SLRSystem.RevertRightForGroup.html">System.RevertRightForGroup</ulink>
+<ulink url="SLRSystem.RevertRightForRole.html">System.RevertRightForRole</ulink>
+<ulink url="SLRSystem.RevertRightForUser.html">System.RevertRightForUser</ulink> 
+<ulink url="SLRSystem.RevokeRightFromGroup.html">System.RevokeRightFromGroup</ulink>
+<ulink url="SLRSystem.RevokeRightFromRole.html">System.RevokeRightFromRole</ulink>
+<ulink url="SLRSystem.RevokeRightFromUser.html">System.RevokeRightFromUser</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.RoleHasRight.html">System.RoleHasRight</ulink>
+<ulink url="SLRSystem.UserHasRight.html">System.UserHasRight</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

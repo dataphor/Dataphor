@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="../../../../Program%20Files/SoftQuad/XMetaL%203/Display/DocBookx.css" ?>
+<!DOCTYPE set PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "../../../../Program%20Files/SoftQuad/XMetaL%203/Rules/DocBookx.dtd" [
+<!ENTITY ADOConnectionLibraryReference SYSTEM "ADOConnectionLibraryReference.xml">
+<!ENTITY ConnectionLibraryReference SYSTEM "ConnectionLibraryReference.xml">
+<!ENTITY D4LanguageGuide SYSTEM "D4LanguageGuide.xml">
+<!ENTITY D4LexerBNF SYSTEM "D4LexerBNF.xml">
+<!ENTITY D4ParserBNF SYSTEM "D4ParserBNF.xml">
+<!ENTITY DAE SYSTEM "DAE.xml">
+<!ENTITY DAEClient SYSTEM "DaeClient.xml">
+<!ENTITY DAEClientControls SYSTEM "DaeClientControls.xml">
+<!ENTITY DAEClientProvider SYSTEM "DaeClientProvider.xml">
+<!ENTITY DAEServer SYSTEM "DaeServer.xml">
+<!ENTITY DB2DeviceReference SYSTEM "DB2DeviceReference.xml">
+<!ENTITY DILReference SYSTEM "DILReference.xml">
+<!ENTITY DevGuideIntro SYSTEM "DevGuideIntroduction.xml">
+<!ENTITY DevGuidePart1 SYSTEM "DevGuidePart1.xml">
+<!ENTITY DevGuidePart2 SYSTEM "DevGuidePart2.xml">
+<!ENTITY DevGuidePart3 SYSTEM "DevGuidePart3.xml">
+<!ENTITY DevGuidePart4 SYSTEM "DevGuidePart4.xml">
+<!ENTITY FrontendReference SYSTEM "FrontEndReference.xml">
+<!ENTITY Glossary SYSTEM "DataphorGlossary.xml">
+<!ENTITY MSOracleConnectionLibraryReference SYSTEM "MSOracleConnectionLibraryReference.xml">
+<!ENTITY MSSQLDeviceLibraryReferenceChapter SYSTEM "MSSQLDeviceReference.xml">
+<!ENTITY ODBCConnectionLibraryReference SYSTEM "ODBCConnectionLibraryReference.xml">
+<!ENTITY OracleDeviceReference SYSTEM "OracleDeviceReference.xml">
+<!ENTITY RealSQL SYSTEM "RealSQL.xml">
+<!ENTITY RealSQLBNF SYSTEM "RealSQLBNF.xml">
+<!ENTITY RealSQLLanguageGuide SYSTEM "RealSQLLanguageGuide.xml">
+<!ENTITY ReferenceIntroduction SYSTEM "ReferenceIntroduction.xml">
+<!ENTITY SASDeviceReference SYSTEM "SASDeviceReference.xml">
+<!ENTITY SQLDeviceReference SYSTEM "SQLDeviceReference.xml">
+<!ENTITY SecurityReference SYSTEM "SecurityLibraryReference.xml">
+<!ENTITY SimpleDeviceReference SYSTEM "SimpleDeviceReference.xml">
+<!ENTITY SystemInternetReference SYSTEM "SystemInternetLibraryReference.xml">
+<!ENTITY SystemLibraryReference SYSTEM "SystemLibrary.xml">
+<!ENTITY SystemLibraryReferenceChapter SYSTEM "SystemLibraryReference.xml">
+<!ENTITY SystemTables SYSTEM "SystemTables.xml">
+<!ENTITY TagsReference SYSTEM "TagsReference.xml">
+<!ENTITY Tutorial1 SYSTEM "Tutorial1.xml">
+<!ENTITY UsersGuideIntro SYSTEM "UsersGuideIntroduction.xml">
+<!ENTITY UsersGuidePart1 SYSTEM "UsersGuidePart1.xml">
+]>
+<set id="DataphorSet">
+    <title>Dataphor Help</title>
+    <setinfo>
+        <copyright><year>2004</year><holder>Alphora</holder></copyright>
+    <abstract><para><inlinemediaobject><imageobject><imagedata fileref="images/dataphor.jpg" format="JPG" width="300" depth="116"/></imageobject></inlinemediaobject></para><para> <!--TODO: Revise this description-->The Alphora Dataphor Help Collection contains the
+					 documentation for the Alphora Dataphor and Tools which includes both the Alphora
+					 Dataphor Data Access Engine (DAE) and the Alphora Dataphoria. </para></abstract><date role="LastMod">Monday, May 17, 2004 2:57:37 PM</date></setinfo>
+    <book id="DataphorUsersGuide"> 
+		  <title>Dataphor User's Guide</title> 
+		  <bookinfo><abstract> 
+					 <para><mediaobject><imageobject><imagedata fileref="images/Dataphor Logo.gif" width="320" depth="66" scalefit="1"/></imageobject></mediaobject>
+						  
+						  </para> 
+					 <para><!--TODO: Revise this description-->The Dataphor User's Guide provides the reader with the
+						  information necessary to begin using Dataphor. The Guide provides an overview
+						  of the motivation behind Dataphor, introduces the Dataphor technology, then
+						  provides several tutorials.</para></abstract> 
+		  </bookinfo> <preface>
+    <title>Dataphor Users Guide</title>
+    <para><?xm-replace_text {Preface Para}?></para>
+</preface>&UsersGuideIntro; &UsersGuidePart1;<part>
+		<title>Tutorials</title>
+		<partintro><para><?xm-replace_text {Part introductory paragraph}?></para></partintro>
+		&Tutorial1;
+	</part>  &Glossary; 
+	 </book>
+	 <book id="DataphorDevelopersGuide"> 
+		  <title>Dataphor Developer's Guide</title> 
+		  <bookinfo><abstract> 
+					 <para><mediaobject><imageobject><imagedata width="320" depth="66" fileref="images/Dataphor Logo.gif" scalefit="1"/></imageobject></mediaobject>
+						  
+						  </para> 
+					 <para><!--TODO: Revise this description-->The Dataphor
+						  Developer's Guide provides detailed information relating to application
+						  development using Dataphor. It contains architectural material necessary to
+						  take full advantage of the capabilities of a Dataphor application. </para></abstract> 
+		  </bookinfo> <preface>
+        <title><?xm-replace_text {Preface Title}?></title>
+        <para><?xm-replace_text {Preface Para}?></para>
+    </preface>&DevGuideIntro;  &DevGuidePart1;&DevGuidePart2; 
+		   
+		   
+	 &DevGuidePart3;&DevGuidePart4;<part>
+  <title>Language Guides</title>
+  <partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  
+&D4LanguageGuide;&RealSQLLanguageGuide;</part></book>
+<book><title>Dataphor Reference</title><bookinfo><abstract> 
+					 <para><mediaobject><imageobject><imagedata width="320" depth="66" fileref="images/Dataphor Logo.gif" scalefit="1"/></imageobject></mediaobject>
+						  
+						  </para> 
+					 <para><!--TODO: Revise this description-->The Dataphor
+						  Reference provides detailed information about Dataphor internals. It contains detailed material necessary to
+						  take full advantage of the capabilities of Dataphor. </para></abstract> 
+		  </bookinfo><chapter>
+    <chapterinfo><date role="LastMod">Wednesday, April 21, 2004 3:36:51 PM</date></chapterinfo><title>Introduction</title>
+    <para><?xm-replace_text {Paragraph}?></para>
+</chapter><part>
+  <title>Language</title>
+  <partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  <chapter>
+	<title>D4 BNF Language Diagrams</title>
+	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+<sect1>
+  		<title>D4 Lexer BNF</title>
+  		<para><?xm-replace_text {Section Introductory Paragraph}?></para>
+  	&D4LexerBNF;</sect1><sect1>
+  		<title>D4 Parser BNF</title>
+  		<para><?xm-replace_text {Section Introductory Paragraph}?></para>
+  	&D4ParserBNF;</sect1></chapter>
+</part><part>
+  <title>Dataphor Controls</title>
+  <!--Review this introductory material. It was lifted directly from the old documentation.--><partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  &ReferenceIntroduction;<chapter>
+  	<title>Controls</title>
+  	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+  	<!--Review the generated DilRef document, specifically format compatibility with this document.-->&DILReference;
+  </chapter>
+</part><part>
+  <title>Tags</title>
+  <partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  <chapter>
+  	<title>Derivation</title>
+  	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+  	<sect1>
+  		<title><?xm-replace_text {Section Title}?></title>
+  		<para><?xm-replace_text {Section Introductory Paragraph}?></para>
+  	</sect1>
+  </chapter>
+&TagsReference;</part><part>
+  <title>Call Level Interface</title>
+  <partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  <chapter>
+  	<title>Data Access Engine</title>
+  	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+  	&DAE;
+  </chapter>
+</part><part>
+  <title>DAC</title>
+  <partintro><para><?xm-replace_text {Part Introductory Paragraph}?></para></partintro>
+  <chapter>
+  	<title>DAE Client</title>
+  	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+  	
+  &DAEClient;</chapter>
+</part><part>
+  <title>Libraries</title>
+  <partintro><para>This part contains the documentation for the standard libraries available to Dataphor users.</para></partintro>
+  &SecurityReference;&SystemLibraryReferenceChapter;&FrontendReference;&SystemInternetReference;&ConnectionLibraryReference;&ADOConnectionLibraryReference;&ODBCConnectionLibraryReference;&MSOracleConnectionLibraryReference;&SimpleDeviceReference;&SQLDeviceReference;&MSSQLDeviceLibraryReferenceChapter;&OracleDeviceReference;&DB2DeviceReference;&SASDeviceReference;</part></book></set>

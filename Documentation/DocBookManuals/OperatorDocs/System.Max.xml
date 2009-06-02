@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 15:12:42</date>
+	 </sect2info>
+	 <title>System.Max</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is an aggregate operator that returns the largest value
+		  in the specified expression. If there are no rows then the operator will return
+		  the smallest possible value for the particular datatype.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select Employee group add { Max(Name) MaxName };</programlisting> 
+		  <programlisting>MaxName 
+------- 
+Josh</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="D4LGMax.html">Max</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

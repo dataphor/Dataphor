@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<book id="DUG">
+    <title>Dataphor User's Guide</title>
+    <bookinfo>
+        <copyright><year>2004</year><holder>Alphora</holder></copyright>
+    <date role="LastMod">Wednesday, April 21, 2004 2:16:47 PM</date></bookinfo>
+    <preface>
+        <title>Dataphor Users Guide</title>
+        <para><?xm-replace_text {Preface Para}?></para>
+    </preface>
+    <chapter>
+        <title>Introduction</title>
+        <para><?xm-replace_text {Introduction Paragraph}?></para>
+    </chapter>
+    <part>
+        
+        <title>Overview</title>
+        <partintro>
+          <para><?xm-replace_text {Part Intro Paragraph}?></para>
+        </partintro>
+        <chapter>
+          <title>Background</title>
+          
+        <para><?xm-replace_text {Section Introductory Paragraph}?></para></chapter>
+    <chapter><title>Product Tour</title><para><?xm-replace_text {Section Introductory Paragraph}?></para><sect1><title>Architectural Overview</title><para><?xm-replace_text {Section Introductory Paragraph}?></para></sect1><sect1>
+  <title>Dataphor Data Access Engine</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Dataphoria</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Clients</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1></chapter><chapter>
+	<title>Environment</title>
+	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+<sect1>
+  <title>Introduction</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Aliases</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Dataphor Explorer</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Warnings And Errors</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Libraries</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Documents versus Files</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+<sect2>
+  <title>Document Types</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>Text/XML</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>D4/SQL</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>DFD/X</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2></sect1><sect1>
+  <title>Designers</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+<sect2>
+  <title>Text/XML Designers</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>D4/XML Designers</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>DFD/X Designers</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2></sect1><sect1>
+  <title>Schema</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+<sect2>
+  <title>Domains</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2></sect1><sect1>
+  <title>Applications</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1></chapter><chapter>
+	<title>Dataphor Applications</title>
+	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+<sect1>
+  <title>Introduction</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Running</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Clients</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1><sect1>
+  <title>Forms</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+<sect2>
+  <title>Modality</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2><sect2>
+  <title>Modes</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect2></sect1><sect1>
+  <title>User Interface Elements</title>
+  <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+</sect1></chapter></part>
+	<part>
+		<title>Tutorials</title>
+		<partintro><para><?xm-replace_text {Part introductory paragraph}?></para></partintro>
+		<chapter><title><?xm-replace_text {Chapter title}?></title>
+			<para><?xm-replace_text {Chapter introductory paragraph}?></para>
+			<sect1>
+				<title><?xm-replace_text {Section title}?></title>
+				<para><?xm-replace_text {Section introductory paragraph}?></para>
+			</sect1>
+		</chapter>
+	</part>
+	<part>
+		<title>Administration</title>
+		<partintro><para><?xm-replace_text {Part introductory paragraph}?></para></partintro>
+		<chapter><title>Security</title>
+			<para><?xm-replace_text {Chapter introductory paragraph}?></para>
+			
+		</chapter>
+	<chapter>
+	<title>Deployment</title>
+	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+</chapter><chapter>
+	<title>Troubleshooting</title>
+	<para><?xm-replace_text {Chapter Introductory Paragraph}?></para>
+</chapter></part>
+	&DataphorGlossary;
+</book>

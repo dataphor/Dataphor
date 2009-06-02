@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 08:39:51</date> 
+	 </sect2info> 
+	 <title>System.Execute</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator compiles and executes the code in the string specified.
+		  It is executed as if it were normal code. The string can be typed in as
+		  literals or built and placed as variable.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>Execute("select Employee;");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRFrontend.ExecuteScript.html">Frontend.ExecuteScript</ulink>
+<ulink url="SLRSystem.Evaluate.html">System.Evaluate</ulink>
+<ulink url="SLRSystem.ExecuteAs.html">System.ExecuteAs</ulink>
+<ulink url="SLRSystem.ExecuteAsync.html">System.ExecuteAsync</ulink>
+<ulink url="SLRSystem.ExecuteMultiple.html">System.ExecuteMultiple</ulink>
+<ulink url="SLRSystem.ExecuteWithTimeout.html">System.ExecuteWithTimeout</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

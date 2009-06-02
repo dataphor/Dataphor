@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 21, 2004 16:00:48</date> 
+	 </sect2info> 
+	 <title>System.GroupName</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.GroupName
+	like System.String
+	tags { Frontend.Title = "Group Name", Frontend.Width = "30"}
+	static tags { Catalog.Comment = "System String", Storage.Length = "255" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>GroupName</symbol> is the selector for the DataType and an
+		  operator.</para> 
+	 <para><symbol>GroupName</symbol> is the set of all possible group
+		  names.</para>
+	 <para>The <symbol>GroupName</symbol> operator returns the name of the Group
+		  that the current user is in.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>Select GroupName();</programlisting> 
+		  <programlisting>Admin</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 14:35:51</date> 
+	 </sect2info> 
+	 <title>System.SetUserGroup</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator places AUserId into AGroupName.
+		  <note>
+				<para>A user must be a member of one, and only one, group. </para>
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateGroup("Developers", "User");
+CreateUser("JS1", "John Smith", "Password");
+
+select Users where ID = "JS1";
+SetUserGroup("JS1", "Developers");
+select Users where ID = "JS1";
+
+DropUser("JS1");
+DropGroup("Developers");</programlisting> 
+		  <programlisting>ID  Name       Group_Name
+--- ---------- ----------
+JS1 John Smith User
+
+ID  Name       Group_Name
+--- ---------- ----------
+JS1 John Smith Developers</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

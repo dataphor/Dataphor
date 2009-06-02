@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 14, 2004 14:34:26</date> 
+	 </sect2info> 
+	 <title>System.DropGroup</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The specified group is deleted. A group must be empty to be
+		  dropped.</para> 
+	 <para>A group can not be dropped if it has any members. To remove all the
+		  users from a group, the users can be dropped or be set to another group.</para>
+	 
+	 <para> There are 3 system-defined security groups: System, Admin, and User.
+		  These system-defined groups cannot be dropped.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+<ulink url="SLRSystem.SetUserGroup.html">System.SetUserGroup</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

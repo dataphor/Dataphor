@@ -311,7 +311,8 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					if (ARequest.Result.IsNative)
 					{
-						SetImage(System.Drawing.Image.FromStream(new MemoryStream(ARequest.Result.AsByteArray, false)));
+						byte[] LResultBytes = ARequest.Result.AsByteArray;
+						SetImage(System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true)));
 					}
 					else
 					{

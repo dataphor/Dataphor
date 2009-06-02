@@ -138,6 +138,9 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Requests that any child data changes be posted. </summary>
 		void PostChanges();
 
+		/// <summary> Requests that any child data changes be posted. </summary>
+		void PostChangesIfModified();
+
 		/// <summary> Requests that any child data changes be canceled. </summary>
 		void CancelChanges();
 
@@ -203,7 +206,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <para>Default: (None)</para> </value>
 		IAction OnBeforeDeactivate { get; set; }
 
-		/// <summary> Dictionary of non-persisted miscellenious data. </summary>
+		/// <summary> Dictionary of non-persisted miscellenious data. </summary> <doc/>
 		System.Collections.Specialized.HybridDictionary UserState { get; }
 	}
 
@@ -242,6 +245,16 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value> <para>Boolean: True|False</para>
 		/// <para> Default: True </para></value>
 		bool Center { get; set; }
+
+		/// <summary> An object capable of loading an Image. </summary> <doc/>	 	
+		IImageSource ImageSource { get; } 		
+	}
+
+	public interface IImageSource 
+	{
+		System.IO.Stream Stream { get; }
+		void LoadImage();
+		bool Loading { get; }
 	}
 
 	/// <summary> Displays a read-only representation of a data field. </summary> <doc/>
@@ -446,6 +459,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// property of the parent interface (found in the Root Form Node)
 		/// will be used. </remarks>
 		IAction OnDoubleClick { get; set; }
+
+		/// <summary> Use Natural Width as the Max Width. </summary> <doc/>
+		/// <value> <para>Boolean</para>
+		/// <para>Default: (false)</para></value>  		
+		bool UseNaturalMaxWidth { get; set; }
+													
 	}
 
 	public interface ILookupElement : IElement, ILookup, IReadOnly
@@ -569,6 +588,15 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <value> <para>Integer: </para>
 		/// <para>Default: 200</para></value>
 		int AutoUpdateInterval { get; set; }
+
+		/// <summary> Determines the CheckState transition sequence for CheckBoxes with three-states. </summary> <doc/>
+		/// <example>Frontend.CheckBox.TrueFirst='true'
+		/// provides the checkstate sequence nil->true(checked)->false(unchecked). Frontend.CheckBox.TrueFirst='false' provides
+		/// the checkstate sequence nil->false(uncheck)->true(checked).
+		/// </example>
+		/// <value> <para>Boolean: </para>
+		/// <para>Default: true</para></value>
+		bool TrueFirst { get; set; }
 	}
 
 	/// <summary> Choice is a control which presents a pre-determined set of 
@@ -875,8 +903,6 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		// Published
 
-		// TODO: Element property bool Tabstop { get; set; }
-
 		/// <summary> Text which describes the element to the end-user. </summary> <doc/>
 		/// <value> <para>String </para>
 		/// <para>Default: empty string</para></value>
@@ -968,6 +994,12 @@ namespace Alphora.Dataphor.Frontend.Client
 		bool GetEnabled();
 
 		event EventHandler OnClosed;
+
+		// Published
+
+		/// <summary> If true, the accept/reject state is forced. </summary> <doc/>
+		/// <value>Default: False</value>
+		bool ForceAcceptReject { get; set; }
 	}
 
 	/// <summary> A Frame control embeds a user interface document as an element. </summary> <doc/>

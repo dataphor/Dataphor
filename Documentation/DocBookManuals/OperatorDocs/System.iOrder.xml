@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:42:57</date> 
+	 </sect2info> 
+	 <title>iOrder</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>order</symbol> is the parser recognized symbol for this
+		  operator. This clause modifies the ordering of rows in a cursor definition. The
+		  <symbol>order by</symbol> clause returns the list of rows ordered by the
+		  contents of the columns specified. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee order by { Name };</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+5  Jake 
+4  Jeff 
+6  Jeff 
+1  Joe  
+2  John 
+3  Josh</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOrderingTheResultSet.html">Ordering the Result Set</ulink>
+<ulink url="D4LGOrders.html">Orders</ulink>
+<ulink url="D4LGSelectStatement1.html">Select Statement</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -423,7 +423,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (IsPhysicalStreaming)
 				{
-					MemoryStream LStream = new MemoryStream(value, 0, value.Length, false);
+					MemoryStream LStream = new MemoryStream(value, 0, value.Length, false, true);
 					ReadFromPhysical(LStream);
 				}
 				else

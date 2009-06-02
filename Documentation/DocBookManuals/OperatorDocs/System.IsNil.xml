@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 08, 2004 08:54:03</date> 
+	 </sect2info> 
+	 <title>System.IsNil</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Does a check on the current value to see if it is a null value. Note
+		  that Nulls can not normally appear in Dataphor created tables, but can exist in
+		  presentations (including incompatible device tables), views, and other query
+		  type expressions.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee left join EmployeePhone 
+   add { not IsNil(Phone) HasPhone };</programlisting> 
+		  <programlisting>ID Name Phone      HasPhone
+-- ---- ---------- --------
+1  Joe  555-1000   True
+1  Joe  555-1234   True
+2  John 555-4321   True
+3  Josh &lt;no value&gt; False
+4  Jeff 555-4444   True
+5  Jake 555-5678   True
+6  Jeff &lt;no value&gt; False</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.IfNil.html">System.IfNil</ulink>
+<ulink url="DDGSpecialvalues.html">Special Values</ulink>
+<ulink url="D4LGLanguageTranslation.html">Language Translation</ulink>
+<ulink url="DDGP2SQLReader.html">SQLReader</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

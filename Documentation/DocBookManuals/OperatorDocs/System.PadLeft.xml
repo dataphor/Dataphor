@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 30, 2004 11:26:00</date> 
+	 </sect2info> 
+	 <title>System.PadLeft</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>PadLeft</symbol> right-aligns the characters in
+		  <symbol>AString</symbol>, padding on the left with spaces or optionally a
+		  specified Unicode character <symbol>APadChar</symbol>, for a specified total
+		  length <symbol>ATotalLength</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example
+	 { Before : String, After : String, key{} };
+begin
+	var LString : String;
+	LString := "Hello World";
+	insert table
+  { row 
+   { LString Before, LString.PadLeft(15, "*") After }
+  } into Example;
+end;
+select Example add { After.Length() AfterLength };
+drop table Example;</programlisting> 
+		  <programlisting>Before      After           AfterLength
+----------- --------------- -----------
+Hello World ****Hello World 15</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Trim.html">System.Trim</ulink>
+<ulink url="SLRSystem.TrimLeft.html">System.TrimLeft</ulink>
+<ulink url="SLRSystem.TrimRight.html">System.TrimRight</ulink>
+<ulink url="SLRSystem.PadRight.html">System.PadRight</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

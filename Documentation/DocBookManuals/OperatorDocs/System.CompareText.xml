@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 13:34:15</date> 
+	 </sect2info> 
+	 <title>System.CompareText</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator performs a case insensitive compare of case sensitive
+		  strings.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select
+	table { row { "Linter" Mixed, "LINTER" Caps } }
+	add { CompareText(Mixed, Caps) Compare };</programlisting> 
+		  <programlisting>Mixed  Caps   Compare 
+------ ------ ------- 
+Linter LINTER 0</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRiEqual.html">iEqual (<symbol>=</symbol>)</ulink>
+<ulink url="SLRiCompare.html">iCompare (<symbol>?=</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

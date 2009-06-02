@@ -1,0 +1,206 @@
+<sect2 id="FrontendServerRequestTypes"> 
+	 <title>Frontend Server Request Types</title> 
+	 <para> Learn about the Frontend Server request types. </para> 
+	 <para> The Frontend Server supports three request types: Derivation,
+		  Derivation Image, and Customization. The following sections describe the
+		  requests. </para> 
+	 <sect3> 
+		  <title>Derivation Request</title> 
+		  <para> The following table describes the parts of the Derivation
+				Request. <emphasis role="strong">Format:</emphasis> <symbol>&lt;derivation page
+				name&gt;?&lt;derivedpage arguments&gt;[&amp;&lt;frontend server
+				argument&gt;]</symbol> 
+				<informaltable> 
+					 <tgroup cols="2">
+						  <colspec colwidth="*" colname="col1" colnum="1"/>
+						  <colspec colwidth="*" colname="col2" colnum="2"/> 
+						  <thead> 
+								<row> 
+									 <entry colname="col1">Part</entry> 
+									 <entry colname="col2">Value / Description</entry> 
+								</row> 
+						  </thead> 
+						  <tbody> 
+								<row> 
+									 <entry colname="col1">derivation page name</entry> 
+									 <entry colname="col2"> 
+										  <para> One of the following:
+												derivation.add.dil, derivation.edit.dil, derivation.delete.dil,
+												derivation.browse.dil, derivation.view.dil, derivation.orderbrowse.dil,
+												derivation.reportbrowse.dil </para> 
+										  <para> Selects one of a number of defined
+												derivation pages. See 
+												<ulink url="DFRPageTypes.html" >Derivation Page Types</ulink> for details about each of the pages.
+												</para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">derivedpage arguments</entry>
+									 
+									 <entry colname="col2"> 
+										  <para> derivedpage arguments consist of a
+												series of ampersand ( &amp; ) delimited <symbol>name="value"</symbol> pairs.
+												Only one of the following arguments must be used: 
+												<itemizedlist mark="bullet"> 
+													 <listitem> 
+														  <para> <symbol>table</symbol> is
+																the name of the table used as the source of the derivedpage.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para> <symbol>query</symbol> is a
+																D4 expression</para> 
+													 </listitem> 
+												</itemizedlist> </para> 
+										  <para> The following list of arguments are
+												optional, but may all appear after the <symbol>table</symbol> or
+												<symbol>query</symbol>: 
+												<itemizedlist mark="bullet"> 
+													 <listitem> 
+														  <para> <symbol>mastertable</symbol>
+																is the name of the table used in a master - detail relationship.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>
+																<symbol>masterkeynames</symbol> is a comma separated list of columns which are
+																the keys of the master table.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>
+																<symbol>detailkeynames</symbol> is a comma separated list of column which are
+																the keys of the detail table.</para> 
+													 </listitem> 
+												</itemizedlist> </para> 
+										  <para> For more information on derivedpage
+												arguments see .... </para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">frontend server
+										  argument</entry> 
+									 <entry colname="col2"> 
+										  <para> noremap </para> 
+										  <para> Optional argument that requests that
+												server-side link mappings are not to cause client-side redirection to occur. If
+												this option is not set, the server may automatically respond with a client side
+												redirection caused by a link mapping entry. Link mapping entries allow pages
+												requests to be automatically redirected to another URI. </para> </entry> 
+								</row> 
+						  </tbody> 
+					 </tgroup> 
+				</informaltable> </para> 
+	 </sect3> 
+	 <sect3> 
+		  <title>Derivation Image Request</title> 
+		  <para> The Derivation Image returns the base image of the requested
+				type. The following table describes the <symbol>&lt;image name&gt;</symbol>
+				portion of the Derivation Image Request. <emphasis
+				role="strong">Format:</emphasis> <symbol>derivation.&lt;image
+				name&gt;.aspx</symbol> 
+				<informaltable> 
+					 <tgroup cols="2">
+						  <colspec colwidth="*" colname="col1" colnum="1"/>
+						  <colspec colwidth="*" colname="col2" colnum="2"/> 
+						  <thead> 
+								<row> 
+									 <entry colname="col1">image name</entry> 
+									 <entry colname="col2">description</entry> 
+								</row> 
+						  </thead> 
+						  <tbody> 
+								<row> 
+									 <entry colname="col1">add</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the add page image. </para>
+										  </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">delete</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the delete page image. </para>
+										  </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">detail</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the detail page image. </para>
+										  </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">edit</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the edit page image. </para>
+										  </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">offlight</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the </para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">onlight</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the </para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">view</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the view image. </para> </entry>
+									 
+								</row> 
+						  </tbody> 
+					 </tgroup> 
+				</informaltable> </para> 
+	 </sect3> 
+	 <sect3> 
+		  <title>Customization Request</title> 
+		  <para> Customization requests provide tools for customizing the pages
+				of an application, usually using the Designer. There are three requests in this
+				group: save, getraw, getlineage. The following table describes each request. 
+				<informaltable> 
+					 <tgroup cols="2">
+						  <colspec colwidth="*" colname="col1" colnum="1"/>
+						  <colspec colwidth="*" colname="col2" colnum="2"/> 
+						  <thead> 
+								<row> 
+									 <entry colname="col1">Request</entry> 
+									 <entry colname="col2">Description</entry> 
+								</row> 
+						  </thead> 
+						  <tbody> 
+								<row> 
+									 <entry colname="col1">save</entry> 
+									 <entry colname="col2"> 
+										  <para> Saves the data embedded in the request
+												http content body to a file specified by the uri parameter. </para> 
+										  <para> <emphasis
+												role="strong">Format:</emphasis> <symbol>customization.save.aspx?uri={&lt;dil
+												filename&gt; | &lt;dilx filename&gt;}[&amp;addlinkmap=&lt;linkmap source
+												filename&gt;]</symbol> where:<symbol>&lt;dil filename&gt;</symbol> is the save
+												to dil filename.<symbol>&lt;dil filename&gt;</symbol> is the save to dilx
+												filename.<symbol>&lt;linkmap source filename&gt;</symbol> is the linkmap
+												filename. </para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">getraw</entry> 
+									 <entry colname="col2"> 
+										  <para> Returns the pre-process DILX document.
+												Ordinary requests for DILX documents result in server-side generated DIL based
+												on the ancestry and content of the DILX document. </para> 
+										  <para> <emphasis
+												role="strong">Format:</emphasis> <symbol>customization.getraw.aspx?uri=&lt;dilx
+												filename&gt;</symbol> where:<symbol>&lt;dilx filename&gt;</symbol> is the
+												filename of an existing dilx page. </para> </entry> 
+								</row> 
+								<row> 
+									 <entry colname="col1">getlineage</entry> 
+									 <entry colname="col2"> 
+										  <para> Requires that the http content body be a
+												DILX document containing the desired ancestors. The ancestors are merged and
+												the response contains the resulting DIL content. </para> 
+										  <para> <emphasis
+												role="strong">Format:</emphasis> <symbol>customization.getlineage.aspx</symbol>
+												</para> </entry> 
+								</row> 
+						  </tbody> 
+					 </tgroup> 
+				</informaltable> </para> 
+	 </sect3>
+</sect2>

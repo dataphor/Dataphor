@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 15:31:06</date> 
+	 </sect2info> 
+	 <title>System.UserName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the UserName for the current Dataphor
+		  user.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select UserName();</programlisting> 
+		  <programlisting>Administrator</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+<ulink url="SLRSystem.UserID.html">System.UserID</ulink>
+<ulink url="DDGP1Session.html">Session</ulink>
+<ulink url="DDGP2SystemUsersandProcesses.html">System Users and Processes</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

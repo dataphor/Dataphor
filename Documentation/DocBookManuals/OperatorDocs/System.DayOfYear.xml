@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 20, 2004 09:33:56</date> 
+	 </sect2info> 
+	 <title>System.DayOfYear</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns an Integer that represents the day of the year of the
+		  specified DateTime. This will always be a number between 1 and 366.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { DateTime(2004,11,18).DayOfYear() Day };</programlisting> 
+		  <programlisting>Day
+---
+323</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="SLRSystem.DayOfWeek.html">System.DayOfWeek</ulink>
+<ulink url="SLRSystem.DayOfYear.html">System.DayOfYear</ulink>
+<ulink url="SLRSystem.DaysInMonth.html">System.DaysInMonth</ulink>
+<ulink url="SLRSystem.Date.html">System.Date</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

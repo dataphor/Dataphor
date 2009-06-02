@@ -347,3 +347,24 @@ function TrapKeyDown(btn, event)
 		}
 	}
 }
+
+// http://weblogs.asp.net/bstahlhood/
+// Form level enter key processing taken from ASP.NET js code
+var __defaultFired = false;
+function FireDefaultButton(event, target) 
+{    
+	if (!__defaultFired && event.keyCode == 13 && !(event.srcElement && (event.srcElement.tagName.toLowerCase() == "textarea"))) 
+	{        
+		var defaultButton = document.getElementById(target);        
+		if (defaultButton && typeof(defaultButton.click) != "undefined") 
+		{            
+			__defaultFired = true;            
+			defaultButton.click();            
+			event.cancelBubble = true;            
+			if (event.stopPropagation) 
+				event.stopPropagation();            
+			return false;        
+		}    
+	}    
+		return true;
+}

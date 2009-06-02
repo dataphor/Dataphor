@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 29, 2004 09:38:10</date> 
+	 </sect2info> 
+	 <title>System.IsUndefined</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para> <symbol>IsUndefined</symbol> returns <symbol>true</symbol> if the
+		  specified <symbol>VersionNumber</symbol>, <symbol>AValue</symbol>, is the
+		  special <symbol>VersionNumber</symbol> value
+		  <symbol>VersionNumberUndefined</symbol>. Otherwise false is returned.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example
+	 { VersNbr : VersionNumber, key{VersNbr} };
+begin
+	insert table { row { VersionNumberUndefined() VersNbr } } into Example;
+	insert table { row { "2.3.*".ToVersionNumber() VersNbr } } into Example;
+	insert table { row { "2.3.4.5".ToVersionNumber() VersNbr } } into Example;
+end;
+select Example
+	add { VersNbr.IsUndefined() UnDefined };
+drop table Example;</programlisting> 
+		  <programlisting>VersNbr UnDefined
+------- ---------
+*       True
+2.3.*   False
+2.3.4.5 False</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.VersionNumber.html">System.VersionNumber</ulink>
+<ulink url="SLRSystem.ToVersionNumber.html">System.ToVersionNumber</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

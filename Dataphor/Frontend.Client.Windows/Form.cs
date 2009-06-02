@@ -249,6 +249,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 		}
 
+		private bool FForceAcceptReject;
+		
+		public bool ForceAcceptReject
+		{
+			get { return FForceAcceptReject; }
+			set
+			{
+				if (FForceAcceptReject != value)
+				{
+					FForceAcceptReject = value;
+					AcceptRejectChanged();
+				}
+			}
+		}
+		
 		[Publish(PublishMethod.None)]
 		[Browsable(false)]
 		public bool IsAcceptReject
@@ -256,15 +271,17 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get
 			{
 				return 
-					(FMode != FormMode.None) ||
-					(
-						(MainSource != null) &&
-						(MainSource.DataView != null) &&
+					ForceAcceptReject 
+						|| (FMode != FormMode.None) 
+						|| 
 						(
-							(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
-							(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
-						)
-					);
+							(MainSource != null) &&
+							(MainSource.DataView != null) &&
+							(
+								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
+								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
+							)
+						);
 			}
 		}
 

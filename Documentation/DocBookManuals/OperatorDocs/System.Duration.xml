@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 09:16:27</date> 
+	 </sect2info> 
+	 <title>System.Duration</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is a TimeSpan operator that returns a positive TimeSpan value
+		  for the specified value. It is equivalent to the Absolute value
+		  (<symbol>System.Abs</symbol>) operator for number type values. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { Duration(-TimeSpan.Ticks(10000000)) Duration };</programlisting> 
+		  <programlisting>Duration
+--------
+1sec</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Abs.html">System.Abs</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

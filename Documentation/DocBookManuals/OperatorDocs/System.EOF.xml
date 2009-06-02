@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 09:20:48</date> 
+	 </sect2info> 
+	 <title>System.EOF</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Checks to see if the cursor specified is at the end of the current
+		  recordset. Returns true if the cursor is at the end, false if it is anywhere
+		  else. </para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var Output : String := "";
+	var TempCursor : cursor(table { ID: Integer, Name : String});
+	TempCursor := cursor(Employee capabilities { Updateable });
+	TempCursor.First();
+	TempCursor.Next();
+	while not TempCursor.EOF() do
+	begin
+		Output := Output + String.Unicode({13})+ Name from TempCursor.Select();
+		TempCursor.Next();
+	end;
+	raise Error(Output + Unicode({13}));
+end;</programlisting> 
+		  <programlisting>Joe
+John
+Josh
+Jeff
+Jake
+Jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BOF.html">System.BOF</ulink>
+<ulink url="D4LGUsingCursors.html">Cursor Operators</ulink>
+<ulink url="D4LGUsingCursors.html">Using Cursors</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

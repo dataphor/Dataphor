@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:37:04</date> 
+	 </sect2info> 
+	 <title>iModulus</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>mod</symbol>is the parser recognized symbol for this
+		  operator. This operator can be used on both integer types and fractional
+		  types.</para> 
+	 <para>The dividend is subtracted from the divisor until the divisor cannot
+		  be subtracted from what remains of the dividend without changing the sign of
+		  the remainder of the dividend. this operator returns what remains of the
+		  dividend. The number of times the divisor can be subtracted from the dividend
+		  can be accessed via the integer division (<symbol>iDiv</symbol>)
+		  operator.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {17 mod 5 IntDiv, 1.2 mod 0.35 DecIntDiv };</programlisting> 
+		  <programlisting>IntDiv DecIntDiv
+------ ---------
+2      0.15</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGArithmeticExpression.html">Arithmetic Expressions</ulink>
+<ulink url="SLRiDiv.html">iDiv (<symbol>div</symbol>)</ulink>
+<ulink url="SLRiDivision.html">iDivison (<symbol>/</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

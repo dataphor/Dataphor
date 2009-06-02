@@ -796,7 +796,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Streams.Conveyor LConveyor = DataType.GetConveyor(Process);
 						if (LConveyor.IsStreaming)
 						{
-							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false);
+							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false, true);
 							FValue = LConveyor.Read(LStream);
 							LStream.Close();
 						}
@@ -838,10 +838,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (IsNative)
 			{
-				if ((DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true))
-					return new MemoryStream((byte[])FValue, false);
-
-				return new MemoryStream((byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this), false);
+				byte[] LValue = 
+					(DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true)
+						? (byte[])FValue
+						: (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
+				return new MemoryStream(LValue, 0, LValue.Length, false, true);
 			}
 			return Process.Open(StreamID, LockMode.Exclusive);
 		}
@@ -1490,7 +1491,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						Streams.Conveyor LConveyor = DataType.GetConveyor(Process);
 						if (LConveyor.IsStreaming)
 						{
-							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false);
+							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false, true);
 							Value = LConveyor.Read(LStream);
 							LStream.Close();
 						}
@@ -1532,10 +1533,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (IsNative)
 			{
-				if ((DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true))
-					return new MemoryStream((byte[])Value, false);
-
-				return new MemoryStream((byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this), false);
+				byte[] LValue =
+					(DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true)
+						? (byte[])Value
+						: (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
+				return new MemoryStream(LValue, 0, LValue.Length, false, true);
 			}
 			return Process.Open(StreamID, LockMode.Exclusive);
 		}

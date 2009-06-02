@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:40:50</date> 
+	 </sect2info> 
+	 <title>System.Abs</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns the Absolute value (nonnegative) of a given value. If the
+		  given value is negative, then this function will return the opposite (additive
+		  inverse) of the given number.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select
+	TableDee add
+	{
+		Abs(3) Pos, // returns 3
+		Abs(-3.14159) Neg // returns 3.14159
+	};</programlisting> 
+		  <programlisting>Pos Neg
+--- -------
+3   3.14159</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Duration.html">System.Duration</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

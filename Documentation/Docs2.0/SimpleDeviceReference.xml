@@ -1,0 +1,336 @@
+<?xml version="1.0"?>
+<chapter id="DRSimpleDeviceLibrary"> 
+	 <chapterinfo><date role="LastMod">Friday, December 01, 2006 12:09:27
+				PM</date> 
+	 </chapterinfo> 
+	 <title> 
+		  <indexterm><primary>SimpleDevice</primary></indexterm> 
+		  <indexterm><primary>SimpleDevice Library</primary></indexterm> 
+		  <indexterm><primary>Libraries</primary><secondary>SimpleDevice</secondary></indexterm>
+		  SimpleDevice </title> 
+	 <para>This chapter provides reference material for working with and
+		  understanding the Dataphor SimpleDevice Library.</para> 
+	 <section id="DRSimpleDeviceLibrary-Definition"> 
+		  <title> 
+				<indexterm><primary>SimpleDevice
+						  Library</primary><secondary>Definition</secondary></indexterm> 
+				<indexterm><primary>Definitions</primary><secondary>SimpleDevice</secondary></indexterm>
+				Definition </title> 
+		  <para>The following information describes the definition of the
+				SimpleDevice library.</para> 
+		  <formalpara> 
+				<title>Version</title> 
+				<para><?DocLib D4ExpressionField Version Libraries where Name = "SimpleDevice"?></para>
+				
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryRequisites where Library_Name = "SimpleDevice"?>
+		  <formalpara> 
+				<title>Requisites</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry> 
+										  <entry colname="col2">Version</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field Required_Library_Name?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field Required_Library_Version?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara> <?DocLib D4ExpressionBlock row LibraryFiles where Library_Name = "SimpleDevice"?>
+		  <formalpara> 
+				<title>SimpleDevice Files</title> 
+				<para> 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colnum="1" colname="col1" colwidth="80*"/><colspec colnum="2"
+								colname="col2" colwidth="20*"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">Name</entry><entry
+										  colname="col2">Is Assembly</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1"><?DocLib D4Field FileName?></entry>
+										  
+										  <entry colname="col2"><?DocLib D4Field IsAssembly?></entry>
+										  
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </formalpara> 
+		  <bridgehead renderas="sect4">See Also</bridgehead> 
+		  <para><ulink url="DRSQLDeviceLibrary.html"
+				type="xref">SQLDevice</ulink> | 
+				<ulink url="DRMSSQLDeviceLibrary.html"
+				 type="xref">MSSQLDevice</ulink> | 
+				<ulink url="DROracleDevice.html" type="xref">OracleDevice</ulink> |
+				
+				<ulink url="DRDB2DeviceLibrary.html"
+				 type="xref">DB2Device</ulink></para> <?DocLib D4ExpressionBlock member RegisteredAssemblies where Library_Name = 'SimpleDevice' add { Name.SubString(0, Name.IndexOf(",")) SimpleName }?>
+		  <section id="DRSimpleDeviceLibrary-RegisteredAssemblies"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Registered Assemblies</secondary></indexterm>
+					 Registered Assemblies </title> 
+				<para>The following lists the assemblies registered in the
+					 SimpleDevice Library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </section> <?DocLib D4ExpressionBlock member RegisteredClasses where Library_Name = 'SimpleDevice' add { Name.SubString(Name.IndexOf('.') + 1) SimpleName }?>
+		  <section id="DRSimpleDeviceLibrary-RegisteredClasses"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Registered Classes</secondary></indexterm>
+					 Registered Classes </title> 
+				<para>The following lists the classes registered in the
+					 SimpleDevice library.</para> 
+				<para> 
+					 <simplelist columns="2"> 
+						  <member><?DocLib D4Field SimpleName?></member> 
+					 </simplelist> </para> 
+		  </section> 
+	 </section>
+	<!-- the below assumes a documentation database where the ObjectDocumentation table exists... -->
+<!--DocLib D4ExpressionIf TableDee add{ Count(Objects join ObjectDocumentation where Objects.Name = SimpleDevice and (TextType = "DocSettings" or TextType = "DocConnectivity" or TextType = "DocExample") ) > 0  -->
+<?DocLib D4ExpressionIf TableDee add{ 'True' Result} ?>
+	 <section id="DRSimpleDeviceLibrary-Documentation"> 
+		  <title>Documentation</title>
+		<!--This contains all the human-written documentation-->
+		  <para>Data stored using a memory device will be lost when the Dataphor
+				Server shuts down, but the table definitions will be kept and restored as part
+				of the catalog. This makes it useful for tasks such as development.</para> 
+		  <para>The simple device is the memory device with the added ability to
+				persist the data in files on the DataPhor Server local storage media. The
+				Simple Device, while it will persists the data, is intended for small amounts
+				data that does not require concurrent access.</para> 
+		  <section id="DRSimpleDeviceLibrary-Settings"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Settings</secondary></indexterm> 
+					 <indexterm><primary>Settings</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Settings </title> 
+				<bridgehead>Device Map Item Commalist</bridgehead> 
+				<para> The device map item commalist is valid, but not currently
+					 used in the Simple or Memory devices. The Simple and Memory devices only
+					 support indexed access to base table variables, but it supports all
+					 types.</para> 
+				<bridgehead>Reconciliation Mode Description</bridgehead> 
+				<para>The valid reconciliation modes are:</para> 
+				<itemizedlist> 
+					 <listitem> 
+						  <para><symbol>None</symbol></para> 
+						  <para>No reconciliation will be performed.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><symbol>Startup</symbol></para> 
+						  <para> Reconciliation will be performed on device
+								startup.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><symbol>Command</symbol></para> 
+						  <para> Reconciliation will be performed in response to each
+								DDL command.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><symbol>Automatic</symbol></para> 
+						  <para> Reconciliation will be performed when a catalog miss
+								occurs, and this device is the default device.</para> 
+					 </listitem> 
+				</itemizedlist> 
+				<bridgehead>Reconciliation Master</bridgehead> 
+				<para>The reconciliation master can be server, device, or both.
+					 Server indicates that the DAE contains the master copy of the catalog. Device
+					 indicates that the device is considered the master catalog, and both indicates
+					 that the catalogs should be reconciled from both directions.</para> 
+				<para> Reconciliation for a device proceeds as follows:</para> 
+				<para><simplelist> 
+						  <member>1. If the reconciliation master setting is server
+								or both, each table in the DAE catalog is reconciled against the device. If a
+								table does not exist in the device, it is created; otherwise, it is updated to
+								match the DAE.</member></simplelist></para> 
+				<para><simplelist> 
+						  <member>2. If the reconciliation master setting is device
+								or both, each table in the device catalog is reconciled against the DAE. If it
+								does not exist in the DAE, it is created; otherwise, it is updated to match the
+								device.</member></simplelist></para> 
+				<bridgehead>Attributes</bridgehead> 
+				<para>The attributes for the Simple Device are:</para> 
+				<itemizedlist> 
+					 <listitem> 
+						  <para><symbol>AutoSave</symbol> :
+								<symbol>Boolean</symbol></para> 
+						  <para><symbol>true</symbol> = every change to the table
+								will be saved immediately. (Default)</para> 
+						  <para><symbol>false</symbol> = changes are only saved when
+								<symbol>SaveTable</symbol> is called.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para><symbol>DirectoryName</symbol> :
+								<symbol>String</symbol></para> 
+						  <para>Specifies a directory for the data files created by
+								this device for storing the data. If the given path is not rooted, it is
+								interpreted as a sub-directory of the run-time directory of the Dataphor
+								Server. If DirectoryName is not specified at all, a directory named
+								<symbol>Data</symbol> will be created as a sub-directory of the run-time
+								directory of the Dataphor Server.</para> 
+						  <para>The data files are named LibraryName.TableName.dat 
+								<warning> 
+									 <para> Do not modify these files at all. Any
+										  changes made to these files outside of Dataphor will render the files unusable
+										  and/or the data unreliable.</para> 
+								</warning></para> 
+					 </listitem> 
+				</itemizedlist> 
+				<bridgehead>See Also</bridgehead> 
+				<para><ulink url="DRSimpleDeviceLibrary-Schema.html"
+					 type="link">Simple Device Operators</ulink> | 
+					 <ulink url="D4LGCatalogElements-Devices.html"
+					  type="olinka">Devices</ulink></para> 
+		  </section> 
+		  <section id="DRSimpleDeviceLibrary-Connectivity"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Connectivity</secondary></indexterm> 
+					 <indexterm><primary>Connectivity</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Connectivity </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+		  <section id="DRSimpleDeviceLibrary-Translation"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Translation</secondary></indexterm> 
+					 <indexterm><primary>Translations</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Translation </title> 
+				<para><?xm-replace_text {Section Introductory Paragraph}?></para> 
+		  </section> 
+		  <section id="DRSimpleDeviceLibrary-Example"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Example</secondary></indexterm> 
+					 <indexterm><primary>Examples</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Example </title> 
+				<para> 
+					 <programlisting>create device DataDevice
+ reconciliation { mode = { Command }, master = device }
+ class "SimpleDevice"
+  attributes
+  {
+   "DirectoryName" = "c:\Data",
+   "AutoSave" = "true"
+  };
+</programlisting></para> 
+		  </section> 
+	 </section>
+	<!--DocLib D4ExpressionIf TableDee add{  Result} --><!-- todo: figure out how to skip this section -->
+	 <section id="DRSimpleDeviceLibrary-Schema"> 
+		  <title> 
+				<indexterm><primary>SimpleDevice
+						  Library</primary><secondary>Schema</secondary></indexterm> 
+				<indexterm><primary>Schema</primary><secondary>SimpleDevice</secondary></indexterm>
+				Schema </title>
+		<!--This contains forms and everything else extracted from the catalog-->
+		  <para>The following sections list the schema elements defined in the
+				SimpleDevice library.</para> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "SimpleDevice" and Type_ID = 'dfd'?>
+		  <section id="DRSimpleDeviceLibrary-Schema-Forms"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Forms</secondary></indexterm> 
+					 <indexterm><primary>Forms</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Forms </title> 
+				<para>The following lists the forms defined in the SimpleDevice
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Documents where Library_Name = "SimpleDevice" and Type_ID = 'dfdx'?>
+		  <section id="DRSimpleDeviceLibrary-Schema-CustomizedForms"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Customized Forms</secondary></indexterm> 
+					 <indexterm><primary>Customized
+								Forms</primary><secondary>SimpleDevice</secondary></indexterm> Customized Forms
+					 </title> 
+				<para>The following lists the forms defined in the SimpleDevice
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Roles where 'SimpleDevice.'.Pos(Name) = 0?>
+		  <section id="DRSimpleDeviceLibrary-Schema-Roles"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Roles</secondary></indexterm> 
+					 <indexterm><primary>Roles</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Roles </title> 
+				<para>The following lists the roles defined in the SimpleDevice
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock listitem Devices where 'SimpleDevice.'.Pos(Name) = 0?>
+		  <section id="DRSimpleDeviceLibrary-Schema-Devices"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Devices</secondary></indexterm> 
+					 <indexterm><primary>Devices</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Devices </title> 
+				<para>The following lists the devices defined in the SimpleDevice
+					 library.</para> 
+				<para> 
+					 <itemizedlist> 
+						  <listitem> 
+								<para><?DocLib D4Field Name?></para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </section> <?DocLib D4ExpressionBlock section ScalarTypes where Name.StartsWith("SimpleDevice.") add { ObjectMetaData(Name, "Catalog.Comment", System.String(Name)) Comment, Name.SubString(Name.IndexOf('.') + 1) SimpleName }?>
+		  <section id="DRSimpleDeviceLibrary-Schema-Types"> 
+				<title> 
+					 <indexterm><primary>SimpleDevice
+								Library</primary><secondary>Types</secondary></indexterm> 
+					 <indexterm><primary>Types</primary><secondary>SimpleDevice</secondary></indexterm>
+					 Types </title> 
+				<para>The following sections describe the types declared in the
+					 System Library.</para> 
+				<section> 
+					 <title> 
+						  <indexterm><primary>SimpleDevice
+									 Library</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm>
+						  
+						  <indexterm><primary><?DocLib D4Field Name?></primary></indexterm>
+						  
+						  <indexterm><primary>Types</primary><secondary><?DocLib D4Field SimpleName?></secondary></indexterm>
+						  Type: <?DocLib D4Field SimpleName?>
+					 </title> 
+					 <para><?xm-replace_text {Section Introductory Paragraph}?></para>
+					 
+					 <para><?DocLib D4Field Comment?></para> 
+				</section> 
+		  </section>
+		<!--The following DocLib instruction includes the whole section level data of the System Operators-->
+<?DocLib ExtDoc outer droptags="sectioninfo" c:\src\Alphora\Docs\Docs2.0\SimpleDeviceOperators.xml?>
+	 </section>
+</chapter>

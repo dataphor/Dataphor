@@ -1,0 +1,796 @@
+<?xml version="1.0"?>
+<appendix> 
+	 <appendixinfo> 
+		  <date role="LastMod">Saturday, March 02, 2002 2:13:37 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 3:13:01 PM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+				<revision><revnumber>2</revnumber><date>5/21/2002</date> 
+					 <revdescription> 
+						  <para>changed to an appendix</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </appendixinfo> 
+	 <title>Appendix A - File Structures</title> 
+	 <para>This appendix outlines the various file formats used in the different
+		  components of the Dataphor product.</para> 
+	 <sect1 id="DataphorConfigFiles"> 
+		  <sect1info> 
+				<revhistory> 
+					 <revision> 
+						  <revnumber>1</revnumber> 
+						  <date>May 28, 2002 9:33:09 AM MDT</date> 
+						  <revdescription> 
+								<para>DXC to DocBook</para> 
+						  </revdescription> 
+					 </revision> 
+				</revhistory> 
+				<keywordset> 
+					 <keyword>File Extensions</keyword> 
+					 <keyword>Configuration files</keyword> 
+				</keywordset> 
+		  </sect1info> 
+		  <title>Dataphor File Structures</title> 
+		  <para> The several sample applications contain files which contain
+				comments about structure and function. Look at the files in the
+				<symbol>ReferenceApplication</symbol>, <symbol>IssueTracker</symbol>, and
+				<symbol>Pubs</symbol> for details of structure and function of each file type.
+				</para> 
+		  <sect2> 
+				<title>File Extensions</title> 
+				<para> Dataphor uses the following file extensions: 
+					 <informaltable> 
+						  <tgroup cols="2">
+								<colspec colwidth="*" colname="col1" colnum="1"/>
+								<colspec colwidth="*" colname="col2" colnum="2"/> 
+								<thead> 
+									 <row> 
+										  <entry colname="col1">File extension</entry> 
+										  <entry colname="col2">Description</entry> 
+									 </row> 
+								</thead> 
+								<tbody> 
+									 <row> 
+										  <entry colname="col1">.D4</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFDAEScript">Dataphor DAE D4 Script</link> </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dft</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFFrontendTheme">Dataphor Frontend Theme</link> </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dfs</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFFrontendSession">Dataphor Frontend Session</link> </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.d4c</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFCatalogFormat">Dataphor DAE Catalog</link> </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.config</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFConfigFormat">Configuration File</link> </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dnt</entry> 
+										  <entry colname="col2"> 
+												<para> 
+													 <link role="cref"
+													  linkend="DCFNodeTypesDnt">Dataphor Frontend Node Type Table</link> </para>
+												</entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dfi</entry> 
+										  <entry colname="col2"> 
+												<para> Used by the windows client cache and
+													 the default customization engine to store surrogate mappings to files. The
+													 files are all named unique identifiers, while the "mapping" from a longer
+													 string key to the file names is contained in this index file. </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dfc</entry> 
+										  <entry colname="col2"> 
+												<para> Dataphor Frontend client cache data
+													 file. </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dil</entry> 
+										  <entry colname="col2"> 
+												<para> Dataphor Interface Language file.
+													 </para> </entry> 
+									 </row> 
+									 <row> 
+										  <entry colname="col1">.dilx</entry> 
+										  <entry colname="col2"> 
+												<para> Dataphor Interface Language eXtended
+													 file. </para> </entry> 
+									 </row> 
+								</tbody> 
+						  </tgroup> 
+					 </informaltable> </para> 
+		  </sect2> 
+		  <sect2 id="DUGDAEServerServicesFiles"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>DAE Server Services Files</title> 
+				<para>Files used to affect the behavior of the DAE Server
+					 Services.</para> 
+				<sect3 id="DCFCatalog"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Catalog</title> 
+					 <para>This file is used by the DAE to persist catalog
+						  information. When the DAE starts, it restores catalog from this file.</para> 
+					 <para>Located in the "user's" directory.</para> 
+				</sect3> 
+				<sect3 id="DCFDaeServiceConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>DAE Service Config</title> 
+					 <para>Settings which affect the behavior of the DAE
+						  Service.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the "all users" directory.</para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>See Also</title> 
+						  <para> 
+								<link role="cref" linkend="DCFConfigFormat">Config File
+									 Format</link> </para> 
+					 </sect4> 
+				</sect3> 
+		  </sect2> 
+		  <sect2 id="DUGDataphoriaFiles"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>Dataphoria</title> 
+				<para>Files used to affect the behavior of Dataphoria.</para> 
+				<sect3 id="DCFDataphoriaConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Dataphoria ConFig</title> 
+					 <para>Settings which affect the behavior of Dataphoria are
+						  stored in this file.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the "all users" directory.</para> 
+						  <para> The settings stored here are accessible from
+								Dataphoria. </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>See Also</title> 
+						  <para> 
+								<link role="cref"
+								 linkend="DCFConfigFormat">Configuration File Format</link> </para> 
+					 </sect4> 
+				</sect3> 
+				<sect3 id="DCFDataphoriaConnectionsConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Dataphoria Connections Config</title> 
+					 <para/> 
+						  <sect4> 
+								<title>Settings</title> 
+								<para>Located in the "all users" directory.</para> 
+								<para> The settings stored here are accessible from
+									 Dataphoria. </para> 
+						  </sect4> 
+				</sect3> 
+		  </sect2> 
+		  <sect2 id="DUGWebClientFiles"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>Dataphor Web Client</title> 
+				<para>Files used to affect the behavior of a Dataphor Web
+					 Client.</para> 
+				<sect3 id="DCFWebClientConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Web Client Config</title> 
+					 <para>Settings which affect the behavior of the Web
+						  Client.</para> 
+					 <sect4> 
+						  <title>Remarks</title> 
+						  <para>Contains only the SessionURL.</para> 
+						  <para> Located in the "all users" directory. </para> 
+					 </sect4> 
+				</sect3> 
+		  </sect2> 
+		  <sect2 id="DUGWindowsClientFiles"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>Dataphor Windows Client</title> 
+				<para>Files used to affect the behavior of a Dataphor Windows
+					 Client.</para> 
+				<sect3 id="DCFWindowsClientConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Windows Client Config</title> 
+					 <para>Settings which affect the behavior of the Windows Client
+						  are stored in this file.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the "all users" directory.</para> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="2">
+										  <colspec colwidth="*" colname="col1" colnum="1"/>
+										  <colspec colwidth="*" colname="col2" colnum="2"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Setting
+														  name</entry> 
+													 <entry
+													  colname="col2">Description</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry
+													  colname="col1">SessionURI</entry> 
+													 <entry colname="col2"> 
+														  <para> URI of the file containing
+																the initial settings for the session. See the description of the dfs file for
+																more information. </para> 
+														  <para> Default value is
+																<symbol>http://localhost/</symbol> </para> </entry> 
+												</row> 
+												<row> 
+													 <entry
+													  colname="col1">NodeTypeFilename</entry> 
+													 <entry colname="col2"> 
+														  <para> Name of the filename used to
+																map Frontend Nodes to the C# classes that implement them. </para> 
+														  <para> Default value is
+																<symbol>nodetypes.dnt</symbol>. The node types file is assumed to be in the
+																same directory as the application. </para> </entry> 
+												</row> 
+												<row> 
+													 <entry
+													  colname="col1">ThemeFileName</entry> 
+													 <entry colname="col2"> 
+														  <para> Name of the filename used to
+																store theme settings. </para> 
+														  <para> Default value is
+																<symbol>default.dft</symbol>. </para> </entry> 
+												</row> 
+												<row> 
+													 <entry
+													  colname="col1">RequestTimeout</entry> 
+													 <entry colname="col2"> 
+														  <para> Number of milliseconds to
+																wait for a reply before timing out. </para> 
+														  <para> Default value is 40000 which
+																is 40 seconds. </para> </entry> 
+												</row> 
+												<row> 
+													 <entry
+													  colname="col1">CachingOption</entry> 
+													 <entry colname="col2"> 
+														  <para> One of: disabled, enabled,
+																<emphasis role="strong">auto</emphasis> </para> 
+														  <para> Controls client-side
+																caching. <symbol>auto</symbol> is the default value in which the client detects
+																the bandwidth of the connection to the server and enables caching on low
+																bandwidth connections. </para> </entry> 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>See Also</title> 
+						  <para> 
+								<link role="cref"
+								 linkend="DCFConfigFormat">Configuration File Format</link> </para> 
+					 </sect4> 
+				</sect3> 
+		  </sect2> 
+		  <sect2 id="DUGFrontendAppFiles"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>Frontend Application</title> 
+				<para>Files used to affect the behavior of the Dataphor
+					 Frontend.</para> 
+				<sect3 id="DCFWebConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Web Config</title> 
+					 <para>Settings which affect the behavior of a Dataphor Web
+						  Client are stored in this file.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the application's directory.</para> 
+						  <para> Read the comments in web.config located in the
+								Frontend.ReferenceApplication for details. </para> 
+					 </sect4> 
+				</sect3> 
+				<sect3 id="DCFFrontendConfig"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Frontend Config</title> 
+					 <para>Settings which affect the behavior of the Dataphor
+						  Frontend are stored in this file.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the application's directory.</para> 
+						  <para> Read the comments in frontend.config located in the
+								Frontend.ReferenceApplication for details. </para> 
+					 </sect4> 
+				</sect3> 
+				<sect3 id="DCFMainDfs"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Main dfs</title> 
+					 <para>Settings which affect the startup behavior of Dataphor
+						  are stored in this file.</para> 
+					 <sect4> 
+						  <title>Settings</title> 
+						  <para>Located in the application's directory.</para> 
+						  <para> Read the comments in the main.dfs located in the
+								Frontend.ReferenceApplication for details. </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>See Also</title> 
+						  <para> 
+								<link role="cref" linkend="DCFFrontendSession">Frontend
+									 Session file format</link> </para> 
+					 </sect4> 
+				</sect3> 
+		  </sect2> 
+		  <sect2 id="DataphorConfigFilesGeneric"> 
+				<sect2info> 
+					 <revhistory> 
+						  <revision> 
+								<revnumber>1</revnumber> 
+								<date>May 28, 2002 9:33:09 AM MDT</date> 
+								<revdescription> 
+									 <para>DXC to DocBook</para> 
+								</revdescription> 
+						  </revision> 
+					 </revhistory> 
+				</sect2info> 
+				<title>Generic Dataphor File Types</title> 
+				<para>Dataphor uses several different file types. Learn what they
+					 are and what they contain in this section.</para> 
+				<sect3 id="DCFFrontendSession"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Frontend Session Format</title> 
+					 <para>Contains information about a Frontend session.</para> 
+					 <sect4> 
+						  <title/> 
+								<para> See main.dfs located in the
+									 Frontend.ReferenceApplication for details. </para> 
+					 </sect4> 
+				</sect3> 
+				<sect3 id="DCFFrontendTheme"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Frontend Theme Format</title> 
+					 <para>Contains a BOP serialization of the information that
+						  defines a Frontend theme.</para> 
+				</sect3> 
+				<sect3 id="DCFDAEScript"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>DAE Script Format</title> 
+					 <para>Contains a runnable D4 script.</para> 
+					 <bridgehead renderas="sect3">See Also</bridgehead>
+						  <para> 
+								<ulink
+								url="D4LGD4LanguageGuide.html">Dataphor
+									 Language Reference</ulink></para> 
+				</sect3> 
+				<sect3 id="DCFNodeTypesDnt"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Nodetypes File Format</title> 
+					 <para>Mapping of Frontend Nodes to C# implementor
+						  classes.</para> 
+					 <sect4> 
+						  <title>Elements</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="2">
+										  <colspec colwidth="*" colname="col1" colnum="1"/>
+										  <colspec colwidth="*" colname="col2" colnum="2"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Element
+														  name</entry> 
+													 <entry
+													 colname="col2">Description</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry colname="col1">nodetypes</entry>
+													 
+													 <entry colname="col2"> 
+														  <para> Contains one or more
+																<symbol>namespace</symbol>s and declares the nodetypes namespace. </para>
+														  </entry> 
+												</row> 
+												<row> 
+													 <entry colname="col1">namespace</entry>
+													 
+													 <entry colname="col2"> 
+														  <para> Contains one or more
+																<symbol>nodetype</symbol>s. Declares the name of the namespace. Declares the
+																name of the assembly implementing the namespace. </para> </entry> 
+												</row> 
+												<row> 
+													 <entry colname="col1">nodetype</entry> 
+													 <entry colname="col2"> 
+														  <para> Declares the name of a node
+																type contained in the namespace. </para> </entry> 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>Remarks</title> 
+						  <para> Each <symbol>nodetype</symbol> entry represents an
+								element that may appear in the Dataphor Interface Language (DIL). Each DIL
+								element has a corresponding C# class in an assembly that implements the
+								behavior of the interface element. </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>Example</title> 
+						  <para> 
+								<programlisting> &lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;nodetypes xmlns="http://www.alphora.com/schemas/nodetypes"&gt;
+	&lt;namespace name="Alphora.Dataphor.Frontend.Client"
+		assembly="Alphora.Dataphor.Frontend.Client"&gt;
+		&lt;nodetype name="source"/&gt;
+		&lt;nodetype name="acceptaction"/&gt; 
+		&lt;nodetype name="blockaction"/&gt;
+		&lt;nodetype name="clearnextrequestaction"/&gt;
+		&lt;nodetype name="closeaction"/&gt;
+		&lt;nodetype name="findaction"/&gt;
+		&lt;nodetype name="rejectaction"/&gt;
+		&lt;nodetype name="setnextrequestaction"/&gt;
+		&lt;nodetype name="setpropertyaction"/&gt;
+		&lt;nodetype name="post"/&gt;
+		&lt;nodetype name="viewaction"/&gt;
+		&lt;nodetype name="callaction"/&gt;
+		&lt;nodetype name="dynamicaction"/&gt;
+		&lt;nodetype name="scriptaction"/&gt;
+		&lt;nodetype name="propertysetter"/&gt;	
+	&lt;/namespace&gt; 
+	&lt;namespace name="Alphora.Dataphor.Frontend.Client.Windows"
+		assembly="Alphora.Dataphor.Frontend.Client.Windows"&gt;
+		&lt;nodetype name="session"/&gt;
+		&lt;nodetype name="exposed"/&gt;
+		&lt;nodetype name="menu"/&gt;
+		&lt;nodetype name="designaction"/&gt;
+		&lt;nodetype name="showaction"/&gt;
+		&lt;nodetype name="surrogateaction"/&gt;
+		&lt;nodetype name="column"/&gt;
+		&lt;nodetype name="table"/&gt;
+		&lt;nodetype name="group"/&gt;
+		&lt;nodetype name="row"/&gt;
+		&lt;nodetype name="text"/&gt;
+		&lt;nodetype name="image"/&gt;
+		&lt;nodetype name="statictext"/&gt;
+		&lt;nodetype name="staticimage"/&gt;
+		&lt;nodetype name="trigger"/&gt;
+		&lt;nodetype name="textbox"/&gt;
+		&lt;nodetype name="checkbox"/&gt;
+		&lt;nodetype name="choice"/&gt;
+		&lt;nodetype name="grid"/&gt;
+		&lt;nodetype name="gridcolumn"/&gt;
+		&lt;nodetype name="search"/&gt;
+		&lt;nodetype name="searchcolumn"/&gt;
+		&lt;nodetype name="quicklookup"/&gt;
+		&lt;nodetype name="fulllookup"/&gt;
+		&lt;nodetype name="tree"/&gt;
+		&lt;nodetype name="detailframe"/&gt;
+		&lt;nodetype name="surrogateframe"/&gt;
+	&lt;/namespace&gt;
+	&lt;namespace name="Alphora.Dataphor.Frontend.Client.Windows.Reporting"
+		assembly="Alphora.Dataphor.Frontend.Client.Windows"&gt;
+		&lt;nodetype name="reportaction" /&gt;
+		&lt;nodetype name="reportdesignaction" /&gt;
+	&lt;/namespace&gt;
+	&lt;namespace name="Alphora.Dataphor.Frontend.Client.Reporting"
+		assembly="Alphora.Dataphor.Frontend.Client"&gt;
+		&lt;nodetype name="report"/&gt;
+		&lt;nodetype name="header"/&gt;
+		&lt;nodetype name="footer"/&gt;
+		&lt;nodetype name="staticgroup"/&gt;
+		&lt;nodetype name="databand"/&gt;
+		&lt;nodetype name="line"/&gt;
+		&lt;nodetype name="box"/&gt;
+		&lt;nodetype name="textarea"/&gt;
+		&lt;nodetype name="imageuri"/&gt;
+		&lt;nodetype name="field"/&gt;
+		&lt;nodetype name="imagefield"/&gt;
+		&lt;nodetype name="pagenumber"/&gt;
+		&lt;nodetype name="date"/&gt;
+	&lt;/namespace&gt;
+&lt;/nodetypes&gt; </programlisting> </para> 
+					 </sect4> 
+				</sect3> 
+				<sect3 id="DCFCatalogFormat"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Catalog Format</title> 
+					 <para> Contains a BOP persisted serialization of a DAE catalog.
+						  </para> 
+					 <para> This contains the complete "data dictionary" for the DAE
+						  server. This is loaded when a DAE Server is started, and saved when the DAE
+						  Server is stopped. This file can also be manually saved and loaded with the
+						  SaveCatalog() and LoadCatalog() commands. </para> 
+				</sect3> 
+				<sect3 id="DCFConfigFormat"> 
+					 <sect3info> 
+						  <revhistory> 
+								<revision> 
+									 <revnumber>1</revnumber> 
+									 <date>May 28, 2002 9:33:09 AM MDT</date> 
+									 <revdescription> 
+										  <para>DXC to DocBook</para> 
+									 </revdescription> 
+								</revision> 
+						  </revhistory> 
+					 </sect3info> 
+					 <title>Configuration Format</title> 
+					 <para> Dataphor configuration files have XML-formatted content.
+						  There are two elements defined: a <symbol>settingscontainer</symbol> which
+						  contains one or more <symbol>settingsitem</symbol>s. </para> 
+					 <sect4> 
+						  <title>Elements</title> 
+						  <para> 
+								<informaltable> 
+									 <tgroup cols="2">
+										  <colspec colwidth="*" colname="col1" colnum="1"/>
+										  <colspec colwidth="*" colname="col2" colnum="2"/> 
+										  <thead> 
+												<row> 
+													 <entry colname="col1">Element
+														  Name</entry> 
+													 <entry
+													 colname="col2">Description</entry> 
+												</row> 
+										  </thead> 
+										  <tbody> 
+												<row> 
+													 <entry
+													 colname="col1">settingscontainer</entry> 
+													 <entry colname="col2"> 
+														  <para> Contains one or more
+																<symbol>settingsitem</symbol>s. </para> 
+														  <para> See the example for special
+																name spaces that must be defined. </para> </entry> 
+												</row> 
+												<row> 
+													 <entry
+													 colname="col1">settingsitem</entry> 
+													 <entry colname="col2"> 
+														  <para> Provides a place to store
+																name/value pairs in the configuration file. </para> 
+														  <para> The <symbol>name</symbol>
+																attribute stores the name for the name/value pair of the settings item. </para>
+														  
+														  <para> The <symbol>value</symbol>
+																attribute stores the value for the name/value pair of the settings item.
+																</para> </entry> 
+												</row> 
+										  </tbody> 
+									 </tgroup> 
+								</informaltable> </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>Remarks</title> 
+						  <para> Applications may maintain configuration files using
+								the settings API of Dataphor BOP. This API makes a configuration file appear
+								like the Windows registry. </para> 
+					 </sect4> 
+					 <sect4> 
+						  <title>Example</title> 
+						  <para> 
+								<programlisting> &lt;settingscontainer xmlns:bop="www.alphora.com/schemas/bop"
+	xmlns="Alphora.Dataphor.BOP,Alphora.Dataphor.BOP"&gt;
+	&lt;settingsitem name="SessionURI" 
+		value="http://localhost/environment/BugTracker/main.dfs" /&gt;
+&lt;/settingscontainer&gt; </programlisting> </para> 
+					 </sect4> 
+				</sect3> 
+		  </sect2> 
+	 </sect1> 
+</appendix> 

@@ -18,8 +18,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	{
 		private const int CRadioButtonSize = 12;
 		private const int CButtonSpacing = 4;
-		private const int CMinimumWidth = CRadioButtonSize + CButtonSpacing + 40;
-
+        private const int CMinimumWidth = CRadioButtonSize + CButtonSpacing;
+        // Right Buffer is needed to adjust for differing behavior between Windows themes
+        private const int CTitleBuffer = 10;
+		
 		public RadioButtonGroup() : base()
 		{
 			CausesValidation = false;
@@ -288,44 +290,51 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				// Actual number of "populated" columns
 				int LColumns = Math.Min(FColumns, FItems.Length);
 
-				// Calculate the maximum widths of buttons within each column
-				FButtonBounds = new Rectangle[FItems.Length];
-				int[] LColumnWidths = new int[FColumns];
-				int LWidth;
-				int LColumn;
-				using (Graphics LGraphics = CreateGraphics())
-				{
-					for (int i = 0; i < FItems.Length; i++)
-					{
-						LColumn = i / LButtonsPerColumn;
-						LWidth = CRadioButtonSize + CButtonSpacing + Size.Ceiling(LGraphics.MeasureString(FItems[i], Font)).Width;
-						if (LColumnWidths[LColumn] < LWidth)
-							LColumnWidths[LColumn] = LWidth;
-					}
-				}
+                // Get desired width of columns
+			    int[] LColumnWidths = GetColumnWidths(LButtonsPerColumn);                
 
-				// Calculate the total desired width of the columns
-				int LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
-
-				// Subtract the minimal required width for the total (for all columns)
-				LTotalWidth = Math.Max(0, LTotalWidth - (LColumns * CMinimumWidth));
+                // Calculate the total desired width of the columns
+				int LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);             
 
 				// Calculate the total width available to the columns
 				int LUsableWidth = LBounds.Width - ((LColumns - 1) * FSpacingWidth);
 
-				// Subtract the minimal required width for the usable (for all columns)
-				LUsableWidth = Math.Max(0, LUsableWidth - (LColumns * CMinimumWidth));
-
-				// Calculate the scaling factor
-				double LScalar = (LTotalWidth == 0 ? 1d : (double)LUsableWidth / (double)LTotalWidth);
-
-				// Scale each column's "excess" appropriately
-				for (int i = 0; i < LColumns; i++)
-					LColumnWidths[i] = CMinimumWidth + (int)Math.Round((double)Math.Max(0, (LColumnWidths[i] - CMinimumWidth) * LScalar));
-
+                // Calculate the excess 
+                int LExcess = LUsableWidth - LTotalWidth;
+                           
+				// Add the excess to column's width.  If the excess is positive, split it evenly, othewise distribute it to largest columns
+                if (LExcess >= 0)
+                {
+                    int LColumnExcess = (int)Math.Round((double)LExcess / LColumns);                  
+                    for (int i = 0; i < LColumns; i++)                   
+                        LColumnWidths[i] = LColumnWidths[i] + LColumnExcess;
+                }
+                else
+                {
+                    int LMaxWidth = 0;
+                    for (int i = 0; i < LColumns; i++)
+                        LMaxWidth = Math.Max(LMaxWidth, LColumnWidths[i]);
+                    while ((LMaxWidth >= CMinimumWidth) && (LExcess < 0))
+                    {
+                        for (int i = 0; i < LColumns; i++)
+                        {
+                            if (LExcess == 0)
+                                break;
+                            if (LColumnWidths[i] == LMaxWidth)
+                            {
+                                LColumnWidths[i] = LColumnWidths[i] - 1;
+                                LExcess++;
+                            }
+                        }
+                        LMaxWidth--;
+                    }
+                }
+                      
 				// Layout each button
 				int LRow;
+                int LColumn;
 				int LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
+                FButtonBounds = new Rectangle[FItems.Length];
 				for (int i = 0; i < FItems.Length; i++)
 				{
 					LColumn = i / LButtonsPerColumn;
@@ -345,17 +354,20 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 			Invalidate();
 		}
-
+      
 		private static StringFormat FFormat;
-		private static StringFormat GetFormat()
+		private static StringFormat Format
 		{
-			if (FFormat == null)
-			{
-				FFormat = new StringFormat(StringFormat.GenericDefault);
-				FFormat.Trimming = StringTrimming.EllipsisWord;
-				FFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
-			}
-			return FFormat;
+            get
+            {
+                if (FFormat == null)
+                {
+                    FFormat = new StringFormat();
+                    FFormat.Trimming = StringTrimming.EllipsisCharacter;
+                    FFormat.HotkeyPrefix = System.Drawing.Text.HotkeyPrefix.Show;
+                }
+                return FFormat;
+            }
 		}
 
 		protected override void OnPaint(PaintEventArgs AArgs)
@@ -365,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				ControlPaint.DrawFocusRectangle(AArgs.Graphics, DisplayRectangle);
 			if (FButtonBounds != null)
 			{
-				Rectangle LBounds;
+				Rectangle LBounds;              
 				ButtonState LBaseState = (Enabled ? ButtonState.Normal : ButtonState.Inactive);
 				using (Brush LBrush = new SolidBrush(ForeColor))
 				{
@@ -393,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 									Font, 
 									LBrush, 
 									LBounds,
-									FFormat
+                                    Format 
 								);
 							}
 						}
@@ -449,37 +461,76 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			InvalidateFocusRectangle();
 		}
 
+        private int[] GetColumnWidths(int AButtonsPerColumn)
+        {
+            int[] LColumnWidths = new int[FColumns];
+            int LWidth;
+            int LColumn;
+            
+            using (Graphics LGraphics = CreateGraphics())
+            {
+                for (int i = 0; i < FItems.Length; i++)
+                {
+                    LColumn = i / AButtonsPerColumn;
+                    LWidth = CMinimumWidth + Size.Ceiling(LGraphics.MeasureString(FItems[i], Font)).Width;                    
+                    if (LColumnWidths[LColumn] < LWidth)
+                        LColumnWidths[LColumn] = LWidth;
+                }
+            }
+            return LColumnWidths;
+        }
+
+        private Size FMinimumSize;
+        public override Size MinimumSize
+        {
+            get
+            {
+                if (!FMinimumSize.IsEmpty)
+                    return FMinimumSize;
+
+                Size LResult = Size.Empty;
+                if (FItems.Length > 0)
+                {
+                    int LButtonsPerColumn = (FItems.Length / FColumns) + ((FItems.Length % FColumns) == 0 ? 0 : 1);
+                    int LColumns = Math.Min(FColumns, FItems.Length);
+                    int LTotalWidth = LColumns * CMinimumWidth;
+                    int LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
+                    LResult =
+                        new Size
+                        (
+                            LTotalWidth + ((LColumns - 1) * FSpacingWidth),
+                            (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight)
+                        );
+                }
+                return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));               
+            }
+            set
+            {
+                FMinimumSize = value;
+            }
+        }
+               
 		public Size NaturalSize()
 		{
 			Size LResult = Size.Empty;
+            int LTotalWidth = 0;
+            int LRowHeight = 0;
 			if (FItems.Length > 0)
 			{
 				int LButtonsPerColumn = (FItems.Length / FColumns) + ((FItems.Length % FColumns) == 0 ? 0 : 1);
 				int LColumns = Math.Min(FColumns, FItems.Length);
-
-				int[] LColumnWidths = new int[FColumns];
-				int LWidth;
-				int LColumn;
-				using (Graphics LGraphics = CreateGraphics())
-				{
-					for (int i = 0; i < FItems.Length; i++)
-					{
-						LColumn = i / LButtonsPerColumn;
-						LWidth = CRadioButtonSize + CButtonSpacing + Size.Ceiling(LGraphics.MeasureString(FItems[i], Font)).Width;
-						if (LColumnWidths[LColumn] < LWidth)
-							LColumnWidths[LColumn] = LWidth;
-					}
-				}
-				int LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
-				int LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
-				LResult = 
-					new Size
-					(
-						LTotalWidth + ((LColumns - 1) * FSpacingWidth), 
-						(LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight)
-					);
-			}
-			return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
+                int[] LColumnWidths = GetColumnWidths(LButtonsPerColumn);
+				
+				LTotalWidth = Sum(LColumnWidths, 0, LColumnWidths.Length - 1);
+                LTotalWidth += ((LColumns - 1) * FSpacingWidth);
+				LRowHeight = Math.Max(Font.Height, CRadioButtonSize);
+                LRowHeight = (LButtonsPerColumn * LRowHeight) + ((LButtonsPerColumn - 1) * FSpacingHeight);			    
+			}            
+            using (Graphics LGraphics = CreateGraphics())
+            {
+                LResult = new Size(Math.Max(LTotalWidth, (Size.Ceiling(LGraphics.MeasureString(Text, Font)).Width + CTitleBuffer)), LRowHeight);
+            }
+            return LResult + (Size - DisplayRectangle.Size) + new Size(2 + (FMarginWidth * 2), 2 + (FMarginHeight * 2));
 		}
 	}
 }

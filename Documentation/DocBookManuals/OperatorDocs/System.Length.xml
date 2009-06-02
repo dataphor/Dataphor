@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 14:01:01</date> 
+	 </sect2info> 
+	 <title>System.Length</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Returns the current length of the specified string.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee add { Name.Length() NameLength};</programlisting> 
+		  <programlisting>ID Name NameLength
+-- ---- ----------
+1  Joe  3
+2  John 4
+3  Josh 4
+4  Jeff 4
+5  Jake 4
+6  Jeff 4</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingStrings.html">Using Strings</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:43:01</date> 
+	 </sect2info> 
+	 <title>System.Date</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Date
+{
+	representation Ticks
+	{
+		Ticks : System.Long
+	}selector  class "System.SystemDateTicksSelectorNode", 
+	representation Date
+	{
+		Year : System.Integer, 
+		Month : System.Integer, 
+		Day : System.Integer
+	}selector  class "System.SystemDateTimeDateTimeDaysSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.DateAsStringSelectorNode"
+} class "System.DateTimeConveyor" static tags { Catalog.Comment = "System Date", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>Date</symbol> is the selector for the <symbol>Date</symbol>
+		  Datatype and an operator.</para> 
+	 <para><symbol>System.Date</symbol> is the set of all possible dates from a
+		  fixed point. The physical representation for this type is a 64-bit signed
+		  integer representing the number of ticks since 12:00 midnight, January 1, 1
+		  C.E. (Common Era) in the Gregorian calendar. This means that the range of
+		  values for this domain is from January 1, 0001 C.E. to December 31, 9999
+		  C.E.</para> 
+	 <para>The <symbol>Date</symbol> operator, with no arguments, returns a
+		  <symbol>Date</symbol> type representing the current date. Unlike the
+		  <symbol>DateTime</symbol> operator, this operator does not return the time.
+		  Only the date portion is returned. </para> 
+	 <para>With integer year, month, and day specified, this operator returns a
+		  <symbol>Date</symbol> type value representing the date specified.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Date();
+select Date(2003,1,18);
+select Date.Ticks(627346080000000000);</programlisting> 
+		  <programlisting>2004-04-20
+2003-01-18
+1988-12-25</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.DateTime.html">System.DateTime</ulink>
+<ulink url="SLRSystem.Time.html">System.Time</ulink>
+<ulink url="SLRSystem.TimeSpan.html">System.TimeSpan</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+<ulink url="SLRSystem.ToDate.html">System.ToDate</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

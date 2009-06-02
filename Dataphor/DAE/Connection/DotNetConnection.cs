@@ -327,6 +327,7 @@ namespace Alphora.Dataphor.DAE.Connection
 				SQLIndex LIndex = new SQLIndex("");
 				LIndex.IsUnique = true;
 				
+				bool LContainsIsHidden = LDataTable.Columns.Contains("IsHidden");
 				int LColumnIndex = 0;
 				foreach (System.Data.DataRow LRow in LDataTable.Rows)
 				{
@@ -355,8 +356,12 @@ namespace Alphora.Dataphor.DAE.Connection
 					LValue = LRow["IsLong"];
 					bool LIsLong = IsNull(LValue) ? false : (bool)LValue;
 
-                    LValue = LRow["IsHidden"];
-                    bool LIsHidden = IsNull(LValue) ? false : (bool)LValue;
+					bool LIsHidden = false;
+					if (LContainsIsHidden)
+					{
+						LValue = LRow["IsHidden"];
+						LIsHidden = IsNull(LValue) ? false : (bool)LValue;
+					}
 
                     if (!LIsHidden)
     					LSchema.Columns.Add(new SQLColumn(LColumnName, new SQLDomain(LDataType, LLength, LPrecision, LScale, LIsLong)));
@@ -417,7 +422,7 @@ namespace Alphora.Dataphor.DAE.Connection
 						
 					byte[] LData = new byte[(int)LLength];
 					FRecord.GetBytes(AIndex, 0, LData, 0, LData.Length);
-					return new MemoryStream(LData);
+					return new MemoryStream(LData, 0, LData.Length, true, true);	// Must use this overload or GetBuffer() will not be accessible
 
 				default: throw new ConnectionException(ConnectionException.Codes.NonDeferredDataType, FRecord.GetDataTypeName(AIndex));
 			}

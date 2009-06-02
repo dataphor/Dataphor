@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:43:34</date> 
+	 </sect2info> 
+	 <title>System.GetKey</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns a row with structure the same as the searchable
+		  key, with data that is the same as the data in those columns in the current
+		  row. This information can be saved in a row variable and used later in
+		  <symbol>FindKey</symbol>. This is similar to the bookmark, except that the data
+		  and structure of a bookmark is unimportant.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmpCursor : cursor := cursor (Employee capabilities {Updateable});
+	var TempRow : row;
+	TempRow = row {"Jed" Name,45 ID};
+	EmpCursor.Insert(TempRow);
+end;</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Searchable.html">Cursor Capabilities, Searchable</ulink>
+<ulink url="SLRSystem.FindKey.html">System.FindKey</ulink>
+<ulink url="SLRSystem.GetBookmark.html">System.GetBookmark</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

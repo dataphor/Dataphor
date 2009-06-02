@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 27, 2004 16:14:23</date> 
+	 </sect2info> 
+	 <title>Frontend.ExecuteScript</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator opens the specified file and executes the contents of
+		  the file as D4 statements.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>ExecuteScript("MakeLinterDevice.D4");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+<ulink url="SLRSystem.Evaluate.html">System.Evaluate</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 14:20:14</date> 
+	 </sect2info> 
+	 <title>System.Round</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the specifiied value rounded to the number of
+		  decimal spaces speficied by the precision. If the number of decimal places
+		  specified is positive then rounding will occur right of the decimel point that
+		  many digits. If the number of decimal places specified is zero then it rounds
+		  to the nearest whole number. If the number of decimal places specified is
+		  negative then rounding will occur left of the decimal point that many
+		  digits.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee
+	add
+	{
+		3141.59265 Number
+	}
+	add
+	{
+		Round(Number, 0) RoundZero,
+		Round(Number, 2) RoundPositive,
+		Round(Number,-2) RoundNegative
+	};</programlisting> 
+		  <programlisting>Number     RoundZero RoundPositive RoundNegative
+---------- --------- ------------- -------------
+3141.59265 3142      3141.59       3100         </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Ceiling.html">System.Ceiling</ulink>
+<ulink url="SLRSystem.Floor.html">System.Floor</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

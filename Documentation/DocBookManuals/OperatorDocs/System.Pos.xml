@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, August 26, 2005 5:10:27 PM</date> 
+	 </sect2info> 
+	 <title>System.Pos</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>POS</symbol> returns an <symbol>Integer</symbol> value
+		  idendifying starting position in <symbol>AString</symbol> of the FIRST
+		  occurance of <symbol>ASubString</symbol>. If <symbol>ASubString</symbol> is not
+		  found in <symbol>AString</symbol>, -1 is returned. If
+		  <symbol>ASubString</symbol> is empty, -1 is always returned (the empty string
+		  is not found in any string).</para> 
+	 <para><symbol>POS</symbol> is similar to the <symbol>IndexOf</symbol>
+		  operator. The difference is in the order of the parameters. Because D4 allows
+		  OOP-stlye operator invocation on every operator. The parser invokes the
+		  operator as if the calling variable is the first argument of the operator.
+		  Though the <symbol>IndexOf</symbol> operator makes more sense when calling
+		  OOP-style, this operator makes more sense when called out of OOP-style. 
+		  <note> 
+				<para>Dataphor indexes are zero based.</para> 
+				<para><symbol>POS</symbol> does case-sensitive comparison.</para> 
+		  </note></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Pos("b", "abcabcabc");
+select LastPos("b", "abcabcabc");
+select if Pos("x", "abcabcabc") &gt;= 0 then "Found it" else "Not found";</programlisting> 
+		  <programlisting>1
+7
+Not found</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.StartsWith.html">System.StartsWith</ulink>
+<ulink url="SLRSystem.EndsWith.html">System.EndsWith</ulink>
+<ulink url="SLRSystem.IndexOf.html">System.IndexOf</ulink>
+<ulink url="SLRSystem.LastIndexOf.html">System.LastIndexOf</ulink>
+<ulink url="SLRSystem.IndexOfAny.html">System.IndexOfAny</ulink>
+<ulink url="SLRSystem.LastIndexOfAny.html">System.LastIndexOfAny</ulink>
+<ulink url="SLRSystem.LastPos.html">System.LastPos</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="SLRSystem.Lower.html">System.Lower</ulink>
+<ulink url="SLRSystem.Upper.html">System.Upper</ulink>
+<ulink url="D4LGQualifierExpression.html">Qualifier Expression</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

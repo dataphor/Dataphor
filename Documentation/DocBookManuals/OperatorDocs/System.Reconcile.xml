@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 12:19:53</date> 
+	 </sect2info> 
+	 <title>System.Reconcile</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator reconciles with the specified device. Reconciliation
+		  adds items in the device to the Dataphor system catalog.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <para><ulink url="D4LGExamples2.html">MSSQL Server Device
+					 Example</ulink></para> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGReconciliation.html">Using Devices, Reconciliation</ulink>
+<ulink url="DDGP2ExtendingtheDeviceClass.html">Extending the Device Class</ulink>
+<ulink url="DDGP2Reconciliation.html">SQL Device Reconciliation</ulink>
+<ulink url="DDGP2SchemaReconciliation2.html">Schema Reconciliation</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

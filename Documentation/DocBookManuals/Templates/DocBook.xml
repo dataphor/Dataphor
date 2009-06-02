@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="DocBookx.css" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "c:/src/alphora/docs/docbookmanuals/DocBookx.dtd">
+<book>
+    <title><?xm-replace_text {Book Title}?></title>
+    <bookinfo>
+        <copyright><year>2002</year><holder>Alphora</holder></copyright>
+    </bookinfo>
+    <preface>
+        <title><?xm-replace_text {Preface Title}?></title>
+        <para><?xm-replace_text {Preface Para}?></para>
+    </preface>
+    <part>
+        <partinfo>
+            <copyright><year>2002</year><holder>Alphora</holder></copyright>
+        </partinfo>
+        <title><?xm-replace_text {Part Title}?></title>
+        <partintro>
+          <para><?xm-replace_text {Part Intro Paragraph}?></para>
+        </partintro>
+        <chapter>
+          <title><?xm-replace_text {Chapter Title}?></title>
+          <sect1>
+            <title><?xm-replace_text {Section Title}?></title>
+            <para><?xm-replace_text {Paragraph}?></para>
+          </sect1>
+        </chapter>
+    </part>
+</book>

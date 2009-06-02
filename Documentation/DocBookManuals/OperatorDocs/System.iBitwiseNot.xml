@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:30:45</date> 
+	 </sect2info> 
+	 <title>iBitwiseNot</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>~</symbol> is the parser recognized symbol for this operator.
+		  <symbol>Bitwise Not</symbol> is a unary operator. It takes the number given and
+		  looks at every byte. The value that it returns is the number that would result
+		  if all of the bits were switched from 1 to 0 and vice versa.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table BitwiseNot { One : Integer , Two : Integer };
+begin
+	var LInteger1 : Integer := 314159265; //  bit value : 00010010 10111001 10110000 10100001
+	var LInteger2 : Integer := ~LInteger1; // bit value : 11101101 01000110 01001111 01011110 
+	insert table { row { LInteger1 One, LInteger2 Two } } into BitwiseNot;
+end;
+select BitwiseNot;</programlisting> 
+		  <programlisting>Statement Executed Successfully!
+
+Statement Executed Successfully!
+
+One       Two        
+--------- ---------- 
+314159265 -314159266 </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRiNot.html">iNot (<symbol>not</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

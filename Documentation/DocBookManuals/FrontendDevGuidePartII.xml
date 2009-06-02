@@ -1,0 +1,470 @@
+<?xml version="1.0"?>
+<part id="DDGPartII"> 
+	 <partinfo> 
+		  <date role="LastMod">Thursday, December 04, 2003 9:30:47 AM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 9:29:28 AM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </partinfo> 
+	 <title>Part II - Implementation Architecture</title> 
+	 <chapter id="DFDGApplications"> 
+		  <title>Applications</title> 
+		  <para/> 
+				<sect1 id="DFDGConfiguration"> 
+					 <title>Configuration</title> 
+					 <para/> 
+						  <sect2 id="DFDGHookingIIS"> 
+								<sect2info> 
+									 <revhistory> 
+										  <revision> 
+												<revnumber>1</revnumber> 
+												<date>May 28, 2002 9:33:10 AM MDT</date> 
+												<revdescription> 
+													 <para>DXC to DocBook</para> 
+												</revdescription> 
+										  </revision> 
+									 </revhistory> 
+									 <keywordset> 
+										  <keyword>How To, Register Dataphor with
+												IIS</keyword> 
+										  <keyword>How To, make IIS work with
+												Dataphor</keyword> 
+										  <keyword>Setting up IIS with Dataphor</keyword>
+										  
+									 </keywordset> 
+								</sect2info> 
+								<title><indexterm><primary>How
+												to</primary><secondary>Register Dataphor with
+												IIS</secondary></indexterm><indexterm><primary>How to</primary><secondary>Make
+												IIS work with Dataphor
+												Frontend</secondary></indexterm><indexterm><primary>Setting up IIS with
+												Dataphor</primary></indexterm><indexterm><primary>Registering Frontend File
+												Extensions</primary></indexterm>Registering Frontend File Extensions</title> 
+								<para/> 
+									 <sect3> 
+										  <title><indexterm><primary>Register .Dil and
+														  .Dilx with IIS</primary></indexterm>Register .Dil and .Dilx with IIS</title> 
+										  <para> 
+												<indexterm><primary>IIS</primary><secondary>Register
+														  .dil, .dilx</secondary></indexterm>The following steps are required for IIS to
+												get the .dil and .dilx requests to ASP.NET and to Dataphor: 
+												<orderedlist> 
+													 <listitem> 
+														  <para>Go to properties on the app
+																in IIS manager.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Go to the Home Directory tab
+																and select "Configuration..."</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Add a mapping that looks the
+																same as the mapping for aspx for the ".dil" extension.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Add a mapping that looks the
+																same as the mapping for aspx for the ".dilx" extension.</para> 
+													 </listitem> 
+												</orderedlist> </para> 
+										  <para> The .dil and .dilx mappings must look
+												similar to the aspx entries so these new extensions used by Dataphor are
+												processed through ASP.NET. </para> 
+									 </sect3> 
+									 <sect3> 
+										  <title>Troubleshooting</title> 
+										  <para> If you have installed Dataphor and your
+												application but it doesn't seem to work, verify that you have the .dil and
+												.dilx correctly mapped in IIS. The Dataphor install does this automatically.
+												When you distribute your own applications using Dataphor you may have to do
+												this step yourself. </para> 
+									 </sect3> 
+						  </sect2> 
+				</sect1> 
+				<sect1 id="DFDGExtendingtheFrontend"> 
+					 <title><indexterm><primary>Extending the
+									 Frontend</primary></indexterm><indexterm><primary>How
+									 to</primary><secondary>Extend the Frontend</secondary></indexterm>Extending the
+						  Frontend</title> 
+					 <para><indexterm><primary>Frontend</primary><secondary>extending</secondary></indexterm>The
+						  Dataphor Frontend provides many extensibility points throughout. Custom
+						  controls can be developed and utilized by the Frontend clients by integration
+						  into DIL. The clients can be altered or extended and even custom clients can be
+						  developed to interpret DIL documents. The derivation processes can be
+						  customized or replaced and the customization engine can be modified as
+						  well.</para> 
+				</sect1> 
+	 </chapter> 
+	 <chapter id="DFDGWindowsClient"> 
+		  <title><indexterm><primary>Windows Client</primary></indexterm>Windows
+				Client</title> 
+		  <para/> 
+				<sect1 id="DFDGWinClientOverview"> 
+					 <title>Overview</title> 
+					 <para><indexterm><primary>Frontend</primary><secondary>Windows
+									 Client</secondary></indexterm>The Dataphor Frontend Windows Client transforms
+						  DIL documents into Windows Forms through Basic Object Persistence (BOP), a form
+						  of object serialization. The Windows Client is responsible for presenting the
+						  interface described in a Windows Forms environment. It uses the Dataphor Data
+						  Access Components to communicate with the DAE.</para> 
+					 <sect2 id="DUGUsingDesigner"> 
+						  <title><indexterm><primary>Using the
+										  Designer</primary></indexterm>Using the Designer</title> 
+						  <para/> 
+								<sect3 id="DUGCustomizingForm"> 
+									 <title><indexterm><primary>Customizing a
+													 Form</primary></indexterm>Customizing a Form</title> 
+									 <para> 
+										  <indexterm><primary>How
+													 to</primary><secondary>customize a form with the
+													 Designer</secondary></indexterm><indexterm><primary>Dataphor Frontend
+													 Designer</primary></indexterm>Learn how to modify a form by adding and moving
+										  Frontend Nodes. </para> 
+									 <para> The Designer may be used with a mouse by
+										  selecting an element in the Element List or the Object Tree with a click and
+										  hold and dragging the element onto the Object Tree. The Designer may be used
+										  with the keyboard by selecting an element and using the menu or hot keys
+										  assigned to menu items. In this discussion the mouse method will be used to
+										  describe actions. </para> 
+									 <sect4> 
+										  <title>Understanding Customizations
+												Saving</title> 
+										  <para> The designer can save your form as a new
+												file or as a customization. </para> 
+										  <para> When you save your form as a new file,
+												the Designer creates a .dil file on the application Web server. Saving the form
+												overwrites the original file. So be careful. </para> 
+										  <para> When you save your file as a
+												customization to a the previous form, the designer creates a new file and saves
+												only the changes that you made to the parent form. Saving a customization
+												creates a .dilx file. These XML-based files contain links to any parent forms
+												as well the changes in this customization. </para> 
+										  <para> When a .dilx file is loaded from the
+												application server, the server automatically applies the customization to the
+												parents and returns the customized document. This way the parent design changes
+												are automatically applied to all the descendant customized pages. Multiple
+												levels of customizations can exist and will be handled correctly. </para> 
+										  <para> Aliasing can be setup to automatically
+												replace a requested document with a customized one if you so choose. The
+												application server can be customized so that certain pages are returned to
+												certain connections based upon their login or any other setting. This allows
+												for the ability to have different customized forms to automatically be used for
+												different users or security levels. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Adding an Element</title> 
+										  <para> 
+												<indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>Adding an Element</secondary></indexterm>Use the
+												following steps to add an element to a form. 
+												<orderedlist> 
+													 <listitem> 
+														  <para>Select the desired element in
+																the Element List.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Drag the element to the
+																desired location on the Object Tree.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Drop the element by releasing
+																the mouse button.</para> 
+													 </listitem> 
+												</orderedlist> </para> 
+										  <para> When a drop occurs on the Object Tree
+												the node the element was dropped on may reject the new element. If the new
+												element does not meet the criteria defined in the parent node it is rejected, a
+												message box will be shown stating the reason, and will not appear on the Object
+												Tree. For more information on child node validation see 
+												<ulink
+												url="Alphora.Dataphor.Frontend.Client.Node.IsValidChild.html"> Frontend
+													 Classes, Clients.</ulink>. With a successful drop, the new element will appear
+												on the Object Tree. If a parent node does not have a name it can not have any
+												children added to it. This is due to the way that customizations are saved.
+												</para> 
+										  <para> When drag and dropping nodes they will
+												by default be inserted before the node that it is dropped on. To add as a child
+												of the target node hold down the control key of the keyboard when you let go of
+												the mouse button. To add a child after the last node of a container you must
+												add it as a child to the parent container object, since inserting as a sibling
+												will always insert before the target node. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Moving an Element</title> 
+										  <para><indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>moving an element</secondary></indexterm> Use the
+												following steps to move an element on a form. 
+												<orderedlist> 
+													 <listitem> 
+														  <para>Select the desired element in
+																the Object Tree.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Drag the element to the new
+																desired location on the Object Tree.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Drop the element by releasing
+																the mouse button.</para> 
+													 </listitem> 
+												</orderedlist> </para> 
+										  <para> When a drop occurs on the Object Tree
+												the node the element was dropped on may reject the moved element. If the new
+												element does not meet the criteria defined in the parent node it is rejected, a
+												message box will be shown stating the reason, and will not be moved. For more
+												information on child node validation see 
+												<ulink
+												url="Alphora.Dataphor.Frontend.Client.Node.IsValidChild"> Frontend Classes,
+													 Clients.</ulink>. With a successful drop, the moved element will appear on the
+												Object Tree in the new position. If a parent node does not have a name it can
+												not have any children added to it. This is due to the way that customizations
+												are saved. </para> 
+										  <para> When using the keyboard or a menu to
+												move an object, the object being moved will be shown in bold type and the
+												designer will be in "Move Mode" until a destination is chosen by pressing Enter
+												or Control-A to add as a child. Escape may be pressed when in move mode to
+												cancel the move. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Deleting an Element</title> 
+										  <para><indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>Deleting an element</secondary></indexterm> A
+												customized form depends on the original form for much of its information. Only
+												the changes on the form are stored as the results of customization. Therefore,
+												elements which are on the ancestor form may not be deleted from the customized
+												form. The only elements that may be deleted from a form are those elements that
+												were part of the current customization. </para> 
+										  <para> To delete an element that was added in
+												this customization: 
+												<orderedlist> 
+													 <listitem> 
+														  <para>Select the element to be
+																deleted.</para> 
+													 </listitem> 
+													 <listitem> 
+														  <para>Press the Delete key or
+																select the Delete menu item.</para> 
+													 </listitem> 
+												</orderedlist> </para> 
+									 </sect4> 
+								</sect3> 
+								<sect3 id="DUGUsingIntegratedDesigner"> 
+									 <title>Using the Integrated Designer</title> 
+									 <para>Learn about the Designer's interface.</para> 
+									 <sect4> 
+										  <title>Understanding the Interface</title> 
+										  <para> The following image shows the Designer
+												interface. </para> 
+										  <para>
+												<inlinegraphic fileref="images/designer.gif" width="631" depth="517"/> </para> 
+										  <para> The Designer provides 3 panes for
+												editing a form. The left pane is the Interface Node Toolbar, displaying a list
+												of nodes and templates that can be added to a form. The center pane is the
+												Object Tree, displaying the Nodes of the form being designed. The right pane is
+												the Property Editor which displays and edits the properties of the selected
+												Node. These tools combine to allow you to customize the forms provided in the
+												Frontend and those you may have added. </para> 
+										  <para> The following sections provide more
+												detail about each of the panes and how they are used in customizing a form.
+												</para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Understanding the Node Toolbar</title> 
+										  <para> 
+												<indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>Node toolbar</secondary></indexterm>The Node
+												Toolbar provides a list of elements that may be added to a form. An element may
+												be as simple as a label, or as complex as a complete sub-panel containing
+												several labels, edit controls and other sub-panels. Each element of the form
+												appears as a node in the Object Tree. Dragging an element from the Node Toolbar
+												to the Object Tree is all that is required to add to a form. </para> 
+										  <para> When you select a node, a description of
+												what the node does will appear in the designer status bar at the bottom of the
+												designer form. </para> 
+										  <para> The major types of nodes are Elements,
+												Actions, and Containers. Elements are visual controls on the form. Each element
+												node represents a different type of object that can be placed on the form.
+												Actions have to be triggered by a control node (Menu, Trigger, and Exposed).
+												They all contain a Text and Image parameter that will be used by default by the
+												control nodes. Containers are technically elements but hold groups of other
+												elements as children. They are Row, Column, and Table and contain multiple
+												children elements. Group is also a container node but can only contain a single
+												child element. </para> 
+										  <para> When using the keyboard or a menu item
+												to add nodes to the form, the currently selected item in the tool bar will be
+												used. If an item has not been selected yet then nothing will be added. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Understanding the Object Tree</title> 
+										  <para><indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>Object Tree</secondary></indexterm> The Object
+												Tree lists the Nodes currently part of a form in a tree view. The location of
+												an element in the tree determines where the element appears on the resulting
+												form displayed to the user. There are also elements that do not appear for the
+												user such as a source. The source represents a database connection in Dataphor.
+												</para> 
+										  <para> The Object Tree is fully "drag and drop"
+												enabled. Dragging an element from the Element List adds that element to the
+												Object Tree and subsequently to the form. Dragging an element from one location
+												in the tree to another also moves where the element appears on the form. When
+												drag and dropping nodes they will by default be inserted before the node that
+												it is dropped on. To add as a child of the target node hold down the control
+												key of the keyboard when you let go of the mouse button. To add a child after
+												the last node of a container you must add it as a child to the parent container
+												object, since inserting as a sibling will always insert before the target node.
+												</para> 
+										  <para> As you edit the nodes, the form that you
+												are editing will reflect the changes in real time. So you have an immediate
+												view of what your changes will do and how they appear. The form still remains
+												fully functional while being edited. All nodes in the Dataphor Frontend Client
+												system flow dynamically, like a web page, and as such there is no need to work
+												about the absolute position and size of all controls on the form. The Dataphor
+												Frontend Clients will take care of it for you. </para> 
+										  <para> At the root of the tree there will be a
+												FormInterface node or a FrameInterface node, depending on what the design is
+												currently instantiated as. They act the same when editing and when the design
+												is saved the root node is saved as an Interface node. By doing that, the same
+												design can be be used in a frame or as a stand alone page without changing.
+												Non-visual elements should usually be placed directly as children of the form
+												interface itself. Form interfaces can contain only one visual element as a
+												child, therefore it is usually necessary to have a container be the root
+												visible element of the form. This is done so that the form has a default
+												direction to place the elements it contains, either vertically, horizontally,
+												or a mix via the table node. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Understanding the Property
+												Editor</title> 
+										  <para><indexterm><primary>Dataphor Frontend
+														  Designer</primary><secondary>Changing element
+														  properties</secondary></indexterm> The Property Editor allows you to view and
+												change the properties of the selected element in the Object Tree. Changing a
+												property may change the appearance of a control on the form. For example,
+												changing the border property of a visible control will change its appearance on
+												the form immediately. </para> 
+										  <para> Several property types have special
+												selectors built into the designer. An action reference will automatically list
+												all action available and there are similar drop down boxes for Sources, Node
+												References, and Property References (See property setter node). The text
+												properties generally accept C programming style escaped special characters.
+												(IE. <symbol>\n</symbol> for a carriage return, <symbol>\t</symbol> for a tab)
+												</para> 
+										  <para> If a node or any of it's parents does
+												not have a name set, then it can not be customized due to the way that the
+												customizations to form designs are saved. This provides a convenient way to
+												make a node read only to any future customizations. </para> 
+									 </sect4> 
+								</sect3> 
+								<sect3 id="DUGAddingTemplates"> 
+									 <title>Extending the Integrated Designer</title> 
+									 <para><indexterm><primary>Dataphor Frontend
+													 Designer</primary><secondary>custom templates</secondary></indexterm> Learn how
+										  to add custom templates to the designer. </para> 
+									 <para> Adding a template to the Designer consists
+										  of: 
+										  <orderedlist> 
+												<listitem> 
+													 <para>Create a template.</para> 
+												</listitem> 
+												<listitem> 
+													 <para>Add a reference to a template
+														  index file.</para> 
+												</listitem> 
+												<listitem> 
+													 <para>Add a template index reference to
+														  the session or a page.</para> 
+												</listitem> 
+										  </orderedlist> </para> 
+									 <para> An example template and index files
+										  (grid.xml and index.xml) is in the Source subdirectory of Dataphor directory.
+										  </para> 
+									 <para> There can be only one root node in a
+										  template file. The designer will auto generate a name for each unnamed node in
+										  a template and will check for duplicates in the design when added, adjusting
+										  the node names appropriately. </para> 
+									 <sect4> 
+										  <title>Add at the Session</title> 
+										  <para> The
+												<symbol>DefaultDesignerTemplateRef</symbol> session attribute points the
+												designer to the templates index file. The session files typically end in a .dfs
+												extension and reside on the application server. </para> 
+									 </sect4> 
+									 <sect4> 
+										  <title>Add at the Form</title> 
+										  <para> The
+												<symbol>DesignerAction.TemplateRef</symbol> property points the designer to a
+												template index file to be used when the designer action is activated. It can be
+												set from within the form designer itself. </para> 
+									 </sect4> 
+									 <sect4 id="DUGCreatingTemplate"> 
+										  <title>Creating a Template</title> 
+										  <para>Learn how to create a Frontend Element
+												Template.</para> 
+										  <sect5> 
+												<title>Overview</title> 
+												<para>Designer Templates are built using
+													 the Dataphor Interface Language (DIL).</para> 
+												<para> DIL files are simple xml that is
+													 easy to create and edit. Only one root node in a template file can exist,
+													 although there can be any number of children nodes. A saved form design can be
+													 edited and made into a template file. </para> 
+										  </sect5> 
+										  <sect5> 
+												<title>See Also</title> 
+												<para> 
+													 <ulink
+													 url="DFRDerivationReference.html"> Dataphor Derivation Reference</ulink>, 
+													 <ulink url="dilrefdocs.html"> Dataphor
+														  Interface Language (DIL) Reference</ulink> </para> 
+										  </sect5> 
+									 </sect4> 
+									 <sect4> 
+										  <title>See Also</title> 
+										  <para> 
+												<ulink url="DFRDerivationReference"
+												role="cref">Dataphor Derivation Reference</ulink>, 
+												<ulink url="dilrefdocs.html"> Dataphor
+													 Interface Language (DIL) Reference</ulink> </para> 
+									 </sect4> 
+								</sect3> 
+								<sect3> 
+									 <title>See Also</title> 
+									 <para> 
+										  <ulink url="dilrefdocs.html">Dataphor user
+												Interface Language Reference</ulink>, 
+										  <ulink url="DFDGReference.html"> Dataphor
+												Frontend Reference</ulink> </para> 
+								</sect3> 
+					 </sect2> 
+				</sect1> 
+	 </chapter> 
+	 <chapter id="DFDGWebClient"> 
+		  <title>Web Client</title> 
+		  <para/> 
+				<sect1 id="DFDGWebClientOverview"> 
+					 <title>Overview</title> 
+					 <para><indexterm><primary>Frontend</primary><secondary>Web
+									 Client</secondary></indexterm>The Dataphor Frontend Web Client is a Web
+						  Application that provides HTML output based on the DIL documents coming from
+						  the Frontend. It communicates with the DAE using Dataphor Data Access
+						  Components.</para> 
+				</sect1> 
+	 </chapter> 
+	 <chapter id="DFDGReporting"> 
+		  <title>Reporting</title> 
+		  <para><indexterm><primary>Frontend</primary><secondary>Reports</secondary></indexterm>Creating
+				and modifying reports is much like creating and modifying forms. See 
+				<citetitle>Using the Integrated Designer</citetitle> for how the
+				designer works. See 
+				<citetitle>Common Nodes</citetitle> in the 
+				<citetitle>Frontend Reference</citetitle> for information on the
+				function of the Reporting Nodes.</para> 
+		  <para>The Report Designer has report specific elements and an
+				additional button. The button is to test the selected report.</para> 
+	 </chapter> 
+</part> 

@@ -493,7 +493,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						if (ARequest.Result.IsNative)
 						{
-							FInternalImage = System.Drawing.Image.FromStream(new MemoryStream(ARequest.Result.AsByteArray, false));
+							byte[] LResultBytes = ARequest.Result.AsByteArray;
+							FInternalImage = System.Drawing.Image.FromStream(new MemoryStream(LResultBytes, 0, LResultBytes.Length, false, true));
 						}
 						else
 						{
@@ -989,9 +990,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		
 		protected override Size InternalMaxSize
 		{
-			get { return WinForms.Screen.FromControl(Control).WorkingArea.Size; }
+            get { return FUseNaturalMaxWidth ? new Size(InternalNaturalSize.Width, WinForms.Screen.FromControl(Control).WorkingArea.Size.Width) : WinForms.Screen.FromControl(Control).WorkingArea.Size; }
 		}
-		
+
+        [DefaultValue(false)]
+        [Description("Use Natural Width as the Max Width.")]
+        private bool FUseNaturalMaxWidth;
+        public bool UseNaturalMaxWidth
+        {
+            get { return FUseNaturalMaxWidth; }
+            set { FUseNaturalMaxWidth = value; }
+        }
+
 		protected override Size InternalNaturalSize
 		{
 			get

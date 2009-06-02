@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:42:17</date> 
+	 </sect2info> 
+	 <title>System.Byte</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Byte
+{
+	representation Byte
+	{
+		Value : System.Byte
+	}selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.ByteAsStringSelectorNode"
+} class "System.ByteConveyor" static tags { Catalog.Comment = "System Unsigned 8-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>Byte</symbol>.</para> 
+	 <para><symbol>System.Byte</symbol> is the set of all integer values in the
+		  range 0 through positive 255 (2<superscript>8</superscript>-1). The physical
+		  representation of this type is an unsigned 8-bit integer.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Byte(134);</programlisting> 
+		  <programlisting>134</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToByte.html">System.ToByte</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

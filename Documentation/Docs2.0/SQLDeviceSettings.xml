@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<para>The following table lists the settings available for all SQL devices,
+	 e.g. MSSQL, Oracle, etc. These settings are configured using the attributes of
+	 the class definition: The format is "AttributeName"="Value". 
+	 <example> 
+		  <title>Examples</title> 
+		  <para>"ConnectionBufferSize"="40"</para> 
+		  <para>"ConnectionParameters"="ConnectionTimeout=0;DataCompression=False"</para>
+		  
+		  <para>"SupportsNestedFrom"="False"</para> 
+	 </example> 
+	 <informaltable> 
+		  <tgroup cols="4"><colspec colname="col01" colnum="1"
+				colwidth="2.00*"/><colspec colname="col1" colnum="2" colwidth="1*"/><colspec
+				colname="col03" colnum="3" colwidth="2.00*"/><colspec colname="col3" colnum="4"
+				colwidth="2.00*"/><thead> 
+					 <row><entry>Attribute Name</entry><entry>Possible
+								Values</entry><entry>Meaning</entry> 
+					 </row></thead><tbody> 
+					 <row><entry><indexterm><primary>ConnectionBufferSize</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>ConnectionBufferSize</secondary></indexterm><symbol>ConnectionBufferSize</symbol></entry><entry>
+								
+								<programlisting>&lt;integer&gt;</programlisting></entry><entry>Specifies the number of rows to fetch at a time
+								from the target system. The default value for this attribute is 20. A value of
+								0 for this attribute indicates that the entire result set should be read
+								immediately, i.e., the result set should be
+								<emphasis>disconnected</emphasis>.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>ConnectionClass</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>ConnectionClass</secondary></indexterm><symbol>ConnectionClass</symbol></entry><entry>
+								
+								<programlisting>&lt;class name&gt;</programlisting></entry><entry>Determines the class which will be used to
+								implement the connectivity layer for this device. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>ConnectionParameters</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>ConnectionParameters</secondary></indexterm><symbol>ConnectionParameters</symbol></entry><entry>
+								
+								<programlisting>&lt;parameter&gt;{;&lt;parameter&gt;}
+			
+  &lt;parameter&gt; ::=
+    &lt;parameter name&gt;=&lt;parameter value&gt;</programlisting></entry><entry>Specifies additional connection parameters to
+								be used in building the connection string. For more information on how the SQL
+								devices build a connection string, refer to the discussion on 
+								<ulink url="DDGP2BasicConnectivity.htm"
+								 type="olinkb"><citetitle>Basic Connectivity</citetitle></ulink> in Part IV of
+								the Dataphor Developer's Guide. The default value for this attribute is an
+								empty string.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>ConnectionStringBuilderClass</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>ConnectionStringBuilderClass</secondary></indexterm><symbol>ConnectionStringBuilderClass</symbol></entry><entry>
+								
+								<programlisting>&lt;class name&gt;</programlisting></entry><entry>Determines the class which will be used to
+								construct connection strings for this device. The default is set appropriately
+								by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>DeviceForeignKeysExpression</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>DeviceForeignKeysExpression</secondary></indexterm><symbol>DeviceForeignKeysExpression</symbol></entry><entry>
+								
+								<programlisting>&lt;string&gt;</programlisting></entry><entry>Specifies an SQL statement in the dialect of
+								the target system to be used to retrieve the set of foreign keys defined in the
+								target database. The default is set appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col01"><indexterm><primary>DeviceIndexesExpression</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>DeviceIndexesExpression</secondary></indexterm><phrase
+								role="code">DeviceIndexesExpression</phrase></entry><entry colname="col1"> 
+								<programlisting>&lt;string&gt;</programlisting></entry><entry colname="col03">Specifies an SQL statement in
+								the dialect of the target system to be used to retrieve the set of indexes and
+								index keys defined on the tables in the target database. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>DeviceTablesExpression</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>DeviceTablesExpression</secondary></indexterm><symbol>DeviceTablesExpression</symbol></entry><entry>
+								
+								<programlisting>&lt;string&gt;</programlisting></entry><entry>Specifies an SQL statement in the dialect of
+								the target system to be used to retrieve the set of tables and columns defined
+								in the target database. The default is set appropriately by each
+								device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>IsOrderByInContext</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>IsOrderByInContext</secondary></indexterm><symbol>IsOrderByInContext</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the order by clause is
+								processed as part of the query context. If this is false the order must be
+								specified in terms of the result set columns, rather than the range variable
+								columns within the query. The default is set appropriately by each
+								device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>OnBrowseConnectStatement</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>OnBrowseConnectStatement</secondary></indexterm><symbol>OnBrowseConnectStatement</symbol></entry><entry>
+								
+								<programlisting>&lt;string&gt;</programlisting></entry><entry>A D4 expression denoting an SQL statement in
+								the target dialect to be executed on all new browse connections.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>OnExecuteConnectStatement</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>OnExecuteConnectStatement</secondary></indexterm><symbol>OnExecuteConnectStatement</symbol></entry><entry>
+								
+								<programlisting>&lt;string&gt;</programlisting></entry><entry>A D4 expression denoting an SQL statement in
+								the target dialect to be executed on all new execute connections.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>Schema</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>Schema</secondary></indexterm><symbol>Schema</symbol></entry><entry>
+								
+								<programlisting>&lt;string&gt;</programlisting></entry><entry>Specifies the 
+								<phrase role="code">Schema</phrase> setting for the
+								device. Although the way that this is used is device-specific, it is typically
+								used to specify the current schema in systems such as Oracle and DB2, or the
+								current owner in systems such as SQL Server and Sybase.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col01"><indexterm><primary>ShouldNormalizeWhitespace</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>ShouldNormalizeWhitespace</secondary></indexterm><symbol>ShouldNormalizeWhitespace</symbol></entry><entry
+						  colname="col1">
+								<programlisting>true | false</programlisting></entry><entry colname="col03">Determines whether or not
+								whitespace in the SQL statements emitted by this device should be normalized
+								(i.e. whether or not carriage-returns, line-feeds, and other special characters
+								should become spaces). The default is set appropriately by each device.</entry>
+					 </row>
+					 <row><entry
+						  colname="col01"><indexterm><primary>SupportsAlgebraicFromClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsAlgebriacFromClause</secondary></indexterm><symbol>SupportsAlgebraicFromClause</symbol></entry><entry
+						  colname="col1"> 
+								<programlisting>true | false</programlisting></entry><entry colname="col03">Indicates whether the SQL
+								dialect for the device supports the use of an algebraic style from clause, e.g.
+								
+								<phrase role="code">select * from A join B on A.ID =
+									 B.ID</phrase> rather than 
+								<phrase role="code">select * from A, B where A.ID =
+									 B.ID</phrase></entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsNestedCorrelation</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsNestedCorrelation</secondary></indexterm><symbol>SupportsNestedCorrelation</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of correlation between queries nested within the from clause and the outer SQL
+								query. The default is set appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsNestedFrom</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsNestedFrom</secondary></indexterm><symbol>SupportsNestedFrom</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of query expressions nested within the from clause of an SQL query. The default
+								is set appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsOrderByExpressions</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsOrderByExpressions</secondary></indexterm><symbol>SupportsOrderByExpressions</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of expressions in the order by clause. The default is set appropriately by each
+								device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsSubSelectInGroupByClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsSubSelectInGroupByClause</secondary></indexterm><symbol>SupportsSubSelectInGroupByClause</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of sub-selects within the group by clause of an SQL query. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsSubSelectInHavingClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsSubSelectInHavingClause</secondary></indexterm><symbol>SupportsSubSelectInHavingClause</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of sub-selects within the having clause of an SQL query. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsSubSelectInOrderByClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsSubSelectInOrderByClause</secondary></indexterm><symbol>SupportsSubSelectInOrderByClause</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the usse
+								of sub-selects within the order by clause of an SQL query. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsSubSelectInSelectClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsSubSelectInSelectClause</secondary></indexterm><symbol>SupportsSubSelectInSelectClause</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of sub-selects within the select clause of an SQL query. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>SupportsSubSelectInWhereClause</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>SupportsSubSelectInWhereClause</secondary></indexterm><symbol>SupportsSubSelectInWhereClause</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device supports the use
+								of sub-selects within the where clause of an SQL query. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col01"><indexterm><primary>UseParametersForCursors</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseParametersForCursors</secondary></indexterm><symbol>UseParametersForCursors</symbol></entry><entry
+						  colname="col1"> 
+								<programlisting>true | false</programlisting></entry><entry colname="col03">Indicates whether the device
+								should use parameterization for cursors used to retrieve datasets from the
+								target system. The default is set appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry
+						  colname="col01"><indexterm><primary>UseQualifiedNames</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseQualifiedNames</secondary></indexterm><symbol>UseQualifiedNames</symbol></entry><entry
+						  colname="col1"> 
+								<programlisting>true | false</programlisting></entry><entry colname="col03">Indicates whether or not to use
+								the fully qualified name of an object in D4 to produce the storage name for the
+								object. Qualifiers will be replaced with underscores in the resulting storage
+								name. The default is false.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>UseQuotedIdentifiers</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseQuotedIdentifiers</secondary></indexterm><symbol>UseQuotedIdentifiers</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device should use quoted
+								identifiers when producing statements in the target dialect. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>UseStatementTerminator</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseStatementTerminator</secondary></indexterm><symbol>UseStatementTerminator</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether the device should use
+								statement terminators when producing statements in the target dialect. The
+								default is set appropriately by each device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>UseTransactions</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseTransactions</secondary></indexterm><symbol>UseTransactions</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>Indicates whether or not to use transactions
+								through the CLI of the target system. The default is set appropriately by each
+								device.</entry> 
+					 </row> 
+					 <row><entry><indexterm><primary>UseValuesClauseInInsert</primary></indexterm><indexterm><primary>Common
+										  SQL Device
+										  Settings</primary><secondary>UseValuesClauseInInsert</secondary></indexterm><symbol>UseValuesClauseInInsert</symbol></entry><entry>
+								
+								<programlisting>true | false</programlisting></entry><entry>True if insert statements should be constructed
+								using a values clause, false to use a select expression. The default is set
+								appropriately by each device.</entry> 
+					 </row> 
+				</tbody> 
+		  </tgroup> 
+	 </informaltable></para>

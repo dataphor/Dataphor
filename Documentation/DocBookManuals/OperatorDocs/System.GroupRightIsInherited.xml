@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:14:14</date> 
+	 </sect2info> 
+	 <title>System.GroupRightIsInherited</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns <symbol>true</symbol> if the specified right
+		  has inherited set to true in the specified group, otherwise it will return
+		  <symbol>false</symbol>. A runtime error will occur if the right is not
+		  available in the group.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateGroup("Developers", "User");
+GrantRightToGroup("AddProgram", "User", true);
+
+select if GroupHasRight("User", "AddProgram") then
+  	GroupRightIsInherited("User", "AddProgram").ToString()
+else
+   "AddProgram right not assigned to User";
+
+select if GroupHasRight("Developers", "AddProgram") then
+  	GroupRightIsInherited("Developers", "AddProgram").ToString()
+else
+ 	"AddProgram right not assigned to Developers";
+
+DropGroup("Developers");
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>true
+true</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.GrantRightToGroup.html">System.GrantRightToGroup</ulink>
+<ulink url="SLRSystem.GroupHasRight.html">System.GroupHasRight</ulink>
+<ulink url="SLRSystem.RevertRightForGroup.html">System.RevertRightForGroup</ulink>
+<ulink url="SLRSystem.RevokeRightFromGroup.html">System.RevokeRightFromGroup</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

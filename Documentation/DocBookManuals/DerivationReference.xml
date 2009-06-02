@@ -1,0 +1,751 @@
+<?xml version="1.0"?>
+<sect2 id="DFRDerivationReference"> 
+	 <sect2info><date role="LastMod">Tuesday, December 10, 2002 3:45:02
+				PM</date>
+	 </sect2info>
+	 <title><indexterm><primary>Dataphor Derivation
+					 Reference</primary></indexterm><indexterm><primary>Derivation</primary></indexterm><indexterm><primary>Tags</primary></indexterm>Dataphor
+		  Derivation Reference</title> 
+	 <para/> 
+		  <sect3> 
+				<title><indexterm><primary>Derivation</primary><secondary>tags</secondary></indexterm>Tags
+					 and Derivation</title> 
+				<para> The tags listed in this section are the only tags recognized
+					 in Derivation. </para> 
+				<para> Tags attached to database objects are converted to
+					 attributes of elements written into an "interface" through derivation. For
+					 example: The tag <symbol>Frontend.textbox.width="15"</symbol> is applied to the
+					 column of a table. When the field is assigned to a textbox in an interface, the
+					 width is copied to the textbox tag: 
+					 <programlisting>&lt;textbox column="TaggedColumn" width="15"/&gt;</programlisting> </para> 
+				<para> Otherwise the textbox element will be derived as follows: 
+					 <programlisting>&lt;textbox column="UntaggedColumn" /&gt;</programlisting> </para> 
+				<para> The additional information on the
+					 <symbol>TaggedColumn</symbol> can be used by the client to set the width of the
+					 TextBox displaying the column data. Otherwise a default width is used for the
+					 TextBox which might not suggest the width of the underlying column. </para> 
+		  </sect3> 
+		  <sect3> 
+				<title><indexterm><primary>Derivation</primary><secondary>unknown
+								tags treatment</secondary></indexterm>Unknown Tags Treatment</title> 
+				<para> Unknown tags, such as height on a TextBox becomes an
+					 attribute in the xml file fed to the client who has the job of ignoring or
+					 doing something with it. </para> 
+				<para> Other tags will be ignored or copied into attributes based
+					 on the tag and its "namespace." </para> 
+		  </sect3> 
+		  <sect3> 
+				<title><indexterm><primary>Derivation</primary><secondary>tag
+								inheritance</secondary></indexterm>Tag "Inheritance"</title> 
+				<para> Tags have an inference model which behaves similar to
+					 inheritance. Each of the listed items is a point where the tag value may be
+					 overridden. The order of precedence is (lowest precedence on top of list): 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>domain</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>column</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>view</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>query</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para> The tag value is taken from the first item from the bottom
+					 of the list where the tag is defined. </para> 
+		  </sect3> 
+		  <sect3 id="DFRValidInterfaceTags"> 
+				<title><indexterm><primary>Derivation</primary><secondary>valid
+								interface tags</secondary></indexterm>Valid Interface Tags</title> 
+				<para>Learn about what makes a valid interface tag.</para> 
+				<sect4> 
+					 <title/> 
+						  <para> All Frontend tag names are prefixed by the namespace
+								Frontend. All tags can be prefixed with an optional &lt;page type&gt; namespace
+								as well to designate that the tag only applies to the given page, otherwise,
+								the tag applies to all page types. Further namespace contexts are defined for
+								the specific objects to which they apply. </para> 
+				</sect4> 
+				<sect4> 
+					 <title>Syntax</title> 
+					 <para> 
+						  <programlisting>Frontend[.&lt;page type&gt;][.&lt;object/element type name&gt;].&lt;tag name&gt;="&lt;value&gt;"</programlisting> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRDomainsColumns"> 
+				<title><indexterm><primary>Derivation</primary><secondary>domain
+								tags</secondary></indexterm><indexterm><primary>Derivation</primary><secondary>Column
+								tags</secondary></indexterm>Domains / Columns</title> 
+				<para> Learn about tags that affect Domains and Columns. </para> 
+				<para> The tags listed in the table may be attached to a Domain or
+					 a Column in the Dataphor Catalog. See the example in 
+					 <ulink url="DFRTableVars" role="cref">TableVars</ulink> for how
+					 to attach these tags to columns. </para> 
+				<sect4> 
+					 <title><indexterm><primary>Derivation</primary><secondary>namimg
+									 domain/column tags</secondary></indexterm>Naming Domain / Column tags</title> 
+					 <para> Domain / Column tags can be namespaced to a particular
+						  ElementType. Any tag so partitioned will be passed through to the interface
+						  client and ignored by the Frontend derivation engine. </para> 
+				</sect4> 
+				<sect4> 
+					 <title><indexterm><primary>Domain
+									 Tags</primary></indexterm><indexterm><primary>Column
+									 Tags</primary></indexterm>Tags</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type /
+													 Description</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;string&gt; </para> 
+													 <para> designates the title for this
+														  column </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Width</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;integer&gt; </para> 
+													 <para> designates the width for this
+														  column in terms of logical characters </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TextAlign</entry> 
+												<entry colname="col2"> 
+													 <para> left | center | right </para> 
+													 <para> designates the alignment for
+														  values of this column </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Hint</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;string&gt; </para> 
+													 <para> designates the hint for this
+														  column </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Visible</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether the column
+														  will appear </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">ElementType</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;element type&gt; </para> 
+													 <para> designates the type of node to
+														  generate for this column </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">LineBreak</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether there is a
+														  logical break after this column </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Group</entry> 
+												<entry colname="col2"> 
+													 <para> {&lt;string&gt;\}&lt;string&gt;
+														  </para> 
+													 <para> designates the name of a logical
+														  group to which this column belongs </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Include</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether the column
+														  should be included when the table expression is built. If no Include tags are
+														  found in a table definition, all columns are included by default. </para>
+													 </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">ReadOnly</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> Designates that the display
+														  element for this column, or columns defined on this domain should be read only.
+														  </para> </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRTableVars"> 
+				<title><indexterm><primary>Derivation</primary><secondary>TableVar
+								tags</secondary></indexterm>TableVars</title> 
+				<para> Learn about tags that affect TableVars. </para> 
+				<para> The tags listed in the table may be attached to a Table in
+					 the Dataphor Catalog. </para> 
+				<sect4> 
+					 <title><indexterm><primary>TableVar
+									 Tags</primary></indexterm>Tags</title> 
+					 <para>Learn how to namespace tags.</para> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Attribute</entry> 
+												<entry colname="col2">Type /
+													 Description</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;string&gt; </para> 
+													 <para> designates the title for this
+														  table var </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">DefaultOrder</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;order name&gt; </para> 
+													 <para> designates the default order for
+														  this table var </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Query</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;expression&gt; </para> 
+													 <para> designates the query expression
+														  to be used for this table var </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TableAlias</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;identifier&gt; </para> 
+													 <para> designates the alias name for a
+														  table. Used to substitute a table when linking to an interface. </para>
+													 </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+				<sect4> 
+					 <title>Example</title> 
+					 <para> The following example demonstrates using D4 to create a
+						  table with various tags assigned to the table and its columns. 
+						  <programlisting>/* Issue Table from Issue Tracker.D4 */
+create table Issue in Memory
+{
+	ID: IssueID
+		{ default NextIssueID() }
+		tags
+		{
+			Frontend.Visible = "false",
+			Frontend.Browse.Visible = "true"
+		},
+	Product_ID: ProductID
+		tags
+		{
+			Frontend.LineBreak = "false",
+			Frontend.Hint = "Identifier of the product involved"
+		},
+	Version: String
+		tags
+		{
+			Frontend.Width = "11", 
+			Frontend.LineBreak = "false",
+			Frontend.Hint = "The version of the product", 
+			DAE.StaticByteSize = "11"
+		},
+	Priority: Integer
+		tags
+		{
+			Frontend.Title = "Priority",
+			Frontend.Hint = "Numeric priority (0 = Highest)" 
+		},
+	Description: String
+		tags
+		{
+			Frontend.Width = "50", 
+			Frontend.TextBox.Height = "5",
+			Frontend.IsDisplayKey = "true",
+			Frontend.Hint = "Complete description of the problem",
+			DAE.StaticByteSize="100"
+		},
+	ReproductionSteps: String
+		tags
+		{
+			Frontend.Width = "50",
+			Frontend.TextBox.Height = "7",
+			Frontend.Title = "Steps To Reproduce",
+			Frontend.Hint = "Steps necessary to reproduce the issue",
+			DAE.StaticByteSize="150"
+		},
+	key {ID},
+	reference Issue_Product {Product_ID} references Product {ID} delete set {ShortIDUnknown()},
+	order {Product_ID, Version, Priority},
+	order {Description, Priority}
+}
+	comment = "Bug, Problem or other Issue"
+	tags { Frontend.Add.TableAlias = "NewIssue" };                            </programlisting> </para> 
+					 <para> Each <symbol>tags</symbol> clause attaches one or more
+						  metadata tags to the table or column name it follows. </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRReferences"> 
+				<title><indexterm><primary>Derivation</primary><secondary>Reference
+								tags</secondary></indexterm>References</title> 
+				<para> Learn about tags that affect references. </para> 
+				<para> The tags listed in the table may be attached to a Reference
+					 in the Dataphor Catalog. </para> 
+				<sect4> 
+					 <title><indexterm><primary>Derivation</primary><secondary>namimg
+									 reference tags</secondary></indexterm>Naming References Tags</title> 
+					 <para> Reference tags can be namespaced by the name of the
+						  reference type to control behavior during derivation. For example, the tags
+						  <symbol>Frontend.Add.Detail.Embedded = "false"</symbol> and
+						  <symbol>Frontend.Add.Lookup.Embedded = "true"</symbol> would indicate that a
+						  reference should not be embedded when it appears as a detail in a derived
+						  interface, but should be embedded when it appears as a lookup. </para> 
+				</sect4> 
+				<sect4> 
+					 <title><indexterm><primary>Reference
+									 tags</primary></indexterm>Tags</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type /
+													 Description</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Visible</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether this
+														  reference is visible </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Exposed</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether this
+														  reference is exposed (shown on the toolbar) </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Embedded</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether this
+														  reference is embedded </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Priority</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;integer&gt; </para> 
+													 <para> designates a requested priority
+														  for order of appearance for this reference </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">UseFullLookup</entry>
+												
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates that the display
+														  element to be used when this reference is embedded as a lookup in a user
+														  interface should be a full lookup, rather than quick lookup. Note that a full
+														  lookup will always be used if the number of columns to be looked up is greater
+														  than 1. </para> </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFROrders"> 
+				<title><indexterm><primary>Derivation</primary><secondary>Orders
+								tags</secondary></indexterm>Orders</title> 
+				<para> Learn about tags that affect orders. </para> 
+				<para> The tags listed in the table may be attached to an Order in
+					 the Dataphor Catalog. </para> 
+				<sect4> 
+					 <title><indexterm><primary>Orders
+									 tags</primary></indexterm>Tags</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type /
+													 Description</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;string&gt; </para> 
+													 <para> designates the title for this
+														  order </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Visible</entry> 
+												<entry colname="col2"> 
+													 <para> &lt;boolean&gt; </para> 
+													 <para> designates whether this order is
+														  available for user selection </para> </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Priority </entry> 
+												<entry colname="col2"> 
+													 <para> &lt;integer&gt; </para> 
+													 <para> designates a requested priority
+														  for order of appearance for this order </para> </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRElementTypeSpecificTags"> 
+				<title><indexterm><primary>Derivation</primary><secondary>Frontend
+								Element type specific tags</secondary></indexterm>ElementType Specific
+					 Tags</title> 
+				<para> Learn about tags that affect specific Frontend Elements.
+					 </para> 
+				<sect4> 
+					 <title><indexterm><primary>Frontend Element Type
+									 Tags</primary><secondary>common</secondary></indexterm>Common</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry
+												 colname="col2">&lt;string&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Width</entry> 
+												<entry
+												 colname="col2">&lt;integer&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TextAlign</entry> 
+												<entry colname="col2">left | center |
+													 right</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Hint</entry> 
+												<entry
+												 colname="col2">&lt;string&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">ReadOnly</entry> 
+												<entry
+												 colname="col2">&lt;boolean&gt;</entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+				<sect4> 
+					 <title><indexterm><primary>Frontend Element Type
+									 Tags</primary><secondary>text</secondary></indexterm><indexterm><primary>Text
+									 control tags</primary></indexterm>Text</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry
+												 colname="col2">&lt;string&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TitleAlign</entry> 
+												<entry colname="col2">left | top |
+													 none</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Width</entry> 
+												<entry
+												 colname="col2">&lt;integer&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TextAlign</entry> 
+												<entry colname="col2">left | center |
+													 right</entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+				<sect4> 
+					 <title><indexterm><primary>Frontend Element Type
+									 Tags</primary><secondary>textbox</secondary></indexterm><indexterm><primary>TextBox
+									 tags</primary></indexterm>TextBox</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry
+												 colname="col2">&lt;string&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TitleAlign</entry> 
+												<entry colname="col2">left | top |
+													 none</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Width</entry> 
+												<entry
+												 colname="col2">&lt;integer&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Height</entry> 
+												<entry
+												 colname="col2">&lt;integer&gt;</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">TextAlign</entry> 
+												<entry colname="col2">left | center |
+													 right</entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">IsPassword</entry> 
+												<entry
+												 colname="col2">&lt;boolean&gt;</entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+				<sect4> 
+					 <title><indexterm><primary>Frontend Element Type
+									 Tags</primary><secondary>checkbox</secondary></indexterm><indexterm><primary>CheckBox
+									 tags</primary></indexterm>CheckBox</title> 
+					 <para> 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Tag</entry> 
+												<entry colname="col2">Type</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Title</entry> 
+												<entry
+												 colname="col2">&lt;string&gt;</entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRRelationships"> 
+				<title><indexterm><primary>Derivation</primary><secondary>Reference
+								Types tags</secondary></indexterm>Reference Types</title> 
+				<para>Learn about tags and reference types.</para> 
+				<sect4> 
+					 <title><indexterm><primary>Table Relationship
+									 tags</primary></indexterm>Table Relationships</title> 
+					 <para> Frontend distinguishes four classes of relationships
+						  between tables, based on the type of reference used to define the relationship.
+						  The following definitions are made with respect to the table being presented as
+						  the "primary" table in the interface. 
+						  <informaltable> 
+								<tgroup cols="2">
+									 <colspec colwidth="*" colname="col1" colnum="1"/>
+									 <colspec colwidth="*" colname="col2" colnum="2"/> 
+									 <thead> 
+										  <row> 
+												<entry colname="col1">Relationship</entry> 
+												<entry colname="col2">Description</entry> 
+										  </row> 
+									 </thead> 
+									 <tbody> 
+										  <row> 
+												<entry colname="col1">Details</entry> 
+												<entry colname="col2"> A detail is a
+													 reference for which this table is the target and the reference is one-to-many.
+													 </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Extensions</entry> 
+												<entry colname="col2"> An extension is a
+													 reference for which this table is the target and the reference is one-to-one.
+													 </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Lookups</entry> 
+												<entry colname="col2"> A lookup is a
+													 reference for which this table is the source and the reference is many-to-one,
+													 and the source columns are all non-key columns. </entry> 
+										  </row> 
+										  <row> 
+												<entry colname="col1">Parents</entry> 
+												<entry colname="col2"> A parent is a
+													 reference for which this table is the source and the reference is one-to-one or
+													 many-to-one, and at least one of the source columns is a key column. </entry> 
+										  </row> 
+									 </tbody> 
+								</tgroup> 
+						  </informaltable> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRPageTypes"> 
+				<title><indexterm><primary>Derivation</primary><secondary>Page
+								Types</secondary></indexterm>PageTypes</title> 
+				<para>Learn about page types.</para> 
+				<sect4> 
+					 <title>Interface Categories</title> 
+					 <para> Frontend distinguishes two classes of page interface,
+						  table-level and row-level, and further partitions those types into the
+						  following categories of interface: </para> 
+					 <para> Table 
+						  <itemizedlist mark="bullet"> 
+								<listitem> 
+									 <para>Browse</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Lookup</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+					 <para> Row 
+						  <itemizedlist mark="bullet"> 
+								<listitem> 
+									 <para>Add</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Edit</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Delete</para> 
+								</listitem> 
+								<listitem> 
+									 <para>View</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Filter</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Manage</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Preview</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3 id="DFRRelationshipDerivation"> 
+				<title>Relationship Derivation Per PageType</title> 
+				<para>Learn about what Derivation does with PageTypes.</para> 
+				<sect4> 
+					 <title>Table</title> 
+					 <para> <emphasis role="strong">Browse/Lookup</emphasis>
+						  Derivation Actions: 
+						  <itemizedlist mark="bullet"> 
+								<listitem> 
+									 <para>Adds BrowseAction nodes for all Details and
+										  creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Adds UpdateAction nodes for all Extensions
+										  and creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Adds ViewAction nodes for all Lookups and
+										  Parents and creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Joins all Lookups into the expression used to
+										  populate the page.</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+				</sect4> 
+				<sect4> 
+					 <title>Row</title> 
+					 <para> <emphasis role="strong">Add/Edit/Delete/View</emphasis>
+						  Derivation Actions: 
+						  <itemizedlist mark="bullet"> 
+								<listitem> 
+									 <para>Adds BrowseAction nodes for all Details and
+										  creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Adds UpdateAction nodes of the same type as
+										  the page for all Extensions and creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Adds ViewAction nodes for all Lookups and
+										  Parents and creates menu items that reference them.</para> 
+								</listitem> 
+								<listitem> 
+									 <para>Joins all Lookups into the expression used to
+										  populate the page.</para> 
+								</listitem> 
+						  </itemizedlist> </para> 
+				</sect4> 
+		  </sect3> 
+		  <sect3> 
+				<title>See Also</title> 
+				<para> 
+					 <ulink url="D4LGTables.html">Create Table</ulink>, 
+					 <ulink url="D4LGMetaData.html">Metadata definition</ulink>
+					 </para> 
+		  </sect3> 
+</sect2> 

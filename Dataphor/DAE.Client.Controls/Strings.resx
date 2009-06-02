@@ -140,7 +140,7 @@
   </data>
   <data name="DBFileForm.LoadFileCaption" xml:space="preserve">
     <value>Load File</value>
-  </data>  
+  </data>
   <data name="DBFileForm.FileLockedText" xml:space="preserve">
     <value>The temporary file is being accessed by another application.  Close the application then click "OK" to capture changes. [ {0} ]</value>
   </data>
@@ -200,5 +200,26 @@
   </data>
   <data name="DBFileForm.AllFileFilter" xml:space="preserve">
     <value>All files (*.*)|*.*</value>
-  </data>  
+  </data>
+  <data name="DBImageAspect.Menu.CaptureText" xml:space="preserve">
+    <value>Ca&amp;pture...</value>
+  </data>
+  <data name="DBImageAspect.Menu.ClearText" xml:space="preserve">
+    <value>Cl&amp;ear</value>
+  </data>
+  <data name="DBImageAspect.Menu.CopyText" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="DBImageAspect.Menu.LoadText" xml:space="preserve">
+    <value>&amp;Load...</value>
+  </data>
+  <data name="DBImageAspect.Menu.PasteText" xml:space="preserve">
+    <value>&amp;Paste</value>
+  </data>
+  <data name="DBImageAspect.Menu.SaveAsText" xml:space="preserve">
+    <value>&amp;Save As...</value>
+  </data>
+  <data name="DBImageAspect.SaveFileDialog.Filter" xml:space="preserve">
+    <value>Image Files(*.jpeg)|*.jpeg</value>
+  </data>
 </root>

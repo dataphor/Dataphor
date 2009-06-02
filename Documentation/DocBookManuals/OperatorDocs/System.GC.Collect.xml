@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 10:33:04</date> 
+	 </sect2info> 
+	 <title>System.GC.Collect</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This tells the system to perform a garbage collection.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>GC.Collect();</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="Alphora.Dataphor.BOP.Persistence.Finalize.html">Persistence Finalize Method</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 10:26:32</date>
+	 </sect2info>
+	 <title>System.Frac</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the fractional portion of the specified real
+		  type.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add { Frac(-3.4) Neg, Frac(3.4) Pos };</programlisting> 
+		  <programlisting>Neg  Pos
+---- ---
+-0.4 0.4</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title><?xm-replace_text {title}?></title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Floor.html">System.Floor</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

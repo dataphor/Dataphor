@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 10:53:52</date> 
+	 </sect2info> 
+	 <title>System.ObjectID</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the ID (as an Integer) for the specified object
+		  name. Most of the objects in the system catalog are operators that have
+		  overloads. This Operator requires the full object name, not the abbreviated
+		  one.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Operators
+   where ( OperatorName = "System.Avg" )
+   add { ObjectID(Name) ObjID }
+   over { Name, ObjID };</programlisting> 
+		  <programlisting>Name                        ObjID
+--------------------------- -----
+System.Avg_System_Decimal_  4366
+System.Avg_System_Integer_  4357
+System.Avg_System_Money_    4374
+System.Avg_System_TimeSpan_ 4392</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.ObjectName.html">System.ObjectName</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

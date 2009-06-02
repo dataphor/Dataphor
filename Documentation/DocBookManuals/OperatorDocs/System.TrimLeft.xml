@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 30, 2004 11:12:43</date> 
+	 </sect2info> 
+	 <title>System.TrimLeft</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The <symbol>TrimLeft</symbol> operator returns the specified string
+		  with all white space removed from the left side.</para> 
+	 <para>Valid white space characters are members of the SpaceSeparator
+		  category in UnicodeCategory. Signified by the Unicode designation "Zs"
+		  (separator, space). Also these Unicode characters: hexadecimal 0x0009
+		  (horizontal tab), 0x000a (line feed), 0x000b (vertical tab), 0x000c (form
+		  feed), 0x000d (carriage return), 0x0085, 0x2028, and 0x2029.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example
+	 { UnTrimmed : String, Trimmed : String, key{} };
+begin
+	var LString : String;
+	LString := "     Hello World";
+	insert table { row { LString UnTrimmed, TrimLeft(LString) Trimmed } } into Example;
+end;
+select Example
+	add { UnTrimmed.Length() UnTrimmedLength, Trimmed.Length() TrimmedLength };
+drop table Example;</programlisting> 
+		  <programlisting>UnTrimmed        Trimmed     UnTrimmedLength TrimmedLength
+---------------- ----------- --------------- -------------
+     Hello World Hello World 16              11</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Trim.html">System.Trim</ulink>
+<ulink url="SLRSystem.TrimRight.html">System.TrimRight</ulink>
+<ulink url="SLRSystem.PadLeft.html">System.PadLeft</ulink>
+<ulink url="SLRSystem.PadRight.html">System.PadRight</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

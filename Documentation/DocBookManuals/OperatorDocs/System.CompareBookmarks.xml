@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 12:52:15</date> 
+	 </sect2info> 
+	 <title>CompareBookmarks</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator's return values are similar to the
+		  <symbol>compare</symbol> operator. This operator compares two bookmarks. The
+		  values returned are interpreted as follows: -1 if the left bookmark occurs
+		  earlier in the table/view, 0 if the bookmarks are the same, 1 if the left
+		  bookmark occurs later in the table/view than the other bookmark. A bookmark is
+		  returned from the <symbol>GetBookMark</symbol> operator. </para>
+<!--
+	 <example> 
+		  <title>Example</title> 
+		  <para>See 
+				<ulink url="D4LGUsingCursors.html">Programming Topics, Using
+					 Cursors</ulink></para> 
+	 </example>
+-->
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DDGP2Bookmarkable.html">Cursors Capabilities, Bookmarkable</ulink>
+<ulink url="D4LGCursorCapabilities.html">Select Statement, Cursors Capabilities</ulink>
+<ulink url="D4LGUsingCursors.html">Programming Topics, Using Cursors</ulink>
+<ulink url="SLRiCompare.html">iCompare</ulink>
+<ulink url="SLRSystem.GetBookmark.html">System.GetBookmark</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

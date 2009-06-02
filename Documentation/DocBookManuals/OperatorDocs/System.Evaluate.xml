@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 27, 2004 14:26:01</date> 
+	 </sect2info> 
+	 <title>System.ToDecimal</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The Evaluate operator dynamicly evaluates a string as D4 code.</para>
+	 
+	 <para>If AProcessID is specified the evaluation will be done on the
+		  specified process, otherwise it will be done on the current process.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Evaluate("6 - 2");
+select Evaluate("Arg1 + Arg2", row { 2 Arg1, 6 Arg2 });</programlisting> 
+		  <programlisting>4
+8</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

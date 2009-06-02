@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 14:50:45</date> 
+	 </sect2info> 
+	 <title>System.Math.Exp</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator calculates the natural exponent of the specified value.
+		  In other words it returns <emphasis>e</emphasis> raised to the specified power
+		  (<emphasis>e<superscript>x</superscript></emphasis>)
+		  <informalexample> 
+				<para><emphasis>e<superscript>6</superscript> =
+					 403.428793492735</emphasis></para> 
+		  </informalexample></para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { Exp(6) NaturalExponent};</programlisting> 
+		  <programlisting>NaturalExponent 
+---------------- 
+403.428793492735</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Math.Ln.html">System.Math.Ln</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

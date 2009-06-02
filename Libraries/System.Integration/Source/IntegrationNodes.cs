@@ -148,80 +148,92 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			try
 			{
 				// Have the target process use the main process' context
-				((ServerProcess)LTargetProcess).SwitchContext(AProcess.Context);
-				
-				LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
-				IServerProcess LSourceProcess = ((IServerSession)AProcess.ServerSession).StartProcess(LInfo);
+				Context LOldTargetContext = ((ServerProcess)LTargetProcess).SwitchContext(AProcess.Context);
 				try
 				{
-					// Have the source process use the main process' context
-					((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
-
-					Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess).Value;
+					LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
+					IServerProcess LSourceProcess = ((IServerSession)AProcess.ServerSession).StartProcess(LInfo);
 					try
 					{
-						LSource.Open();
-
-						// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
-						using (Row LRow = new Row(LTargetProcess, ASourceTable.DataType.CreateRowType()))
+						// Have the source process use the main process' context
+						Context LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
+						try
 						{
-							DataParams LParams = new DataParams();
-							LParams.Add(new DataParam("ASourceRow", LRow.DataType, DAE.Language.Modifier.Const, LRow));
-
-							IServerStatementPlan LTarget = LTargetProcess.PrepareStatement(new D4TextEmitter().Emit(LTargetStatement), LParams);
+							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess).Value;
 							try
 							{
-								LTarget.CheckCompiled();
+								LSource.Open();
 
-								while (LSource.Next())
+								// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
+								using (Row LRow = new Row(LTargetProcess, ASourceTable.DataType.CreateRowType()))
 								{
-									LRow.ClearValues();
-									LTargetProcess.BeginTransaction(IsolationLevel.Isolated);
+									DataParams LParams = new DataParams();
+									LParams.Add(new DataParam("ASourceRow", LRow.DataType, DAE.Language.Modifier.Const, LRow));
+
+									IServerStatementPlan LTarget = LTargetProcess.PrepareStatement(new D4TextEmitter().Emit(LTargetStatement), LParams);
 									try
 									{
-										LSource.Select(LRow);
-										LTarget.Execute(LParams);
-										LTargetProcess.CommitTransaction();
-										LSucceededUpdateCount++;
-									}
-									catch (Exception LException)
-									{
-										LFailedUpdateCount++;
-										LTargetProcess.RollbackTransaction();
-										if (LResult.Length < 100000)
-											LResult.Append(KeyValuesToString(LDisplaySourceKey, LRow) + " - " + LException.Message + "\r\n");
-										else
+										LTarget.CheckCompiled();
+
+										while (LSource.Next())
 										{
-											if (!LMaxResultLengthMessageWritten)
+											LRow.ClearValues();
+											LTargetProcess.BeginTransaction(IsolationLevel.Isolated);
+											try
 											{
-												LResult.Append(Strings.Get("MaxResultLengthExceeded"));
-												LMaxResultLengthMessageWritten = true;
+												LSource.Select(LRow);
+												LTarget.Execute(LParams);
+												LTargetProcess.CommitTransaction();
+												LSucceededUpdateCount++;
 											}
+											catch (Exception LException)
+											{
+												LFailedUpdateCount++;
+												LTargetProcess.RollbackTransaction();
+												if (LResult.Length < 100000)
+													LResult.Append(KeyValuesToString(LDisplaySourceKey, LRow) + " - " + LException.Message + "\r\n");
+												else
+												{
+													if (!LMaxResultLengthMessageWritten)
+													{
+														LResult.Append(Strings.Get("MaxResultLengthExceeded"));
+														LMaxResultLengthMessageWritten = true;
+													}
+												}
+											}
+
+											// Yield in case our process is aborted.
+											AProcess.CheckAborted();
 										}
 									}
-
-									// Yield in case our process is aborted.
-									AProcess.CheckAborted();
+									finally
+									{
+										LTargetProcess.UnprepareStatement(LTarget);
+									}
 								}
 							}
 							finally
 							{
-								LTargetProcess.UnprepareStatement(LTarget);
+								LSource.Close();
 							}
+						}
+						finally
+						{
+							((ServerProcess)LSourceProcess).SwitchContext(LOldSourceContext);	// Don't let the source process cleanup the main context
 						}
 					}
 					finally
 					{
-						LSource.Close();
+						((IServerSession)AProcess.ServerSession).StopProcess(LSourceProcess);
 					}
+
+					LResult.AppendFormat(Strings.Get("Results"), LSucceededUpdateCount, LFailedUpdateCount);
+					return LResult.ToString();
 				}
 				finally
 				{
-					((IServerSession)AProcess.ServerSession).StopProcess(LSourceProcess);
+					((ServerProcess)LTargetProcess).SwitchContext(LOldTargetContext);	// Don't let the target process cleanup the main context
 				}
-
-				LResult.AppendFormat(Strings.Get("Results"), LSucceededUpdateCount, LFailedUpdateCount);
-				return LResult.ToString();
 			}
 			finally
 			{

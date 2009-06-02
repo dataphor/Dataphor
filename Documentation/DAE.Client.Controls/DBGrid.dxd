@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<doc>
+  <members>
+    <member name="T:Alphora.Dataphor.DAE.Client.Controls.DBGrid">
+		<remarks>
+			The purpose of a grid is to show a two dementional view of data from a database.
+			Set the <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.Source" name="Sorce"/> property
+			to bind the grid to a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> of data.
+			Use the <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.Columns" name="Columns"/> property
+			to define the columnns to be displayed in the grid.  If no columns are specified all columns will appear.
+		</remarks>
+    </member>
+    
+    <member name="M:Alphora.Dataphor.DAE.Client.Controls.DBGrid.#ctor">
+		<remarks>
+			The purpose of a grid is to show a two dementional view of data.
+			Set the <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.Source" name="Sorce"/> property
+			to bind the grid to a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> of data.
+			The grid uses the DataViews view technology to provide a virtual view of data from the database.
+		</remarks>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.Source">
+		<value>
+			A <see cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/> that 
+			represents the view linked to; otherwise null. The default is null.
+		</value>
+		<remarks>
+			Links the <c>DBGrid</c> to a view of data.
+			Set <c>Source</c> to the <see cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/> 
+			through which the data from a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> 
+			is provided to the <c>DBGrid</c>.
+		</remarks>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.NoValueBackColor">
+		<value>
+			A <see cref="T:System.Drawing.Color" name="Color"/> that represents the background color 
+			of a cell when it has no value; The default is 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ControlColor.NoValueBackColor" name="NoValueBackColor"/>.
+		</value>
+		<remarks>
+			You can use <c>NoValueBackColor</c> to define the background color of a cell when it has no value.
+			A cell has no value when the 
+			<see cref="M:Alphora.Dataphor.DAE.Client.DataField.HasValue"/> method returns false.
+		</remarks>
+		<seealso cref="M:Alphora.Dataphor.DAE.Client.DataField.HasValue" name="HasValue"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.Controls.ControlColor" name="ControlColor"/>
+	</member>
+    
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.Link">
+		<value>
+			A <see cref="T:Alphora.Dataphor.DAE.Client.DataLink" name="DataLink"/> that
+			links this control to a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>.
+		</value>
+		<remarks>
+			Use the <c>Link</c> property to reference the <see cref="T:Alphora.Dataphor.DAE.Client.DataLink" name="DataLink"/> instance used by this control.
+			Links this control to a DataView through the <see cref="P:Alphora.Dataphor.DAE.Client.DataLink.Source" name="Source"/> property.
+		</remarks>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataLink" name="DataLink"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBGrid.ReadOnly">
+		<value>
+			true if the grid is read-only; otherwise, false. The default is true.
+		</value>
+		<remarks>
+			When this property is true any
+			<see cref="T:Alphora.Dataphor.DAE.Client.Controls.GridColumn" name="GridColumn"/>
+			that supports editing is read-only(editing is suppressed).  For example the
+			<see cref="T:Alphora.Dataphor.DAE.Client.Controls.CheckBoxGridColumn" name="CheckBoxGridColumn"/>.
+			The CheckBoxGridColumn is a GridColumn
+			that supports editing on the grid through a CheckBox control.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataView.State" name="DataView.State"/>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="TextBoxBase.ReadOnly"/>
+	</member>
+
+	
+  </members>
+</doc>

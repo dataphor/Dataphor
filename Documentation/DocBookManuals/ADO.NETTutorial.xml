@@ -1,0 +1,904 @@
+<appendix id="ANTADONetTut"> 
+	 <appendixinfo> 
+		  <date role="LastMod">Friday, October 04, 2002 5:21:17 PM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 3:05:59 PM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </appendixinfo> 
+	 <title>Appendix B - ADO.NET Provider Tutorial</title> 
+	 <para><indexterm><primary>How to</primary><secondary>use ADO.NET
+					 Provider</secondary></indexterm><indexterm><primary>ADO.NET
+					 Provider</primary></indexterm><indexterm><primary>ADO.NET
+					 Provider</primary><secondary>Tutorial</secondary></indexterm>This tutorial
+		  demonstrates key concepts of the ADO.NET Data Provider components.</para> 
+	 <sect1 id="ANTADONETTutIntroduction"> 
+		  <title>Introduction</title> 
+		  <para>In this apendix we introduce the ADO.NET provider components and
+				create a simple application with them. The application is a simple interface
+				to add, edit, and delete data in the State table of the Issue Tracker data
+				model that ships with Dataphor.</para> 
+		  <sect2 id="ANTPrerequisites"> 
+				<title>Prerequisites</title> 
+				<para>Basic knowledge of:</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>ADO.NET data providers.  For more information on
+									 ADO.NET data providers 
+									 <ulink
+									  url="ms-help://MS.VSCC/MS.MSDNVS/cpguide/html/cpconusingadonetproviderstoaccessdata.htm">Using
+										  .NET Data Providers to Access Data</ulink>.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>ADO.NET Typed Datasets 
+									 <ulink
+									  url="ms-help://MS.VSCC/MS.MSDNVS/vbcon/html/vbconDataSets.htm">Introduction to
+										  DataSets</ulink> </para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Visual Studio Forms Designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Programming in VB.NET, C# or any .NET supported
+									 language.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>D4, SQL or similar data access language.</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTWhatYouWillLearn"> 
+				<title>What You Will Learn</title> 
+				<para>Components Introduction</para> 
+				<para>Setting Up the Development Environment</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Installing ADO.NET Provider Components</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Verifying the DAE Service</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>Building the Application</para> 
+				<para> 
+					 <itemizedlist mark="bullet"> 
+						  <listitem> 
+								<para>Creating the Data Model</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Creating a New Application</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Building the Browse Form</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Creating a Typed DataSet</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Binding the Grid to a Table</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Connecting to the DAE Service</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Using Commands and Parameters</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Using the DataAdapter to Fill Datasets</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Building the Edit Form</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Putting It All Together</para> 
+						  </listitem> 
+					 </itemizedlist> </para> 
+				<para>Conclusion</para> 
+		  </sect2> 
+		  <sect2 id="ANTRequirements"> 
+				<title>Requirements</title> 
+				<para>Active DAE Service</para> 
+		  </sect2> 
+		  <sect2 id="ANTTerms"> 
+				<title>Terms:</title> 
+				<para>DAE: Dataphor Data Access Engine</para> 
+				<para>ADO.NET Data Providers:  See Framework SDK on ADO.NET data
+					 providers.</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="ANTComponentsIntroduction"> 
+		  <title>Components Introduction</title> 
+		  <para>The following is a brief introduction to the components of the
+				DAE ADO.NET Data Provider.</para> 
+		  <para> 
+				<orderedlist numeration="arabic"> 
+					 <listitem> 
+						  <para>The <symbol>DAEConnection</symbol> component
+								implements <symbol>IDbConnection</symbol> and provides a connection to the DAE
+								server.  It encapsulates the Uri (ConnectionString) and session specific
+								information such as a user name and password.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The <symbol>DAECommand</symbol> component
+								encapsulates a D4 or SQL (depending on the selected language) statement that is
+								executed while connected to the DAE server.  It also provides a parameter
+								collection for parameterized statements.</para> 
+					 </listitem> 
+					 <listitem> 
+						  <para>The <symbol>DAEDataAdapter</symbol> component uses a
+								set of DAE commands and <symbol>DataSets</symbol> to consume data in the
+								DAE.</para> 
+					 </listitem> 
+				</orderedlist> </para> 
+	 </sect1> 
+	 <sect1 id="ANTSettingUptheDevelopmentEnvironment"> 
+		  <title>Setting Up the Development Environment</title> 
+		  <para><indexterm><primary>ADO.NET Provider</primary><secondary>Setting
+						  up the development environment</secondary></indexterm><indexterm><primary>How
+						  to</primary><secondary>Set up the ADO.Net Development
+						  Environment</secondary></indexterm>Before creating the application we need to
+				do a few things to prepare the development environment.  First we demonstrate
+				the installation of ADO.NET Provider components into the Toolbox.  Finally we
+				verify that there is an active DAE service running.</para> 
+		  <sect2 id="ANTInstallingADONETProviderComponents"> 
+				<title>Installing ADO.NET Provider Components</title> 
+				<para><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Installing the
+								components</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>Install ADO.NET Provider
+								Components</secondary></indexterm>To install the ADO.NET Provider components
+					 into the Toolbox do the following:</para> 
+				<para> 
+					 <orderedlist numeration="arabic"> 
+						  <listitem> 
+								<para>Open Visual Studio.NET.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select Tools|Customize ToolBoxâ€¦</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the ".NET Framework Components"
+									 tab.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Sort the list by namespace by clicking the column
+									 title Namespace.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select all components in the
+									 "Alphora.Dataphor.DAE.Client.Provider" namespace.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the OK button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>If the Toolbox is not visible in Visual Studio
+									 then select View|ToolBox and locate the DAEConnection, DAECommand, and
+									 DAEDataAdapter components.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTVerifyingtheDAEService"> 
+				<title>Verifying the DAE Service</title> 
+				<para><indexterm><primary>DAE Service</primary><secondary>Verify it
+								is running</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>Verify the DAE Service is
+								running</secondary></indexterm>The application needs access to an active DAE
+					 Service. To verify that the DAE Service is running do one of the
+					 following.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Open the <application>Dataphor DAE Service
+									 Configuration Utility</application>.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open the Windows Services Manager and look for
+									 the <application>Alphora Dataphor Data Access Engine
+									 Server</application>.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>For help starting the service see 
+					 <link role="cref" linkend="DDGServiceConfigurationUtility">DAE
+						  Service</link>.</para> 
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="ANTBuildingtheApplication"> 
+		  <title>Building the Application</title> 
+		  <para><indexterm><primary>ADO.NET Provider</primary><secondary>Building
+						  an application</secondary></indexterm><indexterm><primary>How
+						  to</primary><secondary>Build an application with ADO.NET
+						  Provider</secondary></indexterm>We will be creating a forms application using
+				Visual Studio.NET to demonstrate various aspects of the components.  The
+				application will be a simple browse to edit interface that allows data
+				consumers to add, edit, and delete data in the State table of the Issue Tracker
+				sample database that ships with 
+				<productname>Dataphor</productname>.  We will begin by creating
+				the sample database.</para> 
+		  <sect2 id="ANTCreatingtheDataModel"> 
+				<title>Creating the Data Model</title> 
+				<para><indexterm><primary>How to</primary><secondary>Create a data
+								model</secondary></indexterm>The State table schema is in the sample Issue
+					 Tracker.D4 script that ships with 
+					 <productname>Dataphor</productname>.  All we need to do is run
+					 the sample script in <application>Dataphoria</application>.</para> 
+				<para>Start <application>Dataphoria</application>.</para> 
+				<para>Right-click on "Servers" and select "Add
+					 Connectionâ€¦".</para> 
+				<para>Change the Uri property to "tcp://localhost:8061/dataphor" or
+					 to the configured port number for the DAE Service.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Right-click on the server and select "Query
+									 (Script)".</para> 
+						  </listitem> 
+					 </orderedlist> 
+					 <orderedlist numeration="loweralpha"> 
+						  <listitem> 
+								<para>Open the "Issue Tracker.D4" script
+									 (File|Open).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Execute the script by selecting (Script|Execute)
+									 or by pressing (Ctrl-E). You should see a "Statement executed successfully."
+									 message corresponding to each statement in the script. The "Issue Tracker.D4"
+									 script uses the default storage device called a MemoryDevice. Because the data
+									 is being stored in memory, the data is destroyed when the DAE services stops.
+									 To persist the data specify a different storage device in the script. Some of
+									 the more common devices are SQLServerDevice, OracleDevice, DB2Device, and
+									 LinterDevice. For more information on Dataphor devices see 
+									 <link role="cref"
+									  linkend="D4LGUsingDevices">Storage Devices </link>.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Leave <application>Dataphoria</application> open
+									 because we will be using it again to generate typed datasets.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTCreatingaNewApplication"> 
+				<title>Creating a New Application</title> 
+				<para>Create a new Windows application.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Open Visual Studio.NET.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select File|New Projectâ€¦ then select the
+									 "Windows Application" template and change the application name to
+									 "IssueTrackerState".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select OK.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open Form1 in the designer. Right-click Form1 in
+									 the Solution Explorer and select "View Designer".</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTBuildingtheBrowseForm"> 
+				<title>Building the Browse Form</title> 
+				<para><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Build a browse
+								form</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>Build a browse form for ADO.NET
+								Provider</secondary></indexterm>The browse is a simple form with a Grid and
+					 three buttons Add, Edit, and Delete. The grid simply allows a data consumer to
+					 navigate the result set.  The Add button inserts a State.  The Edit button
+					 updates a State.  The Delete button deletes a State.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Setup the development environment as described
+									 above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change the forms <property>Text</property>
+									 property to "State Browse" by clicking on the form and editing the
+									 <property>Text</property> property in the properties window.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Locate the 
+									 <classname>DataGrid</classname> control in the
+									 Toolbox and place one in the designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>ReadOnly</property> property to
+									 true.  This restricts editing in the grid, we will be creating an edit form
+									 for editing.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add three buttons to the form.   Change their
+									 names to "btnAdd", "btnEdit", and "btnDelete".  Set their
+									 <property>Text</property> properties to "&amp;Add", "&amp;Edit", and
+									 "&amp;Delete".</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>Now the form should look something like:</para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut002.jpg" width="300" depth="208"/> </para>
+				
+		  </sect2> 
+		  <sect2 id="ANTCreatingaTypedDataset"> 
+				<title>Creating a Typed Dataset</title> 
+				<para><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Creating a typed
+								dataset</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>create an ADO.NET Provider typed data
+								set</secondary></indexterm>Typed datasets are used extensively in ADO.NET. The
+					 structure of a <symbol>dataset</symbol> can be defined in an XML Schema. XML
+					 Schemas are a standards-based format of the W3C (World Wide Web Consortium) for
+					 defining the structure of XML data.  In this section we demonstrate how to
+					 create a typed Dataset for a table in the DAE.  For more information on typed
+					 datasets 
+					 <ulink
+					  url="ms-help://MS.VSCC/MS.MSDNVS/vbcon/html/vbconDataSets.htm">Introduction to
+						  Datasets</ulink> </para> 
+				<para>Creating a Typed <symbol>dataset</symbol> with the Dataphor
+					 tool set includes three steps.  First, use
+					 <application>Dataphoria</application> to export the schema.  Second, add a new
+					 Data Set to your project in Visual Studio, replacing the default schema with
+					 the schema generated by <application>Dataphoria</application>.  Finally locate
+					 the <symbol>DataSet</symbol> component and put one in the designer selecting
+					 Typed Dataset when prompted by the designer for the <symbol>DataSet</symbol>
+					 type.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Generate the XML schema:</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Make sure the DAE Service is started (described
+									 above).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Create the data model as described above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>In the script editor in
+									 <application>Dataphoria</application> type the D4 statement "select
+									 state".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Highlight the statement "select State"  </para>
+								
+						  </listitem> 
+						  <listitem> 
+								<para>On the main menu select "Export" then
+									 "Schemaâ€¦"</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>In the "Export" dialog type "State.xsd" then
+									 press enter.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Open the "State.xsd" file in Dataphoria or an
+									 editor of your choice, and copy its contents to the clipboard.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add a new <symbol>Dataset</symbol> to your
+									 project and replace the existing XML with the XML schema generated
+									 above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Right-click the project in the Solution Explorer
+									 and select Add|Add New Itemâ€¦</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the "Data Set" template. Change its name
+									 to State.xsd.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the Open button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the XML tab in the designer for the
+									 Dataset.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select all (Ctrl-A) and replace the existing XML
+									 with the clipboards by pressing (Ctrl-V).  Theoretically you could simply add
+									 the State.xsd file generated by <application>Dataphoria</application> to your
+									 project, but there is one catch.  If you add the file to your project directly
+									 the "Custom Tool" property of the <symbol>DataSet</symbol> is not set, it needs
+									 to be set to "MSDataSetGenerator". If this property is blank the DataSet, is
+									 not recognized by the designer for the creation of typed DataSets. For this
+									 reason the copy paste method was used but you could use either.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the <symbol>DataSet</symbol> tab in the
+									 designer that is next to the XML tab.  In the properties grid change the
+									 "dataSetName" property from "NewDataSet" to "State" and change the "id"
+									 property to "State".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Press Ctrl-S to save changes.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>The State schema should look like:</para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut004.jpg" width="572" depth="404"/> </para>
+				
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Now drop a <symbol>Dataset</symbol> component
+									 from the Toolbox onto the browse form and make it a Typed dataset pointing to
+									 the State Dataset defined above. Change its name to "dsState". Now we have a
+									 typed dataset called dsState.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Save all changes by pressing Ctrl-Shift-S.</para>
+								
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTBindingtheGridtoaTable"> 
+				<title>Binding the Grid to a Table</title> 
+				<para><indexterm><primary>How to</primary><secondary>bind a grid to
+								a table in Visual Studio</secondary></indexterm>Now that the designer is aware
+					 of the state table schema we can bind controls to it.  In this case we will
+					 bind a 
+					 <classname>DataGrid</classname> to the State table.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Create the dsState typed dataset as described
+									 above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the State Browse form in the
+									 designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the 
+									 <classname>DataGrid</classname> in the
+									 designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>DataSource</property> property
+									 to the dsState._Table table.  The ID and Description columns should be showing
+									 in the grid.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut006.jpg" width="300" depth="208"/> </para>
+				
+		  </sect2> 
+		  <sect2 id="ANTConnectingtotheDAEService"> 
+				<title>Connecting to the DAE Service</title> 
+				<para><indexterm><primary>How to</primary><secondary>Connect to the
+								DAE service</secondary></indexterm><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Connecting to the DAE
+								service</secondary></indexterm>In this section we demonstrate how to use the 
+					 <indexterm><primary>DAEConnection
+								component</primary></indexterm><classname>DAEConnection</classname> component
+					 to connect to the DAE service.  An active 
+					 <classname>DAEConnection</classname> is needed to fill a
+					 dataset or update data in the DAE.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Make sure the DAE Service is running as described
+									 above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Verify that the Dataphor ADO.NET Provider
+									 components have been installed into the Toolbox as described above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Locate the 
+									 <classname>DAEConnection</classname> component in
+									 the Toolbox and place one in the designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>ConnectionString</property>
+									 property to server Uri "tcp://localhost:8061/dataphor" or to whatever your DAE
+									 Service is configured to listen on.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Expand the <symbol>SessionInfo</symbol>
+									 section.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>UserID</property> to a valid
+									 user id or admin for default.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Leave the <property>Password</property> blank if
+									 you are using the default user id otherwise set it to the valid
+									 password.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Toggle the <property>Active</property> property
+									 to true. If you cannot activate the session check the
+									 <property>UserID</property>, <property>Password</property> and
+									 <property>ConnectionString</property> <property>(Uri)</property> properties. 
+									 Once the session is active we have a connection with the DAE service.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+		  </sect2> 
+		  <sect2 id="ANTUsingCommandsandParameters"> 
+				<title>Using Commands and Parameters</title> 
+				<para><indexterm><primary>How to</primary><secondary>use the
+								DAECommand component</secondary></indexterm>Because the application will
+					 consume data in the State table we will create a command for each statement. 
+					 The insert, update, and delete statements will demonstrate the use of
+					 parameters with commands.  The value in the <property>CommandText</property>
+					 property of a 
+					 <indexterm><primary>DAECommand
+								component</primary></indexterm><classname>DAECommand</classname> depends on the
+					 selected Language of the session. In this tutorial we will be using the default
+					 language D4.  Do the following to create the commands:</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Locate the 
+									 <classname>DAECommand</classname> component in the
+									 Toolbox and Place four in the designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change their names to "SelectCommand",
+									 "InsertCommand", "UpdateCommand", and "DeleteCommand".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>Connection</property> property
+									 for each command to the 
+									 <classname>DAEConnection</classname> already in the
+									 designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>For the select command set the
+									 <property>CommandText</property> property to "State" D4 statement or "select *
+									 from state" depending on the selected language of the session.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>For the insert command set the
+									 <property>CommandText</property> property to "insert table { row { StateID(AID)
+									 as ID, ADescription as Description } } into State;" D4 statement, or use the
+									 equivalent SQL statement depending on the language setting of the session. Note
+									 that we have defined two parameters here AID and ADescription.  The â€˜Aâ€™
+									 character in front of the parameter is not required; all parameters only need
+									 be uniquely identified.  To add these parameters to the
+									 <property>DAEParameters</property> collection do the following:</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Click on the ellipses button at the right of the
+									 <property>DAEParameters</property> property. The DAE Parameter Collection
+									 Editor should appear.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select Add, daeParameter1 should appear in the
+									 members list.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>ParameterName</property>
+									 property to "AID" exactly as it is defined in the statement.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>SourceColumn</property>
+									 property to column name "ID".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>DAEDbType</property> property
+									 to "String" because the StateID domain is a descendant of the String
+									 domain.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>Direction</property> property
+									 to input because AID is an input parameter in this statement.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add the ADescription parameter to the
+									 <property>DAEParameters</property> collection same as above, accept set the
+									 parameter name property to ADescription and the
+									 <property>SourceColumn</property> property to Description.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>For the Delete command set the
+									 <property>CommandText</property> property to "delete State where ID =
+									 StateID(AOriginalID);".  Add the AOriginalID parameter to the
+									 <property>DAEParameters</property> collection (same as above) accept:</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>ParameterName</property>
+									 property to AOriginalID.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>SourceColumn</property>
+									 property to ID.  This parameter uses the original value of the ID
+									 column.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>Direction</property> property
+									 to input.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>SourceVersion</property>
+									 property to original.  This informs the parameter to use the original value of
+									 the field not the current value.  The current value may have been
+									 modified.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Finally for the Update command set the
+									 CommandText property to "update State set { ID := StateID(AID), Description :=
+									 ADescription } where ID = StateID(AOriginalID);"</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Create the AID parameter (same as above in the
+									 insert command).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Create the ADescription parameter (Same as above
+									 in the insert command).</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Create the AOriginalID parameter (Same as above
+									 in the delete command).</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>Now that the commands are created we can move on to the 
+					 <classname>DAEDataAdapter</classname>.</para> 
+		  </sect2> 
+		  <sect2 id="ANTUsingtheDataAdaptertoFillDatasets"> 
+				<title>Using the DataAdapter to Fill Datasets</title> 
+				<para><indexterm><primary>How to</primary><secondary>Use the
+								DAEDataAdapter component</secondary></indexterm>The 
+					 <indexterm><primary>DAEDataAdapter</primary></indexterm><classname>DAEDataAdapter</classname>
+					 component implements a 
+					 <methodname>Fill</methodname> method to populate DataSets or
+					 DataTables with data from the DAE. It also implements an 
+					 <methodname>Update</methodname> method which calls the
+					 respective INSERT, UPDATE, or DELETE statements for each inserted, updated,
+					 deleted row in the specified table.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Locate the 
+									 <classname>DAEDataAdapter</classname> component in
+									 the Toolbox.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Place a 
+									 <classname>DAEDataAdapter</classname> in the
+									 designer.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <property>SelectCommand</property>
+									 property to the select command created above.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Do the same with the Insert, Update, and Delete
+									 command properties respectively.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Now with the commands set we can use the adapter
+									 to fill the dataset dsState.  In the constructor of the State Browse form
+									 after IntializeComponent() add this code snippet:</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>daeDataAdapter1.Fill(dsState);</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Now run the application press (F5).  The form
+									 should look likeâ€¦</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut008.jpg" width="300" depth="208"/> </para>
+				
+		  </sect2> 
+		  <sect2 id="ANTBuildingtheEditForm"> 
+				<title>Building the Edit Form</title> 
+				<para><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Building an Edit
+								form</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>Build an ADO.NET Provider edit
+								form</secondary></indexterm>The edit form is a simple form with two edit boxes
+					 and two buttons.  The form simply allows editing of the ID, and Description
+					 columns.</para> 
+				<para> 
+					 <orderedlist> 
+						  <listitem> 
+								<para>Add a new form to the project.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Right-click the project and select Add|Add New
+									 Itemâ€¦</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select Windows Form template and set the name to
+									 StateEdit.cs</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select "Open".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Text property of the form to "State
+									 Edit".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add a <symbol>Button</symbol> to the form.</para>
+								
+						  </listitem> 
+						  <listitem> 
+								<para>Change its name to "btnSave".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> property of the
+									 first button to "&amp;Save".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>DialogResult</symbol> property to
+									 OK.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add another Button to the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Change its name to "btnCancel".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> property to
+									 "&amp;Close".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>DialogResult</symbol> property to
+									 Cancel.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Save button as the
+									 <symbol>AcceptButton</symbol> of the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the State Edit form in the designer and
+									 set its <symbol>AcceptButton</symbol> property to the Save button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the Cancel button as the
+									 <symbol>CancelButton</symbol> of the form.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Select the State Edit form in the designer and
+									 set its <symbol>CancelButton</symbol> property to the Cancel button.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add two <symbol>TextBox</symbol> controls to the
+									 form, one for each column represented. Changes their names to "tbID" and
+									 "tbDescription".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Add two labels to the form, one for each column
+									 represented.</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> of label1 to
+									 "ID".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Set the <symbol>Text</symbol> of label2 to
+									 "Description".</para> 
+						  </listitem> 
+						  <listitem> 
+								<para>Arrange the controls on the form to look
+									 something like this:</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut010.jpg" width="208" depth="144"/> </para>
+				
+		  </sect2> 
+		  <sect2 id="ANTPuttingItAllTogether"> 
+				<title>Putting It All Together</title> 
+				<para><indexterm><primary>ADO.NET
+								Provider</primary><secondary>Build the browse to edit
+								interface</secondary></indexterm><indexterm><primary>How
+								to</primary><secondary>Build the browse to edit
+								interface</secondary></indexterm>Now that we have both the browse and edit
+					 forms created we can define the interaction between the two.  The browse
+					 creates the edit form whenever the Add or Edit buttons are pressed.  In this
+					 tutorial we are using C# but you can use VB.NET or any .NET supported
+					 language.</para> 
+				<para> 
+					 <orderedlist numeration="arabic"> 
+						  <listitem> 
+								<para>In order for the State Edit form to work we need
+									 to create a new constructor for it.  The new constructor will be used in the
+									 Add and Edit events of the browse form.  The constructor takes two arguments,
+									 the first being the dsState dataset defined in the browse form, the second will
+									 be its parent control.  In the constructor the dataset will be used to create
+									 new data-bindings for the controls.  The parent control is used to synchronize
+									 the current row by assigning the binding manager of the edit form to the
+									 binding manager of its parent.  The constructor looks like:</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting> public StateEdit( IssueTrackerState.State  ADataSet, Control AParent)
+{
+	InitializeComponent();
+	BindingContext = AParent.BindingContext;
+	tbID.DataBindings.Add("Text", ADataSet._Table, "ID"); 
+	tbDescription.DataBindings.Add("Text", ADataSet._Table, "Description");
+} </programlisting> </para> 
+				<para> 
+					 <orderedlist continuation="continues" numeration="arabic"> 
+						  <listitem> 
+								<para>Design the State Browse form and double click the
+									 Add button.  The implementation for adding a State consists of creating a
+									 binding manager, inserting a new row, showing the edit form, and posting or
+									 canceling changes.  Posting changes includes calling the DAEDataAdapterâ€™s
+									 Update method.  Calling this method posts changes back to the DAE.  The
+									 implementation of the Add event looks like</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting>BindingManagerBase LManager = BindingContext[dsState.Tables["Table"]]; 
+
+LManager.AddNew(); 
+
+using(StateEdit LEditForm = new StateEdit(dsState, this as Control))
+{
+	LEditForm.ShowDialog();
+	if (LEditForm.DialogResult == DialogResult.OK)
+	{
+		LManager.EndCurrentEdit();
+		daeDataAdapter1.Update(dsState);
+	}
+	else 
+		LManager.CancelCurrentEdit();
+} </programlisting> </para> 
+				<para> 
+					 <orderedlist continuation="continues" numeration="arabic"> 
+						  <listitem> 
+								<para>The implementation for editing a State is the
+									 same as adding with one exception, inserting the new row.  Double click the
+									 Edit button on the browse form.  Use the same implementation in the add event,
+									 except remove the line "LManager.AddNew()".</para> 
+						  </listitem> 
+					 </orderedlist> 
+					 <orderedlist numeration="arabic" continuation="continues"> 
+						  <listitem> 
+								<para>Deleting a row is the simplest case. To delete a
+									 row use the binding managerâ€™s RemoveAt method then update the DAE using the
+									 Update method of the data adapter.  The implementation looks like:</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para> 
+					 <programlisting>BindingManagerBase LManager = BindingContext[dsState.Tables["Table"]]; 
+LManager.RemoveAt(LManager.Position);
+daeDataAdapter1.Update(dsState); </programlisting> </para> 
+				<para> 
+					 <orderedlist continuation="continues"> 
+						  <listitem> 
+								<para>Run the application press (F5).  Try adding,
+									 editing and deleting.</para> 
+						  </listitem> 
+					 </orderedlist> </para> 
+				<para>
+					 <inlinegraphic fileref="images/ADOTut012.jpg" width="328" depth="293"/> </para>
+				
+		  </sect2> 
+	 </sect1> 
+	 <sect1 id="ANTConclusion"> 
+		  <title>Conclusion</title> 
+		  <para>In this tutorial we created a simple browse to edit interface to
+				demonstrate key points of the Dataphor ADO.NET data provider components.  In
+				the application we demonstrated the DAE data adapters ability to fill datasets
+				and update the DAE.  We also demonstrated the use of the DAEConnection
+				component by connecting to the DAE service.  We introduced the command
+				component and demonstrated how to use parameters with commands.  This was only
+				a brief introduction intended to provide an understanding of how these
+				components fit into the ADO.NET data provider framework.</para> 
+	 </sect1> 
+</appendix> 

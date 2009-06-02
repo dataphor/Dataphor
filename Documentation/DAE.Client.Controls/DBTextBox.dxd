@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<doc>
+  <members>
+    <member name="T:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox">
+		<remarks>
+			The <c>ExtendedTextBox</c> is an abstract class for all TextBox controls that
+			have different background colors based on the state of the data in
+			the control.  There are three data states NoValue, NoValueReadOnly, and Value.
+			The data state is determined by the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/> 
+			and <see cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/> properties.
+			The colors for each state are NoValueBackColor, NoValueReadOnlyBackColor,
+			and BackColor.  When the data state is NoValue then NoValueBackColor is used.
+			When the data state is NoValueReadOnly then NoValueReadOnlyBackColor is used.
+			When the data state is Value then the original 
+			<see cref="P:System.Windows.Forms.TextBoxBase.BackColor" name="BackColor"/> is used.
+		</remarks>
+    </member>
+    
+    <member name="M:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.#ctor">
+		<remarks>
+			By default <see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.ValueBackColor" name="ValueBackColor"/> equals BackColor.
+		</remarks>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue">
+		<value>
+			true if the TextBox holds a value; otherwise false.
+		</value>
+		<remarks>
+			<para>
+			You can use <c>HasValue</c> to determine if the control holds a value.
+			<c>HasValue</c> is abstract because it is left to the implementation of the TextBox to determine when it has a value.
+			This is important especially in data-aware controls, because the data-aware TextBox does not have
+			a valid value until certain criteria are met like 
+			(<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> != null) &amp;&amp; DataField.HasValue.  
+			In contrast a non data-aware text box may have a value when
+			different criteria are met, for example 
+			<see cref="P:System.Windows.Forms.TextBoxBase.Text" name="Text"/> not equal the empty string.
+			Even an empty string could be a valid value for data-aware TextBox controls.
+			</para>
+			<para>
+			The HasValue and <see cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/> 
+			properties are used to determine the background color of the control.
+			When HasValue is false and ReadOnly is false the background color is the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueBackColor" name="NoValueBackColor"/>.
+			When HasValue is false and ReadOnly is true the background color is the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueReadOnlyBackColor" name="NoValueReadOnlyBackColor"/>.
+			When HasValue is true then the original 
+			<see cref="P:System.Windows.Forms.TextBoxBase.BackColor" name="BackColor"/> is used.
+			</para>
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueBackColor" name="NoValueBackColor"/>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueReadOnlyBackColor" name="NoValueReadOnlyBackColor"/>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.ValueBackColor" name="ValueBackColor"/>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.BackColor" name="BackColor"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueBackColor">
+		<value>
+			A <see cref="T:System.Drawing.Color" name="Color"/> that represents the background color 
+			of the control when it holds no value; The default is 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ControlColor.NoValueBackColor" name="NoValueBackColor"/>.
+		</value>
+		<remarks>
+			You can use the <c>NoValueBackColor</c> to define the background color of the TextBox when it holds no value.
+			The TextBox holds no value when the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/> property is false.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.Controls.ControlColor" name="ControlColor"/>
+	</member>
+    
+    <member name="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.NoValueReadOnlyBackColor">
+		<value>
+			A <see cref="T:System.Drawing.Color" name="Color"/> that represents the background color 
+			of the control when it holds no value and it's read-only; The default is 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ControlColor.NoValueReadOnlyBackColor" name="NoValueReadOnlyBackColor"/>.
+		</value>
+		<remarks>
+			You can use the <c>NoValueReadOnlyBackColor</c> to define the background color of 
+			the TextBox when it holds no value and it is 
+			<see cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/>.
+			The TextBox holds no value when the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/> 
+			property is false.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.Controls.ControlColor" name="ControlColor"/>
+    </member>
+    
+    <member name="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.ValueBackColor">
+		<value>
+			A <see cref="T:System.Drawing.Color" name="Color"/> that represents the background color 
+			of the control when it holds a value; The default is 
+			<see cref="P:System.Windows.Forms.TextBoxBase.BackColor" name="BackColor"/>.
+		</value>
+		<remarks>
+			<para>
+			You can use <c>ValueBackColor</c> to determine the background color of the control when it holds a value.
+			The TextBox holds a value when the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/> 
+			property is true.
+			</para>
+			<para>
+			The ValueBackColor property is maintained by the BackColor property of the TextBox.
+			ValueBackColor is used to restore the background color back to it's original color(BackColor) on a data state change.
+			</para>
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.BackColor" name="BackColor"/>
+    </member>
+    
+    <member name="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.UpdatingBackColor">
+		<value>
+			true if the control is internally updating the background color of the control; otherwise, false.
+		</value>
+		<remarks>
+		You can use <c>UpdatingBackColor</c> to determine when the TextBox background color is being updated 
+		due to a change in the 
+		<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/>
+		 or <see cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/> states.
+		</remarks>
+    </member>
+    
+    <member name="M:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.InternalUpdateBackColor">
+		<remarks>
+			Override this method to change the background color based on the state of the value in the TextBox.
+			By default the background color is determined by the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.HasValue" name="HasValue"/>
+		 and <seealso cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="ReadOnly"/> properties.
+		</remarks>
+    </member>
+    
+    <member name="M:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.UpdateBackColor">
+		<remarks>
+			You can use <c>UpdateBackColor</c> to update the background color when the state of the data value changes.
+			Sets <see cref="P:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.UpdatingBackColor" name="UpdatingBackColor"/> 
+			to true before calling 
+			<see cref="M:Alphora.Dataphor.DAE.Client.Controls.ExtendedTextBox.InternalUpdateBackColor" name="InternalUpdateBackColor"/>.
+		</remarks>
+    </member>
+    
+	<member name="T:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase">
+		<remarks>
+			<para>
+			<c>DBTextBoxBase</c> is a base class for data-aware TextBox controls like 
+			<see cref="T:Alphora.Dataphor.DAE.Client.Controls.DBTextBox" name="DBTextBox"/> and 
+			<see cref="T:Alphora.Dataphor.DAE.Client.Controls.DBDateTextBox" name="DBDateTextBox"/>.
+			The <c>DBTextBoxBase</c> control manages its 
+			<see cref="P:System.Windows.Forms.Control.Text" name="Text"/> 
+			property by linking it a
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>'s value.
+			To link a data-aware TextBox to a DataField set the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ColumnName" name="ColumnName"/> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Source" name="Source"/> 
+			properties.
+			</para>
+			<para>
+			The abstract <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue" name="FieldValue"/> 
+			property determines how the field's value is retrieved and set by descendants.
+			</para>
+		</remarks>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.Text" name="Text"/> 
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Link">
+		<value>
+			A <see cref="T:Alphora.Dataphor.DAE.Client.FieldDataLink" name="FieldDataLink"/> that
+			links this control to a <see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>.
+		</value>
+		<remarks>
+			Use the <c>Link</c> property to reference the <see cref="T:Alphora.Dataphor.DAE.Client.FieldDataLink" name="FieldDataLink"/> instance used by this control.
+			Links this control to a DataField through the <see cref="P:Alphora.Dataphor.DAE.Client.DataLink.Source" name="Source"/> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.FieldDataLink.ColumnName" name="ColumnName"/> properties.
+		</remarks>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.FieldDataLink" name="FieldDataLink"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ColumnName">
+		<value>
+			The name of the column in the view to link to; otherwise String.Empty. The default is String.Empty.
+		</value>
+		<remarks>
+			Set ColumnName to the name of the column in the view that this control will link to.
+			Access to the view is provided by a <c>DataSource</c> specified by the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Source" name="Source"/> property.
+			For a complete data linkage the <c>ColumnName</c> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Source" name="Source"/> 
+			properties must be set.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Source" name="Source"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Source">
+		<value>
+			A <see cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/> that 
+			represents the view linked to; otherwise null. The default is null.
+		</value>
+		<remarks>
+			Links the <c>DBText</c> control to the view that contains the field it represents.
+			Set <c>Source</c> to the <see cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/> 
+			through which the data from a <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> 
+			is provided to the <c>DBTextBox</c>.
+			For a complete data linkage the <c>Source</c> and 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ColumnName" name="ColumnName"/> 
+			properties must be set.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ColumnName" name="ColumnName"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataSource" name="DataSource"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ReadOnly">
+		<value>
+			true if the text box is read-only; otherwise, false. The default is false.
+		</value>
+		<remarks>
+			When this property is true the DataField's value cannot be changed by the user at runtime.  
+			But you can still change the DataField's value programatically by setting the Text property 
+			only if the view is in edit or insert state.
+			See	<see cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="TextBoxBase.ReadOnly"/>.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataView.State" name="DataView.State"/>
+		<seealso cref="P:System.Windows.Forms.TextBoxBase.ReadOnly" name="TextBoxBase.ReadOnly"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.DataField">
+		<value>
+			The <see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> 
+			the <c>DBTextBox</c> represents; otherwise null.
+		</value>
+		<remarks>
+			Use <c>DataField</c> to get direct access to the 
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> 
+			in the view that this control is linked to.
+			The <see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/> 
+			must be active for the field to exist.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataView.Active" name="DataView.Active"/>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataView.Fields" name="View.Fields"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.FieldValue">
+		<value>
+			A <see cref="T:System.String" name="string"/> representation of the field's value;
+		</value>
+		<remarks>
+			The implementation of this property is left to its descendents because it 
+			is not known in this class how the DataField's value is to be retrieved or set. 
+			In most cases the display conveyor's AsString method defines how
+			a data type is to be converted to a string.
+		</remarks>
+		<example>
+			A standard data-aware text box would be defined as:
+			
+			public class MyDBTextBox : DBTextBoxBase
+			{
+				protected override string FieldValue
+				{
+					get { return (DataField != null) &amp;&amp; DataField.HasValue() ? DataField.AsString : String.Empty; }
+					set { DataField.AsString = value; }
+				}
+			}
+			
+			Note the use of DataField.AsString property.
+			
+			A DateTime control might define FieldValue as:
+			public class MyDBDateTextBox : DBTextBoxBase
+			{
+				protected override string FieldValue
+				{
+					get { return ((DataField == null) || (!DataField.HasValue())) ? String.Empty : InternalConvertDateTimeToString(DataField.AsDateTime); }
+					set { DataField.AsDateTime = Convert.ToDateTime(value); }
+				}
+			}	
+		</example>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.DataField.AsString" name="DataField.AsString"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+	</member>
+	
+	<member name="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.DisableWhenReadOnly">
+		<value>
+			true if the control is disabled when read-only is true; otherwise, false. The default is true.
+		</value>
+		<remarks>
+			When this property is true the control is disabled when the ReadOnly property is true.  
+			Use this feature to restrict the user from copying the contents of the control.
+			When this property is false and ReadOnly is true, the user can copy the contents of the control.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ReadOnly" name="ReadOnly"/>
+	</member>
+	
+	<member name="M:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.UpdateReadOnly">
+		<remarks>
+			Updates the read-only state of the control.  This method is 
+			called by the DataLink when read-only updates are needed.  
+			The control is read-only until it is connected to an active view.
+		</remarks>
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.ReadOnly" name="ReadOnly"/>
+	</member>
+	
+	<member name="M:Alphora.DAtaphor.DAE.Client.Controls.DBTextBoxBase.InternalSetText">
+		<remarks>
+			Use <c>InternalSetText</c> to set the value of the 
+			<see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBTextBoxBase.Text" name="Text"/> 
+			property without updating the DataField's value.
+		</remarks>
+	</member>
+	
+	<member name="T:Alphora.Dataphor.DAE.Client.Controls.DBTextBox">
+		<remarks>
+			<para>
+			Use a <c>DBTextBox</c> to edit a DataField's value as a string. 
+			The DBTextBox control manages its 
+			<see cref="P:System.Windows.Forms.Control.Text" name="Text"/> 
+			property by setting it to the
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>'s 
+			<see cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/> value as string.
+			The <see cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue" name="FieldValue"/> 
+			property defines how the field's value is converted to a string before
+			being assigned to the Text property and how the Text property is converted to a value for storage in a DataField.
+			If you want a data-aware memo set the MultiLine property to true.
+			</para>
+		</remarks>
+		<seealso cref="P:System.Windows.Forms.Control.Text" name="Text"/> 
+		<seealso cref="P:Alphora.Dataphor.DAE.Client.Controls.DBText.FieldValue" name="FieldValue"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataField" name="DataField"/>
+		<seealso cref="T:Alphora.Dataphor.DAE.Client.DataView" name="DataView"/>
+	</member>
+	
+  </members>
+</doc>

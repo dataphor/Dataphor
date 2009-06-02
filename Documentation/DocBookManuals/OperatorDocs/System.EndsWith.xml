@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, August 26, 2005 5:13:03 PM</date> 
+	 </sect2info> 
+	 <title>System.EndsWith</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The <symbol>EndsWith</symbol> operator does a case-sensitive
+		  comparison of <symbol>ASubString</symbol> and the equivalent number of
+		  characters at the end of <symbol>AString</symbol>. If there is an exact match
+		  <symbol>EndsWith</symbol> returns <symbol>true</symbol>, otherwise it returns
+		  <symbol>false</symbol>. If <symbol>ASubString</symbol> is empty,
+		  <symbol>EndsWith</symbol> always returns false (the empty string is not found
+		  in any string).</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select "Dataphoria".EndsWith("ria");</programlisting> 
+		  <programlisting>True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.StartsWith.html">System.StartsWith</ulink>
+<ulink url="SLRSystem.IndexOf.html">System.IndexOf</ulink>
+<ulink url="SLRSystem.LastIndexOf.html">System.LastIndexOf</ulink>
+<ulink url="SLRSystem.IndexOfAny.html">System.IndexOfAny</ulink>
+<ulink url="SLRSystem.LastIndexOfAny.html">System.LastIndexOfAny</ulink>
+<ulink url="SLRSystem.Pos.html">System.Pos</ulink>
+<ulink url="SLRSystem.LastPos.html">System.LastPos</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="SLRSystem.Lower.html">System.Lower</ulink>
+<ulink url="SLRSystem.Upper.html">System.Upper</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

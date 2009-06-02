@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:45:22</date> 
+	 </sect2info> 
+	 <title>System.InTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This performs a check to see if the code is currently being executed
+		  in a transaction. It returns a boolean value representing the state.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var Err : String := "";
+	Err := Err + Unicode({13}) + InTransaction().ToString();
+	CommitTransaction();
+	Err := Err + Unicode({13}) + InTransaction().ToString();
+	raise Error(Err);
+end;</programlisting> 
+		  <programlisting>true
+false</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.BeginTransaction.html">System.BeginTransaction</ulink>
+<ulink url="DDGP2TransactionManager.html">Transaction Manager</ulink>
+<ulink url="DDGP2DistributedTransactions.html">Distributed Transactions</ulink>
+<ulink url="DDGP2TransactionManagement.html">Transaction Management</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

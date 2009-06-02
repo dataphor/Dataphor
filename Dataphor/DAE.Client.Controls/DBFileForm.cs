@@ -307,23 +307,30 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
         private void PollFileReadOnly()
         {
-            Thread.Sleep(FWaitForProcessInterval);
-            while (true)
-            {
-                lock (FFilePollerLock)
-                {
-                    if (FFileProcessed)
-                        return;
-                    //we waited at least the delay; the temp file is not locked: delete it and end
-                    if (!FileInUse)
-                    {
-                        ProcessFile();
-                        return;
-                    }
-                }
-                //the temp file is locked: wait for the process to release it
-                Thread.Sleep(FPollInterval);    
-            }                   
+			try
+			{
+				Thread.Sleep(FWaitForProcessInterval);
+				while (true)
+				{
+					lock (FFilePollerLock)
+					{
+						if (FFileProcessed)
+							return;
+						//we waited at least the delay; the temp file is not locked: delete it and end
+						if (!FileInUse)
+						{
+							ProcessFile();
+							return;
+						}
+					}
+					//the temp file is locked: wait for the process to release it
+					Thread.Sleep(FPollInterval);    
+				}
+			}
+			catch
+			{
+				// Don't allow exceptions to go unhandled... the framework will abort the application
+			}
         }
                 
         private object FFilePollerLock = new object();

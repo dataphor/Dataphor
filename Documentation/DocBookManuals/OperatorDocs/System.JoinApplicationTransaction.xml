@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:50:13</date>
+	 </sect2info>
+	 <title>System.JoinApplicationTransaction</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator allows the user to join the specified application
+		  transaction in progress. For more information about application transactions,
+		  see the corresponding entry in the Dataphor Developers guide.</para> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.BeginApplicationTransaction.html">System.BeginApplicationTransaction</ulink>
+<ulink url="DDGApplicationTransactions.html">Application Transactions</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 16:11:40</date> 
+	 </sect2info> 
+	 <title>System.Sum</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is an aggregate operator that returns the arithmetic
+		  sum of all of the values in the specified expression. In the case where there
+		  are no rows then the operator will return 0.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee group add { Sum(ID) IDSum };</programlisting> 
+		  <programlisting>IDSum
+-----
+21</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGSum.html">Sum</ulink>
+<ulink url="D4LGAggregate.html">Table Expressions, Aggregate</ulink>
+<ulink url="DDGP1AggregateOperatorInvocation.html">Aggregate Operator Invocation</ulink>
+<ulink url="D4LGAggregateOperators.html">Aggregate Operators</ulink>
+<ulink url="D4LGUsingDateandTimeValues.html">Using Date and Time Values</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

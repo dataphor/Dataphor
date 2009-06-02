@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 11:08:18</date> 
+	 </sect2info> 
+	 <title>System.Open</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Opens a cursor based on a string representation of a table
+		  expression. The <symbol>Open</symbol> operator is similar to the Cursor
+		  selector, but this takes a string, rather than an expression allowing the user
+		  to construct a string at runtime for the cursor.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var EmployeeCursor : cursor(table { ID : Integer, Name : String });
+	EmployeeCursor := Open("Employee") as cursor(table { ID : Integer, Name : String});
+	EmployeeCursor.Next();
+	raise Error((Name from EmployeeCursor.Select()));
+end;</programlisting> 
+		  <programlisting>Joe</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+<ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Cursors.html">Server Architecture, Cursor</ulink>
+<ulink url="D4LGDynamicExecution.html">Dynamic Execution</ulink>
+<ulink url="DDGP2Execution3.html">Query Processor, Execution</ulink>
+<ulink url="DDGP2Navigable.html">Cursor Capabilities, Navigable</ulink>
+<ulink url="DDGP2SQLConnection.html">SQLConnection</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

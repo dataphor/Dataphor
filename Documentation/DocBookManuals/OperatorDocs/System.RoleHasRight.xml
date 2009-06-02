@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 11:58:05</date> 
+	 </sect2info> 
+	 <title>System.RoleHasRight</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns <symbol>true</symbol> if the specified
+		  <symbol>Role</symbol> has the specified <symbol>Right</symbol>, otherwise it
+		  returns <symbol>false</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateRole("SoftwareDeveloper");
+
+select RoleHasRight("SoftwareDeveloper", "AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+select RoleHasRight("SoftwareDeveloper", "AddProgram");
+
+DropRole("SoftwareDeveloper");
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>false
+true</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.CreateUser.html"><?xm-replace_text {ULinks}?></ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

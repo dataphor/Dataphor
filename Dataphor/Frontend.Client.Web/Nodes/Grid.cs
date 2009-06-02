@@ -1053,6 +1053,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get { return FDataLink; }
 		}
 
+        //this is a no-op in the web client
+        private bool FUseNaturalMaxWidth;
+        public bool UseNaturalMaxWidth
+        {
+            get { return FUseNaturalMaxWidth; }
+            set { FUseNaturalMaxWidth = value; }
+        }
+
 		private void DataLinkActiveChanged(DAE.Client.DataLink ALink, DAE.Client.DataSet ADataSet)
 		{
 			if (ALink.Active)

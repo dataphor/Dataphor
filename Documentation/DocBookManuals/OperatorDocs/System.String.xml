@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:48:39</date> 
+	 </sect2info> 
+	 <title>System.String</title> 
+	 <para>create operator .System.String.ASCII(const ASCII : list(System.Byte))
+		  : System.String class "System.SystemStringASCIINode"</para> 
+	 <para>create operator .System.String.Unicode(const Unicode :
+		  list(System.Integer)) : System.String class
+		  "System.SystemStringUnicodeNode"</para> 
+	 <para>create operator .System.String.UTF8(const UTF8 : list(System.Byte)) :
+		  System.String class "System.SystemStringUTF8Node"</para> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.String
+{
+	representation String
+	{
+		Value : System.String
+	}selector  class "System.ScalarSelectorNode", 
+	representation Unicode
+	{
+		Unicode : list(System.Integer)
+	}selector  class "System.SystemStringUnicodeNode", 
+	representation UTF8
+	{
+		UTF8 : list(System.Byte)
+	}selector  class "System.SystemStringUTF8Node", 
+	representation ASCII
+	{
+		ASCII : list(System.Byte)
+	}selector  class "System.SystemStringASCIINode"
+} class "System.StringConveyor" static tags { Catalog.Comment = "System String", Storage.Length = "20" }</programlisting> 
+				<literallayout><ulink url="SLRSystem.String.Unicode.html">See System.String.Unicode</ulink>
+<ulink url="SLRSystem.String.UTF8.html">See System.String.UTF8</ulink>
+<ulink url="SLRSystem.String.ASCII.html">See System.String.ASCII</ulink></literallayout></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>String</symbol>.</para>
+	 
+	 <para><symbol>System.String</symbol> is the set of all case-sensitive
+		  character strings. The physical representation of this type is a Unicode string
+		  with a maximum length of 2<superscript>31</superscript>-1. The comparison
+		  operators for this domain are defined case-sensitively.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select String("123abc");</programlisting> 
+		  <programlisting>123abc</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.String.Unicode.html">System.String.Unicode</ulink>
+<ulink url="SLRSystem.String.UTF8.html">System.String.UTF8</ulink>
+<ulink url="SLRSystem.String.ASCII.html">System.String.ASCII</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGParserLiterals.html">Parser Literals</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToString.html">System.ToString</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

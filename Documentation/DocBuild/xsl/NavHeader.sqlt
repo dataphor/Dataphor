@@ -1,0 +1,13 @@
+             <div class="navheader">
+             <table width="100%" summary="Navigation header">
+                <tr><td width="20%" align="left">
+                    <a accesskey="p" href="{%link-prev-href%}">Prev</a>&nbsp;</td>
+                    <th width="60%" align="center">&nbsp;
+                        {%anchortitle%}
+                    </th>
+                    <td width="20%" align="right">&nbsp;
+                    <a accesskey="n" href="{%link-next-href%}">Next</a>
+                    </td>
+                </tr>
+            </table>
+            </div>

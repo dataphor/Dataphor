@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 07, 2004 11:30:59</date>
+	 </sect2info>
+	 <title>System.UpdateTimeStamps</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator updates the cache timestamp.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select TableDee add {CacheTimeStamp() Cache};
+UpdateTimeStamps();
+select TableDee add {CacheTimeStamp() Cache};</programlisting>
+		  <programlisting>Cache 
+----- 
+182
+
+Cache 
+----- 
+183</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="DDGCLICaching.html">Caching</ulink>
+<ulink url="SLRSystem.CacheTimeStamp.html">System.CacheTimeStamp</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

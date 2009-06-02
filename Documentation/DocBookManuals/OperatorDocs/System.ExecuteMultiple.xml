@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Wednesday, April 28, 2004 12:06:53</date> 
+	 </sect2info> 
+	 <title>System.ExecuteMultiple</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator compiles and executes the code in the string specified
+		  in AString. It is executed as if it were normal code and repeated ANumber
+		  times. The string can be typed in as literals or built and placed as variable.
+		  Optionally a AUserID and APassword can be specified in which case the code will
+		  be executed as the specified user.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table Example in Temp
+	 { TString : String, key{} };
+insert table { row { "" TString } } into Example;
+ExecuteMultiple( "update Example set { TString := TString + 'x' };", 5 );
+select Example;
+drop table Example;</programlisting> 
+		  <programlisting>TString 
+------- 
+xxxxx</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRFrontend.ExecuteScript.html">Frontend.ExecuteScript</ulink>
+<ulink url="SLRSystem.Evaluate.html">System.Evaluate</ulink>
+<ulink url="SLRSystem.Execute.html">System.Execute</ulink>
+<ulink url="SLRSystem.ExecuteAs.html">System.ExecuteAs</ulink>
+<ulink url="SLRSystem.ExecuteAsync.html">System.ExecuteAsync</ulink>
+<ulink url="SLRSystem.ExecuteWithTimeout.html">System.ExecuteWithTimeout</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

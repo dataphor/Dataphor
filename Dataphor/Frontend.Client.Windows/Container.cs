@@ -232,7 +232,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (LChild.GetVisible()) 
 					{
 						LNatural = LChild.NaturalSize;
-						LResult.Height += LNatural.Height;
+                        LResult.Height += LNatural.Height + LChild.MarginTop + LChild.MarginBottom + 2;
 						ConstrainMinWidth(ref LResult, LNatural.Width);
 					}
 				}
@@ -620,6 +620,34 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			return base.GetOverhead() + new Size(0, CBottomPadding);
 		}
+
+        protected override Size InternalMinSize
+        {
+            get
+            {
+                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((FChild != null) && FChild.GetVisible())
+                {
+                    ConstrainMinWidth(ref LResult, FChild.MinSize.Width);
+                    ConstrainMinHeight(ref LResult, FChild.MinSize.Height);
+                }
+                return LResult;         
+            }
+        }
+
+        protected override Size InternalNaturalSize
+        {
+            get
+            {
+                Size LResult = new Size((Size.Ceiling(Control.CreateGraphics().MeasureString(Title, Control.Font)).Width + GetOverhead().Width), Control.Font.Height);
+                if ((FChild != null) && FChild.GetVisible())
+                {
+                    ConstrainMinWidth(ref LResult, FChild.NaturalSize.Width);
+                    ConstrainMinHeight(ref LResult, FChild.NaturalSize.Height);
+                }
+                return LResult;
+            }
+        }
 	}
 
 	[ToolboxItem(false)]

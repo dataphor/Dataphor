@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 09:40:41</date> 
+	 </sect2info> 
+	 <title>System.GrantRightToGroup</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator assigned the specified right to the specified group.
+		  Optional parameters specify if right should be inherited by sub-groups, if
+		  assignment of <symbol>Right</symbol> should be applied recursively, and if
+		  assignment should also be applied to the users.</para> 
+	 <para>If Inherited is set to true, the <symbol>Right</symbol> will be
+		  available at child (subordinate) groups.</para> 
+	 <para>If ApplyRecursively is set to true, the <symbol>Right</symbol> will
+		  be granted to all child (subordinate) groups.</para> 
+	 <para>If IncludeUsers is set to true, all users in the group (and child
+		  (subordinate) groups if recursing) will be granted the
+		  <symbol>Right</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+CreateGroup("Developers", "User");
+GrantRightToGroup("AddProgram", "Developers");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink>
+<ulink url="SLRSystem.GroupHasRight.html">System.GroupHasRight</ulink>
+<ulink url="SLRSystem.GroupRightIsInherited.html">System.GroupRightIsInherited</ulink>
+<ulink url="SLRSystem.RevertRightForGroup.html">System.RevertRightForGroup</ulink>
+<ulink url="SLRSystem.RevokeRightFromGroup.html">System.RevokeRightFromGroup</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

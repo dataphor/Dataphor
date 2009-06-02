@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 12:38:42</date>
+	 </sect2info>
+	 <title>System.RemoveAt</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Removes an index from the specified list. If the index is not in the
+		  list then an exception is thrown.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>begin
+	var CurrList : list := { "Michelle", "Melinda", "Melissa", "Melody", "Margaret"};
+	CurrList.RemoveAt(1);
+end;</programlisting>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="SLRSystem.Remove.html">System.Remove</ulink>
+<ulink url="D4LGUsingLists.html">Using Lists</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

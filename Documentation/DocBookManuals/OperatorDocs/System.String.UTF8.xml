@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:48:26</date> 
+	 </sect2info> 
+	 <title>System.String.UTF8</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<ulink url="SLRSystem.String.html">See System.String</ulink></para>
+		  
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the <symbol>UTF8</symbol> representation of
+		  the <symbol>String</symbol> DataType. This can be used to return a native
+		  string given a list of Bytes. It can also be used to return a list of Bytes for
+		  a given String.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create session table Example { UTF8String : String, key{} };
+begin
+	var LString : String;
+	LString.UTF8 := list(Byte) { 65, 108, 112, 104, 111, 114, 97 };
+	insert table { row { LString UTF8String } } into Example;
+end;
+select Example
+	add { "Fun".UTF8[0] F, "Fun".UTF8[1] u, "Fun".UTF8[2] n };
+drop table Example;</programlisting> 
+		  <programlisting>UTF8String F  u   n
+---------- -- --- ---
+Alphora    70 117 110</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.String.html">System.String</ulink>
+<ulink url="SLRSystem.String.Unicode.html">System.String.Unicode</ulink>
+<ulink url="SLRSystem.String.ASCII.html">System.String.ASCII</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+<ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="D4LGParserLiterals.html">Parser Literals</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToString.html">System.ToString</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

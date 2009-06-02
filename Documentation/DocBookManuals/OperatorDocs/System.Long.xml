@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 26, 2004 14:46:25</date> 
+	 </sect2info> 
+	 <title>System.Long</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.Long
+{
+	representation Long
+	{
+		Value : System.Long
+	}selector  class "System.ScalarSelectorNode", 
+	representation AsString
+	{
+		AsString : System.String
+	}selector  class "System.LongAsStringSelectorNode"
+} class "System.Int64Conveyor" static tags { Catalog.Comment = "System Signed 64-bit Integer", DAE.AsString = "AsString" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is the selector for the DataType <symbol>Long</symbol>.</para> 
+	 <para><symbol>System.Long</symbol> is the set of all integer values in the
+		  range negative 9,223,372,036,854,775,808 (-2<superscript>63</superscript>)
+		  through positive 9,223,372,036,854,775,807 (2<superscript>64</superscript>-1).
+		  The physical representation of this type is a signed 64-bit integer.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Long(134);</programlisting> 
+		  <programlisting>134</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGConveyors.html">Domain, Conveyors</ulink>
+<ulink url="D4LGSystemDataTypes.html">System Data Types</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2SQLDataTypes.html">SQL Data Types</ulink>
+<ulink url="SLRSystem.ToLong.html">System.ToLong</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

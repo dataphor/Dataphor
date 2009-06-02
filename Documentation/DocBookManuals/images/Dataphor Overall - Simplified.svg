@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 10.0, SVG Export Plug-In . SVG Version: 3.0.0 Build 76)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+]>
+<svg  xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 width="549.017" height="642.906" viewBox="0 0 549.017 642.906" overflow="visible" enable-background="new 0 0 549.017 642.906"
+	 xml:space="preserve">
+	<g id="Layer_1">
+		<path fill="#FFFFFF" stroke="#000000" stroke-width="0.1794" stroke-miterlimit="2.4142" d="M223.45,314.589H0.09V153.651h223.36
+			V314.589z"/>
+		
+			<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1961" stroke-miterlimit="2.4142" d="
+			M548.913,314.831h-86.829V122.297h86.829V314.831z"/>
+		<path fill="#FFFFFF" stroke="#000000" stroke-width="0.1832" stroke-linecap="square" stroke-linejoin="bevel" d="
+			M548.887,525.161H0.488V354.689h548.399V525.161z"/>
+		<g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="M79.609,553.024
+					c-16.268,0-29.454,7.742-29.454,17.294c0,9.551,13.186,17.292,29.454,17.292c16.265,0,29.452-7.741,29.452-17.292
+					C109.061,560.766,95.874,553.024,79.609,553.024z"/>
+				
+					<linearGradient id="XMLID_1_" gradientUnits="userSpaceOnUse" x1="759.6177" y1="1443.2202" x2="890.6655" y2="1443.2202" gradientTransform="matrix(-0.4495 0 0 0.5443 450.5083 -179.017)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="0.49" style="stop-color:#D3DDED"/>
+					<stop  offset="1" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_1_)" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="
+					M50.17,625.983c0.49,9.274,13.524,16.755,29.438,16.755c15.915,0,28.946-7.48,29.436-16.755h0.016v-0.543v-55.122
+					c0,9.524-13.231,17.292-29.452,17.292c-16.224,0-29.454-7.768-29.454-17.292v55.122v0.543H50.17z"/>
+			</g>
+			<text transform="matrix(1 0 0 1 53.2266 618.147)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="19.423">Oracle</tspan></text>
+		</g>
+		<g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="M176.105,552.997
+					c-16.269,0-29.454,7.744-29.454,17.294c0,9.552,13.186,17.293,29.454,17.293c16.264,0,29.452-7.741,29.452-17.293
+					C205.558,560.741,192.37,552.997,176.105,552.997z"/>
+				
+					<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="544.9419" y1="1443.1694" x2="675.9897" y2="1443.1694" gradientTransform="matrix(-0.4495 0 0 0.5443 450.5083 -179.017)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="0.49" style="stop-color:#D3DDED"/>
+					<stop  offset="1" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_2_)" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="
+					M146.667,625.957c0.49,9.273,13.524,16.752,29.438,16.752s28.946-7.479,29.437-16.752h0.016v-0.541v-55.125
+					c0,9.524-13.232,17.293-29.452,17.293c-16.224,0-29.454-7.769-29.454-17.293v55.125v0.541H146.667z"/>
+			</g>
+			<text transform="matrix(1 0 0 1 159.7856 618.438)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="19.423">DB2</tspan></text>
+		</g>
+		<g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="M272.603,552.654
+					c-16.269,0-29.454,7.745-29.454,17.293c0,9.552,13.186,17.295,29.454,17.295c16.264,0,29.452-7.743,29.452-17.295
+					C302.054,560.399,288.867,552.654,272.603,552.654z"/>
+				
+					<linearGradient id="XMLID_3_" gradientUnits="userSpaceOnUse" x1="330.2661" y1="1442.5386" x2="461.314" y2="1442.5386" gradientTransform="matrix(-0.4495 0 0 0.5443 450.5083 -179.017)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="0.49" style="stop-color:#D3DDED"/>
+					<stop  offset="1" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_3_)" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="
+					M243.164,625.615c0.489,9.272,13.524,16.752,29.438,16.752c15.914,0,28.946-7.479,29.435-16.752h0.017v-0.543v-55.125
+					c0,9.524-13.231,17.295-29.452,17.295c-16.224,0-29.454-7.771-29.454-17.295v55.125v0.543H243.164z"/>
+			</g>
+			<text transform="matrix(1 0 0 1 256.6685 606.0698)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="19.423">SQL</tspan><tspan x="-9.673" y="23.423" font-family="'Myriad-Roman'" font-size="19.423">Server</tspan></text>
+		</g>
+		<g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="M369.097,553.024
+					c-16.269,0-29.453,7.742-29.453,17.294c0,9.551,13.185,17.292,29.453,17.292c16.266,0,29.454-7.741,29.454-17.292
+					C398.551,560.766,385.363,553.024,369.097,553.024z"/>
+				
+					<linearGradient id="XMLID_4_" gradientUnits="userSpaceOnUse" x1="115.5898" y1="1443.2202" x2="246.6401" y2="1443.2202" gradientTransform="matrix(-0.4495 0 0 0.5443 450.5083 -179.017)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="0.49" style="stop-color:#D3DDED"/>
+					<stop  offset="1" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_4_)" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="
+					M339.66,625.983c0.491,9.274,13.524,16.755,29.438,16.755c15.914,0,28.947-7.48,29.438-16.755h0.016v-0.543v-55.122
+					c0,9.524-13.231,17.292-29.454,17.292c-16.224,0-29.453-7.768-29.453-17.292v55.122v0.543H339.66z"/>
+			</g>
+			<text transform="matrix(1 0 0 1 347.8315 618.147)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="19.423">ISAM</tspan></text>
+		</g>
+		<g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="M465.594,552.887
+					c-16.267,0-29.453,7.744-29.453,17.294c0,9.551,13.187,17.293,29.453,17.293c16.266,0,29.455-7.742,29.455-17.293
+					C495.049,560.631,481.86,552.887,465.594,552.887z"/>
+				
+					<linearGradient id="XMLID_5_" gradientUnits="userSpaceOnUse" x1="-99.0889" y1="1442.9702" x2="31.9639" y2="1442.9702" gradientTransform="matrix(-0.4495 0 0 0.5443 450.5083 -179.017)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="0.49" style="stop-color:#D3DDED"/>
+					<stop  offset="1" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+					<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_5_)" stroke="#000000" stroke-width="0.3387" stroke-miterlimit="2.4142" d="
+					M436.156,625.847c0.49,9.273,13.524,16.754,29.438,16.754c15.916,0,28.947-7.48,29.438-16.754h0.018v-0.543v-55.123
+					c0,9.526-13.233,17.293-29.455,17.293c-16.225,0-29.453-7.767-29.453-17.293v55.123v0.543H436.156z"/>
+			</g>
+			<text transform="matrix(1 0 0 1 459.6255 613.0376)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="19.423">...</tspan></text>
+		</g>
+		<g>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M214.366,455.136v2.345h-2.343v-2.345H214.366z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M216.71,455.136v2.345h-2.345v-2.345H216.71z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M219.055,455.136v2.345h-2.345v-2.345H219.055z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#9DB3D6" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M221.398,455.136v2.345h-2.343v-2.345H221.398z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M223.743,455.136v2.345h-2.345v-2.345H223.743z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#9DB3D6" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M226.088,455.136v2.345h-2.345v-2.345H226.088z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M228.431,455.136v2.345h-2.343v-2.345H228.431z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M212.022,455.136v2.345h-2.345v-2.345H212.022z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#9DB3D6" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M209.678,455.136v2.345h-2.345v-2.345H209.678z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M207.333,455.136v2.345h-2.344v-2.345H207.333z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M204.989,455.136v2.345h-2.345v-2.345H204.989z"/>
+			
+				<linearGradient id="XMLID_6_" gradientUnits="userSpaceOnUse" x1="-39.8721" y1="1036.939" x2="-37.1646" y2="1036.939" gradientTransform="matrix(4.3285 0 0 0.8657 383.9176 -435.1384)">
+				<stop  offset="0" style="stop-color:#999999"/>
+				<stop  offset="1" style="stop-color:#FFFFFF"/>
+				<a:midPointStop  offset="0" style="stop-color:#999999"/>
+				<a:midPointStop  offset="0.5" style="stop-color:#999999"/>
+				<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+			</linearGradient>
+			<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_6_)" d="M223.053,461.368v2.345h-11.721v-2.345H223.053z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M230.776,455.136v2.345h-2.345v-2.345H230.776z"/>
+			<g>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M222.439,448.515v2.345h-2.345v-2.345H222.439z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M224.784,448.515v2.345h-2.345v-2.345H224.784z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M227.127,448.515v2.345h-2.343v-2.345H227.127z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M220.094,448.515v2.345h-2.343v-2.345H220.094z"/>
+			</g>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M210.718,448.515v2.345h-2.345v-2.345H210.718z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M213.062,448.515v2.345h-2.344v-2.345H213.062z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M215.406,448.515v2.345h-2.345v-2.345H215.406z"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M208.373,448.515v2.345h-2.343v-2.345H208.373z"/>
+			<path fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="M218.084,445.509l1.508,2.611"/>
+			<path fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="M215.015,445.509l-1.507,2.611"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M208.53,454.5v-1.414h0.971v-1.488"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M220.216,454.5v-1.417h1.042v-1.485"/>
+			
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+				M223.639,451.598v1.416h1.265v1.486"/>
+			<g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" d="M216.628,442.26c0.737,0,1.34,0.273,1.34,0.609
+					s-0.603,0.609-1.34,0.609c-0.738,0-1.341-0.273-1.341-0.609S215.89,442.26,216.628,442.26 M216.628,440.592
+					c2.755,0,5.001,1.023,5.001,2.277c0,1.255-2.246,2.277-5.001,2.277c-2.756,0-5.002-1.022-5.002-2.277
+					C211.626,441.616,213.872,440.592,216.628,440.592"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M216.628,442.021c0.737,0,1.34,0.273,1.34,0.609s-0.603,0.609-1.34,0.609c-0.738,0-1.341-0.273-1.341-0.609
+					S215.89,442.021,216.628,442.021 M216.628,440.353c2.755,0,5.001,1.023,5.001,2.277c0,1.255-2.246,2.277-5.001,2.277
+					c-2.756,0-5.002-1.022-5.002-2.277C211.626,441.376,213.872,440.353,216.628,440.353"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M220.548,440.269c0.279,0,0.507,0.104,0.507,0.232c0,0.127-0.228,0.231-0.507,0.231c-0.279,0-0.507-0.104-0.507-0.231
+					C220.041,440.374,220.269,440.269,220.548,440.269z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M221.055,440.946c-0.008,0.125-0.234,0.226-0.507,0.226s-0.498-0.101-0.506-0.226h-0.001v-0.007v-0.438
+					c0,0.127,0.228,0.231,0.507,0.231c0.279,0,0.507-0.104,0.507-0.231v0.438V440.946z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M220.046,440.789l0.289,2.492h0.132c0.194-0.824,0.387-1.647,0.581-2.472C220.75,441.028,220.329,441.034,220.046,440.789z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M216.628,441.755c0.737,0,1.34,0.273,1.34,0.609c0,0.337-0.603,0.61-1.34,0.61c-0.738,0-1.341-0.273-1.341-0.61
+					C215.287,442.029,215.89,441.755,216.628,441.755 M216.628,440.087c2.755,0,5.001,1.022,5.001,2.277
+					c0,1.254-2.246,2.278-5.001,2.278c-2.756,0-5.002-1.024-5.002-2.278C211.626,441.11,213.872,440.087,216.628,440.087"/>
+				<g>
+					<path fill="none" d="M216.608,441.091c1.5,0,2.715,0.559,2.715,1.249c0,0.689-1.216,1.248-2.715,1.248
+						c-1.5,0-2.715-0.559-2.715-1.248C213.893,441.65,215.108,441.091,216.608,441.091z"/>
+					<text transform="matrix(0.9983 0.0579 -0.0579 0.9983 216.7207 441.0884)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401">0</tspan><tspan x="0.455" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="4.721">1</tspan><tspan x="0.906" y="0.035" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="10.031">0</tspan><tspan x="1.347" y="0.11" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="16.424">0</tspan><tspan x="1.77" y="0.231" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="25.132">0</tspan><tspan x="2.165" y="0.407" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="38.935">1</tspan><tspan x="2.514" y="0.664" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="64.948">0</tspan><tspan x="2.709" y="1.043" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="103.089">1</tspan><tspan x="2.651" y="1.38" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="127.254">1</tspan><tspan x="2.398" y="1.715" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="143.976">0</tspan><tspan x="1.979" y="2.008" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="155.402">1</tspan><tspan x="1.527" y="2.211" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="162.823">0</tspan><tspan x="1.069" y="2.347" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="167.194"> </tspan><tspan x="0.837" y="2.401" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="169.807"> </tspan><tspan x="0.604" y="2.443" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="172.194"> </tspan><tspan x="0.366" y="2.478" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="175.705">1</tspan><tspan x="-0.091" y="2.512" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="-179.882">0</tspan><tspan x="-0.547" y="2.512" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="-175.144">1</tspan><tspan x="-0.998" y="2.476" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="0.8401" rotate="-169.848">0</tspan></text>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" d="M219.609,440.631l0.29,2.491h0.133
+					c0.193-0.823,0.386-1.646,0.58-2.471C220.314,440.871,219.892,440.876,219.609,440.631z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="
+					M219.609,440.544l0.29,2.492h0.133c0.193-0.824,0.386-1.647,0.58-2.472C220.314,440.785,219.892,440.789,219.609,440.544z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.1228" stroke-miterlimit="2.4142" d="M220.034,443.04v0.059h-0.114v-0.059
+					H220.034z"/>
+			</g>
+			
+				<path fill="none" stroke="#000000" stroke-width="0.7816" stroke-miterlimit="2.4142" stroke-dasharray="1.5633 0.7816 0 0 0 0" d="
+				M199.236,459.578h34.475"/>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.1729" stroke-miterlimit="2.4142" d="M293.731,493.222v7.485h-27.882v-7.485
+					H293.731z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.1707" stroke-miterlimit="2.4142" d="M293.799,501.533v7.303h-27.881v-7.303
+					H293.799z"/>
+				<g>
+					<path fill="none" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="M253.11,495.143
+						c2.097,0,3.797,0.998,3.797,2.229s-1.7,2.229-3.797,2.229c-2.096,0-3.795-0.998-3.795-2.229S251.015,495.143,253.11,495.143z"
+						/>
+					
+						<linearGradient id="XMLID_7_" gradientUnits="userSpaceOnUse" x1="729.3901" y1="1327.3862" x2="758.6929" y2="1327.3862" gradientTransform="matrix(0.2591 0 0 0.3137 60.3298 85.6367)">
+						<stop  offset="0" style="stop-color:#9DB3D6"/>
+						<stop  offset="0.49" style="stop-color:#D3DDED"/>
+						<stop  offset="1" style="stop-color:#9DB3D6"/>
+						<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+						<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+						<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+						<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+						<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+					</linearGradient>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_7_)" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M256.904,504.546c-0.063,1.194-1.742,2.158-3.794,2.158s-3.729-0.964-3.794-2.158h-0.001v-0.07v-7.104
+						c0,1.228,1.705,2.229,3.795,2.229c2.092,0,3.797-1.001,3.797-2.229v7.104v0.07H256.904z"/>
+				</g>
+				<path fill="none" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="M259.234,501.156l3.847-3.848"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="M259.462,501.731l3.846,3.848"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+					M269.708,496.328v1.741h0.898"/>
+				<path fill="none" stroke="#9DB3D6" stroke-width="0.196" stroke-miterlimit="2.4142" d="M270.269,495.263v1.064h-1.066v-1.064
+					H270.269z"/>
+				<path fill="none" stroke="#9DB3D6" stroke-width="0.196" stroke-miterlimit="2.4142" d="M271.67,497.506v1.065h-1.065v-1.065
+					H271.67z"/>
+				
+					<linearGradient id="XMLID_8_" gradientUnits="userSpaceOnUse" x1="406.0698" y1="1189.4458" x2="396.7202" y2="1189.4458" gradientTransform="matrix(0.3906 0 0 0.3906 117.6864 32.0515)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="1" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+				</linearGradient>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_8_)" d="M272.645,495.971h1.91v-1.063l1.742,1.741l-1.742,1.742
+					v-0.896h-1.91V495.971z"/>
+				<text transform="matrix(1 0 0 1 277.1606 496.9448)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'CourierNewPSMT'" font-size="1.097">SELECT A FROM B WHERE...</tspan></text>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+					M269.708,504.609v1.739h0.898"/>
+				<path fill="none" stroke="#9DB3D6" stroke-width="0.196" stroke-miterlimit="2.4142" d="M270.269,503.542v1.066h-1.066v-1.066
+					H270.269z"/>
+				<path fill="none" stroke="#9DB3D6" stroke-width="0.196" stroke-miterlimit="2.4142" d="M271.67,505.788v1.063h-1.065v-1.063
+					H271.67z"/>
+				
+					<linearGradient id="XMLID_9_" gradientUnits="userSpaceOnUse" x1="406.0698" y1="1112.1313" x2="396.7202" y2="1112.1313" gradientTransform="matrix(0.3906 0 0 0.3906 117.6864 70.53)">
+					<stop  offset="0" style="stop-color:#9DB3D6"/>
+					<stop  offset="1" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+					<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+				</linearGradient>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_9_)" d="M272.645,504.25h1.91v-1.063l1.742,1.742l-1.742,1.741
+					v-0.896h-1.91V504.25z"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M283.145,503.532v0.975h-0.965v-0.975H283.145z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M283.145,504.506v0.975h-0.965v-0.975H283.145z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M283.145,505.481v0.976h-0.965v-0.976H283.145z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M284.112,503.532v0.975h-0.967v-0.975H284.112z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M284.112,504.506v0.975h-0.967v-0.975H284.112z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M284.112,505.481v0.976h-0.967v-0.976H284.112z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M285.075,503.532v0.975h-0.963v-0.975H285.075z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M285.075,504.506v0.975h-0.963v-0.975H285.075z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M285.075,505.481v0.976h-0.963v-0.976H285.075z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M286.041,503.532v0.975h-0.966v-0.975H286.041z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M286.041,504.506v0.975h-0.966v-0.975H286.041z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M286.041,505.481v0.976h-0.966v-0.976H286.041z"/>
+				</g>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M278.69,503.532v0.975h-0.965v-0.975H278.69z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M278.69,504.506v0.975h-0.965v-0.975H278.69z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M278.69,505.481v0.976h-0.965v-0.976H278.69z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M279.655,503.532v0.975h-0.965v-0.975H279.655z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M279.655,504.506v0.975h-0.965v-0.975H279.655z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M279.655,505.481v0.976h-0.965v-0.976H279.655z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M280.622,503.532v0.975h-0.967v-0.975H280.622z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M280.622,504.506v0.975h-0.967v-0.975H280.622z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M280.622,505.481v0.976h-0.967v-0.976H280.622z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M281.586,503.532v0.975h-0.965v-0.975H281.586z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M281.586,504.506v0.975h-0.965v-0.975H281.586z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M281.586,505.481v0.976h-0.965v-0.976H281.586z"/>
+				</g>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M287.6,503.532v0.975h-0.965v-0.975H287.6z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M287.6,504.506v0.975h-0.965v-0.975H287.6z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M287.6,505.481v0.976h-0.965v-0.976H287.6z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M288.566,503.532v0.975H287.6v-0.975H288.566z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M288.566,504.506v0.975H287.6v-0.975H288.566z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M288.566,505.481v0.976H287.6v-0.976H288.566z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M289.53,503.532v0.975h-0.964v-0.975H289.53z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M289.53,504.506v0.975h-0.964v-0.975H289.53z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M289.53,505.481v0.976h-0.964v-0.976H289.53z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M290.497,503.532v0.975h-0.967v-0.975H290.497z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M290.497,504.506v0.975h-0.967v-0.975H290.497z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2117" stroke-miterlimit="2.4142" d="
+						M290.497,505.481v0.976h-0.967v-0.976H290.497z"/>
+				</g>
+			</g>
+			<g>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.0542" stroke-miterlimit="2.4142" d="
+					M318.364,448.861v10.544h-9.479v-10.544H318.364z"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M309.809,451.853c0.195,0,0.354,0.112,0.354,0.249c0,0.139-0.158,0.25-0.354,0.25s-0.354-0.111-0.354-0.25
+						C309.455,451.965,309.614,451.853,309.809,451.853z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M309.809,452.355v0.642v0.315h0.428"/>
+					<path fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="M309.809,453.014h0.425"/>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" d="M317.99,449.235v2.244h-8.731v-2.244H317.99z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M310.699,452.603h6.548"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M310.699,454.538h6.548"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M310.699,456.47h6.548"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M310.699,458.405h6.548"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.0542" stroke-miterlimit="2.4142" d="
+					M331.598,448.861v10.546h-9.48v-10.546H331.598z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.4393" stroke-miterlimit="2.4142" d="M310.263,450.355h6.546"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,451.855c0.194,0,0.354,0.112,0.354,0.249c0,0.138-0.159,0.25-0.354,0.25c-0.197,0-0.355-0.112-0.355-0.25
+						C322.688,451.967,322.846,451.855,323.043,451.855z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,452.357v0.641v0.317h0.428"/>
+					<path fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="M323.043,453.015h0.425"/>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" d="M331.223,449.235v2.245h-8.732v-2.245H331.223z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,452.604h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,454.539h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,456.473h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,458.407h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.0542" stroke-miterlimit="2.4142" d="
+					M331.598,462.595v10.545h-9.48v-10.545H331.598z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.4393" stroke-miterlimit="2.4142" d="M323.496,450.356h6.548"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,465.589c0.194,0,0.354,0.112,0.354,0.25c0,0.137-0.159,0.249-0.354,0.249c-0.197,0-0.355-0.112-0.355-0.249
+						C322.688,465.702,322.846,465.589,323.043,465.589z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,466.092v0.642v0.315h0.428"/>
+					<path fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="M323.043,466.75h0.425"/>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" d="M331.223,462.97v2.246h-8.732v-2.246H331.223z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,466.338h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,468.272h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,470.208h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,472.141h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.0542" stroke-miterlimit="2.4142" d="
+					M344.771,448.861v10.546h-9.48v-10.546H344.771z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.4393" stroke-miterlimit="2.4142" d="M323.496,464.091h6.548"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M336.216,451.855c0.194,0,0.354,0.112,0.354,0.249c0,0.138-0.159,0.25-0.354,0.25c-0.195,0-0.355-0.112-0.355-0.25
+						C335.861,451.967,336.021,451.855,336.216,451.855z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M336.216,452.357v0.641v0.317h0.428"/>
+					<path fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="M336.216,453.015h0.424"/>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" d="M344.396,449.235v2.245h-8.73v-2.245H344.396z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M337.105,452.604h6.547"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M337.105,454.539h6.547"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M337.105,456.473h6.547"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M337.105,458.407h6.547"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.0542" stroke-miterlimit="2.4142" d="
+					M331.598,435.064v10.546h-9.48v-10.546H331.598z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.4393" stroke-miterlimit="2.4142" d="M336.667,450.356h6.547"/>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,438.057c0.194,0,0.354,0.113,0.354,0.25c0,0.139-0.159,0.25-0.354,0.25c-0.197,0-0.355-0.111-0.355-0.25
+						C322.688,438.17,322.846,438.057,323.043,438.057z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="
+						M323.043,438.56v0.642v0.315h0.428"/>
+					<path fill="none" stroke="#000000" stroke-width="0.1939" stroke-miterlimit="2.4142" d="M323.043,439.218h0.425"/>
+				</g>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#D3DDED" d="M331.223,435.439v2.245h-8.732v-2.245H331.223z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,438.806h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,440.741h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,442.675h6.549"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" stroke="#4D4D4D" stroke-width="0.6589" stroke-miterlimit="2.4142" d="
+					M323.932,444.61h6.549"/>
+				<path fill="none" stroke="#000000" stroke-width="0.4393" stroke-miterlimit="2.4142" d="M323.496,436.56h6.548"/>
+				<path fill="none" stroke="#000000" stroke-width="0.3381" stroke-miterlimit="2.4142" d="M318.979,454.162h2.684"/>
+				<path fill="none" stroke="#000000" stroke-width="0.3381" stroke-miterlimit="2.4142" d="M326.749,445.829v2.684"/>
+				<path fill="none" stroke="#000000" stroke-width="0.3381" stroke-miterlimit="2.4142" d="M332.088,454.162h2.684"/>
+				<path fill="none" stroke="#000000" stroke-width="0.3381" stroke-miterlimit="2.4142" d="M326.749,459.625v2.686"/>
+			</g>
+			
+				<linearGradient id="XMLID_10_" gradientUnits="userSpaceOnUse" x1="178.4043" y1="795.0259" x2="223.9262" y2="749.504" gradientTransform="matrix(0 0.805 -1 0 1042.2578 292.6909)">
+				<stop  offset="0" style="stop-color:#9DB3D6"/>
+				<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+				<stop  offset="1" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+				<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+				<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+			</linearGradient>
+			<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_10_)" d="M287.995,476.782h-7.059v-44.306h7.059l-18.001-14.492
+				l-18.003,14.492h7.06v44.306h-7.06l18.003,14.492L287.995,476.782z"/>
+			
+				<linearGradient id="XMLID_11_" gradientUnits="userSpaceOnUse" x1="21.3091" y1="909.8989" x2="70.8762" y2="860.3318" gradientTransform="matrix(0.7375 0 0 1 236.2732 -431.123)">
+				<stop  offset="0" style="stop-color:#9DB3D6"/>
+				<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+				<stop  offset="1" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+				<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+				<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+				<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+			</linearGradient>
+			<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_11_)" d="M293.544,435.992v7.059h-46.558v-7.059l-13.275,18
+				l13.275,18.002v-7.059h46.558v7.059l13.277-18.002L293.544,435.992z"/>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.9054" stroke-miterlimit="2.4142" d="M285.343,460.157l-3.833,3.83
+					l-3.832-3.83l3.832-3.833L285.343,460.157z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#000000" stroke-width="0.0978" stroke-miterlimit="2.4142" d="
+					M260.666,450.313v9.934h5.139"/>
+				<path fill="none" stroke="#000000" stroke-width="0.0978" stroke-miterlimit="2.4142" d="M277.651,460.17h-5.448"/>
+				<path fill="none" stroke="#999999" stroke-width="1.6296" stroke-miterlimit="2.4142" d="M263.872,444.223v6.09h-6.089v-6.09
+					H263.872z"/>
+				<path fill="none" stroke="#999999" stroke-width="1.6296" stroke-miterlimit="2.4142" d="M271.886,457.038v6.09h-6.089v-6.09
+					H271.886z"/>
+			</g>
+			<g>
+				<path fill="none" stroke="#000000" stroke-width="0.8438" stroke-miterlimit="2.4142" d="M275.512,399.777v15.591h-15.589
+					v-15.591H275.512z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" stroke="#000000" stroke-width="0.137" stroke-miterlimit="2.4142" d="
+					M284.386,401.217c1.326,0,2.399,1.074,2.399,2.399c0,1.323-1.073,2.397-2.399,2.397c-1.325,0-2.397-1.074-2.397-2.397
+					C281.989,402.292,283.061,401.217,284.386,401.217z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" stroke="#000000" stroke-width="0.137" stroke-miterlimit="2.4142" d="
+					M284.386,409.371c1.326,0,2.399,1.075,2.399,2.401c0,1.323-1.073,2.395-2.399,2.395c-1.325,0-2.397-1.071-2.397-2.395
+					C281.989,410.446,283.061,409.371,284.386,409.371z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.8005" stroke-miterlimit="2.4142" d="M284.386,403.617h-8.634"/>
+				<path fill="none" stroke="#000000" stroke-width="0.8105" stroke-miterlimit="2.4142" d="M284.386,411.772h-8.634"/>
+				<path fill="none" stroke="#9DB3D6" stroke-width="0.8462" stroke-miterlimit="2.4142" d="M267.599,403.016
+					c2.384,0,4.316,1.934,4.316,4.317c0,2.385-1.932,4.316-4.316,4.316c-2.385,0-4.318-1.932-4.318-4.316
+					C263.281,404.95,265.214,403.016,267.599,403.016z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.137" stroke-miterlimit="2.4142" d="M267.802,415.355"/>
+			</g>
+		</g>
+		<path fill="#999999" d="M548.735,385.834H0.643v-31.451h548.092V385.834z"/>
+		<text transform="matrix(1 0 0 1 187.0361 377.2427)"><tspan x="0" y="0" fill="#FFFFFF" font-family="'Myriad-Roman'" font-size="21.7555">Data Access Engine</tspan></text>
+		<g>
+			<g>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M178.035,211.229v86.633H67.007v-86.633H178.035z"/>
+				
+					<linearGradient id="XMLID_12_" gradientUnits="userSpaceOnUse" x1="-7.394" y1="502.5161" x2="165.1841" y2="502.5161" gradientTransform="matrix(0.6429 0 0 0.6429 71.8174 -109.0999)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_12_)" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M178.014,216.658v-5.379H67.063v5.379H178.014z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M167.477,211.622v4.673h-4.674v-4.673H167.477z"/>
+				
+					<linearGradient id="XMLID_13_" gradientUnits="userSpaceOnUse" x1="-37.9976" y1="554.1147" x2="-43.5543" y2="553.3338" gradientTransform="matrix(0.9406 0 0 0.9406 108.0633 -306.9309)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_13_)" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M72.046,211.566v4.672h-4.674v-4.672H72.046z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M172.617,211.622v4.673h-4.674v-4.673H172.617z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M177.756,211.622v4.673h-4.671v-4.673
+					H177.756z"/>
+				<text transform="matrix(1 0 0 1 174.4287 215.5923)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="5.4436">x</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.9505" stroke-miterlimit="2.4142" d="M164.113,214.732h2.013"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M171.748,212.531v2.235h-2.234v-2.235
+					H171.748z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M170.785,213.496v2.234h-2.237v-2.234H170.785z"/>
+			</g>
+			<g>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M158.133,197.213v86.633H47.106v-86.633H158.133z"/>
+				
+					<linearGradient id="XMLID_14_" gradientUnits="userSpaceOnUse" x1="-9.2847" y1="501.1831" x2="163.29" y2="501.1831" gradientTransform="matrix(0.6429 0 0 0.6429 53.1329 -122.2581)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_14_)" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M158.112,202.643v-5.38H47.164v5.38H158.112z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M147.574,197.605v4.674h-4.672v-4.674H147.574z"/>
+				
+					<linearGradient id="XMLID_15_" gradientUnits="userSpaceOnUse" x1="-39.2896" y1="553.2046" x2="-44.8463" y2="552.4236" gradientTransform="matrix(0.9406 0 0 0.9406 89.3783 -320.0891)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_15_)" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M52.146,197.551v4.672h-4.674v-4.672H52.146z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M152.714,197.605v4.674h-4.673v-4.674H152.714z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M157.856,197.605v4.674h-4.673v-4.674
+					H157.856z"/>
+				<text transform="matrix(1 0 0 1 154.5288 201.5776)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="5.4436">x</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.9505" stroke-miterlimit="2.4142" d="M144.212,200.717h2.013"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M151.846,198.516v2.235h-2.235v-2.235
+					H151.846z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M150.882,199.479v2.236h-2.235v-2.236H150.882z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M148.873,211.431v5.606H92.691v-5.606H148.873z"/>
+				<text transform="matrix(1 0 0 1 94.3462 215.6323)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">αλριγητ χοολ τηινγσ</tspan></text>
+				<text transform="matrix(1 0 0 1 55.5059 230.7573)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">φυν φιση</tspan></text>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+						M90.572,211.431v5.606H49.926v-5.606H90.572z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+						M90.238,212.084v4.481h-5.042v-4.481H90.238z"/>
+					<text transform="matrix(1 0 0 1 50.4609 209.4697)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">αλριγητ</tspan></text>
+				</g>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M52.235,227.585
+					c0.979,0,1.774,0.794,1.774,1.774s-0.794,1.774-1.774,1.774c-0.981,0-1.775-0.795-1.775-1.774S51.254,227.585,52.235,227.585z"
+					/>
+				<text transform="matrix(1 0 0 1 55.5059 224.4072)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">σηελλφιση</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M52.235,221.235
+					c0.979,0,1.774,0.794,1.774,1.775c0,0.979-0.794,1.774-1.774,1.774c-0.981,0-1.775-0.795-1.775-1.774
+					C50.459,222.03,51.254,221.235,52.235,221.235z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M52.235,221.959c0.567,0,1.026,0.461,1.026,1.028c0,0.567-0.459,1.028-1.026,1.028s-1.027-0.46-1.027-1.028
+					C51.208,222.421,51.667,221.959,52.235,221.959z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M140.656,239.257v5.606H50.299v-5.606H140.656z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M143.086,259.05v5.607H52.729v-5.607H143.086z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="
+					M143.088,272.306v5.607H52.73v-5.607H143.088z"/>
+				<text transform="matrix(1 0 0 1 50.8335 237.2954)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">µορε φυν</tspan></text>
+				<text transform="matrix(1 0 0 1 53.2632 257.0894)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">φοοδ φορ µε</tspan></text>
+				<text transform="matrix(1 0 0 1 53.2651 270.3462)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">µε ισ ηυνγρψ</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.2301" stroke-miterlimit="2.4142" d="M155.035,249.434v31.187H50.459
+					v-31.187H155.035z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" d="M78.098,247.006v5.042h-24.65v-5.042H78.098z"/>
+				<text transform="matrix(1 0 0 1 54.9438 251.1128)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="5.4784">φιση φρψ</tspan></text>
+			</g>
+		</g>
+		<path fill="#999999" d="M223.472,180.599H0.067v-26.999h223.404V180.599z"/>
+		<text transform="matrix(1 0 0 1 41.5601 174.8945)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" font-family="'Myriad-Roman'" font-size="21.56">Windows Client</tspan></text>
+		<path fill="#FFFFFF" stroke="#000000" stroke-width="0.1963" stroke-miterlimit="2.4142" d="M454.741,314.497H231.383V153.633
+			h223.358V314.497z"/>
+		<path fill="#999999" d="M454.763,180.582H231.361v-26.999h223.402V180.582z"/>
+		<text transform="matrix(1 0 0 1 294.3159 174.8765)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" font-family="'Myriad-Roman'" font-size="21.56">Web Client</tspan></text>
+		<text transform="matrix(1 0 0 1 346.9116 282.731)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="10.0176">&lt;HTML&gt;&lt;/HTM</tspan></text>
+		<text transform="matrix(1 0 0 1 271.9087 228.4878)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="10.429">ML&gt;&lt;/XML&gt;</tspan></text>
+		
+			<linearGradient id="XMLID_16_" gradientUnits="userSpaceOnUse" x1="-160.4492" y1="475.7739" x2="-276.2774" y2="351.5634" gradientTransform="matrix(0.3389 0 0 0.3389 399.2617 129.6948)">
+			<stop  offset="0.15" style="stop-color:#666666"/>
+			<stop  offset="0.85" style="stop-color:#999999"/>
+			<a:midPointStop  offset="0.15" style="stop-color:#666666"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+			<a:midPointStop  offset="0.85" style="stop-color:#999999"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_16_)" d="M346.417,264.192h6.293v12.038h-5.932
+			c-0.31,1.194-0.714,2.35-1.21,3.456l5.637,5.637l-8.512,8.514l-4.918-4.917c-1.756,1.176-3.69,2.105-5.749,2.734v5.879h-12.041
+			v-5.698c-2.136-0.583-4.148-1.487-5.974-2.657l-4.963,4.964l-8.513-8.513l5.493-5.493c-0.68-1.432-1.21-2.948-1.565-4.527h-6.694
+			V263.57h7.413c0.482-1.354,1.096-2.647,1.824-3.864l-5.864-5.862l8.515-8.512l6.134,6.134c1.233-0.632,2.532-1.153,3.886-1.544
+			v-7.642h12.038v7.642c1.508,0.436,2.95,1.031,4.305,1.767l5.744-5.742l8.512,8.513l-5.654,5.653
+			C345.353,261.397,345.958,262.763,346.417,264.192 M326.315,262.649c4.506,0,8.183,3.674,8.183,8.181
+			c0,4.508-3.677,8.184-8.183,8.184c-4.508,0-8.183-3.676-8.183-8.184C318.132,266.323,321.807,262.649,326.315,262.649"/>
+		
+			<linearGradient id="XMLID_17_" gradientUnits="userSpaceOnUse" x1="-171.4097" y1="465.4888" x2="-300.5777" y2="353.2048" gradientTransform="matrix(0.3368 0.037 -0.037 0.3368 450.2287 97.9863)">
+			<stop  offset="0.15" style="stop-color:#666666"/>
+			<stop  offset="0.85" style="stop-color:#999999"/>
+			<a:midPointStop  offset="0.15" style="stop-color:#666666"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+			<a:midPointStop  offset="0.85" style="stop-color:#999999"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_17_)" d="M377.273,223.761l6.256,0.687l-1.315,11.967
+			l-5.896-0.648c-0.436,1.153-0.967,2.258-1.58,3.303l4.987,6.219l-9.392,7.533l-4.353-5.425c-1.869,0.978-3.893,1.689-6.012,2.09
+			l-0.64,5.845l-11.969-1.316l0.622-5.665c-2.062-0.813-3.962-1.931-5.65-3.291l-5.473,4.391l-7.533-9.392l6.061-4.86
+			c-0.521-1.497-0.882-3.06-1.063-4.67l-6.653-0.731l1.314-11.967l7.369,0.811c0.629-1.294,1.378-2.511,2.235-3.642l-5.188-6.469
+			l9.393-7.531l5.425,6.769c1.295-0.495,2.646-0.87,4.033-1.112l0.833-7.595l11.966,1.314l-0.833,7.596
+			c1.451,0.596,2.819,1.348,4.088,2.225l6.333-5.081l7.532,9.393l-6.236,5.002C376.521,220.868,376.972,222.291,377.273,223.761
+			 M357.46,220.032c4.479,0.492,7.733,4.549,7.239,9.028c-0.492,4.48-4.547,7.733-9.025,7.241c-4.482-0.494-7.734-4.548-7.242-9.029
+			C348.924,222.793,352.981,219.54,357.46,220.032"/>
+		<g>
+			<g>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M408.149,1.27v113.203H277.446V1.27H408.149z"/>
+				
+					<linearGradient id="XMLID_18_" gradientUnits="userSpaceOnUse" x1="-384.3721" y1="207.0181" x2="-186.8096" y2="207.0181" gradientTransform="matrix(0.6611 0 0 0.6611 531.6213 -132.3639)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_18_)" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M408.122,7.662V1.33H277.513v6.332H408.122z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M395.719,1.733v5.501h-5.502V1.733H395.719z"/>
+				
+					<linearGradient id="XMLID_19_" gradientUnits="userSpaceOnUse" x1="-294.7407" y1="352.3071" x2="-301.1011" y2="351.4132" gradientTransform="matrix(0.9672 0 0 0.9672 568.7771 -335.8999)">
+					<stop  offset="0" style="stop-color:#666666"/>
+					<stop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#E6E6E6"/>
+					<a:midPointStop  offset="0" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#666666"/>
+					<a:midPointStop  offset="0.49" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#E6E6E6"/>
+				</linearGradient>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_19_)" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M283.377,1.669v5.5h-5.5v-5.5H283.377z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M401.771,1.733v5.501h-5.501V1.733H401.771z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M407.824,1.733v5.501h-5.506V1.733
+					H407.824z"/>
+				<text transform="matrix(1 0 0 1 403.9028 6.4082)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'ArialMT'" font-size="6.4083">x</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="1.119" stroke-miterlimit="2.4142" d="M391.761,5.395h2.369"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M400.749,2.805v2.63h-2.633v-2.63
+					H400.749z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M399.613,3.94v2.63h-2.631V3.94H399.613z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M408.141,7.724v11.55H277.467V7.724H408.141z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M289.53,8.714
+					c0.446,0,0.808,0.36,0.808,0.808v8.121c0,0.445-0.361,0.807-0.808,0.807h-10.597c-0.444,0-0.806-0.362-0.806-0.807V9.522
+					c0-0.447,0.361-0.808,0.806-0.808H289.53z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M403.876,110.341
+					c0-0.144,0.153-0.258,0.341-0.258h3.388c0.188,0,0.337,0.115,0.337,0.258v3.383c0,0.142-0.149,0.256-0.337,0.256h-3.388
+					c-0.188,0-0.341-0.115-0.341-0.256V110.341z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#999999" d="M288.408,15.563h-4.785v2.434l-4.228-4.229l4.229-4.228
+					l-0.002,2.135h4.785V15.563z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#999999" d="M406.736,110.699v1.528h1.019l-1.766,1.349l-1.764-1.349h0.888
+					v-1.528H406.736z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M291.967,18.45
+					c-0.446,0-0.804-0.362-0.804-0.807V9.52c0-0.443,0.357-0.805,0.804-0.805h10.597c0.446,0,0.806,0.362,0.806,0.805v8.124
+					c0,0.445-0.359,0.807-0.806,0.807H291.967z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#999999" d="M293.091,11.601h4.785V9.166l4.229,4.23l-4.229,4.228v-2.135
+					h-4.785V11.601z"/>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M315.6,8.714
+					c0.444,0,0.804,0.36,0.804,0.808v8.121c0,0.445-0.359,0.807-0.804,0.807h-10.597c-0.447,0-0.807-0.362-0.807-0.807V9.522
+					c0-0.447,0.359-0.808,0.807-0.808H315.6z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#999999" d="M307.185,16.729v-3.503h-1.304l4.229-3.096l4.227,3.096h-1.401
+					v3.503H307.185z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M310.011,14.642v0.861h-0.861v-0.861H310.011z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M311.09,14.642v0.861h-0.861v-0.861H311.09z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M310.011,13.595v0.861h-0.861v-0.861H310.011z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M311.09,13.561v0.861h-0.861v-0.861H311.09z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M396.806,29.045v6.599h-66.138v-6.599H396.806z"/>
+				<text transform="matrix(1 0 0 1 332.6167 33.9897)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">αλριγητ χοολ τηινγσ</tspan></text>
+				<text transform="matrix(1 0 0 1 286.894 51.7944)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">φυν φιση</tspan></text>
+				<g>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+						M328.175,29.045v6.599h-47.847v-6.599H328.175z"/>
+					
+						<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+						M327.781,29.813v5.276h-5.937v-5.276H327.781z"/>
+					<text transform="matrix(1 0 0 1 280.9565 26.7354)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">αλριγητ</tspan></text>
+				</g>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M283.043,48.062
+					c1.153,0,2.09,0.934,2.09,2.088c0,1.152-0.937,2.088-2.09,2.088s-2.089-0.937-2.089-2.088
+					C280.955,48.996,281.89,48.062,283.043,48.062z"/>
+				<text transform="matrix(1 0 0 1 286.894 44.3208)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">σηελλφιση</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M283.043,40.587
+					c1.153,0,2.09,0.936,2.09,2.088c0,1.154-0.937,2.088-2.09,2.088s-2.089-0.934-2.089-2.088
+					C280.955,41.523,281.89,40.587,283.043,40.587z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M283.043,41.44c0.668,0,1.209,0.542,1.209,1.209c0,0.668-0.541,1.209-1.209,1.209c-0.666,0-1.209-0.542-1.209-1.209
+					C281.834,41.982,282.377,41.44,283.043,41.44z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M387.135,61.802v6.6H280.767v-6.6H387.135z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M389.996,85.104v6.599H283.625v-6.599H389.996z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M389.996,100.709v6.6H283.626v-6.6H389.996z"/>
+				<text transform="matrix(1 0 0 1 281.395 59.4937)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">µορε φυν</tspan></text>
+				<text transform="matrix(1 0 0 1 284.2544 82.793)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">φοοδ φορ µε</tspan></text>
+				<text transform="matrix(1 0 0 1 284.2563 98.3999)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">µε ισ ηυνγρψ</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M394.115,73.782v36.712h-113.16V73.782
+					H394.115z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" d="M313.491,70.923v5.936h-29.02v-5.936H313.491z"/>
+				<text transform="matrix(1 0 0 1 286.2339 75.7588)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'SymbolMT'" font-size="6.4492">φιση φρψ</tspan></text>
+				<path fill="none" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="M407.942,23.263
+					c0,0.142-0.149,0.256-0.337,0.256h-3.388c-0.188,0-0.341-0.114-0.341-0.256v-3.384c0-0.14,0.153-0.256,0.341-0.256h3.388
+					c0.188,0,0.337,0.116,0.337,0.256V23.263z"/>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="#999999" d="M405.083,22.904v-1.528h-1.015l1.766-1.35l1.764,1.35h-0.892
+					v1.528H405.083z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#E6E6E6" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M407.946,23.938v85.786h-3.996V23.938H407.946z"/>
+				
+					<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" stroke="#000000" stroke-width="0.2634" stroke-miterlimit="2.4142" d="
+					M407.96,24.656v66.903h-3.758V24.656H407.96z"/>
+			</g>
+		</g>
+		<path opacity="0.84" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M382.738,27.462h-80.883V2.82h80.883V27.462z"/>
+		<text transform="matrix(1 0 0 1 305.5093 21.9521)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" font-family="'Myriad-Roman'" font-size="21.56">Browser</tspan></text>
+		<defs>
+			<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="270.662" y="219.167" width="34.538" height="10.972">
+				<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+			</filter>
+		</defs>
+		<mask maskUnits="userSpaceOnUse" x="270.662" y="219.167" width="34.538" height="10.972" id="XMLID_20_">
+			<g filter="url(#Adobe_OpacityMaskFilter)">
+				<linearGradient id="XMLID_21_" gradientUnits="userSpaceOnUse" x1="270.6621" y1="224.3394" x2="305.606" y2="224.3394">
+					<stop  offset="0" style="stop-color:#FFFFFF"/>
+					<stop  offset="1" style="stop-color:#000000"/>
+					<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="1" style="stop-color:#000000"/>
+				</linearGradient>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_21_)" d="M305.606,230.452h-34.944v-12.225h34.944V230.452z"/>
+			</g>
+		</mask>
+		<linearGradient id="XMLID_22_" gradientUnits="userSpaceOnUse" x1="270.6621" y1="224.6528" x2="305.1997" y2="224.6528">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path mask="url(#XMLID_20_)" fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_22_)" d="M305.2,230.139h-34.538v-10.972
+			H305.2V230.139z"/>
+		<defs>
+			<filter id="Adobe_OpacityMaskFilter_1_" filterUnits="userSpaceOnUse" x="390.528" y="273.615" width="26.817" height="10.564">
+				<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+			</filter>
+		</defs>
+		<mask maskUnits="userSpaceOnUse" x="390.528" y="273.615" width="26.817" height="10.564" id="XMLID_23_">
+			<g filter="url(#Adobe_OpacityMaskFilter_1_)">
+				<linearGradient id="XMLID_24_" gradientUnits="userSpaceOnUse" x1="389.3081" y1="279.3042" x2="416.939" y2="279.3042">
+					<stop  offset="0" style="stop-color:#000000"/>
+					<stop  offset="1" style="stop-color:#FFFFFF"/>
+					<a:midPointStop  offset="0" style="stop-color:#000000"/>
+					<a:midPointStop  offset="0.5" style="stop-color:#000000"/>
+					<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+				</linearGradient>
+				<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_24_)" d="M416.939,285.399h-27.631v-12.19h27.631V285.399z"/>
+			</g>
+		</mask>
+		<linearGradient id="XMLID_25_" gradientUnits="userSpaceOnUse" x1="390.5278" y1="278.8975" x2="417.3452" y2="278.8975">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path mask="url(#XMLID_23_)" fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_25_)" d="M417.345,284.18h-26.817v-10.564
+			h26.817V284.18z"/>
+		<path fill="#999999" d="M549.017,180.656h-87.04v-58.413h87.04V180.656z"/>
+		<text transform="matrix(1 0 0 1 470.9536 143.5908)"><tspan x="0" y="0" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" font-family="'Myriad-Roman'" font-size="21.56">Custom</tspan><tspan x="4.302" y="28.211" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" font-family="'Myriad-Roman'" font-size="21.56">Clients</tspan></text>
+		<linearGradient id="XMLID_26_" gradientUnits="userSpaceOnUse" x1="479.9692" y1="191.7275" x2="479.9692" y2="308.2939">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#999999"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#999999"/>
+		</linearGradient>
+		<path fill="url(#XMLID_26_)" d="M491.775,308.294h-23.611V191.728h23.611V308.294z"/>
+		<text transform="matrix(0 -1 1 0 486.8804 279.689)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="21.56">VS.NET</tspan></text>
+		<linearGradient id="XMLID_27_" gradientUnits="userSpaceOnUse" x1="508.1997" y1="191.7031" x2="508.1997" y2="308.2695">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#999999"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#999999"/>
+		</linearGradient>
+		<path fill="url(#XMLID_27_)" d="M520.431,308.27h-24.462V191.703h24.462V308.27z"/>
+		<linearGradient id="XMLID_28_" gradientUnits="userSpaceOnUse" x1="533.9946" y1="191.7393" x2="533.9946" y2="308.3057">
+			<stop  offset="0" style="stop-color:#FFFFFF"/>
+			<stop  offset="1" style="stop-color:#999999"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#999999"/>
+		</linearGradient>
+		<path fill="url(#XMLID_28_)" d="M543.248,308.306h-18.505V191.739h18.505V308.306z"/>
+		<text transform="matrix(0 -1 1 0 514.5356 301.2578)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="21.56">Dataphoria</tspan></text>
+		<text transform="matrix(1 0 0 1 527.0981 253.6255)"><tspan x="0" y="0" font-family="'Myriad-Roman'" font-size="21.56">...</tspan></text>
+		
+			<linearGradient id="XMLID_29_" gradientUnits="userSpaceOnUse" x1="1130.7837" y1="1830.1987" x2="1056.7458" y2="1851.1991" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_29_)" d="M129.342,339.057h-6.512v-9.568h6.512l-16.607-10.374
+			l-16.61,10.374h6.512v9.568h-6.512l16.61,10.376L129.342,339.057z"/>
+		
+			<linearGradient id="XMLID_30_" gradientUnits="userSpaceOnUse" x1="1130.7378" y1="1349.5425" x2="1056.7009" y2="1370.5426" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_30_)" d="M363.084,339.04h-6.511v-9.568h6.511l-16.606-10.374
+			l-16.609,10.374h6.512v9.568h-6.512l16.609,10.375L363.084,339.04z"/>
+		
+			<linearGradient id="XMLID_31_" gradientUnits="userSpaceOnUse" x1="1132.021" y1="1023.0923" x2="1057.9832" y2="1044.0927" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_31_)" d="M521.837,339.526h-6.512v-9.567h6.512l-16.606-10.375
+			l-16.61,10.375h6.512v9.567h-6.512l16.61,10.376L521.837,339.526z"/>
+		
+			<linearGradient id="XMLID_32_" gradientUnits="userSpaceOnUse" x1="604.356" y1="1358.4526" x2="530.3196" y2="1379.4526" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_32_)" d="M358.752,139.541h-6.512v-9.567h6.512L342.144,119.6
+			l-16.609,10.374h6.512v9.567h-6.512l16.609,10.376L358.752,139.541z"/>
+		
+			<linearGradient id="XMLID_33_" gradientUnits="userSpaceOnUse" x1="1656.0962" y1="1903.772" x2="1615.5544" y2="1915.2715" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_33_)" d="M88.359,542.333h-3.566v-5.238h3.566l-9.094-5.681
+			l-9.096,5.681h3.566v5.238H70.17l9.096,5.683L88.359,542.333z"/>
+		
+			<linearGradient id="XMLID_34_" gradientUnits="userSpaceOnUse" x1="1654.4009" y1="1705.1353" x2="1613.8544" y2="1716.636" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_34_)" d="M184.956,541.69h-3.565v-5.237h3.565l-9.094-5.683
+			l-9.095,5.683h3.565v5.237h-3.565l9.095,5.684L184.956,541.69z"/>
+		
+			<linearGradient id="XMLID_35_" gradientUnits="userSpaceOnUse" x1="1654.4009" y1="1506.4976" x2="1613.8544" y2="1517.9983" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_35_)" d="M281.554,541.69h-3.566v-5.237h3.566l-9.094-5.683
+			l-9.096,5.683h3.566v5.237h-3.566l9.096,5.684L281.554,541.69z"/>
+		
+			<linearGradient id="XMLID_36_" gradientUnits="userSpaceOnUse" x1="1654.396" y1="1307.8618" x2="1613.8518" y2="1319.3619" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_36_)" d="M378.151,541.689h-3.566v-5.239h3.566l-9.094-5.681
+			l-9.096,5.681h3.565v5.239h-3.565l9.096,5.683L378.151,541.689z"/>
+		
+			<linearGradient id="XMLID_37_" gradientUnits="userSpaceOnUse" x1="1654.3999" y1="1109.2241" x2="1613.8534" y2="1120.7249" gradientTransform="matrix(0 0.379 -0.4863 0 1007.8656 -80.2627)">
+			<stop  offset="0" style="stop-color:#9DB3D6"/>
+			<stop  offset="0.49" style="stop-color:#D3DDED"/>
+			<stop  offset="1" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#9DB3D6"/>
+			<a:midPointStop  offset="0.49" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#D3DDED"/>
+			<a:midPointStop  offset="1" style="stop-color:#9DB3D6"/>
+		</linearGradient>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#XMLID_37_)" d="M474.75,541.69h-3.568v-5.237h3.568l-9.097-5.683
+			l-9.096,5.683h3.568v5.237h-3.568l9.096,5.684L474.75,541.69z"/>
+	</g>
+</svg>

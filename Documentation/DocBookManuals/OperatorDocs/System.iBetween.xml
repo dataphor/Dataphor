@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:30:29</date> 
+	 </sect2info> 
+	 <title>iBetween</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>between</symbol> is the parser recognized symbol for this
+		  operator. <symbol>between</symbol> is part of a ternary operator. It is used to
+		  see if one object is between two others. The expression 
+		  <informalexample> 
+				<para><symbol>x between y and z</symbol></para> 
+		  </informalexample>is a shortcut for 
+		  <informalexample> 
+				<para><symbol>x &gt;= y and x &lt;= z</symbol></para> 
+		  </informalexample> <symbol>between</symbol> returns a boolean
+		  value</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee where Name &gt;= "Je" and Name &lt;=  "Jo";</programlisting> 
+		  <programlisting>ID Name
+-- ----
+4  Jeff
+6  Jeff
+1  Jim</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGBetweenClause.html">Between Clause</ulink>
+<ulink url="SLRiAnd.html">iAnd (<symbol>and</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

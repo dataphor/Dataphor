@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:34:32</date> 
+	 </sect2info> 
+	 <title>iLike</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>like</symbol> is the parser recognized symbol for this
+		  operator. This operator performs a string comparison using an inexact match
+		  containing wildcard characters. Using the wildcard characters one can specify
+		  how to limit the dataset. The percent character and the underscore character
+		  are used as wildcard characters to signify part of a string that is unknown.
+		  The underscore is used to represent one unknown character, and the percent is
+		  used to represent an unknown number of unknown characters.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee where Name like "J%";
+select Employee where Name like "J___";</programlisting> 
+		  <programlisting>ID Name 
+-- ---- 
+1  Joe  
+2  John 
+3  Josh 
+4  Jeff 
+5  Jake 
+6  Jeff 
+
+ID Name 
+-- ---- 
+2  John 
+3  Josh 
+4  Jeff 
+5  Jake 
+6  Jeff </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para>
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

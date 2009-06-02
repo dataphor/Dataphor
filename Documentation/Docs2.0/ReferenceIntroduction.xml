@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<chapter id="DRDilIntroduction"> 
+	 <chapterinfo><date role="LastMod">Tuesday, July 13, 2004 13:28:43</date>
+	 </chapterinfo>
+	 <title>Introduction</title> 
+	 <para><?xm-replace_text {Introduction Paragraph}?></para>
+	 <para>DIL is an XML application tightly integrated with the Frontend
+		  Client. Each element tag of DIL represents a node that is defined in a Frontend
+		  Client. So, when you see a <symbol>&lt;checkbox ... &gt;</symbol> tag in an
+		  interface document you know that the client has a 
+		  <classname>checkbox</classname> node defined to render the DIL element.
+		  Properties in the client nodes which may be set are represented as element
+		  attributes in DIL. The values attached to the attributes are converted to the
+		  appropriate type and assigned to the properties of the client node. </para> 
+	 <para>When a DIL element is derived rather than built by hand, the
+		  Derivation engine uses the metadata tags described in 
+		  <ulink url="DFRTagReference.HTML">Tag Reference</ulink> to generate
+		  attributes and values for the client.</para> 
+	 <para>Nearly every DIL element has a <symbol>bop:name</symbol> attribute.
+		  This is the name used to resolve references to other elements, such as a
+		  reference to a source element.</para> 
+	 <bridgehead>Empty Interface</bridgehead> 
+	 <para>The following is an empty Interface element. The interface may
+		  contain exactly one Element node and several action, source, and other
+		  non-element nodes. The Designer enforces the rules of ownership/parenthood in
+		  DIL. If you have questions about whether a node can appear in a specific
+		  location, try out the Designer.</para> 
+	 <programlisting>&lt;interface
+    xmlns:bop='www.alphora.com/schemas/bop'
+    text='form name goes here'
+    mainsource='MainSourceName goes here'
+&gt;
+
+&lt;/interface&gt;
+</programlisting> 
+	 <para>The <symbol>xmlns:bop</symbol> declaration provides several services
+		  used in converting DIL from a text format to an interactive form. The text
+		  attribute provides the title used on the form. The <symbol>mainsource</symbol>
+		  attribute provides a global alias to a source defined in the body of the
+		  <symbol>interface</symbol>. See the appropriate interface class (listed in the
+		  see also section) for more information about the
+		  <symbol>interface</symbol>.</para> 
+	 <bridgehead>Keyboard Accelerators</bridgehead> 
+	 <para>The text/title of nodes may include accelerator hints marked by an
+		  ampersand ("&amp;"), but these are considered optional by the client. The
+		  Windows client will allocate the requested accelerator hint if available, or
+		  assign its own if not available. The Web client currently strips off
+		  accelerators.</para> 
+	 <bridgehead>Designer Toolbox</bridgehead> 
+	 <para>The list of core elements in the toolbox comes from the
+		  <filename>nodetype.dnt</filename> file.</para> 
+	 <para>If you extend DIL by adding controls and their corresponding Frontend
+		  Nodes, you must list the new nodes in the <filename>nodetype.dnt</filename>
+		  file to expose them for use in the Designer.</para> 
+	 <para>If you would like to assign an icon to a Frontend Node that you
+		  create, use the <property>DesignerImageAttribute</property> to select an image
+		  form the list of images used by the Designer.</para>
+</chapter>

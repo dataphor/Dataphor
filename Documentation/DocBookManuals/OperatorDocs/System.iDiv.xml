@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:31:36</date> 
+	 </sect2info> 
+	 <title>iDiv</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>div</symbol> is the parser recognized symbol for this
+		  operator. The <symbol>div</symbol> operator returns a quotient of the two
+		  values. In all cases, including dividing decimal numbers, integer division is
+		  performed. For decimal division, use 
+		  <ulink url="SLRiDivision.html">iDivison</ulink>.</para> 
+	 <para>Integer divison is defined as iterated subtraction. The dividend is
+		  subtracted from the divisor until the divisor cannot be subtracted from what
+		  remains of the dividend without changing the sign of the remainder of the
+		  dividend. The result of this operator is the number of times this can be done.
+		  This same definition applies to decimal numbers. What remains of the dividend
+		  can be accessed via the modulus (<symbol>iMod</symbol>) operator.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add {17 div 5 IntDiv, 1.2 div 0.35 DecIntDiv };</programlisting> 
+		  <programlisting>IntDiv DecIntDiv
+------ ---------
+3      3</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="D4LGArithmeticExpression.html">Arithmetic Expressions</ulink>
+<ulink url="SLRiMod.html">iMod (<symbol>mod</symbol>)</ulink>
+<ulink url="SLRiDivision.html">iDivison (<symbol>/</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 30, 2004 10:30:26</date> 
+	 </sect2info> 
+	 <title>System.ObjectDescription</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>ObjectDescription</symbol> returns the description of an
+		  object. When the ID is specified the description is resolved from all objects.
+		  When the Name is spacified the description is resolved from the Catalog
+		  items.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Objects where ID = 994;
+select ObjectDescription(994);
+select ObjectDescription("Boolean");</programlisting> 
+		  <programlisting>ID  Name    DisplayName Description                                      
+--- ------- ----------- -------------------------------------------------
+994 Boolean Boolean     Representation "Boolean" of type "System.Boolean"
+
+Representation "Boolean" of type "System.Boolean"
+
+Type "System.Boolean"</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGTypes.html">Types</ulink>
+<ulink url="D4LGCatalogElements.html">Catalog Elements</ulink>
+<ulink url="D4LGObjects.html">Objects</ulink>
+<ulink url="SLRSystem.ObjectDisplayName.html">System.ObjectDisplayName</ulink>
+<ulink url="SLRSystem.ObjectExists.html">System.ObjectExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

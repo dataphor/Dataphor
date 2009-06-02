@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 12:10:20</date> 
+	 </sect2info> 
+	 <title>System.RealSQLToD4</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator translates RealSQL code into D4 code. There are minor
+		  differences between SQL dialects from other DBMSs, so this operator does not
+		  translate from any other type of SQL. The System.D4ToSQL operator does
+		  translate from D4 to another dialect of SQL. D4toSQL and RealSQLToD4 are not
+		  symmetrical operators. The code resulting from the conversion RealSQLToD4 and
+		  then D4toSQL will not be the same as the original code.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select TableDee add { RealSQLToD4("select * from Employee;") D4};</programlisting> 
+		  <programlisting>D4                                                                                
+--------------------------------------------------------------------------------- 
+select (
+	Employee
+		rename Employee
+)
+capabilities {navigable}
+type dynamic</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.D4ToSQL.html">System.D4ToSQL</ulink>
+<ulink url="D4LGCase.html">Case Sensitivity</ulink>
+<ulink url="D4LGSQLDevices.html">SQL Devices</ulink>
+<ulink url="DDGP2Translation.html">Translation</ulink>
+<ulink url="DDGP1RealSQLLanguage.html">RealSQL Language</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

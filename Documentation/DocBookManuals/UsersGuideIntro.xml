@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<chapter id="DUGIntroduction"> 
+	 <chapterinfo> 
+		  <date role="LastMod">Thursday, July 17, 2003 10:55:10 AM</date> 
+		  <revhistory> 
+				<revision> 
+					 <revnumber>1</revnumber> 
+					 <date>Friday, June 07, 2002 2:55:28 PM</date> 
+					 <revdescription> 
+						  <para>DXC to DocBook</para> 
+					 </revdescription> 
+				</revision> 
+		  </revhistory> 
+	 </chapterinfo> 
+	 <title>Introduction</title> 
+	 <para>Welcome to Alphora Dataphor, the most advanced application
+		  development toolset available today. Dataphor eliminates or automates the
+		  mundane development tasks, allowing the developer to focus on the art of
+		  application development.</para>
+	 <para>The 
+		  <citetitle>Dataphor User's Guide</citetitle> provides the knowledge
+		  necessary to begin building applications using Dataphor. The 
+		  <citetitle>User's Guide</citetitle> is divided into the following
+		  parts:</para> 
+	 <para> 
+		  <itemizedlist mark="bullet"> 
+				<listitem> 
+					 <para> 
+						  <citetitle>Part I - Introducing Dataphor</citetitle>
+						  </para> 
+					 <para>Describes the motivation behind and background of
+						  Dataphor, then proceeds to give a tour of Dataphor technology.</para> 
+				</listitem> 
+				<listitem> 
+					 <para> 
+						  <citetitle>Part II - Tutorials</citetitle> </para> 
+					 <para>Guides the reader through the creation of several sample
+						  applications using the Dataphor product.</para> 
+				</listitem> 
+		  </itemizedlist> </para>
+	 <para>The 
+		  <citetitle>User's Guide</citetitle> also includes a Glossary that
+		  defines terminology relating to Dataphor.</para> 
+</chapter> 

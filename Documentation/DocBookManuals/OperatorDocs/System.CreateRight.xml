@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 13:08:06</date> 
+	 </sect2info> 
+	 <title>System.CreateRight</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>A right is the basic unit of permission in the DAE. Any operation
+		  which must be protected has an associated right. Rights are then assigned to
+		  users, groups, and roles to allow users access to the various objects and
+		  functions of the DAE. A right can be granted or revoked, and a right assignment
+		  can be reverted. The DAE defines several system rights which protect basic DAE
+		  functions such as DDL statements. </para> 
+	 <para>Whenever a catalog object is created, the rights necessary to protect
+		  operations on that object are also created. For example, creating a table
+		  creates select, insert, update, and delete rights for that table, as well as
+		  alter and drop rights.</para> 
+	 <para>The user that creates a catalog item has full rights to that item.
+		  All users in all superior groups (parent, parent's parent, etc.) also have full
+		  rights to the item.</para> 
+	 <para>A right is itself a catalog item.</para> 
+	 <para>If the UserID is not specified, the current user will be the owner of
+		  the right. If the user is specified it must be the current user or a user in a
+		  subordinate group (child, child's child, etc.) and the specified user will be
+		  the owner of the right.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.GrantRightToGroup.html">System.GrantRightToGroup</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.GrantRightToUser.html">System.GrantRightToUser</ulink>
+<ulink url="SLRSystem.GroupHasRight.html">System.GroupHasRight</ulink>
+<ulink url="SLRSystem.GroupRightIsInherited.html">System.GroupRightIsInherited</ulink>
+<ulink url="SLRSystem.RevertRightForGroup.html">System.RevertRightForGroup</ulink>
+<ulink url="SLRSystem.RevertRightForRole.html">System.RevertRightForRole</ulink>
+<ulink url="SLRSystem.RevertRightForUser.html">System.RevertRightForUser</ulink> 
+<ulink url="SLRSystem.RevokeRightFromGroup.html">System.RevokeRightFromGroup</ulink>
+<ulink url="SLRSystem.RevokeRightFromRole.html">System.RevokeRightFromRole</ulink>
+<ulink url="SLRSystem.RevokeRightFromUser.html">System.RevokeRightFromUser</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.UserHasRight.html">System.UserHasRight</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

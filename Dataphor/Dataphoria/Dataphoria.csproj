@@ -82,7 +82,7 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\release\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
@@ -105,58 +105,38 @@
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedDebug|AnyCPU' ">
-    <OutputPath>bin\debug\</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>DEBUG;TRACE;SIGNASSEMBLIES</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
-    <DebugSymbols>true</DebugSymbols>
-    <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
-    <Optimize>false</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
-    <DebugType>full</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.TextEditor, Version=2.1.0.2429, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Frontend.Client.Windows\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
     <Reference Include="syncfusion.core, Version=4.102.0.62, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.core.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="syncfusion.grid.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.grid.base.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="syncfusion.grid.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\syncfusion.grid.windows.dll</HintPath>
     </Reference>
     <Reference Include="syncfusion.shared.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.shared.base.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="syncfusion.shared.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.shared.windows.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="syncfusion.tools.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.tools.base.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="syncfusion.tools.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\syncfusion.tools.windows.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

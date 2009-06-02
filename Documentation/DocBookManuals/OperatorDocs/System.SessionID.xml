@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 06, 2004 14:57:06</date>
+	 </sect2info>
+	 <title>System.SessionID</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the ID for the current session.</para> 
+	 <example>
+		  <title>Example</title>
+		  <programlisting>select Sessions where ID = SessionID() over {ID, User_ID};</programlisting> 
+		  <programlisting>ID User_ID
+-- -------
+1  Admin</programlisting>
+		  <para>Note that session information may not be exactly the same in
+				every case.</para>
+	 </example> 
+	 <formalpara>
+		  <title>See Also</title>
+		  <para>
+				<literallayout><ulink url="DDGP1Session.html">Session</ulink></literallayout></para>
+	 </formalpara> 
+</sect2> 

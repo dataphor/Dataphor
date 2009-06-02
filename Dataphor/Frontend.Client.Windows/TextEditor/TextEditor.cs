@@ -32,7 +32,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				if (FNilIfBlank != value)
 				{
 					FNilIfBlank = value;
-					InternalUpdateTextEditControl();
+					if (Active)
+						InternalUpdateTextEditControl();
 				}
 			}
 		}

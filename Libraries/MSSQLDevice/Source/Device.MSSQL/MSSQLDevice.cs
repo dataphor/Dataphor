@@ -1454,10 +1454,10 @@ if not exists (select * from sysdatabases where name = '{0}')
 	{
 		public static int Compare(Scalar ALeftValue, Scalar ARightValue)
 		{
-			Stream LLeftStream = ALeftValue.IsNative ? new MemoryStream(ALeftValue.AsByteArray, 0, ALeftValue.AsByteArray.Length, false) : ALeftValue.OpenStream();
+			Stream LLeftStream = ALeftValue.IsNative ? new MemoryStream(ALeftValue.AsByteArray, 0, ALeftValue.AsByteArray.Length, false, true) : ALeftValue.OpenStream();
 			try
 			{
-				Stream LRightStream = ARightValue.IsNative ? new MemoryStream(ARightValue.AsByteArray, 0, ARightValue.AsByteArray.Length, false) : ARightValue.OpenStream();
+				Stream LRightStream = ARightValue.IsNative ? new MemoryStream(ARightValue.AsByteArray, 0, ARightValue.AsByteArray.Length, false, true) : ARightValue.OpenStream();
 				try
 				{
 					int LLeftByte;

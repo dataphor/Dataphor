@@ -673,4 +673,7 @@
   <data name="105285" xml:space="preserve">
     <value>Errors occurred attempting to compile custom error message for constraint "{0}".</value>
   </data>
+  <data name="105286" xml:space="preserve">
+    <value>Restriction is not sargable because the argument for column "{0}" could not be converted from type "{1}" to type "{2}", resulting in a potential reduction in performance.</value>
+  </data>
 </root>

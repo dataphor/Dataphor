@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 13:50:02</date> 
+	 </sect2info> 
+	 <title>System.SetRightOwner</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is used to set <symbol>AUserID</symbol> as the owner of
+		  <symbol>ARightName</symbol>. The current user must have sufficient rights to
+		  <symbol>ARightName</symbol> and <symbol>AUserID</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRight("AddProgram");
+
+select Rights where Name = "AddProgram";
+CreateUser("JS1", "John Smith", "Password");
+SetRightOwner("AddProgram", "JS1");
+select Rights where Name = "AddProgram";
+
+DropUser("JS1");
+DropRight("AddProgram");</programlisting> 
+		  <programlisting>Name       Owner_User_ID
+---------- -------------
+AddProgram Admin
+
+Name       Owner_User_ID
+---------- -------------
+AddProgram JS1
+</programlisting>
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateRight.html">System.CreateRight</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.DropRight.html">System.DropRight</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.RightExists.html">System.RightExists</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -94,6 +94,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get { return FMainMenu.Items; }
 		}
 
+		private bool FForceAcceptReject;
+
+		public bool ForceAcceptReject
+		{
+			get { return FForceAcceptReject; }
+			set { FForceAcceptReject = value; }
+		}
+
 		// IsAcceptReject
 
 		public bool IsAcceptReject
@@ -101,14 +109,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			get 
 			{ 
 				return
-					(FMode != FormMode.None) ||
-					(
-						(MainSource != null) &&
+					ForceAcceptReject
+						|| (FMode != FormMode.None) 
+						||
 						(
-							(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
-							(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
-						)
-					);
+							(MainSource != null) &&
+							(
+								(MainSource.DataView.State == DAE.Client.DataSetState.Edit) || 
+								(MainSource.DataView.State == DAE.Client.DataSetState.Insert)
+							)
+						);
 			}
 		}
 
@@ -326,12 +336,13 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		public virtual void PreprocessRequest(HttpContext AContext)	// this is not part of an IWebPrehandler interface
 		{
 			IncrementLogicalClock();
-			if (GetContextClock(AContext) != (FLogicalClock - 1))	// If logical clock was missing or incorrect, do not apply request and warn
-				throw new WebClientException(WebClientException.Codes.LogicalClockWarning, GetContextClock(AContext), FLogicalClock - 1);
-			PreprocessRequestEvent LEvent = new PreprocessRequestEvent(AContext);
-			BroadcastEvent(LEvent);
-			if (LEvent.AnyErrors)
-				throw new AbortException();
+			if (GetContextClock(AContext) == (FLogicalClock - 1))	// If logical clock was missing or incorrect, do not apply request
+			{
+				PreprocessRequestEvent LEvent = new PreprocessRequestEvent(AContext);
+				BroadcastEvent(LEvent);
+				if (LEvent.AnyErrors)
+					throw new AbortException();
+			}
 		}
 
 		// IWebHandler

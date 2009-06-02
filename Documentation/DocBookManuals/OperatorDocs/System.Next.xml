@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 15:50:30</date> 
+	 </sect2info> 
+	 <title>System.Next</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator moves the specified cursor to the next row of the
+		  specified cursor. <symbol>next</symbol> returns true if the cursor is not on
+		  the EOF crack after the attempted move.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>begin
+	var OutputString : String := Unicode({13}) + "From the Beginning: ";
+	var EmployeeCursor : cursor(table { ID : Integer, Name : String }) := cursor(Employee);
+	try
+		EmployeeCursor.First();
+		while EmployeeCursor.Next() do
+		begin
+			OutputString := OutputString + Unicode({13}) + (Name from EmployeeCursor.Select()) + " ";
+		end;
+		EmployeeCursor.Last();
+		OutputString := OutputString + Unicode({13}) + "From the End: ";
+		while EmployeeCursor.Prior() do
+		begin
+			OutputString := OutputString + Unicode({13}) + (Name from EmployeeCursor.Select()) + " ";
+		end;
+		raise Error(OutputString);
+	finally
+		EmployeeCursor.Close();
+	end;
+end;</programlisting> 
+		  <programlisting>From the Beginning: 
+Joe 
+John 
+Josh 
+Jeff 
+Jake 
+Jeff 
+From the End: 
+Jeff 
+Jake 
+Jeff 
+Josh 
+John 
+Joe</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Navigable.html">Cursors Capabilities, Navigable</ulink>
+<ulink url="SLRSystem.EOF.html">System.EOF</ulink>
+<ulink url="DACDGNavigation.html">Navigation</ulink>
+<ulink url="DDGP2Execution3.html">Execution</ulink>
+<ulink url="DDGP2SQLReader.html">SQLReader</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:33:15</date> 
+	 </sect2info> 
+	 <title>join</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>join</symbol> is the parser recognized symbol for this
+		  operator. This operator links two tables together. If the table includes a
+		  <symbol>by</symbol> clause then it is considered a <emphasis>normal
+		  join</emphasis>. Without a <symbol>by</symbol> clause a <emphasis>natural
+		  join</emphasis> is performed. In a <emphasis>normal join</emphasis>, the tables
+		  are linked as specified in the <symbol>by</symbol> clause. In a
+		  <emphasis>natural join</emphasis> the DAE automatically picks the columns to
+		  use as the restriction. For more information and examples see "Join Query
+		  Operators". This is an inner join, only rows where the by criteria or DAE
+		  automatic criteria match will be shown.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <para><ulink url="D4LGNaturalJoins.html"> Natural Joins</ulink></para> 
+		  <programlisting>select Employee join EmployeePhone; // natural join</programlisting> 
+		  <programlisting>ID Name   Phone
+--  ----  --------
+1  Joe    555-1000 
+1  Joe    555-1234 
+2  John   555-4321
+4  Jeff   555-4444 
+5  Jake   555-5678 </programlisting> 
+		  <para><ulink url="D4LGConditionedJoins.html"> Conditioned
+					 Joins</ulink></para> 
+		  <programlisting>select (Employee rename E) 
+		  join (EmployeePhone rename EP)
+		  by E.ID = EP.ID remove { EP.ID }; // normal join</programlisting> 
+		  <programlisting>E.ID   E.Name    EP.Phone
+------ --------  ----------- 
+1      Joe       555-1000 
+1      Joe       555-1234 
+2      John      555-4321 
+4      Jeff      555-4444 
+5      Jake      555-5678 </programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGJoin.html">Join Expressions</ulink>
+<ulink url="D4LGOuterJoin.html">Outer Join Expressions</ulink>
+<ulink url="SLRiLeftJoin.html">iLeftJoin</ulink>
+<ulink url="SLRiRightJoin.html">iRightJoin</ulink>
+<ulink url="D4LGSelectStatement1.html">Select Statement</ulink>
+<ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

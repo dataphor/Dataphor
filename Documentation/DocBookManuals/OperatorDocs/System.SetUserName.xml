@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 16, 2004 14:39:44</date> 
+	 </sect2info> 
+	 <title>System.SetUserName</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para> This operator sets the User Name for the specified User ID. This
+		  Operator can only be used by the Admin users.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateUser("JS1", "J. Smith" "Password");
+SetUserName("JS1", "John Smith");
+DropUser("JS1");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

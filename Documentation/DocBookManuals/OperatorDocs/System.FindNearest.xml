@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:43:01</date> 
+	 </sect2info> 
+	 <title>System.FindNearest</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator takes the cursor to the specified key. If the row
+		  doesn't exist then it will attempt to move the cursor to the record closest to
+		  the specified row. This key is either one recieved from
+		  <symbol>GetKey</symbol>, or one made. The key data specified must come from
+		  columns in the order clause in the table definition. This operator first checks
+		  to see if the first column in the order specification is in the row provided,
+		  then the second row in the order, and so on.</para> 
+<!--
+	 <example>
+		  <title>Example</title>
+		  <programlisting>begin
+	var EmpCursor : cursor := cursor (Employee capabilities {Updateable});
+	var TempRow : row;
+	TempRow = row {"Jed" Name,45 ID};
+	EmpCursor.Insert(TempRow);
+end;</programlisting>
+	 </example> 
+-->
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGUsingCursors.html">Using Cursors</ulink>
+<ulink url="DDGP2Searchable.html">Cursor Capabilities, Searchable</ulink>
+<ulink url="SLRSystem.FindKey.html">System.FindKey</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

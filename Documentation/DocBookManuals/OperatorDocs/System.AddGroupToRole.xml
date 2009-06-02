@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 14:39:00</date> 
+	 </sect2info> 
+	 <title>System.AddGroupToRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>The operator adds the group to the role.</para> 
+	 <para>If Inherited is set to <symbol>true</symbol>, all child groups will
+		  be considered part of the role. If Inherited is not specified, the default is
+		  <symbol>true</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRight("AddProgram");
+GrantRightToRole("AddProgram", "SoftwareDeveloper");
+
+CreateGroup("Developers", "User");
+AddGroupToRole("Developers", "SoftwareDeveloper");
+
+CreateUser("JS1", "John Smith", "Password");
+SetUserGroup("JS1", "Developers");
+
+DropUser("JS1");
+DropGroup("Developers");
+DropRight("AddProgram");
+DropRole("SoftwareDeveloper");</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.AddUserToRole.html">System.AddUserToRole</ulink>
+<ulink url="SLRSystem.GrantRightToRole.html">System.GrantRightToRole</ulink>
+<ulink url="SLRSystem.RemoveUserFromRole.html">System.RemoveUserFromRole</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.RoleHasRight.html">System.RoleHasRight</ulink>
+<ulink url="SLRSystem.SetUserGroup.html">System.SetUserGroup</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

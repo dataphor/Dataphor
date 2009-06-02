@@ -121,6 +121,8 @@ namespace Alphora.Dataphor.Frontend.Client
 					return Source.DataView.State == DataSetState.Inactive;
 				case SourceActions.PostDetails:
 					return !Source.DataView.IsEmpty();
+                case SourceActions.PostIfModified:
+                    return (Source.IsModified && ((Source.DataView.State == DataSetState.Edit) || (Source.DataView.State == DataSetState.Insert)));
 				default:
 					return false;	// to keep the compiler happy
 			}

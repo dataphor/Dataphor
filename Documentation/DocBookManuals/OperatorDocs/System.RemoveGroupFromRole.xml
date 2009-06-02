@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 15:27:15</date> 
+	 </sect2info> 
+	 <title>System.RemoveGroupFromRole</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>Removes the specified <symbol>Group</symbol> as a member of the
+		  specified <symbol>Role</symbol>.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateRole("SoftwareTester");
+CreateGroup("Developers", "User");
+
+AddGroupToRole("Developers", "SoftwareDeveloper");
+AddGroupToRole("Developers", "SoftwareTester");
+
+select GroupRoles where Group_Name = "Developers";
+RemoveGroupFromRole("Developers", "SoftwareDeveloper");
+select GroupRoles where Group_Name = "Developers";
+
+DropGroup("Developers");
+DropRole("SoftwareDeveloper");DropRole("SoftwareTester");</programlisting> 
+		  <programlisting>Group_Name Role_Name              Inherited
+---------- ---------------------- ---------
+Developers Test.SoftwareDeveloper True
+Developers Test.SoftwareTester    True
+
+Group_Name Role_Name              Inherited
+---------- ---------------------- ---------
+Developers Test.SoftwareTester    True</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRole.html">System.DropRole</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.GroupExists.html">System.GroupExists</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

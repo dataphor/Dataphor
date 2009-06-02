@@ -587,8 +587,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			OperatorAlreadyAttachedToColumnEvent = 105283,
 			
 			/// <summary>Error code 105285: "Errors occurred attempting to compile custom error message for constraint "{0}"."</summary>
-			InvalidCustomConstraintMessage = 105285
-
+			InvalidCustomConstraintMessage = 105285,
+			
+			/// <summary>Error code 105286: "Restriction is not sargable because the argument for column "{0}" could not be converted from type "{1}" to type "{2}", resulting in a potential reduction in performance."</summary>
+			CouldNotConvertSargableArgument = 105286
 		}
 		
 		// Resource manager for this exception class

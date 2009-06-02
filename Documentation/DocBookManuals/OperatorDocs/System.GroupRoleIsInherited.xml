@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 15, 2004 15:06:21</date> 
+	 </sect2info> 
+	 <title>System.GroupRoleIsInherited</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns <symbol>true</symbol> if the specified role has
+		  inherited set to true in the specified group, otherwise it will return
+		  <symbol>false</symbol>. A runtime error will occur if the group is not a member
+		  of the specified role.</para> 
+	 <para>The test can only be performed on groups subordinates (child, child's
+		  child, etd.) to the group the current user is assigned to.</para> 
+	 <para>The Group must be a member of the Role or an error will occur.</para>
+	 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>CreateRole("SoftwareDeveloper");
+CreateGroup("Developers", "User");
+AddGroupToRole("User", "SoftwareDeveloper");
+
+select
+  if exists (GroupRoles
+      where (Group_Name = "User")
+        and (Role_Name = "Test.SoftwareDeveloper"))
+  then
+     GroupRoleIsInherited("User", "SoftwareDeveloper").ToString()
+  else
+     "Group is not a member of Role";
+
+select
+  if exists (GroupRoles
+      where (Group_Name = "Developers")
+        and (Role_Name = "Test.SoftwareDeveloper"))
+  then
+     GroupRoleIsInherited("Developers", "SoftwareDeveloper").ToString()
+  else
+     "Group is not a member of Role";    
+
+DropGroup("Developers");
+DropRole("SoftwareDeveloper");</programlisting> 
+		  <programlisting>true
+Group is not a member of Role</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.AddGroupToRole.html">System.AddGroupToRole</ulink>
+<ulink url="SLRSystem.CreateGroup.html">System.CreateGroup</ulink>
+<ulink url="SLRSystem.CreateRole.html">System.CreateRole</ulink>
+<ulink url="SLRSystem.DropGroup.html">System.DropGroup</ulink>
+<ulink url="SLRSystem.DropRole.html">System.DropRole</ulink>
+<ulink url="SLRSystem.RemoveGroupFromRole.html">System.RemoveGroupFromRole</ulink>
+<ulink url="SLRSystem.RoleExists.html">System.RoleExists</ulink>
+<ulink url="SLRSystem.SetGroupRoleInherited.html">System.SetGroupRoleInherited</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

@@ -339,15 +339,21 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (LHint != String.Empty)
 				AWriter.AddAttribute(HtmlTextWriterAttribute.Title, LHint, true);
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, ID);
-			if (TextAlignment != HorizontalAlignment.Left)
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, "text-Alignment: " + TextAlignment.ToString().ToLower());
 
 			bool LHasValue;
 			string LValue = GetFieldValue(out LHasValue);
 
+			string LStyle = "";
 			string LClass;
+			
+			if (TextAlignment != HorizontalAlignment.Left)
+				LStyle = "text-Alignment: " + TextAlignment.ToString().ToLower() + "; ";
+				
 			if (ReadOnly)
+			{
 				LClass = "readonlytextbox";
+				LStyle += "width: " + Width.ToString() + "ex;";
+			}
 			else
 			{
 				LClass = "textbox";
@@ -360,38 +366,48 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (!LHasValue)
 				LClass = LClass + "null";
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, LClass);
-			if (FHeight == 1)
+			
+			if (!String.IsNullOrEmpty(LStyle))
+				AWriter.AddAttribute(HtmlTextWriterAttribute.Style, LStyle);
+				
+			if (ReadOnly)
 			{
-				if (IsPassword)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "password");
-				else
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-				if (ReadOnly)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.Disabled, "true");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Size, Width.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, LValue);
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+				// HACK: IE does not recognize foreground colors for disabled controls, so we must use a div rather than a textbox control for read-only
+				AWriter.RenderBeginTag(HtmlTextWriterTag.Div);
+				AWriter.Write(HttpUtility.HtmlEncode(FWordWrap ? LValue.Replace("\r\n", " ") : LValue));
 				AWriter.RenderEndTag();
 			}
 			else
 			{
-				if (ReadOnly)
-					AWriter.AddAttribute(HtmlTextWriterAttribute.ReadOnly, null);
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Cols, Width.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, Height.ToString());
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Wrap, (FWordWrap ? "soft" : "off"));
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Textarea);
-				AWriter.Write(HttpUtility.HtmlEncode(LValue));
-				AWriter.RenderEndTag();
-			}
+				if (FHeight == 1)
+				{
+					if (IsPassword)
+						AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "password");
+					else
+						AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "text");
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Size, Width.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Value, LValue);
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+					AWriter.RenderEndTag();
+				}
+				else
+				{
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Cols, Width.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Rows, Height.ToString());
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Wrap, (FWordWrap ? "soft" : "off"));
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Textarea);
+					AWriter.Write(HttpUtility.HtmlEncode(LValue));
+					AWriter.RenderEndTag();
+				}
 
-			if (!LHasValue && !ReadOnly)
-			{
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHasValueID);
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
-				AWriter.AddAttribute(HtmlTextWriterAttribute.Value, "false");
-				AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-				AWriter.RenderEndTag();
+				if (!LHasValue)
+				{
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Name, FHasValueID);
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
+					AWriter.AddAttribute(HtmlTextWriterAttribute.Value, "false");
+					AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+					AWriter.RenderEndTag();
+				}
 			}
 		}
 
@@ -498,7 +514,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		// UNSUPPORTED IN WEB
 
-		private int FAutoUpdateInterval = 200;
+        private bool FTrueFirst = true;
+        public bool TrueFirst
+        {
+            get { return FTrueFirst; }
+            set { FTrueFirst = value; }
+        }
+        
+        private int FAutoUpdateInterval = 200;
 		public int AutoUpdateInterval
 		{
 			get { return FAutoUpdateInterval; }
@@ -867,10 +890,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			}
 		}
 
+		private IImageSource FImageSource;
+		public IImageSource ImageSource
+		{
+			get { return FImageSource; }
+		}
+
 		public void SetImageAccepted(IFormInterface AForm)
 		{
-			SetImageForm LForm = (SetImageForm)AForm;
-			if (LForm.Stream == null)
+			FImageSource = (IImageSource)AForm;
+			if (FImageSource.Stream == null)
 				DataField.ClearValue();
 			else
 			{
@@ -879,8 +908,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					Stream LStream = LNewValue.OpenStream();
 					try
 					{
-						LForm.Stream.Position = 0;
-						StreamUtility.CopyStream(LForm.Stream, LStream);
+						FImageSource.Stream.Position = 0;
+						StreamUtility.CopyStream(FImageSource.Stream, LStream);
 					}
 					finally
 					{
@@ -929,17 +958,36 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		}
 	}
 
-	public class SetImageForm : FormInterface, IWebPrehandler
+	public class SetImageForm : FormInterface, IWebPrehandler, IImageSource
 	{
 		public SetImageForm(string ATitle)
 		{
 			Text = String.Format(Strings.Get("SetImageFormTitle"), ATitle);
 		}
 
-		// Stream
+		// IImageSource
 
 		private Stream FStream;
 		public Stream Stream { get { return FStream; } }
+
+		private bool FLoading;
+		public bool Loading
+		{
+			get { return FLoading; }
+		}
+
+		private HtmlTextWriter FWriter;
+		public void LoadImage()
+		{
+			FWriter.WriteLine(HttpUtility.HtmlEncode(Strings.Get("ImageUpload")));
+			FWriter.RenderBeginTag(HtmlTextWriterTag.Br);
+			FWriter.RenderEndTag();
+
+			FWriter.AddAttribute(HtmlTextWriterAttribute.Type, "file");
+			FWriter.AddAttribute(HtmlTextWriterAttribute.Name, "InputFile");
+			FWriter.RenderBeginTag(HtmlTextWriterTag.Input);
+			FWriter.RenderEndTag();
+		}
 
 		// IWebPrehandler
 
@@ -947,6 +995,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		{
 			if (AContext.Request.Files.Count > 0)
 			{
+				FLoading = true;
 				Stream LStream = new MemoryStream();
 				StreamUtility.CopyStream(AContext.Request.Files[0].InputStream, LStream);
 				FStream = LStream;
@@ -959,16 +1008,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected override void InternalRender(HtmlTextWriter AWriter)
 		{
 			base.InternalRender(AWriter);
-
-			AWriter.WriteLine(HttpUtility.HtmlEncode(Strings.Get("ImageUpload")));
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Br);
-			AWriter.RenderEndTag();
-
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Type, "file");
-			AWriter.AddAttribute(HtmlTextWriterAttribute.Name, "InputFile");
-			AWriter.RenderBeginTag(HtmlTextWriterTag.Input);
-			AWriter.RenderEndTag();
-		}
-
+			FWriter = AWriter;
+			LoadImage();
+		} 
 	}
 }

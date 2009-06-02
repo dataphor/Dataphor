@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Tuesday, April 27, 2004 11:41:47</date> 
+	 </sect2info> 
+	 <title>System.Lower</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator returns the lower case equivalent of the specified
+		  string. This is useful when performing a case insensitive comparison on case
+		  sensitive strings.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee add {Name.Lower() LowerName};</programlisting> 
+		  <programlisting>ID Name LowerName
+-- ---- ---------
+1  Joe  joe
+2  John john
+3  Josh josh
+4  Jeff jeff
+5  Jake jake
+6  Jeff jeff</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.Upper.html">System.Upper</ulink>
+<ulink url="D4LGUsingStrings.html">Using Strings</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 

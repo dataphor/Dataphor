@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Thursday, April 08, 2004 15:10:27</date> 
+	 </sect2info> 
+	 <title>System.IfNil</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This operator is a shorthand. The expression 
+		  <informalexample> 
+				<para><symbol>IfNil(a, b)</symbol></para> 
+		  </informalexample> is a shortcut for 
+		  <informalexample> 
+				<para><symbol>IsNil(a) ? b : a</symbol></para> 
+		  </informalexample>Note that Nulls can not normally appear in Dataphor
+		  created tables, but can exist in presentations (including incompatible device
+		  tables), views, and other query type expressions.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee left join EmployeePhone 
+   redefine { Phone := IfNil(Phone, "No Phone") };</programlisting> 
+		  <programlisting>ID Name Phone
+-- ---- --------
+1  Joe  555-1000
+1  Joe  555-1234
+2  John 555-4321
+3  Josh No Phone
+4  Jeff 555-4444
+5  Jake 555-5678
+6  Jeff No Phone</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="SLRSystem.IsNil.html">System.IsNil</ulink>
+<ulink url="D4LGLanguageTranslation.html">Language Translation</ulink>
+<ulink url="DDGP2SQLOperators.html">SQL Operators</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

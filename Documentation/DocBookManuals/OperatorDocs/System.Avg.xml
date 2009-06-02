@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Monday, April 05, 2004 13:40:25</date> 
+	 </sect2info> 
+	 <title>System.Avg</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para>This is an aggregate operator that computes the average (arithmetic
+		  mean) on the data in the column specified in all of the rows in each
+		  group.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select Employee group add { Avg(ID) AvgID };</programlisting> 
+		  <programlisting>AvgID 
+----- 
+3.5</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGAvg.html">Avg Operator</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

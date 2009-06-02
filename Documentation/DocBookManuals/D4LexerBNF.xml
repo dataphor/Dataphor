@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<programlisting>
+The following non terminals in the Lexer BNF are referenced by the D4 BNF with equivalent meaning:
+	&lt;identifier&gt;
+	&lt;literal&gt;
+	&lt;string&gt;
+
+The same conventions found in the The Third Manifesto are used here, namely:
+	&lt;XYZ list&gt; ::= {&lt;XYZ&gt;}
+	&lt;XYZ commalist&gt; ::= [&lt;XYZ&gt;{,&lt;XYZ&gt;}]
+	&lt;ne XYZ list&gt; ::= &lt;XYZ&gt;{&lt;XYZ&gt;}
+	&lt;ne XYZ commalist&gt; ::= &lt;XYZ&gt;{,&lt;XYZ&gt;}
+
+	&lt;script&gt;<anchor id="D4LexerBNFscript"/> ::=
+		<link linkend="D4LexerBNFcommentedscript">&lt;commented script&gt;</link>{<link linkend="D4LexerBNFcommentedscript">&lt;commented script&gt;</link>}
+		
+	&lt;commented script&gt;<anchor id="D4LexerBNFcommentedscript"/> ::=
+		{<link linkend="D4LexerBNFcomment">&lt;comment&gt;</link>}{<link linkend="D4LexerBNFsymbol">&lt;symbol&gt;</link> | <link linkend="D4LexerBNFliteral">&lt;literal&gt;</link>}{<link linkend="D4LexerBNFcomment">&lt;comment&gt;</link>}
+
+	&lt;symbol&gt;<anchor id="D4LexerBNFsymbol"/> ::=
+		<link linkend="D4LexerBNFidentifier">&lt;identifier&gt;</link> | <link linkend="D4LexerBNFoperator">&lt;operator&gt;</link>
+
+	&lt;identifier&gt;<anchor id="D4LexerBNFidentifier"/> ::=
+		_ | &lt;letter&gt; {_ | &lt;letter&gt; | &lt;digit&gt;}
+
+	&lt;operator&gt;<anchor id="D4LexerBNFoperator"/> ::=
+		* | / | % | + | - | = | &lt;&gt; | &lt; | &gt; | &lt;= | &gt;= |
+		. | , | "(" | ")" | "[" | "]" | "{" | "}" | ~ |
+		^ | &amp; | "|" | &lt;&lt; | &gt;&gt; | ** | ; | : | := | ?=
+
+	&lt;literal&gt;<anchor id="D4LexerBNFliteral"/> ::=
+		<link linkend="D4LexerBNFinteger">&lt;integer&gt;</link> |
+		<link linkend="D4LexerBNFfloat">&lt;float&gt;</link> |
+		<link linkend="D4LexerBNFdecimal">&lt;decimal&gt;</link> |
+		<link linkend="D4LexerBNFnumeric">&lt;numeric&gt;</link> |
+		<link linkend="D4LexerBNFmoney">&lt;money&gt;</link> |
+		<link linkend="D4LexerBNFstring">&lt;string&gt;</link> |
+		true |
+		false
+
+	&lt;integer&gt;<anchor id="D4LexerBNFinteger"/> ::=
+		&lt;digit&gt;{&lt;digit&gt;} | 0x&lt;hexdigit&gt;{&lt;hexdigit&gt;}
+
+	&lt;float&gt;<anchor id="D4LexerBNFfloat"/> ::=
+		<link linkend="D4LexerBNFnumeric">&lt;numeric&gt;</link>f
+
+	&lt;decimal&gt;<anchor id="D4LexerBNFdecimal"/> ::=
+		<link linkend="D4LexerBNFnumeric">&lt;numeric&gt;</link>[d]
+
+	&lt;numeric&gt;<anchor id="D4LexerBNFnumeric"/> ::=
+		&lt;digit&gt;{&lt;digit&gt;}[.{&lt;digit&gt;}][(e|E)[+|-]{&lt;digit&gt;}]
+		
+	&lt;money&gt;<anchor id="D4LexerBNFmoney"/> ::=
+		$&lt;digit&gt;{&lt;digit&gt;}[.{lt;digit&gt;}]
+
+	&lt;string&gt;<anchor id="D4LexerBNFstring"/> ::=
+		""{&lt;character&gt;}"" | '{&lt;character&gt;}'
+
+	&lt;comment&gt;<anchor id="D4LexerBNFcomment"/> ::=
+		// <link linkend="D4LexerBNFcommenttext">&lt;comment text&gt;</link> |
+		/* <link linkend="D4LexerBNFcommenttext">&lt;comment text&gt;</link> */
+		
+	&lt;comment text&gt;<anchor id="D4LexerBNFcommenttext"/> ::=
+		{<link linkend="D4LexerBNFcomment">&lt;comment&gt;</link>}{&lt;character&gt;}{<link linkend="D4LexerBNFcomment">&lt;comment&gt;</link>}
+</programlisting> 

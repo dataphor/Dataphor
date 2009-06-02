@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 02, 2004 09:30:37</date> 
+	 </sect2info> 
+	 <title>iBitwiseAnd</title> 
+	 <para></para> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>&amp;</symbol> is the parser recognized symbol for this
+		  operator. <symbol>Bitwise And</symbol> matches bit for bit, and compares the
+		  corresponding bits for two values. If both are 1, then the corresponding bit in
+		  the resulting value will be 1, otherwise it will be 0.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>create table BitwiseAnd { One : Integer, Two : Integer, Three : Integer };
+begin
+	var LInteger1 : Integer;
+	var LInteger2 : Integer;
+	var LInteger3 : Integer;
+	LInteger1 := 314159265; // this has a bit value of 00010010 10111001 10110000 10100001
+	LInteger2 := 271828182; // this has a bit value of 00010000 00110011 11000100 11010110
+	LInteger3 := LInteger1 &amp; LInteger2; // 271679616   00010000 00110001 10000000 10000000
+	insert table { row { LInteger1 One, LInteger2 Two, LInteger3 Three }} into BitwiseAnd;
+end;
+select BitwiseAnd;</programlisting> 
+		  <programlisting>Statement Executed Successfully!
+
+Statement Executed Successfully!
+
+One       Two       Three     
+--------- --------- --------- 
+314159265 271828182 271679616</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="D4LGOperatorPrecedence.html">Operator Precedence</ulink>
+<ulink url="SLRiAnd.html">iAnd (<symbol>and</symbol>)</ulink></literallayout></para> 
+	 </formalpara> 
+</sect2> 

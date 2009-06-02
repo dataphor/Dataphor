@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE sect2 SYSTEM "/src/Docs/DocBookManuals/docbookx.dtd">
+<sect2> 
+	 <sect2info><date>Friday, April 23, 2004 11:13:48</date> 
+	 </sect2info> 
+	 <title>System.UserID</title> 
+	 <formalpara> 
+		  <title>Type Declaration</title> 
+		  <para> 
+				<programlisting>create type .System.UserID like System.String
+	tags { Frontend.Title = "User ID", Frontend.Width = "10" }
+	static tags { Catalog.Comment = "System String", Storage.Length = "255" }</programlisting></para> 
+	 </formalpara> 
+	 <bridgehead renderas="sect3">Remarks</bridgehead> 
+	 <para><symbol>System.UserID</symbol> is an operator and the selector for
+		  the <symbol>UserID</symbol> Datatype.</para> 
+	 <para>This operator returns the <symbol>UserID</symbol> for the current
+		  Dataphor user.</para> 
+	 <example> 
+		  <title>Example</title> 
+		  <programlisting>select UserID();</programlisting> 
+		  <programlisting>Admin</programlisting> 
+	 </example> 
+	 <formalpara> 
+		  <title>See Also</title> 
+		  <para> 
+				<literallayout><ulink url="DUGSecurity.html">Security</ulink>
+<ulink url="SLRSystem.CreateUser.html">System.CreateUser</ulink>
+<ulink url="SLRSystem.CreateUserWithEncryptedPassword.html">System.CreateUserWithEncryptedPassword</ulink>
+<ulink url="SLRSystem.DropUser.html">System.DropUser</ulink>
+<ulink url="SLRSystem.SetEncryptedPassword.html">System.SetEncryptedPassword</ulink>
+<ulink url="SLRSystem.SetPassword.html">System.SetPassword</ulink>
+<ulink url="SLRSystem.UserExists.html">System.UserExists</ulink>
+<ulink url="SLRSystem.UserName.html">System.UserName</ulink>
+<ulink url="DDGP1Session.html">Session</ulink>
+<ulink url="DDGP2SystemUsersandProcesses.html">System Users and Processes</ulink>
+<ulink url="D4LGConveyors.html">Conveyors</ulink>
+<ulink url="DDGP2ScalarValues.html">Scalar Values</ulink>
+<ulink url="DDGP2PresentationLayerRepresentations.html">Presentation Layer Representations</ulink>
+<ulink url="D4LGTypeConversions.html">Type Conversions</ulink>
+<ulink url="D4LGValueTranslation.html">Value Translation</ulink>
+<ulink url="D4LGSelector.html">Selector, Example</ulink>
+</literallayout></para> 
+	 </formalpara> 
+</sect2> 
