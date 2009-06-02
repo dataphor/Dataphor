@@ -506,7 +506,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void CloseCursor(SimpleSQLStoreCursor ACursor)
 		{
-			if (!FCursorCache.ContainsKey(ACursor.CursorName))
+			if ((TransactionCount > 0) && !FCursorCache.ContainsKey(ACursor.CursorName))
 				FCursorCache.Add(ACursor.CursorName, ACursor);
 			else
 				ACursor.Dispose();
