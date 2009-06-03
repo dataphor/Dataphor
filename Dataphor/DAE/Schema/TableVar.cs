@@ -1581,6 +1581,20 @@ namespace Alphora.Dataphor.DAE.Schema
                 OnChanged(this, EventArgs.Empty);
         }
         
+        public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        {
+			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			
+			TableVarColumn LColumn;
+			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
+			{
+				LColumn = Columns[LIndex];
+				Schema.Sort LSort = Compiler.GetUniqueSort(AProcess.Plan, LColumn.DataType);
+				if (LSort != null)
+					LSort.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			}
+        }
+
         public override Statement EmitStatement(EmitMode AMode)
         {
 			if (AMode == EmitMode.ForStorage)
@@ -2366,6 +2380,9 @@ namespace Alphora.Dataphor.DAE.Schema
 
 					foreach (TableVarColumn LColumn in Columns)
 						LColumn.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						
+					foreach (Key LKey in Keys)
+						LKey.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
 						
 					foreach (Order LOrder in Orders)
 						LOrder.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
