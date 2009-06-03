@@ -113,7 +113,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 LView.BorderStyle = BorderStyle.None;
                 LView.IntegratedScrolling = false;
                 LView.ItemYSpacing = 2;
-                //LView.SmallImageList = FNodesImageList;
+                LView.SmallImageList = FNodesImageList;
                 LView.SmallImageView = true;
                 LView.SelectedTextColor = Color.Navy;
                 LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
@@ -137,11 +137,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
                 if (IsTypeListed(LType))
                 {
-                    LItem = new PaletteItem();
-                    LItem.ClassName = LType.Name;
-                    LItem.Text = LType.Name;
-                    LItem.Description = GetDescription(LType);
-                    LItem.ImageIndex = GetDesignerImage(LType);
+                    LItem = new PaletteItem
+                                {
+                                    ClassName = LType.Name,
+                                    Text = LType.Name,
+                                    Description = GetDescription(LType),
+                                    ImageIndex = GetDesignerImage(LType)
+                                };
                     GroupView LCategory = EnsureCategory(GetDesignerCategory(LType));
                     LCategory.GroupViewItems.Add(LItem);
                 }
