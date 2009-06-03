@@ -242,6 +242,26 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPointerGroupView.Text = "groupView2";
             FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
             */
+
+            // 
+            // FNodesTree
+            // 
+            FNodesTree = new DesignerTree();
+            FNodesTree.AllowDrop = true;
+            FNodesTree.BorderStyle = BorderStyle.None;
+            FNodesTree.CausesValidation = false;
+            FNodesTree.Dock = DockStyle.Fill;
+            FNodesTree.HideSelection = false;
+            FNodesTree.ImageList = FNodesImageList;
+            FNodesTree.Location = new Point(0, 0);
+            FNodesTree.Name = "FNodesTree";
+            FNodesTree.ShowRootLines = false;
+            FNodesTree.Size = new Size(283, 209);
+            FNodesTree.TabIndex = 0;
+            FNodesTree.AfterSelect += FNodesTree_AfterSelect;
+            FNodesTree.Dock = DockStyle.Fill;
+            
+            
             // 
             // FPalettePanel
             // 
@@ -249,6 +269,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             //FPalettePanel.Controls.Add(FPaletteGroupBar);
             //FPalettePanel.Controls.Add(FPointerGroupView);
             //this.FDockingManager.SetEnableDocking(this.FPalettePanel, true);
+            FPalettePanel.NodesTree = this.FNodesTree;
             FPalettePanel.Location = new Point(1, 21);
             FPalettePanel.Name = "FPalettePanel";
             FPalettePanel.Size = new Size(163, 187);
@@ -280,23 +301,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentFormPanel.ShowHint = DockState.Document;
             FDockContentFormPanel.Show(FDockPanel);
 
-            // 
-            // FNodesTree
-            // 
-            FNodesTree = new DesignerTree();
-            FNodesTree.AllowDrop = true;
-            FNodesTree.BorderStyle = BorderStyle.None;
-            FNodesTree.CausesValidation = false;
-            FNodesTree.Dock = DockStyle.Fill;
-            FNodesTree.HideSelection = false;
-            FNodesTree.ImageList = FNodesImageList;
-            FNodesTree.Location = new Point(0, 0);
-            FNodesTree.Name = "FNodesTree";
-            FNodesTree.ShowRootLines = false;
-            FNodesTree.Size = new Size(283, 209);
-            FNodesTree.TabIndex = 0;
-            FNodesTree.AfterSelect += FNodesTree_AfterSelect;
-            FNodesTree.Dock = DockStyle.Fill;
+           
 
 
             FDockContentNodesTree = new DockContent();

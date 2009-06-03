@@ -171,18 +171,18 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                     if (FIsMultiDrop)
                         FSelectedPaletteItem.GroupView.SelectedTextColor = Color.Blue;
 
-                    FNodesTree.PaletteItem = FSelectedPaletteItem;
+                    NodesTree.PaletteItem = FSelectedPaletteItem;
                     SetStatus(FSelectedPaletteItem.Description);
                     FPointerGroupView.ButtonView = false;
                 }
                 else
                 {
-                    FNodesTree.PaletteItem = null;
+                    NodesTree.PaletteItem = null;
                     SetStatus(String.Empty);
                     FPointerGroupView.ButtonView = true;
                 }
 
-                FNodesTree.Select();
+                NodesTree.Select();
             }
         }
        
@@ -237,7 +237,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         private readonly Hashtable FImageIndex = new Hashtable();
         private bool FIsMultiDrop;
-        protected DesignerTree FNodesTree;
         private PaletteItem FSelectedPaletteItem;
 
         [Browsable(false)]
@@ -341,6 +340,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         [Browsable(false)]
         public Session FrontendSession { get; set; }
+
+        public DesignerTree NodesTree { get; set; }
 
         #endregion
     }
