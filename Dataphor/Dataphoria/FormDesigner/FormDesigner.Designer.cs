@@ -8,26 +8,7 @@
 	 behavior is okay for now because Dataphoria does not ask designers to change documents.
 */
 
-using System;
-using System.Drawing;
-using System.Collections;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Windows.Forms;
-using System.IO;
-using System.Net;
-using System.Web;
-using System.Text;
-using System.Xml;
-
-using Alphora.Dataphor.Dataphoria.Designers;
-using Alphora.Dataphor.Frontend.Client;
-using Alphora.Dataphor.Frontend.Client.Windows;
-using Alphora.Dataphor.BOP;
-
-using Syncfusion.Windows.Forms.Tools;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {

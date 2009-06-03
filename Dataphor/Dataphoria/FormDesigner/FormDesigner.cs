@@ -21,7 +21,6 @@ using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Syncfusion.Windows.Forms.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 using Cursors=System.Windows.Forms.Cursors;
 using Image=System.Drawing.Image;
