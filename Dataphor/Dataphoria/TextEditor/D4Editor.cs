@@ -30,7 +30,7 @@ using SD = ICSharpCode.TextEditor;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
     /// <summary> D4 text editor. </summary>
-    public partial class D4Editor : IErrorSource
+    public partial class D4Editor : TextEditor, IErrorSource
     {
         private ToolStripMenuItem FAnalyzeLineMenuItem;
         private ToolStripMenuItem FAnalyzeMenuItem;

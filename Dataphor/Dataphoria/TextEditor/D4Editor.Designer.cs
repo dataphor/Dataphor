@@ -12,7 +12,7 @@ using SD = ICSharpCode.TextEditor;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
 	/// <summary> D4 text editor. </summary>
-    partial class D4Editor : TextEditor
+    partial class D4Editor 
     {
         private System.ComponentModel.IContainer components;
         

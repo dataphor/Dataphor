@@ -20,7 +20,7 @@ using WeifenLuo.WinFormsUI.Docking;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
 	/// <summary> Text Editor form for Dataphoria. </summary>
-    partial class TextEditor : BaseForm
+    partial class TextEditor 
 	{
 		private System.ComponentModel.IContainer components = null;
 		

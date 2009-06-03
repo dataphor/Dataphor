@@ -21,7 +21,7 @@ using SD = ICSharpCode.TextEditor;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
     /// <summary> Text Editor form for Dataphoria. </summary>
-    public partial class TextEditor : IChildFormWithToolBar, IDesigner
+    public partial class TextEditor :BaseForm, IChildFormWithToolBar, IDesigner
     {
         private string FDesignerID;
         protected DockContent FDockContentTextEdit;
