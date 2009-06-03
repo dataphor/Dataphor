@@ -374,7 +374,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private void PrepareSession()
         {
             if (FFrontendSession == null)
+            {
                 FFrontendSession = Dataphoria.GetLiveDesignableFrontendSession();
+                FPalettePanel.FrontendSession = this.FFrontendSession;
+            }
             FFrontendSession.SetFormDesigner();
             FPalettePanel.ClearPalette();
             FPalettePanel.LoadPalette();
