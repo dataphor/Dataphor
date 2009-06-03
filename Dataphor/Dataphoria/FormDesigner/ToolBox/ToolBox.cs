@@ -39,15 +39,15 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         #endregion
 
-        private EventHandler<EventArgs> FStatusChanged;
+        private EventHandler<StatusEventArgs> FStatusChanged;
         
         private void SetStatus(string ADescription)
         {
-            EventHandler<EventArgs> LChanged = FStatusChanged;
+            EventHandler<StatusEventArgs> LChanged = FStatusChanged;
             if (LChanged != null) LChanged(this, new StatusEventArgs(ADescription));
         }
 
-        public event EventHandler<EventArgs> StatusChanged
+        public event EventHandler<StatusEventArgs> StatusChanged
         {
             add { FStatusChanged += value; }
             remove { FStatusChanged -= value; }
