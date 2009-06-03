@@ -37,9 +37,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
     {
         private System.ComponentModel.IContainer components;
         private System.Windows.Forms.ImageList ToolBarImageList;
-        private System.Windows.Forms.Panel FPalettePanel;
-        private Syncfusion.Windows.Forms.Tools.GroupBar FPaletteGroupBar;
-        private Syncfusion.Windows.Forms.Tools.GroupView FPointerGroupView;
+
+        //private Syncfusion.Windows.Forms.Tools.GroupBar FPaletteGroupBar;
+        //private Syncfusion.Windows.Forms.Tools.GroupView FPointerGroupView;
         private System.Windows.Forms.ImageList FPointerImageList;
         private System.Windows.Forms.PropertyGrid FPropertyGrid;
        
@@ -81,53 +81,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 
 
-        protected override void Dispose(bool ADisposed)
-        {
-            if (!IsDisposed && (Dataphoria != null))
-            {
-                try
-                {
-                    SetDesignHost(null, true);
-                }
-                finally
-                {
-                    try
-                    {
-                        ClearPalette();
-                    }
-                    finally
-                    {
-                        try
-                        {
-                            if (FFrontendSession != null)
-                            {
-                                FFrontendSession.Dispose();
-                                FFrontendSession = null;
-                            }
-                        }
-                        finally
-                        {
-                            try
-                            {
-                                Dataphoria.OnFormDesignerLibrariesChanged -= new EventHandler(FormDesignerLibrariesChanged);
-                            }
-                            finally
-                            {
-                                try
-                                {
-                                    if (components != null)
-                                        components.Dispose();
-                                }
-                                finally
-                                {
-                                    base.Dispose(ADisposed);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+   
 
 
         #region Windows Form Designer generated code

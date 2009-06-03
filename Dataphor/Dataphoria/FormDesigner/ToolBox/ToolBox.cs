@@ -251,9 +251,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         {
             get { return FIsMultiDrop; }
         }
-
-        [Browsable(false)]
-        public Session FrontendSession { get; set; }
+        
 
 
         private bool IsTypeListed(Type AType)
@@ -336,6 +334,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             }
             return 0; // Zero is the reserved index for the default image
         }
+
+        #endregion
+
+        #region FrontendSession
+
+        [Browsable(false)]
+        public Session FrontendSession { get; set; }
 
         #endregion
     }

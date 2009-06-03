@@ -18,6 +18,7 @@ using System.Windows.Forms;
 using System.Xml;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Dataphoria.Designers;
+using Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Syncfusion.Windows.Forms.Tools;
@@ -35,8 +36,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         protected DockContent FDockContentFormPanel;
         protected DockContent FDockContentNodesTree;
         protected DockContent FDockContentPalettePanel;
-
         protected DockContent FDockContentPropertyGrid;
+        private ToolBox.ToolBox FPalettePanel;
 
         public FormDesigner() // dummy constructor for SyncFusion's MDI menu merging
         {
@@ -61,6 +62,54 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
             PrepareSession();
             ADataphoria.OnFormDesignerLibrariesChanged += FormDesignerLibrariesChanged;
+        }
+
+        protected override void Dispose(bool ADisposed)
+        {
+            if (!IsDisposed && (Dataphoria != null))
+            {
+                try
+                {
+                    SetDesignHost(null, true);
+                }
+                finally
+                {
+                    try
+                    {
+                        FPalettePanel.ClearPalette();
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            if (FFrontendSession != null)
+                            {
+                                FFrontendSession.Dispose();
+                                FFrontendSession = null;
+                            }
+                        }
+                        finally
+                        {
+                            try
+                            {
+                                Dataphoria.OnFormDesignerLibrariesChanged -= new EventHandler(FormDesignerLibrariesChanged);
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    if (components != null)
+                                        components.Dispose();
+                                }
+                                finally
+                                {
+                                    base.Dispose(ADisposed);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -158,7 +207,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             // FPaletteGroupBar
             // 
-            FPaletteGroupBar = new GroupBar();
+            /*FPaletteGroupBar = new GroupBar();
             FPaletteGroupBar.AllowDrop = true;
             FPaletteGroupBar.BackColor = SystemColors.Control;
             FPaletteGroupBar.BorderStyle = BorderStyle.FixedSingle;
@@ -167,11 +216,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPaletteGroupBar.Name = "FPaletteGroupBar";
             FPaletteGroupBar.SelectedItem = 0;
             FPaletteGroupBar.Size = new Size(163, 163);
-            FPaletteGroupBar.TabIndex = 1;
+            FPaletteGroupBar.TabIndex = 1;*/
             // 
             // FPointerGroupView
             // 
-            FPointerGroupView = new GroupView
+            /*FPointerGroupView = new GroupView
                                     {
                                         BorderStyle = BorderStyle.None,
                                         ButtonView = true,
@@ -193,19 +242,20 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPointerGroupView.TabIndex = 0;
             FPointerGroupView.Text = "groupView2";
             FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
-
+            */
             // 
             // FPalettePanel
             // 
-            FPalettePanel = new Panel();
-            FPalettePanel.Controls.Add(FPaletteGroupBar);
-            FPalettePanel.Controls.Add(FPointerGroupView);
+            FPalettePanel = new ToolBox.ToolBox();
+            //FPalettePanel.Controls.Add(FPaletteGroupBar);
+            //FPalettePanel.Controls.Add(FPointerGroupView);
             //this.FDockingManager.SetEnableDocking(this.FPalettePanel, true);
             FPalettePanel.Location = new Point(1, 21);
             FPalettePanel.Name = "FPalettePanel";
             FPalettePanel.Size = new Size(163, 187);
             FPalettePanel.TabIndex = 1;
             FPalettePanel.Dock = DockStyle.Fill;
+            FPalettePanel.StatusChanged += FPalettePanel_StatusChanged;
 
             FDockContentPalettePanel = new DockContent();
             FDockContentPalettePanel.Controls.Add(FPalettePanel);
@@ -289,6 +339,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentPropertyGrid.Show(FDockPanel);
         }
 
+        private void FPalettePanel_StatusChanged(object ASender, StatusEventArgs AArgs)
+        {
+            this.SetStatus(AArgs.Description);
+        }
+
         protected override void OnClosing(CancelEventArgs AArgs)
         {
             base.OnClosing(AArgs);
@@ -322,8 +377,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             if (FFrontendSession == null)
                 FFrontendSession = Dataphoria.GetLiveDesignableFrontendSession();
             FFrontendSession.SetFormDesigner();
-            ClearPalette();
-            LoadPalette();
+            FPalettePanel.ClearPalette();
+            FPalettePanel.LoadPalette();
         }
 
         private void FormDesignerLibrariesChanged(object ASender, EventArgs AArgs)
@@ -454,10 +509,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             get { return FIsMultiDrop; }
         }
 
-        private void ClearPalette()
-        {
-            FPaletteGroupBar.GroupBarItems.Clear();
-        }
+       
 
         private bool IsTypeListed(Type AType)
         {
@@ -539,134 +591,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             }
             return 0; // Zero is the reserved index for the default image
         }
-
-        private GroupView EnsureCategory(string ACategoryName)
-        {
-            GroupBarItem LItem = FindPaletteBarItem(ACategoryName);
-            if (LItem == null)
-            {
-                var LView = new GroupView();
-                LView.BorderStyle = BorderStyle.None;
-                LView.IntegratedScrolling = false;
-                LView.ItemYSpacing = 2;
-                LView.SmallImageList = FNodesImageList;
-                LView.SmallImageView = true;
-                LView.SelectedTextColor = Color.Navy;
-                LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
-
-                LItem = new GroupBarItem();
-                LItem.Client = LView;
-                LItem.Text = ACategoryName;
-                FPaletteGroupBar.GroupBarItems.Add(LItem);
-            }
-            return (GroupView) LItem.Client;
-        }
-
-        private void LoadPalette()
-        {
-            PaletteItem LItem;            
-            Type LType;
-
-            foreach (String LName in FrontendSession.NodeTypeTable.Keys)
-            {                
-                LType = FrontendSession.NodeTypeTable.GetClassType(LName);
-
-                if (IsTypeListed(LType))
-                {
-                    LItem = new PaletteItem();
-                    LItem.ClassName = LType.Name;
-                    LItem.Text = LType.Name;
-                    LItem.Description = GetDescription(LType);
-                    LItem.ImageIndex = GetDesignerImage(LType);
-                    GroupView LCategory = EnsureCategory(GetDesignerCategory(LType));
-                    LCategory.GroupViewItems.Add(LItem);
-                }
-            }
-        }
-
-        public void SelectPaletteItem(PaletteItem AItem, bool AIsMultiDrop)
-        {
-            if (AItem != FSelectedPaletteItem)
-            {
-                FIsMultiDrop = AIsMultiDrop && (AItem != null);
-
-                if (FSelectedPaletteItem != null)
-                {
-                    FSelectedPaletteItem.GroupView.ButtonView = false;
-                    FSelectedPaletteItem.GroupView.SelectedTextColor = Color.Navy;
-                }
-
-                FSelectedPaletteItem = AItem;
-
-                if (FSelectedPaletteItem != null)
-                {
-                    FSelectedPaletteItem.GroupView.ButtonView = true;
-                    FSelectedPaletteItem.GroupView.SelectedItem =
-                        FSelectedPaletteItem.GroupView.GroupViewItems.IndexOf(FSelectedPaletteItem);
-
-                    if (FIsMultiDrop)
-                        FSelectedPaletteItem.GroupView.SelectedTextColor = Color.Blue;
-
-                    FNodesTree.PaletteItem = FSelectedPaletteItem;
-                    SetStatus(FSelectedPaletteItem.Description);
-                    FPointerGroupView.ButtonView = false;
-                }
-                else
-                {
-                    FNodesTree.PaletteItem = null;
-                    SetStatus(String.Empty);
-                    FPointerGroupView.ButtonView = true;
-                }
-
-                FNodesTree.Select();
-            }
-        }
-
-        public void PaletteItemDropped()
-        {
-            if (!IsMultiDrop)
-                SelectPaletteItem(null, false);
-        }
-
-        private GroupBarItem FindPaletteBarItem(string AText)
-        {
-            foreach (GroupBarItem LItem in FPaletteGroupBar.GroupBarItems)
-            {
-                if (String.Compare(LItem.Text, AText, true) == 0)
-                    return LItem;
-            }
-            return null;
-        }
-
-        protected override bool ProcessDialogKey(Keys AKey)
-        {
-            if
-                (
-                ((AKey & Keys.Modifiers) == Keys.None) &&
-                ((AKey & Keys.KeyCode) == Keys.Escape) &&
-                (FSelectedPaletteItem != null)
-                )
-            {
-                SelectPaletteItem(null, false);
-                return true;
-            }
-            return base.ProcessDialogKey(AKey);
-        }
-
-        private void FPointerGroupView_GroupViewItemSelected(object ASender, EventArgs AArgs)
-        {
-            SelectPaletteItem(null, false);
-        }
-
-        private void CategoryGroupViewItemSelected(object ASender, EventArgs AArgs)
-        {
-            var LView = (GroupView) ASender;
-            SelectPaletteItem
-                (
-                (PaletteItem) LView.GroupViewItems[LView.SelectedItem],
-                ModifierKeys == Keys.Shift
-                );
-        }
+              
 
         #endregion
 
@@ -919,7 +844,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
                     if (FDesignHost != null)
                     {
                         ActivateNode(null);
-                        SelectPaletteItem(null, false);
+                        FPalettePanel.SelectPaletteItem(null, false);
 
                         DetachDesignHost();
                         if (FIsDesignHostOwner && !FDesignFormClosing)
@@ -1123,5 +1048,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         }
 
         #endregion
+
+        public void PaletteItemDropped()
+        {
+            FPalettePanel.PaletteItemDropped();
+        }
     }
 }
