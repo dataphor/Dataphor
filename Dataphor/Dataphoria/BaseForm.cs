@@ -42,8 +42,7 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#region StatusBar
-
-		//private Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel FFormStatus;
+		
 		private Timer FStatusHighlightTimer;
 
 		public void SetTooltip(string ATipText)
@@ -77,8 +76,8 @@ namespace Alphora.Dataphor.Dataphoria
             // FFormStatus
             // 
 
-		    /*FFormStatus = new Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel();
-			FFormStatus.HAlign = Syncfusion.Windows.Forms.Tools.HorzFlowAlign.Justify;
+		    /*FFormStatus = new StatusBarAdvPanel();
+			FFormStatus.HAlign = HorzFlowAlign.Justify;
 			FFormStatus.Alignment = HorizontalAlignment.Left;
 			FFormStatus.BorderStyle = BorderStyle.None;*/
 		}
