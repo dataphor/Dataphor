@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 		private ToolStripButton toolStripButton1;
 		private ToolStripButton FExpandOnDemand;
 
-		public Analyzer()	// dummy constructor for SyncFusion's MDI menu merging
+		public Analyzer()	// dummy constructor for MDI menu merging?
 		{
 			InitializeComponent();
 		}
