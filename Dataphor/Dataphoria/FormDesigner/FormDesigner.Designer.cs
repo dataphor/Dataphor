@@ -19,16 +19,12 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private System.ComponentModel.IContainer components;
         private System.Windows.Forms.ImageList ToolBarImageList;
 
-        //private Syncfusion.Windows.Forms.Tools.GroupBar FPaletteGroupBar;
-        //private Syncfusion.Windows.Forms.Tools.GroupView FPointerGroupView;
         private System.Windows.Forms.ImageList FPointerImageList;
         private System.Windows.Forms.PropertyGrid FPropertyGrid;
        
         protected Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree FNodesTree;
         private Alphora.Dataphor.Dataphoria.FormDesigner.FormPanel FFormPanel;
         private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
-        //protected Syncfusion.Windows.Forms.Tools.DockingManager FDockingManager;
-        //private Syncfusion.Windows.Forms.Tools.DockingClientPanel FDockingPanel;
         private System.Windows.Forms.ImageList FNodesImageList;
 
 

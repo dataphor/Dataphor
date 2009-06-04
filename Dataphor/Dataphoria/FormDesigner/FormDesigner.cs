@@ -983,24 +983,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             //FDockingManager.ActivateControl(FFormPanel);
         }
 
-        /*private void FrameBarManagerItemClicked(object ASender, Syncfusion.Windows.Forms.Tools.XPMenus.BarItemClickedEventArgs AArgs)
-		{
-			switch (AArgs.ClickedBarItem.ID)
-			{
-				case "Save" : Save(); break;
-				case "SaveAsFile" : SaveAsFile(); break;
-				case "SaveAsDocument" : SaveAsDocument(); break;
-				case "Close" : Close(); break;
-				case "Cut" : CutNode(); break;
-				case "Copy" : CopyNode(); break;
-				case "Paste" : PasteNode(); break;
-				case "Delete" : DeleteNode(); break;
-				case "Rename" : RenameNode(); break;
-				case "ShowPalette" : ShowPalette(); break;
-				case "ShowProperties" : ShowProperties(); break;
-				case "ShowForm" : ShowForm(); break;
-			}
-		}*/
 
         private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
         {

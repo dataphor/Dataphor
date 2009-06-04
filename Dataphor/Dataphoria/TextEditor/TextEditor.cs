@@ -14,7 +14,6 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Actions;
 using ICSharpCode.TextEditor.Document;
-using Syncfusion.Windows.Forms.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 using SD = ICSharpCode.TextEditor;
 

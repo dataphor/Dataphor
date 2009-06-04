@@ -21,7 +21,6 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Actions;
 using ICSharpCode.TextEditor.Document;
-using Syncfusion.Windows.Forms.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 using DataSet=System.Data.DataSet;
 using Image=System.Drawing.Image;
@@ -55,7 +54,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         private ToolStripMenuItem FShowResultsMenuItem;
 
 
-        public D4Editor() // dummy constructor for SyncFusion's MDI menu merging
+        public D4Editor() // dummy constructor for MDI menu merging
         {
             InitializeComponent();
             InitializeDocking();
@@ -887,7 +886,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         protected StatusStrip FExecutionTimeStatus;
         private PictureBox FWorkingAnimation;
-        protected StatusBarAdvPanel FWorkingStatus;
+        protected StatusStrip FWorkingStatus;
 
         protected override void InitializeStatusBar()
         {
@@ -918,14 +917,19 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                         SizeMode = PictureBoxSizeMode.AutoSize,
                                         Visible = false
                                     };
-
-            FWorkingStatus = new StatusBarAdvPanel
+            FWorkingStatus = new StatusStrip
+            {
+                Text = "",
+                Name = "FWorkingStatus",
+                Dock = DockStyle.Bottom,                
+            };
+            /*FWorkingStatus = new StatusBarAdvPanel
                                  {
                                      Text = "",
                                      HAlign = HorzFlowAlign.Right,
                                      Alignment = HorizontalAlignment.Center,
                                      BorderStyle = BorderStyle.None
-                                 };
+                                 };*/
             FWorkingStatus.Controls.Add(FWorkingAnimation);
             FWorkingStatus.Size = FWorkingAnimation.Size;
         }
