@@ -11,17 +11,22 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	/// <summary> Base form for all Dataphoria child forms. </summary>
 	/// <remarks> This form does not paint it's background (ancestors must completely cover the background). </remarks>
-    public class BaseForm : DockContent, IStatusBarClient
+    public partial class BaseForm : DockContent, IStatusBarClient
 	{
 		public BaseForm() : base()
 		{
 			AutoScaleMode = AutoScaleMode.None;
+		    InitializeComponent();
 			InitializeStatusBar();
 			FStatusHighlightTimer = new Timer();
 			FStatusHighlightTimer.Interval = 1000;
 			FStatusHighlightTimer.Tick += new EventHandler(StatusHighlightTimerTick);
 		}
 
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="ADisposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool ADisposing)
 		{
 			if (!IsDisposed)
