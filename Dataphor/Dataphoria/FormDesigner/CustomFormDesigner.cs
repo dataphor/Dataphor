@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private Container FComponents;
         private Ancestors FAncestors;
 
-        public CustomFormDesigner() // dummy constructor for SyncFusion's MDI menu merging
+        public CustomFormDesigner() // dummy constructor for MDI menu merging?
         {
             InitializeComponent();
         }
