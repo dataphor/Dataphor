@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         protected DockContent FDockContentPropertyGrid;
         private ToolBox.ToolBox FPalettePanel;
 
-        public FormDesigner() // dummy constructor for SyncFusion's MDI menu merging
+        public FormDesigner() // dummy constructor for MDI menu merging?
         {
             InitializeComponent();
             InitializeDocking();
