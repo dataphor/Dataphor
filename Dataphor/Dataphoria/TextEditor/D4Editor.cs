@@ -885,7 +885,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region StatusBar
 
-        protected StatusBarAdvPanel FExecutionTimeStatus;
+        protected StatusStrip FExecutionTimeStatus;
         private PictureBox FWorkingAnimation;
         protected StatusBarAdvPanel FWorkingStatus;
 
@@ -893,7 +893,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             base.InitializeStatusBar();
 
-            FExecutionTimeStatus = new StatusBarAdvPanel
+            /*FExecutionTimeStatus = new StatusBarAdvPanel
                                        {
                                            Text = "0:00:00",
                                            SizeToContent = true,
@@ -901,7 +901,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                            Alignment = HorizontalAlignment.Center,
                                            BorderStyle = BorderStyle.FixedSingle,
                                            BorderColor = Color.Yellow
-                                       };
+                                       };*/
+            this.FExecutionTimeStatus = new StatusStrip
+            {
+                Name = "FFormStatus",
+                Dock = DockStyle.Bottom,
+                Text = "0:00:00"
+            };
 
             Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(
                 "Alphora.Dataphor.Dataphoria.Images.Rider.gif");

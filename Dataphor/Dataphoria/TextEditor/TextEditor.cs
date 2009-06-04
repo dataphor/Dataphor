@@ -423,13 +423,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region StatusBar
 
-        protected StatusBarAdvPanel FPositionStatus;
+        protected StatusStrip FPositionStatus;
 
         protected override void InitializeStatusBar()
         {
             base.InitializeStatusBar();
 
-            FPositionStatus = new StatusBarAdvPanel
+            this.FPositionStatus = new StatusStrip
+            {
+                Text = "0:0",                
+                Name = "FFormStatus",
+                Dock = DockStyle.Bottom
+            };
+
+            /*FPositionStatus = new StatusStrip
                                   {
                                       Text = "0:0",
                                       SizeToContent = true,
@@ -437,7 +444,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                       Alignment = HorizontalAlignment.Center,
                                       BorderStyle = BorderStyle.FixedSingle,
                                       BorderColor = Color.Gray
-                                  };
+                                  };*/
         }
 
         protected override void DisposeStatusBar()

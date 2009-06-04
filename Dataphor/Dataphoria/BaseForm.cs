@@ -13,7 +13,10 @@ namespace Alphora.Dataphor.Dataphoria
 	/// <remarks> This form does not paint it's background (ancestors must completely cover the background). </remarks>
     public partial class BaseForm : DockContent, IStatusBarClient
 	{
-		public BaseForm() : base()
+
+        private System.Windows.Forms.StatusStrip FFormStatus;
+        
+        public BaseForm() : base()
 		{
 			AutoScaleMode = AutoScaleMode.None;
 		    InitializeComponent();
@@ -40,12 +43,12 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region StatusBar
 
-		private Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel FFormStatus;
+		//private Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel FFormStatus;
 		private Timer FStatusHighlightTimer;
 
 		public void SetTooltip(string ATipText)
-		{
-			FFormStatus.ToolTip = ATipText;
+		{			    
+            FToolTip.SetToolTip(FFormStatus, ATipText);
 		}
 
 		public void SetStatus(string AStatus)
@@ -63,11 +66,21 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		protected virtual void InitializeStatusBar() 
-		{ 
-			FFormStatus = new Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel();
+		{
+
+            this.FFormStatus = new StatusStrip 
+            {
+                Name = "FFormStatus",
+                Dock = DockStyle.Bottom
+            };
+            // 
+            // FFormStatus
+            // 
+
+		    /*FFormStatus = new Syncfusion.Windows.Forms.Tools.StatusBarAdvPanel();
 			FFormStatus.HAlign = Syncfusion.Windows.Forms.Tools.HorzFlowAlign.Justify;
 			FFormStatus.Alignment = HorizontalAlignment.Left;
-			FFormStatus.BorderStyle = BorderStyle.None;
+			FFormStatus.BorderStyle = BorderStyle.None;*/
 		}
 
 		protected virtual void DisposeStatusBar() 
