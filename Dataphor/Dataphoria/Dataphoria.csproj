@@ -303,12 +303,6 @@
     <Compile Include="FormDesigner\ToolBox\ToolBox.Designer.cs">
       <DependentUpon>ToolBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="FreeDataphoria.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FreeDataphoria.Designer.cs">
-      <DependentUpon>FreeDataphoria.cs</DependentUpon>
-    </Compile>
     <Compile Include="General.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -465,10 +459,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\FormDesigner.resx">
       <DependentUpon>FormDesigner.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FreeDataphoria.resx">
-      <DependentUpon>FreeDataphoria.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="General.resx">

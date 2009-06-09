@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.Dataphoria
             {
                 try
                 {
-                    SDataphoriaInstance = new FreeDataphoria();
+                    SDataphoriaInstance = new Dataphoria();
                     try
                     {
                         SDataphoriaInstance.OpenFiles(AArgs);
