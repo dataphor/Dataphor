@@ -304,8 +304,8 @@ namespace Alphora.Dataphor.Dataphoria
 					try
 					{
 						Text = Strings.DataphoriaTitle;
-						//FConnectMenuItem.Visible = true;
-						//FDisconnectMenuItem.Visible = false;
+						FConnectToolStripMenuItem.Visible = true;
+                        FDisconnectToolStripMenuItem.Visible = false;
 						//FDockingManager.SetDockVisibility(FExplorer, false);
 
                         FExplorer.Nodes.Clear();
@@ -1037,13 +1037,13 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					if (FCurrentStatusBarClient != null)
 					{
-						//FCurrentStatusBarClient.Unmerge(FStatusBar);
+						FCurrentStatusBarClient.Unmerge(FStatusStrip);
 						FCurrentStatusBarClient = null;
 					}
 					IStatusBarClient LClient = ActiveMdiChild as IStatusBarClient;
 					if (LClient != null)
 					{
-						//LClient.Merge(FStatusBar);
+                        LClient.Merge(FStatusStrip);
 						FCurrentStatusBarClient = LClient;
 					}
 				}
