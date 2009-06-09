@@ -7,10 +7,8 @@
 using System;
 using System.Drawing;
 using System.Collections;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Forms;
-using System.Threading;
 using System.IO;
 using System.Text;
 
@@ -56,8 +54,8 @@ namespace Alphora.Dataphor.Dataphoria
 			FExplorer.Dataphoria = this;
             FExplorer.Select();
 
-            FErrorListView.OnErrorsAdded += new EventHandler(ErrorsAdded);
-            FErrorListView.OnWarningsAdded += new EventHandler(WarningsAdded);
+            FErrorListView.OnErrorsAdded += ErrorsAdded;
+            FErrorListView.OnWarningsAdded += WarningsAdded;
 
             FDockContentFExplorer = new DockContent();
 
@@ -65,7 +63,7 @@ namespace Alphora.Dataphor.Dataphoria
             FDockContentFExplorer.Controls.Add(FExplorer);
             FDockContentFExplorer.TabText = "Dataphoria Explorer";
             FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
-            FDockContentFExplorer.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockLeft;
+            FDockContentFExplorer.ShowHint = DockState.DockLeft;
 
             FDockContentErrorListView = new DockContent();
 
@@ -73,7 +71,7 @@ namespace Alphora.Dataphor.Dataphoria
             FDockContentErrorListView.Controls.Add(FErrorListView);
             FDockContentErrorListView.TabText = "Dataphoria Error List";
             FDockContentErrorListView.Text = "Error List - Dataphoria";
-            FDockContentErrorListView.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottomAutoHide;
+            FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
             FDockContentFExplorer.Show(this.FDockPanel);
             FDockContentErrorListView.Show(this.FDockPanel);
@@ -104,7 +102,7 @@ namespace Alphora.Dataphor.Dataphoria
 			return Path.Combine(PathUtility.UserAppDataPath(), String.Format(CConfigurationFileName, AType));
 		}
 
-		private ObjectTree.ServerNode FServerNode;
+		private ServerNode FServerNode;
 		
 		public void RefreshLibraries()
 		{
@@ -199,14 +197,14 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Connection
 
-		private Alphora.Dataphor.DAE.Client.DataSession FDataSession;
-		public Alphora.Dataphor.DAE.Client.DataSession DataSession { get { return FDataSession; } }
+		private DataSession FDataSession;
+		public DataSession DataSession { get { return FDataSession; } }
 		
 		private Frontend.Client.Windows.Session FFrontendSession;
 		public Frontend.Client.Windows.Session FrontendSession { get { return FFrontendSession; } }
 		
-		private DAE.IServerProcess FUtilityProcess;
-		public DAE.IServerProcess UtilityProcess { get { return FUtilityProcess; } }
+		private IServerProcess FUtilityProcess;
+		public IServerProcess UtilityProcess { get { return FUtilityProcess; } }
 
 		public void EnsureServerConnection()
 		{
@@ -222,8 +220,8 @@ namespace Alphora.Dataphor.Dataphoria
 					LAlias.PortNumber = 8062;	// don't use the same default port as the service
 					LConfiguration.Aliases.Add(LAlias);
 				}
-				Alphora.Dataphor.Frontend.Client.Windows.ServerConnectForm.Execute(LConfiguration);
-				using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Connecting))
+				ServerConnectForm.Execute(LConfiguration);
+				using (var LStatusForm = new StatusForm(Strings.Connecting))
 				{
 					FDataSession = new DataSession();
 					try
@@ -240,8 +238,8 @@ namespace Alphora.Dataphor.Dataphoria
 							try
 							{
 								FFrontendSession.SetLibrary("Frontend");
-								FFrontendSession.OnDeserializationErrors += new DeserializationErrorsHandler(FrontendSessionDeserializationErrors);
-								FServerNode = new ObjectTree.ServerNode(FDataSession.Server != null);
+								FFrontendSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
+								FServerNode = new ServerNode(FDataSession.Server != null);
 								FServerNode.Text = FDataSession.Alias.ToString();
                                 FExplorer.AddBaseNode(FServerNode);
 								try
@@ -294,7 +292,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void InternalDisconnect()
 		{
-			using (Frontend.Client.Windows.StatusForm LStatusForm = new Frontend.Client.Windows.StatusForm(Strings.Disconnecting))
+			using (StatusForm LStatusForm = new StatusForm(Strings.Disconnecting))
 			{
 				//if (FTabbedMDIManager != null)
 				//	DisposeChildren();		// Don't CloseChildren(), we already did that in Disconnect()
@@ -374,16 +372,21 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private Bitmap LoadBitmap(string AResourceName)
 		{
-			Bitmap LResult = new Bitmap(GetType().Assembly.GetManifestResourceStream(AResourceName));
-			LResult.MakeTransparent();
-			return LResult;
+		    Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(AResourceName);
+		    if (LManifestResourceStream != null)
+		    {
+		        var LResult = new Bitmap(LManifestResourceStream);
+		        LResult.MakeTransparent();
+		        return LResult;
+		    }
+            throw new ArgumentException("Could not get manifest resource stream for: " + AResourceName, "AResourceName");
 		}
 
 		public Frontend.Client.Windows.Session GetLiveDesignableFrontendSession()
 		{
 			Frontend.Client.Windows.Session LSession = new Frontend.Client.Windows.Session(FDataSession, false);
-			LSession.AfterFormActivate += new FormInterfaceHandler(AfterFormActivated);
-			LSession.OnDeserializationErrors += new DeserializationErrorsHandler(FrontendSessionDeserializationErrors);
+			LSession.AfterFormActivate += AfterFormActivated;
+			LSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
 			return LSession;
 		}
 
@@ -391,7 +394,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void AfterFormActivated(IFormInterface AInterface)
 		{
-			AInterface.HostNode.OnDocumentChanged += new EventHandler(HostDocumentChanged);
+			AInterface.HostNode.OnDocumentChanged += HostDocumentChanged;
 			UpdateDesignerActions(AInterface);
 		}
 
@@ -481,7 +484,7 @@ namespace Alphora.Dataphor.Dataphoria
 			try
 			{
 				LDesigner.Open(AInterface.HostNode);
-				((IDesigner)LDesigner).Show();
+				LDesigner.Show();
 				
 				AddDesignerForm(AInterface, LDesigner);
 			}
@@ -576,10 +579,10 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			DesignerInfo LInfo = new DesignerInfo();
 			string LSelectDesigner = Strings.SelectDesigner;
-            Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
+            IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
 			try
 			{
-				if (LForm.ShowModal(Frontend.Client.FormMode.Query) != DialogResult.OK)
+				if (LForm.ShowModal(FormMode.Query) != DialogResult.OK)
 					throw new AbortException();
 				LInfo.ID = LForm.MainSource.DataView.Fields["Main.ID"].AsString;
 				LInfo.ClassName = LForm.MainSource.DataView.Fields["Main.ClassName"].AsString;
@@ -595,7 +598,7 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Determine the default designer for the specified document type ID. </summary>
 		public DesignerInfo GetDefaultDesigner(string ADocumentTypeID)
 		{
-			DAE.IServerCursor LCursor = OpenCursor(String.Format("DocumentTypeDefaultDesigners where DocumentType_ID = '{0}' join Designers by ID = Default_Designer_ID over {{ ID, ClassName }}", ADocumentTypeID));
+			IServerCursor LCursor = OpenCursor(String.Format("DocumentTypeDefaultDesigners where DocumentType_ID = '{0}' join Designers by ID = Default_Designer_ID over {{ ID, ClassName }}", ADocumentTypeID));
 			try
 			{
 				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
@@ -623,7 +626,7 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Allow the user to choose from the designers associated with the specified document type ID. </summary>
 		public DesignerInfo ChooseDesigner(string ADocumentTypeID)
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = 
+			IWindowsFormInterface LForm = 
 				FrontendSession.LoadForm
 				(
 					null,
@@ -736,7 +739,7 @@ namespace Alphora.Dataphor.Dataphoria
 			);
 			try
 			{
-				Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('NewDocument', 'Add')", new Frontend.Client.FormInterfaceHandler(SetInsertOpenState));
+				IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('NewDocument', 'Add')", SetInsertOpenState);
 				try
 				{
 					LForm.Text = Strings.SaveAsDocumentFormTitle;
@@ -782,7 +785,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void SaveFormValidate(object ASender, EventArgs AArgs)
 		{
-			DAE.Client.DataView LView = (DAE.Client.DataView)ASender;
+			var LView = (DataView)ASender;
 			CheckDocumentOverwrite(LView["Main.Library_Name"].AsString, LView["Main.Name"].AsString);
 		}
 
@@ -844,8 +847,7 @@ namespace Alphora.Dataphor.Dataphoria
 			object LResult = base.GetService(AServiceType);
 			if (LResult != null)
 				return LResult;
-			else
-				return FServices[AServiceType];
+		    return FServices[AServiceType];
 		}
 
 		#endregion
@@ -858,7 +860,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			StringBuilder LFilter = new StringBuilder();
 			LFilter.Append(Strings.AllFilesFilter);
-			DAE.IServerCursor LCursor = OpenCursor("DocumentTypes over { ID, Description }");
+			IServerCursor LCursor = OpenCursor("DocumentTypes over { ID, Description }");
 			try
 			{
 				DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow();
@@ -885,7 +887,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private string GetSaveFilter(IDesigner ADesigner)
 		{
 			StringBuilder LFilter = new StringBuilder();
-			DAE.IServerCursor LCursor = 
+			IServerCursor LCursor = 
 				OpenCursor
 				(
 					String.Format
@@ -1073,7 +1075,7 @@ namespace Alphora.Dataphor.Dataphoria
 				Cursor.Current = Cursors.WaitCursor;
 				try
 				{
-					DAE.IServerScript LScript = FUtilityProcess.PrepareScript(AScript);
+					IServerScript LScript = FUtilityProcess.PrepareScript(AScript);
 					try
 					{
 						LScript.Execute(AParams);
@@ -1090,18 +1092,18 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		public DAE.IServerCursor OpenCursor(string AQuery)
+		public IServerCursor OpenCursor(string AQuery)
 		{
 			return OpenCursor(AQuery, null);
 		}
 
-		public DAE.IServerCursor OpenCursor(string AQuery, DAE.Runtime.DataParams AParams)
+		public IServerCursor OpenCursor(string AQuery, DAE.Runtime.DataParams AParams)
 		{
 			Cursor LOldCursor = Cursor.Current;
 			Cursor.Current = Cursors.WaitCursor;
 			try
 			{
-				DAE.IServerExpressionPlan LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
+				IServerExpressionPlan LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
 				try
 				{
 					return LPlan.Open(AParams);
@@ -1118,9 +1120,9 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		public void CloseCursor(DAE.IServerCursor ACursor)
+		public void CloseCursor(IServerCursor ACursor)
 		{
-			DAE.IServerExpressionPlan LPlan = ACursor.Plan;
+			IServerExpressionPlan LPlan = ACursor.Plan;
 			LPlan.Close(ACursor);
 			FUtilityProcess.UnprepareExpression(LPlan);
 		}
@@ -1136,7 +1138,7 @@ namespace Alphora.Dataphor.Dataphoria
 			Cursor.Current = Cursors.WaitCursor;
 			try
 			{
-				DAE.IServerExpressionPlan LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
+				var LPlan = FUtilityProcess.PrepareExpression(AQuery, AParams);
 				DAE.Runtime.Data.DataValue LResult;
 				try
 				{
@@ -1322,10 +1324,10 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void BrowseDesignerLibraries()
 		{
-			Frontend.Client.Windows.IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('FormDesignerLibraries')");
+			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('FormDesignerLibraries')");
 			try
 			{
-				LForm.ShowModal(Frontend.Client.FormMode.None);
+				LForm.ShowModal(FormMode.None);
 			}
 			finally
 			{
@@ -1340,7 +1342,7 @@ namespace Alphora.Dataphor.Dataphoria
 			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, ".Frontend.Derive('DocumentTypes')", null);
 			try
 			{
-				LForm.ShowModal(Frontend.Client.FormMode.None);
+				LForm.ShowModal(FormMode.None);
 			}
 			finally
 			{
@@ -1375,7 +1377,7 @@ namespace Alphora.Dataphor.Dataphoria
 			try
 			{
 				LSession.SetFormDesigner();
-				Frontend.Client.Windows.IWindowsFormInterface LForm = LSession.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
+				IWindowsFormInterface LForm = LSession.LoadForm(null, ".Frontend.Form('.Frontend', 'DerivedFormLauncher')");
 				try
 				{
 					LForm.Show();
