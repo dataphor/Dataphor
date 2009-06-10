@@ -947,20 +947,27 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FExecutionTimeStatus = null;
         }
 
-        public override void Merge(Control AStatusBar)
+        public override void Merge(StatusStrip AStatusBar)
         {
             base.Merge(AStatusBar);
 
-            AStatusBar.Controls.Add(FExecutionTimeStatus);
-            AStatusBar.Controls.Add(FWorkingStatus);
+
+            ToolStripManager.Merge(AStatusBar, FExecutionTimeStatus);
+            ToolStripManager.Merge(AStatusBar, FWorkingStatus);
+
+            //AStatusBar.Controls.Add(FExecutionTimeStatus);
+            //AStatusBar.Controls.Add(FWorkingStatus);
         }
 
-        public override void Unmerge(Control AStatusBar)
+        public override void Unmerge(StatusStrip AStatusBar)
         {
             base.Unmerge(AStatusBar);
 
-            AStatusBar.Controls.Remove(FExecutionTimeStatus);
-            AStatusBar.Controls.Remove(FWorkingStatus);
+            ToolStripManager.RevertMerge(AStatusBar, FExecutionTimeStatus);
+            ToolStripManager.RevertMerge(AStatusBar, FWorkingStatus);
+
+            //AStatusBar.Controls.Remove(FExecutionTimeStatus);
+            //AStatusBar.Controls.Remove(FWorkingStatus);
         }
 
         #endregion

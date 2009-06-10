@@ -88,14 +88,19 @@ namespace Alphora.Dataphor.Dataphoria
 			FFormStatus = null;
 		}
 
-		public virtual void Merge(Control AStatusBar) 
-		{ 
-			AStatusBar.Controls.Add(FFormStatus);
+		public virtual void Merge(StatusStrip AStatusBar) 
+		{
+            ToolStripManager.Merge(FFormStatus, AStatusBar);
+            
+            
+            //AStatusBar.Controls.Add(FFormStatus);
 		}
 
-		public virtual void Unmerge(Control AStatusBar) 
-		{ 
-			AStatusBar.Controls.Remove(FFormStatus);
+		public virtual void Unmerge(StatusStrip AStatusBar) 
+		{
+		    ToolStripManager.RevertMerge(AStatusBar, FFormStatus);
+            
+            //AStatusBar.Controls.Remove(FFormStatus);
 		}
 
 		private void StatusHighlightTimerTick(object ASender, EventArgs AArgs)
