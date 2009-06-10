@@ -7,6 +7,7 @@
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -884,9 +885,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region StatusBar
 
-        protected StatusStrip FExecutionTimeStatus;
+        protected ToolStripStatusLabel FExecutionTimeStatus;
         private PictureBox FWorkingAnimation;
-        protected StatusStrip FWorkingStatus;
+        protected ToolStripControlHost  FWorkingStatus;
 
         protected override void InitializeStatusBar()
         {
@@ -901,37 +902,37 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                            BorderStyle = BorderStyle.FixedSingle,
                                            BorderColor = Color.Yellow
                                        };*/
-            this.FExecutionTimeStatus = new StatusStrip
+            this.FExecutionTimeStatus = new ToolStripStatusLabel 
             {
                 Name = "FFormStatus",
                 Dock = DockStyle.Bottom,
                 Text = "0:00:00"
             };
 
+            const string LCResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
             Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(
-                "Alphora.Dataphor.Dataphoria.Images.Rider.gif");
-            FWorkingAnimation = new PictureBox
-                                    {
-                                        Image = Image.FromStream(
-                                            LManifestResourceStream),
-                                        SizeMode = PictureBoxSizeMode.AutoSize,
-                                        Visible = false
-                                    };
-            FWorkingStatus = new StatusStrip
-            {
-                Text = "",
-                Name = "FWorkingStatus",
-                Dock = DockStyle.Bottom,                
-            };
+                LCResourceName);
+            Debug.Assert(LManifestResourceStream != null, "Resource must exist: " + LCResourceName);
+                FWorkingAnimation = new PictureBox
+                                        {
+                                            Image = Image.FromStream(
+                                                LManifestResourceStream),
+                                            SizeMode = PictureBoxSizeMode.AutoSize,
+                                            Visible = false
+                                        };
+            FWorkingStatus = new ToolStripControlHost(FWorkingAnimation, "FWorkingStatus");
+           
             /*FWorkingStatus = new StatusBarAdvPanel
                                  {
                                      Text = "",
                                      HAlign = HorzFlowAlign.Right,
                                      Alignment = HorizontalAlignment.Center,
                                      BorderStyle = BorderStyle.None
-                                 };*/
-            FWorkingStatus.Controls.Add(FWorkingAnimation);
+                                 };*/            
             FWorkingStatus.Size = FWorkingAnimation.Size;
+
+            FFormStatus.Items.Add(FExecutionTimeStatus);
+            FFormStatus.Items.Add(FWorkingStatus);
         }
 
         protected override void DisposeStatusBar()
@@ -947,7 +948,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FExecutionTimeStatus = null;
         }
 
-        public override void Merge(StatusStrip AStatusBar)
+        /*public override void Merge(StatusStrip AStatusBar)
         {
             base.Merge(AStatusBar);
 
@@ -957,9 +958,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
             //AStatusBar.Controls.Add(FExecutionTimeStatus);
             //AStatusBar.Controls.Add(FWorkingStatus);
-        }
+        }*/
 
-        public override void Unmerge(StatusStrip AStatusBar)
+        /*public override void Unmerge(StatusStrip AStatusBar)
         {
             base.Unmerge(AStatusBar);
 
@@ -968,7 +969,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
             //AStatusBar.Controls.Remove(FExecutionTimeStatus);
             //AStatusBar.Controls.Remove(FWorkingStatus);
-        }
+        }*/
 
         #endregion
     }

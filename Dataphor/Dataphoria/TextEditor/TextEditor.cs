@@ -422,13 +422,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region StatusBar
 
-        protected StatusStrip FPositionStatus;
+        protected ToolStripStatusLabel FPositionStatus;
 
         protected override void InitializeStatusBar()
         {
             base.InitializeStatusBar();
 
-            this.FPositionStatus = new StatusStrip
+            this.FPositionStatus = new ToolStripStatusLabel
             {
                 Text = "0:0",                
                 Name = "FFormStatus",
@@ -444,6 +444,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                       BorderStyle = BorderStyle.FixedSingle,
                                       BorderColor = Color.Gray
                                   };*/
+            FFormStatus.Items.Add(FPositionStatus);
         }
 
         protected override void DisposeStatusBar()
@@ -454,7 +455,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             base.DisposeStatusBar();
         }
 
-        public override void Merge(StatusStrip AStatusBar)
+        /*public override void Merge(StatusStrip AStatusBar)
         {
             base.Merge(AStatusBar);
 
@@ -470,7 +471,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             ToolStripManager.RevertMerge(AStatusBar, FPositionStatus);
 
             //AStatusBar.Controls.Remove(FPositionStatus);
-        }
+        }*/
 
         #endregion
     }

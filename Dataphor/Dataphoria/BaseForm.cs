@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria
     public partial class BaseForm : DockContent, IStatusBarClient
 	{
 
-        private System.Windows.Forms.StatusStrip FFormStatus;
+        protected System.Windows.Forms.StatusStrip FFormStatus;
         
         public BaseForm() : base()
 		{

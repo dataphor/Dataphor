@@ -40,14 +40,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(D4Editor));
             
             this.FDockContentTextEdit.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).BeginInit();
+            
             this.SuspendLayout();
             
             this.ClientSize = new System.Drawing.Size(455, 376);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "D4Editor";
             this.FDockContentTextEdit.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.FPositionStatus)).EndInit();
+            
             this.ResumeLayout(false);
             this.PerformLayout();
 
