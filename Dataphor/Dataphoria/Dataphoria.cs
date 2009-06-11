@@ -1032,40 +1032,47 @@ namespace Alphora.Dataphor.Dataphoria
 		protected override void OnMdiChildActivate(EventArgs AArgs)
 		{
 			base.OnMdiChildActivate(AArgs);
+            MergeOrRevertMergeOfToolbars();
+		    MergeOrRevertMergeOfStatusBars();
+		}
 
+        private void MergeOrRevertMergeOfStatusBars()
+        {
+            if (FCurrentStatusBarClient != ActiveMdiChild)
+            {
+                SuspendLayout();
+                try
+                {
+                    if (FCurrentStatusBarClient != null)
+                    {
+                        FCurrentStatusBarClient.Unmerge(FStatusStrip);
+                        FCurrentStatusBarClient = null;
+                    }
+                    IStatusBarClient LClient = ActiveMdiChild as IStatusBarClient;
+                    if (LClient != null)
+                    {
+                        LClient.Merge(FStatusStrip);
+                        FCurrentStatusBarClient = LClient;
+                    }
+                }
+                finally
+                {
+                    ResumeLayout(true);
+                }
+            }
+        }
+
+        private void MergeOrRevertMergeOfToolbars()
+        {
             ToolStripManager.RevertMerge(this.FToolStrip);
             IChildFormWithToolBar LChildForm = ActiveMdiChild as IChildFormWithToolBar;
             if (LChildForm != null)
             {
                 LChildForm.MergeWith(this.FToolStrip);
             }
+        }
 
-			if (FCurrentStatusBarClient != ActiveMdiChild)
-			{
-				SuspendLayout();
-				try
-				{
-					if (FCurrentStatusBarClient != null)
-					{
-						FCurrentStatusBarClient.Unmerge(FStatusStrip);
-						FCurrentStatusBarClient = null;
-					}
-					IStatusBarClient LClient = ActiveMdiChild as IStatusBarClient;
-					if (LClient != null)
-					{
-                        LClient.Merge(FStatusStrip);
-						FCurrentStatusBarClient = LClient;
-					}
-				}
-				finally
-				{
-					ResumeLayout(true);
-				}
-			}
-		}
-       
-
-		#endregion
+        #endregion
 
 		#region DAE & Frontend Server Helpers
 
