@@ -88,20 +88,14 @@ namespace Alphora.Dataphor.Dataphoria
 			FStatusStrip = null;
 		}
 
-		public virtual void Merge(StatusStrip AStatusBar) 
+		public virtual void MergeStatusBarWith(StatusStrip AStatusBar) 
 		{
             ToolStripManager.Merge(FStatusStrip, AStatusBar);
             
             
             //AStatusBar.Controls.Add(FStatusStrip);
 		}
-
-		public virtual void Unmerge(StatusStrip AStatusBar) 
-		{
-		    ToolStripManager.RevertMerge(AStatusBar, FStatusStrip);
-            
-            //AStatusBar.Controls.Remove(FStatusStrip);
-		}
+		
 
 		private void StatusHighlightTimerTick(object ASender, EventArgs AArgs)
 		{

@@ -1038,37 +1038,21 @@ namespace Alphora.Dataphor.Dataphoria
 
         private void MergeOrRevertMergeOfStatusBars()
         {
-            if (FCurrentStatusBarClient != ActiveMdiChild)
+            ToolStripManager.RevertMerge(this.FStatusStrip);
+            var LChildForm = ActiveMdiChild as IStatusBarClient;
+            if (LChildForm != null)
             {
-                SuspendLayout();
-                try
-                {
-                    if (FCurrentStatusBarClient != null)
-                    {
-                        FCurrentStatusBarClient.Unmerge(FStatusStrip);
-                        FCurrentStatusBarClient = null;
-                    }
-                    IStatusBarClient LClient = ActiveMdiChild as IStatusBarClient;
-                    if (LClient != null)
-                    {
-                        LClient.Merge(FStatusStrip);
-                        FCurrentStatusBarClient = LClient;
-                    }
-                }
-                finally
-                {
-                    ResumeLayout(true);
-                }
+                LChildForm.MergeStatusBarWith(this.FStatusStrip);
             }
         }
 
         private void MergeOrRevertMergeOfToolbars()
         {
-            ToolStripManager.RevertMerge(this.FToolStrip);
+            ToolStripManager.RevertMerge(this.FToolStrip);            
             var LChildForm = ActiveMdiChild as IChildFormWithToolBar;
             if (LChildForm != null)
             {
-                LChildForm.MergeWith(this.FToolStrip);
+                LChildForm.MergeToolbarWith(this.FToolStrip);
             }
         }
 

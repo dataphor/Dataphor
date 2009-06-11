@@ -7,7 +7,6 @@ namespace Alphora.Dataphor.Dataphoria
 {
     public interface IStatusBarClient
     {
-        void Merge(StatusStrip AStatusBar);
-        void Unmerge(StatusStrip AStatusBar);
+        void MergeStatusBarWith(StatusStrip AStatusBar);        
     }
 }

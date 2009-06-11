@@ -5,7 +5,7 @@ namespace Alphora.Dataphor.Dataphoria
     interface IChildFormWithToolBar
     {
 
-        void MergeWith(ToolStrip AParentToolStrip);
+        void MergeToolbarWith(ToolStrip AParentToolStrip);
 
     }
 }

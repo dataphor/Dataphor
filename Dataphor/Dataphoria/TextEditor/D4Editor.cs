@@ -930,6 +930,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                      BorderStyle = BorderStyle.None
                                  };*/            
             FWorkingStatus.Size = FWorkingAnimation.Size;
+            
 
             FStatusStrip.Items.Add(FExecutionTimeStatus);
             FStatusStrip.Items.Add(FWorkingStatus);
@@ -948,28 +949,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FExecutionTimeStatus = null;
         }
 
-        /*public override void Merge(StatusStrip AStatusBar)
-        {
-            base.Merge(AStatusBar);
-
-
-            ToolStripManager.Merge(AStatusBar, FExecutionTimeStatus);
-            ToolStripManager.Merge(AStatusBar, FWorkingStatus);
-
-            //AStatusBar.Controls.Add(FExecutionTimeStatus);
-            //AStatusBar.Controls.Add(FWorkingStatus);
-        }*/
-
-        /*public override void Unmerge(StatusStrip AStatusBar)
-        {
-            base.Unmerge(AStatusBar);
-
-            ToolStripManager.RevertMerge(AStatusBar, FExecutionTimeStatus);
-            ToolStripManager.RevertMerge(AStatusBar, FWorkingStatus);
-
-            //AStatusBar.Controls.Remove(FExecutionTimeStatus);
-            //AStatusBar.Controls.Remove(FWorkingStatus);
-        }*/
+        
 
         #endregion
     }

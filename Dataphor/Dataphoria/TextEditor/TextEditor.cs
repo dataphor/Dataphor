@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region IChildFormWithToolBar Members
 
-        public void MergeWith(ToolStrip AParentToolStrip)
+        public void MergeToolbarWith(ToolStrip AParentToolStrip)
         {
             ToolStripManager.Merge(FToolStrip, AParentToolStrip);
         }
@@ -455,23 +455,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             base.DisposeStatusBar();
         }
 
-        /*public override void Merge(StatusStrip AStatusBar)
-        {
-            base.Merge(AStatusBar);
-
-            ToolStripManager.Merge(AStatusBar, FPositionStatus);
-
-            //AStatusBar.Controls.Add(FPositionStatus);
-        }
-
-        public override void Unmerge(StatusStrip AStatusBar)
-        {
-            base.Unmerge(AStatusBar);
-
-            ToolStripManager.RevertMerge(AStatusBar, FPositionStatus);
-
-            //AStatusBar.Controls.Remove(FPositionStatus);
-        }*/
+       
 
         #endregion
     }

@@ -122,7 +122,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         #region IChildFormWithToolBar Members
 
-        public void MergeWith(ToolStrip AParentToolStrip)
+        public void MergeToolbarWith(ToolStrip AParentToolStrip)
         {
             ToolStripManager.Merge(FToolStrip, AParentToolStrip);
         }
