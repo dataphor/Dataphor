@@ -431,7 +431,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FPositionStatus = new ToolStripStatusLabel
             {
                 Text = "0:0",                
-                Name = "FFormStatusStrip",
+                Name = "FStatusStrip",
                 Dock = DockStyle.Bottom
             };
 
@@ -444,7 +444,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                       BorderStyle = BorderStyle.FixedSingle,
                                       BorderColor = Color.Gray
                                   };*/
-            FFormStatusStrip.Items.Add(FPositionStatus);
+            FStatusStrip.Items.Add(FPositionStatus);
         }
 
         protected override void DisposeStatusBar()

@@ -904,7 +904,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                        };*/
             this.FExecutionTimeStatus = new ToolStripStatusLabel 
             {
-                Name = "FFormStatusStrip",
+                Name = "FStatusStrip",
                 Dock = DockStyle.Bottom,
                 Text = "0:00:00"
             };
@@ -931,8 +931,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                  };*/            
             FWorkingStatus.Size = FWorkingAnimation.Size;
 
-            FFormStatusStrip.Items.Add(FExecutionTimeStatus);
-            FFormStatusStrip.Items.Add(FWorkingStatus);
+            FStatusStrip.Items.Add(FExecutionTimeStatus);
+            FStatusStrip.Items.Add(FWorkingStatus);
         }
 
         protected override void DisposeStatusBar()
