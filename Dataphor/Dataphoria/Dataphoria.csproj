@@ -370,28 +370,28 @@
     <Compile Include="Strings.Designer.cs">
       <DependentUpon>Strings.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextEditor\BaseBlockAction.cs" />
+    <Compile Include="TextEditor\BlockActions\BaseBlockAction.cs" />
     <Compile Include="TextEditor\D4Editor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="TextEditor\D4Editor.Designer.cs">
       <DependentUpon>D4Editor.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextEditor\NextBlock.cs" />
-    <Compile Include="TextEditor\PriorBlock.cs" />
+    <Compile Include="TextEditor\BlockActions\NextBlock.cs" />
+    <Compile Include="TextEditor\BlockActions\PriorBlock.cs" />
     <Compile Include="TextEditor\ResultPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TextEditor\SelectBlock.cs" />
-    <Compile Include="TextEditor\SelectNextBlock.cs" />
-    <Compile Include="TextEditor\SelectPriorBlock.cs" />
+    <Compile Include="TextEditor\BlockActions\SelectBlock.cs" />
+    <Compile Include="TextEditor\BlockActions\SelectNextBlock.cs" />
+    <Compile Include="TextEditor\BlockActions\SelectPriorBlock.cs" />
     <Compile Include="TextEditor\TextEditor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="TextEditor\TextEditor.Designer.cs">
       <DependentUpon>TextEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextEditor\ToggleBlockDelimiter.cs" />
+    <Compile Include="TextEditor\BlockActions\ToggleBlockDelimiter.cs" />
     <Compile Include="TreeView.cs">
       <SubType>Component</SubType>
     </Compile>
