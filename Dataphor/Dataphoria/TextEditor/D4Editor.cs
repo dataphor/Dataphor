@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 }
                 else if (ASender == FExecuteLineMenuItem)
                 {
-                    Execute();
+                    ExecuteLine();
                 }
                 else if (ASender == FCancelMenuItem)
                 {
@@ -906,7 +906,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             {
                 Name = "FStatusStrip",
                 Dock = DockStyle.Bottom,
-                Text = "0:00:00"
+                Text = "0:00:00",
+                Visible = false
             };
 
             const string LCResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
@@ -917,8 +918,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                         {
                                             Image = Image.FromStream(
                                                 LManifestResourceStream),
-                                            SizeMode = PictureBoxSizeMode.AutoSize,
-                                            Visible = false
+                                            SizeMode = PictureBoxSizeMode.AutoSize                                            
                                         };
             FWorkingStatus = new ToolStripControlHost(FWorkingAnimation, "FWorkingStatus");
            
@@ -930,8 +930,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                      BorderStyle = BorderStyle.None
                                  };*/            
             FWorkingStatus.Size = FWorkingAnimation.Size;
+            FWorkingStatus.Visible = false;
             
-
             FStatusStrip.Items.Add(FExecutionTimeStatus);
             FStatusStrip.Items.Add(FWorkingStatus);
         }
@@ -942,11 +942,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
             FWorkingAnimation.Image.Dispose(); //otherwise the animation thread will still be hanging around
 
-            FWorkingStatus.Dispose();
+            /*FWorkingStatus.Dispose();
             FWorkingStatus = null;
 
             FExecutionTimeStatus.Dispose();
-            FExecutionTimeStatus = null;
+            FExecutionTimeStatus = null;*/
         }
 
         
