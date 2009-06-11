@@ -385,6 +385,7 @@
     <Compile Include="TextEditor\BlockActions\SelectBlock.cs" />
     <Compile Include="TextEditor\BlockActions\SelectNextBlock.cs" />
     <Compile Include="TextEditor\BlockActions\SelectPriorBlock.cs" />
+    <Compile Include="TextEditor\ScriptExecutor.cs" />
     <Compile Include="TextEditor\TextEditor.cs">
       <SubType>Form</SubType>
     </Compile>
