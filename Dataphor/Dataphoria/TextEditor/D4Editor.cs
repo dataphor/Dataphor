@@ -906,8 +906,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             {
                 Name = "FStatusStrip",
                 Dock = DockStyle.Bottom,
-                Text = "0:00:00",
-                Visible = false
+                Text = "0:00:00",                
             };
 
             const string LCResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
