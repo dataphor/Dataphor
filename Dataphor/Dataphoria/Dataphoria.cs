@@ -1065,7 +1065,7 @@ namespace Alphora.Dataphor.Dataphoria
         private void MergeOrRevertMergeOfToolbars()
         {
             ToolStripManager.RevertMerge(this.FToolStrip);
-            IChildFormWithToolBar LChildForm = ActiveMdiChild as IChildFormWithToolBar;
+            var LChildForm = ActiveMdiChild as IChildFormWithToolBar;
             if (LChildForm != null)
             {
                 LChildForm.MergeWith(this.FToolStrip);

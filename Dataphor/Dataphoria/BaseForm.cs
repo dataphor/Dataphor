@@ -14,7 +14,7 @@ namespace Alphora.Dataphor.Dataphoria
     public partial class BaseForm : DockContent, IStatusBarClient
 	{
 
-        protected System.Windows.Forms.StatusStrip FFormStatus;
+        protected System.Windows.Forms.StatusStrip FFormStatusStrip;
         
         public BaseForm() : base()
 		{
@@ -47,18 +47,18 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void SetTooltip(string ATipText)
 		{			    
-            FToolTip.SetToolTip(FFormStatus, ATipText);
+            FToolTip.SetToolTip(FFormStatusStrip, ATipText);
 		}
 
 		public void SetStatus(string AStatus)
 		{
-			if (FFormStatus.Text != AStatus)
+			if (FFormStatusStrip.Text != AStatus)
 			{
-				FFormStatus.Text = AStatus;
+				FFormStatusStrip.Text = AStatus;
 				if (AStatus != String.Empty)
 				{
-					FFormStatus.BackColor = System.Drawing.SystemColors.Highlight;
-					FFormStatus.ForeColor = System.Drawing.SystemColors.HighlightText;
+					FFormStatusStrip.BackColor = System.Drawing.SystemColors.Highlight;
+					FFormStatusStrip.ForeColor = System.Drawing.SystemColors.HighlightText;
 					FStatusHighlightTimer.Start();
 				}
 			}
@@ -67,48 +67,48 @@ namespace Alphora.Dataphor.Dataphoria
 		protected virtual void InitializeStatusBar() 
 		{
 
-            this.FFormStatus = new StatusStrip 
+            this.FFormStatusStrip = new StatusStrip 
             {
-                Name = "FFormStatus",
+                Name = "FFormStatusStrip",
                 Dock = DockStyle.Bottom
             };
             // 
-            // FFormStatus
+            // FFormStatusStrip
             // 
 
-		    /*FFormStatus = new StatusBarAdvPanel();
-			FFormStatus.HAlign = HorzFlowAlign.Justify;
-			FFormStatus.Alignment = HorizontalAlignment.Left;
-			FFormStatus.BorderStyle = BorderStyle.None;*/
+		    /*FFormStatusStrip = new StatusBarAdvPanel();
+			FFormStatusStrip.HAlign = HorzFlowAlign.Justify;
+			FFormStatusStrip.Alignment = HorizontalAlignment.Left;
+			FFormStatusStrip.BorderStyle = BorderStyle.None;*/
 		}
 
 		protected virtual void DisposeStatusBar() 
 		{ 
-			FFormStatus.Dispose();
-			FFormStatus = null;
+			FFormStatusStrip.Dispose();
+			FFormStatusStrip = null;
 		}
 
 		public virtual void Merge(StatusStrip AStatusBar) 
 		{
-            ToolStripManager.Merge(FFormStatus, AStatusBar);
+            ToolStripManager.Merge(FFormStatusStrip, AStatusBar);
             
             
-            //AStatusBar.Controls.Add(FFormStatus);
+            //AStatusBar.Controls.Add(FFormStatusStrip);
 		}
 
 		public virtual void Unmerge(StatusStrip AStatusBar) 
 		{
-		    ToolStripManager.RevertMerge(AStatusBar, FFormStatus);
+		    ToolStripManager.RevertMerge(AStatusBar, FFormStatusStrip);
             
-            //AStatusBar.Controls.Remove(FFormStatus);
+            //AStatusBar.Controls.Remove(FFormStatusStrip);
 		}
 
 		private void StatusHighlightTimerTick(object ASender, EventArgs AArgs)
 		{
-			if (FFormStatus != null)
+			if (FFormStatusStrip != null)
 			{
-				FFormStatus.BackColor = System.Drawing.Color.Transparent;
-				FFormStatus.ForeColor = this.ForeColor;
+				FFormStatusStrip.BackColor = System.Drawing.Color.Transparent;
+				FFormStatusStrip.ForeColor = this.ForeColor;
 			}
 			FStatusHighlightTimer.Stop();
 		}
