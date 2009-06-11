@@ -386,8 +386,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.MainMenuStrip = this.FMainMenuStrip;
             this.Name = "Dataphoria";
             this.Text = "Dataphoria";
-            this.Shown += new System.EventHandler(this.Dataphoria_Shown);
-            this.MdiChildActivate += new System.EventHandler(this.Dataphoria_MdiChildActivate);
+            this.Shown += new System.EventHandler(this.Dataphoria_Shown);            
             this.FMainMenuStrip.ResumeLayout(false);
             this.FMainMenuStrip.PerformLayout();
             this.FToolStrip.ResumeLayout(false);

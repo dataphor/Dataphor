@@ -1032,6 +1032,14 @@ namespace Alphora.Dataphor.Dataphoria
 		protected override void OnMdiChildActivate(EventArgs AArgs)
 		{
 			base.OnMdiChildActivate(AArgs);
+
+            ToolStripManager.RevertMerge(this.FToolStrip);
+            IChildFormWithToolBar LChildForm = ActiveMdiChild as IChildFormWithToolBar;
+            if (LChildForm != null)
+            {
+                LChildForm.MergeWith(this.FToolStrip);
+            }
+
 			if (FCurrentStatusBarClient != ActiveMdiChild)
 			{
 				SuspendLayout();
@@ -1055,6 +1063,7 @@ namespace Alphora.Dataphor.Dataphoria
 				}
 			}
 		}
+       
 
 		#endregion
 
@@ -1510,14 +1519,6 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#endregion
 
-        private void Dataphoria_MdiChildActivate(object ASender, EventArgs AArgs)
-        {
-            ToolStripManager.RevertMerge(this.FToolStrip);
-            IChildFormWithToolBar LChildForm = ActiveMdiChild as IChildFormWithToolBar;
-            if (LChildForm != null)
-            {
-                LChildForm.MergeWith(this.FToolStrip);           
-            }                       
-        }
+        
     }
 }
