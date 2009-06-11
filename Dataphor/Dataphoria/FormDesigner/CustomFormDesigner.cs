@@ -14,6 +14,7 @@ using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Serializer=Alphora.Dataphor.Frontend.Client.Serializer;
+using Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {

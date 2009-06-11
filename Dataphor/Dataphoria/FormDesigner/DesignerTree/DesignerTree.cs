@@ -11,7 +11,7 @@ using System.Drawing;
 using Alphora.Dataphor;
 using Alphora.Dataphor.Frontend.Client;
 
-namespace Alphora.Dataphor.Dataphoria.FormDesigner
+namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 {
 	public class DesignerTree : BaseTree
 	{

@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace Alphora.Dataphor.Dataphoria.FormDesigner
+namespace Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree
 {
     public class DesignerTreeDropMenu : ContextMenu
     {

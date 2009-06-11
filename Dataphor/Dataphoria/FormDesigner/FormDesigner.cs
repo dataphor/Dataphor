@@ -246,7 +246,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             // FNodesTree
             // 
-            FNodesTree = new DesignerTree();
+            FNodesTree = new DesignerTree.DesignerTree();
             FNodesTree.AllowDrop = true;
             FNodesTree.BorderStyle = BorderStyle.None;
             FNodesTree.CausesValidation = false;
@@ -447,10 +447,10 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private void FNodesTree_AfterSelect(object ASender, TreeViewEventArgs AArgs)
         {
-            ActivateNode((DesignerNode) AArgs.Node);
+            ActivateNode((DesignerTree.DesignerNode)AArgs.Node);
         }
 
-        public void ActivateNode(DesignerNode ANode)
+        public void ActivateNode(DesignerTree.DesignerNode ANode)
         {
             if ((FPropertyGrid.SelectedObject != null) && (FPropertyGrid.SelectedObject is IDisposableNotify))
                 ((IDisposableNotify) FPropertyGrid.SelectedObject).Disposed -= SelectedNodeDisposed;
@@ -836,7 +836,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private void ClearNodesTree()
         {
-            foreach (DesignerNode LRoot in FNodesTree.Nodes)
+            foreach (DesignerTree.DesignerNode LRoot in FNodesTree.Nodes)
                 LRoot.Dispose();
             FNodesTree.Nodes.Clear();
         }

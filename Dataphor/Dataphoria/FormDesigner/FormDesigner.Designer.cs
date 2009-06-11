@@ -21,8 +21,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private System.Windows.Forms.ImageList FPointerImageList;
         private System.Windows.Forms.PropertyGrid FPropertyGrid;
-       
-        protected Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree FNodesTree;
+
+        protected Alphora.Dataphor.Dataphoria.FormDesigner.DesignerTree.DesignerTree FNodesTree;
         private Alphora.Dataphor.Dataphoria.FormDesigner.FormPanel FFormPanel;
         private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
         private System.Windows.Forms.ImageList FNodesImageList;

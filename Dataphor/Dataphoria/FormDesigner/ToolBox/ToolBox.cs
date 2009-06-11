@@ -343,7 +343,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         [Browsable(false)]
         public Session FrontendSession { get; set; }
 
-        public DesignerTree NodesTree { get; set; }
+        public DesignerTree.DesignerTree NodesTree { get; set; }
 
         #endregion
     }
