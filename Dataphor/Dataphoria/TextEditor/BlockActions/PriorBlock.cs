@@ -1,6 +1,6 @@
 using ICSharpCode.TextEditor;
 
-namespace Alphora.Dataphor.Dataphoria.TextEditor
+namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class PriorBlock : BaseBlockAction
     {

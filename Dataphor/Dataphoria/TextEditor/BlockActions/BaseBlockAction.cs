@@ -1,7 +1,7 @@
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Actions;
 
-namespace Alphora.Dataphor.Dataphoria.TextEditor
+namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public abstract class BaseBlockAction : AbstractEditAction
     {

@@ -1,7 +1,7 @@
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
 
-namespace Alphora.Dataphor.Dataphoria.TextEditor
+namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class SelectNextBlock : BaseBlockAction
     {

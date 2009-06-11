@@ -3,7 +3,7 @@ using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Actions;
 using ICSharpCode.TextEditor.Document;
 
-namespace Alphora.Dataphor.Dataphoria.TextEditor
+namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
 {
     public class ToggleBlockDelimiter : AbstractEditAction
     {

@@ -17,6 +17,7 @@ using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Client.Provider;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.Dataphoria.TextEditor.BlockActions;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using ICSharpCode.TextEditor.Document;
 using WeifenLuo.WinFormsUI.Docking;
