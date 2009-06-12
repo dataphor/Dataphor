@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -9,6 +10,10 @@ namespace Alphora.Dataphor.Dataphoria
     internal class Program
     {
         private static IDataphoria SDataphoriaInstance;
+
+
+        static TraceSwitch STraceSwitch = new TraceSwitch(typeof(Program).FullName, "TraceSwitch for " + typeof(Program).FullName);
+
 
         public static IDataphoria DataphoriaInstance
         {
@@ -40,6 +45,7 @@ namespace Alphora.Dataphor.Dataphoria
         [STAThread]
         private static void Main(string[] AArgs)
         {
+            Debug.WriteLineIf(STraceSwitch.TraceInfo, "Starting program...");            
             AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();
@@ -81,8 +87,7 @@ namespace Alphora.Dataphor.Dataphoria
         {
             if (AException is ThreadAbortException)
                 Thread.ResetAbort();
-            Session.HandleException(AException);
-            //throw new Exception("Handled Exception" + AException, AException);
+            Session.HandleException(AException);            
         }
     }
 }
