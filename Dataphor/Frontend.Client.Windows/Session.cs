@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net;
 using System.IO;
+using Alphora.Dataphor.Logging;
 using WinForms = System.Windows.Forms;
 using System.Reflection;
 using System.Diagnostics;
@@ -28,6 +29,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		public const string CFormDesignerNodeTypesExpression = @".Frontend.GetNodeTypes('Windows', Frontend.FormDesignerLibraries)";
 		public const string CLibraryNodeTypesExpression = @".Frontend.GetLibraryNodeTypes('Windows', ALibraryName)";
 		public const string CSettingsExpression = @".Frontend.GetWindowsSettings(AApplicationID)";
+
+        static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Session));
 
 		public Session(Alphora.Dataphor.DAE.Client.DataSession ADataSession, bool AOwnsDataSession) : base(ADataSession, AOwnsDataSession) 
 		{
@@ -701,9 +704,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					}
 				}
 			}
-			catch
+			catch(Exception LException)
 			{
-				// Do nothing... maybe log or something in the future (but don't let that logging throw!).  Throwing here closes the app, which is probably worse than eating an exception (gulp).
+				SRFLogger.WriteLine(TraceLevel.Error,"Handled Exception {0}",LException);
+                // Do nothing... Do not throw! Throwing here closes the app, which is probably worse than eating an exception (gulp).
 			}
 		}
 
