@@ -323,47 +323,47 @@
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ApplicationNode.cs">
+    <Compile Include="ObjectTree\Nodes\ApplicationNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ConstraintNode.cs">
+    <Compile Include="ObjectTree\Nodes\ConstraintNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ViewNode.cs" />
+    <Compile Include="ObjectTree\Nodes\ViewNode.cs" />
     <Compile Include="ObjectTree\DataTree.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ObjectTree\DeviceNode.cs">
+    <Compile Include="ObjectTree\Nodes\DeviceNode.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ObjectTree\DocumentNode.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ObjectTree\LibraryNode.cs">
+    <Compile Include="ObjectTree\Nodes\LibraryNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\Node.cs">
+    <Compile Include="ObjectTree\Nodes\Node.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\OperatorNode.cs">
+    <Compile Include="ObjectTree\Nodes\OperatorNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ReferenceNode.cs">
+    <Compile Include="ObjectTree\Nodes\ReferenceNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\RoleNode.cs">
+    <Compile Include="ObjectTree\Nodes\RoleNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ScalarTypeNode.cs">
+    <Compile Include="ObjectTree\Nodes\ScalarTypeNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\ServerNode.cs">
+    <Compile Include="ObjectTree\Nodes\ServerNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\TableNode.cs">
+    <Compile Include="ObjectTree\Nodes\TableNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\UserNode.cs">
+    <Compile Include="ObjectTree\Nodes\UserNode.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Program.cs" />
