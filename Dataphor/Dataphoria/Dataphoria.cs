@@ -49,6 +49,19 @@ namespace Alphora.Dataphor.Dataphoria
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
             FExplorer = new DataTree();
+            this.FExplorer.AllowDrop = true;
+            this.FExplorer.BorderStyle = BorderStyle.None;
+            this.FExplorer.CausesValidation = false;
+            this.FExplorer.HideSelection = false;
+            this.FExplorer.ImageIndex = 0;
+            this.FExplorer.ImageList = this.FTreeImageList;
+            
+            this.FExplorer.Name = "FExplorer";
+            this.FExplorer.SelectedImageIndex = 0;
+            this.FExplorer.ShowRootLines = false;            
+            this.FExplorer.TabIndex = 1;
+            this.FExplorer.HelpRequested += this.FExplorer_HelpRequested;
+
             FErrorListView = new ErrorListView();
 
 			// Configure tree
