@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 namespace Alphora.Dataphor.Logging
 {
-    public class Logger : ILogger
+    internal class Logger : ILogger
     {
         private static TraceSwitch FTraceSwitch;
 

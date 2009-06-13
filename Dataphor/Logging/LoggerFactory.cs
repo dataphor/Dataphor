@@ -1,16 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Alphora.Dataphor.Logging;
+﻿
+
+using System;
 
 namespace Alphora.Dataphor.Logging
 {
-    public class LoggerFactory
+    public class LoggerFactory : ILoggerFactory
     {
-        public ILogger CreateLogger()
+
+        private static readonly ILoggerFactory SRFInstance = new LoggerFactory();
+
+       private LoggerFactory() { }
+
+       public static ILoggerFactory Instance
+       {
+          get 
+          {
+              return SRFInstance; 
+          }
+       }
+
+        
+        public ILogger CreateLogger(string ADisplayName, string ADescription)
         {
-            return new Logger();
+            return new Logger(ADisplayName, ADescription);
+        }
+
+        public ILogger CreateLogger(string ADisplayName)
+        {
+            return new Logger(ADisplayName);
+        }
+
+        public ILogger CreateLogger(Type AType)
+        {
+            return new Logger(AType.FullName);
         }
     }
 }
