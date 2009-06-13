@@ -45,7 +45,7 @@ namespace Alphora.Dataphor.Dataphoria
         [STAThread]
         private static void Main(string[] AArgs)
         {
-            Debug.WriteLineIf(STraceSwitch.TraceInfo, "Starting program...");            
+            Debug.WriteLineIf(STraceSwitch.T, "Starting program...");            
             AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();
