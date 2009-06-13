@@ -21,12 +21,14 @@ namespace Alphora.Dataphor.Logging
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat)
         {
-            Debug.WriteLineIf(FTraceSwitch.Level == ATraceLevel,AFormat,FTraceSwitch.DisplayName);
+            bool LWillWriteLine = FTraceSwitch.Level <= ATraceLevel;
+            Debug.WriteLineIf(LWillWriteLine, AFormat, FTraceSwitch.DisplayName);
         }
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat, params object[] AArgs)
         {
-            Debug.WriteLineIf(FTraceSwitch.Level == ATraceLevel, string.Format(AFormat, AArgs), FTraceSwitch.DisplayName);
+            bool LWillWriteLine = FTraceSwitch.Level <= ATraceLevel;
+            Debug.WriteLineIf(LWillWriteLine, string.Format(AFormat, AArgs), FTraceSwitch.DisplayName);
         }
     }
 }
