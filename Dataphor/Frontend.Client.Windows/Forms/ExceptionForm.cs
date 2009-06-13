@@ -76,7 +76,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             this.FExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.FExceptionMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.FExceptionMessage.Location = new System.Drawing.Point(50, 8);
             this.FExceptionMessage.MaxLength = 0;
             this.FExceptionMessage.Multiline = true;
