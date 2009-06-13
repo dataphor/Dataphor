@@ -6,7 +6,7 @@ namespace Alphora.Dataphor.Logging
 {
     internal class Logger : ILogger
     {
-        private static TraceSwitch SRFTraceSwitch;
+        private static TraceSwitch SFTraceSwitch;
 
         public Logger(string ADisplayName):this(ADisplayName,"TraceSwitch for "+ADisplayName)
         {
@@ -15,22 +15,22 @@ namespace Alphora.Dataphor.Logging
 
         public Logger(string ADisplayName, string ADescription)
         {
-            SRFTraceSwitch=new TraceSwitch(ADisplayName,ADescription);
+            SFTraceSwitch=new TraceSwitch(ADisplayName,ADescription);
         }
 
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat)
         {
-            bool LWillWriteLine = SRFTraceSwitch.Level >= ATraceLevel;
+            bool LWillWriteLine = SFTraceSwitch.Level >= ATraceLevel;
             if (LWillWriteLine)
-                Debug.WriteLine(AFormat, SRFTraceSwitch.DisplayName);
+                Debug.WriteLine(AFormat, SFTraceSwitch.DisplayName);
         }
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat, params object[] AArgs)
         {
-            bool LWillWriteLine = SRFTraceSwitch.Level >= ATraceLevel;
+            bool LWillWriteLine = SFTraceSwitch.Level >= ATraceLevel;
             if(LWillWriteLine)
-                Debug.WriteLine(string.Format(AFormat, AArgs), SRFTraceSwitch.DisplayName);
+                Debug.WriteLine(string.Format(AFormat, AArgs), SFTraceSwitch.DisplayName);
         }
     }
 }
