@@ -252,6 +252,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FFindToolStripMenuItem,
             this.FReplaceToolStripMenuItem,
             this.FFindNextToolStripMenuItem});
+            this.FEditToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+            this.FEditToolStripMenuItem.MergeIndex = 1;
             this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
             this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.FEditToolStripMenuItem.Text = "Edit";
@@ -356,7 +358,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSplitWindowToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SplitWindow;
             this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
-            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.FSplitWindowToolStripMenuItem.Text = "Split Window";
             this.FSplitWindowToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
