@@ -311,7 +311,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 }
                 else if (ASender == FExecuteMenuItem)
                 {
-                    new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+                    Execute();
                 }
                 else if (ASender == FExecuteLineMenuItem)
                 {
