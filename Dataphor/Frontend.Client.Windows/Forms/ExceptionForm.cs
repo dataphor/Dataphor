@@ -18,9 +18,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	/// <summary> Shows error details. </summary>
 	public class ExceptionForm : System.Windows.Forms.Form
 	{
-		private System.Windows.Forms.TextBox ExceptionMessage;
-		private System.Windows.Forms.Button closeButton;
-		private System.Windows.Forms.Button detailButton;
+		private System.Windows.Forms.TextBox FExceptionMessage;
+		private System.Windows.Forms.Button FCloseButton;
+		private System.Windows.Forms.Button FDetailButton;
 		private System.Windows.Forms.PictureBox FStopImage;
 		private System.ComponentModel.Container components = null;
 
@@ -64,49 +64,49 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InitializeComponent()
 		{
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExceptionForm));
-            this.ExceptionMessage = new System.Windows.Forms.TextBox();
-            this.closeButton = new System.Windows.Forms.Button();
-            this.detailButton = new System.Windows.Forms.Button();
+            this.FExceptionMessage = new System.Windows.Forms.TextBox();
+            this.FCloseButton = new System.Windows.Forms.Button();
+            this.FDetailButton = new System.Windows.Forms.Button();
             this.FStopImage = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.FStopImage)).BeginInit();
             this.SuspendLayout();
             // 
-            // ExceptionMessage
+            // FExceptionMessage
             // 
-            this.ExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.FExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.ExceptionMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ExceptionMessage.Location = new System.Drawing.Point(50, 8);
-            this.ExceptionMessage.MaxLength = 0;
-            this.ExceptionMessage.Multiline = true;
-            this.ExceptionMessage.Name = "ExceptionMessage";
-            this.ExceptionMessage.ReadOnly = true;
-            this.ExceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ExceptionMessage.Size = new System.Drawing.Size(229, 33);
-            this.ExceptionMessage.TabIndex = 2;
-            this.ExceptionMessage.TabStop = false;
+            this.FExceptionMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.FExceptionMessage.Location = new System.Drawing.Point(50, 8);
+            this.FExceptionMessage.MaxLength = 0;
+            this.FExceptionMessage.Multiline = true;
+            this.FExceptionMessage.Name = "FExceptionMessage";
+            this.FExceptionMessage.ReadOnly = true;
+            this.FExceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.FExceptionMessage.Size = new System.Drawing.Size(229, 33);
+            this.FExceptionMessage.TabIndex = 2;
+            this.FExceptionMessage.TabStop = false;
             // 
-            // closeButton
+            // FCloseButton
             // 
-            this.closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.closeButton.Location = new System.Drawing.Point(94, 49);
-            this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(88, 24);
-            this.closeButton.TabIndex = 0;
-            this.closeButton.Text = "&Close";
-            this.closeButton.Click += new System.EventHandler(this.Ok_Click);
+            this.FCloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.FCloseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.FCloseButton.Location = new System.Drawing.Point(94, 49);
+            this.FCloseButton.Name = "FCloseButton";
+            this.FCloseButton.Size = new System.Drawing.Size(88, 24);
+            this.FCloseButton.TabIndex = 0;
+            this.FCloseButton.Text = "&Close";
+            this.FCloseButton.Click += new System.EventHandler(this.Ok_Click);
             // 
-            // detailButton
+            // FDetailButton
             // 
-            this.detailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.detailButton.Location = new System.Drawing.Point(190, 49);
-            this.detailButton.Name = "detailButton";
-            this.detailButton.Size = new System.Drawing.Size(88, 24);
-            this.detailButton.TabIndex = 1;
-            this.detailButton.Text = "&Details >>";
-            this.detailButton.Click += new System.EventHandler(this.detailButton_Click);
+            this.FDetailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.FDetailButton.Location = new System.Drawing.Point(190, 49);
+            this.FDetailButton.Name = "FDetailButton";
+            this.FDetailButton.Size = new System.Drawing.Size(88, 24);
+            this.FDetailButton.TabIndex = 1;
+            this.FDetailButton.Text = "&Details >>";
+            this.FDetailButton.Click += new System.EventHandler(this.detailButton_Click);
             // 
             // FStopImage
             // 
@@ -119,15 +119,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             // 
             // ExceptionForm
             // 
-            this.AcceptButton = this.closeButton;
+            this.AcceptButton = this.FCloseButton;
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-            this.CancelButton = this.closeButton;
+            this.CancelButton = this.FCloseButton;
             this.ClientSize = new System.Drawing.Size(288, 81);
             this.ControlBox = false;
             this.Controls.Add(this.FStopImage);
-            this.Controls.Add(this.detailButton);
-            this.Controls.Add(this.closeButton);
-            this.Controls.Add(this.ExceptionMessage);
+            this.Controls.Add(this.FDetailButton);
+            this.Controls.Add(this.FCloseButton);
+            this.Controls.Add(this.FExceptionMessage);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ExceptionForm";
@@ -160,24 +160,24 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (FExpanded)
 			{
-				detailButton.Text = Strings.CLessDetails;
-				ExceptionMessage.WordWrap = false;
+				FDetailButton.Text = Strings.CLessDetails;
+				FExceptionMessage.WordWrap = false;
 			}
 			else
 			{
-				detailButton.Text = Strings.CMoreDetails;
-				ExceptionMessage.WordWrap = true;
+				FDetailButton.Text = Strings.CMoreDetails;
+				FExceptionMessage.WordWrap = true;
 			}
 			
 			if (FException != null)
 			{
 				if (FExpanded)
-					ExceptionMessage.Text = ExceptionUtility.DetailedDescription(FException);
+					FExceptionMessage.Text = ExceptionUtility.DetailedDescription(FException);
 				else
-					ExceptionMessage.Text = ExceptionUtility.BriefDescription(FException);
+					FExceptionMessage.Text = ExceptionUtility.BriefDescription(FException);
 			}
 			else
-				ExceptionMessage.Text = String.Empty;
+				FExceptionMessage.Text = String.Empty;
 			UpdateSize();
 		}
 
@@ -185,18 +185,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			if (this.IsHandleCreated)
 			{
-				Size LOverhead = Size - ExceptionMessage.DisplayRectangle.Size;
+				Size LOverhead = Size - FExceptionMessage.DisplayRectangle.Size;
 				Rectangle LWorking = FWorking;
 				LWorking.Size = LWorking.Size - LOverhead;	// Convert working to inner size
 				LWorking.Width -= System.Windows.Forms.SystemInformation.VerticalScrollBarWidth;
 				LWorking.Height -= System.Windows.Forms.SystemInformation.HorizontalScrollBarHeight;
 				Size LSize;
-				using (System.Drawing.Graphics LGraphics = ExceptionMessage.CreateGraphics())
+				using (System.Drawing.Graphics LGraphics = FExceptionMessage.CreateGraphics())
 				{
-					if (ExceptionMessage.WordWrap)
-						LSize = Size.Ceiling(LGraphics.MeasureString(ExceptionMessage.Text, ExceptionMessage.Font, LWorking.Width));
+					if (FExceptionMessage.WordWrap)
+						LSize = Size.Ceiling(LGraphics.MeasureString(FExceptionMessage.Text, FExceptionMessage.Font, LWorking.Width));
 					else
-						LSize = Size.Ceiling(LGraphics.MeasureString(ExceptionMessage.Text, ExceptionMessage.Font));
+						LSize = Size.Ceiling(LGraphics.MeasureString(FExceptionMessage.Text, FExceptionMessage.Font));
 				}
 				ScrollBars LScrollBars = ScrollBars.None;
 				if (LSize.Height > LWorking.Height)
@@ -209,7 +209,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					LSize.Width = LWorking.Width;
 					LScrollBars |= ScrollBars.Horizontal;
 				}
-				ExceptionMessage.ScrollBars = LScrollBars;
+				FExceptionMessage.ScrollBars = LScrollBars;
 				Element.ConstrainMin(ref LSize, new Size(220, 26));
 				LSize += LOverhead;
 				this.Bounds = 
