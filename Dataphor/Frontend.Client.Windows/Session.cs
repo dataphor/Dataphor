@@ -697,7 +697,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				if (!(AException is AbortException))
 				{
-					using (ExceptionForm LExceptionForm = new ExceptionForm())
+					using (var LExceptionForm = new ExceptionForm())
 					{
 						LExceptionForm.Exception = AException;
 						LExceptionForm.ShowDialog();
