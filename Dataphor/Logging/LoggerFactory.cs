@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.Logging
 
         public ILogger CreateLogger(Type AType)
         {
-            return new Logger(AType.FullName);
+            return new Logger(AType);
         }
     }
 }
