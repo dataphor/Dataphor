@@ -63,77 +63,79 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ExceptionForm));
-			this.ExceptionMessage = new System.Windows.Forms.TextBox();
-			this.closeButton = new System.Windows.Forms.Button();
-			this.detailButton = new System.Windows.Forms.Button();
-			this.FStopImage = new System.Windows.Forms.PictureBox();
-			this.SuspendLayout();
-			// 
-			// ExceptionMessage
-			// 
-			this.ExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.ExceptionMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.ExceptionMessage.Location = new System.Drawing.Point(60, 9);
-			this.ExceptionMessage.MaxLength = 0;
-			this.ExceptionMessage.Multiline = true;
-			this.ExceptionMessage.Name = "ExceptionMessage";
-			this.ExceptionMessage.ReadOnly = true;
-			this.ExceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.ExceptionMessage.Size = new System.Drawing.Size(217, 26);
-			this.ExceptionMessage.TabIndex = 2;
-			this.ExceptionMessage.TabStop = false;
-			this.ExceptionMessage.Text = "";
-			// 
-			// closeButton
-			// 
-			this.closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.closeButton.Location = new System.Drawing.Point(55, 44);
-			this.closeButton.Name = "closeButton";
-			this.closeButton.Size = new System.Drawing.Size(106, 28);
-			this.closeButton.TabIndex = 0;
-			this.closeButton.Text = "&Close";
-			this.closeButton.Click += new System.EventHandler(this.Ok_Click);
-			// 
-			// detailButton
-			// 
-			this.detailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.detailButton.Location = new System.Drawing.Point(171, 44);
-			this.detailButton.Name = "detailButton";
-			this.detailButton.Size = new System.Drawing.Size(105, 27);
-			this.detailButton.TabIndex = 1;
-			this.detailButton.Text = "&Details >>";
-			this.detailButton.Click += new System.EventHandler(this.detailButton_Click);
-			// 
-			// FStopImage
-			// 
-			this.FStopImage.Image = ((System.Drawing.Image)(resources.GetObject("FStopImage.Image")));
-			this.FStopImage.Location = new System.Drawing.Point(12, 12);
-			this.FStopImage.Name = "FStopImage";
-			this.FStopImage.Size = new System.Drawing.Size(38, 36);
-			this.FStopImage.TabIndex = 3;
-			this.FStopImage.TabStop = false;
-			// 
-			// ExceptionForm
-			// 
-			this.AcceptButton = this.closeButton;
-			this.AutoScaleBaseSize = new System.Drawing.Size(6, 15);
-			this.CancelButton = this.closeButton;
-			this.ClientSize = new System.Drawing.Size(288, 81);
-			this.ControlBox = false;
-			this.Controls.Add(this.FStopImage);
-			this.Controls.Add(this.detailButton);
-			this.Controls.Add(this.closeButton);
-			this.Controls.Add(this.ExceptionMessage);
-			this.MaximizeBox = false;
-			this.MinimizeBox = false;
-			this.Name = "ExceptionForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Exception";
-			this.ResumeLayout(false);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExceptionForm));
+            this.ExceptionMessage = new System.Windows.Forms.TextBox();
+            this.closeButton = new System.Windows.Forms.Button();
+            this.detailButton = new System.Windows.Forms.Button();
+            this.FStopImage = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.FStopImage)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // ExceptionMessage
+            // 
+            this.ExceptionMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.ExceptionMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ExceptionMessage.Location = new System.Drawing.Point(50, 8);
+            this.ExceptionMessage.MaxLength = 0;
+            this.ExceptionMessage.Multiline = true;
+            this.ExceptionMessage.Name = "ExceptionMessage";
+            this.ExceptionMessage.ReadOnly = true;
+            this.ExceptionMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.ExceptionMessage.Size = new System.Drawing.Size(229, 33);
+            this.ExceptionMessage.TabIndex = 2;
+            this.ExceptionMessage.TabStop = false;
+            // 
+            // closeButton
+            // 
+            this.closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.closeButton.Location = new System.Drawing.Point(94, 49);
+            this.closeButton.Name = "closeButton";
+            this.closeButton.Size = new System.Drawing.Size(88, 24);
+            this.closeButton.TabIndex = 0;
+            this.closeButton.Text = "&Close";
+            this.closeButton.Click += new System.EventHandler(this.Ok_Click);
+            // 
+            // detailButton
+            // 
+            this.detailButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.detailButton.Location = new System.Drawing.Point(190, 49);
+            this.detailButton.Name = "detailButton";
+            this.detailButton.Size = new System.Drawing.Size(88, 24);
+            this.detailButton.TabIndex = 1;
+            this.detailButton.Text = "&Details >>";
+            this.detailButton.Click += new System.EventHandler(this.detailButton_Click);
+            // 
+            // FStopImage
+            // 
+            this.FStopImage.Image = ((System.Drawing.Image)(resources.GetObject("FStopImage.Image")));
+            this.FStopImage.Location = new System.Drawing.Point(10, 10);
+            this.FStopImage.Name = "FStopImage";
+            this.FStopImage.Size = new System.Drawing.Size(32, 32);
+            this.FStopImage.TabIndex = 3;
+            this.FStopImage.TabStop = false;
+            // 
+            // ExceptionForm
+            // 
+            this.AcceptButton = this.closeButton;
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.CancelButton = this.closeButton;
+            this.ClientSize = new System.Drawing.Size(288, 81);
+            this.ControlBox = false;
+            this.Controls.Add(this.FStopImage);
+            this.Controls.Add(this.detailButton);
+            this.Controls.Add(this.closeButton);
+            this.Controls.Add(this.ExceptionMessage);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "ExceptionForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Exception";
+            ((System.ComponentModel.ISupportInitialize)(this.FStopImage)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion
