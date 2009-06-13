@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Alphora.Dataphor.Logging;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -12,7 +13,7 @@ namespace Alphora.Dataphor.Dataphoria
         private static IDataphoria SDataphoriaInstance;
 
 
-        static TraceSwitch STraceSwitch = new TraceSwitch(typeof(Program).FullName, "TraceSwitch for " + typeof(Program).FullName);
+        static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Program));
 
 
         public static IDataphoria DataphoriaInstance
@@ -45,7 +46,7 @@ namespace Alphora.Dataphor.Dataphoria
         [STAThread]
         private static void Main(string[] AArgs)
         {
-            Debug.WriteLineIf(STraceSwitch.T, "Starting program...");            
+            SRFLogger.WriteLine(TraceLevel.Info,"Starting program...");            
             AppDomain.CurrentDomain.UnhandledException += AppDomainException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException, true);
             Application.EnableVisualStyles();
