@@ -10,7 +10,7 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.Dataphoria;
 using Alphora.Dataphor.DAE;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ServerNode : DataNode
 	{

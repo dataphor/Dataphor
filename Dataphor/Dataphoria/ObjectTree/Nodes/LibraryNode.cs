@@ -14,7 +14,7 @@ using Alphora.Dataphor.Dataphoria;
 using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client.Windows;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class LibraryListNode : BrowseNode
 	{

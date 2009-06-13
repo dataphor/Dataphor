@@ -9,7 +9,7 @@ using System.Collections;
 
 using Alphora.Dataphor.Dataphoria;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public abstract class ListNode : DataNode
 	{

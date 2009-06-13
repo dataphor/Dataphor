@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 using Alphora.Dataphor.Dataphoria;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class ReferenceListNode : SchemaListNode
 	{

@@ -26,6 +26,7 @@ using Alphora.Dataphor.Dataphoria.Services;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using WeifenLuo.WinFormsUI.Docking;
+using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 
 namespace Alphora.Dataphor.Dataphoria
 {
