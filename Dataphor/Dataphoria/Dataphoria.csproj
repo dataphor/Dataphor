@@ -329,6 +329,16 @@
     <Compile Include="ObjectTree\Nodes\ConstraintNode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ObjectTree\Nodes\D4DocumentNode.cs" />
+    <Compile Include="ObjectTree\Nodes\DocumentData.cs" />
+    <Compile Include="ObjectTree\Nodes\DocumentListDropMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\Nodes\DocumentListFileDropMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ObjectTree\Nodes\DocumentListNode.cs" />
+    <Compile Include="ObjectTree\Nodes\FormDocumentNode.cs" />
     <Compile Include="ObjectTree\Nodes\ViewNode.cs" />
     <Compile Include="ObjectTree\DataTree.cs">
       <SubType>Component</SubType>
@@ -337,7 +347,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ObjectTree\Nodes\DocumentNode.cs">
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="ObjectTree\Nodes\LibraryNode.cs">
       <SubType>Code</SubType>
