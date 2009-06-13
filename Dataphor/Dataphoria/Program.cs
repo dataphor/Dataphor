@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Dataphoria
         private static IDataphoria SDataphoriaInstance;
 
 
-        static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Program));
+        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Program));
 
 
         public static IDataphoria DataphoriaInstance
