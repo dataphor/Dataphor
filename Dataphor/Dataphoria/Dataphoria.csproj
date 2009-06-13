@@ -336,7 +336,7 @@
     <Compile Include="ObjectTree\Nodes\DeviceNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ObjectTree\DocumentNode.cs">
+    <Compile Include="ObjectTree\Nodes\DocumentNode.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ObjectTree\Nodes\LibraryNode.cs">

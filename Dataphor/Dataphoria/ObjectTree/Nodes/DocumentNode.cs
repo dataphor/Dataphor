@@ -10,8 +10,9 @@ using System.IO;
 
 using Alphora.Dataphor.Dataphoria;
 using Alphora.Dataphor.Dataphoria.Designers;
+using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
 	public class DocumentListNode : BrowseNode
 	{
