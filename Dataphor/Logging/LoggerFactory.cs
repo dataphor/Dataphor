@@ -7,7 +7,7 @@ namespace Alphora.Dataphor.Logging
     public class LoggerFactory : ILoggerFactory
     {
 
-        private static readonly ILoggerFactory SRFInstance = new LoggerFactory();
+       private static readonly ILoggerFactory SRFInstance = new LoggerFactory();
 
        private LoggerFactory() { }
 
