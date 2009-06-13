@@ -187,6 +187,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FCloseToolStripMenuItem,
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
+            this.FFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
             this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.FFileToolStripMenuItem.Text = "File";
@@ -259,7 +260,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FUndoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Undo;
             this.FUndoToolStripMenuItem.Name = "FUndoToolStripMenuItem";
-            this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FUndoToolStripMenuItem.Text = "Undo";
             this.FUndoToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -267,20 +268,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FRedoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Redo;
             this.FRedoToolStripMenuItem.Name = "FRedoToolStripMenuItem";
-            this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRedoToolStripMenuItem.Text = "Redo";
             this.FRedoToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // FCutToolStripMenuItem
             // 
             this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
             this.FCutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -288,7 +289,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
             this.FCopyToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -296,33 +297,33 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
             this.FPasteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
             // 
             // FSelectAllToolStripMenuItem
             // 
             this.FSelectAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SelectAll;
             this.FSelectAllToolStripMenuItem.Name = "FSelectAllToolStripMenuItem";
-            this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSelectAllToolStripMenuItem.Text = "Select All";
             this.FSelectAllToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(121, 6);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(149, 6);
             // 
             // FFindToolStripMenuItem
             // 
             this.FFindToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Find;
             this.FFindToolStripMenuItem.Name = "FFindToolStripMenuItem";
-            this.FFindToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FFindToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFindToolStripMenuItem.Text = "Find";
             this.FFindToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -330,7 +331,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FReplaceToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Replace;
             this.FReplaceToolStripMenuItem.Name = "FReplaceToolStripMenuItem";
-            this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FReplaceToolStripMenuItem.Text = "Replace";
             this.FReplaceToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -338,7 +339,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FFindNextToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.FindNext;
             this.FFindNextToolStripMenuItem.Name = "FFindNextToolStripMenuItem";
-            this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FFindNextToolStripMenuItem.Text = "Find Next";
             this.FFindNextToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -346,6 +347,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FSplitWindowToolStripMenuItem});
+            this.FViewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
             this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.FViewToolStripMenuItem.Text = "View";
@@ -354,7 +356,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSplitWindowToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SplitWindow;
             this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
-            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSplitWindowToolStripMenuItem.Text = "Split Window";
             this.FSplitWindowToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -526,6 +528,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // TextEditor
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.CausesValidation = false;
             this.ClientSize = new System.Drawing.Size(455, 376);
             this.Controls.Add(this.FMenuStrip);
