@@ -93,6 +93,42 @@ namespace Alphora.Dataphor.Dataphoria
             this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
+            // FTreeImageList
+            // 
+            this.FTreeImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FTreeImageList.ImageStream")));
+            this.FTreeImageList.TransparentColor = System.Drawing.Color.Lime;
+            this.FTreeImageList.Images.SetKeyName(0, "");
+            this.FTreeImageList.Images.SetKeyName(1, "");
+            this.FTreeImageList.Images.SetKeyName(2, "");
+            this.FTreeImageList.Images.SetKeyName(3, "");
+            this.FTreeImageList.Images.SetKeyName(4, "");
+            this.FTreeImageList.Images.SetKeyName(5, "");
+            this.FTreeImageList.Images.SetKeyName(6, "");
+            this.FTreeImageList.Images.SetKeyName(7, "");
+            this.FTreeImageList.Images.SetKeyName(8, "");
+            this.FTreeImageList.Images.SetKeyName(9, "");
+            this.FTreeImageList.Images.SetKeyName(10, "");
+            this.FTreeImageList.Images.SetKeyName(11, "");
+            this.FTreeImageList.Images.SetKeyName(12, "");
+            this.FTreeImageList.Images.SetKeyName(13, "Tables2.png");
+            this.FTreeImageList.Images.SetKeyName(14, "Table2.png");
+            this.FTreeImageList.Images.SetKeyName(15, "");
+            this.FTreeImageList.Images.SetKeyName(16, "");
+            this.FTreeImageList.Images.SetKeyName(17, "");
+            this.FTreeImageList.Images.SetKeyName(18, "");
+            this.FTreeImageList.Images.SetKeyName(19, "");
+            this.FTreeImageList.Images.SetKeyName(20, "");
+            this.FTreeImageList.Images.SetKeyName(21, "");
+            this.FTreeImageList.Images.SetKeyName(22, "");
+            this.FTreeImageList.Images.SetKeyName(23, "");
+            this.FTreeImageList.Images.SetKeyName(24, "");
+            this.FTreeImageList.Images.SetKeyName(25, "");
+            this.FTreeImageList.Images.SetKeyName(26, "");
+            this.FTreeImageList.Images.SetKeyName(27, "");
+            this.FTreeImageList.Images.SetKeyName(28, "");
+            this.FTreeImageList.Images.SetKeyName(29, "Views.png");
+            this.FTreeImageList.Images.SetKeyName(30, "View.png");
+            // 
             // FStatusStrip
             // 
             this.FStatusStrip.Location = new System.Drawing.Point(0, 485);
@@ -375,45 +411,6 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDockPanel.Name = "FDockPanel";
             this.FDockPanel.Size = new System.Drawing.Size(664, 436);
             this.FDockPanel.TabIndex = 8;
-
-
-            // 
-            // FTreeImageList
-            // 
-            this.FTreeImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("FTreeImageList.ImageStream")));
-            this.FTreeImageList.TransparentColor = System.Drawing.Color.Lime;
-            this.FTreeImageList.Images.SetKeyName(0, "");
-            this.FTreeImageList.Images.SetKeyName(1, "");
-            this.FTreeImageList.Images.SetKeyName(2, "");
-            this.FTreeImageList.Images.SetKeyName(3, "");
-            this.FTreeImageList.Images.SetKeyName(4, "");
-            this.FTreeImageList.Images.SetKeyName(5, "");
-            this.FTreeImageList.Images.SetKeyName(6, "");
-            this.FTreeImageList.Images.SetKeyName(7, "");
-            this.FTreeImageList.Images.SetKeyName(8, "");
-            this.FTreeImageList.Images.SetKeyName(9, "");
-            this.FTreeImageList.Images.SetKeyName(10, "");
-            this.FTreeImageList.Images.SetKeyName(11, "");
-            this.FTreeImageList.Images.SetKeyName(12, "");
-            this.FTreeImageList.Images.SetKeyName(13, "Tables2.png");
-            this.FTreeImageList.Images.SetKeyName(14, "Table2.png");
-            this.FTreeImageList.Images.SetKeyName(15, "");
-            this.FTreeImageList.Images.SetKeyName(16, "");
-            this.FTreeImageList.Images.SetKeyName(17, "");
-            this.FTreeImageList.Images.SetKeyName(18, "");
-            this.FTreeImageList.Images.SetKeyName(19, "");
-            this.FTreeImageList.Images.SetKeyName(20, "");
-            this.FTreeImageList.Images.SetKeyName(21, "");
-            this.FTreeImageList.Images.SetKeyName(22, "");
-            this.FTreeImageList.Images.SetKeyName(23, "");
-            this.FTreeImageList.Images.SetKeyName(24, "");
-            this.FTreeImageList.Images.SetKeyName(25, "");
-            this.FTreeImageList.Images.SetKeyName(26, "");
-            this.FTreeImageList.Images.SetKeyName(27, "");
-            this.FTreeImageList.Images.SetKeyName(28, "");
-            this.FTreeImageList.Images.SetKeyName(29, "Views.png");
-            this.FTreeImageList.Images.SetKeyName(30, "View.png");
-
             // 
             // Dataphoria
             // 
@@ -428,7 +425,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.MainMenuStrip = this.FMainMenuStrip;
             this.Name = "Dataphoria";
             this.Text = "Dataphoria";
-            this.Shown += new System.EventHandler(this.Dataphoria_Shown);            
+            this.Shown += new System.EventHandler(this.Dataphoria_Shown);
             this.FMainMenuStrip.ResumeLayout(false);
             this.FMainMenuStrip.PerformLayout();
             this.FToolStrip.ResumeLayout(false);
