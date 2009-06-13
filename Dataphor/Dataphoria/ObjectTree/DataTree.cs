@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Drawing;
 
 using Alphora.Dataphor.Dataphoria;
+using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 
 namespace Alphora.Dataphor.Dataphoria.ObjectTree
 {
@@ -95,37 +96,6 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree
 				FDragTarget.DragLeave();
 				FDragTarget = null;
 			}
-		}
-	}
-
-	public class DataNode : BaseNode
-	{
-		public IDataphoria Dataphoria
-		{
-			get
-			{
-				if (TreeView == null)
-					return null;
-				else
-					return ((DataTree)TreeView).Dataphoria; 
-			}
-		}
-
-		public virtual void ItemDrag()
-		{
-		}
-
-		public virtual void DragDrop(DragEventArgs AArgs)
-		{
-		}
-
-		public virtual void DragOver(DragEventArgs AArgs)
-		{
-			AArgs.Effect = DragDropEffects.None;
-		}
-
-		public virtual void DragLeave()
-		{
 		}
 	}
 }

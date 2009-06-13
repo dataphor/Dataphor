@@ -323,6 +323,7 @@
     <Compile Include="NativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ObjectTree\Nodes\DataNode.cs" />
     <Compile Include="ObjectTree\Nodes\ApplicationNode.cs">
       <SubType>Code</SubType>
     </Compile>
