@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 using Alphora.Dataphor.Dataphoria.Designers;
+using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus;
 
 namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {

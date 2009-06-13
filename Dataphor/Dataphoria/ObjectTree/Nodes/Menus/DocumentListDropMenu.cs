@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
+namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes.Menus
 {
     public class DocumentListDropMenu : ContextMenu
     {

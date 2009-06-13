@@ -331,10 +331,10 @@
     </Compile>
     <Compile Include="ObjectTree\Nodes\D4DocumentNode.cs" />
     <Compile Include="ObjectTree\Nodes\DocumentData.cs" />
-    <Compile Include="ObjectTree\Nodes\DocumentListDropMenu.cs">
+    <Compile Include="ObjectTree\Nodes\Menus\DocumentListDropMenu.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ObjectTree\Nodes\DocumentListFileDropMenu.cs">
+    <Compile Include="ObjectTree\Nodes\Menus\DocumentListFileDropMenu.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ObjectTree\Nodes\DocumentListNode.cs" />
