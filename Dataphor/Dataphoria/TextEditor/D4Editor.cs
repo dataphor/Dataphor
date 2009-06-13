@@ -19,6 +19,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.Dataphoria.TextEditor.BlockActions;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Alphora.Dataphor.Logging;
 using ICSharpCode.TextEditor.Document;
 using WeifenLuo.WinFormsUI.Docking;
 using DataSet=System.Data.DataSet;
@@ -51,6 +52,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         private ToolStripMenuItem FScriptMenu;
         private ToolStripMenuItem FSelectBlockMenuItem;
         private ToolStripMenuItem FShowResultsMenuItem;
+
+        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (D4Editor));
 
 
         public D4Editor() // dummy constructor for MDI menu merging
@@ -158,6 +161,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                        FExportMenu
                                                    });
             FScriptMenu.Text = "&Script";
+            FScriptMenu.MergeAction = MergeAction.Insert;
+            FScriptMenu.MergeIndex = 2;
             // 
             // FExecuteMenuItem
             // 
@@ -289,6 +294,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             try
             {
+                                
+                SRFLogger.WriteLine(TraceLevel.Verbose, "Sender {0}", ASender);
+    
                 if (ASender == FSelectBlockMenuItem)
                 {
                     new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
