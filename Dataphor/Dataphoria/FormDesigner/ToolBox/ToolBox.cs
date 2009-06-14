@@ -8,7 +8,6 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Ascend.Windows.Forms;
-using Syncfusion.Windows.Forms.Tools;
 using Image=System.Drawing.Image;
 using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
 

@@ -122,34 +122,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Frontend.Client.Windows\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
-    <Reference Include="syncfusion.core, Version=4.102.0.62, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.core.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.grid.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.grid.base.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.grid.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.grid.windows.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.shared.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.shared.base.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.shared.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.shared.windows.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.tools.base, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.tools.base.dll</HintPath>
-    </Reference>
-    <Reference Include="syncfusion.tools.windows, Version=4.102.0.62, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\syncfusion.tools.windows.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
       <Private>False</Private>
