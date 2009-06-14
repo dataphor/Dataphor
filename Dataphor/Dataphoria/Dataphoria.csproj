@@ -476,7 +476,6 @@
     <EmbeddedResource Include="Images\Edit.bmp" />
     <EmbeddedResource Include="Images\EditCopy.bmp" />
     <EmbeddedResource Include="Images\Rider.gif" />
-    <EmbeddedResource Include="licenses.licx" />
     <EmbeddedResource Include="MenuImages.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
