@@ -15,9 +15,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 {
     public partial class ToolBox : UserControl, IErrorSource
     {
+        //GroupBar.GroupBarItems->GroupBarItem
         private GroupBar FPaletteGroupBar;
+        //GroupView.GroupViewItem->GroupViewItem
         private GroupView FPointerGroupView;
-        //private System.Windows.Forms.ImageList FNodesImageList;
+        
 
 
         public ToolBox()
