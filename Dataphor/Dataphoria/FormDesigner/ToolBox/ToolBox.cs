@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                     {
                                         BorderStyle = BorderStyle.None,
                                         //ButtonView = true,
-                                        View=View.SmallIcon,                                        
+                                        View=View.List,                                        
                                         Dock = DockStyle.Top
                                     };
             
@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 var LView = new ListView
                                 {
                                     BorderStyle = BorderStyle.None,
-                                    View = View.SmallIcon,
+                                    View = View.List,                                    
                                    // IntegratedScrolling = false,
                                     //ItemYSpacing = 2,
                                     SmallImageList = FNodesImageList,
@@ -131,6 +131,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                   //  SelectedTextColor = Color.Navy
                                 };
                 //LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
+                //LView.Columns.Add(new ColumnHeader());
                 LView.ItemSelectionChanged += LView_ItemSelectionChanged;
 
                 LItem = new GroupBarItem();
