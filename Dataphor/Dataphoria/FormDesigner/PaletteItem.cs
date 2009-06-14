@@ -1,9 +1,10 @@
 using System;
+using System.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
-    public class PaletteItem : GroupViewItem
+    public class PaletteItem : ListViewItem
     {
         private string FClassName;
         private string FDescription = String.Empty;

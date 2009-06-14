@@ -115,29 +115,32 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             FPaletteGroupBar.GroupBarItems.Clear();
         }
 
-        private GroupView EnsureCategory(string ACategoryName)
+        private ListView EnsureCategory(string ACategoryName)
         {
             GroupBarItem LItem = FindPaletteBarItem(ACategoryName);
             if (LItem == null)
             {
-                var LView = new GroupView
+                var LView = new ListView
                                 {
                                     BorderStyle = BorderStyle.None,
-                                    IntegratedScrolling = false,
-                                    ItemYSpacing = 2,
+                                   // IntegratedScrolling = false,
+                                    //ItemYSpacing = 2,
                                     SmallImageList = FNodesImageList,
-                                    SmallImageView = true,
-                                    SelectedTextColor = Color.Navy
+                                  //  SmallImageView = true,
+                                  //  SelectedTextColor = Color.Navy
                                 };
-                LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
+                //LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
+                LView.ItemSelectionChanged += LView_ItemSelectionChanged;
 
                 LItem = new GroupBarItem();
                 LItem.Client = LView;
                 LItem.Text = ACategoryName;
                 FPaletteGroupBar.GroupBarItems.Add(LItem);
             }
-            return (GroupView) LItem.Client;
+            return (ListView)LItem.Client;
         }
+
+       
 
         internal void LoadPalette()
         {
@@ -157,8 +160,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                     Description = GetDescription(LType),
                                     ImageIndex = GetDesignerImage(LType)
                                 };
-                    GroupView LCategory = EnsureCategory(GetDesignerCategory(LType));
-                    LCategory.GroupViewItems.Add(LItem);
+                    ListView LCategory = EnsureCategory(GetDesignerCategory(LType));
+                    LCategory.Items.Add(LItem);
                 }
             }
         }
@@ -171,20 +174,22 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
                 if (FSelectedPaletteItem != null)
                 {
-                    FSelectedPaletteItem.GroupView.ButtonView = false;
-                    FSelectedPaletteItem.GroupView.SelectedTextColor = Color.Navy;
+                    //FSelectedPaletteItem.ListView.ButtonView = false;
+                   // FSelectedPaletteItem.ListView.SelectedTextColor = Color.Navy;                    
                 }
 
                 FSelectedPaletteItem = AItem;
 
                 if (FSelectedPaletteItem != null)
                 {
-                    FSelectedPaletteItem.GroupView.ButtonView = true;
-                    FSelectedPaletteItem.GroupView.SelectedItem =
-                        FSelectedPaletteItem.GroupView.GroupViewItems.IndexOf(FSelectedPaletteItem);
+                    //FSelectedPaletteItem.ListView.ButtonView = true;
+                    //FSelectedPaletteItem.ListView.SelectedItem =
+                    //    FSelectedPaletteItem.ListView.GroupViewItems.IndexOf(FSelectedPaletteItem);
 
-                    if (FIsMultiDrop)
-                        FSelectedPaletteItem.GroupView.SelectedTextColor = Color.Blue;
+                    FSelectedPaletteItem.Selected = true;
+
+                   // if (FIsMultiDrop)
+                   //     FSelectedPaletteItem.ListView.SelectedTextColor = Color.Blue;*/
 
                     NodesTree.PaletteItem = FSelectedPaletteItem;
                     SetStatus(FSelectedPaletteItem.Description);
@@ -244,7 +249,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             SelectPaletteItem(null, false);
         }
 
-        private void CategoryGroupViewItemSelected(object ASender, EventArgs AArgs)
+        /*private void CategoryGroupViewItemSelected(object ASender, EventArgs AArgs)
         {
             var LView = (GroupView) ASender;
             SelectPaletteItem
@@ -252,6 +257,16 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 (PaletteItem) LView.GroupViewItems[LView.SelectedItem],
                 ModifierKeys == Keys.Shift
                 );
+        }*/
+
+        void LView_ItemSelectionChanged(object ASender, ListViewItemSelectionChangedEventArgs AArgs)
+        {
+            var LView = (ListView)ASender;
+            /*SelectPaletteItem((PaletteItem)LView.GroupViewItems[LView.SelectedItem],
+                ModifierKeys == Keys.Shift);*/
+
+            var LSelectedItem = (PaletteItem) AArgs.Item;
+            SelectPaletteItem(LSelectedItem,ModifierKeys == Keys.Shift);
         }
 
         #region Palette
