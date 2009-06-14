@@ -123,6 +123,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 var LView = new ListView
                                 {
                                     BorderStyle = BorderStyle.None,
+                                    View = View.SmallIcon,
                                    // IntegratedScrolling = false,
                                     //ItemYSpacing = 2,
                                     SmallImageList = FNodesImageList,
