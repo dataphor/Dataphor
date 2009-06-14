@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Ascend.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Image=System.Drawing.Image;
 using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
@@ -16,7 +17,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
     public partial class ToolBox : UserControl, IErrorSource
     {
         //GroupBar.GroupBarItems->GroupBarItem
-        private GroupBar FPaletteGroupBar;
+        private NavigationPane FPaletteGroupBar;
         //GroupView.GroupViewItem->GroupViewItem
         private ListView FPointerGroupView;
         
@@ -61,14 +62,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             // 
             // FPaletteGroupBar
             // 
-            FPaletteGroupBar = new GroupBar();
+            FPaletteGroupBar = new NavigationPane();
             FPaletteGroupBar.AllowDrop = true;
             FPaletteGroupBar.BackColor = SystemColors.Control;
-            FPaletteGroupBar.BorderStyle = BorderStyle.FixedSingle;
+            //FPaletteGroupBar.BorderStyle = BorderStyle.FixedSingle;
             FPaletteGroupBar.Dock = DockStyle.Fill;
             FPaletteGroupBar.Location = new Point(0, 24);
             FPaletteGroupBar.Name = "FPaletteGroupBar";
-            FPaletteGroupBar.SelectedItem = 0;
+            //FPaletteGroupBar.SelectedItem = 0;
             FPaletteGroupBar.Size = new Size(163, 163);
             FPaletteGroupBar.TabIndex = 1;
             // 
@@ -112,12 +113,12 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
         internal void ClearPalette()
         {
-            FPaletteGroupBar.GroupBarItems.Clear();
+            FPaletteGroupBar.NavigationPages.Clear();
         }
 
         private ListView EnsureCategory(string ACategoryName)
         {
-            GroupBarItem LItem = FindPaletteBarItem(ACategoryName);
+            NavigationPanePage LItem = FindPaletteBarItem(ACategoryName);
             if (LItem == null)
             {
                 var LView = new ListView
@@ -127,6 +128,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                                    // IntegratedScrolling = false,
                                     //ItemYSpacing = 2,
                                     SmallImageList = FNodesImageList,
+                                    Dock = DockStyle.Fill,
                                   //  SmallImageView = true,
                                   //  SelectedTextColor = Color.Navy
                                 };
@@ -134,12 +136,15 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 //LView.Columns.Add(new ColumnHeader());
                 LView.ItemSelectionChanged += LView_ItemSelectionChanged;
 
-                LItem = new GroupBarItem();
-                LItem.Client = LView;
+                LItem = new NavigationPanePage();
+                //LItem.Client = LView;
+                LItem.Controls.Add(LView);
                 LItem.Text = ACategoryName;
-                FPaletteGroupBar.GroupBarItems.Add(LItem);
+                //HACK: It is very important to set the Name of the NavigationPanePage or the NavigationPane will get confused
+                LItem.Name = "NavigationPanePage" + FPaletteGroupBar.NavigationPages.Count;
+                FPaletteGroupBar.NavigationPages.Add(LItem);
             }
-            return (ListView)LItem.Client;
+            return (ListView)LItem.Controls[0];
         }
 
        
@@ -215,9 +220,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
                 SelectPaletteItem(null, false);
         }
 
-        private GroupBarItem FindPaletteBarItem(string AText)
+        private NavigationPanePage FindPaletteBarItem(string AText)
         {
-            foreach (GroupBarItem LItem in FPaletteGroupBar.GroupBarItems)
+            foreach (NavigationPanePage LItem in FPaletteGroupBar.NavigationPages)
             {
                 if (String.Compare(LItem.Text, AText, true) == 0)
                     return LItem;
