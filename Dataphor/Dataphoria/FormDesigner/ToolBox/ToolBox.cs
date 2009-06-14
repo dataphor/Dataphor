@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
         //GroupBar.GroupBarItems->GroupBarItem
         private GroupBar FPaletteGroupBar;
         //GroupView.GroupViewItem->GroupViewItem
-        private GroupView FPointerGroupView;
+        private ListView FPointerGroupView;
         
 
 
@@ -74,32 +74,41 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             // 
             // FPointerGroupView
             // 
-            FPointerGroupView = new GroupView
+            FPointerGroupView = new ListView
                                     {
                                         BorderStyle = BorderStyle.None,
-                                        ButtonView = true,
+                                        //ButtonView = true,
+                                        View=View.SmallIcon,                                        
                                         Dock = DockStyle.Top
                                     };
-            FPointerGroupView.GroupViewItems.AddRange(new[]
+            
+            FPointerGroupView.Items.AddRange(new[]
                                                           {
-                                                              new GroupViewItem("Pointer", 0)
+                                                              new ListViewItem("Pointer", 0)
                                                           });
-            FPointerGroupView.IntegratedScrolling = true;
-            FPointerGroupView.ItemYSpacing = 2;
+            
+            //FPointerGroupView.IntegratedScrolling = true;
+            //FPointerGroupView.ItemYSpacing = 2;
             FPointerGroupView.LargeImageList = null;
             FPointerGroupView.Location = new Point(0, 0);
             FPointerGroupView.Name = "FPointerGroupView";
-            FPointerGroupView.SelectedItem = 0;
+            //FPointerGroupView.SelectedItem = 0;
+            FPointerGroupView.Items[0].Selected = true;
+            FPointerGroupView.MultiSelect = false;
+            
             FPointerGroupView.Size = new Size(163, 24);
             FPointerGroupView.SmallImageList = FPointerImageList;
-            FPointerGroupView.SmallImageView = true;
+            //FPointerGroupView.SmallImageView = true;
             FPointerGroupView.TabIndex = 0;
             FPointerGroupView.Text = "groupView2";
-            FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
+            //FPointerGroupView.GroupViewItemSelected += FPointerGroupView_GroupViewItemSelected;
+            FPointerGroupView.ItemSelectionChanged+=FPointerGroupView_ItemSelectionChanged;
 
             Controls.Add(FPaletteGroupBar);
             Controls.Add(FPointerGroupView);
         }
+
+        
 
         internal void ClearPalette()
         {
@@ -111,13 +120,15 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             GroupBarItem LItem = FindPaletteBarItem(ACategoryName);
             if (LItem == null)
             {
-                var LView = new GroupView();
-                LView.BorderStyle = BorderStyle.None;
-                LView.IntegratedScrolling = false;
-                LView.ItemYSpacing = 2;
-                LView.SmallImageList = FNodesImageList;
-                LView.SmallImageView = true;
-                LView.SelectedTextColor = Color.Navy;
+                var LView = new GroupView
+                                {
+                                    BorderStyle = BorderStyle.None,
+                                    IntegratedScrolling = false,
+                                    ItemYSpacing = 2,
+                                    SmallImageList = FNodesImageList,
+                                    SmallImageView = true,
+                                    SelectedTextColor = Color.Navy
+                                };
                 LView.GroupViewItemSelected += new EventHandler(CategoryGroupViewItemSelected);
 
                 LItem = new GroupBarItem();
@@ -177,13 +188,13 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
 
                     NodesTree.PaletteItem = FSelectedPaletteItem;
                     SetStatus(FSelectedPaletteItem.Description);
-                    FPointerGroupView.ButtonView = false;
+                    //FPointerGroupView.ButtonView = false;
                 }
                 else
                 {
                     NodesTree.PaletteItem = null;
                     SetStatus(String.Empty);
-                    FPointerGroupView.ButtonView = true;
+                    //FPointerGroupView.ButtonView = true;
                 }
 
                 NodesTree.Select();
@@ -222,8 +233,14 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox
             return base.ProcessDialogKey(AKey);
         }
 
-        private void FPointerGroupView_GroupViewItemSelected(object ASender, EventArgs AArgs)
+        /*private void FPointerGroupView_GroupViewItemSelected(object ASender, EventArgs AArgs)
         {
+            SelectPaletteItem(null, false);
+        }*/
+
+        private void FPointerGroupView_ItemSelectionChanged(object ASender, ListViewItemSelectionChangedEventArgs AE)
+        {
+            
             SelectPaletteItem(null, false);
         }
 
