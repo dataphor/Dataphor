@@ -30,65 +30,64 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private void InitializeComponent()
 		{
-			this.tbValue = new System.Windows.Forms.TextBox();
-			this.btnOK = new System.Windows.Forms.Button();
-			this.btnCancel = new System.Windows.Forms.Button();
-			this.SuspendLayout();
-			// 
-			// tbValue
-			// 
-			this.tbValue.AcceptsReturn = true;
-			this.tbValue.AcceptsTab = true;
-			this.tbValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.tbValue.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.tbValue.Location = new System.Drawing.Point(5, 9);
-			this.tbValue.Multiline = true;
-			this.tbValue.Name = "tbValue";
-			this.tbValue.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.tbValue.Size = new System.Drawing.Size(495, 272);
-			this.tbValue.TabIndex = 0;
-			this.tbValue.Text = "";
-			this.tbValue.WordWrap = false;
-			this.tbValue.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TextKeyDown);
-			// 
-			// btnOK
-			// 
-			this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.btnOK.Location = new System.Drawing.Point(310, 288);
-			this.btnOK.Name = "btnOK";
-			this.btnOK.Size = new System.Drawing.Size(90, 26);
-			this.btnOK.TabIndex = 2;
-			this.btnOK.Text = "&OK";
-			this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-			// 
-			// btnCancel
-			// 
-			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(406, 288);
-			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(90, 26);
-			this.btnCancel.TabIndex = 3;
-			this.btnCancel.Text = "&Cancel";
-			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-			// 
-			// MultiLineEditForm
-			// 
-			this.AcceptButton = this.btnOK;
-			this.AutoScaleBaseSize = new System.Drawing.Size(6, 15);
-			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(504, 324);
-			this.Controls.Add(this.btnCancel);
-			this.Controls.Add(this.btnOK);
-			this.Controls.Add(this.tbValue);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-			this.Name = "MultiLineEditForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Edit";
-			this.ResumeLayout(false);
+            this.tbValue = new System.Windows.Forms.TextBox();
+            this.btnOK = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // tbValue
+            // 
+            this.tbValue.AcceptsReturn = true;
+            this.tbValue.AcceptsTab = true;
+            this.tbValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbValue.Font = new System.Drawing.Font("Courier New", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbValue.Location = new System.Drawing.Point(5, 9);
+            this.tbValue.Multiline = true;
+            this.tbValue.Name = "tbValue";
+            this.tbValue.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.tbValue.Size = new System.Drawing.Size(495, 272);
+            this.tbValue.TabIndex = 0;
+            this.tbValue.WordWrap = false;
+            this.tbValue.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TextKeyDown);
+            // 
+            // btnOK
+            // 
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.btnOK.Location = new System.Drawing.Point(310, 288);
+            this.btnOK.Name = "btnOK";
+            this.btnOK.Size = new System.Drawing.Size(90, 26);
+            this.btnOK.TabIndex = 2;
+            this.btnOK.Text = "&OK";
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.Location = new System.Drawing.Point(406, 288);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(90, 26);
+            this.btnCancel.TabIndex = 3;
+            this.btnCancel.Text = "&Cancel";
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
+            // MultiLineEditForm
+            // 
+            this.AcceptButton = this.btnOK;
+            this.CancelButton = this.btnCancel;
+            this.ClientSize = new System.Drawing.Size(504, 324);
+            this.Controls.Add(this.btnCancel);
+            this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.tbValue);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.Name = "MultiLineEditForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Edit";
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion

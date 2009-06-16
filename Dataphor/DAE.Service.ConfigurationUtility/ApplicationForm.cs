@@ -288,7 +288,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// 
 			// ApplicationForm
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(292, 273);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "ApplicationForm";

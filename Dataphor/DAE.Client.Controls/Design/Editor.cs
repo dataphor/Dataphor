@@ -195,7 +195,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// AbstractCollectionBrowse
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(368, 150);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.btnDelete,
@@ -687,7 +687,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(456, 318);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.btnCancel,
@@ -1240,7 +1240,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form5
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(216, 190);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.btnConstraintMetaData,
@@ -1531,7 +1531,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(200, 134);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.rbDescending,
@@ -1744,7 +1744,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form3
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(368, 182);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.btnCancel,
@@ -2228,7 +2228,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(200, 82);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.label1,
@@ -2428,7 +2428,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form3
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(368, 182);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.btnCancel,
@@ -2914,7 +2914,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			// 
 			// Form
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(232, 230);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.rbNone,

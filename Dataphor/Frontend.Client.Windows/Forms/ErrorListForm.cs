@@ -44,27 +44,26 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ErrorListForm));
-			this.FErrorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
-			this.SuspendLayout();
-			// 
-			// FErrorListView
-			// 
-			this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FErrorListView.Name = "FErrorListView";
-			this.FErrorListView.Size = new System.Drawing.Size(584, 254);
-			this.FErrorListView.TabIndex = 0;
-			// 
-			// ErrorListForm
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(584, 254);
-			this.Controls.AddRange(new System.Windows.Forms.Control[] {
-																		  this.FErrorListView});
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Name = "ErrorListForm";
-			this.Text = "Errors";
-			this.ResumeLayout(false);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ErrorListForm));
+            this.FErrorListView = new Alphora.Dataphor.Frontend.Client.Windows.ErrorListView();
+            this.SuspendLayout();
+            // 
+            // FErrorListView
+            // 
+            this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.FErrorListView.Location = new System.Drawing.Point(0, 0);
+            this.FErrorListView.Name = "FErrorListView";
+            this.FErrorListView.Size = new System.Drawing.Size(584, 254);
+            this.FErrorListView.TabIndex = 0;
+            // 
+            // ErrorListForm
+            // 
+            this.ClientSize = new System.Drawing.Size(584, 254);
+            this.Controls.Add(this.FErrorListView);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "ErrorListForm";
+            this.Text = "Errors";
+            this.ResumeLayout(false);
 
 		}
 		#endregion

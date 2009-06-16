@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// 
 			// StatusForm
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(450, 60);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
 																		  this.panel1});

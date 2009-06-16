@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// 
 			// MainForm
 			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(244, 139);
 			this.Controls.Add(this.ServiceStatus);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

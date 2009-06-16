@@ -119,7 +119,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
             // ExceptionForm
             // 
             this.AcceptButton = this.FCloseButton;
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.CancelButton = this.FCloseButton;
             this.ClientSize = new System.Drawing.Size(288, 81);
             this.ControlBox = false;

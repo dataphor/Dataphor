@@ -37,19 +37,23 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(DialogForm));
-			this.SuspendLayout();
-			// 
-			// DialogForm
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(292, 267);
-			this.MaximizeBox = false;
-			this.MinimizeBox = false;
-			this.Name = "DialogForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.ResumeLayout(false);
+            this.SuspendLayout();
+            // 
+            // FContentPanel
+            // 
+            this.FContentPanel.AutoScroll = true;
+            this.FContentPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.FContentPanel.Size = new System.Drawing.Size(292, 196);
+            // 
+            // DialogForm
+            // 
+            this.ClientSize = new System.Drawing.Size(292, 267);
+            this.Location = new System.Drawing.Point(0, 0);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "DialogForm";
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
 		}
 		#endregion

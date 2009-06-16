@@ -52,70 +52,69 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(EditFilterForm));
-			this.okButton = new System.Windows.Forms.Button();
-			this.cancelButton = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
-			this.filterTextBox = new System.Windows.Forms.TextBox();
-			this.SuspendLayout();
-			// 
-			// okButton
-			// 
-			this.okButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-			this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.okButton.Location = new System.Drawing.Point(264, 112);
-			this.okButton.Name = "okButton";
-			this.okButton.TabIndex = 1;
-			this.okButton.Text = "&OK";
-			// 
-			// cancelButton
-			// 
-			this.cancelButton.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-			this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancelButton.Location = new System.Drawing.Point(344, 112);
-			this.cancelButton.Name = "cancelButton";
-			this.cancelButton.TabIndex = 2;
-			this.cancelButton.Text = "&Cancel";
-			// 
-			// label1
-			// 
-			this.label1.Location = new System.Drawing.Point(8, 8);
-			this.label1.Name = "label1";
-			this.label1.TabIndex = 2;
-			this.label1.Text = "Filter Expression";
-			// 
-			// filterTextBox
-			// 
-			this.filterTextBox.AcceptsTab = true;
-			this.filterTextBox.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right);
-			this.filterTextBox.AutoSize = false;
-			this.filterTextBox.Location = new System.Drawing.Point(8, 24);
-			this.filterTextBox.Multiline = true;
-			this.filterTextBox.Name = "filterTextBox";
-			this.filterTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.filterTextBox.Size = new System.Drawing.Size(408, 80);
-			this.filterTextBox.TabIndex = 0;
-			this.filterTextBox.Text = "";
-			// 
-			// EditFilterForm
-			// 
-			this.AcceptButton = this.okButton;
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.CancelButton = this.cancelButton;
-			this.ClientSize = new System.Drawing.Size(424, 142);
-			this.Controls.AddRange(new System.Windows.Forms.Control[] {
-																		  this.filterTextBox,
-																		  this.label1,
-																		  this.cancelButton,
-																		  this.okButton});
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Name = "EditFilterForm";
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Edit Filter";
-			this.ResumeLayout(false);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditFilterForm));
+            this.okButton = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.filterTextBox = new System.Windows.Forms.TextBox();
+            this.SuspendLayout();
+            // 
+            // okButton
+            // 
+            this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.okButton.Location = new System.Drawing.Point(264, 112);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(75, 23);
+            this.okButton.TabIndex = 1;
+            this.okButton.Text = "&OK";
+            // 
+            // cancelButton
+            // 
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancelButton.Location = new System.Drawing.Point(344, 112);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.TabIndex = 2;
+            this.cancelButton.Text = "&Cancel";
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(8, 8);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(100, 23);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Filter Expression";
+            // 
+            // filterTextBox
+            // 
+            this.filterTextBox.AcceptsTab = true;
+            this.filterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.filterTextBox.Location = new System.Drawing.Point(8, 24);
+            this.filterTextBox.Multiline = true;
+            this.filterTextBox.Name = "filterTextBox";
+            this.filterTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.filterTextBox.Size = new System.Drawing.Size(408, 80);
+            this.filterTextBox.TabIndex = 0;
+            // 
+            // EditFilterForm
+            // 
+            this.AcceptButton = this.okButton;
+            this.CancelButton = this.cancelButton;
+            this.ClientSize = new System.Drawing.Size(424, 142);
+            this.Controls.Add(this.filterTextBox);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.cancelButton);
+            this.Controls.Add(this.okButton);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "EditFilterForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Edit Filter";
+            this.ResumeLayout(false);
 
 		}
 		#endregion

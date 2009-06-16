@@ -310,7 +310,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// ConfigForm
 			// 
 			this.AcceptButton = this.Ok;
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			//this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(306, 268);
 			this.Controls.Add(this.cbCatalogStoreShared);
