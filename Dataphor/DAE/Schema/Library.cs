@@ -473,6 +473,18 @@ namespace Alphora.Dataphor.DAE.Schema
 			return AServerLibraryDirectory.Split(';')[0];
 		}
 		
+		public string GetInstanceLibraryDirectory(string AInstanceDirectory)
+		{
+			return GetInstanceLibraryDirectory(AInstanceDirectory, Name);
+		}
+		
+		public static string GetInstanceLibraryDirectory(string AInstanceDirectory, string ALibraryName)
+		{
+			string LResult = Path.Combine(Path.Combine(AInstanceDirectory, Server.Server.CDefaultLibraryDataDirectory), ALibraryName);
+			System.IO.Directory.CreateDirectory(LResult);
+			return LResult;
+		}
+		
 		public void SaveToFile(string AFileName)
 		{
 			#if !RESPECTREADONLY
@@ -484,13 +496,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public static Library LoadFromFile(string AFileName)
+		public static Library LoadFromFile(string AFileName, string AInstanceDirectory)
 		{
 			using (FileStream LStream = new FileStream(AFileName, FileMode.Open, FileAccess.Read))
 			{
 				Library LLibrary = LoadFromStream(LStream);
 				LLibrary.Name = Path.GetFileNameWithoutExtension(AFileName);
-				LLibrary.LoadInfoFromFile(Path.Combine(Path.GetDirectoryName(AFileName), GetInfoFileName(LLibrary.Name)));
+				LLibrary.LoadInfoFromFile(Path.Combine(GetInstanceLibraryDirectory(AInstanceDirectory, LLibrary.Name), GetInfoFileName(LLibrary.Name)));
 				return LLibrary;
 			}
 		}
@@ -522,15 +534,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public static void GetAvailableLibraries(string ALibraryDirectory, Libraries ALibraries)
+		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries)
 		{
 			ALibraries.Clear();
 			string[] LDirectories = ALibraryDirectory.Split(';');
 			for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
-				GetAvailableLibraries(LDirectories[LIndex], ALibraries, LIndex > 0);
+				GetAvailableLibraries(AInstanceDirectory, LDirectories[LIndex], ALibraries, LIndex > 0);
 		}
 		
-		public static void GetAvailableLibraries(string ALibraryDirectory, Libraries ALibraries, bool ASetLibraryDirectory)
+		public static void GetAvailableLibraries(string AInstanceDirectory, string ALibraryDirectory, Libraries ALibraries, bool ASetLibraryDirectory)
 		{
 			string LLibraryName;
 			string LLibraryFileName;
@@ -541,7 +553,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				LLibraryFileName = Path.Combine(LLibraries[LIndex], Schema.Library.GetFileName(LLibraryName));
 				if (File.Exists(LLibraryFileName))
 				{
-					Schema.Library LLibrary = LoadFromFile(LLibraryFileName);
+					Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
 					if (ASetLibraryDirectory)
 						LLibrary.Directory = LLibraries[LIndex];
 					ALibraries.Add(LLibrary);
@@ -549,12 +561,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public static Schema.Library GetAvailableLibrary(string ALibraryName, string ALibraryDirectory)
+		public static Schema.Library GetAvailableLibrary(string AInstanceDirectory, string ALibraryName, string ALibraryDirectory)
 		{
 			string LLibraryFileName = Path.Combine(ALibraryDirectory, Schema.Library.GetFileName(ALibraryName));
 			if (File.Exists(LLibraryFileName))
 			{
-				Schema.Library LLibrary = LoadFromFile(LLibraryFileName);
+				Schema.Library LLibrary = LoadFromFile(LLibraryFileName, AInstanceDirectory);
 				LLibrary.Directory = ALibraryDirectory;
 				return LLibrary;
 			}

@@ -3,6 +3,8 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+#define LOADFROMLIBRARIES
+
 using System;
 using System.IO;
 using System.Xml;
@@ -485,6 +487,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
+			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.Catalog.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("TimeStamp", APlan.Catalog.DataTypes.SystemDateTime));
 			foreach (Schema.Column LColumn in DataType.Columns)
@@ -504,8 +507,9 @@ namespace Alphora.Dataphor.Frontend.Server
 		{
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
+				ARow["Library_Name"].AsString = ALibrary.Name;
 				ARow["Name"].AsString = LFile.FileName;
-				ARow["TimeStamp"].AsDateTime = File.GetLastWriteTimeUtc(PathUtility.GetFullFileName(LFile.FileName));
+				ARow["TimeStamp"].AsDateTime = File.GetLastWriteTimeUtc(AProcess.GetFullFileName(ALibrary, LFile.FileName));
 				if (!ATable.FindKey(ARow))
 					ATable.Insert(ARow);
 			}

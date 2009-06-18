@@ -116,6 +116,7 @@
     <Compile Include="ServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ServiceUtility.cs" />
     <Compile Include="Strings.cs">
       <SubType>Code</SubType>
     </Compile>

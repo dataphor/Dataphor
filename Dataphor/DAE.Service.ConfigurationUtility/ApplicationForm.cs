@@ -28,18 +28,25 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		public bool FMainFormIsShowing = false;
 		private const int CServicePollingInterval = 5000;
 
-		public enum DAEServiceStatus {Running, Stopped, Unavailable, Unassigned};
-
 		public ConfigurationUtilitySettings FConfigurationUtilitySettings = new ConfigurationUtilitySettings();
-		public DAEServiceStatus FDAEServiceStatus = DAEServiceStatus.Unassigned;
+		public ServiceStatus FServiceStatus = ServiceStatus.Unassigned;
 		public NotifyIcon FTrayIcon = new NotifyIcon();
 		private ContextMenu FMenu = new ContextMenu();
 		private MainForm FMainForm;
+		
+		public string SelectedInstanceName
+		{
+			get { return FConfigurationUtilitySettings.SelectedInstanceName; }
+			set
+			{
+				FConfigurationUtilitySettings.SelectedInstanceName = value;
+				Timer_Tick(this, null);
+			}
+		}
 
-		public enum ImageStatus {Running, Stopped, Unavailable};
+		public enum ImageStatus { Running, Stopped, Unavailable };
 
 		public System.Windows.Forms.Timer FTimer = new System.Windows.Forms.Timer();
-
 
 		private System.ComponentModel.Container components = null;
 
@@ -122,22 +129,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			{
 				if (FMainFormIsShowing == true)
 				{
-					Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(FMainForm.FServiceAutoStartRegKeyName, true);
-					// if we didn't find this reg key, the service isn't installed
-					if (LRegKey == null)
-					{
-						FMainForm.ServiceAutoStart.Checked = false;
-					}
-					else
-					{
-						object LObject = LRegKey.GetValue(MainForm.CServiceStartModeRegName);
-						int LServiceStart = (int)(LObject != null ? LObject : MainForm.CServiceManualStart);
-						if (LServiceStart == MainForm.CServiceAutoStart)
-							FMainForm.ServiceAutoStart.Checked = true;
-						else
-							FMainForm.ServiceAutoStart.Checked = false;
-						LRegKey.Close();
-					}
+					FMainForm.ServiceAutoStart.Checked = ServiceUtility.GetServiceAutoStart(SelectedInstanceName);
 				}
 			}
 			catch(Exception e)
@@ -197,51 +189,46 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
 		public void CheckServiceStatus()
 		{
-			bool LServiceIsInstalled = true;
-			try
-			{
-				System.ServiceProcess.ServiceController LServiceController = new System.ServiceProcess.ServiceController(Alphora.Dataphor.DAE.Server.ServerService.GetServiceName());
+			FServiceStatus = ServiceUtility.GetServiceStatus(SelectedInstanceName);
 
-				switch (LServiceController.Status)
-				{
-					case System.ServiceProcess.ServiceControllerStatus.Running:
-						FDAEServiceStatus = DAEServiceStatus.Running;
-						break;
-					case System.ServiceProcess.ServiceControllerStatus.Stopped:
-						FDAEServiceStatus = DAEServiceStatus.Stopped;
-						break;
-				}
-			}
-			catch
+			switch (FServiceStatus)
 			{
-				FDAEServiceStatus = DAEServiceStatus.Unavailable;
-			}
-
-			switch(FDAEServiceStatus)
-			{
-				case DAEServiceStatus.Running:
+				case ServiceStatus.Running:
 					SetImageStatus(ApplicationForm.ImageStatus.Running);
 					if (FMainFormIsShowing == true)
+					{
 						FMainForm.StartStopButton.Text = "Stop";
-					break;
-				case DAEServiceStatus.Stopped:
+						FMainForm.StartStopButton.Enabled = true;
+						FMainForm.InstallButton.Text = "Uninstall";
+						FMainForm.InstallButton.Enabled = false;
+						FMainForm.ServiceAutoStart.Enabled = true;
+					}
+				break;
+
+				case ServiceStatus.Stopped:
 					SetImageStatus(ApplicationForm.ImageStatus.Stopped);
 					if (FMainFormIsShowing == true)
+					{
 						FMainForm.StartStopButton.Text = "Start";
-					break;
-				case DAEServiceStatus.Unavailable:
+						FMainForm.StartStopButton.Enabled = true;
+						FMainForm.InstallButton.Text = "Uninstall";
+						FMainForm.InstallButton.Enabled = true;
+						FMainForm.ServiceAutoStart.Enabled = true;
+					}
+				break;
+
+				case ServiceStatus.Unavailable:
 				default:
 					SetImageStatus(ApplicationForm.ImageStatus.Unavailable);
 					if (FMainFormIsShowing == true)
+					{
 						FMainForm.StartStopButton.Text = "Not-Available";
-					LServiceIsInstalled = false;
-					break;
-			}
-
-			if (FMainFormIsShowing == true)
-			{
-				FMainForm.StartStopButton.Enabled = LServiceIsInstalled;
-				FMainForm.ServiceAutoStart.Enabled = LServiceIsInstalled;
+						FMainForm.StartStopButton.Enabled = false;
+						FMainForm.InstallButton.Text = "Install";
+						FMainForm.InstallButton.Enabled = true;
+						FMainForm.ServiceAutoStart.Enabled = false;
+					}
+				break;
 			}
 		}
 
@@ -249,8 +236,8 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		{
 			if (!FMainFormIsShowing)
 			{
-				FMainFormIsShowing = true;
 				FMainForm = new MainForm(this);
+				FMainFormIsShowing = true;
 				Timer_Tick(this, null);
 				FMainForm.Show();
 				FMainForm.ShowInTaskbar = true;
@@ -305,7 +292,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			// See if this is already running
 			LProcesses = System.Diagnostics.Process.GetProcessesByName("DAEConfigUtil");
 			// There will be 1 running...this one!  But any more, and we just exit.
-			if (LProcesses.Length == 1)
+			if (LProcesses.Length <= 1)
 			{
 				ApplicationForm LAppForm;
 				if ((AArgs.Length > 0) && (AArgs[0] == CSilentMode))
@@ -321,28 +308,4 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			MessageBox.Show(AArgs.Exception.ToString());
 		}
 	}
-
-	public class ConfigurationUtilitySettings : System.Object 
-	{
-		public ConfigurationUtilitySettings()
-		{
-			FShowTrayIcon = true;
-			FAppAutoStart = false;
-		}
-
-		private bool FShowTrayIcon;
-		public bool ShowTrayIcon
-		{
-			get	{ return FShowTrayIcon; }
-			set { FShowTrayIcon = value; }
-		}
-
-		private bool FAppAutoStart;
-		public bool AppAutoStart
-		{
-			get { return FAppAutoStart; }
-			set { FAppAutoStart = value; }
-		}
-	}
-
 }

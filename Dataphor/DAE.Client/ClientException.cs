@@ -115,6 +115,9 @@ namespace Alphora.Dataphor.DAE.Client
 			
 			/// <summary>Error code 121134: "Dataset was opened write-only and cannot be used to edit or delete rows, because these operations require reading."</summary>
 			IsWriteOnly = 121134,
+			
+			/// <summary>Error code 121135: "An error occurred attempting to connect to the listener on "{0}"." </summary>
+			CouldNotDeterminePortNumber = 121135,
 		}
 
 		// Resource manager for this exception class

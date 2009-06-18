@@ -368,4 +368,13 @@
   <data name="106187" xml:space="preserve">
     <value>Check table for table "{0}" could not be created.</value>
   </data>
+  <data name="106188" xml:space="preserve">
+    <value>Instance configuration has not been loaded.</value>
+  </data>
+  <data name="106189" xml:space="preserve">
+    <value>Instance "{0}" not found.</value>
+  </data>
+  <data name="106190" xml:space="preserve">
+    <value>Unable to connect to listener on "{0}".</value>
+  </data>
 </root>

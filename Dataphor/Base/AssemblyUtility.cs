@@ -60,7 +60,8 @@ namespace Alphora.Dataphor
 
 			foreach (Assembly LAssembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
-				if (String.Compare(LAssembly.GetName().Name, AArgs.Name, true) == 0)
+				AssemblyName LAssemblyName = LAssembly.GetName();
+				if ((String.Compare(LAssemblyName.ToString(), AArgs.Name, true) == 0) || (String.Compare(LAssemblyName.Name, AArgs.Name, true) == 0))
 					return LAssembly;
 				else
 				{

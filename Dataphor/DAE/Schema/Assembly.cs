@@ -170,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			string LClassName = LClass.ClassName;
 			try
 			{
-				return Type.GetType(LClassName, true, true);
+				return AssemblyUtility.GetType(LClassName, true, true);
 			}
 			catch (Exception E)
 			{

@@ -29,6 +29,8 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 		protected System.Web.UI.WebControls.Label Label4;
 		protected System.Web.UI.WebControls.Label Label6;
 		protected System.Web.UI.WebControls.TextBox FAliasNameTextBox;
+		protected System.Web.UI.WebControls.TextBox FInstanceNameTextBox;
+		protected System.Web.UI.WebControls.TextBox FInProcessInstanceNameTextBox;
 		protected System.Web.UI.WebControls.RadioButton FConnectionRadioButton;
 		protected System.Web.UI.WebControls.Button FAcceptButton;
 		protected System.Web.UI.WebControls.Button FRejectButton;
@@ -113,15 +115,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (LInProcess != null)
 			{
 				FInProcessRadioButton.Checked = true;
-				FPortNumberInProcessTextBox.Text = AAlias.PortNumber.ToString();
-				FCatalogDirectoryTextBox.Text = LInProcess.CatalogDirectory;
-				FLibraryDirectoryTextBox.Text = LInProcess.LibraryDirectory;
+				FInProcessInstanceNameTextBox.Text = LInProcess.InstanceName;
 			}
 			else
 			{
 				FConnectionRadioButton.Checked = true;
-				FPortNumberConnectionTextBox.Text = AAlias.PortNumber.ToString();
 				FHostNameTextBox.Text = LConnection.HostName;
+				FInstanceNameTextBox.Text = LConnection.InstanceName;
+				FPortNumberConnectionTextBox.Text = LConnection.OverridePortNumber.ToString();
 			}
 
 			FPassword.Text = AAlias.SessionInfo.Password;
@@ -134,16 +135,15 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (FInProcessRadioButton.Checked)
 			{
 				InProcessAlias LInProcess = new InProcessAlias();
-				LInProcess.PortNumber = Int32.Parse(FPortNumberInProcessTextBox.Text);
-				LInProcess.CatalogDirectory = FCatalogDirectoryTextBox.Text;
-				LInProcess.LibraryDirectory = FLibraryDirectoryTextBox.Text;
+				LInProcess.InstanceName = FInProcessInstanceNameTextBox.Text;
 				LResult = LInProcess;
 			}
 			else
 			{
 				ConnectionAlias LConnection = new ConnectionAlias();
-				LConnection.PortNumber = Int32.Parse(FPortNumberConnectionTextBox.Text);
 				LConnection.HostName = FHostNameTextBox.Text;
+				LConnection.InstanceName = FInstanceNameTextBox.Text;
+				LConnection.OverridePortNumber = Int32.Parse(FPortNumberConnectionTextBox.Text);
 				LResult = LConnection;
 			}
 			

@@ -59,12 +59,23 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			#if USEWATCHERS
 			FServerSession = AProcess.ServerSession;
 			#endif
-			FLibraryDirectory = Schema.Library.GetDefaultLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
-			FFrontendDirectory = Path.Combine(FLibraryDirectory, Library.Name);
+			FFrontendDirectory = AProcess.ServerSession.Server.Catalog.Libraries[Library.Name].GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory);
+			string LOldFrontendDirectory = Path.Combine(Schema.Library.GetDefaultLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory), Library.Name);
+
 			FDesignersFileName = Path.Combine(FFrontendDirectory, "Designers.bop");
+			string LOldDesignersFileName = Path.Combine(LOldFrontendDirectory, "Designers.bop");
+			if (!File.Exists(FDesignersFileName) && File.Exists(LOldDesignersFileName))
+				File.Copy(LOldDesignersFileName, FDesignersFileName);
+
 			LoadDesigners();
+
 			FDocumentTypesFileName = Path.Combine(FFrontendDirectory, "DocumentTypes.bop");
+			string LOldDocumentTypesFileName = Path.Combine(LOldFrontendDirectory, "DocumentTypes.bop");
+			if (!File.Exists(FDocumentTypesFileName) && File.Exists(LOldDocumentTypesFileName))
+				File.Copy(LOldDocumentTypesFileName, FDocumentTypesFileName);
+				
 			LoadDocumentTypes();
+
 			#if USEWATCHERS
 			FWatcher = new FileSystemWatcher(FFrontendDirectory);
 			FWatcher.IncludeSubdirectories = false;
@@ -227,7 +238,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private string FFrontendDirectory;
 		
 		// LibraryDirectory
-		private string FLibraryDirectory;
+		//private string FLibraryDirectory;
 
 		// DirectoryLock - protects file operations within the FrontendDirectory		
 		public void AcquireDirectoryLock()

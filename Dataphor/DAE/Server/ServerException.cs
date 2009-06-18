@@ -262,7 +262,16 @@ namespace Alphora.Dataphor.DAE.Server
 			ProcessAborted = 106186,
 			
 			/// <summary>Error code 106187: "Check table for table "{0}" could not be created."</summary>
-			CouldNotCreateCheckTable = 106187
+			CouldNotCreateCheckTable = 106187,
+			
+			/// <summary>Error code 106188: "Instance configuration has not been loaded."</summary>
+			InstanceConfigurationNotLoaded = 106188,
+			
+			/// <summary>Error code 106189: "Instance "{0}" not found."</summary>
+			InstanceNotFound = 106189,
+			
+			/// <summary>Error code 106190: "Unable to connect to listener on "{0}"."</summary>
+			UnableToConnectToListener = 106190
 
 		}
 		

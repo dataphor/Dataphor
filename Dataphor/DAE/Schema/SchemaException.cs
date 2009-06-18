@@ -451,7 +451,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			NoNonSparseKeysAvailable = 113246,
 			
 			/// <summary>Error code 113247: "Table "{0}" does not have any non-nilable keys from which to select a minimum."</summary>
-			NoNonNilableKeysAvailable = 113247
+			NoNonNilableKeysAvailable = 113247,
+			
+			/// <summary>Error code 113248: "Errors occurred while attempting to apply device settings for device "{0}", setting "{1}", value "{2}"."</summary>
+			ErrorApplyingDeviceSetting = 113248,
 		}		
 
 		// Resource manager for this exception class

@@ -57,7 +57,7 @@ namespace Alphora.Dataphor
 		private static string BuildAppPath(string ARoot, string AApplicationName, VersionModifier AModifier)
 		{
 			StringBuilder LResult = new StringBuilder(ARoot);
-			LResult.Append(@"\Alphora\Dataphor\");
+			LResult.AppendFormat(@"{0}Alphora{0}Dataphor{0}", Path.DirectorySeparatorChar);
 			
 			if ((AModifier == VersionModifier.VersionSpecific) || (AModifier == VersionModifier.BuildSpecific))
 			{
@@ -71,13 +71,13 @@ namespace Alphora.Dataphor
 					LResult.Append('.');
 					LResult.Append(LVersion.Build.ToString());
 				}
-				LResult.Append('\\');
+				LResult.Append(Path.DirectorySeparatorChar);
 			}
 
 			if ((AApplicationName != null) && (AApplicationName != String.Empty))
 			{
 				LResult.Append(AApplicationName);
-				LResult.Append('\\');
+				LResult.Append(Path.DirectorySeparatorChar);
 			}
 
 			Directory.CreateDirectory(LResult.ToString());
@@ -143,6 +143,19 @@ namespace Alphora.Dataphor
 					return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LPaths[0]);
 			}
 			return AppDomain.CurrentDomain.BaseDirectory;
+		}
+
+		public static string GetInstallationDirectory()
+		{
+			// Start with the base directory
+			string LResult = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+			
+			// if this directory is named "bin", we are in a development environment, pop out one more to get the actual Dataphor directory
+			if (Path.GetFileName(LResult).ToLower() == "bin")
+				LResult = Path.GetDirectoryName(LResult);
+				
+			// pop out one more to get the root installation directory
+			return Path.GetDirectoryName(LResult);
 		}
 		
 		public static string GetFullFileName(string AFileName)

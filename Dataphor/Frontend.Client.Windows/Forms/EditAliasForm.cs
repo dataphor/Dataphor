@@ -13,10 +13,11 @@ using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
-	/// <summary> Form for adding and editing ServerAlias instances. </summary>
+	/// <summary> Form for adding and editing Dataphor instance configurations. </summary>
 	public class EditAliasForm : BaseForm
 	{
 		private System.ComponentModel.Container components = null;
@@ -30,28 +31,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private System.Windows.Forms.CheckBox cbClientSideLogging;
 		private System.Windows.Forms.TextBox tbHost;
 		private Label label7;
-		private System.Windows.Forms.TextBox tbPortNumber;
 		private Label label8;
 		private TabPage tpInProcessAlias;
-		private Label label5;
-		private Label label3;
-		private System.Windows.Forms.CheckBox cbEmbedded;
-		private System.Windows.Forms.CheckBox cbLogErrors;
-		private System.Windows.Forms.CheckBox cbTracingEnabled;
-		private Button button1;
-		private Button button2;
-		private System.Windows.Forms.TextBox tbLibraryDirectory;
-		private Label label9;
-		private System.Windows.Forms.TextBox tbCatalogDirectory;
-		private System.Windows.Forms.TextBox tbInProcessPortNumber;
 		private Label label11;
-		private Label label12;
-		private Label label13;
-		private System.Windows.Forms.TextBox tbCatalogStoreDatabaseName;
 		private Label label6;
 		private Label label10;
-		private System.Windows.Forms.TextBox tbCatalogStorePassword;
-		private System.Windows.Forms.CheckBox cbCatalogStoreShared;
+		private ComboBox cbInstanceName;
+		private ComboBox cbInProcessInstanceName;
+		private Button EditInstanceButton;
+		private Button NewInstanceButton;
+		private System.Windows.Forms.CheckBox cbEmbedded;
+		private System.Windows.Forms.TextBox tbOverridePortNumber;
+		private Label label2;
 		private System.Windows.Forms.CheckBox cbIsUserAlias;
 
 		public EditAliasForm()
@@ -91,6 +82,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditAliasForm));
 			this.SessionInfoPropertyGrid = new System.Windows.Forms.PropertyGrid();
 			this.tbAliasName = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
@@ -99,31 +91,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.cbIsUserAlias = new System.Windows.Forms.CheckBox();
 			this.tcAliasType = new System.Windows.Forms.TabControl();
 			this.tpConnectionAlias = new System.Windows.Forms.TabPage();
+			this.tbOverridePortNumber = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cbInstanceName = new System.Windows.Forms.ComboBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.cbClientSideLogging = new System.Windows.Forms.CheckBox();
 			this.tbHost = new System.Windows.Forms.TextBox();
 			this.label7 = new System.Windows.Forms.Label();
-			this.tbPortNumber = new System.Windows.Forms.TextBox();
 			this.label8 = new System.Windows.Forms.Label();
 			this.tpInProcessAlias = new System.Windows.Forms.TabPage();
-			this.cbCatalogStoreShared = new System.Windows.Forms.CheckBox();
-			this.tbCatalogStorePassword = new System.Windows.Forms.TextBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.tbCatalogStoreDatabaseName = new System.Windows.Forms.TextBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
 			this.cbEmbedded = new System.Windows.Forms.CheckBox();
-			this.cbLogErrors = new System.Windows.Forms.CheckBox();
-			this.cbTracingEnabled = new System.Windows.Forms.CheckBox();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.tbLibraryDirectory = new System.Windows.Forms.TextBox();
-			this.label9 = new System.Windows.Forms.Label();
-			this.tbCatalogDirectory = new System.Windows.Forms.TextBox();
-			this.tbInProcessPortNumber = new System.Windows.Forms.TextBox();
+			this.EditInstanceButton = new System.Windows.Forms.Button();
+			this.NewInstanceButton = new System.Windows.Forms.Button();
+			this.cbInProcessInstanceName = new System.Windows.Forms.ComboBox();
+			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.label12 = new System.Windows.Forms.Label();
-			this.label13 = new System.Windows.Forms.Label();
 			this.FContentPanel.SuspendLayout();
 			this.tcAliasType.SuspendLayout();
 			this.tpConnectionAlias.SuspendLayout();
@@ -139,18 +121,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FContentPanel.Controls.Add(this.tcAliasType);
 			this.FContentPanel.Controls.Add(this.tbAliasName);
 			this.FContentPanel.Controls.Add(this.SessionInfoPropertyGrid);
-			this.FContentPanel.Size = new System.Drawing.Size(325, 546);
-			this.FContentPanel.Controls.SetChildIndex(this.SessionInfoPropertyGrid, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.tbAliasName, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.tcAliasType, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.AdvancedButton, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.cbIsUserAlias, 0);
-			this.FContentPanel.Controls.SetChildIndex(this.label1, 0);
+			this.FContentPanel.Size = new System.Drawing.Size(325, 501);
 			// 
 			// SessionInfoPropertyGrid
 			// 
 			this.SessionInfoPropertyGrid.LineColor = System.Drawing.SystemColors.ScrollBar;
-			this.SessionInfoPropertyGrid.Location = new System.Drawing.Point(8, 358);
+			this.SessionInfoPropertyGrid.Location = new System.Drawing.Point(8, 313);
 			this.SessionInfoPropertyGrid.Name = "SessionInfoPropertyGrid";
 			this.SessionInfoPropertyGrid.Size = new System.Drawing.Size(309, 181);
 			this.SessionInfoPropertyGrid.TabIndex = 8;
@@ -167,7 +143,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			this.label1.AutoSize = true;
 			this.label1.BackColor = System.Drawing.Color.Transparent;
-			this.label1.Location = new System.Drawing.Point(16, 8);
+			this.label1.Location = new System.Drawing.Point(16, 11);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(60, 13);
 			this.label1.TabIndex = 8;
@@ -176,7 +152,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// AdvancedButton
 			// 
 			this.AdvancedButton.BackColor = System.Drawing.Color.Transparent;
-			this.AdvancedButton.Location = new System.Drawing.Point(8, 329);
+			this.AdvancedButton.Location = new System.Drawing.Point(8, 284);
 			this.AdvancedButton.Name = "AdvancedButton";
 			this.AdvancedButton.Size = new System.Drawing.Size(88, 23);
 			this.AdvancedButton.TabIndex = 7;
@@ -186,7 +162,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// cbIsUserAlias
 			// 
 			this.cbIsUserAlias.AutoSize = true;
-			this.cbIsUserAlias.Location = new System.Drawing.Point(8, 306);
+			this.cbIsUserAlias.Location = new System.Drawing.Point(8, 261);
 			this.cbIsUserAlias.Name = "cbIsUserAlias";
 			this.cbIsUserAlias.Size = new System.Drawing.Size(225, 17);
 			this.cbIsUserAlias.TabIndex = 9;
@@ -200,120 +176,148 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tcAliasType.Location = new System.Drawing.Point(12, 34);
 			this.tcAliasType.Name = "tcAliasType";
 			this.tcAliasType.SelectedIndex = 0;
-			this.tcAliasType.Size = new System.Drawing.Size(300, 266);
+			this.tcAliasType.Size = new System.Drawing.Size(300, 212);
 			this.tcAliasType.TabIndex = 6;
-			this.tcAliasType.Selected += new System.Windows.Forms.TabControlEventHandler(this.tcAliasType_Selected);
 			// 
 			// tpConnectionAlias
 			// 
+			this.tpConnectionAlias.Controls.Add(this.tbOverridePortNumber);
+			this.tpConnectionAlias.Controls.Add(this.label2);
+			this.tpConnectionAlias.Controls.Add(this.cbInstanceName);
 			this.tpConnectionAlias.Controls.Add(this.label6);
 			this.tpConnectionAlias.Controls.Add(this.cbClientSideLogging);
 			this.tpConnectionAlias.Controls.Add(this.tbHost);
 			this.tpConnectionAlias.Controls.Add(this.label7);
-			this.tpConnectionAlias.Controls.Add(this.tbPortNumber);
 			this.tpConnectionAlias.Controls.Add(this.label8);
 			this.tpConnectionAlias.Location = new System.Drawing.Point(4, 22);
 			this.tpConnectionAlias.Name = "tpConnectionAlias";
 			this.tpConnectionAlias.Padding = new System.Windows.Forms.Padding(3);
-			this.tpConnectionAlias.Size = new System.Drawing.Size(292, 240);
+			this.tpConnectionAlias.Size = new System.Drawing.Size(292, 186);
 			this.tpConnectionAlias.TabIndex = 0;
 			this.tpConnectionAlias.Text = "Connect";
 			this.tpConnectionAlias.UseVisualStyleBackColor = true;
 			// 
+			// tbOverridePortNumber
+			// 
+			this.tbOverridePortNumber.Location = new System.Drawing.Point(78, 129);
+			this.tbOverridePortNumber.Name = "tbOverridePortNumber";
+			this.tbOverridePortNumber.Size = new System.Drawing.Size(183, 20);
+			this.tbOverridePortNumber.TabIndex = 19;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(6, 132);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(69, 13);
+			this.label2.TabIndex = 20;
+			this.label2.Text = "Override Port";
+			// 
+			// cbInstanceName
+			// 
+			this.cbInstanceName.FormattingEnabled = true;
+			this.cbInstanceName.Location = new System.Drawing.Point(78, 102);
+			this.cbInstanceName.Name = "cbInstanceName";
+			this.cbInstanceName.Size = new System.Drawing.Size(183, 21);
+			this.cbInstanceName.TabIndex = 18;
+			this.cbInstanceName.DropDown += new System.EventHandler(this.cbInstanceName_DropDown);
+			// 
 			// label6
 			// 
-			this.label6.Location = new System.Drawing.Point(8, 7);
+			this.label6.Location = new System.Drawing.Point(6, 7);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(276, 30);
+			this.label6.Size = new System.Drawing.Size(276, 57);
 			this.label6.TabIndex = 17;
-			this.label6.Text = "Connect to an existing server using a machine name (Host) and Port Number.";
+			this.label6.Text = resources.GetString("label6.Text");
 			// 
 			// cbClientSideLogging
 			// 
-			this.cbClientSideLogging.Location = new System.Drawing.Point(6, 95);
+			this.cbClientSideLogging.Location = new System.Drawing.Point(9, 163);
 			this.cbClientSideLogging.Name = "cbClientSideLogging";
-			this.cbClientSideLogging.Size = new System.Drawing.Size(168, 24);
+			this.cbClientSideLogging.Size = new System.Drawing.Size(168, 17);
 			this.cbClientSideLogging.TabIndex = 16;
 			this.cbClientSideLogging.Text = "Client-Side Logging Enabled";
 			// 
 			// tbHost
 			// 
-			this.tbHost.Location = new System.Drawing.Point(78, 45);
+			this.tbHost.Location = new System.Drawing.Point(78, 76);
 			this.tbHost.Name = "tbHost";
 			this.tbHost.Size = new System.Drawing.Size(183, 20);
 			this.tbHost.TabIndex = 12;
+			this.tbHost.TextChanged += new System.EventHandler(this.tbHost_TextChanged);
 			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(6, 45);
+			this.label7.Location = new System.Drawing.Point(6, 79);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(29, 13);
 			this.label7.TabIndex = 15;
 			this.label7.Text = "Host";
 			// 
-			// tbPortNumber
-			// 
-			this.tbPortNumber.Location = new System.Drawing.Point(78, 69);
-			this.tbPortNumber.Name = "tbPortNumber";
-			this.tbPortNumber.Size = new System.Drawing.Size(183, 20);
-			this.tbPortNumber.TabIndex = 13;
-			// 
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(6, 69);
+			this.label8.Location = new System.Drawing.Point(6, 105);
 			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(66, 13);
+			this.label8.Size = new System.Drawing.Size(48, 13);
 			this.label8.TabIndex = 14;
-			this.label8.Text = "Port Number";
+			this.label8.Text = "Instance";
 			// 
 			// tpInProcessAlias
 			// 
-			this.tpInProcessAlias.Controls.Add(this.cbCatalogStoreShared);
-			this.tpInProcessAlias.Controls.Add(this.tbCatalogStorePassword);
-			this.tpInProcessAlias.Controls.Add(this.label10);
-			this.tpInProcessAlias.Controls.Add(this.tbCatalogStoreDatabaseName);
-			this.tpInProcessAlias.Controls.Add(this.label5);
-			this.tpInProcessAlias.Controls.Add(this.label3);
 			this.tpInProcessAlias.Controls.Add(this.cbEmbedded);
-			this.tpInProcessAlias.Controls.Add(this.cbLogErrors);
-			this.tpInProcessAlias.Controls.Add(this.cbTracingEnabled);
-			this.tpInProcessAlias.Controls.Add(this.button1);
-			this.tpInProcessAlias.Controls.Add(this.button2);
-			this.tpInProcessAlias.Controls.Add(this.tbLibraryDirectory);
-			this.tpInProcessAlias.Controls.Add(this.label9);
-			this.tpInProcessAlias.Controls.Add(this.tbCatalogDirectory);
-			this.tpInProcessAlias.Controls.Add(this.tbInProcessPortNumber);
+			this.tpInProcessAlias.Controls.Add(this.EditInstanceButton);
+			this.tpInProcessAlias.Controls.Add(this.NewInstanceButton);
+			this.tpInProcessAlias.Controls.Add(this.cbInProcessInstanceName);
+			this.tpInProcessAlias.Controls.Add(this.label10);
 			this.tpInProcessAlias.Controls.Add(this.label11);
-			this.tpInProcessAlias.Controls.Add(this.label12);
-			this.tpInProcessAlias.Controls.Add(this.label13);
 			this.tpInProcessAlias.Location = new System.Drawing.Point(4, 22);
 			this.tpInProcessAlias.Name = "tpInProcessAlias";
 			this.tpInProcessAlias.Padding = new System.Windows.Forms.Padding(3);
-			this.tpInProcessAlias.Size = new System.Drawing.Size(292, 240);
+			this.tpInProcessAlias.Size = new System.Drawing.Size(292, 186);
 			this.tpInProcessAlias.TabIndex = 1;
 			this.tpInProcessAlias.Text = "In-Process";
 			this.tpInProcessAlias.UseVisualStyleBackColor = true;
 			// 
-			// cbCatalogStoreShared
+			// cbEmbedded
 			// 
-			this.cbCatalogStoreShared.AutoSize = true;
-			this.cbCatalogStoreShared.Location = new System.Drawing.Point(6, 217);
-			this.cbCatalogStoreShared.Name = "cbCatalogStoreShared";
-			this.cbCatalogStoreShared.Size = new System.Drawing.Size(127, 17);
-			this.cbCatalogStoreShared.TabIndex = 9;
-			this.cbCatalogStoreShared.Text = "Shared Catalog Store";
-			this.cbCatalogStoreShared.UseVisualStyleBackColor = true;
-			this.cbCatalogStoreShared.Visible = false;
+			this.cbEmbedded.AutoSize = true;
+			this.cbEmbedded.Location = new System.Drawing.Point(11, 108);
+			this.cbEmbedded.Name = "cbEmbedded";
+			this.cbEmbedded.Size = new System.Drawing.Size(117, 17);
+			this.cbEmbedded.TabIndex = 50;
+			this.cbEmbedded.Text = "Embedded Server?";
+			this.cbEmbedded.UseVisualStyleBackColor = true;
 			// 
-			// tbCatalogStorePassword
+			// EditInstanceButton
 			// 
-			this.tbCatalogStorePassword.Location = new System.Drawing.Point(164, 191);
-			this.tbCatalogStorePassword.Name = "tbCatalogStorePassword";
-			this.tbCatalogStorePassword.PasswordChar = '*';
-			this.tbCatalogStorePassword.Size = new System.Drawing.Size(98, 20);
-			this.tbCatalogStorePassword.TabIndex = 11;
+			this.EditInstanceButton.Location = new System.Drawing.Point(133, 72);
+			this.EditInstanceButton.Name = "EditInstanceButton";
+			this.EditInstanceButton.Size = new System.Drawing.Size(45, 21);
+			this.EditInstanceButton.TabIndex = 49;
+			this.EditInstanceButton.Text = "Edit...";
+			this.EditInstanceButton.UseVisualStyleBackColor = true;
+			this.EditInstanceButton.Click += new System.EventHandler(this.EditInstanceButton_Click);
+			// 
+			// NewInstanceButton
+			// 
+			this.NewInstanceButton.Location = new System.Drawing.Point(82, 72);
+			this.NewInstanceButton.Name = "NewInstanceButton";
+			this.NewInstanceButton.Size = new System.Drawing.Size(45, 21);
+			this.NewInstanceButton.TabIndex = 48;
+			this.NewInstanceButton.Text = "New...";
+			this.NewInstanceButton.UseVisualStyleBackColor = true;
+			this.NewInstanceButton.Click += new System.EventHandler(this.NewInstanceButton_Click);
+			// 
+			// cbInProcessInstanceName
+			// 
+			this.cbInProcessInstanceName.FormattingEnabled = true;
+			this.cbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
+			this.cbInProcessInstanceName.Name = "cbInProcessInstanceName";
+			this.cbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
+			this.cbInProcessInstanceName.TabIndex = 47;
+			this.cbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
 			// 
 			// label10
 			// 
@@ -323,136 +327,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.label10.TabIndex = 46;
 			this.label10.Text = "Start a new server in-process using the following configuration:";
 			// 
-			// tbCatalogStoreDatabaseName
-			// 
-			this.tbCatalogStoreDatabaseName.Location = new System.Drawing.Point(6, 191);
-			this.tbCatalogStoreDatabaseName.Name = "tbCatalogStoreDatabaseName";
-			this.tbCatalogStoreDatabaseName.Size = new System.Drawing.Size(151, 20);
-			this.tbCatalogStoreDatabaseName.TabIndex = 7;
-			this.tbCatalogStoreDatabaseName.Text = "DAECatalog";
-			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(164, 175);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(53, 13);
-			this.label5.TabIndex = 40;
-			this.label5.Text = "Password";
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(6, 175);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(151, 13);
-			this.label3.TabIndex = 38;
-			this.label3.Text = "Catalog Store Database Name";
-			// 
-			// cbEmbedded
-			// 
-			this.cbEmbedded.AutoSize = true;
-			this.cbEmbedded.Location = new System.Drawing.Point(194, 152);
-			this.cbEmbedded.Name = "cbEmbedded";
-			this.cbEmbedded.Size = new System.Drawing.Size(77, 17);
-			this.cbEmbedded.TabIndex = 5;
-			this.cbEmbedded.Text = "Embedded";
-			this.cbEmbedded.UseVisualStyleBackColor = true;
-			// 
-			// cbLogErrors
-			// 
-			this.cbLogErrors.Location = new System.Drawing.Point(112, 148);
-			this.cbLogErrors.Name = "cbLogErrors";
-			this.cbLogErrors.Size = new System.Drawing.Size(76, 24);
-			this.cbLogErrors.TabIndex = 4;
-			this.cbLogErrors.Text = "Log Errors";
-			// 
-			// cbTracingEnabled
-			// 
-			this.cbTracingEnabled.Location = new System.Drawing.Point(6, 148);
-			this.cbTracingEnabled.Name = "cbTracingEnabled";
-			this.cbTracingEnabled.Size = new System.Drawing.Size(111, 24);
-			this.cbTracingEnabled.TabIndex = 3;
-			this.cbTracingEnabled.Text = "Tracing Enabled";
-			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(262, 125);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(24, 22);
-			this.button1.TabIndex = 29;
-			this.button1.Text = "...";
-			this.button1.Click += new System.EventHandler(this.LibraryDirectoryLookupButton_Click);
-			// 
-			// button2
-			// 
-			this.button2.Location = new System.Drawing.Point(262, 85);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(24, 22);
-			this.button2.TabIndex = 27;
-			this.button2.Text = "...";
-			this.button2.Click += new System.EventHandler(this.CatalogDirectoryLookupButton_Click);
-			// 
-			// tbLibraryDirectory
-			// 
-			this.tbLibraryDirectory.Location = new System.Drawing.Point(6, 125);
-			this.tbLibraryDirectory.Name = "tbLibraryDirectory";
-			this.tbLibraryDirectory.Size = new System.Drawing.Size(256, 20);
-			this.tbLibraryDirectory.TabIndex = 2;
-			// 
-			// label9
-			// 
-			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(6, 109);
-			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(83, 13);
-			this.label9.TabIndex = 33;
-			this.label9.Text = "Library Directory";
-			// 
-			// tbCatalogDirectory
-			// 
-			this.tbCatalogDirectory.Location = new System.Drawing.Point(6, 85);
-			this.tbCatalogDirectory.Name = "tbCatalogDirectory";
-			this.tbCatalogDirectory.Size = new System.Drawing.Size(256, 20);
-			this.tbCatalogDirectory.TabIndex = 1;
-			// 
-			// tbInProcessPortNumber
-			// 
-			this.tbInProcessPortNumber.Location = new System.Drawing.Point(78, 45);
-			this.tbInProcessPortNumber.Name = "tbInProcessPortNumber";
-			this.tbInProcessPortNumber.Size = new System.Drawing.Size(184, 20);
-			this.tbInProcessPortNumber.TabIndex = 0;
-			// 
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(6, 45);
+			this.label11.Location = new System.Drawing.Point(6, 48);
 			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(66, 13);
+			this.label11.Size = new System.Drawing.Size(48, 13);
 			this.label11.TabIndex = 32;
-			this.label11.Text = "Port Number";
-			// 
-			// label12
-			// 
-			this.label12.AutoSize = true;
-			this.label12.Location = new System.Drawing.Point(6, 45);
-			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(66, 13);
-			this.label12.TabIndex = 31;
-			this.label12.Text = "Port Number";
-			// 
-			// label13
-			// 
-			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(6, 69);
-			this.label13.Name = "label13";
-			this.label13.Size = new System.Drawing.Size(88, 13);
-			this.label13.TabIndex = 30;
-			this.label13.Text = "Catalog Directory";
+			this.label11.Text = "Instance";
 			// 
 			// EditAliasForm
 			// 
-			this.ClientSize = new System.Drawing.Size(325, 617);
+			this.ClientSize = new System.Drawing.Size(325, 572);
 			this.ControlBox = false;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Location = new System.Drawing.Point(0, 0);
@@ -502,22 +388,15 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (LInProcess != null)
 			{
 				tcAliasType.SelectedTab = tpInProcessAlias;
-				tbInProcessPortNumber.Text = AAlias.PortNumber.ToString();
-				//StartupScriptUriTextBox.Text = LInProcess.StartupScriptUri;
-				tbCatalogDirectory.Text = LInProcess.CatalogDirectory;
-				tbCatalogStoreDatabaseName.Text = LInProcess.CatalogStoreDatabaseName;
-				tbCatalogStorePassword.Text = LInProcess.CatalogStorePassword;
-				cbCatalogStoreShared.Checked = LInProcess.CatalogStoreShared;
-				tbLibraryDirectory.Text = LInProcess.LibraryDirectory;
-				cbTracingEnabled.Checked = LInProcess.TracingEnabled;
-				cbLogErrors.Checked = LInProcess.LogErrors;
+				cbInProcessInstanceName.Text = LInProcess.InstanceName;
 				cbEmbedded.Checked = LInProcess.IsEmbedded;
 			}
 			else
 			{
 				tcAliasType.SelectedTab = tpConnectionAlias;
-				tbPortNumber.Text = AAlias.PortNumber.ToString();
 				tbHost.Text = LConnection.HostName;
+				cbInstanceName.Text = LConnection.InstanceName;
+				tbOverridePortNumber.Text = LConnection.OverridePortNumber.ToString();
 				cbClientSideLogging.Checked = LConnection.ClientSideLoggingEnabled;
 			}
 		}
@@ -528,23 +407,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (tcAliasType.SelectedTab == tpInProcessAlias)
 			{
 				InProcessAlias LInProcess = new InProcessAlias();
-				LInProcess.PortNumber = Int32.Parse(tbInProcessPortNumber.Text);
-				//LInProcess.StartupScriptUri = StartupScriptUriTextBox.Text;
-				LInProcess.CatalogDirectory = tbCatalogDirectory.Text;
-				LInProcess.CatalogStoreDatabaseName = tbCatalogStoreDatabaseName.Text;
-				LInProcess.CatalogStorePassword = tbCatalogStorePassword.Text;
-				LInProcess.CatalogStoreShared = cbCatalogStoreShared.Checked;
-				LInProcess.LibraryDirectory = tbLibraryDirectory.Text;
-				LInProcess.TracingEnabled = cbTracingEnabled.Checked;
-				LInProcess.LogErrors = cbLogErrors.Checked;
+				LInProcess.InstanceName = cbInProcessInstanceName.Text;
 				LInProcess.IsEmbedded = cbEmbedded.Checked;
 				LResult = LInProcess;
 			}
 			else
 			{
 				ConnectionAlias LConnection = new ConnectionAlias();
-				LConnection.PortNumber = Int32.Parse(tbPortNumber.Text);
 				LConnection.HostName = tbHost.Text;
+				LConnection.InstanceName = cbInstanceName.Text;
+				LConnection.OverridePortNumber = Int32.Parse(tbOverridePortNumber.Text);
 				LConnection.ClientSideLoggingEnabled = cbClientSideLogging.Checked;
 				LResult = LConnection;
 			}
@@ -580,32 +452,84 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}		
 		}
 
-		private void PortNumberConnectionTextBox_TextChanged(object sender, System.EventArgs e)
+		private bool FInstancesEnumerated;
+
+		private void cbInstanceName_DropDown(object sender, EventArgs e)
 		{
-			Int32.Parse(tbPortNumber.Text);
+			if ((tbHost.Text != String.Empty) && (!FInstancesEnumerated))
+			{
+				try
+				{
+					FInstancesEnumerated = true;
+					cbInstanceName.Items.Clear();
+					string[] LInstanceNames = ServerFactory.EnumerateInstances(tbHost.Text);
+					for (int LIndex = 0; LIndex < LInstanceNames.Length; LIndex++)
+						cbInstanceName.Items.Add(LInstanceNames[LIndex]);
+				}
+				catch (Exception LException)
+				{
+					MessageBox.Show(String.Format("Could not enumerate instances for host \"{0}\".\r\n{1}", tbHost.Text, LException.Message));
+				}
+			}
 		}
 
-		private void PortNumberInProcessTextBox_TextChanged(object sender, System.EventArgs e)
+		private void tbHost_TextChanged(object sender, EventArgs e)
 		{
-			Int32.Parse(tbInProcessPortNumber.Text);
+			FInstancesEnumerated = false;
+		}
+		
+		private bool FLocalInstancesEnumerated;
+		
+		private void LoadInstances(InstanceConfiguration AConfiguration)
+		{
+			FLocalInstancesEnumerated = true;
+			for (int LIndex = 0; LIndex < AConfiguration.Instances.Count; LIndex++)
+				cbInProcessInstanceName.Items.Add(AConfiguration.Instances[LIndex].Name);
 		}
 
-		private void CatalogDirectoryLookupButton_Click(object sender, System.EventArgs e)
+		private void cbInProcessInstanceName_DropDown(object sender, EventArgs e)
 		{
-			tbCatalogDirectory.Text = FolderUtility.GetDirectory(tbCatalogDirectory.Text);
+			if (!FLocalInstancesEnumerated)
+				LoadInstances(InstanceManager.LoadConfiguration());
 		}
 
-		private void LibraryDirectoryLookupButton_Click(object sender, System.EventArgs e)
+		private void NewInstanceButton_Click(object sender, EventArgs e)
 		{
-			tbLibraryDirectory.Text = FolderUtility.GetDirectory(tbLibraryDirectory.Text);
+			ServerConfiguration LInstance = EditInstanceForm.ExecuteAdd();
+			InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
+			LConfiguration.Instances.Add(LInstance);
+			InstanceManager.SaveConfiguration(LConfiguration);
+
+			FLocalInstancesEnumerated = false;
+			LoadInstances(LConfiguration);
+
+			cbInProcessInstanceName.Text = LInstance.Name;
 		}
 
-		private void tcAliasType_Selected(object sender, TabControlEventArgs e)
+		private void EditInstanceButton_Click(object sender, EventArgs e)
 		{
-			if ((e.TabPage == tpInProcessAlias) && (tbInProcessPortNumber.Text == String.Empty))
-				tbInProcessPortNumber.Text = tbPortNumber.Text;
-			else if ((e.TabPage == tpConnectionAlias) && (tbPortNumber.Text == String.Empty))
-				tbPortNumber.Text = tbInProcessPortNumber.Text;
+			if (!String.IsNullOrEmpty(cbInProcessInstanceName.Text))
+			{
+				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
+				ServerConfiguration LInstance = LConfiguration.Instances[cbInProcessInstanceName.Text];
+				if (LInstance == null)
+				{
+					LInstance = new ServerConfiguration();
+					LInstance.Name = cbInProcessInstanceName.Text;
+				}
+				else
+					LConfiguration.Instances.Remove(LInstance.Name);
+				
+				LInstance = EditInstanceForm.ExecuteEdit(LInstance);
+				
+				LConfiguration.Instances.Add(LInstance);
+				InstanceManager.SaveConfiguration(LConfiguration);
+
+				FLocalInstancesEnumerated = false;
+				LoadInstances(LConfiguration);
+				
+				cbInProcessInstanceName.Text = LInstance.Name;
+			}
 		}
 	}
 }

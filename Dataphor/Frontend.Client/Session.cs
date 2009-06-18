@@ -162,7 +162,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						while (LCursor.Next())
 						{
 							LCursor.Select(LRow);
-							((DAE.Server.LocalServer)DataSession.Server).GetFile((DAE.Server.LocalProcess)LCursor.Plan.Process, LRow["Name"].AsString, LRow["TimeStamp"].AsDateTime);
+							((DAE.Server.LocalServer)DataSession.Server).GetFile((DAE.Server.LocalProcess)LCursor.Plan.Process, LRow["Library_Name"].AsString, LRow["Name"].AsString, LRow["TimeStamp"].AsDateTime);
 						}
 					}
 				}

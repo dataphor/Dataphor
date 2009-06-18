@@ -544,6 +544,9 @@
     <Compile Include="Schema\TableVar.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\IListener.cs" />
+    <Compile Include="Server\InstanceManager.cs" />
+    <Compile Include="Server\Listener.cs" />
     <Compile Include="Server\LocalServer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -553,15 +556,14 @@
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Server\ServerException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Server\ServerService.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Server\ServerHost.cs" />
     <Compile Include="Server\SignalPool.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -709,7 +711,6 @@
     <EmbeddedResource Include="Server\ServerException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Server\ServerService.bmp" />
     <EmbeddedResource Include="Storage\StorageException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>

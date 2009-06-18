@@ -15,19 +15,23 @@ using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 
 using CommandLine;
+using Alphora.Dataphor.DAE.Server;
 
 namespace D4Runner
 {
 	class D4Runner
 	{
-		[Argument(ArgumentType.AtMostOnce, HelpText="The name of the alias to use to connect. If specified, this is used before the Host and Port options.", DefaultValue="")]
+		[Argument(ArgumentType.AtMostOnce, HelpText="The name of the alias to use to connect. If specified, this is used before the Host, Instance, and/or Port options.", DefaultValue="")]
 		public string AliasName = String.Empty;
 		
 		[Argument(ArgumentType.AtMostOnce, HelpText="Host address (name or IP) of Dataphor Server.", DefaultValue="localhost")]
 		public string Host = "localhost";
+		
+		[Argument(ArgumentType.AtMostOnce, HelpText="The name of the instance to use to connect.", DefaultValue="Dataphor")]
+		public string Instance = Server.CDefaultServerName;
 
-		[Argument(ArgumentType.AtMostOnce, HelpText="Port of Dataphor Server.", DefaultValue=8061)]
-		public int Port = 8061;
+		[Argument(ArgumentType.AtMostOnce, HelpText="Port of Dataphor Server (override to bypass the listener).", DefaultValue=0)]
+		public int Port = 0;
 
 		[DefaultArgument(ArgumentType.AtMostOnce, HelpText="D4 Script to be executed.")]
 		public string Script;
@@ -72,7 +76,9 @@ namespace D4Runner
 					{
 						ConnectionAlias LAlias = new ConnectionAlias();
 						LAlias.HostName = Host;
-						LAlias.PortNumber = Port;
+						LAlias.InstanceName = Instance;
+						if (Port > 0)
+							LAlias.OverridePortNumber = Port;
 						LDataphorConnection.Alias = LAlias;
 					}
 					else

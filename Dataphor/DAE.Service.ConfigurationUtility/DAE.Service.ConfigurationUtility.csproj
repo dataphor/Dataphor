@@ -115,6 +115,7 @@
     <Compile Include="ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ConfigurationUtilitySettings.cs" />
     <Compile Include="FolderBrowser.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -150,6 +151,16 @@
     </EmbeddedResource>
     <None Include="bin\Debug\DAE.Service.ConfigurationUtility.exe.manifest" />
     <None Include="bin\Release\DAE.Service.ConfigurationUtility.exe.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DAE.Service\DAE.Service.csproj">
+      <Project>{B7466206-120E-45BD-9FB0-F30A0C7971A4}</Project>
+      <Name>DAE.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client.Windows\Frontend.Client.Windows.csproj">
+      <Project>{E7152100-FDC7-4BF1-957C-75051BF7D8E8}</Project>
+      <Name>Frontend.Client.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

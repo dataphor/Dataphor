@@ -558,4 +558,7 @@
   <data name="113247" xml:space="preserve">
     <value>Table "{0}" does not have any non-nilable keys from which to select a minimum.</value>
   </data>
+  <data name="113248" xml:space="preserve">
+    <value>Errors occurred while attempting to apply device settings for device "{0}", setting "{1}", value "{2}".</value>
+  </data>
 </root>

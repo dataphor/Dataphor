@@ -103,26 +103,17 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 		}
-
-		// PortNumber
-
-		private int FPortNumber = ServerService.CDefaultPortNumber;
-		/// <summary> The port number configured for this alias. </summary>
-		/// <remarks>
-		/// The port number that will be used to communicate with the Dataphor Server.
-		/// For an in-process alias, this is the port that the server will use
-		/// to listen for incoming connections. For an out-of-process alias, this
-		/// port number must be the same as the configured port number for the
-		/// server that is being connected to. The default port for a Dataphor
-		/// Server is 8061.
-		/// </remarks>
-		[DefaultValue(ServerService.CDefaultPortNumber)]
-		public int PortNumber
-		{
-			get { return FPortNumber; }
-			set { FPortNumber = value; }
-		}
 		
+		private string FInstanceName;
+		/// <summary>
+		/// The name of the instance. If this is not specified, the name of the alias is assumed to be the name of the instance.
+		/// </summary>
+		public string InstanceName
+		{
+			get { return FInstanceName; }
+			set { FInstanceName = value; }
+		}
+
 		// IsUserAlias
 		
 		private bool FIsUserAlias = true;
@@ -155,6 +146,22 @@ namespace Alphora.Dataphor.DAE.Client
 			set { FHostName = value; }
 		}
 		
+		private int FOverridePortNumber;
+		/// <summary>
+		/// Allows the port number for the connection to be explicitly specified.
+		/// </summary>
+		/// <remarks>
+		/// If an override port number is specified, the connection will not attempt to use the listener for URI discovery, but
+		/// will construct a URI based on this port number.
+		/// </remarks>
+		[DefaultValue(0)]
+		[Description("If specified, a uri is constructed with this port number, rather than attempting to use listener services to connect.")]
+		public int OverridePortNumber
+		{
+			get { return FOverridePortNumber; }
+			set { FOverridePortNumber = value; }
+		}
+		
 		private bool FClientSideLoggingEnabled;
 		/// <summary> Whether or not to perform client-side logging. </summary>
 		/// <remarks>
@@ -172,7 +179,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public override string ToString()
 		{
-			return String.Format("{0} ({1}:{2})", Name, FHostName, PortNumber.ToString());
+			return String.Format("{0} ({1} on {2})", Name, InstanceName ?? Name, FHostName.ToString());
 		}
 	}
 
@@ -190,126 +197,7 @@ namespace Alphora.Dataphor.DAE.Client
 	/// </remarks>
 	public class InProcessAlias : ServerAlias
 	{
-		private string FStartupScriptUri = String.Empty;
-		/// <summary>The URI to a startup script to run while initializing the server.</summary>
-		[Description("The URI to a startup script to run while initializing the server.")]
-		[DefaultValue("")]
-		public string StartupScriptUri
-		{
-			get { return FStartupScriptUri; }
-			set { FStartupScriptUri = value; }
-		}
-		
-		private string FCatalogStoreClassName;
-		/// <summary>
-		/// The assembly-qualified class name of the store used to persist the system catalog.
-		/// </summary>
-		[Description("The assembly-qualified class name of the store used to persist the system catalog.")]
-		[DefaultValue(null)]
-		public string CatalogStoreClassName
-		{
-			get { return FCatalogStoreClassName; }
-			set { FCatalogStoreClassName = value; }
-		}
-		
-		private string FCatalogStoreConnectionString;
-		/// <summary>
-		/// The connection string to be used to connect to the system catalog store.
-		/// </summary>
-		[Description("The connection string to be used to connect to the system catalog store.")]
-		[DefaultValue(null)]
-		public string CatalogStoreConnectionString
-		{
-			get { return FCatalogStoreConnectionString; }
-			set { FCatalogStoreConnectionString = value; }
-		}
-
-		private string FCatalogDirectory = String.Empty;
-		/// <summary>The directory used by the Dataphor Server to persist it's catalog (schema).</summary>
-		[DefaultValue("")]
-		[Description("The directory used by the Dataphor Server to persist it's catalog (schema).")]
-		public string CatalogDirectory
-		{
-			get { return FCatalogDirectory; }
-			set { FCatalogDirectory = value; }
-		}
-		
-		private string FCatalogStoreDatabaseName = "DAECatalog";
-		/// <summary>The name of the database to be used for the catalog store.</summary>
-		[DefaultValue("DAECatalog")]
-		[Description("The name of the database to be used for the catalog store.")]
-		public string CatalogStoreDatabaseName
-		{
-			get { return FCatalogStoreDatabaseName; }
-			set 
-			{ 
-				if ((value == null) || (value == String.Empty))
-					FCatalogStoreDatabaseName = "DAECatalog";
-				else
-					FCatalogStoreDatabaseName = value;
-			}
-		}
-
-		private string FCatalogStorePassword = String.Empty;
-		/// <summary>If not using integrated security, the password to be used to connect to the catalog store.</summary>
-		[DefaultValue("")]
-		[Description("If not using integrated security, the password to be used to connect to the catalog store.")]
-		public string CatalogStorePassword
-		{
-			get { return FCatalogStorePassword; }
-			set 
-			{ 
-				if ((value == null) || (value == String.Empty))
-					FCatalogStorePassword = "";
-				else
-					FCatalogStorePassword = value;
-			}
-		}
-		
-		private bool FCatalogStoreShared = false;
-		/// <summary>This property is deprecated. Setting it will have no effect. It is retained only for backwards compatibility with existing alias definitions.</summary>
-		[DefaultValue(false)]
-		[Description("This property is deprecated. Setting it will have no effect. It is retained only for backwards compatibility with existing alias definitions.")]
-		public bool CatalogStoreShared
-		{
-			get { return FCatalogStoreShared; }
-			set { FCatalogStoreShared = value; }
-		}
-		
-		private string FLibraryDirectory = String.Empty;
-		/// <summary>The directory used for Dataphor Server libraries.</summary>
-		[DefaultValue("")]
-		[Description("The directory used for Dataphor Server libraries.")]
-		public string LibraryDirectory
-		{
-			get { return FLibraryDirectory; }
-			set { FLibraryDirectory = value; }
-		}
-		
-		private bool FTracingEnabled = true;
-		/// <summary>Determines whether the Dataphor Server will use the Dataphor event log to write service events.</summary>
-		[DefaultValue(true)]
-		[Description("Determines whether the Dataphor Server will use the Dataphor event log to write service events.")]
-		public bool TracingEnabled
-		{
-			get { return FTracingEnabled; }
-			set { FTracingEnabled = value; }
-		}
-
-		private bool FLogErrors = false;
-		/// <summary>Determines whether the Dataphor Server will use the Dataphor event log to write errors returned to clients.</summary>
-		[DefaultValue(false)]
-		[Description("Determines whether the Dataphor Server will use the Dataphor event log to write errors returned to clients.")]
-		public bool LogErrors
-		{
-			get { return FLogErrors; }
-			set { FLogErrors = value; }
-		}
-		
-		private bool FIsEmbedded = false;
-		/// <summary>Determines whether the Dataphor Server is intended to be used as a single-user data access engine embedded in a client application.</summary>
-		[DefaultValue(false)]
-		[Description("Determines whether the Dataphor Server is intended to be used as a single-user data access engine embedded in a client application.")]
+		private bool FIsEmbedded;
 		public bool IsEmbedded
 		{
 			get { return FIsEmbedded; }
@@ -318,7 +206,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public override string ToString()
 		{
-			return String.Format("{0} ({1}) - {2}", Name, PortNumber.ToString(), Strings.Get("CInProcess"));
+			return String.Format("{0} ({1}) - {2}", Name, String.IsNullOrEmpty(InstanceName) ? Name : InstanceName, Strings.Get("CInProcess"));
 		}
 	}
 	
@@ -330,18 +218,13 @@ namespace Alphora.Dataphor.DAE.Client
 	/// If a user-specific alias has the same name as a machine-specific alias, the user-specific
 	/// alias overrides the machine-specific alias.
 	/// The default alias manager uses multiple alias configuration files:
-	///	Machine specific: <common application data path>\Alphora\Dataphor\ServerAliases.config
-	/// User specific: <user application data path>\Alphora\Dataphor\ServerAliases.config
-	///
-	/// Note that to retain backwards compatibility with previous versions of the Dataphor product,
-	/// if a version-specific user configuration file exists, it will be used, with a duplicate
-	/// of the configuration saved in the non-version-specific directory. Otherwise, only the
-	/// non-version-specific file will be used.
+	///	Machine specific: <&lt;>common application data path<&gt;>\Alphora\Dataphor\Aliases.config
+	/// User specific: <&lt;>user application data path<&gt;>\Alphora\Dataphor\Aliases.config
 	/// </remarks>
 	public class AliasManager
 	{
 		// Do not localize
-		public const string CAliasConfigurationFileName = "ServerAliases.config";
+		public const string CAliasConfigurationFileName = "Aliases.config";
 
 		private static string FDefaultAliasName;		
 		public static string DefaultAliasName
@@ -372,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static string GetMachineAliasConfigurationFileName()
 		{
-			return PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None) + '\\' + CAliasConfigurationFileName;
+			return Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), CAliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadMachineAliasConfiguration()
@@ -382,35 +265,17 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		private static string GetUserAliasConfigurationFileName()
 		{
-			return PathUtility.UserAppDataPath(String.Empty, VersionModifier.None) + '\\' + CAliasConfigurationFileName;
-		}
-		
-		private static string GetVersionSpecificUserAliasConfigurationFileName()
-		{
-			return PathUtility.UserAppDataPath() + '\\' + CAliasConfigurationFileName;
+			return Path.Combine(PathUtility.UserAppDataPath(String.Empty, VersionModifier.None), CAliasConfigurationFileName);
 		}
 		
 		private static AliasConfiguration LoadUserAliasConfiguration()
 		{
-			// If a version specific file exists, it will be used, and an identical copy will be saved to the non-version specific path
-			// Otherwise, only the non-versioned path will be used.
-			
-			string LVersionFileName = GetVersionSpecificUserAliasConfigurationFileName();
-				
-			if (File.Exists(LVersionFileName))
-				return AliasConfiguration.Load(LVersionFileName);
-			else
-				return AliasConfiguration.Load(GetUserAliasConfigurationFileName());
+			return AliasConfiguration.Load(GetUserAliasConfigurationFileName());
 		}
 		
 		private static void SaveUserAliasConfiguration(AliasConfiguration AConfiguration)
 		{
-			string LVersionFileName = GetVersionSpecificUserAliasConfigurationFileName();
-			
-			if (File.Exists(LVersionFileName))
-				AConfiguration.Save(LVersionFileName);
-			else
-				AConfiguration.Save(GetUserAliasConfigurationFileName());
+			AConfiguration.Save(GetUserAliasConfigurationFileName());
 		}
 		
 		private static void SaveMachineAliasConfiguration(AliasConfiguration AConfiguration)
@@ -554,7 +419,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			protected override string GetElementNamespace(Type AType)
 			{
-				return "Alphora.Dataphor.Frontend.Client,Alphora.Dataphor.Frontend.Client";
+				return "Alphora.Dataphor.DAE.Client,Alphora.Dataphor.DAE.Client";
 			}
 		}
 		
@@ -638,33 +503,42 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (LInProcessAlias != null)
 				{
+					ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInProcessAlias.InstanceName);
 					FHostedServer = new Server.Server();
-					FHostedServer.Name = Alphora.Dataphor.DAE.Server.Server.CDefaultServerName;
-					FHostedServer.LogErrors = LInProcessAlias.LogErrors;
-					FHostedServer.TracingEnabled = LInProcessAlias.TracingEnabled;
-					FHostedServer.StartupScriptUri = LInProcessAlias.StartupScriptUri;
-					FHostedServer.CatalogStoreClassName = LInProcessAlias.CatalogStoreClassName;
-					FHostedServer.CatalogStoreConnectionString = LInProcessAlias.CatalogStoreConnectionString;
-					FHostedServer.CatalogDirectory = LInProcessAlias.CatalogDirectory;
-					FHostedServer.CatalogStoreDatabaseName = LInProcessAlias.CatalogStoreDatabaseName;
-					FHostedServer.CatalogStorePassword = LInProcessAlias.CatalogStorePassword;
-					FHostedServer.LibraryDirectory = LInProcessAlias.LibraryDirectory;
+					LConfiguration.ApplyTo(FHostedServer);
+					
 					FHostedServer.IsEmbedded = LInProcessAlias.IsEmbedded;
 					FHostedServer.OnDeviceStarting += new DeviceNotifyEvent(FHostedServer_OnDeviceStarting);
 					FHostedServer.OnDeviceStarted += new DeviceNotifyEvent(FHostedServer_OnDeviceStarted);
 					FHostedServer.OnLibraryLoading += new LibraryNotifyEvent(FHostedServer_OnLibraryLoading);
 					FHostedServer.OnLibraryLoaded += new LibraryNotifyEvent(FHostedServer_OnLibraryLoaded);
+
 					if (!LInProcessAlias.IsEmbedded)
-						FServerHost = new ServerHost(FHostedServer, LInProcessAlias.PortNumber);
+						FServerHost = new ServerHost(FHostedServer, LConfiguration.PortNumber);
 					if (AAutoStart)
 						FHostedServer.Start();
 				}
 				else
 				{
+					string LInstanceURI = null;
+					if (LConnectionAlias.OverridePortNumber != 0)
+						LInstanceURI = Listener.BuildInstanceURI(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
+					else
+					{
+						try
+						{
+							LInstanceURI = ServerFactory.GetInstanceURI(LConnectionAlias.HostName, LConnectionAlias.InstanceName);
+						}
+						catch (Exception LException)
+						{
+							throw new ClientException(ClientException.Codes.CouldNotDeterminePortNumber, LConnectionAlias.HostName, LException);
+						}
+					}
+					
 					FRemoteServer = 
 						ServerFactory.Connect
 						(
-							String.Format("tcp://{0}:{1}/Dataphor", LConnectionAlias.HostName, LConnectionAlias.PortNumber), 
+							LInstanceURI, 
 							LConnectionAlias.ClientSideLoggingEnabled,
 							TerminalServiceUtility.ClientName
 						);

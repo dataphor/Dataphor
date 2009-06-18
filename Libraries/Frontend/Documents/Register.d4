@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Frontend Server Registration Script
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
@@ -560,7 +560,7 @@ end;
 grant usage on GetWindowsSettings(Name) to role User;
 
 //* Operator: GetLibraryFiles
-create operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime }
+create operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Library_Name : String, Name : String, TimeStamp : DateTime }
 	class "Frontend.GetLibraryFilesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 grant usage on GetLibraryFiles(table { Library_Name : Name }) to role User;
 

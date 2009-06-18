@@ -24,7 +24,9 @@
 							<P>
 								<asp:Label id="Label2" runat="server">Host</asp:Label>
 								<asp:TextBox id="FHostNameTextBox" runat="server"></asp:TextBox><BR>
-								<asp:Label id="Label3" runat="server">Port Number</asp:Label>
+								<asp:Label id="Label9" runat="server">Instance</asp:Label>
+								<asp:TextBox id="FInstanceNameTextBox" runat="server"></asp:TextBox><BR>
+								<asp:Label id="Label3" runat="server">Override Port Number</asp:Label>
 								<asp:TextBox id="FPortNumberConnectionTextBox" runat="server"></asp:TextBox></P>
 						</TD>
 					</TR>
@@ -35,13 +37,10 @@
 				<TABLE id="Table1" cellSpacing="1" cellPadding="1" width="300" border="1">
 					<TR>
 						<TD>
-							<asp:Label id="Label4" runat="server">Port Number</asp:Label>
-							<asp:TextBox id="FPortNumberInProcessTextBox" runat="server"></asp:TextBox><BR>
+							<asp:Label id="Label4" runat="server">Instance</asp:Label>
+							<asp:TextBox id="FInProcessInstanceNameTextBox" runat="server"></asp:TextBox><BR>
 							<BR>
-							<asp:Label id="Label6" runat="server">Catalog Directory</asp:Label><BR>
-							<asp:TextBox id="FCatalogDirectoryTextBox" runat="server" Width="256px"></asp:TextBox><BR>
-							<asp:Label id="Label7" runat="server">Library Directory</asp:Label><BR>
-							<asp:TextBox id="FLibraryDirectoryTextBox" runat="server" Width="256px"></asp:TextBox></TD>
+						</TD>
 					</TR>
 				</TABLE>
 			</P>

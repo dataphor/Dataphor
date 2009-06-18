@@ -1,5 +1,6 @@
 //#define TRACEEVENTS // Enable this to turn on tracing
 #define ALLOWPROCESSCONTEXT
+#define LOADFROMLIBRARIES
 
 /*
 	Alphora Dataphor
@@ -714,13 +715,17 @@ namespace Alphora.Dataphor.DAE.Server
 	public class Server : ServerObject, IDisposable, IServer, IRemoteServer, ITrackingHandler
 	{
 		// Do not localize
-		public const string CDefaultServerName = "dataphor";
+		public const string CDefaultServerName = "Dataphor";
 		public const string CServerLogName = @"Dataphor";											 
 		public const string CServerSourceName = @"Dataphor Server";
 		public const string CDefaultLibraryDirectory = @"Libraries";
+		public const string CDefaultLibraryDataDirectory = @"LibraryData";
+		public const string CDefaultInstanceDirectory = @"Instances";
 		public const string CDefaultCatalogDirectory = @"Catalog";
+		public const string CDefaultCatalogDatabaseName = @"DAECatalog";
 		public const string CDefaultBackupDirectory = @"Backup";
 		public const string CDefaultSaveDirectory = @"Save";
+		public const string CDefaultLogDirectory = @"Log";
 		public const string CSystemLibraryName = @"System";
 		public const string CGeneralLibraryName = @"General";
 		public const string CUserRoleName = "System.User";
@@ -935,6 +940,13 @@ namespace Alphora.Dataphor.DAE.Server
 					throw new ServerException(ServerException.Codes.InvalidServerState, ServerState.Started.ToString());
 				return FATDevice; 
 			} 
+		}
+		
+		// DeviceSettings
+		private Schema.DeviceSettings FDeviceSettings = new Schema.DeviceSettings();
+		public Schema.DeviceSettings DeviceSettings
+		{
+			get { return FDeviceSettings; }
 		}
 		
 		// PlanCache
@@ -1370,9 +1382,9 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					try
 					{
+						SetState(ServerState.Starting);
 						StartLog();
 						FNextSessionID = 0;
-						SetState(ServerState.Starting);
 						InternalStart();
 						SetState(ServerState.Started);
 						LogEvent(DAE.Server.LogEvent.ServerStarted);
@@ -1438,12 +1450,8 @@ namespace Alphora.Dataphor.DAE.Server
 			InitializeAvailableLibraries();
 			InitializeCatalog();
 			RegisterCatalog();
-//			if (AScript != String.Empty)
-//				RunScript(AScript, String.Empty);
-//			else
-			if (FFirstRun)
-				LoadCatalog(); // Load the catalog from the d4c files if this is the first time running on the configured store for this instance
-			else
+
+			if (!FFirstRun)
 				LoadServerState(); // Load server state from the persistent store
 
 			FCatalogLoaded = true;
@@ -1501,9 +1509,16 @@ namespace Alphora.Dataphor.DAE.Server
 			return String.Format("{0}{1}", CServerLogName, ALogIndex == 0 ? " (current)" : ALogIndex.ToString());
 		}
 		
+		private string GetLogDirectory()
+		{
+			string LResult = Path.Combine(InstanceDirectory, CDefaultLogDirectory);
+			Directory.CreateDirectory(LResult);
+			return LResult;
+		}
+		
 		private string GetLogFileName(int ALogIndex)
 		{
-			return Path.Combine(IsRepository ? PathUtility.CommonAppDataPath() : PathUtility.GetBinDirectory(), String.Format("{0}{1}.log", CServerLogName, ALogIndex == 0 ? String.Empty : ALogIndex.ToString()));
+			return Path.Combine(GetLogDirectory(), String.Format("{0}{1}.log", CServerLogName, ALogIndex == 0 ? String.Empty : ALogIndex.ToString()));
 		}
 		
 		public StringCollection ListLogs()
@@ -2120,7 +2135,36 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 			}
 		}
-        
+		
+		private string FInstanceDirectory;
+		/// <summary>
+		/// The primary data directory for the instance. All write activity for the server should occur in this directory (logging, catalog, device data, etc.,.)
+		/// </summary>
+		public string InstanceDirectory
+		{
+			get 
+			{ 
+				if (State != ServerState.Stopped)
+				{
+					if (String.IsNullOrEmpty(FInstanceDirectory))
+						FInstanceDirectory = Name;
+						
+					if (!Path.IsPathRooted(FInstanceDirectory))
+						FInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), CDefaultInstanceDirectory), FInstanceDirectory);
+
+					if (!Directory.Exists(FInstanceDirectory))
+						Directory.CreateDirectory(FInstanceDirectory);
+				}
+
+				return FInstanceDirectory; 
+			}
+			set
+			{
+				CheckState(ServerState.Stopped);
+				FInstanceDirectory = value;
+			}
+		}
+		
 		private bool FTracingEnabled = true;
 		/// <summary> Determines whether trace logging for server events is enabled. </summary>
 		/// <remarks> The default is true. </remarks>
@@ -2415,7 +2459,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </summary>
 		/// <remarks>
 		/// This property cannot be changed once the server has been started. If this property is not
-		/// set, a default SQLCE connection string will be built based on the values of the CatalogDirectory,
+		/// set, a default SQLCE connection string will be built based on the values of the InstanceDirectory,
 		/// CatalogStoreDatabaseName and CatalogStorePassword properties.
 		/// </remarks>
 		public string CatalogStoreConnectionString
@@ -2436,88 +2480,26 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			return 
 				String.IsNullOrEmpty(FCatalogStoreConnectionString)
-					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), CatalogStorePassword, "Read Write")
+					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), String.Empty, "Read Write")
 					: FCatalogStoreConnectionString;
 		}
 		
-		private string FCatalogDirectory = String.Empty;
-		/// <summary> The directory the DAE will use to persist system and library catalogs. </summary>
-		/// <remarks>
-		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
-		/// </remarks>
-		public string CatalogDirectory
+		/// <summary>
+		/// Returns the catalog directory for this instance. This is always a directory named Catalog within the instance directory.
+		/// </summary>
+		public string GetCatalogDirectory()
 		{
-			get { return FCatalogDirectory; }
-			set
-			{
-				CheckState(ServerState.Stopped);
-				if ((value == null) || (value == String.Empty))
-					FCatalogDirectory = String.Empty;
-				else
-				{
-					if (Path.IsPathRooted(value))
-						FCatalogDirectory = value;
-					else
-						FCatalogDirectory = Path.Combine(PathUtility.GetBinDirectory(), value);
-				}
-			}
-		}
-		
-		private string FCatalogStoreDatabaseName = "DAECatalog";
-		/// <summary>The name of the database to be used for the catalog store.</summary>
-		/// <remarks>
-		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
-		/// </remarks>
-		public string CatalogStoreDatabaseName
-		{
-			get { return FCatalogStoreDatabaseName; }
-			set 
-			{ 
-				CheckState(ServerState.Stopped); 
-				if ((value == null) || (value == String.Empty))
-					FCatalogStoreDatabaseName = "DAECatalog";
-				else
-				{
-					if (!Parser.IsValidIdentifier(value))
-						throw new ParserException(ParserException.Codes.InvalidIdentifier, value);
-					FCatalogStoreDatabaseName = value;
-				}
-			}
+			string LDirectory = Path.Combine(InstanceDirectory, CDefaultCatalogDirectory);
+			if (!Directory.Exists(LDirectory))
+				Directory.CreateDirectory(LDirectory);
+			return LDirectory;
 		}
 		
 		public string GetCatalogStoreDatabaseFileName()
 		{
-			string LCatalogDirectory;
-			if (FCatalogDirectory == String.Empty)
-				LCatalogDirectory = GetDefaultCatalogDirectory();
-			else
-			{
-				LCatalogDirectory = FCatalogDirectory;
-				if (!Directory.Exists(LCatalogDirectory))
-					Directory.CreateDirectory(LCatalogDirectory);
-			}
-			
-			return Path.Combine(LCatalogDirectory, Path.ChangeExtension(FCatalogStoreDatabaseName, ".sdf"));
+			return Path.Combine(GetCatalogDirectory(), Path.ChangeExtension(CDefaultCatalogDatabaseName, ".sdf"));
 		}
 
-		private string FCatalogStorePassword = String.Empty;
-		/// <summary>The password to be used to connect to the catalog store.</summary>
-		/// <remarks>
-		/// Note that this setting is used to maintain backwards-compatibility. If the CatalogStoreConnectionString is set, this setting will have no effect.
-		/// </remarks>
-		public string CatalogStorePassword
-		{
-			get { return FCatalogStorePassword; }
-			set 
-			{ 
-				CheckState(ServerState.Stopped); 
-				if ((value == null) || (value == String.Empty))
-					FCatalogStorePassword = "";
-				else
-					FCatalogStorePassword = value;
-			}
-		}
-		
 		private string FLibraryDirectory = String.Empty;
 		/// <summary> The directory the DAE uses to find available libraries. </summary>
 		public string LibraryDirectory
@@ -2558,179 +2540,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return Path.Combine(PathUtility.GetBinDirectory(), CDefaultLibraryDirectory);
 		}
 		
-		public static string GetDefaultCatalogDirectory()
-		{
-			string LDirectoryName = Path.Combine(PathUtility.GetBinDirectory(), CDefaultCatalogDirectory);
-			if (!Directory.Exists(LDirectoryName))
-				Directory.CreateDirectory(LDirectoryName);
-			return LDirectoryName;
-		}
-
-		/// <summary> Saves the system catalog to the given directory. </summary>
-		/// <remarks>
-		/// 	Serializes the catalog into the directory identified by 
-		/// 	<see cref="CatalogDirectory" />.  If CatalogDirectory is empty, nothing
-		/// 	happens.
-		/// </remarks>
-		public void SaveCatalog(bool AShouldThrow)
-		{
-			if (FCatalogDirectory != String.Empty) 
-			{
-				try
-				{
-					SaveCatalog(Path.Combine(FCatalogDirectory, CDefaultSaveDirectory));
-					OverwriteCatalog(Path.Combine(FCatalogDirectory, CDefaultSaveDirectory), FCatalogDirectory);
-				}
-				catch (Exception E)
-				{
-					LogError(E);
-					if (AShouldThrow)
-						throw;
-				}
-			}
-		}
-		
-		public void SaveCatalog()
-		{
-			SaveCatalog(true);
-		}
-		
-		public void BackupCatalog()
-		{
-			if (FCatalogDirectory != String.Empty)
-				SaveCatalog(Path.Combine(FCatalogDirectory, CDefaultBackupDirectory));
-		}
-		
-		private void BackupFile(string AFileName)
-		{
-			if (File.Exists(AFileName))
-				File.Copy(AFileName, Path.ChangeExtension(AFileName, ".old"), true);
-		}
-		
-		private void RestoreFile(string AFileName)
-		{
-			if (File.Exists(AFileName))
-				File.Copy(AFileName, Path.ChangeExtension(AFileName, ".d4c"), true);
-		}
-		
-		private void OverwriteCatalog(string ASourceDirectory, string ATargetDirectory)
-		{
-			string LSourceFileName;
-			string LTargetFileName;
-			string[] LCatalogFileNames = Directory.GetFiles(ASourceDirectory, "*.d4c");
-			string[] LWrittenFiles = new string[LCatalogFileNames.Length];
-			try
-			{
-				for (int LIndex = 0; LIndex < LCatalogFileNames.Length; LIndex++)
-				{
-					LSourceFileName = LCatalogFileNames[LIndex];
-					LTargetFileName = Path.Combine(ATargetDirectory, Path.GetFileName(LSourceFileName));
-					BackupFile(LTargetFileName);
-					File.Copy(LSourceFileName, LTargetFileName, true);
-					LWrittenFiles[LIndex] = LTargetFileName;
-				}
-			}
-			catch (Exception E)
-			{
-				foreach (string LRestoreFileName in LWrittenFiles)
-					if (LRestoreFileName != null)
-						RestoreFile(LRestoreFileName);
-				
-				LogError(E);
-				throw;
-			}
-		}
-		
-		public void SaveLibraryCatalog(Schema.LoadedLibrary ALibrary)
-		{
-			if (FCatalogDirectory != String.Empty)
-				SaveLibraryCatalog(FCatalogDirectory, ALibrary);
-		}
-		
-		public bool CanLoadLibrary(string ALibraryName)
-		{
-			return (FCatalogDirectory != String.Empty) && File.Exists(Path.Combine(FCatalogDirectory, GetLibraryCatalogFileName(ALibraryName)));
-		}
-		
-		private void SaveLibraryCatalog(string ADirectoryName, Schema.LoadedLibrary ALibrary)
-		{
-			EnsureCatalogDirectory(ADirectoryName);
-			string LFileName = Path.Combine(ADirectoryName, GetLibraryCatalogFileName(ALibrary.Name));
-			BackupFile(LFileName);
-			using (FileStream LCatalogStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
-			{
-				StreamWriter LWriter = new StreamWriter(LCatalogStream);
-				try
-				{
-					LWriter.Write(new D4TextEmitter().Emit(FCatalog.EmitStatement(FSystemProcess, EmitMode.ForCopy, ALibrary.Name, false)));
-				}
-				finally
-				{
-					LWriter.Close();
-				}
-			}
-		}
-		
-		private void EnsureCatalogDirectory(string ADirectoryName)
-		{
-			if (!Path.IsPathRooted(ADirectoryName)) // if a relative path
-				ADirectoryName = Path.Combine(PathUtility.GetBinDirectory(), ADirectoryName); // Prepend startup path of executable.
-
-			if (!Directory.Exists(ADirectoryName))
-				Directory.CreateDirectory(ADirectoryName);
-		}
-		
-		private string SaveLibraryVersions()
-		{
-			FSystemSession.CurrentLibrary = FSystemLibrary;
-			IServerExpressionPlan LPlan = ((IServerProcess)FSystemProcess).PrepareExpression(@"select 'insert ' + System.ScriptData('System.LibraryVersions') + ' into System.LibraryVersions;'", null);
-			try
-			{
-				return String.Format("{0}\r\n", LPlan.Evaluate(null).AsString);
-			}
-			finally
-			{
-				((IServerProcess)FSystemProcess).UnprepareExpression(LPlan);
-			}
-		}
-		
-		private string SaveLibraryOwners()
-		{
-			FSystemSession.CurrentLibrary = FSystemLibrary;
-			IServerExpressionPlan LPlan = ((IServerProcess)FSystemProcess).PrepareExpression(@"select 'insert ' + System.ScriptData('System.LibraryOwners') + ' into System.LibraryOwners;'", null);
-			try
-			{
-				return String.Format("{0}\r\n", LPlan.Evaluate(null).AsString);
-			}
-			finally
-			{
-				((IServerProcess)FSystemProcess).UnprepareExpression(LPlan);
-			}
-		}
-		
-		private string SaveLibraryDirectories()
-		{
-			StringBuilder LStatement = new StringBuilder();
-			
-			foreach (Schema.Library LLibrary in Catalog.Libraries)
-				if (LLibrary.Directory != String.Empty)
-					LStatement.AppendFormat("AttachLibrary('{0}', '{1}');\r\n", LLibrary.Name, LLibrary.GetLibraryDirectory(LibraryDirectory));
-					
-			return LStatement.ToString();
-		}
-		
 		private string SaveServerSettings()
 		{
 			StringBuilder LUpdateStatement = new StringBuilder();
-			//if (!TracingEnabled)
-			//	LUpdateStatement.AppendFormat("TracingEnabled := {0}", TracingEnabled.ToString().ToLower());
-			
-			//if (LogErrors)
-			//{
-			//	if (LUpdateStatement.Length > 0)
-			//		LUpdateStatement.Append(", ");
-			//	LUpdateStatement.AppendFormat("LogErrors := {0}", LogErrors.ToString().ToLower());
-			//}
 			
 			if (MaxConcurrentProcesses != CDefaultMaxConcurrentProcesses)
 			{
@@ -2932,56 +2744,6 @@ namespace Alphora.Dataphor.DAE.Server
 			return LResult.ToString();
 		}
 		
-		public void SaveCatalog(string ADirectoryName)
-		{
-			EnsureCatalogDirectory(ADirectoryName);
-			Exception LException = null;
-			foreach (Schema.LoadedLibrary LLibrary in FCatalog.LoadedLibraries)
-			{
-				try
-				{
-					if (LLibrary.Name != Server.CSystemLibraryName)
-						SaveLibraryCatalog(ADirectoryName, LLibrary);
-				}
-				catch (Exception E)
-				{
-					LException = E;
-					LogError(E);
-				}
-			}
-
-			try
-			{				
-				string LFileName = Path.Combine(ADirectoryName, GetLibraryCatalogFileName(CSystemLibraryName));
-				BackupFile(LFileName);
-				using (FileStream LCatalogStream = new FileStream(LFileName, FileMode.Create, FileAccess.Write))
-				{
-					StreamWriter LWriter = new StreamWriter(LCatalogStream);
-					try
-					{
-						LWriter.Write(SaveLibraryVersions());
-						LWriter.Write(SaveLibraryOwners());
-						LWriter.Write(SaveLibraryDirectories());
-						LWriter.Write(SaveServerSettings());
-						LWriter.Write(SaveSystemDeviceSettings());
-						LWriter.Write(new D4TextEmitter().Emit(FCatalog.EmitStatement(FSystemProcess, EmitMode.ForCopy, false)));
-					}
-					finally
-					{
-						LWriter.Close();
-					}
-				}
-			}
-			catch (Exception E)
-			{
-				LogError(E);
-				throw;
-			}
-			
-			if (LException != null)
-				throw LException;
-		}
-		
 		/// <summary>Returns a script to recreate the server state.</summary>
 		public string ScriptServerState(ServerProcess AProcess)
 		{
@@ -3017,25 +2779,6 @@ namespace Alphora.Dataphor.DAE.Server
 		public string ScriptDropLibrary(ServerProcess AProcess, string ALibraryName)
 		{
 			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(AProcess, new string[] {}, ALibraryName, false, false, true, true));
-		}
-		
-		public string ScriptLibraryChanges(string AOldCatalogDirectory, string ALibraryName)
-		{
-			DAE.Server.Server LServer = new DAE.Server.Server();
-			try
-			{
-				LServer.CatalogDirectory = AOldCatalogDirectory;
-				LServer.LoggingEnabled = false;
-				LServer.Start();
-
-				Schema.SchemaComparer LComparer = new Schema.SchemaComparer(LServer, this, ALibraryName);
-				return new D4TextEmitter().Emit(LComparer.EmitChanges());
-			}
-			finally
-			{
-				LServer.CatalogDirectory = String.Empty;	// do not save the catalog
-				LServer.Dispose();
-			}
 		}
 		
 		public void RunScript(string AScript)
@@ -3082,13 +2825,6 @@ namespace Alphora.Dataphor.DAE.Server
 		private bool FCatalogLoaded = false;
 		public bool CatalogLoaded { get { return FCatalogLoaded; } }
 		
-		private string FLoadingCatalogDirectory = String.Empty;
-		public string LoadingCatalogDirectory 
-		{ 
-			get { return FLoadingCatalogDirectory; }
-			set { FLoadingCatalogDirectory = value == null ? String.Empty : value; }
-		}
-		
 		// Indicates that the server is in the process of loading the full catalog
 		private bool FLoadingFullCatalog = false;
 		public bool LoadingFullCatalog
@@ -3118,53 +2854,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		/// <summary> Loads the system catalog from the given directory. </summary>
-		/// <remarks>
-		///		Deserializes the catalog from the files in the directory identified by
-		///		<see cref="CatalogDirectory"/>. If CatalogDirectory is empty
-		///		nothing happens.
-		/// </remarks>
-		public void LoadCatalog(string ADirectoryName)
-		{
-			if (!Path.IsPathRooted(ADirectoryName)) // if a relative path
-				ADirectoryName = Path.Combine(PathUtility.GetBinDirectory(), ADirectoryName); // Prepend startup path of executable.
-			
-			string LFileName = Path.Combine(ADirectoryName, GetLibraryCatalogFileName(CSystemLibraryName));
-			if (Directory.Exists(ADirectoryName) && File.Exists(LFileName))
-			{
-				FLoadingCatalog = true;
-				FLoadingFullCatalog = true;
-				FLoadingCatalogDirectory = ADirectoryName;
-				try
-				{
-					using (FileStream LCatalogStream = new FileStream(LFileName, FileMode.Open, FileAccess.Read))
-					{
-						using (StreamReader LReader = new StreamReader(LCatalogStream))
-						{
-							RunScript(LReader.ReadToEnd(), String.Empty);
-						}
-					}
-				}
-				finally
-				{
-					FLoadingCatalogDirectory = String.Empty;
-					FLoadingFullCatalog = false;
-					FLoadingCatalog = false;
-				}
-			}
-		}
-		
-		public static string GetLibraryCatalogFileName(string ALibraryName)
-		{
-			return String.Format("{0}.d4c", ALibraryName);
-		}
-		
-		public void LoadCatalog()
-		{
-			if ((FCatalogDirectory != null) && (FCatalogDirectory != String.Empty))
-				LoadCatalog(FCatalogDirectory);
-		}
-		
 		public void ClearCatalog()
 		{
 			InitializeResourceManagers();
@@ -3184,28 +2873,14 @@ namespace Alphora.Dataphor.DAE.Server
 				if (!FLoadingCatalog)
 					FLoadingCatalog = true;
 					
-				bool LLoadingCatalogDirectorySet = false;
-				if (FLoadingCatalogDirectory == String.Empty)
-				{
-					LLoadingCatalogDirectorySet = true;
-					FLoadingCatalogDirectory = FCatalogDirectory;
-				}
+				Schema.LoadedLibrary LSaveCurrentLibrary = FSystemSession.CurrentLibrary;
 				try
 				{
-					Schema.LoadedLibrary LSaveCurrentLibrary = FSystemSession.CurrentLibrary;
-					try
-					{
-						SystemLoadLibraryNode.LoadLibrary(FSystemProcess, ALibraryName);
-					}
-					finally
-					{
-						FSystemSession.CurrentLibrary = LSaveCurrentLibrary;
-					}
+					SystemLoadLibraryNode.LoadLibrary(FSystemProcess, ALibraryName);
 				}
 				finally
 				{
-					if (LLoadingCatalogDirectorySet)
-						FLoadingCatalogDirectory = String.Empty;
+					FSystemSession.CurrentLibrary = LSaveCurrentLibrary;
 				}
 			}
 			finally
@@ -3343,7 +3018,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				FCatalog.UpdateTimeStamp();
 				if (!IsRepository)
-					Schema.Library.GetAvailableLibraries(FLibraryDirectory, FCatalog.Libraries);
+					Schema.Library.GetAvailableLibraries(InstanceDirectory, FLibraryDirectory, FCatalog.Libraries);
 
 				// Create the implicit system library
 				Schema.Library LSystemLibrary = new Schema.Library(CSystemLibraryName);
@@ -6336,17 +6011,18 @@ namespace Alphora.Dataphor.DAE.Server
 			return FServerSession.Server.Catalog.ClassLoader.Classes[AClassName].ClassName;
 		}
 		
-		private void GetFileNames(Schema.Library ALibrary, StringCollection AFileNames, ArrayList AFileDates)
+		private void GetFileNames(Schema.Library ALibrary, StringCollection ALibraryNames, StringCollection AFileNames, ArrayList AFileDates)
 		{
 			foreach (Schema.FileReference LReference in ALibrary.Files)
 				if (!AFileNames.Contains(LReference.FileName))
 				{
+					ALibraryNames.Add(ALibrary.Name);
 					AFileNames.Add(LReference.FileName);
-					AFileDates.Add(File.GetLastWriteTimeUtc(GetFullFileName(LReference.FileName)));
+					AFileDates.Add(File.GetLastWriteTimeUtc(GetFullFileName(ALibrary, LReference.FileName)));
 				} 
 			
 			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
-				GetFileNames(FServerSession.Server.Catalog.Libraries[LLibrary.Name], AFileNames, AFileDates);
+				GetFileNames(FServerSession.Server.Catalog.Libraries[LLibrary.Name], ALibraryNames, AFileNames, AFileDates);
 		}
 		
 		private void GetAssemblyFileNames(Schema.Library ALibrary, StringCollection AFileNames)
@@ -6369,18 +6045,22 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		void IRemoteServerProcess.GetFileNames(string AClassName, out string[] AFileNames, out DateTime[] AFileDates, out string[] AAssemblyFileNames)
+		void IRemoteServerProcess.GetFileNames(string AClassName, out string[] ALibraryNames, out string[] AFileNames, out DateTime[] AFileDates, out string[] AAssemblyFileNames)
 		{
 			Schema.RegisteredClass LClass = FServerSession.Server.Catalog.ClassLoader.Classes[AClassName];
 
+			StringCollection LLibraryNames = new StringCollection();
 			StringCollection LFileNames = new StringCollection();
 			StringCollection LAssemblyFileNames = new StringCollection();
 			ArrayList LFileDates = new ArrayList();
 			
 			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
 			Schema.Library LLibrary = FServerSession.Server.Catalog.Libraries[LClass.Library.Name];
-			GetFileNames(LLibrary, LFileNames, LFileDates);
+			GetFileNames(LLibrary, LLibraryNames, LFileNames, LFileDates);
 			GetAssemblyFileNames(LLibrary, LAssemblyFileNames);
+			
+			ALibraryNames = new string[LLibraryNames.Count];
+			LLibraryNames.CopyTo(ALibraryNames, 0);
 			
 			AFileNames = new string[LFileNames.Count];
 			LFileNames.CopyTo(AFileNames, 0);
@@ -6394,14 +6074,24 @@ namespace Alphora.Dataphor.DAE.Server
 				AAssemblyFileNames[LAssemblyFileNames.Count - LIndex - 1] = LAssemblyFileNames[LIndex];
 		}
 		
-		private string GetFullFileName(string AFileName)
+		public string GetFullFileName(Schema.Library ALibrary, string AFileName)
 		{
+			#if LOADFROMLIBRARIES
+			return 
+				Path.IsPathRooted(AFileName) 
+					? AFileName 
+					: 
+						ALibrary.Name == Server.CSystemLibraryName
+							? PathUtility.GetFullFileName(AFileName)
+							: Path.Combine(ALibrary.GetLibraryDirectory(FServerSession.Server.LibraryDirectory), AFileName);
+			#else
 			return PathUtility.GetFullFileName(AFileName);
+			#endif
 		}
 		
-		IRemoteStream IRemoteServerProcess.GetFile(string AFileName)
+		IRemoteStream IRemoteServerProcess.GetFile(string ALibraryName, string AFileName)
 		{
-			return new CoverStream(new FileStream(GetFullFileName(AFileName), FileMode.Open, FileAccess.Read, FileShare.Read), true);
+			return new CoverStream(new FileStream(GetFullFileName(FServerSession.Server.Catalog.Libraries[ALibraryName], AFileName), FileMode.Open, FileAccess.Read, FileShare.Read), true);
 		}
 		
 		// DeviceSessions		

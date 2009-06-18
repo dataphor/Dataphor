@@ -27,6 +27,7 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using WeifenLuo.WinFormsUI.Docking;
 using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -224,17 +225,26 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FDataSession == null)
 			{
+				InstanceConfiguration LInstanceConfiguration = InstanceManager.LoadConfiguration();
+				ServerConfiguration LDefaultInstance = LInstanceConfiguration.Instances[Server.CDefaultServerName];
+				if (LInstanceConfiguration.Instances.Count == 0)
+				{
+					LDefaultInstance = ServerConfiguration.DefaultLocalInstance();
+					LInstanceConfiguration.Instances.Add(LDefaultInstance);
+					InstanceManager.SaveConfiguration(LInstanceConfiguration);
+				}
+				
 				AliasConfiguration LConfiguration = AliasManager.LoadConfiguration();
 				if (LConfiguration.Aliases.Count == 0)
 				{
 					InProcessAlias LAlias = new InProcessAlias();
-					LAlias.LibraryDirectory = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)), @"Libraries");
-					LAlias.CatalogDirectory = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), @"Catalog");
-					LAlias.Name = "In Process";
-					LAlias.PortNumber = 8062;	// don't use the same default port as the service
+					LAlias.Name = LDefaultInstance == null ? ServerConfiguration.CDefaultLocalInstanceName : LDefaultInstance.Name;
+					LAlias.InstanceName = LDefaultInstance == null ? ServerConfiguration.CDefaultLocalInstanceName : LDefaultInstance.Name;
 					LConfiguration.Aliases.Add(LAlias);
 				}
+
 				ServerConnectForm.Execute(LConfiguration);
+
 				using (var LStatusForm = new StatusForm(Strings.Connecting))
 				{
 					FDataSession = new DataSession();

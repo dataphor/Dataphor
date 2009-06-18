@@ -521,7 +521,7 @@ begin
 	create operator ScriptDrop(const ASpecifier : String, const AIncludeDependents : Boolean, const AIncludeObject : Boolean) : String class "System.SystemScriptDropNode" static tags { DAE.IsRemotable = "False" };
 	create operator ScriptDropLibrary(const AName : Name) : String class "System.SystemScriptDropLibraryNode" static tags { DAE.IsRemotable = "False" };
 	create operator ScriptDropCatalog() : String class "System.SystemScriptDropCatalogNode" static tags { DAE.IsRemotable = "False" };
-	create operator ScriptLibraryChanges(const AOldCatalogDirectory : String, const ALibraryName : Name) : String class "System.SystemScriptLibraryChangesNode" static tags { DAE.IsRemotable = "False" };
+	//create operator ScriptLibraryChanges(const AOldCatalogDirectory : String, const ALibraryName : Name) : String class "System.SystemScriptLibraryChangesNode" static tags { DAE.IsRemotable = "False" };
 	create operator GetDefaultDeviceName() : Name class "System.SystemGetDefaultDeviceNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator GetDefaultDeviceName(const ALibraryName : Name) : Name class "System.SystemGetDefaultDeviceNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator SetDefaultDeviceName(const ADeviceName : Name) class "System.SystemSetDefaultDeviceNameNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -1154,7 +1154,7 @@ begin
 		CacheTimeStamp : Long, 
 		PlanCacheTimeStamp : Long,
 		DerivationTimeStamp : Long, 
-		CatalogDirectory : String, 
+		InstanceDirectory : String, 
 		LibraryDirectory : String,
 		IsRepository : Boolean, 
 		IsEmbedded : Boolean,

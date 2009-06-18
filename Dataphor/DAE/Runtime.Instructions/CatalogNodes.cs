@@ -630,7 +630,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemString, AProcess.ServerSession.Server.ScriptLibraryChanges(AArguments[0].Value.AsString, AArguments[1].Value.AsString)));
+			return new DataVar(FDataType, null);
+			//return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemString, AProcess.ServerSession.Server.ScriptLibraryChanges(AArguments[0].Value.AsString, AArguments[1].Value.AsString)));
 		}
 	}
 

@@ -132,7 +132,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FInternalServer = new Server();
 			FInternalServer.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
 			FInternalServer.TracingEnabled = false;
-			FInternalServer.CatalogDirectory = String.Empty;
 			FInternalServer.IsRepository = true;
 			FInternalServer.LoggingEnabled = AClientSideLoggingEnabled;
 			FInternalServer.Start();
@@ -489,11 +488,30 @@ namespace Alphora.Dataphor.DAE.Server
 		private StringCollection FFilesCached = new StringCollection();
 		private StringCollection FAssembliesCached = new StringCollection();
 		
-		public void GetFile(LocalProcess AProcess, string AFileName, DateTime AFileDate)
+		private string FLocalBinDirectory;
+		private string LocalBinDirectory
+		{
+			get
+			{
+				if (FLocalBinDirectory == null)
+				{
+					FLocalBinDirectory = Path.Combine(Path.Combine(PathUtility.GetBinDirectory(), "LocalBin"), FServer.Name);
+					Directory.CreateDirectory(FLocalBinDirectory);
+				}
+				return FLocalBinDirectory;
+			}
+		}
+		
+		private string GetLocalFileName(string ALibraryName, string AFileName)
+		{
+			return Path.Combine(ALibraryName == Server.CSystemLibraryName ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
+		}
+		
+		public void GetFile(LocalProcess AProcess, string ALibraryName, string AFileName, DateTime AFileDate)
 		{
 			if (!FFilesCached.Contains(AFileName))
 			{
-				string LFullFileName = Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(AFileName));
+				string LFullFileName = GetLocalFileName(ALibraryName, AFileName);
 				if (!File.Exists(LFullFileName) || (File.GetLastWriteTimeUtc(LFullFileName) < AFileDate))
 				{
 					#if LOGFILECACHEEVENTS
@@ -502,7 +520,7 @@ namespace Alphora.Dataphor.DAE.Server
 					else
 						FInternalServer.LogMessage(String.Format(@"Downloading newer version of file ""{0}"" from server. Client write time: ""{1}"". Server write time: ""{2}"".", LFullFileName, File.GetLastWriteTimeUtc(LFullFileName), AFileDate.ToString()));
 					#endif
-					using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(AFileName)))
+					using (Stream LSourceStream = new RemoteStreamWrapper(AProcess.RemoteProcess.GetFile(ALibraryName, AFileName)))
 					{
 						FileUtility.EnsureWriteable(LFullFileName);
 						try
@@ -541,19 +559,20 @@ namespace Alphora.Dataphor.DAE.Server
 					//string AFullClassName = AProcess.RemoteProcess.GetClassName(AClassDefinition.ClassName); // BTR 5/17/2004 -> As far as I can tell, this doesn't do anything
 
 					// Retrieve the list of all files required to load the assemblies required to load the class.
+					string[] LLibraryNames;
 					string[] LFileNames;
 					DateTime[] LFileDates;
 					string[] LAssemblyFileNames;
-					AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, out LFileNames, out LFileDates, out LAssemblyFileNames);
+					AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, out LLibraryNames, out LFileNames, out LFileDates, out LAssemblyFileNames);
 					for (int LIndex = 0; LIndex < LFileNames.Length; LIndex++)
-						GetFile(AProcess, LFileNames[LIndex], LFileDates[LIndex]);
+						GetFile(AProcess, LLibraryNames[LIndex], LFileNames[LIndex], LFileDates[LIndex]);
 					
 					// Retrieve the list of all assemblies required to load the class.
 					foreach (string LAssemblyFileName in LAssemblyFileNames)
 					{
 						if (!FAssembliesCached.Contains(LAssemblyFileName))
 						{
-							Assembly LAssembly = Assembly.LoadFrom(Path.Combine(PathUtility.GetBinDirectory(), Path.GetFileName(LAssemblyFileName)));
+							Assembly LAssembly = Assembly.LoadFrom(GetLocalFileName(LLibraryNames[Array.IndexOf<string>(LFileNames, LAssemblyFileName)], LAssemblyFileName));
 							if (!AClassLoader.Assemblies.Contains(LAssembly.GetName()))
 								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Server.CSystemLibraryName], LAssembly);
 							FAssembliesCached.Add(LAssemblyFileName);

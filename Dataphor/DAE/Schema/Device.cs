@@ -657,6 +657,21 @@ namespace Alphora.Dataphor.DAE.Schema
         public int ResourceManagerID { get { return FResourceManagerID; } }
         
         // Start
+        protected virtual void ApplyDeviceSettings(ServerProcess AProcess)
+        {
+			foreach (DeviceSetting LSetting in AProcess.ServerSession.Server.DeviceSettings.GetSettingsForDevice(Name))
+			{
+				try
+				{
+					ClassLoader.SetProperty(this, LSetting.SettingName, LSetting.SettingValue);
+				}
+				catch (Exception LException)
+				{
+					AProcess.ServerSession.Server.LogError(new SchemaException(SchemaException.Codes.ErrorApplyingDeviceSetting, LException, Name, LSetting.SettingName, LSetting.SettingValue));
+				}
+			}
+        }
+        
         protected virtual void InternalStart(ServerProcess AProcess)
         {
 			FSessions = new DeviceSessions();
@@ -670,6 +685,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				try
 				{
+					ApplyDeviceSettings(AProcess);
 					InternalStart(AProcess);
 					FRunning = true;
 					InternalStarted(AProcess);
@@ -1158,6 +1174,55 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
+    public class DeviceSetting : System.Object
+    {
+		private string FDeviceName;
+		public string DeviceName
+		{
+			get { return FDeviceName; }
+			set { FDeviceName = value; }
+		}
+		
+		private string FSettingName;
+		public string SettingName
+		{
+			get { return FSettingName; }
+			set { FSettingName = value; }
+		}
+		
+		private string FSettingValue;
+		public string SettingValue
+		{
+			get { return FSettingValue; }
+			set { FSettingValue = value; }
+		}
+		
+		public override string ToString()
+		{
+			return String.Format("{0}\\{1}={2}", FDeviceName, FSettingName, FSettingValue);
+		}
+	}
+	
+	public class DeviceSettings : TypedList
+	{
+		public DeviceSettings() : base(typeof(DeviceSetting)) { }
+		
+		public new DeviceSetting this[int AIndex]
+		{
+			get { return (DeviceSetting)base[AIndex]; }
+			set { base[AIndex] = value; }
+		}
+		
+		public DeviceSettings GetSettingsForDevice(string ADeviceName)
+		{
+			DeviceSettings LResult = new DeviceSettings();
+			for (int LIndex = 0; LIndex < Count; LIndex++)
+				if (this[LIndex].DeviceName == ADeviceName)
+					LResult.Add(this[LIndex]);
+			return LResult;
+		}
+	}
+	
 	public class DeviceSessionInfo : System.Object
 	{
 		public DeviceSessionInfo(string AUserName, string APassword) : base()

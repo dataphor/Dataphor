@@ -636,7 +636,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			ARow[5].AsInt64 = LServer.CacheTimeStamp;
 			ARow[6].AsInt64 = LServer.PlanCacheTimeStamp;
 			ARow[7].AsInt64 = LServer.DerivationTimeStamp;
-			ARow[8].AsString = LServer.CatalogDirectory;
+			ARow[8].AsString = LServer.InstanceDirectory;
 			ARow[9].AsString = LServer.LibraryDirectory;
 			ARow[10].AsBoolean = LServer.IsRepository;
 			ARow[11].AsBoolean = LServer.IsEmbedded;

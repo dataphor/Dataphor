@@ -105,13 +105,17 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	
 		public SimpleDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
 		{
-			FDirectoryName = Path.Combine(PathUtility.GetBinDirectory(), CDataDirectoryName);
-			if (!Directory.Exists(FDirectoryName))
-				Directory.CreateDirectory(FDirectoryName);
 		}
 		
 		protected override void InternalStart(ServerProcess AProcess)
 		{
+			if (String.IsNullOrEmpty(FDirectoryName))
+				FDirectoryName = CDataDirectoryName;
+			if (!Path.IsPathRooted(FDirectoryName))
+				FDirectoryName = Path.Combine(AProcess.ServerSession.Server.InstanceDirectory, FDirectoryName);
+			if (!Directory.Exists(FDirectoryName))
+				Directory.CreateDirectory(FDirectoryName);
+			
 			base.InternalStart(AProcess);
 		}
 		
@@ -138,16 +142,8 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			get { return FDirectoryName; }
 			set 
 			{
-				if (FDirectoryName != value)
-				{
-					if (Path.IsPathRooted(value))
-						FDirectoryName = value; 
-					else
-						FDirectoryName = Path.Combine(PathUtility.GetBinDirectory(), value);
-
-					if (!Directory.Exists(FDirectoryName))
-						Directory.CreateDirectory(FDirectoryName);
-				}
+				CheckNotRunning();
+				FDirectoryName = value;
 			}
 		}
 		

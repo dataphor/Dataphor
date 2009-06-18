@@ -12,92 +12,10 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
 using Alphora.Dataphor.DAE;
+using System.Configuration;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class ServerHost : Disposable
-	{
-		public ServerHost(Server AServer, int APortNumber)
-		{
-			BinaryServerFormatterSinkProvider LProvider = new BinaryServerFormatterSinkProvider();
-			LProvider.TypeFilterLevel = TypeFilterLevel.Full;
-			if (RemotingConfiguration.CustomErrorsMode != CustomErrorsModes.Off)	// Must check, will throw if we attempt to set it again (regardless)
-				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
-
-			IDictionary LProperties = new System.Collections.Specialized.ListDictionary();
-			LProperties["port"] = APortNumber;
-			string LChannelName = GetNextChannelName();
-			LProperties["name"] = LChannelName;
-			FChannel = new TcpChannel(LProperties, null, LProvider);
-			ChannelServices.RegisterChannel(FChannel, false);
-			try
-			{
-				RemotingServices.Marshal
-				(
-					AServer, 
-					"Dataphor",
-					typeof(Server)
-				);
-				FServer = AServer;
-			}
-			catch
-			{
-				ChannelServices.UnregisterChannel(FChannel);
-				FChannel = null;
-				throw;
-			}
-		}
-
-		protected override void Dispose(bool ADisposing)
-		{
-			try
-			{
-				try
-				{
-					if (FServer != null)
-					{
-						RemotingServices.Disconnect(FServer);
-						FServer = null;
-					}
-				}
-				finally
-				{
-					if (FChannel != null)
-					{
-						ChannelServices.UnregisterChannel(FChannel);
-						FChannel = null;
-					}
-				}
-			}
-			finally
-			{
-				base.Dispose(ADisposing);
-			}
-		}
-
-		private TcpChannel FChannel;
-		public TcpChannel Channel
-		{
-			get { return FChannel; }
-		}
-
-
-		private Server FServer;
-		public Server Server
-		{
-			get { return FServer; }
-		}
-
-		// statics
-
-		public static int FChannelNameGenerator = 0;
-		public static string GetNextChannelName()
-		{
-
-			return "Channel" + System.Threading.Interlocked.Increment(ref FChannelNameGenerator).ToString();
-		}
-	}
-
 	#if DEBUG
 	public class LoggingClientSinkProvider : IClientChannelSinkProvider
 	{
@@ -166,14 +84,40 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return FClientChannel; }
 		}
 		
-		public static IServer Connect(string AServerURI, string AHostName)
+		private static string GetListenerURI(string AHostName)
 		{
-			return Connect(AServerURI, false, AHostName);
+			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("listener");
+			int LPort = LSettings == null || LSettings["port"] == null ? Listener.CDefaultListenerPort : (int)LSettings["port"];
+			return String.Format("tcp://{0}:{1}/DataphorListener", AHostName, LPort);
 		}
-
+		
+		private static IListener GetListener(string AHostName)
+		{
+			EnsureClientChannel();
+			IListener LListener = (IListener)Activator.GetObject(typeof(IListener), GetListenerURI(AHostName));
+			if (LListener == null)
+				throw new ServerException(ServerException.Codes.UnableToConnectToListener, AHostName);
+			return LListener;
+		}
+		
+		public static string[] EnumerateInstances(string AHostName)
+		{
+			return GetListener(AHostName).EnumerateInstances();
+		}
+		
+		public static string GetInstanceURI(string AHostName, string AInstanceName)
+		{
+			return GetListener(AHostName).GetInstanceURI(AInstanceName);
+		}
+		
+		public static IServer Connect(string AServerURI, string AClientHostName)
+		{
+			return Connect(AServerURI, false, AClientHostName);
+		}
+		
 		/// <summary> Connect to a remote server by it's URI. </summary>
 		/// <returns> An IServer interface representing a server instance. </returns>
-        public static IServer Connect(string AServerURI, bool AClientSideLoggingEnabled, string AHostName)
+        public static IServer Connect(string AServerURI, bool AClientSideLoggingEnabled, string AClientHostName)
         {
 			EnsureClientChannel();
 			IServer LServer = (IServer)Activator.GetObject(typeof(IRemoteServer), AServerURI);
@@ -182,7 +126,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!RemotingServices.IsTransparentProxy(LServer))
 				return LServer;
 			else
-				return new LocalServer((IRemoteServer)LServer, AClientSideLoggingEnabled, AHostName);
+				return new LocalServer((IRemoteServer)LServer, AClientSideLoggingEnabled, AClientHostName);
         }
         /// <summary> Dereferences a server object </summary>
         public static void Disconnect(IServer AServer)
