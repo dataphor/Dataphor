@@ -5,20 +5,21 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.Remoting;
 using System.Collections;
-using System.Runtime.Remoting.Channels.Tcp;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters;
+
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.DAE.Server
 {
 	public class Listener : MarshalByRefObject, IListener
 	{
-		public const int CDefaultListenerPort = 8060;
 		public const string CDefaultListenerChannelName = "DAEListener";
 		
 		private static TcpChannel FChannel;
@@ -41,17 +42,18 @@ namespace Alphora.Dataphor.DAE.Server
 				RemotingConfiguration.CustomErrorsMode = CustomErrorsModes.Off;
 
 			IDictionary LProperties = new System.Collections.Specialized.ListDictionary();
-			LProperties["port"] = (LSettings != null && LSettings.Contains("port")) ? LSettings["port"] : CDefaultListenerPort;
+			LProperties["port"] = (LSettings != null && LSettings.Contains("port")) ? LSettings["port"] : RemotingUtility.CDefaultListenerPort;
 			LProperties["name"] = (LSettings != null && LSettings.Contains("name")) ? LSettings["name"] : CDefaultListenerChannelName;
-			FChannel = new TcpChannel(LProperties, null, LProvider);
 			
 			try
 			{
+				FChannel = new TcpChannel(LProperties, null, LProvider);
 				ChannelServices.RegisterChannel(FChannel, false);
 			}
 			catch
 			{
 				// An error attempting to register the channel means there is another process with a listener already established
+				FChannel = null;
 				return false;
 			}
 			
@@ -70,22 +72,36 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public string[] EnumerateInstances()
 		{
-			InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-			string[] LResult = new string[LConfiguration.Instances.Count];
-			for (int LIndex = 0; LIndex < LConfiguration.Instances.Count; LIndex++)
-				LResult[LIndex] = LConfiguration.Instances[LIndex].Name;
-			return LResult;
+			try
+			{
+				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
+				string[] LResult = new string[LConfiguration.Instances.Count];
+				for (int LIndex = 0; LIndex < LConfiguration.Instances.Count; LIndex++)
+					LResult[LIndex] = LConfiguration.Instances[LIndex].Name;
+				return LResult;
+			}
+			catch (Exception LException)
+			{
+				throw NativeCLIUtility.WrapException(LException);
+			}
 		}
 		
 		public string GetInstanceURI(string AInstanceName)
 		{
-			ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
-			return BuildInstanceURI(Environment.MachineName, LServer.PortNumber, LServer.Name);
+			return GetInstanceURI(AInstanceName, false);
 		}
 		
-		public static string BuildInstanceURI(string AHostName, int APortNumber, string AInstanceName)
+		public string GetInstanceURI(string AInstanceName, bool AUseNative)
 		{
-			return String.Format("tcp://{0}:{1}/{2}", AHostName, APortNumber, AInstanceName);
+			try
+			{
+				ServerConfiguration LServer = InstanceManager.LoadConfiguration().Instances[AInstanceName];
+				return RemotingUtility.BuildInstanceURI(Environment.MachineName, LServer.PortNumber, LServer.Name, AUseNative);
+			}
+			catch (Exception LException)
+			{
+				throw NativeCLIUtility.WrapException(LException);
+			}
 		}
 	}
 }

@@ -13,6 +13,7 @@ using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -522,12 +523,12 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					string LInstanceURI = null;
 					if (LConnectionAlias.OverridePortNumber != 0)
-						LInstanceURI = Listener.BuildInstanceURI(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
+						LInstanceURI = RemotingUtility.BuildInstanceURI(LConnectionAlias.HostName, LConnectionAlias.OverridePortNumber, LConnectionAlias.InstanceName);
 					else
 					{
 						try
 						{
-							LInstanceURI = ServerFactory.GetInstanceURI(LConnectionAlias.HostName, LConnectionAlias.InstanceName);
+							LInstanceURI = ListenerFactory.GetInstanceURI(LConnectionAlias.HostName, LConnectionAlias.InstanceName);
 						}
 						catch (Exception LException)
 						{

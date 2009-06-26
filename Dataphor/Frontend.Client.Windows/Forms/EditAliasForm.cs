@@ -14,6 +14,7 @@ using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -462,7 +463,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				{
 					FInstancesEnumerated = true;
 					cbInstanceName.Items.Clear();
-					string[] LInstanceNames = ServerFactory.EnumerateInstances(tbHost.Text);
+					string[] LInstanceNames = ListenerFactory.EnumerateInstances(tbHost.Text);
 					for (int LIndex = 0; LIndex < LInstanceNames.Length; LIndex++)
 						cbInstanceName.Items.Add(LInstanceNames[LIndex]);
 				}

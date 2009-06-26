@@ -127,6 +127,10 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
+      <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
+      <Name>DAE.NativeCLI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs">
@@ -544,7 +548,6 @@
     <Compile Include="Schema\TableVar.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Server\IListener.cs" />
     <Compile Include="Server\InstanceManager.cs" />
     <Compile Include="Server\Listener.cs" />
     <Compile Include="Server\LocalServer.cs">
@@ -553,6 +556,10 @@
     <Compile Include="Server\MemberLastDesigner.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\NativeCLIUtility.cs" />
+    <Compile Include="Server\NativeServerCLI.cs" />
+    <Compile Include="Server\NativeServer.cs" />
+    <Compile Include="Server\NativeSession.cs" />
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>
     </Compile>

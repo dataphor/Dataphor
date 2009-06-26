@@ -5,6 +5,8 @@
 */
 
 using System;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Alphora.Dataphor.DAE
 {
@@ -14,7 +16,7 @@ namespace Alphora.Dataphor.DAE
     /// <summary> Contains settings relevant to a server session. </summary>
 	[Serializable]
 	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
-	public class SessionInfo : ICloneable
+	public class SessionInfo : ICloneable, ISerializable
     {
 		public const int CDefaultFetchCount = 20;
 		public const string CDefaultUserName = "Admin";
@@ -273,7 +275,52 @@ namespace Alphora.Dataphor.DAE
 			//LSessionInfo.PlanCacheSize = FPlanCacheSize;
 			return LSessionInfo;
 		}
-    }
+
+		#region ISerializable Members
+
+		[SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			info.AddValue("UserID", UserID);
+			info.AddValue("UnstructuredData", UnstructuredData);
+			info.AddValue("HostName", HostName);
+			info.AddValue("CatalogCacheName", CatalogCacheName);
+			info.AddValue("DefaultLibraryName", DefaultLibraryName);
+			info.AddValue("SessionTracingEnabled", SessionTracingEnabled);
+			info.AddValue("DefaultUseDTC", DefaultUseDTC);
+			info.AddValue("DefaultUseImplicitTransactions", DefaultUseImplicitTransactions);
+			info.AddValue("Language", Language);
+			info.AddValue("FetchCount", FetchCount);
+			info.AddValue("FetchAtOpen", FetchAtOpen);
+			info.AddValue("DefaultIsolationLevel", DefaultIsolationLevel);
+			info.AddValue("DefaultMaxStackDepth", DefaultMaxStackDepth);
+			info.AddValue("DefaultMaxCallDepth", DefaultMaxCallDepth);
+			info.AddValue("UsePlanCache", UsePlanCache);
+			info.AddValue("ShouldEmitIL", ShouldEmitIL);
+		}
+		
+		protected SessionInfo(SerializationInfo info, StreamingContext context)
+		{
+			UserID = info.GetString("UserID");
+			UnstructuredData = info.GetString("UnstructuredData");
+			HostName = info.GetString("HostName");
+			CatalogCacheName = info.GetString("CatalogCacheName");
+			DefaultLibraryName = info.GetString("DefaultLibraryName");
+			SessionTracingEnabled = info.GetBoolean("SessionTracingEnabled");
+			DefaultUseDTC = info.GetBoolean("DefaultUseDTC");
+			DefaultUseImplicitTransactions = info.GetBoolean("DefaultUseImplicitTransactions");
+			Language = (QueryLanguage)info.GetValue("Language", typeof(QueryLanguage));
+			FetchCount = info.GetInt32("FetchCount");
+			FetchAtOpen = info.GetBoolean("FetchAtOpen");
+			DefaultIsolationLevel = (IsolationLevel)info.GetValue("DefaultIsolationLevel", typeof(IsolationLevel));
+			DefaultMaxStackDepth = info.GetInt32("DefaultMaxStackDepth");
+			DefaultMaxCallDepth = info.GetInt32("DefaultMaxCallDepth");
+			UsePlanCache = info.GetBoolean("UsePlanCache");
+			ShouldEmitIL = info.GetBoolean("ShouldEmitIL");
+		}
+
+		#endregion
+	}
     
     [Serializable]
  	[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]

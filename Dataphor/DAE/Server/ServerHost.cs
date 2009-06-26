@@ -12,6 +12,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -42,6 +43,21 @@ namespace Alphora.Dataphor.DAE.Server
 					typeof(Server)
 				);
 				FServer = AServer;
+
+				if (!NativeServerCLI.HasNativeServer())
+				{
+					FNativeServer = new NativeServer(AServer);
+					NativeServerCLI.SetNativeServer(FNativeServer);
+					RemotingConfiguration.RegisterWellKnownServiceType
+					(
+						new WellKnownServiceTypeEntry
+						(
+							typeof(NativeServerCLI), 
+							String.Format("{0}Native", AServer.Name), 
+							WellKnownObjectMode.SingleCall
+						)
+					);
+				}
 			}
 			catch
 			{
@@ -90,7 +106,13 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return FServer; }
 		}
-
+		
+		private NativeServer FNativeServer;
+		public NativeServer NativeServer
+		{
+			get { return FNativeServer; }
+		}
+		
 		// statics
 
 		public static int FChannelNameGenerator = 0;
