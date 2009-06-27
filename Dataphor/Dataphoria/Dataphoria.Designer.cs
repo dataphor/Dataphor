@@ -360,7 +360,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FNewToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FNewToolStripButton.Name = "FNewToolStripButton";
             this.FNewToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.FNewToolStripButton.Text = "toolStripButton1";
+            this.FNewToolStripButton.Text = "New";
             this.FNewToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FNewScriptToolStripButton
@@ -370,7 +370,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FNewScriptToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FNewScriptToolStripButton.Name = "FNewScriptToolStripButton";
             this.FNewScriptToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.FNewScriptToolStripButton.Text = "toolStripButton2";
+            this.FNewScriptToolStripButton.Text = "New script";
             this.FNewScriptToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FOpenFileToolStripButton
@@ -380,7 +380,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FOpenFileToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FOpenFileToolStripButton.Name = "FOpenFileToolStripButton";
             this.FOpenFileToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.FOpenFileToolStripButton.Text = "toolStripButton3";
+            this.FOpenFileToolStripButton.Text = "Open file";
             this.FOpenFileToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FOpenFileWithToolStripButton
@@ -390,7 +390,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FOpenFileWithToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FOpenFileWithToolStripButton.Name = "FOpenFileWithToolStripButton";
             this.FOpenFileWithToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.FOpenFileWithToolStripButton.Text = "toolStripButton4";
+            this.FOpenFileWithToolStripButton.Text = "Open file with";
             this.FOpenFileWithToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FLaunchFormToolStripButton
@@ -400,7 +400,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FLaunchFormToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.FLaunchFormToolStripButton.Name = "FLaunchFormToolStripButton";
             this.FLaunchFormToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.FLaunchFormToolStripButton.Text = "toolStripButton5";
+            this.FLaunchFormToolStripButton.Text = "Launch form";
             this.FLaunchFormToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FDockPanel
