@@ -2941,7 +2941,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public AlterOperatorBlock Finalization { get { return FFinalization; } }
 	}
 	
-	#if OnExpression
 	public class CreateServerStatement : D4Statement, IMetaData
 	{
 		// ServerName
@@ -2951,14 +2950,32 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return FServerName; }
 			set { FServerName = value == null ? String.Empty : value; }
 		}
-		
-		// ServerURI
-		protected string FServerURI = String.Empty;
-		public string ServerURI
+
+/*		
+		// HostName
+		protected string FHostName = String.Empty;
+		public string HostName
 		{
-			get { return FServerURI; }
-			set { FServerURI = value == null ? String.Empty : value; }
+			get { return FHostName; }
+			set { FHostName = value == null ? String.Empty : value; }
 		}
+		
+		// InstanceName
+		protected string FInstanceName = String.Empty;
+		public string InstanceName
+		{
+			get { return FInstanceName; }
+			set { FInstanceName = value == null ? String.Empty : value; }
+		}
+		
+		// OverridePortNumber
+		protected int FOverridePortNumber;
+		public int OverridePortNumber
+		{
+			get { return FOverridePortNumber; }
+			set { FOverridePortNumber = value; }
+		}
+*/
 		
         // MetaData
         protected MetaData FMetaData;
@@ -2979,13 +2996,31 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { FServerName = value == null ? String.Empty : value; }
 		}
 		
-		// ServerURI will be null if there is no change to the URI
-		protected string FServerURI;
-		public string ServerURI
+/*
+		// HostName will be null if there is no change to the host
+		protected string FHostName;
+		public string HostName
 		{
-			get { return FServerURI; }
-			set { FServerURI = value; }
+			get { return FHostName; }
+			set { FHostName = value; }
 		}
+		
+		// InstanceName will be null if there is no change to the host
+		protected string FInstanceName;
+		public string InstanceName
+		{
+			get { return FInstanceName; }
+			set { FInstanceName = value; }
+		}
+		
+		// OverridePortNumber will be null if there is no change to the host
+		protected int? FOverridePortNumber;
+		public int? OverridePortNumber
+		{
+			get { return FOverridePortNumber; }
+			set { FOverridePortNumber = value; }
+		}
+*/
 		
         // AlterMetaData
         protected AlterMetaData FAlterMetaData;
@@ -2995,7 +3030,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			set { FAlterMetaData = value; }
         }
 	}
-	#endif
 	
 	public abstract class DeviceMapItem : D4Statement{}
 	
@@ -5686,13 +5720,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public FormalParameterSpecifiers FormalParameterSpecifiers { get { return FFormalParameterSpecifiers; } }
 	}
 
-	#if OnExpression
 	public class DropServerStatement : DropObjectStatement
 	{
 		public DropServerStatement() : base(){}
 		public DropServerStatement(string AObjectName) : base(AObjectName){}
 	}
-	#endif
 
 	public class DropDeviceStatement : DropObjectStatement
 	{

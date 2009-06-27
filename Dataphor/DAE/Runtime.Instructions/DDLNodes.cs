@@ -707,7 +707,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
     }
 
-	#if OnExpression    
     public class CreateServerNode : CreateObjectNode
     {
 		protected Schema.ServerLink FServerLink;
@@ -716,24 +715,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return FServerLink; }
 			set { FServerLink = value; }
 		}
+
+		public override void BindToProcess(Plan APlan)
+		{
+			APlan.CheckRight(Schema.RightNames.CreateServer);
+			base.BindToProcess(APlan);
+		}
 		
 		public override DataVar InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Plan.Catalog.Add(FServerLink);
-			try
-			{
-				FServerLink.AttachDependencies();
-				return null;
-			}
-			catch
-			{
-				FServerLink.DetachDependencies();
-				AProcess.Plan.Catalog.SafeRemove(FServerLink);
-				throw;
-			}
+			FServerLink.ApplyMetaData();
+			AProcess.CatalogDeviceSession.InsertCatalogObject(FServerLink);
+			return null;
 		}
     }
-    #endif
     
     public class CreateDeviceNode : CreateObjectNode
     {
@@ -2517,7 +2512,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
     }
     
-    #if OnExpression
     public class AlterServerNode : AlterNode
     {		
 		// AlterServerStatement
@@ -2536,18 +2530,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LObject;
 		}
 		
+		public override void BindToProcess(Plan APlan)
+		{
+			Schema.ServerLink LServerLink = (Schema.ServerLink)FindObject(APlan, FAlterServerStatement.ServerName);
+			APlan.CheckRight(LServerLink.GetRight(Schema.RightNames.Alter));
+			base.BindToProcess(APlan);
+		}
+
 		public override DataVar InternalExecute(ServerProcess AProcess)
 		{
 			Schema.ServerLink LServer = (Schema.ServerLink)FindObject(AProcess.Plan, FAlterServerStatement.ServerName);
 			
-			if (FAlterServerStatement.ServerURI != null)
-				LServer.ServerURI = FAlterServerStatement.ServerURI;
+			// TODO: Prevent altering the server link with active sessions? (May not be necessary, the active sessions would just continue to use the current settings)
+			AProcess.CatalogDeviceSession.AlterMetaData(LServer, FAlterServerStatement.AlterMetaData);
+			LServer.ResetServerLink();
+			LServer.ApplyMetaData();
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServer);
 
-			AlterMetaData(AProcess.Plan, LServer, FAlterServerStatement.AlterMetaData);
 			return null;
 		}
     }
-    #endif
     
     public class AlterDeviceNode : AlterNode
     {		
@@ -3051,34 +3053,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
     
-	#if OnExpression
 	public class DropServerNode : DropObjectNode
 	{		
+		private Schema.ServerLink FServerLink;
+		public Schema.ServerLink ServerLink
+		{
+			get { return FServerLink; }
+			set { FServerLink = value; }
+		}
+		
+		public override void BindToProcess(Plan APlan)
+		{
+			APlan.CheckRight(FServerLink.GetRight(Schema.RightNames.Drop));
+			base.BindToProcess(APlan);
+		}
+
 		public override DataVar InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
-				int LObjectIndex = AProcess.Plan.Catalog.IndexOf(FObjectName, AProcess.Plan.CurrentLibrary.Name);
-					
-				if (LObjectIndex >= 0)
-				{
-					Schema.Object LObject = AProcess.Plan.Catalog[LObjectIndex];
-					if (!(LObject is Schema.ServerLink))
-						throw new RuntimeException(RuntimeException.Codes.ObjectNotServer, LObject.Name);
-						
-					CheckNotSystem(AProcess, LObject);
-					CheckNoDependents(AProcess, LObject);
-
-					LObject.DetachDependencies();
-					AProcess.Plan.Catalog.SafeRemove(LObject);
-					return null;
-				}
-				else
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, FObjectName);
+				// TODO: Prevent dropping when server sessions are active
+				// TODO: Drop server link users
+				
+				CheckNotSystem(AProcess, FServerLink);
+				CheckNoDependents(AProcess, FServerLink);
+				
+				AProcess.CatalogDeviceSession.DeleteCatalogObject(FServerLink);
 			}
+			
+			return null;
 		}
 	}
-	#endif
     
 	public class DropDeviceNode : DropObjectNode
 	{

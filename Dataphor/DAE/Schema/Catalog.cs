@@ -160,9 +160,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						(AItem is ScalarType) ||
                         (AItem is Operator) ||
                         (AItem is Device) ||
-                        #if OnExpression
                         (AItem is ServerLink) ||
-                        #endif
                         (AItem is TableVar) ||
                         (AItem is Reference) || 
                         (AItem is CatalogConstraint) ||

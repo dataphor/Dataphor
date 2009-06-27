@@ -548,22 +548,41 @@
     <Compile Include="Schema\TableVar.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\CatalogCache.cs" />
+    <Compile Include="Server\DAERegisterAttribute.cs" />
     <Compile Include="Server\InstanceManager.cs" />
     <Compile Include="Server\Listener.cs" />
+    <Compile Include="Server\LocalBatch.cs" />
+    <Compile Include="Server\LocalCursor.cs" />
+    <Compile Include="Server\LocalPlan.cs" />
+    <Compile Include="Server\LocalProcess.cs" />
+    <Compile Include="Server\LocalScript.cs" />
     <Compile Include="Server\LocalServer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\LocalServerObject.cs" />
+    <Compile Include="Server\LocalServerStructures.cs" />
+    <Compile Include="Server\LocalSession.cs" />
     <Compile Include="Server\MemberLastDesigner.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\NativeCLIUtility.cs" />
+    <Compile Include="Server\NativeMarshal.cs" />
     <Compile Include="Server\NativeServerCLI.cs" />
     <Compile Include="Server\NativeServer.cs" />
     <Compile Include="Server\NativeSession.cs" />
+    <Compile Include="Server\Plan.cs" />
+    <Compile Include="Server\PlanCache.cs" />
+    <Compile Include="Server\RemoteServerCursor.cs" />
+    <Compile Include="Server\RemoteServerPlan.cs" />
+    <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Server\ServerBatch.cs" />
     <Compile Include="Server\ServerConfiguration.cs" />
+    <Compile Include="Server\ServerConnection.cs" />
+    <Compile Include="Server\ServerCursor.cs" />
     <Compile Include="Server\ServerException.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -571,6 +590,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerHost.cs" />
+    <Compile Include="Server\ServerObject.cs" />
+    <Compile Include="Server\ServerPlan.cs" />
+    <Compile Include="Server\ServerProcess.cs" />
+    <Compile Include="Server\ServerScript.cs" />
+    <Compile Include="Server\ServerSession.cs" />
+    <Compile Include="Server\ServerStructures.cs" />
+    <Compile Include="Server\ServerTransaction.cs" />
     <Compile Include="Server\SignalPool.cs">
       <SubType>Code</SubType>
     </Compile>

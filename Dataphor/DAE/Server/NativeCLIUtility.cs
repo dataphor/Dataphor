@@ -1,6 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Text;
+using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.NativeCLI;
 using Alphora.Dataphor.DAE.Language;
@@ -22,6 +28,18 @@ namespace Alphora.Dataphor.DAE.Server
 				case System.Data.IsolationLevel.Unspecified: 
 				default: throw new ArgumentException("Chaos, snapshot, and unspecified isolation levels are not supported.");
 			}
+		}
+		
+		public static System.Data.IsolationLevel IsolationLevelToSystemDataIsolationLevel(IsolationLevel AIsolationLevel)
+		{
+			switch (AIsolationLevel)
+			{
+				case IsolationLevel.Isolated : return System.Data.IsolationLevel.Serializable; break;
+				case IsolationLevel.CursorStability : return System.Data.IsolationLevel.ReadCommitted; break;
+				case IsolationLevel.Browse : return System.Data.IsolationLevel.ReadUncommitted; break;
+			}
+			
+			return System.Data.IsolationLevel.Unspecified;
 		}
 
 		public static SessionInfo NativeSessionInfoToSessionInfo(NativeSessionInfo ANativeSessionInfo)
@@ -74,6 +92,17 @@ namespace Alphora.Dataphor.DAE.Server
 				case NativeModifier.Out : return Modifier.Out;
 				case NativeModifier.Var : return Modifier.Var;
 				default : return Modifier.In;
+			}
+		}
+
+		public static NativeModifier ModifierToNativeModifier(Modifier AModifier)
+		{
+			switch (AModifier)
+			{
+				case Modifier.In : return NativeModifier.In;
+				case Modifier.Out : return NativeModifier.Out;
+				case Modifier.Var : return NativeModifier.Var;
+				default : return NativeModifier.In;
 			}
 		}
 	}

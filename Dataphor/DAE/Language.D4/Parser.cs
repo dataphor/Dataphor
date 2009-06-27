@@ -15,7 +15,6 @@ using Alphora.Dataphor.DAE.Language;
 
 namespace Alphora.Dataphor.DAE.Language.D4
 {
-
     /*
 		HEADER:
 		The following non terminals in the Lexer BNF are referenced by the D4 BNF with equivalent meaning:
@@ -3546,6 +3545,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 <create operator statement> |
                 <create aggregate operator statement> |
                 <create device statement> |
+				<create server link statement> |
                 <create sort statement> |
                 <create conversion statement> |
                 <create role statement> |
@@ -3574,9 +3574,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						default : throw new ParserException(ParserException.Codes.UnknownCreateDirective, FLexer[0].AsSymbol);
 					}
 				case Keywords.Type: return CreateScalarTypeStatement();
-				#if OnExpression
 				case Keywords.Server: return CreateServerStatement();
-				#endif
 				case Keywords.Device: return CreateDeviceStatement();
 				case Keywords.Sort: return CreateSortStatement();
 				case Keywords.Conversion: return CreateConversionStatement();
@@ -5116,11 +5114,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return LStatement;
         }
 		
-		#if OnExpression
 		/* 
 			BNF:
             <create server link statement> ::=
-                create server link <server link name> URI = <server URI> <metadata>
+                create server <server link name> <metadata>
 
 			<server link name> ::=
 				<qualified identifier>
@@ -5132,16 +5129,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
         {
 			CreateServerStatement LStatement = new CreateServerStatement();
 			LStatement.SetPosition(FLexer);
-			FLexer.NextToken().CheckSymbol(Keywords.Link);
 			LStatement.ServerName = QualifiedIdentifier();
-			FLexer.NextToken().CheckSymbol(Keywords.URI);
-			FLexer.NextToken().CheckSymbol(Keywords.Equal);
-			FLexer.NextToken();
-			LStatement.ServerURI = FLexer[0].AsString();
 			MetaData(LStatement);
 			return LStatement;
         }
-		#endif
 		
 		/* 
 			BNF:
@@ -5523,6 +5514,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				<alter operator statement> |
 				<alter aggregate operator statement> |
 				<alter device statement> |
+				<alter server statement> |
 				<alter sort statement> |
 				<alter role statement>
 		*/
@@ -5538,9 +5530,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.Type: return AlterScalarTypeStatement();
 				case Keywords.Operator: return AlterOperatorStatement();
 				case Keywords.Aggregate: return AlterAggregateOperatorStatement();
-				#if OnExpression
 				case Keywords.Server: return AlterServerStatement();
-				#endif
 				case Keywords.Device: return AlterDeviceStatement();
 				case Keywords.Sort: return AlterSortStatement();
 				case Keywords.Role: return AlterRoleStatement();
@@ -6501,29 +6491,19 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return LStatement;
         }
 
-		#if OnExpression
 		/* 
 			BNF:
 			<alter server link statement> ::=
-				alter server link <server link name> [URI = <server URI>] <alter metadata>
+				alter server <server link name> <alter metadata>
 		*/        
         protected Statement AlterServerStatement()
         {
 			AlterServerStatement LStatement = new AlterServerStatement();
 			LStatement.SetPosition(FLexer);
-			FLexer.NextToken().CheckSymbol(Keywords.Link);
 			LStatement.ServerName = QualifiedIdentifier();
-			if (FLexer.PeekTokenSymbol(1) == Keywords.URI)
-			{
-				FLexer.NextToken();
-				FLexer.NextToken().CheckSymbol(Keywords.Equal);
-				FLexer.NextToken();
-				LStatement.ServerURI = FLexer[0].AsString();
-			}
 			AlterMetaData(LStatement, false);
 			return LStatement;
         }
-        #endif
         
 		/* 
 			BNF:
@@ -6876,6 +6856,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 (drop operator <operator name>"("<formal parameter specifier commalist>")") |
 				(drop aggregate operator <operator name>"("<formal parameter specifier commalist>")") |
                 (drop device <device name>) |
+				(drop server <server name>) |
                 (drop sort <scalar type name>) |
                 (drop conversion <scalar type name> to <scalar type name> using <operator name>) |
                 (drop role <role name>) |
@@ -6895,9 +6876,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.Aggregate:
 					FLexer.NextToken().CheckSymbol(Keywords.Operator);
 					return DropOperatorStatement();
-				#if OnExpression
 				case Keywords.Server: return DropServerStatement();
-				#endif
 				case Keywords.Device: return DropDeviceStatement();
 				case Keywords.Sort: return DropSortStatement();
 				case Keywords.Conversion: return DropConversionStatement();
@@ -6956,16 +6935,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return LStatement;
         }
         
-        #if OnExpression
         protected DropServerStatement DropServerStatement()
         {
 			DropServerStatement LStatement = new DropServerStatement();
 			LStatement.SetPosition(FLexer);
-			FLexer.NextToken().CheckSymbol(Keywords.Link);
 			LStatement.ObjectName = QualifiedIdentifier();
 			return LStatement;
         }
-        #endif
         
         protected DropDeviceStatement DropDeviceStatement()
         {

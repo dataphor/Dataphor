@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private NativeTable FTable;
 		
-		public override bool IsNil { get { return FTable != null; } }
+		public override bool IsNil { get { return FTable == null; } }
 		
 		public override object AsNative
 		{

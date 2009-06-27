@@ -23,6 +23,8 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public const int CDefaultMaxStackDepth = 32767;
 		public const int CDefaultMaxCallDepth = 1024;
 		
+		public NativeSessionInfo() { }
+		
         // UserID
         private string FUserID = CDefaultUserName;
         /// <summary>The user ID used to login to the Dataphor Server.</summary>
@@ -159,5 +161,24 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		}
 
 		#endregion
-    }
+
+		public NativeSessionInfo Copy()
+		{
+			return 
+				new NativeSessionInfo()
+				{
+					UserID = this.UserID,
+					Password = this.Password,
+					HostName = this.HostName,
+					DefaultLibraryName = this.DefaultLibraryName,
+					DefaultUseDTC = this.DefaultUseDTC,
+					DefaultUseImplicitTransactions = this.DefaultUseImplicitTransactions,
+					DefaultIsolationLevel = this.DefaultIsolationLevel,
+					DefaultMaxStackDepth = this.DefaultMaxStackDepth,
+					DefaultMaxCallDepth = this.DefaultMaxCallDepth,
+					UsePlanCache = this.UsePlanCache,
+					ShouldEmitIL = this.ShouldEmitIL
+				};
+		}
+	}
 }

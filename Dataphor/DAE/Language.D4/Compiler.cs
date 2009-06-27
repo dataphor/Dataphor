@@ -1,6 +1,6 @@
 /*
 	Alphora Dataphor
-	© Copyright 2000-2008 Alphora
+	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
@@ -723,6 +723,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			StatementEntries.Add("CreateConstraintStatement", new CompileStatementCallback(CompileCreateConstraintStatement));
 			StatementEntries.Add("CreateReferenceStatement", new CompileStatementCallback(CompileCreateReferenceStatement));
 			StatementEntries.Add("CreateDeviceStatement", new CompileStatementCallback(CompileCreateDeviceStatement));
+			StatementEntries.Add("CreateServerStatement", new CompileStatementCallback(CompileCreateServerStatement));
 			StatementEntries.Add("CreateSortStatement", new CompileStatementCallback(CompileCreateSortStatement));
 			StatementEntries.Add("CreateConversionStatement", new CompileStatementCallback(CompileCreateConversionStatement));
 			StatementEntries.Add("CreateRoleStatement", new CompileStatementCallback(CompileCreateRoleStatement));
@@ -735,6 +736,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			StatementEntries.Add("AlterConstraintStatement", new CompileStatementCallback(CompileAlterConstraintStatement));
 			StatementEntries.Add("AlterReferenceStatement", new CompileStatementCallback(CompileAlterReferenceStatement));
 			StatementEntries.Add("AlterDeviceStatement", new CompileStatementCallback(CompileAlterDeviceStatement));
+			StatementEntries.Add("AlterServerStatement", new CompileStatementCallback(CompileAlterServerStatement));
 			StatementEntries.Add("AlterSortStatement", new CompileStatementCallback(CompileAlterSortStatement));
 			StatementEntries.Add("AlterRoleStatement", new CompileStatementCallback(CompileAlterRoleStatement));
 			StatementEntries.Add("DropTableStatement", new CompileStatementCallback(CompileDropTableStatement));
@@ -744,6 +746,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			StatementEntries.Add("DropConstraintStatement", new CompileStatementCallback(CompileDropConstraintStatement));
 			StatementEntries.Add("DropReferenceStatement", new CompileStatementCallback(CompileDropReferenceStatement));
 			StatementEntries.Add("DropDeviceStatement", new CompileStatementCallback(CompileDropDeviceStatement));
+			StatementEntries.Add("DropServerStatement", new CompileStatementCallback(CompileDropServerStatement));
 			StatementEntries.Add("DropSortStatement", new CompileStatementCallback(CompileDropSortStatement));
 			StatementEntries.Add("DropConversionStatement", new CompileStatementCallback(CompileDropConversionStatement));
 			StatementEntries.Add("DropRoleStatement", new CompileStatementCallback(CompileDropRoleStatement));
@@ -801,6 +804,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						case "CreateConstraintStatement" : return CompileCreateConstraintStatement(APlan, AStatement);
 						case "CreateReferenceStatement" : return CompileCreateReferenceStatement(APlan, AStatement);
 						case "CreateDeviceStatement" : return CompileCreateDeviceStatement(APlan, AStatement);
+						case "CreateServerStatement" : return CompileCreateServerStatement(APlan, AStatement);
 						case "CreateSortStatement" : return CompileCreateSortStatement(APlan, AStatement);
 						case "CreateConversionStatement" : return CompileCreateConversionStatement(APlan, AStatement);
 						case "CreateRoleStatement" : return CompileCreateRoleStatement(APlan, AStatement);
@@ -813,6 +817,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						case "AlterConstraintStatement" : return CompileAlterConstraintStatement(APlan, AStatement);
 						case "AlterReferenceStatement" : return CompileAlterReferenceStatement(APlan, AStatement);
 						case "AlterDeviceStatement" : return CompileAlterDeviceStatement(APlan, AStatement);
+						case "AlterServerStatement" : return CompileAlterServerStatement(APlan, AStatement);
 						case "AlterSortStatement" : return CompileAlterSortStatement(APlan, AStatement);
 						case "AlterRoleStatement" : return CompileAlterRoleStatement(APlan, AStatement);
 						case "DropTableStatement" : return CompileDropTableStatement(APlan, AStatement);
@@ -822,6 +827,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						case "DropConstraintStatement" : return CompileDropConstraintStatement(APlan, AStatement);
 						case "DropReferenceStatement" : return CompileDropReferenceStatement(APlan, AStatement);
 						case "DropDeviceStatement" : return CompileDropDeviceStatement(APlan, AStatement);
+						case "DropServerStatement" : return CompileDropServerStatement(APlan, AStatement);
 						case "DropSortStatement" : return CompileDropSortStatement(APlan, AStatement);
 						case "DropConversionStatement" : return CompileDropConversionStatement(APlan, AStatement);
 						case "DropRoleStatement" : return CompileDropRoleStatement(APlan, AStatement);
@@ -8016,6 +8022,25 @@ indicative of other problems, a reference will never be attached as an explicit 
 				}
 			}
 		}
+		
+		public static PlanNode CompileCreateServerStatement(Plan APlan, Statement AStatement)
+		{
+			if (APlan.IsOperatorCreationContext)
+				throw new CompilerException(CompilerException.Codes.DDLStatementInOperator, AStatement);
+				
+			CreateServerStatement LStatement = (CreateServerStatement)AStatement;
+			APlan.CheckRight(Schema.RightNames.CreateServer);
+			string LServerName = Schema.Object.Qualify(LStatement.ServerName, APlan.CurrentLibrary.Name);
+			CheckValidCatalogObjectName(APlan, AStatement, LServerName);
+			CreateServerNode LNode = new CreateServerNode();
+			LNode.ServerLink = new Schema.ServerLink(Schema.Object.GetObjectID(LStatement.MetaData), LServerName);
+			LNode.ServerLink.Owner = APlan.User;
+			LNode.ServerLink.Library = APlan.CurrentLibrary;
+			// TODO: Set ServerLink attributes from MetaData
+			LNode.ServerLink.MetaData = LStatement.MetaData;
+			LNode.ServerLink.IsRemotable = false;
+			return LNode;
+		}
 
 		public static PlanNode CompileCreateDeviceStatement(Plan APlan, Statement AStatement)
 		{
@@ -8810,6 +8835,22 @@ indicative of other problems, a reference will never be attached as an explicit 
 			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
 			return LNode;
 		}
+		
+		public static PlanNode CompileAlterServerStatement(Plan APlan, Statement AStatement)
+		{
+			if (APlan.IsOperatorCreationContext)
+				throw new CompilerException(CompilerException.Codes.DDLStatementInOperator, AStatement);
+
+			AlterServerStatement LStatement = (AlterServerStatement)AStatement;
+			AlterServerNode LNode = new AlterServerNode();
+			LNode.AlterServerStatement = LStatement;
+			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ServerName, true);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected, AStatement);
+			APlan.CheckRight(((Schema.ServerLink)LObject).GetRight(Schema.RightNames.Alter));
+			AcquireDependentLocks(APlan, LObject, LockMode.Exclusive);
+			return LNode;
+		}
 
 		public static PlanNode CompileDropTableStatement(Plan APlan, Statement AStatement)
 		{
@@ -9020,6 +9061,24 @@ indicative of other problems, a reference will never be attached as an explicit 
 				APlan.PlanCatalog.Remove(LObject);
 			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
 			LNode.DropDevice = (Schema.Device)LObject;
+			return LNode;
+		}
+		
+		public static PlanNode CompileDropServerStatement(Plan APlan, Statement AStatement)
+		{
+			if (APlan.IsOperatorCreationContext)
+				throw new CompilerException(CompilerException.Codes.DDLStatementInOperator, AStatement);
+
+			DropServerStatement LStatement = (DropServerStatement)AStatement;
+			DropServerNode LNode = new DropServerNode();
+			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ObjectName, true);
+			if (!(LObject is Schema.Device))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected, AStatement);
+			APlan.CheckRight(((Schema.ServerLink)LObject).GetRight(Schema.RightNames.Drop));
+			if (APlan.PlanCatalog.Contains(LObject.Name))
+				APlan.PlanCatalog.Remove(LObject);
+			APlan.AcquireCatalogLock(LObject, LockMode.Exclusive);
+			LNode.ServerLink = (Schema.ServerLink)LObject;
 			return LNode;
 		}
 

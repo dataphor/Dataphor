@@ -176,6 +176,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public const string CreateView = "System.CreateView";
 		public const string CreateOperator = "System.CreateOperator";
 		public const string CreateDevice = "System.CreateDevice";
+		public const string CreateServer = "System.CreateServer";
 		public const string CreateConstraint = "System.CreateConstraint";
 		public const string CreateReference = "System.CreateReference";
 		public const string CreateRole = "System.CreateRole";

@@ -1905,10 +1905,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitCreateScalarTypeStatement((CreateScalarTypeStatement)AStatement);
 			else if (AStatement is CreateOperatorStatementBase)
 				EmitCreateOperatorStatementBase((CreateOperatorStatementBase)AStatement);
-			#if OnExpression
 			else if (AStatement is CreateServerStatement)
 				EmitCreateServerStatement((CreateServerStatement)AStatement);
-			#endif
 			else if (AStatement is CreateDeviceStatement)
 				EmitCreateDeviceStatement((CreateDeviceStatement)AStatement);
 			else if (AStatement is AlterTableVarStatement)
@@ -1917,10 +1915,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitAlterScalarTypeStatement((AlterScalarTypeStatement)AStatement);
 			else if (AStatement is AlterOperatorStatementBase)
 				EmitAlterOperatorStatementBase((AlterOperatorStatementBase)AStatement);
-			#if OnExpression
 			else if (AStatement is AlterServerStatement)
 				EmitAlterServerStatement((AlterServerStatement)AStatement);
-			#endif
 			else if (AStatement is AlterDeviceStatement)
 				EmitAlterDeviceStatement((AlterDeviceStatement)AStatement);
 			else if (AStatement is DropObjectStatement)
@@ -2462,13 +2458,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			EmitMetaData(AStatement.MetaData);
 		}
 		
-		#if OnExpression
 		protected virtual void EmitCreateServerStatement(CreateServerStatement AStatement)
 		{
-			AppendFormat("{0} {1} {2} {3} {4} {5}", Keywords.Create, Keywords.Server, Keywords.Link, AStatement.ServerName, Keywords.URI, AStatement.ServerURI);
+			AppendFormat("{0} {1} {2}", Keywords.Create, Keywords.Server, AStatement.ServerName);
 			EmitMetaData(AStatement.MetaData);
 		}
-		#endif
 		
 		protected virtual void EmitCreateDeviceStatement(CreateDeviceStatement AStatement)
 		{
@@ -3202,15 +3196,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			EmitAlterMetaData(AStatement.AlterMetaData);
 		}
 		
-		#if OnExpression
 		protected virtual void EmitAlterServerStatement(AlterServerStatement AStatement)
 		{
-			AppendFormat("{0} {1} {2} {3}", Keywords.Alter, Keywords.Server, Keywords.Link, AStatement.ServerName);
-			if (AStatement.ServerURI != null)
-				AppendFormat(" {0} {1} {2}", Keywords.URI, Keywords.Equal, AStatement.ServerURI);
+			AppendFormat("{0} {1} {2}", Keywords.Alter, Keywords.Server, AStatement.ServerName);
 			EmitAlterMetaData(AStatement.AlterMetaData);
 		}
-		#endif
 		
 		protected virtual void EmitAlterDeviceStatement(AlterDeviceStatement AStatement)
 		{
@@ -3317,10 +3307,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitDropScalarTypeStatement((DropScalarTypeStatement)AStatement);
 			else if (AStatement is DropOperatorStatement)
 				EmitDropOperatorStatement((DropOperatorStatement)AStatement);
-			#if OnExpression
 			else if (AStatement is DropServerStatement)
 				EmitDropServerStatement((DropServerStatement)AStatement);
-			#endif
 			else if (AStatement is DropDeviceStatement)
 				EmitDropDeviceStatement((DropDeviceStatement)AStatement);
 			else
@@ -3354,12 +3342,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Append(Keywords.EndGroup);
 		}
 		
-		#if OnExpression
 		protected virtual void EmitDropServerStatement(DropServerStatement AStatement)
 		{
-			AppendFormat("{0} {1} {2} {3}", Keywords.Drop, Keywords.Server, Keywords.Link, AStatement.ObjectName);
+			AppendFormat("{0} {1} {2}", Keywords.Drop, Keywords.Server, AStatement.ObjectName);
 		}
-		#endif
 		
 		protected virtual void EmitDropDeviceStatement(DropDeviceStatement AStatement)
 		{

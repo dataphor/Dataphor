@@ -1292,6 +1292,112 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
+	// create operator ExecuteOn(const AServerName : System.Name, const AStatement : String) 
+	// create operator ExecuteOn(const AServerName : System.Name, const AStatement : String, const AInParams : row) 
+	// create operator ExecuteOn(const AServerName : System.Name, const AStatement : String, const AInParams : row, var AOutParams : row) 
+	public class SystemExecuteOnNode : InstructionNode
+	{
+		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		{
+			string LServerName = AArguments[0].Value.AsString;
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString);
+			Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
+			if (LServerLink == null)
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+				
+			string LStatement = AArguments[1].Value.AsString;
+			
+			Row LInRow = AArguments.Length >= 3 ? (Row)AArguments[2].Value : null;
+			Row LOutRow = AArguments.Length >= 4 ? (Row)AArguments[3].Value : null;
+			
+			DataParams LParams = SystemEvaluateNode.ParamsFromRows(LInRow, LOutRow);
+			AProcess.RemoteConnect(LServerLink).Execute(LStatement, LParams);
+			SystemEvaluateNode.UpdateRowFromParams(LOutRow, LParams);
+			
+			return null;
+		}
+	}
+	
+	/// <remarks>operator EvaluateOn(const AServerName : System.Name, const AExpression : String) : generic;</remarks>
+	/// <remarks>operator EvaluateOn(const AServerName : System.Name, const AExpression : String, const AInParams : row) : generic;</remarks>
+	/// <remarks>operator EvaluateOn(const AServerName : System.Name, const AExpression : String, const AInParams : row, var AOutParams : row) : generic;</remarks>
+	public class SystemEvaluateOnNode : InstructionNode
+	{
+		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		{
+			string LServerName = AArguments[0].Value.AsString;
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString);
+			Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
+			if (LServerLink == null)
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+				
+			string LExpression = AArguments[1].Value.AsString;
+
+			Row LInRow = AArguments.Length >= 3 ? (Row)AArguments[2].Value : null;
+			Row LOutRow = AArguments.Length >= 4 ? (Row)AArguments[3].Value : null;
+			
+			DataParams LParams = SystemEvaluateNode.ParamsFromRows(LInRow, LOutRow);
+			DataVar LResult = AProcess.RemoteConnect(LServerLink).Evaluate(LExpression, LParams);
+			SystemEvaluateNode.UpdateRowFromParams(LOutRow, LParams);
+
+			return LResult;
+		}
+	}
+	
+	#if OnExpression
+	/// <remarks>operator ExecuteRemote(ADevice : System.Name, AStatement : System.String);</remarks>
+	public class SystemExecuteRemoteNode : InstructionNode
+	{
+		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		{
+			string LServerName = AArguments[0].Value.AsString;
+			Schema.ServerLink LServerLink;
+			lock (AProcess.Plan)
+			{
+				LServerLink = (Schema.ServerLink)AProcess.Plan.Catalog[LServerName];
+				AProcess.Plan.AcquireCatalogLock(LServerLink, LockMode.Shared);
+			}
+			string LCode = AArguments[1].Value.AsString;
+
+			IServer LServer = ServerFactory.Connect(LServerLink.ServerURI);
+			try 
+			{
+				IServerSession LServerSession = LServer.Connect(null);
+				try 
+				{
+					IServerProcess LProcess = LServerSession.StartProcess();
+					try
+					{
+						IServerStatementPlan LStatementPlan = LProcess.PrepareStatement(LCode, null);
+						try
+						{
+							LStatementPlan.Execute(null);
+						}
+						finally
+						{
+							LProcess.UnprepareStatement(LStatementPlan);
+						}
+					}
+					finally
+					{
+						LServerSession.StopProcess(LProcess);
+					}
+				}
+				finally
+				{
+					LServer.Disconnect(LServerSession);
+				}
+			}
+			finally
+			{
+				ServerFactory.Disconnect(LServer);
+			}
+
+			return null;
+		}
+	}
+	#endif
+	
 	/// <remarks>operator ExecuteAs(AScript : System.String, AUserID : System.UserID, APassword : System.String);</remarks>
 	/// <remarks>operator ExecuteAs(AScript : System.String, AUserID : System.UserID, APassword : System.String; const AInParams : row);</remarks>
 	/// <remarks>operator ExecuteAs(AScript : System.String, AUserID : System.UserID, APassword : System.String; const AInParams : row; var AOutParams : row);</remarks>
@@ -1538,60 +1644,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 	}
-	
-	#if OnExpression
-	/// <remarks>operator ExecuteRemote(ADevice : System.Name, AStatement : System.String);</remarks>
-	public class SystemExecuteRemoteNode : InstructionNode
-	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
-		{
-			string LServerName = AArguments[0].Value.AsString;
-			Schema.ServerLink LServerLink;
-			lock (AProcess.Plan)
-			{
-				LServerLink = (Schema.ServerLink)AProcess.Plan.Catalog[LServerName];
-				AProcess.Plan.AcquireCatalogLock(LServerLink, LockMode.Shared);
-			}
-			string LCode = AArguments[1].Value.AsString;
-
-			IServer LServer = ServerFactory.Connect(LServerLink.ServerURI);
-			try 
-			{
-				IServerSession LServerSession = LServer.Connect(null);
-				try 
-				{
-					IServerProcess LProcess = LServerSession.StartProcess();
-					try
-					{
-						IServerStatementPlan LStatementPlan = LProcess.PrepareStatement(LCode, null);
-						try
-						{
-							LStatementPlan.Execute(null);
-						}
-						finally
-						{
-							LProcess.UnprepareStatement(LStatementPlan);
-						}
-					}
-					finally
-					{
-						LServerSession.StopProcess(LProcess);
-					}
-				}
-				finally
-				{
-					LServer.Disconnect(LServerSession);
-				}
-			}
-			finally
-			{
-				ServerFactory.Disconnect(LServer);
-			}
-
-			return null;
-		}
-	}
-	#endif
 	
 	/// <remarks>operator Open(AExpression : System.String): System.Cursor;</remarks>
 	public class SystemOpenNode : InstructionNode

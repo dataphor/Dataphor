@@ -1,8 +1,9 @@
 /*
 	Dataphor
-	© Copyright 2000-2008 Alphora
+	© Copyright 2000-2009 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
 using System.IO;
 using System.Text;
@@ -20,46 +21,157 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.NativeCLI;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-	#if OnExpression    
-	public class ServerLink : Object
+	public class ServerLink : CatalogObject
     {
-		public ServerLink(Guid AID) : base(AID){}
-		public ServerLink(Guid AID, string AName) : base(AID, AName){}
-
-		public ServerLink(string AName) : base()
+		public const string CDefaultUserID = "";
+		
+		public ServerLink(int AID, string AName) : base(AID, AName)
 		{
-			Name = AName;
+			IsRemotable = false;
+		}
+
+		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.ServerLink"), DisplayName, InstanceName, HostName, OverridePortNumber > 0 ? ":" + OverridePortNumber.ToString() : ""); } }
+		
+		private string FHostName = String.Empty;
+		public string HostName
+		{
+			get { return FHostName; }
+			set { FHostName = value == null ? String.Empty : value; }
 		}
 		
-		// ServerURI		
-		private string FServerURI = String.Empty;
-		public string ServerURI
+		private string FInstanceName = String.Empty;
+		public string InstanceName
 		{
-			get { return FServerURI; }
-			set { FServerURI = value == null ? String.Empty : value; }
+			get { return FInstanceName; }
+			set { FInstanceName = value == null ? String.Empty : value; }
+		}
+		
+		private int FOverridePortNumber = 0;
+		public int OverridePortNumber
+		{
+			get { return FOverridePortNumber; }
+			set { FOverridePortNumber = value; }
+		}
+		
+		private bool FUseSessionInfo = true;
+		public bool UseSessionInfo
+		{
+			get { return FUseSessionInfo; }
+			set { FUseSessionInfo = value; }
+		}
+		
+		private NativeSessionInfo FDefaultNativeSessionInfo;
+		public NativeSessionInfo DefaultNativeSessionInfo
+		{
+			get { return FDefaultNativeSessionInfo; }
+		}
+		
+		private NativeSessionInfo EnsureDefaultNativeSessionInfo()
+		{
+			if (FDefaultNativeSessionInfo == null)
+				FDefaultNativeSessionInfo = new NativeSessionInfo();
+				
+			return FDefaultNativeSessionInfo;
+		}
+		
+		public void ResetServerLink()
+		{
+			FHostName = String.Empty;
+			FInstanceName = String.Empty;
+			FOverridePortNumber = 0;
+			FUseSessionInfo = true;
+			FDefaultNativeSessionInfo = null;
+		}
+		
+		public void ApplyMetaData()
+		{
+			if (MetaData != null)
+			{
+				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
+				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Server.Server.CDefaultServerName);
+				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
+				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
+				
+				Tag LTag;
+				
+				LTag = MetaData.Tags.GetTag("DefaultIsolationLevel");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
+					
+				LTag = MetaData.Tags.GetTag("DefaultLibraryName");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultLibraryName = LTag.Value;
+					
+				LTag = MetaData.Tags.GetTag("DefaultMaxCallDepth");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
+					
+				LTag = MetaData.Tags.GetTag("DefaultMaxStackDepth");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
+
+				LTag = MetaData.Tags.GetTag("DefaultUseDTC");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultUseDTC = Convert.ToBoolean(LTag.Value);
+
+				LTag = MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
+				
+				LTag = MetaData.Tags.GetTag("ShouldEmitIL");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().ShouldEmitIL = Convert.ToBoolean(LTag.Value);
+				
+				LTag = MetaData.Tags.GetTag("UsePlanCache");
+				if (LTag != null)
+					EnsureDefaultNativeSessionInfo().UsePlanCache = Convert.ToBoolean(LTag.Value);
+			}
 		}
 		
 		// ServerLinkUsers
 		private ServerLinkUsers FUsers = new ServerLinkUsers();
 		public ServerLinkUsers Users { get { return FUsers; } }
 		
-		public SessionInfo GetSessionInfo(User AUser)
+		/// <summary>
+		/// Returns a ServerLinkUser for the given UserID.
+		/// </summary>
+		/// <remarks>
+		/// If there is no configured server link user for the given UserID, 
+		/// the default server link user for the server link is returned.
+		/// If there is no default server link user for the server link,
+		/// a default ServerLinkUser is returned with credentials of
+		/// Admin and a blank password.
+		/// </remarks>
+		public ServerLinkUser GetUser(string AUserID)
 		{
-			ServerLinkUser LUser = FUsers[AUser.ID];
-			return (LUser == null) ? null : new SessionInfo(LUser.ServerLinkUserID, SecurityUtility.DecryptPassword(LUser.ServerLinkPassword));
+			ServerLinkUser LUser = FUsers[AUserID];
+			if (LUser == null)
+				LUser = FUsers[CDefaultUserID];
+			if (LUser == null)
+				LUser = new ServerLinkUser(CDefaultUserID, this, Server.Server.CAdminUserID, SecurityUtility.EncryptPassword(String.Empty));
+
+			return LUser;
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
 		{
+			if (AMode == EmitMode.ForStorage)
+			{
+				SaveObjectID();
+			}
+			else
+			{
+				RemoveObjectID();
+			}
+			
 			CreateServerStatement LStatement = new CreateServerStatement();
 			LStatement.ServerName = Schema.Object.EnsureRooted(Name);
-			LStatement.MetaData = MetaData == null ? null : (MetaData)MetaData.Clone();
-			LStatement.ServerURI = ServerURI;
-			
+			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
+
 			if (FUsers.Count > 0)
 			{
 				Block LBlock = new Block();
@@ -74,7 +186,7 @@ namespace Alphora.Dataphor.DAE.Schema
 								"CreateServerLinkUserWithEncryptedPassword", 
 								new Expression[]
 								{
-									new ValueExpression(LUser.User.ID), 
+									new ValueExpression(LUser.UserID), 
 									new CallExpression("Name", new Expression[]{new ValueExpression(LUser.ServerLink.Name)}), 
 									new ValueExpression(LUser.ServerLinkUserID), 
 									new ValueExpression(LUser.ServerLinkPassword)
@@ -85,24 +197,24 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 				return LBlock;
 			}
-			
+
 			return LStatement;
 		}
-    }
+	}
 
 	public class ServerLinkUser : System.Object
 	{
 		public ServerLinkUser() : base(){}
-		public ServerLinkUser(User AUser, ServerLink AServerLink, string AServerLinkUserID, string AServerLinkPassword) : base()
+		public ServerLinkUser(string AUserID, ServerLink AServerLink, string AServerLinkUserID, string AServerLinkPassword) : base()
 		{
-			User = AUser;
+			UserID = AUserID;
 			ServerLink = AServerLink;
 			ServerLinkUserID = AServerLinkUserID;
 			ServerLinkPassword = AServerLinkPassword;
 		}
 		
-		private User FUser;
-		public User User { get { return FUser; } set { FUser = value; } }
+		private string FUserID;
+		public string UserID { get { return FUserID; } set { FUserID = value; } }
 		
 		private ServerLink FServerLink;
 		public ServerLink ServerLink { get { return FServerLink; } set { FServerLink = value; } }
@@ -116,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class ServerLinkUsers : HashtableList
 	{		
-		public ServerLinkUsers() : base(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default){}
+		public ServerLinkUsers() : base(StringComparer.InvariantCultureIgnoreCase) {}
 		
 		public ServerLinkUser this[string AID] { get { return (ServerLinkUser)base[AID]; } }
 		
@@ -131,8 +243,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public void Add(ServerLinkUser AServerLinkUser)
 		{
-			Add(AServerLinkUser.User.ID, AServerLinkUser);
+			Add(AServerLinkUser.UserID, AServerLinkUser);
 		}
 	}
-	#endif
 }

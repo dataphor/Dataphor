@@ -76,6 +76,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public object[][] Rows;
 	}
 	
+	[Serializable]
 	public class NativeResult
 	{
 		public NativeParam[] Params;

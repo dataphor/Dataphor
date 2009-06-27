@@ -737,13 +737,14 @@ namespace Alphora.Dataphor
 	/// <summary>A Hashtable descendent which implements the IList interface.</summary>
 	public abstract class HashtableList : Hashtable, IList
     {
-		public HashtableList() : base () {}
+		public HashtableList() : base() {}
 		public HashtableList(IDictionary ADictionary) : base(ADictionary) {}
 		public HashtableList(int ACapacity) : base(ACapacity) {}
 		public HashtableList(IDictionary ADictionary, float ALoadFactor) : base(ADictionary, ALoadFactor) {}
 		public HashtableList(IEqualityComparer AComparer) : base(AComparer) {}
 		public HashtableList(int ACapacity, float ALoadFactor) : base(ACapacity, ALoadFactor) {}
 		public HashtableList(IDictionary ADictionary, IEqualityComparer AComparer) : base (ADictionary, AComparer) {}
+		public HashtableList(IHashCodeProvider AHashCodeProvider, IComparer AComparer) : base(AHashCodeProvider, AComparer) {}
 
 		public abstract int Add(object AValue);
 		

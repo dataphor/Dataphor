@@ -160,6 +160,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string RowExists = "rowexists";           
 		public const string Scalar = "scalar";
 		public const string Select = "select";                 
+		public const string Server = "server";
 		public const string Selector = "selector";
 		public const string Sequence = "sequence";             
 		public const string Session = "session";               
