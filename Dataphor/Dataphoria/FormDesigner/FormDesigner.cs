@@ -278,6 +278,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPalettePanel.StatusChanged += FPalettePanel_StatusChanged;
 
             FDockContentPalettePanel = new DockContent();
+            FDockContentPalettePanel.HideOnClose = true;
             FDockContentPalettePanel.Controls.Add(FPalettePanel);
             FDockContentPalettePanel.TabText = "Forms Palette";
             FDockContentPalettePanel.Text = "Palette";
@@ -297,6 +298,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FFormPanel.Dock = DockStyle.Fill;
 
             FDockContentFormPanel = new DockContent();
+            FDockContentFormPanel.HideOnClose = true;
             FDockContentFormPanel.Controls.Add(FFormPanel);
             FDockContentFormPanel.ShowHint = DockState.Document;
             FDockContentFormPanel.Show(FDockPanel);
@@ -305,6 +307,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 
             FDockContentNodesTree = new DockContent();
+            FDockContentNodesTree.HideOnClose = true;
             FDockContentNodesTree.Controls.Add(FNodesTree);
             FDockContentNodesTree.TabText = "Forms Nodes Tree";
             FDockContentNodesTree.Text = "Nodes Tree";
@@ -336,6 +339,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FPropertyGrid.Dock = DockStyle.Fill;
 
             FDockContentPropertyGrid = new DockContent();
+            FDockContentPropertyGrid.HideOnClose = true;
             FDockContentPropertyGrid.Controls.Add(FPropertyGrid);
             FDockContentPropertyGrid.TabText = "Forms Properties Grid";
             FDockContentPropertyGrid.Text = "Properties Grid";

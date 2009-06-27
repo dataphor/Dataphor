@@ -108,6 +108,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FResultPanel.Dock = DockStyle.Fill;
 
             FDockContentResultPanel = new DockContent();
+            FDockContentResultPanel.HideOnClose = true;
             FDockContentResultPanel.Controls.Add(FResultPanel);
             FDockContentResultPanel.Text = "Results";
             FDockContentResultPanel.TabText = "D4 Results";

@@ -76,6 +76,7 @@ namespace Alphora.Dataphor.Dataphoria
 
             FExplorer.Dock = DockStyle.Fill;
             FDockContentFExplorer.Controls.Add(FExplorer);
+            FDockContentFExplorer.HideOnClose = true;
             FDockContentFExplorer.TabText = "Dataphoria Explorer";
             FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
             FDockContentFExplorer.ShowHint = DockState.DockLeft;
@@ -83,6 +84,7 @@ namespace Alphora.Dataphor.Dataphoria
             FDockContentErrorListView = new DockContent();
 
             FErrorListView.Dock = DockStyle.Fill;
+            FDockContentFExplorer.HideOnClose = true;
             FDockContentErrorListView.Controls.Add(FErrorListView);
             FDockContentErrorListView.TabText = "Dataphoria Error List";
             FDockContentErrorListView.Text = "Error List - Dataphoria";
