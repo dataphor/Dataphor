@@ -269,10 +269,9 @@ namespace Alphora.Dataphor.Dataphoria
 								try
 								{
 									FServerNode.Expand();
-									
-									//FDockingManager.SetDockVisibility(FExplorer, true);
-									//FConnectMenuItem.Visible = false;
-									//FDisconnectMenuItem.Visible = true;
+								    FDockContentFExplorer.Hide();
+								    FConnectToolStripMenuItem.Visible = false;
+								    FDisconnectToolStripMenuItem.Visible = true;									
 									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
 								}
 								catch
@@ -327,8 +326,8 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						Text = Strings.DataphoriaTitle;
 						FConnectToolStripMenuItem.Visible = true;
-                        FDisconnectToolStripMenuItem.Visible = false;
-						//FDockingManager.SetDockVisibility(FExplorer, false);
+                        FDisconnectToolStripMenuItem.Visible = false;						
+                        FDockContentFExplorer.Hide();
 
                         FExplorer.Nodes.Clear();
 						FServerNode = null;
@@ -1299,8 +1298,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void ShowWarnings()
 		{
-			//FDockingManager.SetDockVisibility(FErrorListView, true);
-			//FDockingManager.ActivateControl(FErrorListView);
+			FDockContentErrorListView.Show(FDockPanel);
+            FDockContentErrorListView.Activate();                                   
 		}
 
 		private void WarningsAdded(object ASender, EventArgs AArgs)
@@ -1311,7 +1310,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void ErrorsAdded(object ASender, EventArgs AArgs)
 		{
 			ShowWarnings();
-			//FDockingManager.ActivateControl(FErrorListView);
+            FDockContentErrorListView.Show(FDockPanel);			
 		}
 
 		private void ClearWarnings()
@@ -1421,8 +1420,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void ShowDataphorExplorer()
 		{
-			//FDockingManager.SetDockVisibility(FExplorer, true);
-			//FDockingManager.ActivateControl(FExplorer);
+			FDockContentFExplorer.Show(FDockPanel);
+            FDockContentFExplorer.Activate();            
 		}
 
 		public void LaunchAlphoraWebsite()
