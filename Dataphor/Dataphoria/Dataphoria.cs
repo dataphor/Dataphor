@@ -369,13 +369,11 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void Disconnect()
 		{
-			//if (FTabbedMDIManager != null)
-			//{
-				// Make sure we can safely disconnect
-				CloseChildren();
-			//	if (FTabbedMDIManager.MdiChildren.Length > 0)
-			//		throw new AbortException();
-			//}
+			// Make sure we can safely disconnect
+			CloseChildren();
+			if (MdiChildren.Length > 0){
+				throw new AbortException();
+			}
 
 			InternalDisconnect();
 		}
@@ -850,13 +848,15 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void SaveAll()
 		{
-			//IDesigner LDesigner;
-			//foreach (Form LForm in FTabbedMDIManager.MdiChildren)
-			//{
-				//LDesigner = LForm as IDesigner;
-				//if ((LDesigner != null) && LDesigner.Service.IsModified)
-				//	LDesigner.Service.Save();
-			//}
+			
+            
+            IDesigner LDesigner;
+			foreach (Form LForm in this.MdiChildren)
+			{
+				LDesigner = LForm as IDesigner;
+				if ((LDesigner != null) && LDesigner.Service.IsModified)
+					LDesigner.Service.Save();
+			}
 		}
 
 		#endregion
@@ -1039,16 +1039,16 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void CloseChildren()
 		{
-			//Form[] LForms = FTabbedMDIManager.MdiChildren;
-			//foreach (Form LForm in LForms)
-			//	LForm.Close();
+			Form[] LForms = this.MdiChildren;
+			foreach (Form LForm in LForms)
+				LForm.Close();
 		}
 
 		private void DisposeChildren()
 		{
-			//Form[] LForms = FTabbedMDIManager.MdiChildren;
-			//foreach (Form LForm in LForms)
-			//	LForm.Dispose();
+			Form[] LForms = this.MdiChildren;
+			foreach (Form LForm in LForms)
+				LForm.Dispose();
 		}
 
 		private IStatusBarClient FCurrentStatusBarClient;
