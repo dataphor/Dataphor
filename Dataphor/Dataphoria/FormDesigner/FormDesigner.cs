@@ -970,17 +970,17 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private void ShowPalette()
         {
-            //FDockingManager.ActivateControl(FPalettePanel);
+            FDockContentPalettePanel.Show(FDockPanel);                        
         }
 
         private void ShowProperties()
         {
-            //FDockingManager.ActivateControl(FPropertyGrid);
+            FDockContentPropertyGrid.Show(FDockPanel);                        
         }
 
         private void ShowForm()
         {
-            //FDockingManager.ActivateControl(FFormPanel);
+            FDockContentFormPanel.Show(FDockPanel);                        
         }
 
 
