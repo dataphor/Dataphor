@@ -284,9 +284,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         private void ShowResults()
         {
-            //FDockingManager.SetDockVisibility(FResultPanel, true);
-            // TODO: There is a problem with Syncfusion that crashes the whole app if the FResultPanel is pinned and the following code runs
-//			FDockingManager.ActivateControl(FResultPanel);
+            FDockContentResultPanel.Show(FDockPanel);
+            FDockContentResultPanel.Activate();
+            FDockContentResultPanel.ActiveControl = FResultPanel;                       
         }
 
 
@@ -390,7 +390,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         private void HideResultPanel()
         {
             FResultPanel.Clear();
-            //FDockingManager.SetDockVisibility(FResultPanel, false);
+            FDockContentResultPanel.Hide();            
         }
 
         private string GetTextToExecute()
