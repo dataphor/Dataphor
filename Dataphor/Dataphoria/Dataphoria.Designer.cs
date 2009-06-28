@@ -179,7 +179,9 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FConnectToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Connect;
             this.FConnectToolStripMenuItem.Name = "FConnectToolStripMenuItem";
-            this.FConnectToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FConnectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.C)));
+            this.FConnectToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FConnectToolStripMenuItem.Text = "Connect";
             this.FConnectToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -200,7 +202,9 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FNewToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.New;
             this.FNewToolStripMenuItem.Name = "FNewToolStripMenuItem";
-            this.FNewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FNewToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.N)));
+            this.FNewToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FNewToolStripMenuItem.Text = "New";
             this.FNewToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -208,7 +212,8 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FNewScriptToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.NewScript;
             this.FNewScriptToolStripMenuItem.Name = "FNewScriptToolStripMenuItem";
-            this.FNewScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FNewScriptToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.FNewScriptToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FNewScriptToolStripMenuItem.Text = "New Script";
             this.FNewScriptToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -216,7 +221,8 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FOpenFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Open;
             this.FOpenFileToolStripMenuItem.Name = "FOpenFileToolStripMenuItem";
-            this.FOpenFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FOpenFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.FOpenFileToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FOpenFileToolStripMenuItem.Text = "Open File";
             this.FOpenFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -224,7 +230,8 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FOpenFileWithToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.OpenWith;
             this.FOpenFileWithToolStripMenuItem.Name = "FOpenFileWithToolStripMenuItem";
-            this.FOpenFileWithToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FOpenFileWithToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.FOpenFileWithToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FOpenFileWithToolStripMenuItem.Text = "Open File With";
             // 
             // toolStripMenuItem2
@@ -236,7 +243,9 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FSaveAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveAll;
             this.FSaveAllToolStripMenuItem.Name = "FSaveAllToolStripMenuItem";
-            this.FSaveAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FSaveAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.S)));
+            this.FSaveAllToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FSaveAllToolStripMenuItem.Text = "Save All";
             this.FSaveAllToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -249,14 +258,16 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.FLaunchFormToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.LaunchForm;
             this.FLaunchFormToolStripMenuItem.Name = "FLaunchFormToolStripMenuItem";
-            this.FLaunchFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FLaunchFormToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.FLaunchFormToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FLaunchFormToolStripMenuItem.Text = "Launch Form";
             this.FLaunchFormToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // FExitToolStripMenuItem
             // 
             this.FExitToolStripMenuItem.Name = "FExitToolStripMenuItem";
-            this.FExitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FExitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.FExitToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.FExitToolStripMenuItem.Text = "Exit";
             this.FExitToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
