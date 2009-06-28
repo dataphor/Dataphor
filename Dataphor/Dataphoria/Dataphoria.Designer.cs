@@ -62,11 +62,14 @@ namespace Alphora.Dataphor.Dataphoria
             this.FFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FConnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FDisconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.FNewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FNewScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FOpenFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FOpenFileWithToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.FSaveAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.FLaunchFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -89,9 +92,9 @@ namespace Alphora.Dataphor.Dataphoria
             this.FOpenFileWithToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FLaunchFormToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.FMainMenuStrip.SuspendLayout();
             this.FToolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -188,6 +191,11 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDisconnectToolStripMenuItem.Text = "Disconnect";
             this.FDisconnectToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+            // 
             // FNewToolStripMenuItem
             // 
             this.FNewToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.New;
@@ -219,6 +227,11 @@ namespace Alphora.Dataphor.Dataphoria
             this.FOpenFileWithToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FOpenFileWithToolStripMenuItem.Text = "Open File With";
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
+            // 
             // FSaveAllToolStripMenuItem
             // 
             this.FSaveAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveAll;
@@ -226,6 +239,11 @@ namespace Alphora.Dataphor.Dataphoria
             this.FSaveAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FSaveAllToolStripMenuItem.Text = "Save All";
             this.FSaveAllToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
             // 
             // FLaunchFormToolStripMenuItem
             // 
@@ -247,6 +265,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FDataphorExplorerToolStripMenuItem,
             this.FWarningsErrorsToolStripMenuItem,
+            this.toolStripMenuItem4,
             this.FClearWarningsToolStripMenuItem});
             this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
             this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -302,9 +321,11 @@ namespace Alphora.Dataphor.Dataphoria
             // 
             this.LHelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FDataphorDocumentationToolStripMenuItem,
+            this.toolStripMenuItem5,
             this.FAlphoraWebSiteToolStripMenuItem,
             this.FAlphoraDiscussionGroupsToolStripMenuItem,
             this.FWebDocumentationToolStripMenuItem,
+            this.toolStripMenuItem6,
             this.FAboutToolStripMenuItem});
             this.LHelpToolStripMenuItem.Name = "LHelpToolStripMenuItem";
             this.LHelpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -418,20 +439,20 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDockPanel.Size = new System.Drawing.Size(664, 436);
             this.FDockPanel.TabIndex = 8;
             // 
-            // toolStripMenuItem1
+            // toolStripMenuItem4
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(177, 6);
             // 
-            // toolStripMenuItem2
+            // toolStripMenuItem5
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(213, 6);
             // 
-            // toolStripMenuItem3
+            // toolStripMenuItem6
             // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(213, 6);
             // 
             // Dataphoria
             // 
@@ -493,5 +514,8 @@ namespace Alphora.Dataphor.Dataphoria
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
     }
 }
