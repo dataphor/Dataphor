@@ -172,6 +172,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FExecuteMenuItem.Text = "&Execute";
             FExecuteMenuItem.Click += FMainMenuStrip_ItemClicked;
             FExecuteMenuItem.Image = MenuImages.Execute;
+            FExecuteMenuItem.ShortcutKeys = Keys.Control | Keys.E;
             // 
             // FCancelMenuItem
             // 
@@ -186,6 +187,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FPrepareMenuItem.Text = "&Prepare";
             FPrepareMenuItem.Click += FMainMenuStrip_ItemClicked;
             FPrepareMenuItem.Image = MenuImages.Prepare;
+            FPrepareMenuItem.ShortcutKeys = Keys.Control | Keys.R;
             // 
             // FAnalyzeMenuItem
             // 
@@ -194,6 +196,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FAnalyzeMenuItem.Text = "&Analyze";
             FAnalyzeMenuItem.Click += FMainMenuStrip_ItemClicked;
             FAnalyzeMenuItem.Image = MenuImages.Analyze;
+            FAnalyzeMenuItem.ShortcutKeys = Keys.Control | Keys.T;
             // 
             // FInjectMenuItem
             // 
@@ -202,6 +205,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FInjectMenuItem.Text = "&Inject As Upgrade";
             FInjectMenuItem.Click += FMainMenuStrip_ItemClicked;
             FInjectMenuItem.Image = MenuImages.Inject;
+            FInjectMenuItem.ShortcutKeys = Keys.Control | Keys.I;
             // 
             // FExportMenu
             // 
@@ -228,15 +232,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             // FExecuteBothMenuItem
             // 
-
-
             FExecuteBothMenuItem.Text = "S&chema and Data...";
-            FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;            
             // 
             // FExecuteLineMenuItem
             // 
             FExecuteLineMenuItem.Text = "E&xecute Line";
-            FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;            
             // 
             // FPrepareLineMenuItem
             // 
@@ -246,7 +248,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // FAnalyzeLineMenuItem
             // 
             FAnalyzeLineMenuItem.Text = "A&nalyze Line";
-            FAnalyzeLineMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FAnalyzeLineMenuItem.Click += FMainMenuStrip_ItemClicked;            
             // 
             // FSelectBlockMenuItem
             // 
@@ -267,6 +269,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             FShowResultsMenuItem.Text = "&Results";
             FShowResultsMenuItem.Click += FMainMenuStrip_ItemClicked;
+            FShowResultsMenuItem.ShortcutKeys = Keys.F7;
             // 
             // D4Editor
             // 

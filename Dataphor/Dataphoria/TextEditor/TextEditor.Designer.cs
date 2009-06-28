@@ -196,6 +196,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
             this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
+            this.FSaveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FSaveToolStripMenuItem.Text = "Save";
             this.FSaveToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
@@ -364,7 +365,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSplitWindowToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SplitWindow;
             this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
-            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.FSplitWindowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.D1)));
+            this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
             this.FSplitWindowToolStripMenuItem.Text = "Split Window";
             this.FSplitWindowToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
