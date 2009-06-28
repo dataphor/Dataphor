@@ -196,7 +196,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
             this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
-            this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FSaveToolStripMenuItem.Text = "Save";
             this.FSaveToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -204,7 +204,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSaveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
             this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
-            this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FSaveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.F)));
+            this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
             this.FSaveAsFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -212,7 +214,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FSaveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
             this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
-            this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FSaveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.D)));
+            this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
             this.FSaveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -220,20 +224,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             // 
             this.FCloseToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
             this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
-            this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FCloseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
+            this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FCloseToolStripMenuItem.Text = "Close";
             this.FCloseToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(170, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(258, 6);
             // 
             // FPrintToolStripMenuItem
             // 
             this.FPrintToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Print;
             this.FPrintToolStripMenuItem.Name = "FPrintToolStripMenuItem";
-            this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.FPrintToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
             this.FPrintToolStripMenuItem.Text = "Print";
             this.FPrintToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
