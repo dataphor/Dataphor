@@ -271,7 +271,7 @@ namespace Alphora.Dataphor.Dataphoria
 								try
 								{
 									FServerNode.Expand();
-								    FDockContentFExplorer.Hide();
+								    FDockContentFExplorer.DockState=DockState.DockLeftAutoHide;
 								    FConnectToolStripMenuItem.Visible = false;
 								    FDisconnectToolStripMenuItem.Visible = true;									
 									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
