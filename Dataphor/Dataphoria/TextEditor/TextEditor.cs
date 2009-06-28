@@ -193,7 +193,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         private void UpdateTitle()
         {
-            Text = FService.GetDescription() + (FService.IsModified ? "*" : "");
+            this.TabText = FService.GetDescription() + (FService.IsModified ? "*" : "");            
         }
 
         // Service callbacks
