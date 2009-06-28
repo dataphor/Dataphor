@@ -286,7 +286,8 @@ namespace Alphora.Dataphor.Dataphoria
             // FDataphorExplorerToolStripMenuItem
             // 
             this.FDataphorExplorerToolStripMenuItem.Name = "FDataphorExplorerToolStripMenuItem";
-            this.FDataphorExplorerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.FDataphorExplorerToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
+            this.FDataphorExplorerToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.FDataphorExplorerToolStripMenuItem.Text = "Dataphor Explorer";
             this.FDataphorExplorerToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
