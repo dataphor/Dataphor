@@ -776,7 +776,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         private void UpdateTitle()
         {
-            Text =
+            TabText =
                 String.Format
                     (
                     "{0} - {1}{2}",
