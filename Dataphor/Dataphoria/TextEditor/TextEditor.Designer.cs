@@ -539,7 +539,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TextEditor";
             this.TabText = "Untitled";
-            this.Text = "Untitled";
+            this.Text = "";
             this.FMenuStrip.ResumeLayout(false);
             this.FMenuStrip.PerformLayout();
             this.FToolStrip.ResumeLayout(false);
