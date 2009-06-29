@@ -1220,7 +1220,7 @@ begin
 		Name : Name tags { Frontend.Preview.Include = "True" },
 		Directory : String { default "" } tags { Frontend.Width = "50", Frontend.Edit.ReadOnly = "True", Frontend.Hint = "The server-side physical directory for the library, if different from the default library directory." },
 		Version : VersionNumber { default VersionNumberUndefined() },
-		DefaultDeviceName : Name { default "" } tags { Frontend.Title = "Default Device Name" },
+		DefaultDeviceName : Name { default "" } tags { Frontend.Title = "Default Device Name",  Frontend.TextBox.NilIfBlank = "False" },
 		CanLoad : Boolean { default false } tags { Frontend.Visible = "False" },
 		IsSuspect : Boolean { default false } tags { Frontend.Title = "Is Suspect", Frontend.Visible = "False", Frontend.View.Visible = "True", Frontend.ReadOnly = "True" },
 		SuspectReason : String { nil } tags { Frontend.Title = "Suspect Reason", Frontend.Visible = "False", Frontend.View.Visible = "True", Frontend.ReadOnly = "True", Frontend.TextBox.Height = "7" },
@@ -1613,6 +1613,17 @@ begin
 	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "StoreView" };
 	
 	grant usage on Devices to role CatalogUser;
+		
+	create view DevicesNameAndLibrary
+	Devices over {ID ,Name,Library_Name} 
+	adorn
+	{ 
+		ID tags { Frontend.Visible = "false" }
+	};
+	
+	create reference Libraries_Devices 
+		Libraries { Name, DefaultDeviceName } references DevicesNameAndLibrary { Library_Name, Name }
+	tags { DAE.Enforced = "false" };
 
 	create table DeviceUsers in Catalog
 	{
