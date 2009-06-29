@@ -1814,24 +1814,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
     
-	#if OnExpression
     /// <remarks>operator CreateServerLinkUser(AUserID : string, AServerLinkName : System.Name, AServerUserID : string, AServerPassword : string); </remarks>
     public class SystemCreateServerLinkUserNode : InstructionNode
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				Schema.User LUser = AProcess.Plan.Catalog.Users[AArguments[0].Value.AsString];
-				if (String.Compare(LUser.ID, AProcess.Plan.User.ID, true) != 0)
-					AProcess.Plan.CheckAdminUser();
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
-				LServerLink.Users.Add(new Schema.ServerLinkUser(LUser, LServerLink, AArguments[2].Value).ToString(), Schema.SecurityUtility.EncryptPassword(((Scalar)AArguments[3].Value.AsString)));
-				return null;
-			}
+			string LUserID = AArguments[0].Value.AsString;
+			AProcess.Plan.CheckAuthorized(LUserID);
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			LServerLink.Users.Add(new Schema.ServerLinkUser(LUserID, LServerLink, AArguments[2].Value.AsString, Schema.SecurityUtility.EncryptPassword(AArguments[3].Value.AsString)));
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
     
@@ -1840,17 +1836,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				AProcess.Plan.CheckSystemUser();
-				Schema.User LUser = AProcess.Plan.Catalog.Users[AArguments[0].Value.AsString];
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
-				LServerLink.Users.Add(new Schema.ServerLinkUser(LUser, LServerLink, AArguments[2].Value).ToString(), ((Scalar)AArguments[3].Value.AsString));
-				return null;
-			}
+			string LUserID = AArguments[0].Value.AsString;
+			AProcess.Plan.CheckAuthorized(LUserID);
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			LServerLink.Users.Add(new Schema.ServerLinkUser(LUserID, LServerLink, AArguments[2].Value.AsString, AArguments[3].Value.AsString));
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
     
@@ -1859,18 +1853,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				Schema.User LUser = AProcess.Plan.Catalog.Users[AArguments[0].Value.AsString];
-				if (String.Compare(LUser.ID, AProcess.Plan.User.ID, true) != 0)
-					AProcess.Plan.CheckAdminUser();
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
-				LServerLink.Users[LUser.ID].ServerLinkUserID = AArguments[2].Value.AsString;
-				return null;
-			}
+			string LUserID = AArguments[0].Value.AsString;
+			AProcess.Plan.CheckAuthorized(LUserID);
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			LServerLink.Users[LUserID].ServerLinkUserID = AArguments[2].Value.AsString;
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
     
@@ -1879,37 +1870,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				Schema.User LUser = AProcess.Plan.Catalog.Users[AArguments[0].Value.AsString];
-				AProcess.Plan.CheckAdminUser();
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
-				LServerLink.Users[LUser.ID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
-				return null;
-			}
+			string LUserID = AArguments[0].Value.AsString;
+			AProcess.Plan.CheckAuthorized(LUserID);
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			LServerLink.Users[LUserID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
     
     /// <remarks>operator ChangeServerLinkUserPassword(AServerLinkName : System.Name, AOldPassword : string, APassword : string); </remarks>
-    public class ChangeServerLinkUserPasswordNode : InstructionNode
+    public class SystemChangeServerLinkUserPasswordNode : InstructionNode
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
-				Schema.User LUser = AProcess.ServerSession.User;
-				if (String.Compare(AArguments[1].Value.AsString, Schema.SecurityUtility.DecryptPassword(LServerLink.Users[LUser.ID].ServerLinkPassword), true) != 0)
-					throw new ServerException(ServerException.Codes.InvalidPassword);
-				LServerLink.Users[LUser.ID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
-				return null;
-			}
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			Schema.User LUser = AProcess.ServerSession.User;
+			if (String.Compare(AArguments[1].Value.AsString, Schema.SecurityUtility.DecryptPassword(LServerLink.Users[LUser.ID].ServerLinkPassword), true) != 0)
+				throw new ServerException(ServerException.Codes.InvalidPassword);
+			LServerLink.Users[LUser.ID].ServerLinkPassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
     
@@ -1918,29 +1905,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Users)
-			{
-				Schema.User LUser = AProcess.Plan.Catalog.Users[AArguments[0].Value.AsString];
-				if (String.Compare(LUser.ID, AProcess.Plan.User.ID, true) != 0)
-					AProcess.Plan.CheckAdminUser();
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
-				if (!(LObject is Schema.ServerLink))
-					throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
-				Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			string LUserID = AArguments[0].Value.AsString;
+			AProcess.Plan.CheckAuthorized(LUserID);
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			
+			// TODO: Prevent drop if user has active sessions on this server?
 				
-				foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
-					if (String.Compare(LSession.User.ID, LUser.ID, true) == 0)
-						foreach (RemoteSession LRemoteSession in LSession.RemoteSessions)
-							if (LRemoteSession.ServerLink.Equals(LServerLink))
-								throw new ServerException(ServerException.Codes.UserHasOpenSessions, LUser.ID);
-				
-				LServerLink.Users.Remove(LServerLink.Users[LUser.ID]);
-				return null;
-			}
+			LServerLink.Users.Remove(LServerLink.Users[LUserID]);
+			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
+			return null;
 		}
     }
-	#endif
-	
+    
+    /// <remarks>operator ServerUserExists(AUserID : string, AServerLinkName : System.Name) : Boolean;</remarks>
+    public class SystemServerUserExistsNode : InstructionNode
+    {
+		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		{
+			string LUserID = AArguments[0].Value.AsString;
+			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString);
+			if (!(LObject is Schema.ServerLink))
+				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected);
+			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
+			
+			return new DataVar(AProcess.DataTypes.SystemBoolean, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LServerLink.Users.ContainsKey(LUserID)));
+		}
+    }
+    
     public class SystemStopProcessNode : InstructionNode
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)

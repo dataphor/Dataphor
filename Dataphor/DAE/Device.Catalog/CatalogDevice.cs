@@ -891,6 +891,58 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		}
 		#endif
 		
+		private void PopulateServerLinks(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		{
+			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			{
+				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
+				if (LServerLink != null)
+				{
+					ARow[0].AsInt32 = LServerLink.ID;
+					ARow[1].AsString = LServerLink.Name;
+					ARow[2].AsString = LServerLink.Library.Name;
+					ARow[3].AsString = LServerLink.Owner.ID;
+					ARow[4].AsBoolean = LServerLink.IsSystem;
+					ARow[5].AsBoolean = LServerLink.IsGenerated;
+					ARow[6].AsString = LServerLink.HostName;
+					ARow[7].AsString = LServerLink.InstanceName;
+					ARow[8].AsInt32 = LServerLink.OverridePortNumber;
+					ARow[9].AsBoolean = LServerLink.UseSessionInfo;
+					ANativeTable.Insert(AProcess, ARow);
+				}
+			}
+		}
+		
+		private void PopulateServerLinkUsers(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		{
+			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			{
+				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
+				if (LServerLink != null)
+				{
+					foreach (ServerLinkUser LLinkUser in LServerLink.Users)
+					{
+						ARow[0].AsString = LLinkUser.UserID;
+						ARow[1].AsString = LServerLink.Name;
+						ARow[2].AsString = LLinkUser.ServerLinkUserID;
+						ANativeTable.Insert(AProcess, ARow);
+					}
+				}
+			}
+		}
+		
+		private void PopulateRemoteSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		{
+			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+				foreach (ServerProcess LProcess in LSession.Processes)
+					foreach (RemoteSession LRemoteSession in LProcess.RemoteSessions)
+					{
+						ARow[0].AsString = LRemoteSession.ServerLink.Name;
+						ARow[1].AsInt32 = LProcess.ProcessID;
+						ANativeTable.Insert(AProcess, ARow);
+					}
+		}
+		
 		private void PopulateDeviceSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
 			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
@@ -948,12 +1000,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					#endif
 					case "System.DeviceSessions" : PopulateDeviceSessions(AProcess, AHeader.NativeTable, LRow); break;
 					case "System.ApplicationTransactions" : PopulateApplicationTransactions(AProcess, AHeader.NativeTable, LRow); break;
-					#if OnExpression
 					case "System.ServerLinks": PopulateServerLinks(AProcess, AHeader.NativeTable, LRow); break;
 					case "System.ServerLinkUsers": PopulateServerLinkUsers(AProcess, AHeader.NativeTable, LRow); break;
 					case "System.RemoteSessions": PopulateRemoteSessions(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.RemotePlans": PopulateRemotePlans(AProcess, AHeader.NativeTable, LRow); break;
-					#endif
 				}
 			}
 			finally

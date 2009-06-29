@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Server
 			set { FProcess = value; }
 		}
 		
-		public NativeResult Execute(string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
 			IServerScript LScript = FProcess.PrepareScript(AStatement);
 			try
@@ -76,21 +76,35 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							if (LExpressionPlan.DataType is Schema.TableType)
 							{
-								IServerCursor LCursor = LExpressionPlan.Open(LDataParams);
-								try
+								if (AOptions != NativeExecutionOptions.SchemaOnly)
 								{
-									LResult.Value = NativeMarshal.ServerCursorToNativeValue(FProcess, LCursor);
+									IServerCursor LCursor = LExpressionPlan.Open(LDataParams);
+									try
+									{
+										LResult.Value = NativeMarshal.ServerCursorToNativeValue(FProcess, LCursor);
+									}
+									finally
+									{
+										LExpressionPlan.Close(LCursor);
+									}
 								}
-								finally
+								else
 								{
-									LExpressionPlan.Close(LCursor);
+									LResult.Value = NativeMarshal.TableVarToNativeTableValue(FProcess, LExpressionPlan.TableVar);
 								}
 							}
 							else
 							{
-								using (DataValue LValue = LExpressionPlan.Evaluate(LDataParams))
+								if (AOptions != NativeExecutionOptions.SchemaOnly)
 								{
-									LResult.Value = NativeMarshal.DataValueToNativeValue(FProcess, LValue);
+									using (DataValue LValue = LExpressionPlan.Evaluate(LDataParams))
+									{
+										LResult.Value = NativeMarshal.DataValueToNativeValue(FProcess, LValue);
+									}
+								}
+								else
+								{
+									LResult.Value = NativeMarshal.DataTypeToNativeValue(FProcess, LExpressionPlan.DataType);
 								}
 							}
 						}
@@ -104,7 +118,8 @@ namespace Alphora.Dataphor.DAE.Server
 						IServerStatementPlan LStatementPlan = LBatch.PrepareStatement(LDataParams);
 						try
 						{
-							LStatementPlan.Execute(LDataParams);
+							if (AOptions != NativeExecutionOptions.SchemaOnly)
+								LStatementPlan.Execute(LDataParams);
 						}
 						finally
 						{
@@ -112,7 +127,8 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 					}
 
-					NativeMarshal.SetNativeOutputParams(FProcess, LResult.Params, LDataParams);
+					if (AOptions != NativeExecutionOptions.SchemaOnly)
+						NativeMarshal.SetNativeOutputParams(FProcess, LResult.Params, LDataParams);
 					return LResult;
 				}
 				finally
@@ -135,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			NativeResult[] LResults = new NativeResult[AOperations.Length];
 			for (int LIndex = 0; LIndex < AOperations.Length; LIndex++)
-				LResults[LIndex] = Execute(AOperations[LIndex].Statement, AOperations[LIndex].Params);
+				LResults[LIndex] = Execute(AOperations[LIndex].Statement, AOperations[LIndex].Params, AOperations[LIndex].Options);
 				
 			return LResults;
 		}

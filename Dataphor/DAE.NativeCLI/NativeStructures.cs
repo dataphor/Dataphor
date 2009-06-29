@@ -32,11 +32,15 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public object Value;
 	}
 	
+	[Serializable]
+	public enum NativeExecutionOptions { Default, SchemaOnly }
+	
 	[Serializable]	
 	public struct NativeExecuteOperation
 	{
 		public string Statement;
 		public NativeParam[] Params;
+		public NativeExecutionOptions Options;
 	}
 	
 	[Serializable]	
@@ -62,6 +66,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public string DataTypeName;
 	}
 	
+	[Serializable]
+	public struct NativeKey
+	{
+		public string[] KeyColumns;
+	}
+	
 	[Serializable]	
 	public class NativeRowValue : NativeValue
 	{
@@ -73,6 +83,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 	public class NativeTableValue : NativeValue
 	{
 		public NativeColumn[] Columns;
+		public NativeKey[] Keys;
 		public object[][] Rows;
 	}
 	

@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams);
+		NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
 		/// Executes a series of D4 statements and the returns the results, if any.
@@ -140,7 +140,7 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		/// </para>
 		/// </remarks>
 		/// <returns>The result of the execution, if the statement is an expression, null otherwise.</returns>
-		NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams);
+		NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions);
 
 		/// <summary>
 		/// Executes a series of D4 statements and the returns the results, if any.

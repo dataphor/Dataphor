@@ -110,7 +110,17 @@ namespace Alphora.Dataphor.DAE.Server
 
 			BaseTableVar LTableVar = new BaseTableVar(LTableType);
 			LTableVar.EnsureTableVarColumns();
-			LTableVar.EnsureKey(AProcess.Plan); // TODO: Transport key information for table-valued results?
+			if (ANativeTable.Keys != null)
+			{
+				foreach (NativeKey LNativeKey in ANativeTable.Keys)
+				{
+					Key LKey = new Key();
+					foreach (string LColumnName in LNativeKey.KeyColumns)
+						LKey.Columns.Add(LTableVar.Columns[LColumnName]);
+					LTableVar.Keys.Add(LKey);
+				}
+			}
+			LTableVar.EnsureKey(AProcess.Plan);
 			return LTableVar;
 		}
 		
@@ -162,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Server
 								LRow[LColumnIndex] = NativeValueToDataValue(AProcess, LNativeTable.Columns[LColumnIndex].DataTypeName, LNativeTable.Rows[LIndex][LColumnIndex]);
 							LInternalTable.Insert(AProcess, LRow);
 						}
-						catch (Exception E)
+						catch (Exception)
 						{
 							LRow.Dispose();
 							throw;
@@ -173,6 +183,42 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			
 			throw new NotSupportedException(String.Format("Unknown native value type: \"{0}\".", ANativeValue.GetType().Name));
+		}
+		
+		public static NativeValue DataTypeToNativeValue(IServerProcess AProcess, IDataType ADataType)
+		{
+			ScalarType LScalarType = ADataType as ScalarType;
+			if (LScalarType != null)
+			{
+				NativeScalarValue LNativeScalar = new NativeScalarValue();
+				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess, LScalarType);
+				return LNativeScalar;
+			}
+			
+			ListType LListType = ADataType as ListType;
+			if (LListType != null)
+			{
+				NativeListValue LNativeList = new NativeListValue();
+				return LNativeList;
+			}
+			
+			RowType LRowType = ADataType as RowType;
+			if (LRowType != null)
+			{
+				NativeRowValue LNativeRow = new NativeRowValue();
+				LNativeRow.Columns = ColumnsToNativeColumns(AProcess, LRowType.Columns);
+				return LNativeRow;
+			}
+			
+			TableType LTableType = ADataType as TableType;
+			if (LTableType != null)
+			{
+				NativeTableValue LNativeTable = new NativeTableValue();
+				LNativeTable.Columns = ColumnsToNativeColumns(AProcess, LTableType.Columns);
+				return LNativeTable;
+			}
+				
+			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", ADataType.Name));
 		}
 		
 		public static NativeValue DataValueToNativeValue(IServerProcess AProcess, DataValue ADataValue)
@@ -211,6 +257,7 @@ namespace Alphora.Dataphor.DAE.Server
 					for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
 						LNativeRow.Values[LIndex] = LRow.HasValue(LIndex) ? LRow[LIndex].AsNative : null;
 				}
+				return LNativeRow;
 			}
 			
 			Table LTable = ADataValue as Table;
@@ -239,16 +286,29 @@ namespace Alphora.Dataphor.DAE.Server
 					
 					LNativeTable.Rows = LNativeRows.ToArray();
 				}
+				return LNativeTable;
 			}
 			
 			throw new NotSupportedException(String.Format("Values of type \"{0}\" are not supported.", ADataValue.DataType.Name));
 		}
 		
-		public static NativeValue ServerCursorToNativeValue(IServerProcess AProcess, IServerCursor ACursor)
+		public static NativeTableValue TableVarToNativeTableValue(IServerProcess AProcess, TableVar ATableVar)
 		{
 			NativeTableValue LNativeTable = new NativeTableValue();
-			ITableType LTableType = ACursor.Plan.TableVar.DataType;
-			LNativeTable.Columns = ColumnsToNativeColumns(AProcess, LTableType.Columns);
+			LNativeTable.Columns = ColumnsToNativeColumns(AProcess, ATableVar.DataType.Columns);
+			LNativeTable.Keys = new NativeKey[ATableVar.Keys.Count];
+			for (int LIndex = 0; LIndex < ATableVar.Keys.Count; LIndex++)
+			{
+				LNativeTable.Keys[LIndex] = new NativeKey();
+				LNativeTable.Keys[LIndex].KeyColumns = ATableVar.Keys[LIndex].Columns.ColumnNames;
+			}
+			
+			return LNativeTable;
+		}
+		
+		public static NativeValue ServerCursorToNativeValue(IServerProcess AProcess, IServerCursor ACursor)
+		{
+			NativeTableValue LNativeTable = TableVarToNativeTableValue(AProcess, ACursor.Plan.TableVar);
 				
 			List<object[]> LNativeRows = new List<object[]>();
 			

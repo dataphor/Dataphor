@@ -724,6 +724,13 @@ begin
 	create operator SetDeviceUserConnectionParameters(const AUserID : UserID, const ADeviceName : Name, const AConnectionParameters : String) class "System.SystemSetDeviceUserConnectionParametersNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator DropDeviceUser(const AUserID : UserID, const ADeviceName : Name) class "System.SystemDropDeviceUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator DeviceUserExists(const AUserID : UserID, const ADeviceName : Name) : Boolean class "System.SystemDeviceUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+    create operator CreateServerLinkUser(AUserID : String, AServerLinkName : System.Name, AServerUserID : String, AServerPassword : String) class "System.SystemCreateServerLinkUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator CreateServerLinkUserWithEncryptedPassword(AUserID : String, AServerLinkName : System.Name, AServerUserID : String, AEncryptedServerPassword : String) class "System.SystemCreateServerLinkUserWithEncryptedPasswordNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator SetServerLinkUserID(AUserID : String, AServerLinkName : System.Name, AServerUserID : String) class "System.SystemSetServerLinkUserIDNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator SetServerLinkUserPassword(AUserID : String, AServerLinkName : System.Name, APassword : String) class "System.SystemSetServerLinkUserPasswordNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator ChangeServerLinkUserPassword(AServerLinkName : System.Name, AOldPassword : String, APassword : String) class "System.SystemChangeServerLinkUserPasswordNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator DropServerLinkUser(AUserID : String, AServerLinkName : System.Name) class "System.SystemDropServerLinkUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+    create operator ServerUserExists(AUserID : String, AServerLinkName : System.Name) : Boolean class "System.SystemServerUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator CloseSession(const ASessionID : Integer) class "System.SystemCloseSessionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator StartProcess() : Integer class "System.SystemStartProcessNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator StopProcess(const AProcessID : Integer) class "System.SystemStopProcessNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -1595,7 +1602,7 @@ begin
 	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "StoreView" };
 	
 	grant usage on Sorts to role CatalogUser;
-
+	
 	create table Devices in Catalog
 	{
 		ID : Integer static tags { Storage.Name = "C.ID" },
@@ -1677,6 +1684,48 @@ begin
 	
 	grant usage on DeviceOperators to role CatalogUser;
 
+	create table ServerLinks in Catalog
+	{
+		ID : Integer,
+		Name : Name,
+		Library_Name : Name,
+		Owner_User_ID : UserID,
+		IsSystem : Boolean,
+		IsGenerated : Boolean,
+		HostName : String,
+		InstanceName : String,
+		OverridePortNumber : Integer,
+		UseSessionInfo : Boolean,
+		key { ID } static tags { DAE.Enforced = "False" },
+		key { Name } static tags { DAE.Enforced = "False" },
+		reference ServerLinks_CatalogObjects { Name } references CatalogObjects { Name } static tags { DAE.Enforced = "False" }
+	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "None" };
+	
+	grant usage on ServerLinks to role CatalogUser;
+	
+	create table ServerLinkUsers in Catalog
+	{
+		User_ID : UserID,
+		ServerLink_Name : Name,
+		UserID : String,
+		key { User_ID, ServerLink_Name } static tags { DAE.Enforced = "False" },
+		reference ServerLinkUsers_ServerLinks { ServerLink_Name } references ServerLinks { Name } tags { DAE.Enforced = "False" },
+		reference ServerLinkUsers_Users { User_ID } references Users { ID } tags { DAE.Enforced = "False" }
+	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "None" };
+	
+	grant usage on ServerLinkUsers to role CatalogUser;
+	
+	create table RemoteSessions in Catalog
+	{
+		ServerLink_Name : Name,
+		Process_ID : Integer,
+		key { ServerLink_Name, Process_ID } static tags { DAE.Enforced = "False" },
+		reference RemoteSessions_ServerLinks { ServerLink_Name } references ServerLinks { Name } tags { DAE.Enforced = "False" },
+		reference RemoteSessions_Processes { Process_ID } references Processes { ID } tags { DAE.Enforced = "False" }
+	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "None" };
+	
+	grant usage on RemoteSessions to role CatalogUser;
+	
 	create table TableVars in Catalog
 	{
 		ID : Integer static tags { Storage.Name = "C.ID" },

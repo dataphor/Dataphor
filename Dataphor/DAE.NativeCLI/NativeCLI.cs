@@ -105,9 +105,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			return GetNativeInterface().GetTransactionCount(ASessionHandle);
 		}
 		
-		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return GetNativeInterface().Execute(ASessionHandle, AStatement, AParams);
+			return GetNativeInterface().Execute(ASessionHandle, AStatement, AParams, AOptions);
 		}
 
 		public NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
@@ -122,9 +122,9 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		public NativeStatelessCLI(string AHostName, string AInstanceName) : base(AHostName, AInstanceName) { }
 		public NativeStatelessCLI(string AHostName, string AInstanceName, int AOverridePortNumber) : base(AHostName, AInstanceName, AOverridePortNumber) { }
 
-		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return GetNativeInterface().Execute(ASessionInfo, AStatement, AParams);
+			return GetNativeInterface().Execute(ASessionInfo, AStatement, AParams, AOptions);
 		}
 		
 		public NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)

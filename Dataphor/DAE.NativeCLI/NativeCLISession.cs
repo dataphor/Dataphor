@@ -74,7 +74,12 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 		
 		public NativeResult Execute(string AStatement, NativeParam[] AParams)
 		{
-			return FNativeCLI.Execute(FSessionHandle, AStatement, AParams);
+			return FNativeCLI.Execute(FSessionHandle, AStatement, AParams, NativeExecutionOptions.Default);
+		}
+		
+		public NativeResult Execute(string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
+		{
+			return FNativeCLI.Execute(FSessionHandle, AStatement, AParams, AOptions);
 		}
 		
 		public NativeResult[] Execute(NativeExecuteOperation[] AOperations)

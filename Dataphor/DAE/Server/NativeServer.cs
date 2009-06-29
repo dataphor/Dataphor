@@ -185,14 +185,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
 			try
 			{
 				NativeSession LNativeSession = StartNativeSession(ASessionInfo);
 				try
 				{
-					return LNativeSession.Execute(AStatement, AParams);
+					return LNativeSession.Execute(AStatement, AParams, AOptions);
 				}
 				finally
 				{
@@ -225,11 +225,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
 			try
 			{
-				return GetNativeSession(ASessionHandle).Execute(AStatement, AParams);
+				return GetNativeSession(ASessionHandle).Execute(AStatement, AParams, AOptions);
 			}
 			catch (Exception LException)
 			{

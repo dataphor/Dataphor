@@ -82,9 +82,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return GetNativeServer().GetTransactionCount(ASessionHandle);
 		}
 
-		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionInfo ASessionInfo, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return GetNativeServer().Execute(ASessionInfo, AStatement, AParams);
+			return GetNativeServer().Execute(ASessionInfo, AStatement, AParams, AOptions);
 		}
 
 		public NativeResult[] Execute(NativeSessionInfo ASessionInfo, NativeExecuteOperation[] AOperations)
@@ -92,9 +92,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return GetNativeServer().Execute(ASessionInfo, AOperations);
 		}
 
-		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams)
+		public NativeResult Execute(NativeSessionHandle ASessionHandle, string AStatement, NativeParam[] AParams, NativeExecutionOptions AOptions)
 		{
-			return GetNativeServer().Execute(ASessionHandle, AStatement, AParams);
+			return GetNativeServer().Execute(ASessionHandle, AStatement, AParams, AOptions);
 		}
 
 		public NativeResult[] Execute(NativeSessionHandle ASessionHandle, NativeExecuteOperation[] AOperations)
