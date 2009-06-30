@@ -1,0 +1,49 @@
+CreateAndSave
+(
+	"R2", "Test", "d4", "create table { blah };"
+);
+//*
+select 
+	(R2Application rename { ID R2Application_ID }
+	join R2Library)['R2Test']
+	
+	left join Realm)['R2Test'] 
+
+
+
+//*
+select Libraries
+select R2Application
+
+select R2Type
+select R2Column
+select R2Key
+select R2KeyColumn
+select Realm
+select R2Table
+
+select ScalarTypes { Name } right join (R2Type { Name })
+select R2Type right join (ScalarTypes { Name })
+select AllTypes
+
+select ScalarTypes
+
+select R2Library['R2Test']
+select 
+
+
+
+
+select ScriptTypes('R2Test', 'Main');
+select ScriptColumns('R2Test', 'Person');
+select ScriptTables('R2Test', 'Main');
+
+
+select SubString('blah, bleh,',0,'blah, bleh,'.Length() -1);
+
+select R2Table ['R2Test', 'R1T1' by { Library, Name } ];
+
+select GetNextInteger('Blah');
+
+
+RealmStructures('zTest');

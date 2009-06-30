@@ -1,0 +1,281 @@
+// In keeping with the Star Wars theme, R2 seems an appropriate name for the application application :).
+
+//* Managed(R2) application [Library] is described by [Description].
+SafeDrop('R2Application');
+create table R2Application
+{
+	Library : System.Name tags { Frontend.Width = "25" }
+		tags { Frontend.Hint = "The application's D4 Library." },
+	Description : Description
+		tags { Frontend.Hint = 'Describe the application.' },
+	key { Library },
+	reference R2Application_Library { Library } references Libraries { Name }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Library/Application", Frontend.Lookup.Title = "Library/Application" }
+};
+
+// Realms dictate the prefix of the script name used for the item's creation.
+//* There is a realm[ID] in [R2Application] described by [Description].
+SafeDrop('Realm');
+create table Realm
+{
+	Name : System.Name tags { Frontend.Width = "25" }
+		tags { Frontend.Hint = 'Realms are used for organization.  An A/R application has Invoice and Payment Realms.' },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Description : Description
+		tags { Frontend.Hint = 'Describe the realm.' },
+	Priority : Integer { default GetNextInteger('RealmPriority') }, // This is used for dnd and will be hidden after UIs are built.
+	key { Name, Library },
+	key { Priority },
+	reference Realm_R2Application { Library } references R2Application { Library } update cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Library" }
+}
+static tags { Frontend.Plural.Title = 'Realms' };
+;
+
+//* There is an R2Type[Name] in library[Library] and realm[Realm_Name].
+SafeDrop('R2Type');
+create table R2Type
+{
+	Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Realm_Name : System.Name tags { Frontend.Width = "25" },
+	Like : System.Name,
+	key { Name },
+	reference R2Type_Type { Like } references ScalarTypes { Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", /*Frontend.Embedded = "True", */ Frontend.Title = "Like Type" },
+	reference R2Type_Realm { Realm_Name, Library } references Realm { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Realm" }
+}
+static tags { Frontend.Singular.Title = 'Type', Frontend.Plural.Title = 'Types' };
+	
+	
+//* There is an R2Table[Name] in library[Library] and realm[Realm_ID].
+//TODO: When AutoKey is selected, we should go ahead and create the R2Type so that it's available for other tables, references, etc.
+SafeDrop('R2Table');
+create table R2Table
+{
+	Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Realm_Name : System.Name tags { Frontend.Width = "25" },
+	AutoKey : Boolean { default false },		//AutoKey causes the generator to insert the column ID(Surrogate ID) and the default GetNextID() line.
+	Priority : Integer, // This is used for dnd and will be hidden after UIs are built.
+	order { Priority }
+		tags { Frontend.IsDefault = "True" },
+	key { Name, Library },
+	reference R2Table_Realm { Realm_Name, Library } references Realm { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Realm" }
+}
+static tags { Frontend.Singular.Title = 'Table', Frontend.Plural.Title = 'Tables' };
+
+//*
+create operator GetNextR2TablePriority() : Integer
+begin
+	result := Max( Priority from R2Table ) + 1;
+end 
+	tags { DAE.ShouldTranslate = "false" };
+	
+alter table R2Table { alter column Priority { create default GetNextR2TablePriority() } };
+
+//* Operator: ManageAutoKeyType
+create operator ManageAutoKeyType(var ARow : typeof (R2Table[])) : Boolean
+begin
+	result := false;
+	if not(IsNil(ARow.AutoKey)) then
+		begin
+			result := true;
+			if ARow.AutoKey then
+				begin
+					try	
+					insert
+						row 
+						{ 
+							ARow.Name + "ID" Name,
+							ARow.Library Library,
+							ARow.Realm_Name Realm_Name,
+							"IBAS.ID" Like
+						}
+						into R2Type;
+					commit;
+				end
+			else
+				begin
+					if not IsNil(R2Type where Name = ARow.Name + "ID") then
+						delete R2Type where Name = ARow.Name + "ID";
+				end;
+		end;
+end;
+attach operator ManageAutoKeyType to AutoKey in R2Table on { change }
+	tags { DAE.ShouldTranslate = 'True' };
+
+// View:Scalars necessary for the transition constraint to allow the insertion a R2Column without a scalar type.
+SafeDrop('Scalars');
+create view Scalars
+	ScalarTypes { ID, Name, Library_Name }
+	adorn { drop reference System.ScalarTypes_CatalogObjects };
+
+//TODO: Priority for use in dnd 
+//* There is an R2Colunmn[Name] in library[Library] and R2Table[R2Table_Name] of type[Type].
+SafeDrop('R2Column');
+create table R2Column
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },	
+	Name : System.Name tags { Frontend.Width = "25" },
+	ScalarType : System.Name nil tags { Frontend.Width = "25", Frontend.Hint = "Select an R2Type OR Scalar Type." },
+	R2Type : System.Name nil tags { Frontend.Width = "25", Frontend.Hint = "Select an R2Type OR Scalar Type." },
+	key { R2Table_Name, Library, Name  },
+	reference R2Column_R2Table { R2Table_Name, Library } references R2Table { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Table" },
+	reference R2Column_Scalars { ScalarType } references Scalars { Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Extension.Title = "Scalar Type" },
+	reference R2Column_Type { R2Type } references R2Type { Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Extension.Title = "R2Type" },
+	transition constraint R2OrScalarType_InsertMutex on insert
+		IsNil(new.R2Type) xor IsNil(new.ScalarType)
+		tags { DAE.SimpleMessage = "The [R2Type] and [ScalarType] columns are mutally exclusive." },
+	transition constraint R2OrScalarType_UpdateMutex on update
+		IsNil(new.R2Type) xor IsNil(new.ScalarType)
+		tags { DAE.SimpleMessage = "The [R2Type] and [ScalarType] columns are mutally exclusive." }
+}
+static tags { Frontend.Singular.Title = 'Column', Frontend.Plural.Title = 'Columns' };
+
+//* There is an R2Key[Name] in library[Library] and R2Table[R2Table_Name]
+SafeDrop('R2Key');
+create table R2Key
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Name : System.Name tags { Frontend.Width = "25" },
+	key { R2Table_Name, Library, Name },
+	reference R2Key_R2Table { R2Table_Name, Library } references R2Table { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Key" }
+}
+static tags { Frontend.Singular.Title = 'Key', Frontend.Plural.Title = 'Keys' };
+
+//* There is an R2KeyColumn[Column] in Table[R2Key_Name]
+SafeDrop('R2KeyColumn');
+create table R2KeyColumn
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	R2Key_Name : System.Name tags { Frontend.Width = "25", Frontend.Title = 'Key' },
+	Column : System.Name tags { Frontend.Width = "25" },
+	key { R2Table_Name, R2Key_Name, Column },
+	reference R2KeyColumn_R2Key { R2Table_Name, Library, R2Key_Name } references R2Key { R2Table_Name, Library, Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Key" },
+	reference R2KeyColumn_R2Column { R2Table_Name, Library, Column } references R2Column { R2Table_Name, Library,Name }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True" }
+}
+static tags { Frontend.Singular.Title = 'Key Column', Frontend.Plural.Title = 'Key Columns' };
+
+//* There is an R2Key[Name] in library[Library] and R2Table[R2Table_Name]
+SafeDrop('R2Order');
+create table R2Order
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Name : System.Name tags { Frontend.Width = "25" },
+	key { R2Table_Name, Library, Name },
+	key { Name },
+	reference R2Order_R2Table { R2Table_Name, Library } references R2Table { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Order" }
+}
+static tags { Frontend.Singular.Title = 'Order', Frontend.Plural.Title = 'Orders' };
+
+//* There is an R2OrderColumn[Column] in Table[R2Order_Name]
+SafeDrop('R2OrderColumn');
+create table R2OrderColumn
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	R2Order_Name : System.Name tags { Frontend.Width = "25", Frontend.Title = 'Order' },
+	Column : System.Name tags { Frontend.Width = "25" },
+	key { R2Table_Name, R2Order_Name, Column },
+	reference R2OrderColumn_R2Order { R2Table_Name, Library, R2Order_Name } references R2Order { R2Table_Name, Library, Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Order" },
+	reference R2OrderColumn_R2Column { R2Table_Name, Library, Column } references R2Column { R2Table_Name, Library,Name }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True" }
+}
+static tags { Frontend.Singular.Title = 'Order Column', Frontend.Plural.Title = 'Order Columns' };
+
+//*
+create type ReferenceTypeID like IBAS.ShortID;
+//* Table: ReferenceType
+SafeDrop('R2ReferenceType');
+create table R2ReferenceType
+{
+	ID : ReferenceTypeID,
+	Description : IBAS.Description
+		tags { Frontend.Preview.Include = 'True' },
+	key { ID }
+};
+
+//*
+if not exists R2ReferenceType then
+// Data: ReferenceType
+insert
+	table of { ID : IBAS.ShortID, Description : IBAS.Description }
+	{
+		row { IBAS.ShortID('DET') ID, IBAS.Description('Detail') Description }, 
+		row { IBAS.ShortID('EXT') ID, IBAS.Description('Extension') Description }, 
+		row { IBAS.ShortID('LOO') ID, IBAS.Description('Lookup') Description }, 
+		row { IBAS.ShortID('PAR') ID, IBAS.Description('Parent') Description }, 
+		key { ID }
+	}
+	into R2ReferenceType;
+	
+//* There is an R2Reference[Name] in library[Library] and R2Table[R2Table_Name]
+SafeDrop('R2Reference');
+create table R2Reference
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	Name : System.Name tags { Frontend.Width = "25" },
+	R2TargetTable_Name : System.Name tags { Frontend.Width = "25" },
+	ReferenceType_ID : ReferenceTypeID,
+	Embed : Boolean
+		tags { Frontend.Title = "Embed" },
+	key { R2Table_Name, Library, Name },
+	key { Name },
+	reference R2Reference_R2Table { R2Table_Name, Library } references R2Table { Name, Library } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Reference" },
+	reference R2Reference_R2TargetTable { R2TargetTable_Name, Library } references R2Table { Name, Library }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.FullLookup.Title = 'Target Table' },
+	reference R2Reference_R2ReferenceType { ReferenceType_ID } references R2ReferenceType { ID }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.FullLookup.Title = 'Reference Type' }				
+}
+static tags { Frontend.Singular.Title = 'Reference', Frontend.Plural.Title = 'References' };
+
+//* There is an R2ReferenceColumn[Column] in Table[R2Reference_Name]
+SafeDrop('R2ReferenceSourceColumn');
+create table R2ReferenceSourceColumn
+{
+	R2Table_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	R2Reference_Name : System.Name tags { Frontend.Width = "25", Frontend.Title = 'Reference' },
+	Column : System.Name tags { Frontend.Width = "25" },
+	key { R2Table_Name, R2Reference_Name, Column },
+	reference R2ReferenceSourceColumn_R2Reference { R2Table_Name, Library, R2Reference_Name } references R2Reference { R2Table_Name, Library, Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Reference" },
+	reference R2ReferenceSourceColumn_R2Column { R2Table_Name, Library, Column } references R2Column { R2Table_Name, Library, Name }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True" }
+}
+static tags { Frontend.Singular.Title = 'Source Reference Column', Frontend.Plural.Title = 'Source Reference Columns' };
+
+//* There is an R2ReferenceColumn[Column] in Table[R2Reference_Name]
+SafeDrop('R2ReferenceTargetColumn');
+create table R2ReferenceTargetColumn
+{
+	R2TargetTable_Name : System.Name tags { Frontend.Width = "25" },
+	Library : System.Name tags { Frontend.Width = "25" },
+	R2Reference_Name : System.Name tags { Frontend.Width = "25", Frontend.Title = 'Reference' },
+	Column : System.Name tags { Frontend.Width = "25" },
+	key { R2TargetTable_Name, R2Reference_Name, Column },
+	reference R2ReferenceTargetColumn_R2Reference { R2TargetTable_Name, Library, R2Reference_Name } references R2Reference { R2TargetTable_Name, Library, Name } update cascade delete cascade
+		tags { Frontend.Add.FullLookup.AutoLookup = "True", Frontend.Embedded = "True", Frontend.Extension.Title = "Reference" },
+	reference R2ReferenceTargetColumn_R2Column { R2TargetTable_Name, Library, Column } references R2Column { R2Table_Name, Library, Name }
+		tags { Frontend.Add.FullLookup.AutoLookup = "True" }
+}
+static tags { Frontend.Singular.Title = 'Target Reference Column', Frontend.Plural.Title = 'Target Reference Columns' };
+
+//alter table R2Key { drop key { Name } }

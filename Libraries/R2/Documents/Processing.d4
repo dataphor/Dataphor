@@ -1,0 +1,157 @@
+//* R2 Processing
+/*
+	Assumptions:
+		- Every time we generate an application, we'll completely build from top to bottom...no synching (yet).
+		- The Library (App) will be created (Added or Associated with existing) by the user when he's filling in the Create Application form.
+	Process:	
+		- Clear the existing Library of all Non-custom scripts. This can start out being manual.
+		- Generated scripts will be micro-libraried using RealmName + (Structures) or (Processing).
+		- For each Realm Entry, create a RealmStructure.d4 document
+
+*/
+
+//*
+create operator ScriptTypes(const ALibrary : System.Name, const ARealm : System.Name) : System.String
+begin
+	result := '//* Types' + Unicode({ 13, 10 });
+	foreach var LRow in R2Type where Library = ALibrary and Realm_Name = ARealm do
+		result := result + "create type " + LRow.Name + " like " + LRow.Like + ";" + Unicode({ 13, 10 });
+	result := result + Unicode({ 13, 10 });
+		//TODO: Tags
+end;
+
+//This is being replaced by ManageAutoKeyType which hooked to the OnChange of the AutoKey column in R2Table.
+//create operator ScriptAutoKeyTypes(const ALibrary : System.Name, const ARealm : System.Name) : System.String
+//begin
+//	result := '//* AutoKey Types' + Unicode({ 13, 10 });
+//	foreach var LRow in R2Table where Library = ALibrary and Realm_Name = ARealm do
+//		if LRow.AutoKey then result := result + "create type " + LRow.Name + "ID like IBAS.ID;" + Unicode({ 13, 10 });
+//	result := result + Unicode({ 13, 10 });
+//		//TODO: Tags
+//end;
+//*
+create operator ScriptColumns(const ALibrary : System.Name, const AR2Table_Name : System.Name) : System.String
+begin
+	result := '';
+	var LTableRow := R2Table[ALibrary, AR2Table_Name by { Library, Name }];
+	if LTableRow.AutoKey then result := result + Unicode({ 09 }) + "ID : " + AR2Table_Name + "ID { default GetNextID('" + AR2Table_Name + ".ID') }," + Unicode({ 13, 10 });
+	foreach var LRow in R2Column where Library = ALibrary and R2Table_Name = AR2Table_Name do
+		result := result + Unicode({ 09 }) + LRow.Name + " : " + IfNil(LRow.R2Type, LRow.ScalarType) + "," + Unicode({ 13, 10 });
+		//TODO: Default
+		//TODO: Tags
+end;
+
+//*
+create operator ScriptKeyColumns(const ALibrary : System.Name, const AR2Table_Name : System.Name, const AR2Key_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2KeyColumn where Library = ALibrary and R2Table_Name = AR2Table_Name and R2Key_Name = AR2Key_Name do
+		result := result + LRow.Column + ", ";
+	if result.Length() > 2 then result := SubString(result, 0, result.Length() -2);//removes trailing comma.
+end;
+
+//* An empty key is used for a singleton -- useful for settings, etc.
+create operator ScriptKeys(const ALibrary : System.Name, const AR2Table_Name : System.Name) : System.String
+begin
+	result := '';
+	var LTableRow := R2Table[ALibrary, AR2Table_Name by { Library, Name }];
+	if LTableRow.AutoKey then result := result + Unicode({ 09 }) + "key { ID }," + Unicode({ 13, 10 });
+	foreach var LRow in R2Key where Library = ALibrary and R2Table_Name = AR2Table_Name do
+		begin
+			var LKeyName := LRow.Name;
+			result := result + Unicode({ 09 }) + "key { " +
+			ScriptKeyColumns(ALibrary, AR2Table_Name, LKeyName) + " }," + Unicode({ 13, 10 });
+		end;
+end;
+
+//*
+create operator ScriptOrderColumns(const ALibrary : System.Name, const AR2Table_Name : System.Name, const AR2Order_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2OrderColumn where Library = ALibrary and R2Table_Name = AR2Table_Name and R2Order_Name = AR2Order_Name do
+		result := result + LRow.Column + ", ";
+	if result.Length() > 2 then result := SubString(result, 0, result.Length() -2);//removes trailing comma.
+end;
+
+//* An empty order is used for a singleton -- useful for settings, etc.
+create operator ScriptOrders(const ALibrary : System.Name, const AR2Table_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2Order where Library = ALibrary and R2Table_Name = AR2Table_Name do
+		begin
+			var LOrderName := LRow.Name;
+			result := result + Unicode({ 09 }) + "order { " +
+			ScriptOrderColumns(ALibrary, AR2Table_Name, LOrderName) + " }," + Unicode({ 13, 10 });
+		end;
+end;
+
+
+//*
+create operator ScriptRefTargetColumns(const ALibrary : System.Name, const AR2TargetTable_Name : System.Name, const AR2Reference_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2ReferenceTargetColumn where Library = ALibrary and R2TargetTable_Name = AR2TargetTable_Name and R2Reference_Name = AR2Reference_Name do
+		result := result + LRow.Column + ", ";
+	if result.Length() > 2 then result := SubString(result, 0, result.Length() -2);//removes trailing comma.
+end;
+
+//*
+create operator ScriptRefSourceColumns(const ALibrary : System.Name, const AR2Table_Name : System.Name, const AR2Reference_Name : System.Name, const AR2TargetTable_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2ReferenceSourceColumn where Library = ALibrary and R2Table_Name = AR2Table_Name and R2Reference_Name = AR2Reference_Name do
+		result := result + LRow.Column + ", ";
+	if result.Length() > 2 then result := SubString(result, 0, result.Length() -2);//removes trailing comma.
+	result := result + " } references " + AR2TargetTable_Name + " { " +
+	ScriptRefTargetColumns(ALibrary, AR2TargetTable_Name, AR2Reference_Name);
+end;
+
+//* An empty key is used for a singleton -- useful for settings, etc.
+create operator ScriptReferences(const ALibrary : System.Name, const AR2Table_Name : System.Name) : System.String
+begin
+	result := '';
+	foreach var LRow in R2Reference where Library = ALibrary and R2Table_Name = AR2Table_Name do
+		begin
+			var LReferenceName := LRow.Name;
+			var LTargetTableName := LRow.R2TargetTable_Name;
+			result := result + Unicode({ 09 }) + "reference " + LReferenceName + " { " +
+			ScriptRefSourceColumns(ALibrary, AR2Table_Name, LReferenceName, LTargetTableName) + " }," + Unicode({ 13, 10 });
+		end;
+end;
+
+
+//*
+create operator ScriptTables(const ALibrary : System.Name, const ARealm : System.Name) : System.String
+begin
+	result := '//* Tables' + Unicode({ 13, 10 });
+	foreach var LRow in R2Table where Library = ALibrary and Realm_Name = ARealm order by { Priority } do
+		begin
+			var LTable := LRow.Name;
+			result := result + "create table " + LTable + Unicode({ 13, 10 }) + "{" + Unicode({ 13, 10 });
+			result := result + ScriptColumns(ALibrary, LTable);
+			result := result + ScriptKeys(ALibrary, LTable);
+			result := result + ScriptOrders(ALibrary, LTable);
+			result := result + ScriptReferences(ALibrary, LTable);
+			if result.Length() > 2 then result := SubString(result, 0, result.Length()-3) + Unicode({ 13, 10 });//removes trailing comma and adds final CR/LF.
+			result := result + "};" + Unicode({ 13, 10 });
+		end;
+		//TODO: Tags
+end;
+
+//* RealmStructures is R2's Main program.
+create operator RealmStructures(const AApplication : System.Name)
+begin
+	var LAppRow := R2Application[AApplication];
+	var LLibrary := LAppRow.Library;
+	foreach var LRow in Realm where Library = LAppRow.Library do
+		begin
+			var LRealm := LRow.Name;
+			if DocumentExists(LLibrary, LRealm + 'Structures') then DeleteDocument(LLibrary, LRealm + 'Structures');
+			CreateDocument(LLibrary, LRealm + 'Structures', 'd4');
+			var LContent := ScriptTypes(LLibrary, LRealm);
+//			LContent := LContent + ScriptAutoKeyTypes(LLibrary, LRealm);
+			LContent := LContent + ScriptTables(LLibrary, LRealm);
+			SaveDocument(LLibrary, LRealm + 'Structures', LContent);
+		end;
+end;		
+
