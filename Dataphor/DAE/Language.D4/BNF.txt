@@ -725,14 +725,11 @@ The same conventions found in the The Third Manifesto are used here, namely:
 			finalization (<class definition> | <block>)
 			<metadata>
 
-          <create server link statement> ::=
-              create server link <server link name> URI = <server URI> <metadata>
+	<create server link statement> ::=
+		create server <server link name> <metadata>
 
 	<server link name> ::=
 		<qualified identifier>
-
-	<server URI> ::=
-		<string>
 
 	<create device statement> ::=
 		create device <device name>
@@ -953,7 +950,7 @@ The same conventions found in the The Third Manifesto are used here, namely:
 			<alter metadata>
 
 	<alter server link statement> ::=
-		alter server link <server link name> [URI = <server URI>] <alter metadata>
+		alter server <server link name> <alter metadata>
 
 	<alter device statement> ::=
 		alter device <device name> 
@@ -1006,9 +1003,10 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		(drop operator <operator name>"("<formal parameter specifier commalist>")") |
 		(drop aggregate operator <operator name>"("<formal parameter specifier commalist>")") |
 		(drop device <device name>) |
+		(drop server <server name>) |
 		(drop sort <scalar type name>) |
 		(drop conversion <scalar type name> to <scalar type name> using <operator name>)
-
+		
 	<attach statement> ::=
 		attach [operator] <operator name> 
 			to <event source specifier> 
