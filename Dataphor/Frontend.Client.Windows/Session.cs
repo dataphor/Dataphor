@@ -702,6 +702,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 						LExceptionForm.Exception = AException;
 						LExceptionForm.ShowDialog();
 					}
+                    SRFLogger.WriteLine(TraceLevel.Info, "Handled exception {0}", AException);
 				}
 			}
 			catch(Exception LException)
