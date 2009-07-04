@@ -9,19 +9,15 @@
 	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in SQL Server Everywhere.
 */
 
-using System;
-using System.Data.SqlClient;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-
 using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Store.SQLCE
 {
-	public class SQLCEStore : SQLStore
+    public class MSSQLStore : SQLStore
 	{
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
@@ -31,27 +27,12 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 
 	    public override SQLConnection GetSQLConnection()
 		{
-			return new SQLCEConnection(ConnectionString);
+            return new MSSQLConnection(ConnectionString);
 		}
 
 		protected override SQLStoreConnection InternalConnect()
 		{
-			return new SQLCEStoreConnection(this);
+            return new MSSQLStoreConnection(this);
 		}
-	}
-	
-	public class SQLCEStoreConnection : SQLStoreConnection
-	{
-        public SQLCEStoreConnection(SQLCEStore AStore) : base(AStore) { }
-
-		protected override DbConnection InternalCreateConnection()
-		{
-			return new SqlConnection(Store.ConnectionString);
-		}
-
-        public override bool HasTable(string ATableName)
-        {
-            return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);
-        }
 	}
 }
