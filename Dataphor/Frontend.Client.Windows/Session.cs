@@ -697,12 +697,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				if (!(AException is AbortException))
 				{
-					using (var LExceptionForm = new ExceptionForm())
+                    SRFLogger.WriteLine(TraceLevel.Info, "Will handle exception {0}", AException);
+                    using (var LExceptionForm = new ExceptionForm())
 					{
 						LExceptionForm.Exception = AException;
 						LExceptionForm.ShowDialog();
-					}
-                    SRFLogger.WriteLine(TraceLevel.Info, "Handled exception {0}", AException);
+					}                    
 				}
 			}
 			catch(Exception LException)
