@@ -45,6 +45,7 @@
     <Compile Include="SQLCEConnection.cs" />
     <Compile Include="SQLCEStore.cs" />
     <Compile Include="SQLCEStoreConnection.cs" />
+    <Compile Include="SQLCEStoreCursor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.csproj">
