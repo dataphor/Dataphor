@@ -8,8 +8,8 @@
     <ProjectGuid>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DAE.MSSQL</RootNamespace>
-    <AssemblyName>DAE.MSSQL</AssemblyName>
+    <RootNamespace>Alphora.Dataphor.DAE</RootNamespace>
+    <AssemblyName>Alphora.Dataphor.DAE.MSSQL</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
