@@ -775,7 +775,8 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			catch (Exception E)
 			{
-				throw WrapException(E, true);
+			    Exception LWrappedException = WrapException(E, true);
+                throw LWrappedException;
 			}
 			finally
 			{
