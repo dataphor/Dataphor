@@ -503,10 +503,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			tbPortNumber.Text = AConfiguration.PortNumber.ToString();
 			tbInstanceDirectory.Text = AConfiguration.InstanceDirectory;
 			LibraryDirectoriesListBox.Items.Clear();
-			string[] LLibraryDirectories = AConfiguration.LibraryDirectories.Split(';');
-			for (int LIndex = 0; LIndex < LLibraryDirectories.Length; LIndex++)
-				LibraryDirectoriesListBox.Items.Add(LLibraryDirectories[LIndex]);
-			tbCatalogStoreClassName.Text = AConfiguration.CatalogStoreClassName;
+            if (AConfiguration.LibraryDirectories != null)
+            {
+                string[] LLibraryDirectories = AConfiguration.LibraryDirectories.Split(';');
+                for (int LIndex = 0; LIndex < LLibraryDirectories.Length; LIndex++)
+                    LibraryDirectoriesListBox.Items.Add(LLibraryDirectories[LIndex]);
+            }
+		    tbCatalogStoreClassName.Text = AConfiguration.CatalogStoreClassName;
 			tbCatalogStoreConnectionString.Text = AConfiguration.CatalogStoreConnectionString;
 			DeviceSettingsListBox.Items.Clear();
 			foreach (DeviceSetting LDeviceSetting in AConfiguration.DeviceSettings)
