@@ -2,7 +2,7 @@ using System;
 using System.Data.Common;
 using System.Data.SqlClient;
 
-namespace Alphora.Dataphor.DAE.Store.SQLCE
+namespace Alphora.Dataphor.DAE.Store.MSSQL
 {
     public class MSSQLStoreConnection : SQLStoreConnection
     {

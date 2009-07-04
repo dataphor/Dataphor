@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using Alphora.Dataphor.DAE.Connection;
 
-namespace Alphora.Dataphor.DAE.Store.SQLCE
+namespace Alphora.Dataphor.DAE.Store.MSSQL
 {
     public class MSSQLStore : SQLStore
 	{
