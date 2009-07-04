@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private Label label6;
 		private Label label10;
 		private ComboBox cbInstanceName;
-		private ComboBox cbInProcessInstanceName;
+		private ComboBox FCbInProcessInstanceName;
 		private Button EditInstanceButton;
 		private Button NewInstanceButton;
 		private System.Windows.Forms.CheckBox cbEmbedded;
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.cbEmbedded = new System.Windows.Forms.CheckBox();
 			this.EditInstanceButton = new System.Windows.Forms.Button();
 			this.NewInstanceButton = new System.Windows.Forms.Button();
-			this.cbInProcessInstanceName = new System.Windows.Forms.ComboBox();
+			this.FCbInProcessInstanceName = new System.Windows.Forms.ComboBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
 			this.FContentPanel.SuspendLayout();
@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.tpInProcessAlias.Controls.Add(this.cbEmbedded);
 			this.tpInProcessAlias.Controls.Add(this.EditInstanceButton);
 			this.tpInProcessAlias.Controls.Add(this.NewInstanceButton);
-			this.tpInProcessAlias.Controls.Add(this.cbInProcessInstanceName);
+			this.tpInProcessAlias.Controls.Add(this.FCbInProcessInstanceName);
 			this.tpInProcessAlias.Controls.Add(this.label10);
 			this.tpInProcessAlias.Controls.Add(this.label11);
 			this.tpInProcessAlias.Location = new System.Drawing.Point(4, 22);
@@ -311,14 +311,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.NewInstanceButton.UseVisualStyleBackColor = true;
 			this.NewInstanceButton.Click += new System.EventHandler(this.NewInstanceButton_Click);
 			// 
-			// cbInProcessInstanceName
+			// FCbInProcessInstanceName
 			// 
-			this.cbInProcessInstanceName.FormattingEnabled = true;
-			this.cbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
-			this.cbInProcessInstanceName.Name = "cbInProcessInstanceName";
-			this.cbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
-			this.cbInProcessInstanceName.TabIndex = 47;
-			this.cbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
+			this.FCbInProcessInstanceName.FormattingEnabled = true;
+			this.FCbInProcessInstanceName.Location = new System.Drawing.Point(82, 45);
+			this.FCbInProcessInstanceName.Name = "FCbInProcessInstanceName";
+			this.FCbInProcessInstanceName.Size = new System.Drawing.Size(155, 21);
+			this.FCbInProcessInstanceName.TabIndex = 47;
+			this.FCbInProcessInstanceName.DropDown += new System.EventHandler(this.cbInProcessInstanceName_DropDown);
 			// 
 			// label10
 			// 
@@ -389,7 +389,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (LInProcess != null)
 			{
 				tcAliasType.SelectedTab = tpInProcessAlias;
-				cbInProcessInstanceName.Text = LInProcess.InstanceName;
+				FCbInProcessInstanceName.Text = LInProcess.InstanceName;
 				cbEmbedded.Checked = LInProcess.IsEmbedded;
 			}
 			else
@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			if (tcAliasType.SelectedTab == tpInProcessAlias)
 			{
 				InProcessAlias LInProcess = new InProcessAlias();
-				LInProcess.InstanceName = cbInProcessInstanceName.Text;
+				LInProcess.InstanceName = FCbInProcessInstanceName.Text;
 				LInProcess.IsEmbedded = cbEmbedded.Checked;
 				LResult = LInProcess;
 			}
@@ -484,8 +484,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void LoadInstances(InstanceConfiguration AConfiguration)
 		{
 			FLocalInstancesEnumerated = true;
-			for (int LIndex = 0; LIndex < AConfiguration.Instances.Count; LIndex++)
-				cbInProcessInstanceName.Items.Add(AConfiguration.Instances[LIndex].Name);
+		    InstanceList LInstances = AConfiguration.Instances;
+            FCbInProcessInstanceName.Items.Clear();
+		    for (int LIndex = 0; LIndex < LInstances.Count; LIndex++)
+			{
+			    FCbInProcessInstanceName.Items.Add(LInstances[LIndex].Name);
+			}
 		}
 
 		private void cbInProcessInstanceName_DropDown(object sender, EventArgs e)
@@ -504,19 +508,19 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			FLocalInstancesEnumerated = false;
 			LoadInstances(LConfiguration);
 
-			cbInProcessInstanceName.Text = LInstance.Name;
+			FCbInProcessInstanceName.Text = LInstance.Name;
 		}
 
 		private void EditInstanceButton_Click(object sender, EventArgs e)
 		{
-			if (!String.IsNullOrEmpty(cbInProcessInstanceName.Text))
+			if (!String.IsNullOrEmpty(FCbInProcessInstanceName.Text))
 			{
 				InstanceConfiguration LConfiguration = InstanceManager.LoadConfiguration();
-				ServerConfiguration LInstance = LConfiguration.Instances[cbInProcessInstanceName.Text];
+				ServerConfiguration LInstance = LConfiguration.Instances[FCbInProcessInstanceName.Text];
 				if (LInstance == null)
 				{
 					LInstance = new ServerConfiguration();
-					LInstance.Name = cbInProcessInstanceName.Text;
+					LInstance.Name = FCbInProcessInstanceName.Text;
 				}
 				else
 					LConfiguration.Instances.Remove(LInstance.Name);
@@ -529,7 +533,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FLocalInstancesEnumerated = false;
 				LoadInstances(LConfiguration);
 				
-				cbInProcessInstanceName.Text = LInstance.Name;
+				FCbInProcessInstanceName.Text = LInstance.Name;
 			}
 		}
 	}
