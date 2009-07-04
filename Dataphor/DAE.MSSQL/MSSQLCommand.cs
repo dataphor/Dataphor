@@ -19,86 +19,86 @@ namespace Alphora.Dataphor.DAE.Connection
             for (int LIndex = 0; LIndex < FParameterIndexes.Length; LIndex++)
             {
                 LParameter = Parameters[FParameterIndexes[LIndex]];
-                SqlParameter LSQLCEParameter = (SqlParameter)FCommand.CreateParameter();
-                LSQLCEParameter.ParameterName = String.Format("@{0}", LParameter.Name);
+                SqlParameter LSQLParameter = (SqlParameter)FCommand.CreateParameter();
+                LSQLParameter.ParameterName = String.Format("@{0}", LParameter.Name);
                 switch (LParameter.Direction)
                 {
-                    case SQLDirection.Out : LSQLCEParameter.Direction = System.Data.ParameterDirection.Output; break;
-                    case SQLDirection.InOut : LSQLCEParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
-                    case SQLDirection.Result : LSQLCEParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
-                    default : LSQLCEParameter.Direction = System.Data.ParameterDirection.Input; break;
+                    case SQLDirection.Out : LSQLParameter.Direction = System.Data.ParameterDirection.Output; break;
+                    case SQLDirection.InOut : LSQLParameter.Direction = System.Data.ParameterDirection.InputOutput; break;
+                    case SQLDirection.Result : LSQLParameter.Direction = System.Data.ParameterDirection.ReturnValue; break;
+                    default : LSQLParameter.Direction = System.Data.ParameterDirection.Input; break;
                 }
 
                 if (LParameter.Type is SQLStringType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.NVarChar;
-                    LSQLCEParameter.Size = ((SQLStringType)LParameter.Type).Length;
+                    LSQLParameter.SqlDbType = SqlDbType.NVarChar;
+                    LSQLParameter.Size = ((SQLStringType)LParameter.Type).Length;
                 }
                 else if (LParameter.Type is SQLBooleanType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Bit;
+                    LSQLParameter.SqlDbType = SqlDbType.Bit;
                 }
                 else if (LParameter.Type is SQLByteArrayType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Binary;
-                    LSQLCEParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
+                    LSQLParameter.SqlDbType = SqlDbType.Binary;
+                    LSQLParameter.Size = ((SQLByteArrayType)LParameter.Type).Length;
                 }
                 else if (LParameter.Type is SQLIntegerType)
                 {
                     switch (((SQLIntegerType)LParameter.Type).ByteCount)
                     {
-                        case 1 : LSQLCEParameter.SqlDbType = SqlDbType.TinyInt; break;
-                        case 2 : LSQLCEParameter.SqlDbType = SqlDbType.SmallInt; break;
-                        case 8 : LSQLCEParameter.SqlDbType = SqlDbType.BigInt; break;
-                        default : LSQLCEParameter.SqlDbType = SqlDbType.Int; break;
+                        case 1 : LSQLParameter.SqlDbType = SqlDbType.TinyInt; break;
+                        case 2 : LSQLParameter.SqlDbType = SqlDbType.SmallInt; break;
+                        case 8 : LSQLParameter.SqlDbType = SqlDbType.BigInt; break;
+                        default : LSQLParameter.SqlDbType = SqlDbType.Int; break;
                     }
                 }
                 else if (LParameter.Type is SQLNumericType)
                 {
                     SQLNumericType LType = (SQLNumericType)LParameter.Type;
-                    LSQLCEParameter.SqlDbType = SqlDbType.Decimal;
-                    LSQLCEParameter.Scale = LType.Scale;
-                    LSQLCEParameter.Precision = LType.Precision;
+                    LSQLParameter.SqlDbType = SqlDbType.Decimal;
+                    LSQLParameter.Scale = LType.Scale;
+                    LSQLParameter.Precision = LType.Precision;
                 }
                 else if (LParameter.Type is SQLFloatType)
                 {
                     SQLFloatType LType = (SQLFloatType)LParameter.Type;
                     if (LType.Width == 1)
-                        LSQLCEParameter.SqlDbType = SqlDbType.Real;
+                        LSQLParameter.SqlDbType = SqlDbType.Real;
                     else
-                        LSQLCEParameter.SqlDbType = SqlDbType.Float;
+                        LSQLParameter.SqlDbType = SqlDbType.Float;
                 }
                 else if (LParameter.Type is SQLBinaryType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Image;
+                    LSQLParameter.SqlDbType = SqlDbType.Image;
                 }
                 else if (LParameter.Type is SQLTextType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.NText;
+                    LSQLParameter.SqlDbType = SqlDbType.NText;
                 }
                 else if (LParameter.Type is SQLDateType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    LSQLParameter.SqlDbType = SqlDbType.DateTime;
                 }
                 else if (LParameter.Type is SQLTimeType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    LSQLParameter.SqlDbType = SqlDbType.DateTime;
                 }
                 else if (LParameter.Type is SQLDateTimeType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.DateTime;
+                    LSQLParameter.SqlDbType = SqlDbType.DateTime;
                 }
                 else if (LParameter.Type is SQLGuidType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.UniqueIdentifier;
+                    LSQLParameter.SqlDbType = SqlDbType.UniqueIdentifier;
                 }
                 else if (LParameter.Type is SQLMoneyType)
                 {
-                    LSQLCEParameter.SqlDbType = SqlDbType.Money;
+                    LSQLParameter.SqlDbType = SqlDbType.Money;
                 }
                 else
                     throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
-                FCommand.Parameters.Add(LSQLCEParameter);
+                FCommand.Parameters.Add(LSQLParameter);
             }
         }
     }
