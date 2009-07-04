@@ -706,7 +706,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			}
 			catch(Exception LException)
 			{
-				SRFLogger.WriteLine(TraceLevel.Error,"Handled Exception {0}",LException);
+				SRFLogger.WriteLine(TraceLevel.Error,"Error trying to handle exception {0}",LException);
                 // Do nothing... Do not throw! Throwing here closes the app, which is probably worse than eating an exception (gulp).
 			}
 		}
