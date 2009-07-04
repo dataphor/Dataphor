@@ -40,6 +40,7 @@ using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+using Alphora.Dataphor.Logging;
 
 /*
 	DAE Object Hierarchy ->
@@ -136,6 +137,8 @@ namespace Alphora.Dataphor.DAE.Server
 		public const int CDefaultProcessWaitTimeout = 30;
 		public const int CDefaultProcessTerminationTimeout = 30;
 		public const int CDefaultPlanCacheSize = 1000;
+
+        private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(Server));
 		
 		// constructor		
 		public Server() : base()
@@ -680,7 +683,8 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (!IsRemotableException(AException))
 			{
-				Exception LInnerException = null;
+                SRFLogger.WriteLine(TraceLevel.Warning,"Exception is not remotable: {0}", AException);
+                Exception LInnerException = null;
 				if (AException.InnerException != null)
 					LInnerException = EnsureRemotableException(AException.InnerException);
 					
@@ -691,8 +695,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		public Exception WrapException(Exception AException, bool AIsRemoteCall)
-		{
-			if (FLogErrors)
+		{			
+            if (FLogErrors)
 				LogError(AException);
 				
 			if (!IsRepository && AIsRemoteCall)
@@ -1584,7 +1588,9 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void LogMessage(LogEntryType AEntryType, string ADescription)
 		{
-			if (FLoggingEnabled)
+            SRFLogger.WriteLine(TraceLevel.Verbose, "Logging {0} Message: {0}", AEntryType, ADescription);
+            
+            if (FLoggingEnabled)
 			{
 				if (!IsRepository && IsAdministrator() && (System.Environment.OSVersion.Platform == PlatformID.Win32NT))
 					try
