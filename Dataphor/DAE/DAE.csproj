@@ -131,6 +131,10 @@
       <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
       <Name>DAE.NativeCLI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Logging\Logging.csproj">
+      <Project>{47AC1A13-6F39-41CD-9F5F-7F5B1792CB84}</Project>
+      <Name>Logging</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs">
