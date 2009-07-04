@@ -39,8 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MSSQLCommand.cs" />
-    <Compile Include="MSSQLConnection.cs" />
     <Compile Include="MSSQLStore.cs" />
     <Compile Include="MSSQLStoreConnection.cs" />
   </ItemGroup>
@@ -48,6 +46,10 @@
     <EmbeddedResource Include="SystemStoreCatalog.sql" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\MSSQLDevice\Source\DAEDeviceMSSQL.csproj">
+      <Project>{58FF91A7-4AB9-4E04-A042-5CBD6C67CD01}</Project>
+      <Name>DAEDeviceMSSQL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
