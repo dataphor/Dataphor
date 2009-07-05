@@ -22,8 +22,8 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             SQLStoreConnection LConnection = LSQLStore.Connect();
             string ATableName = "TableTest";
             SQLIndex AIndex = new SQLIndex("PK_TableTest", new[] { new SQLIndexColumn("ID") });
-            bool AisUpdatable = true;
-            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, AisUpdatable);
+            
+            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
             var LRow = new object[] { 1, "Hi" };
             LCursor.Insert(LRow);
@@ -40,8 +40,8 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             SQLStoreConnection LConnection = LSQLStore.Connect();
             string ATableName = "TableTest";
             SQLIndex AIndex = new SQLIndex("PK_TableTest", new[] { new SQLIndexColumn("ID") });
-            bool AisUpdatable = true;
-            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, AisUpdatable);
+            
+            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
             var LRow=new object[]{1,"Hi"};
             LCursor.Insert(LRow);
