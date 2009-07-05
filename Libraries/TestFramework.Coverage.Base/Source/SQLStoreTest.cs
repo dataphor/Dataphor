@@ -85,6 +85,14 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             LCursor.Next();
             LCursor.Dispose();
 
+            SQLStoreCursor LOtherCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            
+            LCursor.SetRange(null,null);
+            
+            
+            LCursor.Dispose();
+            LOtherCursor.Dispose();
             
             LConnection.CommitTransaction();                                   
         }
