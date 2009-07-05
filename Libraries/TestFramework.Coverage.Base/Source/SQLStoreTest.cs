@@ -33,13 +33,21 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             LCursor.Dispose();
 
             LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
-            LRow = new object[] {2, "Bye" };
+            LRow = new object[] { 2, "Bye" };
             LCursor.Insert(LRow);
-
-            LCursor.SetRange(null, null);
-
             LCursor.Dispose();
-            LConnection.CommitTransaction();
+
+            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor.SetRange(null, null);
+            LCursor.Dispose();
+
+
+            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor.Next();
+            LCursor.Dispose();
+
+
+            LConnection.CommitTransaction();  
         }
 
         //Data Source=
@@ -66,10 +74,18 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
             LRow = new object[] { 2, "Bye" };
             LCursor.Insert(LRow);
-
-            LCursor.SetRange(null, null);
-
             LCursor.Dispose();
+            
+            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor.SetRange(null, null);
+            LCursor.Dispose();
+            
+
+            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor.Next();
+            LCursor.Dispose();
+
+            
             LConnection.CommitTransaction();                                   
         }
     }
