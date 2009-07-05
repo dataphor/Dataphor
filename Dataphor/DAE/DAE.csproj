@@ -650,6 +650,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Store\SQLStore.cs" />
+    <Compile Include="Store\SQLStoreConnection.cs" />
+    <Compile Include="Store\SQLStoreCounter.cs" />
+    <Compile Include="Store\SQLStoreCursor.cs" />
     <Compile Include="Store\StoreException.cs" />
     <Compile Include="Streams\Conveyor.cs">
       <SubType>Code</SubType>

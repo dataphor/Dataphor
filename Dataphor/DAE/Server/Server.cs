@@ -1841,9 +1841,15 @@ namespace Alphora.Dataphor.DAE.Server
 		/// Gets or sets the connection string for the store used to persist the system catalog.
 		/// </summary>
 		/// <remarks>
+		/// <para>
 		/// This property cannot be changed once the server has been started. If this property is not
-		/// set, a default SQLCE connection string will be built based on the values of the InstanceDirectory,
-		/// CatalogStoreDatabaseName and CatalogStorePassword properties.
+		/// set, a default SQLCE connection string will be built that specifies the catalog will be
+		/// stored in the Catalog subfolder of the instance directory, and named DAECatalog.sdf.
+		/// </para>
+		/// <para>
+		/// If the CatalogStoreConnectionString is specified, the token %CatalogPath% will be replaced
+		/// by the catalog directory of the instance.
+		/// </para>
 		/// </remarks>
 		public string CatalogStoreConnectionString
 		{
@@ -1864,7 +1870,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return 
 				String.IsNullOrEmpty(FCatalogStoreConnectionString)
 					? String.Format("Data Source={0};Password={1};Mode={2}", GetCatalogStoreDatabaseFileName(), String.Empty, "Read Write")
-					: FCatalogStoreConnectionString;
+					: FCatalogStoreConnectionString.Replace("%CatalogPath%", GetCatalogDirectory());
 		}
 		
 		/// <summary>

@@ -34,9 +34,9 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			switch (AIsolationLevel)
 			{
-				case IsolationLevel.Isolated : return System.Data.IsolationLevel.Serializable; break;
-				case IsolationLevel.CursorStability : return System.Data.IsolationLevel.ReadCommitted; break;
-				case IsolationLevel.Browse : return System.Data.IsolationLevel.ReadUncommitted; break;
+				case IsolationLevel.Isolated : return System.Data.IsolationLevel.Serializable;
+				case IsolationLevel.CursorStability : return System.Data.IsolationLevel.ReadCommitted;
+				case IsolationLevel.Browse : return System.Data.IsolationLevel.ReadUncommitted;
 			}
 			
 			return System.Data.IsolationLevel.Unspecified;
