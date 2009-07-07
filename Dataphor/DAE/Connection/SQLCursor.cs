@@ -108,6 +108,20 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 		
+		protected abstract string InternalGetColumnName(int AIndex);
+		public string GetColumnName(int AIndex)
+		{
+			try
+			{
+				return InternalGetColumnName(AIndex);
+			}
+			catch (Exception LException)
+			{
+				FCommand.Connection.WrapException(LException, "getcolumnname", true);
+				throw;
+			}
+		}
+		
 		protected abstract object InternalGetColumnValue(int AIndex);
 		public object this[int AIndex] 
 		{ 

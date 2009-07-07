@@ -111,6 +111,11 @@ namespace Alphora.Dataphor.DAE.Connection
 		{
 			return ((System.Data.Common.DbDataReader)FCursor).VisibleFieldCount;	// Visible field count hides internal fields like "rowstat" returned by server side cursors
 		}
+
+		protected override string InternalGetColumnName(int AIndex)
+		{
+			return FCursor.GetName(AIndex);
+		}
 		
 		protected override bool InternalNext()
 		{

@@ -54,5 +54,15 @@ namespace Alphora.Dataphor.DAE.Connection
 				
 			return LBatches;
 		}
+
+		public static SQLIsolationLevel IsolationLevelToSQLIsolationLevel(IsolationLevel AIsolationLevel)
+		{
+			switch (AIsolationLevel)
+			{
+				case IsolationLevel.Isolated : return SQLIsolationLevel.Serializable;
+				case IsolationLevel.CursorStability : return SQLIsolationLevel.ReadCommitted;
+				default : return SQLIsolationLevel.ReadUncommitted;
+			}
+		}
 	}
 }

@@ -1,5 +1,3 @@
-//#define SQLSTORETIMING
-
 /*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
@@ -10,6 +8,8 @@
 	The store is capable of storing integers, strings, booleans, and long text and binary data.
 	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
+
+//#define SQLSTORETIMING
 
 using System;
 using System.IO;

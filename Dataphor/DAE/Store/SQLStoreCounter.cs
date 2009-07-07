@@ -1,14 +1,7 @@
-﻿//#define SQLSTORETIMING
-
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
-	Abstract SQL Store
-	
-	Defines the expected behavior for a simple storage device that uses a SQL DBMS as it's backend.
-	The store is capable of storing integers, strings, booleans, and long text and binary data.
-	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
 
 using System;

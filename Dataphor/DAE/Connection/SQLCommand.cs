@@ -175,6 +175,21 @@ namespace Alphora.Dataphor.DAE.Connection
 			}
 		}
 		
+		public object Evaluate()
+		{
+			SQLCursor LCursor = Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+			try
+			{
+				if (LCursor.Next())
+					return LCursor[0];
+				return null;
+			}
+			finally
+			{
+				Close(LCursor);
+			}
+		}
+		
 		protected abstract SQLCursor InternalOpen(SQLCursorType ACursorType, SQLIsolationLevel ACursorIsolationLevel);
 		public SQLCursor Open(SQLCursorType ACursorType, SQLIsolationLevel ACursorIsolationLevel)
 		{

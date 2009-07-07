@@ -1,3 +1,9 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
 using System;
 using System.Data;
 using System.Data.SqlServerCe;
@@ -99,6 +105,31 @@ namespace Alphora.Dataphor.DAE.Connection
                     throw new ConnectionException(ConnectionException.Codes.UnknownSQLDataType, LParameter.Type.GetType().Name);
                 FCommand.Parameters.Add(LSQLCEParameter);
             }
+        }
+        
+        protected SqlCeCommand Command { get { return (SqlCeCommand)FCommand; } }
+        
+        public SQLCECursor ExecuteResultSet(string ATableName, string AIndexName, DbRangeOptions ARangeOptions, object[] AStartValues, object[] AEndValues, ResultSetOptions AResultSetOptions)
+        {
+			Command.CommandType = System.Data.CommandType.TableDirect;
+			Command.CommandText= ATableName;
+			Command.IndexName = AIndexName;
+			Command.SetRange(ARangeOptions, AStartValues, AEndValues);
+			#if SQLSTORETIMING
+			long LStartTicks = TimingUtility.CurrentTicks;
+			try
+			{
+			#endif
+
+	            return new SQLCECursor(this, Command.ExecuteResultSet(AResultSetOptions));
+			
+			#if SQLSTORETIMING
+			}
+			finally
+			{
+				Store.Counters.Add(new SQLStoreCounter("ExecuteResultSet", ATableName, AIndexName, AStartValues != null && AEndValues == null, AStartValues != null && AEndValues != null, (ResultSetOptions.Updatable & AResultSetOptions) != 0, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			}
+			#endif
         }
     }
 }

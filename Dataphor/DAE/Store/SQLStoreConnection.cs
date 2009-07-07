@@ -1,15 +1,12 @@
-﻿//#define SQLSTORETIMING
-
-/*
+﻿/*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
-	Abstract SQL Store
-	
-	Defines the expected behavior for a simple storage device that uses a SQL DBMS as it's backend.
-	The store is capable of storing integers, strings, booleans, and long text and binary data.
-	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
+	Abstract SQL Store Connection
 */
+
+//#define SQLSTORETIMING
+#define USESQLCONNECTION
 
 using System;
 using System.IO;
@@ -19,8 +16,11 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+
+#if !USESQLCONNECTION
 using System.Data;
 using System.Data.Common;
+#endif
 
 using Alphora.Dataphor.DAE.Connection;
 
@@ -32,20 +32,22 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			FStore = AStore;
 			FConnection = InternalCreateConnection();
+			#if !USESQLCONNECTION
 			FConnection.Open();
+			#endif
 		}
 		
+		#if USESQLCONNECTION
+		protected abstract SQLConnection InternalCreateConnection();
+		#else
 		protected abstract DbConnection InternalCreateConnection();
+		#endif
 		
 		#region IDisposable Members
 		
 		protected virtual void InternalDispose()
 		{
-			if (FExecuteCommand != null)
-			{
-				FExecuteCommand.Dispose();
-				FExecuteCommand = null;
-			}
+			DisposeExecuteCommand();
 
 			if (FConnection != null)
 			{
@@ -80,12 +82,18 @@ namespace Alphora.Dataphor.DAE.Store
 		public SQLStore Store { get { return FStore; } }
 		
 		// Connection
+		#if USESQLCONNECTION
+		private SQLConnection FConnection;
+		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
+		protected SQLConnection Connection { get { return FConnection; } }
+		#else
 		private DbConnection FConnection;
 		/// <summary>This is the internal connection to the server housing the catalog store.</summary>
 		protected DbConnection Connection { get { return FConnection; } }
 		
 		/// <summary>The transaction object for this connection.</summary>
 		private DbTransaction FTransaction;
+		#endif
 		
 		/// <summary>Returns whether or not the store has a table of the given name.</summary>
 		public virtual bool HasTable(string ATableName)
@@ -96,6 +104,31 @@ namespace Alphora.Dataphor.DAE.Store
 			throw new NotSupportedException();
 		}
 		
+		#if USESQLCONNECTION
+		protected virtual SQLCommand InternalCreateCommand()
+		{
+			return FConnection.CreateCommand(false);
+		}
+
+		// ExecuteCommand
+		private SQLCommand FExecuteCommand;
+		/// <summary>This is the internal command used to execute statements on this connection.</summary>
+		protected SQLCommand ExecuteCommand
+		{
+			get
+			{
+				if (FExecuteCommand == null)
+					FExecuteCommand = InternalCreateCommand();
+				return FExecuteCommand;
+			}
+		}
+		
+		/// <summary>Returns a new command that can be used to open readers on this connection.</summary>
+		public SQLCommand GetReaderCommand()
+		{
+			return InternalCreateCommand();
+		}
+		#else
 		protected virtual DbCommand InternalCreateCommand()
 		{
 			DbCommand LCommand = FConnection.CreateCommand();
@@ -122,24 +155,58 @@ namespace Alphora.Dataphor.DAE.Store
 		{
 			return InternalCreateCommand();
 		}
+		#endif
+		
+		protected void DisposeExecuteCommand()
+		{
+			if (FExecuteCommand != null)
+			{
+				FExecuteCommand.Dispose();
+				FExecuteCommand = null;
+			}
+		}
 		
 		public void ExecuteScript(string AScript)
 		{
-			List<String> LStatements = SQLStore.ProcessBatches(AScript);
-			for (int LIndex = 0; LIndex < LStatements.Count; LIndex++)
-				ExecuteStatement(LStatements[LIndex]);
+			#if USESQLCONNECTION
+			bool LSaveShouldNormalizeWhitespace = ExecuteCommand.ShouldNormalizeWhitespace;
+			ExecuteCommand.ShouldNormalizeWhitespace = false;
+			try
+			{
+			#endif
+			
+				List<String> LStatements = SQLStore.ProcessBatches(AScript);
+				for (int LIndex = 0; LIndex < LStatements.Count; LIndex++)
+					ExecuteStatement(LStatements[LIndex]);
+					
+			#if USESQLCONNECTION
+			}
+			finally
+			{
+				ExecuteCommand.ShouldNormalizeWhitespace = LSaveShouldNormalizeWhitespace;
+			}
+			#endif
 		}
 
 		public void ExecuteStatement(string AStatement)
 		{
+			#if USESQLCONNECTION
+			ExecuteCommand.CommandType = SQLCommandType.Statement;
+			ExecuteCommand.Statement = AStatement;
+			#else
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
+			#endif
 
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
 			#endif
 
+			#if USESQLCONNECTION
+			ExecuteCommand.Execute();
+			#else
 			ExecuteCommand.ExecuteNonQuery();
+			#endif
 
 			#if SQLSTORETIMING
 			Store.Counters.Add(new SQLStoreCounter("ExecuteNonQuery", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -148,8 +215,13 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		public object ExecuteScalar(string AStatement)
 		{
+			#if USESQLCONNECTION
+			ExecuteCommand.CommandType = SQLCommandType.Statement;
+			ExecuteCommand.Statement = AStatement;
+			#else
 			ExecuteCommand.CommandType = CommandType.Text;
 			ExecuteCommand.CommandText = AStatement;
+			#endif
 
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
@@ -157,7 +229,11 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 			
+				#if USESQLCONNECTION
+				return ExecuteCommand.Evaluate();
+				#else
 				return ExecuteCommand.ExecuteScalar();
+				#endif
 			
 			#if SQLSTORETIMING
 			}
@@ -168,6 +244,28 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 		}
 		
+		#if USESQLCONNECTION
+		protected internal SQLCursor ExecuteReader(string AStatement, out SQLCommand AReaderCommand)
+		{
+			AReaderCommand = GetReaderCommand();
+			AReaderCommand.CommandType = SQLCommandType.Statement;
+			AReaderCommand.Statement = AStatement;
+			
+			#if SQLSTORETIMING
+			long LStartTicks = TimingUtility.CurrentTicks;
+			try
+			{
+			#endif
+				return AReaderCommand.Open(SQLCursorType.Dynamic, SQLIsolationLevel.Serializable);
+			#if SQLSTORETIMING
+			}
+			finally
+			{
+				Store.Counters.Add(new SQLStoreCounter("ExecuteReader", AStatement, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
+			}
+			#endif
+		}
+		#else
 		protected internal DbDataReader ExecuteReader(string AStatement, out DbCommand AReaderCommand)
 		{
 			AReaderCommand = GetReaderCommand();
@@ -188,6 +286,7 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 			#endif
 		}
+		#endif
 		
 		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
 		{
@@ -236,27 +335,43 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 		
+		#if USESQLCONNECTION
+		protected virtual void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		{
+			FConnection.BeginTransaction(AIsolationLevel);
+		}
+		#else
 		protected virtual DbTransaction InternalBeginTransaction(System.Data.IsolationLevel AIsolationLevel)
 		{
 			return FConnection.BeginTransaction(AIsolationLevel);
 		}
+		#endif
 
 		// BeginTransaction
+		#if USESQLCONNECTION
+		public virtual void BeginTransaction(SQLIsolationLevel AIsolationLevel)
+		#else
 		public virtual void BeginTransaction(System.Data.IsolationLevel AIsolationLevel)
+		#endif
 		{
-			if (FTransaction == null)
+			if (FTransactionCount == 0)
 			{
 				#if SQLSTORETIMING
 				long LStartTicks = TimingUtility.CurrentTicks;
 				#endif
 				
+				#if USESQLCONNECTION
+				DisposeExecuteCommand();
+				FConnection.BeginTransaction(AIsolationLevel);
+				#else
 				FTransaction = InternalBeginTransaction(AIsolationLevel);
+				ExecuteCommand.Transaction = FTransaction;
+				#endif
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("BeginTransaction", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
 
-				ExecuteCommand.Transaction = FTransaction;
 			}
 			FTransactionCount++;
 			
@@ -266,22 +381,30 @@ namespace Alphora.Dataphor.DAE.Store
 		public virtual void CommitTransaction()
 		{
 			FTransactionCount--;
-			if ((FTransaction != null) && (FTransactionCount <= 0))
+			if (FTransactionCount <= 0)
 			{
 				#if SQLSTORETIMING
 				long LStartTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				FTransaction.Commit();
+				#if USESQLCONNECTION
+				if (FConnection.InTransaction)
+					FConnection.CommitTransaction();
+				#else
+				if (FTransaction != null)
+				{
+					FTransaction.Commit();
+					FTransaction.Dispose();
+					FTransaction = null;
+				}
+
+				if (FExecuteCommand != null)
+					FExecuteCommand.Transaction = null;
+				#endif
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
-
-				FTransaction.Dispose();
-				FTransaction = null;
-				if (FExecuteCommand != null)
-					FExecuteCommand.Transaction = null;
 			}
 
 			for (int LIndex = FOperationLog.Count - 1; LIndex >= 0; LIndex--)
@@ -306,22 +429,30 @@ namespace Alphora.Dataphor.DAE.Store
 					LOperation.Undo(this);
 			}
 
-			if ((FTransaction != null) && (FTransactionCount <= 0))
+			if (FTransactionCount <= 0)
 			{
 				#if SQLSTORETIMING
 				long LStartTicks = TimingUtility.CurrentTicks;
 				#endif
 				
-				FTransaction.Rollback();
+				#if USESQLCONNECTION
+				if (FConnection.InTransaction)
+					FConnection.RollbackTransaction();
+				#else
+				if (FTransaction != null)
+				{
+					FTransaction.Rollback();
+					FTransaction.Dispose();
+					FTransaction = null;
+				}
+				
+				if (FExecuteCommand != null)
+					FExecuteCommand.Transaction = null;
+				#endif
 				
 				#if SQLSTORETIMING
 				Store.Counters.Add(new SQLStoreCounter("Disconnect", "", "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 				#endif
-
-				FTransaction.Dispose();
-				FTransaction = null;
-				if (FExecuteCommand != null)
-					FExecuteCommand.Transaction = null;
 			}
 		}
 

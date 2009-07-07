@@ -1,15 +1,12 @@
-//#define SQLSTORETIMING
-
 /*
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
-	Simple SQL CE Store
-	
-	A simple storage device that uses a SQL Server Everywhere instance as it's backend.
-	The store is capable of storing integers, strings, booleans, and long text and binary data.
-	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in SQL Server Everywhere.
+	Simple SQL CE Store Connection
 */
+
+//#define SQLSTORETIMING
+#define USESQLCONNECTION
 
 using System;
 using System.Data;
@@ -25,7 +22,13 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
     {
         public SQLCEStoreConnection(SQLCEStore AStore) : base(AStore)
         { }
-		
+
+		#if USESQLCONNECTION
+		protected override SQLConnection InternalCreateConnection()
+		{
+			return new SQLCEConnection(Store.ConnectionString);
+		}
+		#else
         protected override DbConnection InternalCreateConnection()
         {
             return new SqlCeConnection(Store.ConnectionString);
@@ -38,12 +41,16 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
                 AIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
             return base.InternalBeginTransaction(AIsolationLevel);
         }
+        #endif
 
         public override bool HasTable(string ATableName)
         {
             return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);
         }
-
+        
+        #if USESQLCONNECTION
+		public new SQLCECommand ExecuteCommand { get { return (SQLCECommand)base.ExecuteCommand; } }
+		#else
         internal SqlCeResultSet ExecuteResultSet(string ATableName, string AIndexName, DbRangeOptions ARangeOptions, object[] AStartValues, object[] AEndValues, ResultSetOptions AResultSetOptions)
         {
             ExecuteCommand.CommandType = CommandType.TableDirect;
@@ -69,7 +76,8 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
         }
 		
         public new SqlCeCommand ExecuteCommand { get { return (SqlCeCommand)base.ExecuteCommand; } }
-
+		#endif
+		
         protected override SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
         {
             return

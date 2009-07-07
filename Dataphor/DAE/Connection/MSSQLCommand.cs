@@ -442,7 +442,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		internal bool ContainsParameter(string AParameterName)
 		{
-			return FCommand.Parameters.Contains(AParameterName);
+			return (FCommand != null) && FCommand.Parameters.Contains(AParameterName);
 		}
 
 		internal void ParametersAreAvailable()

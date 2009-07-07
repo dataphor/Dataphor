@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define USESQLCONNECTION
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Alphora.Dataphor.DAE.Connection;
@@ -28,7 +30,11 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
 
+			#if USESQLCONNECTION
+			LConnection.BeginTransaction(SQLIsolationLevel.ReadCommitted);
+			#else
             LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
+            #endif
 
             SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             var LRow = new object[] { 1, "Hi" };
@@ -70,7 +76,11 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
 
+			#if USESQLCONNECTION
+			LConnection.BeginTransaction(SQLIsolationLevel.ReadCommitted);
+			#else
             LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
+            #endif
 
             SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);            
             var LRow=new object[]{1,"Hi"};

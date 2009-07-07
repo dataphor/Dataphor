@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define REQUIRECASEMATCHONRESOLVE // Use this to require a case match when resolving identifiers (see IBAS Proposal #26889)
+#define USESQLCONNECTION // Use an SQLConnection descendent for connectivity in the SQLStore
 
 using System;
 using System.IO;
@@ -713,6 +714,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			if (FConnection.TransactionCount == 0)
 				FlushCache();
+			#if USESQLCONNECTION
+			FConnection.BeginTransaction(SQLUtility.IsolationLevelToSQLIsolationLevel(AIsolationLevel));
+			#else
 			System.Data.IsolationLevel LIsolationLevel = System.Data.IsolationLevel.Unspecified;
 			switch (AIsolationLevel)
 			{
@@ -721,6 +725,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				case IsolationLevel.Browse : LIsolationLevel = System.Data.IsolationLevel.ReadUncommitted; break;
 			}
 			FConnection.BeginTransaction(LIsolationLevel);
+			#endif
 		}
 
 		public void CommitTransaction()

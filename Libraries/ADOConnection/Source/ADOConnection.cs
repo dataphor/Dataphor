@@ -505,6 +505,11 @@ namespace Alphora.Dataphor.DAE.Connection.ADO
 		{
 			return FValues.Length;
 		}
+
+		protected override string InternalGetColumnName(int AIndex)
+		{
+			return FRecordset.Fields[AIndex].Name;
+		}
 		
 		protected override object InternalGetColumnValue(int AIndex)
 		{

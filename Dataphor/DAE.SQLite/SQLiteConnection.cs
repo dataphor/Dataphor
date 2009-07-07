@@ -12,7 +12,10 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class SQLiteConnection : DotNetConnection
 	{
-		public SQLiteConnection(string AConnection) : base(AConnection) {}
+		public SQLiteConnection(string AConnection) : base(AConnection) 
+		{
+			FSupportsMARS = true;
+		}
 		
 		protected override IDbConnection CreateDbConnection(string AConnectionString)
 		{

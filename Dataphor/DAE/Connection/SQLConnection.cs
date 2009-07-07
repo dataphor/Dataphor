@@ -28,6 +28,9 @@ namespace Alphora.Dataphor.DAE.Connection
 			LCommand.ShouldNormalizeWhitespace = FDefaultShouldNormalizeWhitespace;
 			return LCommand;
 		}
+		
+		protected bool FSupportsMARS;
+		public bool SupportsMARS { get { return FSupportsMARS; } }
 
 		private SQLConnectionState FState;
 		public SQLConnectionState State { get { return FState; } }
@@ -36,33 +39,42 @@ namespace Alphora.Dataphor.DAE.Connection
 			FState = AState;
 		}
 		
+		private List<SQLCommand> FActiveCommands = new List<SQLCommand>();
 		private SQLCommand FActiveCommand;
 		public SQLCommand ActiveCommand { get { return FActiveCommand; } }
 		internal void SetActiveCommand(SQLCommand ACommand)
 		{
-			if ((ACommand != null) && (FActiveCommand != null))
+			if ((ACommand != null) && (FActiveCommand != null) && !FSupportsMARS)
 				throw new ConnectionException(ConnectionException.Codes.ConnectionBusy);
+			if ((FActiveCommand != null) && FActiveCommands.Contains(FActiveCommand))
+				FActiveCommands.Remove(FActiveCommand);
 			FActiveCommand = ACommand;
-			if (FActiveCommand != null)
+			if ((FActiveCommand != null) && !FActiveCommands.Contains(FActiveCommand))
+				FActiveCommands.Add(FActiveCommand);
+			if (FActiveCommands.Count > 0)
 				FState = SQLConnectionState.Executing;
 			else
 				FState = SQLConnectionState.Idle;
 		}
 		
+		private List<SQLCursor> FActiveCursors = new List<SQLCursor>();
 		private SQLCursor FActiveCursor;
 		public SQLCursor ActiveCursor { get { return FActiveCursor; } }
 		internal void SetActiveCursor(SQLCursor ACursor)
 		{
-			if ((ACursor != null) && (FActiveCursor != null))
+			if ((ACursor != null) && (FActiveCursor != null) && !FSupportsMARS)
 				throw new ConnectionException(ConnectionException.Codes.ConnectionBusy);
+			if ((FActiveCursor != null) && FActiveCursors.Contains(FActiveCursor))
+				FActiveCursors.Remove(FActiveCursor);
 			FActiveCursor = ACursor;
-			if (FActiveCursor != null)
+			if ((FActiveCursor != null) && !FActiveCursors.Contains(FActiveCursor))
+				FActiveCursors.Add(FActiveCursor);
+			if (FActiveCursors.Count > 0)
 				FState = SQLConnectionState.Reading;
+			else if (FActiveCommands.Count > 0)
+				FState = SQLConnectionState.Executing;
 			else
-				if (FActiveCommand != null)
-					FState = SQLConnectionState.Executing;
-				else
-					FState = SQLConnectionState.Idle;
+				FState = SQLConnectionState.Idle;
 		}
 		
 		public void Execute(string AStatement, SQLParameters AParameters)

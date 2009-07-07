@@ -2,12 +2,9 @@
 	Alphora Dataphor
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
-	Abstract SQL Store
-	
-	Defines the expected behavior for a simple storage device that uses a SQL DBMS as it's backend.
-	The store is capable of storing integers, strings, booleans, and long text and binary data.
-	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
+
+#define USESQLCONNECTION
 
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
@@ -29,7 +26,27 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
         {	
 			EnsureReader(null, true, true);
         }
+        
+        public new SQLCEStoreConnection Connection { get { return (SQLCEStoreConnection)base.Connection; } }
 
+		#if USESQLCONNECTION
+		protected override SQLCursor InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
+		{
+			SQLCECursor LCursor =
+				Connection.ExecuteCommand.ExecuteResultSet
+				(
+					TableName, 
+					IndexName, 
+					DbRangeOptions.Default, 
+					null, 
+					null, 
+					ResultSetOptions.Scrollable | ResultSetOptions.Sensitive | (IsUpdatable ? ResultSetOptions.Updatable : ResultSetOptions.None)
+				);
+
+			FResultSet = LCursor.ResultSet;
+			return LCursor;
+		}
+		#else
         protected override System.Data.Common.DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
         {
             FResultSet =
@@ -45,6 +62,7 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 				
             return FResultSet;
         }
+        #endif
 
         protected override void InternalDispose()
         {
@@ -55,8 +73,6 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
         }
 		
         private SqlCeResultSet FResultSet;
-		
-        public new SQLCEStoreConnection Connection { get { return (SQLCEStoreConnection)base.Connection; } }
 		
         protected override bool InternalNext()
         {

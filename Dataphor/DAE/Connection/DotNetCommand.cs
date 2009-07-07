@@ -166,7 +166,8 @@ namespace Alphora.Dataphor.DAE.Connection
 		
 		protected internal override void InternalClose()
 		{
-			UnprepareCommand();
+			if (FCommand != null)
+				UnprepareCommand();
 		}
 		
 		public void Cancel()

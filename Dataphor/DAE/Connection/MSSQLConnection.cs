@@ -10,6 +10,7 @@ using System.Text;
 using System.Reflection;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.Common;
 
 /*
 	MSSQLConnection - implements client or server-side SQL Server cursors
@@ -37,7 +38,12 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class MSSQLConnection : DotNetConnection
 	{
-		public MSSQLConnection(string AConnectionString) : base(AConnectionString) { }
+		public MSSQLConnection(string AConnectionString) : base(AConnectionString) 
+		{ 
+			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
+			LBuilder.ConnectionString = AConnectionString;
+			FSupportsMARS = LBuilder.ContainsKey("MultipleActiveResultSets") && (bool)LBuilder["MultipleActiveResultSets"];
+		}
 
 		protected override IDbConnection CreateDbConnection(string AConnectionString)
 		{
