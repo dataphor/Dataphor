@@ -4,7 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define REQUIRECASEMATCHONRESOLVE // Use this to require a case match when resolving identifiers (see IBAS Proposal #26889)
-#define USECURSORCACHE
 
 using System;
 using System.IO;
@@ -59,10 +58,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	
 	internal class StoreTableHeader : StoreObjectHeader
 	{
-		public StoreTableHeader(string ATableName, string APrimaryKeyName) : base(ATableName)
+		public StoreTableHeader(string ATableName, List<string> AColumns, string APrimaryKeyName) : base(ATableName)
 		{
+			FColumns = AColumns;
 			FPrimaryKeyName = APrimaryKeyName;
 		}
+		
+		private List<string> FColumns;
+		public List<string> Columns { get { return FColumns; } }
 		
 		private string FPrimaryKeyName;
 		public string PrimaryKeyName { get { return FPrimaryKeyName; } }
@@ -165,6 +168,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private SQLStore FStore;
 		
+		public bool UseCursorCache { get { return FStore.SupportsMARS; } }
+		public bool InsertThroughCursor { get { return FStore.SupportsUpdatableCursor; } }
+		public bool DeleteThroughCursor { get { return FStore.SupportsUpdatableCursor; } }
+		
+		public SQLStoreCounters Counters { get { return FStore.Counters; } }
+		
 		private string FStoreClassName;
 		public string StoreClassName
 		{
@@ -261,34 +270,173 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private StoreTableHeader BuildTableHeader(string ATableName)
 		{
+			List<string> LColumns = new List<string>();
+			
 			switch (ATableName)
 			{
-				case "DAEServerInfo" : return new StoreTableHeader(ATableName, "PK_DAEServerInfo");
-				case "DAEUsers" : return new StoreTableHeader(ATableName, "PK_DAEUsers");
-				case "DAELoadedLibraries" : return new StoreTableHeader(ATableName, "PK_DAELoadedLibraries");
-				case "DAELibraryDirectories" : return new StoreTableHeader(ATableName, "PK_DAELibraryDirectories");
-				case "DAELibraryVersions" : return new StoreTableHeader(ATableName, "PK_DAELibraryVersions");
-				case "DAELibraryOwners" : return new StoreTableHeader(ATableName, "PK_DAELibraryOwners");
-				case "DAEObjects" : return new StoreTableHeader(ATableName, "PK_DAEObjects");
-				case "DAEObjectDependencies" : return new StoreTableHeader(ATableName, "PK_DAEObjectDependencies");
-				case "DAECatalogObjects" : return new StoreTableHeader(ATableName, "PK_DAECatalogObjects");
-				case "DAECatalogObjectNames" : return new StoreTableHeader(ATableName, "PK_DAECatalogObjectNames");
-				case "DAEBaseCatalogObjects" : return new StoreTableHeader(ATableName, "PK_DAEBaseCatalogObjects");
-				case "DAEScalarTypes" : return new StoreTableHeader(ATableName, "PK_DAEScalarTypes");
-				case "DAEOperatorNames" : return new StoreTableHeader(ATableName, "PK_DAEOperatorNames");
-				case "DAEOperatorNameNames" : return new StoreTableHeader(ATableName, "PK_DAEOperatorNameNames");
-				case "DAEOperators" : return new StoreTableHeader(ATableName, "PK_DAEOperators");
-				case "DAEEventHandlers" : return new StoreTableHeader(ATableName, "PK_DAEEventHandlers");
-				case "DAEApplicationTransactionTableMaps" : return new StoreTableHeader(ATableName, "PK_DAEApplicationTransactionTableMaps");
-				case "DAEApplicationTransactionOperatorNameMaps" : return new StoreTableHeader(ATableName, "PK_DAEApplicationTransactionOperatorNameMaps");
-				case "DAEApplicationTransactionOperatorMaps" : return new StoreTableHeader(ATableName, "PK_DAEApplicationTransactionOperatorMaps");
-				case "DAEUserRoles" : return new StoreTableHeader(ATableName, "PK_DAEUserRoles");
-				case "DAERights" : return new StoreTableHeader(ATableName, "PK_DAERights");
-				case "DAERoleRightAssignments" : return new StoreTableHeader(ATableName, "PK_DAERoleRightAssignments");
-				case "DAEUserRightAssignments" : return new StoreTableHeader(ATableName, "PK_DAEUserRightAssignments");
-				case "DAEDevices" : return new StoreTableHeader(ATableName, "PK_DAEDevices");
-				case "DAEDeviceUsers" : return new StoreTableHeader(ATableName, "PK_DAEDeviceUsers");
-				case "DAEDeviceObjects" : return new StoreTableHeader(ATableName, "PK_DAEDeviceObjects");
+				case "DAEServerInfo" : 
+					LColumns.Add("ID");
+					LColumns.Add("Name");
+					LColumns.Add("Version");
+					LColumns.Add("MaxConcurrentProcesses");
+					LColumns.Add("ProcessWaitTimeout");
+					LColumns.Add("ProcessTerminationTimeout");
+					LColumns.Add("PlanCacheSize");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEServerInfo");
+
+				case "DAEUsers" : 
+					LColumns.Add("ID");
+					LColumns.Add("Name");
+					LColumns.Add("Data");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEUsers");
+					
+				case "DAELoadedLibraries" : 
+					LColumns.Add("Library_Name");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAELoadedLibraries");
+					
+				case "DAELibraryDirectories" : 
+					LColumns.Add("Library_Name");
+					LColumns.Add("Directory");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAELibraryDirectories");
+					
+				case "DAELibraryVersions" : 
+					LColumns.Add("Library_Name");
+					LColumns.Add("VersionNumber");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAELibraryVersions");
+					
+				case "DAELibraryOwners" : 
+					LColumns.Add("Library_Name");
+					LColumns.Add("Owner_User_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAELibraryOwners");
+					
+				case "DAEObjects" : 
+					LColumns.Add("ID");
+					LColumns.Add("Name");
+					LColumns.Add("Library_Name");
+					LColumns.Add("DisplayName");
+					LColumns.Add("Description");
+					LColumns.Add("Type");
+					LColumns.Add("IsSystem");
+					LColumns.Add("IsRemotable");
+					LColumns.Add("IsGenerated");
+					LColumns.Add("IsATObject");
+					LColumns.Add("IsSessionObject");
+					LColumns.Add("IsPersistent");
+					LColumns.Add("Catalog_Object_ID");
+					LColumns.Add("Parent_Object_ID");
+					LColumns.Add("Generator_Object_ID");
+					LColumns.Add("ServerData");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEObjects");
+					
+				case "DAEObjectDependencies" : 
+					LColumns.Add("Object_ID");
+					LColumns.Add("Dependency_Object_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEObjectDependencies");
+
+				case "DAECatalogObjects" : 
+					LColumns.Add("ID");
+					LColumns.Add("Name");
+					LColumns.Add("Library_Name");
+					LColumns.Add("Owner_User_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAECatalogObjects");
+
+				case "DAECatalogObjectNames" : 
+					LColumns.Add("Depth");
+					LColumns.Add("Name");
+					LColumns.Add("ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAECatalogObjectNames");
+					
+				case "DAEBaseCatalogObjects" : 
+					LColumns.Add("ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEBaseCatalogObjects");
+					
+				case "DAEScalarTypes" : 
+					LColumns.Add("ID");
+					LColumns.Add("Unique_Sort_ID");
+					LColumns.Add("Sort_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEScalarTypes");
+
+				case "DAEOperatorNames" : 
+					LColumns.Add("Name");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEOperatorNames");
+				
+				case "DAEOperatorNameNames" : 
+					LColumns.Add("Depth");
+					LColumns.Add("Name");
+					LColumns.Add("OperatorName");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEOperatorNameNames");
+
+				case "DAEOperators" : 
+					LColumns.Add("ID");
+					LColumns.Add("OperatorName");
+					LColumns.Add("Signature");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEOperators");
+
+				case "DAEEventHandlers" : 
+					LColumns.Add("ID");
+					LColumns.Add("Operator_ID");
+					LColumns.Add("Source_Object_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEEventHandlers");
+
+				case "DAEApplicationTransactionTableMaps" : 
+					LColumns.Add("Source_TableVar_ID");
+					LColumns.Add("Translated_TableVar_ID");
+					LColumns.Add("Deleted_TableVar_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEApplicationTransactionTableMaps");
+
+				case "DAEApplicationTransactionOperatorNameMaps" : 
+					LColumns.Add("Source_OperatorName");
+					LColumns.Add("Translated_OperatorName");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEApplicationTransactionOperatorNameMaps");
+				
+				case "DAEApplicationTransactionOperatorMaps" : 
+					LColumns.Add("Source_Operator_ID");
+					LColumns.Add("Translated_Operator_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEApplicationTransactionOperatorMaps");
+
+				case "DAEUserRoles" : 
+					LColumns.Add("User_ID");
+					LColumns.Add("Role_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEUserRoles");
+
+				case "DAERights" : 
+					LColumns.Add("Name");
+					LColumns.Add("Owner_User_ID");
+					LColumns.Add("Catalog_Object_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAERights");
+
+				case "DAERoleRightAssignments" : 
+					LColumns.Add("Role_ID");
+					LColumns.Add("Right_Name");
+					LColumns.Add("IsGranted");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAERoleRightAssignments");
+
+				case "DAEUserRightAssignments" : 
+					LColumns.Add("User_ID");
+					LColumns.Add("Right_Name");
+					LColumns.Add("IsGranted");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEUserRightAssignments");
+
+				case "DAEDevices" : 
+					LColumns.Add("ID");
+					LColumns.Add("ResourceManagerID");
+					LColumns.Add("ReconciliationMaster");
+					LColumns.Add("ReconciliationMode");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEDevices");
+				
+				case "DAEDeviceUsers" : 
+					LColumns.Add("User_ID");
+					LColumns.Add("Device_ID");
+					LColumns.Add("UserID");
+					LColumns.Add("Data");
+					LColumns.Add("ConnectionParameters");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEDeviceUsers");
+
+				case "DAEDeviceObjects" : 
+					LColumns.Add("ID");
+					LColumns.Add("Device_ID");
+					LColumns.Add("Mapped_Object_ID");
+					return new StoreTableHeader(ATableName, LColumns, "PK_DAEDeviceObjects");
 			}
 
 			Error.Fail("Table header could not be constructed for store table \"{0}\".", ATableName);
@@ -589,6 +737,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			FConnection.RollbackTransaction();
 		}
 		
+		public int TransactionCount { get { return FConnection.TransactionCount; } }
+		
+		public bool InTransaction { get { return FConnection.TransactionCount > 0; } }
+		
 		private CatalogStore FStore;
 		public CatalogStore Store { get { return FStore; } }
 		
@@ -603,11 +755,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void CloseCursor(SQLStoreCursor ACursor)
 		{
-			#if USECURSORCACHE
-			if ((FConnection.TransactionCount > 0) && !FCursorCache.ContainsKey(ACursor.CursorName))
+			if (FStore.UseCursorCache && (FConnection.TransactionCount > 0) && !FCursorCache.ContainsKey(ACursor.CursorName))
 				FCursorCache.Add(ACursor.CursorName, ACursor);
 			else
-			#endif
 				ACursor.Dispose();
 		}
 		
@@ -615,17 +765,16 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			string LCursorName = AIndexName + AIsUpdatable.ToString();
 			SQLStoreCursor LCursor;
-			#if USECURSORCACHE
-			if (FCursorCache.TryGetValue(LCursorName, out LCursor))
+			if (FStore.UseCursorCache && FCursorCache.TryGetValue(LCursorName, out LCursor))
 			{
 				FCursorCache.Remove(LCursorName);
 				LCursor.SetRange(null, null);
 			}
 			else
-			#endif
 			{
 				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(AIndexName);
-				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LIndexHeader.SQLIndex, AIsUpdatable);
+				StoreTableHeader LTableHeader = Store.GetTableHeader(LIndexHeader.TableName);
+				LCursor = FConnection.OpenCursor(LIndexHeader.TableName, LTableHeader.Columns, LIndexHeader.SQLIndex, AIsUpdatable);
 			}
 			return LCursor;
 		}
@@ -662,41 +811,82 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public void InsertRow(string ATableName, params object[] ARowValues)
 		{
-			SQLStoreCursor LCursor = OpenCursor(Store.GetTableHeader(ATableName).PrimaryKeyName, true);
-			try
+			if (FStore.InsertThroughCursor)
 			{
-				LCursor.Insert(ARowValues);
+				SQLStoreCursor LCursor = OpenCursor(Store.GetTableHeader(ATableName).PrimaryKeyName, true);
+				try
+				{
+					LCursor.Insert(ARowValues);
+				}
+				finally
+				{
+					CloseCursor(LCursor);
+				}
 			}
-			finally
+			else
 			{
-				CloseCursor(LCursor);
+				StoreTableHeader LHeader = Store.GetTableHeader(ATableName);
+				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(LHeader.PrimaryKeyName);
+				FConnection.PerformInsert(ATableName, LHeader.Columns, LIndexHeader.Columns, ARowValues);
 			}
 		}
 		
 		public void DeleteRows(string AIndexName, params object[] AKeyValues)
 		{
-			SQLStoreCursor LCursor = OpenMatchedCursor(AIndexName, true, AKeyValues);
-			try
+			if (FStore.DeleteThroughCursor)
 			{
-				while (LCursor.Next())
-					LCursor.Delete();
+				SQLStoreCursor LCursor = OpenMatchedCursor(AIndexName, true, AKeyValues);
+				try
+				{
+					while (LCursor.Next())
+						LCursor.Delete();
+				}
+				finally
+				{
+					CloseCursor(LCursor);
+				}
 			}
-			finally
+			else
 			{
-				CloseCursor(LCursor);
+				StoreIndexHeader LIndexHeader = Store.GetIndexHeader(AIndexName);
+				StoreTableHeader LTableHeader = Store.GetTableHeader(LIndexHeader.TableName);
+				if (LIndexHeader.IsUnique && (AKeyValues.Length >= LIndexHeader.Columns.Count))
+				{
+					object[] LRow = new object[LTableHeader.Columns.Count];
+					for (int LIndex = 0; LIndex < AKeyValues.Length; LIndex++)
+						LRow[LTableHeader.Columns.IndexOf(LIndexHeader.Columns[LIndex])] = AKeyValues[LIndex];
+					FConnection.PerformDelete(LIndexHeader.TableName, LTableHeader.Columns, LIndexHeader.Columns, LRow);
+				}
+				else
+				{
+					List<object[]> LRows = new List<object[]>();
+					SQLStoreCursor LCursor = OpenMatchedCursor(AIndexName, true, AKeyValues);
+					try
+					{
+						while (LCursor.Next())
+							LRows.Add(LCursor.Select());
+					}
+					finally
+					{
+						CloseCursor(LCursor);
+					}
+					
+					for (int LIndex = 0; LIndex < LRows.Count; LIndex++)
+						FConnection.PerformDelete(LIndexHeader.TableName, LTableHeader.Columns, LIndexHeader.Columns, LRows[LIndex]);
+				}
 			}
 		}
 		
 		#region Platform Independent Internal Logic
 		
-		private void InsertObjectDependencies(SQLStoreCursor ADependencies, Schema.Object AObject)
+		private void InsertObjectDependencies(Schema.Object AObject)
 		{
 			if (AObject.HasDependencies())
 				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
 					InsertRow("DAEObjectDependencies", AObject.ID, AObject.Dependencies.IDs[LIndex]);
 		}
 		
-		private void InsertObjectAndDependencies(SQLStoreCursor AObjects, SQLStoreCursor ADependencies, Schema.Object AObject)
+		private void InsertObjectAndDependencies(Schema.Object AObject)
 		{
 			InsertRow
 			(
@@ -718,7 +908,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				AObject.GeneratorID
 			);
 
-			InsertObjectDependencies(ADependencies, AObject);
+			InsertObjectDependencies(AObject);
 		}
 		
 		private void InsertAllObjectsAndDependencies(Schema.Object AObject)
@@ -757,109 +947,97 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// DeviceOperator
 			// Operator
 			
-			SQLStoreCursor LObjects = OpenCursor("PK_DAEObjects", false);
-			try
+			InsertObjectDependencies(AObject);
+	
+			int LIndex;
+			int LSubIndex;
+			Schema.ScalarType LScalarType = AObject as Schema.ScalarType;
+			if (LScalarType != null)
 			{
-				SQLStoreCursor LDependencies = OpenCursor("PK_DAEObjectDependencies", false);
-				try
+				for (LIndex = 0; LIndex < LScalarType.Representations.Count; LIndex++)
 				{
-					InsertObjectDependencies(LDependencies, AObject);
-			
-					int LIndex;
-					int LSubIndex;
-					Schema.ScalarType LScalarType = AObject as Schema.ScalarType;
-					if (LScalarType != null)
+					Schema.Representation LRepresentation = LScalarType.Representations[LIndex];
+					if (!LRepresentation.IsPersistent)
 					{
-						for (LIndex = 0; LIndex < LScalarType.Representations.Count; LIndex++)
-						{
-							Schema.Representation LRepresentation = LScalarType.Representations[LIndex];
-							if (!LRepresentation.IsPersistent)
-							{
-								InsertObjectAndDependencies(LObjects, LDependencies, LRepresentation);
-								for (LSubIndex = 0; LSubIndex < LRepresentation.Properties.Count; LSubIndex++)
-									InsertObjectAndDependencies(LObjects, LDependencies, LRepresentation.Properties[LSubIndex]);
-							}
-						}
-
-						for (LIndex = 0; LIndex < LScalarType.Specials.Count; LIndex++)
-							if (!LScalarType.Specials[LIndex].IsPersistent)
-								InsertObjectAndDependencies(LObjects, LDependencies, LScalarType.Specials[LIndex]);
-							
-						if (LScalarType.Default != null)
-							if (!LScalarType.Default.IsPersistent)
-								InsertObjectAndDependencies(LObjects, LDependencies, LScalarType.Default);
-						
-						for (LIndex = 0; LIndex < LScalarType.Constraints.Count; LIndex++)
-							if (!LScalarType.Constraints[LIndex].IsPersistent)
-								InsertObjectAndDependencies(LObjects, LDependencies, LScalarType.Constraints[LIndex]);
-							
-						return;
-					}
-					
-					{
-						Schema.Representation LRepresentation = AObject as Schema.Representation;
-						if (LRepresentation != null)
-						{
-							for (LIndex = 0; LIndex < LRepresentation.Properties.Count; LIndex++)
-								InsertObjectAndDependencies(LObjects, LDependencies, LRepresentation.Properties[LIndex]);
-						
-							return;
-						}
-					}
-					
-					Schema.TableVar LTableVar = AObject as Schema.TableVar;
-					if (LTableVar != null)
-					{
-						for (LIndex = 0; LIndex < LTableVar.Columns.Count; LIndex++)
-						{
-							Schema.TableVarColumn LColumn = LTableVar.Columns[LIndex];
-							InsertObjectAndDependencies(LObjects, LDependencies, LColumn);
-
-							if (LColumn.Default != null)
-								if (!LColumn.Default.IsPersistent)
-									InsertObjectAndDependencies(LObjects, LDependencies, LColumn.Default);
-								
-							if (LColumn.HasConstraints())
-								for (LSubIndex = 0; LSubIndex < LColumn.Constraints.Count; LSubIndex++)
-									if (!LColumn.Constraints[LSubIndex].IsPersistent)
-										InsertObjectAndDependencies(LObjects, LDependencies, LColumn.Constraints[LSubIndex]);
-						}
-
-						for (LIndex = 0; LIndex < LTableVar.Keys.Count; LIndex++)
-							InsertObjectAndDependencies(LObjects, LDependencies, LTableVar.Keys[LIndex]);
-							
-						for (LIndex = 0; LIndex < LTableVar.Orders.Count; LIndex++)
-							InsertObjectAndDependencies(LObjects, LDependencies, LTableVar.Orders[LIndex]);
-
-						for (LIndex = 0; LIndex < LTableVar.Constraints.Count; LIndex++)
-							if (!LTableVar.Constraints[LIndex].IsGenerated && !LTableVar.Constraints[LIndex].IsPersistent) // Generated constraints are maintained internally
-								InsertObjectAndDependencies(LObjects, LDependencies, LTableVar.Constraints[LIndex]);
+						InsertObjectAndDependencies(LRepresentation);
+						for (LSubIndex = 0; LSubIndex < LRepresentation.Properties.Count; LSubIndex++)
+							InsertObjectAndDependencies(LRepresentation.Properties[LSubIndex]);
 					}
 				}
-				finally
+
+				for (LIndex = 0; LIndex < LScalarType.Specials.Count; LIndex++)
+					if (!LScalarType.Specials[LIndex].IsPersistent)
+						InsertObjectAndDependencies(LScalarType.Specials[LIndex]);
+					
+				if (LScalarType.Default != null)
+					if (!LScalarType.Default.IsPersistent)
+						InsertObjectAndDependencies(LScalarType.Default);
+				
+				for (LIndex = 0; LIndex < LScalarType.Constraints.Count; LIndex++)
+					if (!LScalarType.Constraints[LIndex].IsPersistent)
+						InsertObjectAndDependencies(LScalarType.Constraints[LIndex]);
+					
+				return;
+			}
+			
+			{
+				Schema.Representation LRepresentation = AObject as Schema.Representation;
+				if (LRepresentation != null)
 				{
-					CloseCursor(LDependencies);
+					for (LIndex = 0; LIndex < LRepresentation.Properties.Count; LIndex++)
+						InsertObjectAndDependencies(LRepresentation.Properties[LIndex]);
+				
+					return;
 				}
 			}
-			finally
+			
+			Schema.TableVar LTableVar = AObject as Schema.TableVar;
+			if (LTableVar != null)
 			{
-				CloseCursor(LObjects);
+				for (LIndex = 0; LIndex < LTableVar.Columns.Count; LIndex++)
+				{
+					Schema.TableVarColumn LColumn = LTableVar.Columns[LIndex];
+					InsertObjectAndDependencies(LColumn);
+
+					if (LColumn.Default != null)
+						if (!LColumn.Default.IsPersistent)
+							InsertObjectAndDependencies(LColumn.Default);
+						
+					if (LColumn.HasConstraints())
+						for (LSubIndex = 0; LSubIndex < LColumn.Constraints.Count; LSubIndex++)
+							if (!LColumn.Constraints[LSubIndex].IsPersistent)
+								InsertObjectAndDependencies(LColumn.Constraints[LSubIndex]);
+				}
+
+				for (LIndex = 0; LIndex < LTableVar.Keys.Count; LIndex++)
+					InsertObjectAndDependencies(LTableVar.Keys[LIndex]);
+					
+				for (LIndex = 0; LIndex < LTableVar.Orders.Count; LIndex++)
+					InsertObjectAndDependencies(LTableVar.Orders[LIndex]);
+
+				for (LIndex = 0; LIndex < LTableVar.Constraints.Count; LIndex++)
+					if (!LTableVar.Constraints[LIndex].IsGenerated && !LTableVar.Constraints[LIndex].IsPersistent) // Generated constraints are maintained internally
+						InsertObjectAndDependencies(LTableVar.Constraints[LIndex]);
 			}
 		}
 		
 		private void DeleteObjectDependencies(Schema.Object AObject)
 		{
 			DeleteRows("PK_DAEObjectDependencies", AObject.ID);
+			List<object> LObjectList = new List<object>();
 			SQLStoreCursor LObjects = OpenMatchedCursor("IDX_DAEObjects_Catalog_Object_ID", false, AObject.ID);
 			try
 			{
 				while (LObjects.Next())
-					DeleteRows("PK_DAEObjectDependencies", LObjects[0]);
+					LObjectList.Add(LObjects[0]);
 			}
 			finally
 			{
 				CloseCursor(LObjects);
 			}
+			
+			for (int LObjectIndex = 0; LObjectIndex < LObjectList.Count; LObjectIndex++)
+				DeleteRows("PK_DAEObjectDependencies", LObjectList[LObjectIndex]);
 		}
 
 		#endregion
@@ -1151,26 +1329,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public Schema.CatalogObjectHeaders SelectUserOperators(string AUserID)
 		{
 			Schema.CatalogObjectHeaders LHeaders = new Schema.CatalogObjectHeaders();
+			List<object[]> LObjectList = new List<object[]>();
 			SQLStoreCursor LCatalogObjects = OpenMatchedCursor("IDX_DAECatalogObjects_Owner_User_ID", false, AUserID);
 			try
 			{
-				SQLStoreCursor LOperators = OpenCursor("PK_DAEOperators", false);
-				try
-				{
-					while (LCatalogObjects.Next())
-						if (LOperators.FindKey(new object[] { LCatalogObjects[0] }))
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LCatalogObjects[0], (string)LCatalogObjects[1], (string)LCatalogObjects[2], (string)LCatalogObjects[3]));
-
-					return LHeaders;
-				}
-				finally
-				{
-					CloseCursor(LOperators);
-				}
+				while (LCatalogObjects.Next())
+					LObjectList.Add(new object[] { LCatalogObjects[0], LCatalogObjects[1], LCatalogObjects[2], LCatalogObjects[3] });
 			}
 			finally
 			{
 				CloseCursor(LCatalogObjects);
+			}
+
+			SQLStoreCursor LOperators = OpenCursor("PK_DAEOperators", false);
+			try
+			{
+				for (int LIndex = 0; LIndex < LObjectList.Count; LIndex++)
+					if (LOperators.FindKey(new object[] { LObjectList[LIndex][0] }))
+						LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjectList[LIndex][0], (string)LObjectList[LIndex][1], (string)LObjectList[LIndex][2], (string)LObjectList[LIndex][3]));
+
+				return LHeaders;
+			}
+			finally
+			{
+				CloseCursor(LOperators);
 			}
 		}
 
@@ -1216,31 +1398,36 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			
 			bool LGranted = false;
+			List<object> LRoleNames = new List<object>();
 			SQLStoreCursor LRoles = OpenMatchedCursor("PK_DAEUserRoles", false, AUserID);
 			try
 			{
 				while (LRoles.Next())
-				{
-					SQLStoreCursor LRoleRights = OpenMatchedCursor("PK_DAERoleRightAssignments", false, LRoles[1], ARightName);
-					try
-					{
-						if (LRoleRights.Next())
-						{
-							LGranted = (bool)LRoleRights[2];
-							if (!LGranted)
-								return LGranted;
-						}
-					}
-					finally
-					{
-						CloseCursor(LRoleRights);
-					}
-				}
+					LRoleNames.Add(LRoles[1]);
 			}
 			finally
 			{
 				CloseCursor(LRoles);
 			}
+
+			for (int LIndex = 0; LIndex < LRoleNames.Count; LIndex++)
+			{
+				SQLStoreCursor LRoleRights = OpenMatchedCursor("PK_DAERoleRightAssignments", false, LRoleNames[LIndex], ARightName);
+				try
+				{
+					if (LRoleRights.Next())
+					{
+						LGranted = (bool)LRoleRights[2];
+						if (!LGranted)
+							return LGranted;
+					}
+				}
+				finally
+				{
+					CloseCursor(LRoleRights);
+				}
+			}
+
 			return LGranted;
 		}
 		
@@ -1343,51 +1530,67 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// </remarks>
 		public void SnapshotBase()
 		{
+			List<object[]> LObjectList = new List<object[]>();
 			SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
 			try
+			{
+				while (LObjects.Next())
+					LObjectList.Add(new object[] { LObjects[0] });
+			}
+			finally
+			{
+				CloseCursor(LObjects);
+			}
+			
+			if (FStore.InsertThroughCursor)
 			{
 				SQLStoreCursor LBaseObjects = OpenCursor("PK_DAEBaseCatalogObjects", true);
 				try
 				{
-					while (LObjects.Next())
-						LBaseObjects.Insert(new object[] { LObjects[0] });
+					for (int LIndex = 0; LIndex < LObjectList.Count; LIndex++)
+						LBaseObjects.Insert(LObjectList[LIndex]);
 				}
 				finally
 				{
 					CloseCursor(LBaseObjects);
 				}
 			}
-			finally
+			else
 			{
-				CloseCursor(LObjects);
+				for (int LIndex = 0; LIndex < LObjectList.Count; LIndex++)
+					InsertRow("DAEBaseCatalogObjects", LObjectList[LIndex]);
 			}
 		}
 		
 		/// <summary>Returns a list of catalog headers for the base system objects.</summary>
 		public Schema.CatalogObjectHeaders SelectBaseCatalogObjects()
 		{
+			List<object[]> LObjectList = new List<object[]>();
 			SQLStoreCursor LBaseObjects = OpenCursor("PK_DAEBaseCatalogObjects", false);
 			try
 			{
-				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-				try
-				{
-					Schema.CatalogObjectHeaders LHeaders = new Schema.CatalogObjectHeaders();
-
-					while (LBaseObjects.Next())
-						if (LObjects.FindKey(new object[] { LBaseObjects[0] }))
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-							
-					return LHeaders;
-				}
-				finally
-				{
-					CloseCursor(LObjects);
-				}
+				while (LBaseObjects.Next())
+					LObjectList.Add(new object[] { LBaseObjects[0] });
 			}
 			finally
 			{
 				CloseCursor(LBaseObjects);
+			}
+					
+			SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+			try
+			{
+				Schema.CatalogObjectHeaders LHeaders = new Schema.CatalogObjectHeaders();
+
+				for (int LIndex = 0; LIndex < LObjectList.Count; LIndex++)
+					if (LObjects.FindKey(LObjectList[LIndex]))
+						LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+						
+				return LHeaders;
+			}
+			finally
+			{
+				CloseCursor(LObjects);
 			}
 		}
 
@@ -1411,28 +1614,33 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public Schema.CatalogObjectHeaders SelectGeneratedObjects(int AObjectID)
 		{
+			List<object[]> LObjectList = new List<object[]>();
+			
 			SQLStoreCursor LObjects = OpenMatchedCursor("IDX_DAEObjects_Generator_Object_ID", false, AObjectID);
 			try
 			{
-				SQLStoreCursor LCatalogObjects = OpenCursor("PK_DAECatalogObjects", false);
-				try
-				{
-					Schema.CatalogObjectHeaders LHeaders = new Schema.CatalogObjectHeaders();
-					
-					while (LObjects.Next())
-						if (LCatalogObjects.FindKey(new object[] { LObjects[0] }))
-							LHeaders.Add(new Schema.CatalogObjectHeader((int)LCatalogObjects[0], (string)LCatalogObjects[1], (string)LCatalogObjects[2], (string)LCatalogObjects[3]));
-							
-					return LHeaders;
-				}
-				finally
-				{
-					CloseCursor(LCatalogObjects);
-				}
+				while (LObjects.Next())
+					LObjectList.Add(new object[] { LObjects[0] });
 			}
 			finally
 			{
 				CloseCursor(LObjects);
+			}
+			
+			SQLStoreCursor LCatalogObjects = OpenCursor("PK_DAECatalogObjects", false);
+			try
+			{
+				Schema.CatalogObjectHeaders LHeaders = new Schema.CatalogObjectHeaders();
+					
+				for (int LIndex = 0; LIndex < LObjectList.Count; LIndex++)
+					if (LCatalogObjects.FindKey(LObjectList[LIndex]))
+						LHeaders.Add(new Schema.CatalogObjectHeader((int)LCatalogObjects[0], (string)LCatalogObjects[1], (string)LCatalogObjects[2], (string)LCatalogObjects[3]));
+							
+				return LHeaders;
+			}
+			finally
+			{
+				CloseCursor(LCatalogObjects);
 			}
 		}
 
@@ -1672,28 +1880,37 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			
 			for (int LIndex = GetMaxCatalogObjectNamesIndexDepth() - Schema.Object.GetQualifierCount(AName); LIndex >= 0; LIndex--)
 			{
+				List<object[]> LNames = new List<object[]>();
+
 				SQLStoreCursor LCursor = OpenMatchedCursor("PK_DAECatalogObjectNames", false, LIndex, AName);
 				try
 				{
-					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-					try
-					{
-						while (LCursor.Next())
-							#if REQUIRECASEMATCHONRESOLVE
-							if ((AName == (string)LCursor[1]) && LObjects.FindKey(new object[] { LCursor[2] }))
-							#else
-							if (LObjects.FindKey(new object[] { LCursor[2] }))
-							#endif
-								LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-					}
-					finally
-					{
-						CloseCursor(LObjects);
-					}
+					while (LCursor.Next())
+						#if REQUIRECASEMATCHONRESOLVE
+						LNames.Add(new object[] { LCursor[1], LCursor[2] });
+						#else
+						LNames.Add(new object[] { LCursor[2] });
+						#endif
 				}
 				finally
 				{
 					CloseCursor(LCursor);
+				}
+
+				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+				try
+				{
+					for (int LNameIndex = 0; LNameIndex < LNames.Count; LNameIndex++)
+						#if REQUIRECASEMATCHONRESOLVE
+						if ((AName == (string)LNames[LNameIndex][0]) && LObjects.FindKey(new object[] { LNames[LNameIndex][1] }))
+						#else
+						if (LObjects.FindKey(LNames[LNameIndex]))
+						#endif
+							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+				}
+				finally
+				{
+					CloseCursor(LObjects);
 				}
 			}
 			
@@ -1724,71 +1941,88 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (Schema.Object.IsRooted(AName))
 			{
 				AName = Schema.Object.EnsureUnrooted(AName);
+				List<object[]> LNameList = new List<object[]>();
+				
 				SQLStoreCursor LCursor = OpenMatchedCursor("IDX_DAEOperators_OperatorName", false, AName);
 				try
 				{
-					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-					try
-					{
-						while (LCursor.Next())
-							#if REQUIRECASEMATCHONRESOLVE
-							if ((AName == (string)LCursor[1]) && LObjects.FindKey(new object[] { LCursor[0] }))
-							#else
-							if (LObjects.FindKey(new object[] { LCursor[0] }))
-							#endif
-								LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-					}
-					finally
-					{
-						CloseCursor(LObjects);
-					}
-						
-					return LHeaders;
+					while (LCursor.Next())
+						#if REQUIRECASEMATCHONRESOLVE
+						LNameList.Add(new object[] { LCursor[1], LCursor[0] });
+						#else
+						LNameList.Add(new object[] { LCursor[0] });
+						#endif
 				}
 				finally
 				{
 					CloseCursor(LCursor);
 				}
+
+				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+				try
+				{
+					for (int LNameIndex = 0; LNameIndex < LNameList.Count; LNameIndex++)
+						#if REQUIRECASEMATCHONRESOLVE
+						if ((AName == (string)LNameList[LNameIndex][0]) && LObjects.FindKey(new object[] { LNameList[LNameIndex][1] }))
+						#else
+						if (LObjects.FindKey(LNameList[LNameIndex]))
+						#endif
+							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+				}
+				finally
+				{
+					CloseCursor(LObjects);
+				}
+					
+				return LHeaders;
 			}
 			
 			for (int LIndex = GetMaxOperatorNameNamesIndexDepth() - Schema.Object.GetQualifierCount(AName); LIndex >= 0; LIndex--)
 			{
+				List<object[]> LOperatorNameList = new List<object[]>();
 				SQLStoreCursor LCursor = OpenMatchedCursor("PK_DAEOperatorNameNames", false, LIndex, AName);
 				try
 				{
-					SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
-					try
-					{
-						while (LCursor.Next())
-						{
-							#if REQUIRECASEMATCHONRESOLVE
-							if (AName == (string)LCursor[1])
-							{
-							#endif
-								SQLStoreCursor LOperators = OpenMatchedCursor("IDX_DAEOperators_OperatorName", false, LCursor[2]);
-								try
-								{
-									while (LOperators.Next())
-										if (LObjects.FindKey(new object[] { LOperators[0] }))
-											LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
-								}
-								finally
-								{
-									CloseCursor(LOperators);
-								}
-							#if REQUIRECASEMATCHONRESOLVE
-							}
-							#endif
-						}
-					}
-					finally
-					{
-						CloseCursor(LObjects);
-					}
+					while (LCursor.Next())
+						LOperatorNameList.Add(new object[] { LCursor[1], LCursor[2] });
 				}
 				finally
 				{
 					CloseCursor(LCursor);
+				}
+				
+				List<object> LOperatorList = new List<object>();
+				for (int LOperatorNameIndex = 0; LOperatorNameIndex < LOperatorNameList.Count; LOperatorNameIndex++)
+				{
+					#if REQUIRECASEMATCHONRESOLVE
+					if (AName == (string)LOperatorNameList[LOperatorNameIndex][0])
+					{
+					#endif
+						SQLStoreCursor LOperators = OpenMatchedCursor("IDX_DAEOperators_OperatorName", false, LOperatorNameList[LOperatorNameIndex][1]);
+						try
+						{
+							while (LOperators.Next())
+								LOperatorList.Add(LOperators[0]);
+						}
+						finally
+						{
+							CloseCursor(LOperators);
+						}
+					#if REQUIRECASEMATCHONRESOLVE
+					}
+					#endif
+				}
+
+				SQLStoreCursor LObjects = OpenCursor("PK_DAECatalogObjects", false);
+				try
+				{
+					for (int LOperatorIndex = 0; LOperatorIndex < LOperatorList.Count; LOperatorIndex++)
+						if (LObjects.FindKey(new object[] { LOperatorList[LOperatorIndex] }))
+							LHeaders.Add(new Schema.CatalogObjectHeader((int)LObjects[0], (string)LObjects[1], (string)LObjects[2], (string)LObjects[3]));
+				}
+				finally
+				{
+					CloseCursor(LObjects);
 				}
 			}
 			
@@ -1843,42 +2077,49 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public Schema.FullCatalogObjectHeader SelectCatalogObject(int AObjectID)
 		{
+			object[] LObject = null;
 			SQLStoreCursor LObjects = OpenMatchedCursor("PK_DAEObjects", false, AObjectID);
 			try
+			{
+				if (LObjects.Next())
+					LObject = LObjects.Select();
+			}
+			finally
+			{
+				CloseCursor(LObjects);
+			}
+			
+			if (LObject != null)
 			{
 				SQLStoreCursor LCatalogObjects = OpenCursor("PK_DAECatalogObjects", false);
 				try
 				{
-					if (LObjects.Next() && LCatalogObjects.FindKey(new object[] { LObjects[0] }))
+					if (LCatalogObjects.FindKey(new object[] { LObject[0] }))
 						return
 							new Schema.FullCatalogObjectHeader
 							(
-								(int)LObjects[0], // ID
-								(string)LObjects[1], // Name
-								(string)LObjects[2], // LibraryName
+								(int)LObject[0], // ID
+								(string)LObject[1], // Name
+								(string)LObject[2], // LibraryName
 								(string)LCatalogObjects[3], // OwnerID
-								(string)LObjects[15], // Script
-								(string)LObjects[3], // DisplayName
-								(string)LObjects[5], // ObjectType
-								(bool)LObjects[6], // IsSystem
-								(bool)LObjects[7], // IsRemotable
-								(bool)LObjects[8], // IsGenerated
-								(bool)LObjects[9], // IsATObject
-								(bool)LObjects[10], // IsSessionObject
-								(int)LObjects[14] // GeneratorObjectID
+								(string)LObject[15], // Script
+								(string)LObject[3], // DisplayName
+								(string)LObject[5], // ObjectType
+								(bool)LObject[6], // IsSystem
+								(bool)LObject[7], // IsRemotable
+								(bool)LObject[8], // IsGenerated
+								(bool)LObject[9], // IsATObject
+								(bool)LObject[10], // IsSessionObject
+								(int)LObject[14] // GeneratorObjectID
 							);
-							
-					return null;
 				}
 				finally
 				{
 					CloseCursor(LCatalogObjects);
 				}
 			}
-			finally
-			{
-				CloseCursor(LObjects);
-			}
+
+			return null;
 		}
 		
 		public void InsertPersistentObject(Schema.Object AObject, string AObjectScript)
@@ -1939,33 +2180,38 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				if (LOperator != null)			
 				{
 					// Ensure the DAEOperatorNames and DAEOperatorNameNames rows exist
+					bool LDidInsert = false;
 					SQLStoreCursor LOperatorNames = OpenMatchedCursor("PK_DAEOperatorNames", true, LOperator.OperatorName);
 					try
 					{
 						if (!LOperatorNames.Next())
 						{
 							LOperatorNames.Insert(new object[] { LOperator.OperatorName });
-							
-							SQLStoreCursor LOperatorNameNames = OpenCursor("PK_DAEOperatorNameNames", true);
-							try
-							{
-								string LName = LOperator.OperatorName;
-								int LDepth = Schema.Object.GetQualifierCount(LName);
-								for (int LIndex = 0; LIndex <= LDepth; LIndex++)
-								{
-									LOperatorNameNames.Insert(new object[] { LIndex, LName, LOperator.OperatorName });
-									LName = Schema.Object.Dequalify(LName);
-								}
-							}
-							finally
-							{
-								CloseCursor(LOperatorNameNames);
-							}
+							LDidInsert = true;
 						}
 					}
 					finally
 					{
 						CloseCursor(LOperatorNames);
+					}
+					
+					if (LDidInsert)
+					{
+						SQLStoreCursor LOperatorNameNames = OpenCursor("PK_DAEOperatorNameNames", true);
+						try
+						{
+							string LName = LOperator.OperatorName;
+							int LDepth = Schema.Object.GetQualifierCount(LName);
+							for (int LIndex = 0; LIndex <= LDepth; LIndex++)
+							{
+								LOperatorNameNames.Insert(new object[] { LIndex, LName, LOperator.OperatorName });
+								LName = Schema.Object.Dequalify(LName);
+							}
+						}
+						finally
+						{
+							CloseCursor(LOperatorNameNames);
+						}
 					}
 					
 					// Insert the DAEOperators row
@@ -2111,18 +2357,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				
 			// Delete the DAERoleRightAssignments rows
 			// Delete the DAEUserRightAssignments rows
+			List<object> LRightList = new List<object>();
 			SQLStoreCursor LRights = OpenMatchedCursor("IDX_DAERights_Catalog_Object_ID", false, AObject.ID);
 			try
 			{
 				while (LRights.Next())
-				{
-					DeleteRows("IDX_DAERoleRightAssignments_Right_Name", LRights[0]);
-					DeleteRows("IDX_DAEUserRightAssignments_Right_Name", LRights[0]);
-				}
+					LRightList.Add(LRights[0]);
 			}
 			finally
 			{
 				CloseCursor(LRights);
+			}
+			
+			for (int LIndex = 0; LIndex < LRightList.Count; LIndex++)
+			{
+				DeleteRows("IDX_DAERoleRightAssignments_Right_Name", LRightList[LIndex]);
+				DeleteRows("IDX_DAEUserRightAssignments_Right_Name", LRightList[LIndex]);
 			}
 			
 			// Delete the DAERights rows
@@ -2181,6 +2431,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				CloseCursor(LCatalogObjects);
 			}
 			
+			// TODO: UpdateThroughCursor property?
 			SQLStoreCursor LRights = OpenMatchedCursor("IDX_DAERights_Catalog_Object_ID", true, ACatalogObjectID);
 			try
 			{
@@ -2338,127 +2589,132 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return LHeaders;
 		}
 		
-		private void SelectObjectDependents(SQLStoreCursor AObjects, int AObjectID, int ALevel, Schema.DependentObjectHeaders AHeaders, bool ARecursive)
+		private object[] SelectObjectRow(int AObjectID)
 		{
-			SQLStoreCursor LDependencies = OpenMatchedCursor("IDX_DAEObjectDependencies_Dependency_Object_ID", false, AObjectID);
-			try
-			{
-				while (LDependencies.Next())
-				{
-					if (!AHeaders.Contains((int)LDependencies[0]))
-					{
-						if (AObjects.FindKey(new object[] { LDependencies[0] }))
-						{
-							AHeaders.Add
-							(
-								new Schema.DependentObjectHeader
-								(
-									(int)AObjects[0], // ID
-									(string)AObjects[1], // Name
-									(string)AObjects[2], // LibraryName
-									(string)AObjects[3], // DisplayName
-									(string)AObjects[4], // Description
-									(string)AObjects[5], // ObjectType
-									(bool)AObjects[6], // IsSystem 
-									(bool)AObjects[7], // IsRemotable
-									(bool)AObjects[8], // IsGenerated
-									(bool)AObjects[9], // IsATObject
-									(bool)AObjects[10], // IsSessionObject
-									(bool)AObjects[11], // IsPersistent
-									(int)AObjects[12], // CatalogObjectID
-									(int)AObjects[13], // ParentObjectID,
-									(int)AObjects[14], // GeneratorObjectID,
-									ALevel, // Level
-									AHeaders.Count + 1 // Sequence
-								)
-							);
-							
-							if (ARecursive)
-								SelectObjectDependents(AObjects, (int)LDependencies[0], ALevel + 1, AHeaders, ARecursive);
-						}
-					}
-				}
-			}
-			finally
-			{
-				CloseCursor(LDependencies);
-			}
-		}
-
-		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
-		{
-			Schema.DependentObjectHeaders LHeaders = new Schema.DependentObjectHeaders();
 			SQLStoreCursor LObjects = OpenCursor("PK_DAEObjects", false);
 			try
 			{
-				SelectObjectDependents(LObjects, AObjectID, 1, LHeaders, ARecursive);
+				if (LObjects.FindKey(new object[] { AObjectID }))
+					return LObjects.Select();
+				return null;
 			}
 			finally
 			{
 				CloseCursor(LObjects);
 			}
-			return LHeaders;
 		}
-		
-		private void SelectObjectDependencies(SQLStoreCursor AObjects, int AObjectID, int ALevel, Schema.DependentObjectHeaders AHeaders, bool ARecursive)
+
+		private void SelectObjectDependents(int AObjectID, int ALevel, Schema.DependentObjectHeaders AHeaders, bool ARecursive)
 		{
-			SQLStoreCursor LDependencies = OpenMatchedCursor("PK_DAEObjectDependencies", false, AObjectID);
+			List<int> LDependencyList = new List<int>();
+			SQLStoreCursor LDependencies = OpenMatchedCursor("IDX_DAEObjectDependencies_Dependency_Object_ID", false, AObjectID);
 			try
 			{
 				while (LDependencies.Next())
-				{
-					if (!AHeaders.Contains((int)LDependencies[1]))
-					{
-						if (AObjects.FindKey(new object[] { LDependencies[1] }))
-						{
-							AHeaders.Add
-							(
-								new Schema.DependentObjectHeader
-								(
-									(int)AObjects[0], // ID
-									(string)AObjects[1], // Name
-									(string)AObjects[2], // LibraryName
-									(string)AObjects[3], // DisplayName
-									(string)AObjects[4], // Description
-									(string)AObjects[5], // ObjectType
-									(bool)AObjects[6], // IsSystem 
-									(bool)AObjects[7], // IsRemotable
-									(bool)AObjects[8], // IsGenerated
-									(bool)AObjects[9], // IsATObject
-									(bool)AObjects[10], // IsSessionObject
-									(bool)AObjects[11], // IsPersistent
-									(int)AObjects[12], // CatalogObjectID
-									(int)AObjects[13], // ParentObjectID,
-									(int)AObjects[14], // GeneratorObjectID,
-									ALevel, // Level
-									AHeaders.Count + 1 // Sequence
-								)
-							);
-							
-							if (ARecursive)
-								SelectObjectDependencies(AObjects, (int)LDependencies[1], ALevel + 1, AHeaders, ARecursive);
-						}
-					}
-				}
+					if (!AHeaders.Contains((int)LDependencies[0]))
+						LDependencyList.Add((int)LDependencies[0]);
 			}
 			finally
 			{
 				CloseCursor(LDependencies);
+			}
+			
+			for (int LDependencyIndex = 0; LDependencyIndex < LDependencyList.Count; LDependencyIndex++)
+			{
+				object[] LObject = SelectObjectRow(LDependencyList[LDependencyIndex]);
+				if (LObject != null)
+				{
+					AHeaders.Add
+					(
+						new Schema.DependentObjectHeader
+						(
+							(int)LObject[0], // ID
+							(string)LObject[1], // Name
+							(string)LObject[2], // LibraryName
+							(string)LObject[3], // DisplayName
+							(string)LObject[4], // Description
+							(string)LObject[5], // ObjectType
+							(bool)LObject[6], // IsSystem 
+							(bool)LObject[7], // IsRemotable
+							(bool)LObject[8], // IsGenerated
+							(bool)LObject[9], // IsATObject
+							(bool)LObject[10], // IsSessionObject
+							(bool)LObject[11], // IsPersistent
+							(int)LObject[12], // CatalogObjectID
+							(int)LObject[13], // ParentObjectID,
+							(int)LObject[14], // GeneratorObjectID,
+							ALevel, // Level
+							AHeaders.Count + 1 // Sequence
+						)
+					);
+					
+					if (ARecursive)
+						SelectObjectDependents(LDependencyList[LDependencyIndex], ALevel + 1, AHeaders, ARecursive);
+				}
+			}
+		}
+		
+		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
+		{
+			Schema.DependentObjectHeaders LHeaders = new Schema.DependentObjectHeaders();
+			SelectObjectDependents(AObjectID, 1, LHeaders, ARecursive);
+			return LHeaders;
+		}
+		
+		private void SelectObjectDependencies(int AObjectID, int ALevel, Schema.DependentObjectHeaders AHeaders, bool ARecursive)
+		{
+			List<int> LDependencyList = new List<int>();
+			SQLStoreCursor LDependencies = OpenMatchedCursor("PK_DAEObjectDependencies", false, AObjectID);
+			try
+			{
+				while (LDependencies.Next())
+					if (!AHeaders.Contains((int)LDependencies[1]))
+						LDependencyList.Add((int)LDependencies[1]);
+			}
+			finally
+			{
+				CloseCursor(LDependencies);
+			}
+			
+			for (int LDependencyIndex = 0; LDependencyIndex < LDependencyList.Count; LDependencyIndex++)
+			{
+				object[] LObject = SelectObjectRow(LDependencyList[LDependencyIndex]);
+				if (LObject != null)
+				{
+					AHeaders.Add
+					(
+						new Schema.DependentObjectHeader
+						(
+							(int)LObject[0], // ID
+							(string)LObject[1], // Name
+							(string)LObject[2], // LibraryName
+							(string)LObject[3], // DisplayName
+							(string)LObject[4], // Description
+							(string)LObject[5], // ObjectType
+							(bool)LObject[6], // IsSystem 
+							(bool)LObject[7], // IsRemotable
+							(bool)LObject[8], // IsGenerated
+							(bool)LObject[9], // IsATObject
+							(bool)LObject[10], // IsSessionObject
+							(bool)LObject[11], // IsPersistent
+							(int)LObject[12], // CatalogObjectID
+							(int)LObject[13], // ParentObjectID,
+							(int)LObject[14], // GeneratorObjectID,
+							ALevel, // Level
+							AHeaders.Count + 1 // Sequence
+						)
+					);
+					
+					if (ARecursive)
+						SelectObjectDependencies(LDependencyList[LDependencyIndex], ALevel + 1, AHeaders, ARecursive);
+				}
 			}
 		}
 
 		public Schema.DependentObjectHeaders SelectObjectDependencies(int AObjectID, bool ARecursive)
 		{
 			Schema.DependentObjectHeaders LHeaders = new Schema.DependentObjectHeaders();
-			SQLStoreCursor LObjects = OpenCursor("PK_DAEObjects", false);
-			try
-			{
-				SelectObjectDependencies(LObjects, AObjectID, 1, LHeaders, ARecursive);
-			}
-			finally
-			{
-				CloseCursor(LObjects);
-			}
+			SelectObjectDependencies(AObjectID, 1, LHeaders, ARecursive);
 			return LHeaders;
 		}
 		

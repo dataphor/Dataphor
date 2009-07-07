@@ -24,6 +24,32 @@ namespace Alphora.Dataphor.DAE.Connection
 			return new SQLiteCommand(this, CreateDbCommand());
 		}
 		
+		protected bool FInReadUncommittedTransaction;
+
+		protected override void InternalBeginTransaction(SQLIsolationLevel AIsolationLevel)
+		{
+			if (AIsolationLevel == SQLIsolationLevel.ReadUncommitted)
+				FInReadUncommittedTransaction = true;
+			else
+				base.InternalBeginTransaction(AIsolationLevel);
+		}
+
+		protected override void InternalCommitTransaction()
+		{
+			if (FInReadUncommittedTransaction)
+				FInReadUncommittedTransaction = false;
+			else
+				base.InternalCommitTransaction();
+		}
+
+		protected override void InternalRollbackTransaction()
+		{
+			if (FInReadUncommittedTransaction)
+				FInReadUncommittedTransaction = false;
+			else
+				base.InternalRollbackTransaction();
+		}
+		
 		protected override bool IsTransactionFailure(Exception AException)
 		{
 			SQLiteException LException = AException as SQLiteException;

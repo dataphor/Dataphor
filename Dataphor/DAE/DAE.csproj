@@ -161,10 +161,15 @@
     <Compile Include="Device.Catalog\CatalogDevice.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Device.Catalog\CatalogDevicePlan.cs" />
+    <Compile Include="Device.Catalog\CatalogDeviceSession.cs" />
+    <Compile Include="Device.Catalog\CatalogDeviceTable.cs" />
     <Compile Include="Device.Catalog\CatalogException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Device.Catalog\CatalogHeader.cs" />
     <Compile Include="Device.Catalog\CatalogStore.cs" />
+    <Compile Include="Device.Catalog\NameResolutionCache.cs" />
     <Compile Include="Device.Memory\MemoryDevice.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -21,28 +21,31 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             LSQLStore.ConnectionString = @"Data Source=E:\Users\Luxspes\Documents\Visual Studio 2008\SqlCE\MyDatabase1.sdf";
             SQLStoreConnection LConnection = LSQLStore.Connect();
             string ATableName = "TableTest";
+            List<string> AColumns = new List<string>();
+            AColumns.Add("ID");
+            AColumns.Add("NAME");
             SQLIndex AIndex = new SQLIndex("PK_TableTest", new[] { new SQLIndexColumn("ID") });
 
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
 
             LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
 
-            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             var LRow = new object[] { 1, "Hi" };
             LCursor.Insert(LRow);
             LCursor.Dispose();
 
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LRow = new object[] { 2, "Bye" };
             LCursor.Insert(LRow);
             LCursor.Dispose();
 
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LCursor.SetRange(null, null);
             LCursor.Dispose();
 
 
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LCursor.Next();
             LCursor.Dispose();
 
@@ -60,33 +63,36 @@ namespace Alphora.Dataphor.DAE.Diagnostics
             LSQLStore.ConnectionString = "Data Source=HUITZILOPOCHTLI;Initial Catalog=Tests;Integrated Security=True;";
             SQLStoreConnection LConnection = LSQLStore.Connect();
             string ATableName = "TableTest";
+            List<string> AColumns = new List<string>();
+            AColumns.Add("ID");
+            AColumns.Add("NAME");
             SQLIndex AIndex = new SQLIndex("PK_TableTest", new[] { new SQLIndexColumn("ID") });
 
             //The table has 2 columns ID (integer) and NAME (nvarchar 50)
 
             LConnection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
 
-            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AIndex, true);            
+            SQLStoreCursor LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);            
             var LRow=new object[]{1,"Hi"};
             LCursor.Insert(LRow);
             LCursor.Dispose();
 
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LRow = new object[] { 2, "Bye" };
             LCursor.Insert(LRow);
             LCursor.Dispose();
             
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LCursor.SetRange(null, null);
             LCursor.Dispose();
             
 
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             LCursor.Next();
             LCursor.Dispose();
 
-            SQLStoreCursor LOtherCursor = LConnection.OpenCursor(ATableName, AIndex, true);
-            LCursor = LConnection.OpenCursor(ATableName, AIndex, true);
+            SQLStoreCursor LOtherCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
+            LCursor = LConnection.OpenCursor(ATableName, AColumns, AIndex, true);
             
             LCursor.SetRange(null,null);
             

@@ -40,6 +40,12 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 		
+		protected bool FSupportsMARS;
+		public bool SupportsMARS { get { return FSupportsMARS; } }
+		
+		protected bool FSupportsUpdatableCursor;
+		public bool SupportsUpdatableCursor { get { return FSupportsUpdatableCursor; } }
+		
 		private bool FInitialized;
 		public bool Initialized { get { return FInitialized; } }
 

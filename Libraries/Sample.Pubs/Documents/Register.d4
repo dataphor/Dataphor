@@ -1,4 +1,4 @@
-﻿//	© Copyright 2000-2008 Alphora
+//	© Copyright 2000-2008 Alphora
 //	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 //
 // Pubs Database Import
@@ -12,7 +12,7 @@
 //
 
 create device Pubs
-	reconciliation { mode = { none }, master = device}
+	reconciliation { mode = { Command }, master = device}
 	class "MSSQLDevice.MSSQLDevice"
 	attributes
 	{

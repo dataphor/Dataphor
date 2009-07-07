@@ -24,6 +24,9 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
 		protected override void InternalInitialize()
 		{
+			FSupportsMARS = true;
+			FSupportsUpdatableCursor = true;
+			
 			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
 			LBuilder.ConnectionString = ConnectionString;
 			if (LBuilder.ContainsKey("Data Source"))

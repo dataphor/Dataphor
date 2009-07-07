@@ -22,7 +22,8 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
 		{
-            // Nothing to do, database creation can be accomplished with external management tools.
+            FSupportsMARS = ConnectionString.ToLower().Contains("multipleactiveresultsets=true");
+            FSupportsUpdatableCursor = false;
 		}
 
 	    public override SQLConnection GetSQLConnection()

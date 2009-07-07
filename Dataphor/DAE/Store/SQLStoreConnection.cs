@@ -26,7 +26,6 @@ using Alphora.Dataphor.DAE.Connection;
 
 namespace Alphora.Dataphor.DAE.Store
 {
-	// TODO: Move timing functionality into the base, not the internals
 	public abstract class SQLStoreConnection : System.Object, IDisposable
 	{
 		protected internal SQLStoreConnection(SQLStore AStore) : base()
@@ -190,21 +189,22 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 		}
 		
-		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, SQLIndex AIndex, bool AIsUpdatable)
+		protected virtual SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
 		{
 			return
 				new SQLStoreCursor
 				(
 					this,
 					ATableName,
+					AColumns,
 					AIndex,
 					AIsUpdatable
 				);
 		}
 		
-		public SQLStoreCursor OpenCursor(string ATableName, SQLIndex AIndex, bool AIsUpdatable)
+		public SQLStoreCursor OpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
 		{
-			return InternalOpenCursor(ATableName, AIndex, AIsUpdatable);
+			return InternalOpenCursor(ATableName, AColumns, AIndex, AIsUpdatable);
 		}
 		
 		private int FTransactionCount = 0;
