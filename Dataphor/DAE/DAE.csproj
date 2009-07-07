@@ -144,11 +144,20 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Connection\ConnectionException.cs" />
+    <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
+    <Compile Include="Connection\DotNetCursor.cs" />
     <Compile Include="Connection\GenericDotNetConnection.cs" />
+    <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
+    <Compile Include="Connection\MSSQLServerCursor.cs" />
+    <Compile Include="Connection\SQLCommand.cs" />
     <Compile Include="Connection\SQLConnection.cs" />
+    <Compile Include="Connection\SQLCursor.cs" />
+    <Compile Include="Connection\SQLParameter.cs" />
+    <Compile Include="Connection\SQLSchema.cs" />
     <Compile Include="Connection\SQLTypes.cs" />
+    <Compile Include="Connection\SQLUtility.cs" />
     <Compile Include="DAEException.cs">
       <SubType>Code</SubType>
     </Compile>

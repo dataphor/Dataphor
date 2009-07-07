@@ -3,13 +3,14 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+
+using Alphora.Dataphor;
+
 namespace Alphora.Dataphor.DAE.Connection
 {
-	using System;
-	using System.IO;
-	
-	using Alphora.Dataphor;
-	
 	public abstract class SQLType {}
 	
 	public class SQLStringType : SQLType
