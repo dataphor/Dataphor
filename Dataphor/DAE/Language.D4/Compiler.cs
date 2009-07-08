@@ -8,6 +8,7 @@
 #define USECONVERSIONPATHCACHE
 #define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
 #define ALLOWPROCESSCONTEXT
+//#define DISALLOWAMBIGUOUSNAMES
 
 using System;
 using System.Text;
@@ -8030,6 +8031,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 			CreateServerStatement LStatement = (CreateServerStatement)AStatement;
 			APlan.CheckRight(Schema.RightNames.CreateServer);
+
 			string LServerName = Schema.Object.Qualify(LStatement.ServerName, APlan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(APlan, AStatement, LServerName);
 			CreateServerNode LNode = new CreateServerNode();
@@ -8039,7 +8041,32 @@ indicative of other problems, a reference will never be attached as an explicit 
 			// TODO: Set ServerLink attributes from MetaData
 			LNode.ServerLink.MetaData = LStatement.MetaData;
 			LNode.ServerLink.IsRemotable = false;
-			return LNode;
+			APlan.PushCreationObject(LNode.ServerLink);
+			try
+			{
+				// Attach a dependency on the CreateServerLinkUserWithEncryptedPassword because it is used in the create script for the object
+				Compiler.ResolveOperatorSpecifier
+				(
+					APlan, 
+					new OperatorSpecifier
+					(
+						"System.CreateServerLinkUserWithEncryptedPassword", 
+						new FormalParameterSpecifier[] 
+						{
+							new FormalParameterSpecifier(Modifier.Const, new ScalarTypeSpecifier("System.String")), 
+							new FormalParameterSpecifier(Modifier.Const, new ScalarTypeSpecifier("System.Name")),
+							new FormalParameterSpecifier(Modifier.Const, new ScalarTypeSpecifier("System.String")),
+							new FormalParameterSpecifier(Modifier.Const, new ScalarTypeSpecifier("System.String"))
+						}
+					), 
+					true
+				);
+				return LNode;
+			}
+			finally
+			{
+				APlan.PopCreationObject();
+			}
 		}
 
 		public static PlanNode CompileCreateDeviceStatement(Plan APlan, Statement AStatement)
@@ -9072,7 +9099,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			DropServerStatement LStatement = (DropServerStatement)AStatement;
 			DropServerNode LNode = new DropServerNode();
 			Schema.Object LObject = ResolveCatalogIdentifier(APlan, LStatement.ObjectName, true);
-			if (!(LObject is Schema.Device))
+			if (!(LObject is Schema.ServerLink))
 				throw new CompilerException(CompilerException.Codes.ServerLinkIdentifierExpected, AStatement);
 			APlan.CheckRight(((Schema.ServerLink)LObject).GetRight(Schema.RightNames.Drop));
 			if (APlan.PlanCatalog.Contains(LObject.Name))

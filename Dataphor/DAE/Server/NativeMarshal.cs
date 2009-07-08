@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				NativeScalarValue LNativeScalar = new NativeScalarValue();
 				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess, LScalar.DataType);
-				LNativeScalar.Value = ADataValue.IsNil ? null : DataValueToNativeValue(AProcess, LScalar);
+				LNativeScalar.Value = ADataValue.IsNil ? null : LScalar.AsNative;
 				return LNativeScalar;
 			}
 			
@@ -353,7 +353,10 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				NativeParam LNativeParam = ANativeParams[LIndex];
 				if ((LNativeParam.Modifier == NativeModifier.Var) || (LNativeParam.Modifier == NativeModifier.Out))
-					LNativeParam.Value = DataValueToNativeValue(AProcess, ADataParams[LIndex].Value);
+				{
+					DataParam LDataParam = ADataParams[LIndex];
+					LNativeParam.Value = (LDataParam.Value == null || LDataParam.Value.IsNil) ? null : LDataParam.Value.AsNative;
+				}
 			}
 		}
 		
@@ -369,7 +372,7 @@ namespace Alphora.Dataphor.DAE.Server
 						Name = LDataParam.Name, 
 						DataTypeName = DataTypeToDataTypeName(AProcess, LDataParam.DataType),
 						Modifier = NativeCLIUtility.ModifierToNativeModifier(LDataParam.Modifier),
-						Value = LDataParam.Value == null ? null : DataValueToNativeValue(AProcess, LDataParam.Value)
+						Value = (LDataParam.Value == null || LDataParam.Value.IsNil) ? null : LDataParam.Value.AsNative
 					};
 			}
 			return LNativeParams;

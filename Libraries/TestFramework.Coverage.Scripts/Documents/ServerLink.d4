@@ -1,0 +1,201 @@
+/*
+	Server Link Test Script
+	
+	Assumes a running default Dataphor instance.
+*/
+
+// Create Default Server Link
+create server Test;
+
+if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+	raise Error("Evaluate On Default Server Link Failed");
+
+drop server Test;
+
+// Basic Server Link
+create server Test tags { HostName = "localhost", InstanceName = "Dataphor" };
+
+if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+	raise Error("Evaluate on Basic Server Link Failed");
+	
+drop server Test;
+
+// Server Link With Use Session Info
+create server Test tags { HostName = "localhost", InstanceName = "Dataphor", UseSessionInfo = "true" };
+
+SetMaxCallDepth(128);
+if (EvaluateOn('Test', 'select Processes[ProcessID()].MaxNestingLevel') as Integer) = 128 then
+	raise Error("Server link with UseSessionInfo failed");
+	
+drop server Test;
+
+// Server Link With Session Info
+create server Test tags { HostName = "localhost", InstanceName = "Dataphor", DefaultMaxCallDepth = "128" };
+
+if (EvaluateOn('Test', 'select Processes[ProcessID()].MaxNestingLevel') as Integer) <> 128 then
+	raise Error("Server link with Session Info failed");
+	
+drop server Test;
+
+// Server Link With Default User
+CreateUser('TestUser', 'Test User', '');
+create server Test;
+CreateServerLinkUser('', 'Test', 'Admin', '');
+ExecuteAs
+(
+	"
+		if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+			raise Error('Server Link With Default User Failed');
+	",
+	'TestUser',
+	''
+);
+
+drop server Test;
+DropUser('TestUser');
+
+// Server Link With User Credentials
+CreateUser('TestUser', 'Test User', '');
+create server Test;
+CreateServerLinkUser('TestUser', 'Test', 'Admin', '');
+ExecuteAs
+(
+	"
+		if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+			raise Error('Server Link With User Credentials Failed');
+	",
+	'TestUser',
+	''
+);
+
+drop server Test;
+DropUser('TestUser');
+
+// Alter Server Link
+create server Test tags { HostName = "NONE", InstanceName = "NONE" };
+alter server Test alter tags { alter HostName = "localhost", alter InstanceName = "Dataphor" };
+if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+	raise Error('Alter Server Link Failed');
+drop server Test;
+
+// ExecuteOn/EvaluateOn
+create server Test;
+ExecuteOn('Test', 'create table IsCool { IsCool : Boolean };');
+ExecuteOn('Test', 'insert row { true IsCool } into IsCool;');
+if not (EvaluateOn('Test', 'select IsCool') as table { IsCool : Boolean })[].IsCool then
+	raise Error('ExecuteOn failed');
+ExecuteOn('Test', 'drop table IsCool;');
+drop server Test;
+
+// ExecuteOn/EvaluateOn w/ In Params
+create server Test;
+ExecuteOn('Test', 'create table IsCool { IsCool : Boolean };');
+ExecuteOn('Test', 'insert row { AIsCool IsCool } into IsCool;', row { true AIsCool });
+if not (EvaluateOn('Test', 'select IsCool where IsCool = AIsCool', row { true AIsCool }) as table { IsCool : Boolean })[].IsCool then
+	raise Error('EvaluateOn w/ In Params failed');
+ExecuteOn('Test', 'drop table IsCool;');
+drop server Test;
+
+// ExecuteOn/EvaluateOn w/ In/Out Params
+create server Test;
+begin
+	var LOutRow := row { nil as Boolean AIsReallyCool };
+	ExecuteOn('Test', 'AIsReallyCool := AIsCool;', row { false AIsCool }, var LOutRow);
+	if not LOutRow.AIsReallyCool then
+		raise Error("ExecuteOn w/ In/Out Params failed");
+end;
+
+ExecuteOn
+(
+	'Test',
+	"
+		create operator TestIsCool(const AIsCool : Boolean, var AIsReallyCool : Boolean) : Boolean
+		begin
+			AIsReallyCool := AIsCool;
+			result := AIsReallyCool;
+		end;
+	"
+);
+
+begin
+	var LOutRow := row { nil as Boolean AIsReallyCool };
+	if not (EvaluateOn('Test', 'select TestIsCool(AIsCool, var AIsReallyCool)', row { true AIsCool }, var LOutRow) as Boolean) then
+		raise Error("EvaluateOn w/ In/Out Params failed");
+	if not LOutRow.AIsReallyCool then
+		raise Error("EvaluateOn w/ In/Out Params failed");
+end;
+
+ExecuteOn('Test', 'drop operator TestIsCool(Boolean, var Boolean)');
+drop server Test;
+
+// ServerLinks
+create server Test;
+if not exists (ServerLinks where Name = LibraryName() + '.Test') then
+	raise Error("ServerLinks did not contain the server Test");
+alter server Test alter tags { create HostName = "TEST" };
+if ServerLinks[LibraryName() + ".Test"].HostName <> "TEST" then
+	raise Error("ServerLinks did not contain the correct HostName after an alter");
+drop server Test;
+if exists (ServerLinks where Name = LibraryName() + '.Test') then
+	raise Error("ServerLinks did not refresh after a drop");
+	
+// ServerLinkUsers
+// CreateServerLinkUser
+// CreateServerLinkUserWithEncryptedPassword
+// SetServerLinkUserID
+// SetServerLinkUserPassword
+// ChangeServerLinkUserPassword
+// DropServerLinkUser
+// ServerLinkUserExists
+create server Test;
+CreateUser('TestUser', 'Test User', '');
+CreateServerLinkUser('TestUser', 'Test', 'Admin', '');
+if not exists (ServerLinkUsers where User_ID = 'TestUser' and ServerLink_Name = LibraryName() + '.Test') then
+	raise Error("CreateServerLinkUser failed");
+DropServerLinkUser('TestUser', 'Test');
+if ServerLinkUserExists('TestUser', 'Test') then
+	raise Error("DropServerLinkUser failed");
+ExecuteOn('Test', "CreateUser('TestUser', 'Test User', 'secret');");
+CreateServerLinkUserWithEncryptedPassword('TestUser', 'Test', 'TestUser', EncryptPassword("secret"));
+ExecuteAs
+(
+	"
+		if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+			raise Error('CreateServerLinkUserWithEncryptedPassword failed');
+	",
+	'TestUser',
+	''
+);
+SetServerLinkUserID('TestUser', 'Test', 'TestUser');
+SetServerLinkUserPassword('TestUser', 'Test', 'secret');
+ExecuteAs
+(
+	"
+		if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+			raise Error('SetServerLinkUserID/Password failed');
+	",
+	'TestUser',
+	''
+);
+ExecuteOn('Test', "SetPassword('TestUser', 'reallysecret')");
+ExecuteAs("ChangeServerLinkUserPassword('Test', 'secret', 'reallysecret');", 'TestUser', '');
+ExecuteAs
+(
+	"
+		if (EvaluateOn('Test', 'select Count(TableDee)') as Integer) <> 1 then
+			raise Error('ChangeServerLinkUserPassword failed');
+	",
+	'TestUser',
+	''
+);
+
+ExecuteOn('Test', 'DropUser("TestUser");');
+DropUser('TestUser');
+drop server Test;
+
+// RemoteSessions
+create server Test;
+ExecuteOn('Test', 'GC.Collect();');
+if not exists (RemoteSessions where Process_ID = ProcessID() and ServerLink_Name = LibraryName() + '.Test') then
+	raise Error("RemoteSessions failed");
+drop server Test;

@@ -4,6 +4,10 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+//#define TRACEEVENTS // Enable this to turn on tracing
+#define ALLOWPROCESSCONTEXT
+#define LOADFROMLIBRARIES
+
 using System;
 using System.Collections.Generic;
 using System.Text;

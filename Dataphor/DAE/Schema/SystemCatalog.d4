@@ -730,7 +730,7 @@ begin
     create operator SetServerLinkUserPassword(AUserID : String, AServerLinkName : System.Name, APassword : String) class "System.SystemSetServerLinkUserPasswordNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
     create operator ChangeServerLinkUserPassword(AServerLinkName : System.Name, AOldPassword : String, APassword : String) class "System.SystemChangeServerLinkUserPasswordNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
     create operator DropServerLinkUser(AUserID : String, AServerLinkName : System.Name) class "System.SystemDropServerLinkUserNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-    create operator ServerUserExists(AUserID : String, AServerLinkName : System.Name) : Boolean class "System.SystemServerUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
+    create operator ServerLinkUserExists(AUserID : String, AServerLinkName : System.Name) : Boolean class "System.SystemServerLinkUserExistsNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
 	create operator CloseSession(const ASessionID : Integer) class "System.SystemCloseSessionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator StartProcess() : Integer class "System.SystemStartProcessNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator StopProcess(const AProcessID : Integer) class "System.SystemStopProcessNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
@@ -1980,6 +1980,7 @@ begin
 	grant usage on Change(cursor, row, var row, String) to role User;                                                                    
 	grant usage on ChangeDeviceUserPassword(Name, String, String) to role User;                                            
 	grant usage on ChangePassword(String, String) to role User;                                                                   
+	grant usage on ChangeServerLinkUserPassword(Name, String, String) to role User;
 	grant usage on Clear(var list) to role User;                                                                                                
 	grant usage on Close(cursor) to role User;                                                                                                  
 	grant usage on CommitApplicationTransaction(Guid) to role User;                                                                      
@@ -1996,6 +1997,8 @@ begin
 	grant usage on Count(Scalar) to role User;                                                                                           
 	grant usage on CountOf(String, String) to role User;                                                                          
 	grant usage on CreateGenerators() to role User;                                                                                             
+	grant usage on CreateServerLinkUser(String, Name, String, String) to role CatalogUser;
+	grant usage on CreateServerLinkUserWithEncryptedPassword(String, Name, String, String) to role CatalogUser;
 	grant usage on Date() to role User;                                                                                                         
 	grant usage on DatePart(DateTime) to role User;                                                                                      
 	grant usage on DateTime() to role User;                                                                                                     
@@ -2016,6 +2019,7 @@ begin
 	grant usage on DependentObjects(Name, Boolean) to role CatalogUser;                                                                  
 	grant usage on DerivationTimeStamp() to role User;                                                                                          
 	grant usage on DeviceUserExists(UserID, Name) to role CatalogUser;                                                                   
+	grant usage on DropServerLinkUser(String, Name) to role CatalogUser;
 	grant usage on Duration(TimeSpan) to role User;                                                                                      
 	grant usage on EncryptString(String) to role User;
 	grant usage on EndsWith(String, String) to role User;                                                                         
@@ -2034,6 +2038,9 @@ begin
 	grant usage on Evaluate(String) to role User;                                                                                        
 	grant usage on Evaluate(String, row) to role User;                                                                                   
 	grant usage on Evaluate(String, row, var row) to role User;                                                                          
+	grant usage on EvaluateOn(Name, String) to role User;
+	grant usage on EvaluateOn(Name, String, row) to role User;
+	grant usage on EvaluateOn(Name, String, row, var row) to role User;
 	grant usage on Execute(Integer, String) to role User;                                                                         
 	grant usage on Execute(Integer, String, row) to role User;                                                                    
 	grant usage on Execute(Integer, String, row, var row) to role User;                                                           
@@ -2048,6 +2055,9 @@ begin
 	grant usage on ExecuteAsync(String, row, var row) to role User;                                                                      
 	grant usage on ExecuteMultiple(String, Integer) to role User;                                                                 
 	grant usage on ExecuteMultiple(String, Integer, String, String) to role User;                                   
+	grant usage on ExecuteOn(Name, String) to role User;
+	grant usage on ExecuteOn(Name, String, row) to role User;
+	grant usage on ExecuteOn(Name, String, row, var row) to role User;
 	grant usage on ExecuteWithTimeout(Integer, String, Integer) to role User;                                              
 	grant usage on ExecuteWithTimeout(Integer, String, Integer, row) to role User;                                         
 	grant usage on ExecuteWithTimeout(Integer, String, Integer, row, var row) to role User;                                
@@ -2505,6 +2515,7 @@ begin
 	grant usage on ScriptLibrary(Name) to role CatalogUser;                                                                                     
 	grant usage on Select(cursor) to role User;                                                                                                 
 	grant usage on ServerName() to role User;                                                                                                   
+	grant usage on ServerLinkUserExists(String, Name) to role CatalogUser;
 	grant usage on SessionID() to role User;                                                                                                    
 	grant usage on SetDefaultIsolationLevel(String) to role User;                                                                        
 	grant usage on SetDefaultMaxCallDepth(Integer) to role User;                                                                         
@@ -2515,6 +2526,8 @@ begin
 	grant usage on SetLibrary(Name) to role User;                                                                                        
 	grant usage on SetMaxCallDepth(Integer) to role User;                                                                                
 	grant usage on SetMaxStackDepth(Integer) to role User;                                                                               
+	grant usage on SetServerLinkUserID(String, Name, String) to role CatalogUser;
+	grant usage on SetServerLinkUserPassword(String, Name, String) to role CatalogUser;
 	grant usage on SetUseImplicitTransactions(Boolean) to role User;                                                                     
 	grant usage on SetUserName(UserID, String) to role User;
 	grant usage on Sleep(Integer) to role User;                                                                                          

@@ -171,7 +171,8 @@
 				<Key word="select" />         
 				<Key word="selector" />
 				<Key word="sequence" />       
-				<Key word="session" />       
+				<Key word="session" />
+				<Key word="server" />
 				<Key word="set" />            
 				<Key word="sort" />           
 				<Key word="source" />           

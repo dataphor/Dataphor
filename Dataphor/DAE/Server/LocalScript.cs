@@ -4,6 +4,9 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define USESPINLOCK
+#define LOGFILECACHEEVENTS
+
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1913,15 +1913,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.ServerLink LServerLink = (Schema.ServerLink)LObject;
 			
 			// TODO: Prevent drop if user has active sessions on this server?
-				
-			LServerLink.Users.Remove(LServerLink.Users[LUserID]);
+			
+			if (!LServerLink.Users.ContainsKey(LUserID))
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ServerLinkUserNotFound, LUserID);
+
+			LServerLink.Users.Remove(LUserID);
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServerLink);
 			return null;
 		}
     }
     
-    /// <remarks>operator ServerUserExists(AUserID : string, AServerLinkName : System.Name) : Boolean;</remarks>
-    public class SystemServerUserExistsNode : InstructionNode
+    /// <remarks>operator ServerLinkUserExists(AUserID : string, AServerLinkName : System.Name) : Boolean;</remarks>
+    public class SystemServerLinkUserExistsNode : InstructionNode
     {
 		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
 		{

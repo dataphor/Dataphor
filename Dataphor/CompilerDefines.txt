@@ -1,6 +1,7 @@
-#define ALLOWPROCESSCONTEXT in Alphora.Dataphor.DAE // ??
+#define ALLOWPROCESSCONTEXT in Alphora.Dataphor.DAE // Enables batch-level scoping for scripts in the Dataphor Server (e.g. var L : Integer; L := 5; does not have to be in a block)
 #define AUTOUPGRADELIBRARIES in Alphora.Dataphor.DAE to have the Dataphor server automatically apply any pending upgrades on startup
 #define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
+//#define DISALLOWAMBIGUOUSNAMES in Alphora.Dataphor.DAE (currently disabled) // To prevent the compiler from allowing ambiguous names to be defined
 //#define DISALLOWMANYTOMANYOUTERJOINS in Alphora.Dataphor.DAE // Disables support for many to many outer joins
 #define INVERTEXCEPTIONDESCRIPTIONS in Alphora.Dataphor.Base to display error messages beginning with the innermost exception
 #define LOADFROMLIBRARIES in Alphora.Dataphor.DAE // Enables in-place library loading, instead of copying assemblies in to the bin directory
