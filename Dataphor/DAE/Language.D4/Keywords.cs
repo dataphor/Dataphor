@@ -207,11 +207,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public const string Write = "write";                   
 		public const string Xor = "xor";                       
         
-        #if OnExpression
-        public const string Server = "server";
-        public const string Link = "link";
-        public const string URI = "URI";
-        #endif
         #if VirtualSupport
         public const string Abstract = "abstract";
         public const string Virtual = "virtual";

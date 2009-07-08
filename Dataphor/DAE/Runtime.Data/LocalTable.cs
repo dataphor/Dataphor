@@ -22,6 +22,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class LocalTable : Table
     {
+		public LocalTable(TableNode ATableNode, ServerProcess AProcess, TableValue ATableValue) : base(ATableNode, AProcess)
+		{
+			FNativeTable = (NativeTable)ATableValue.AsNative;
+			FKey = new Schema.Order(FNativeTable.TableVar.FindClusteringKey(), AProcess.Plan);
+		}
+		
 		public LocalTable(TableNode ATableNode, ServerProcess AProcess) : base(ATableNode, AProcess)
 		{
 			FNativeTable = new NativeTable(AProcess, ATableNode.TableVar);

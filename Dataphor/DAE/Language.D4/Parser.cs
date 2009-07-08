@@ -492,9 +492,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 case Keywords.Group:
                 case Keywords.Return:
                 case Keywords.Explode:
-                #if OnExpression
                 case Keywords.On:
-                #endif
                 case Keywords.Adorn:
                 case Keywords.Redefine:
                 case Keywords.Union:
@@ -534,9 +532,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 case Keywords.Group:
                 case Keywords.Return:
                 case Keywords.Explode:
-                #if OnExpression
                 case Keywords.On:
-                #endif
                 case Keywords.Adorn:
                 case Keywords.Redefine: return true;
             }
@@ -583,7 +579,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				<join clause> |
 				<having clause> |
 				<without clause> |
-				<outer join clause>
+				<outer join clause> |
+				<on clause>
 		*/
         protected Expression Expression()
         {
@@ -601,9 +598,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                     case Keywords.Group: LExpression = AggregateClause(LExpression); break;
                     case Keywords.Return: LExpression = QuotaClause(LExpression); break;
                     case Keywords.Explode: LExpression = ExplodeClause(LExpression); break;
-                    #if OnExpression
                     case Keywords.On: LExpression = OnClause(LExpression); break;
-                    #endif
                     case Keywords.Adorn: LExpression = AdornClause(LExpression); break;
                     case Keywords.Redefine: LExpression = RedefineClause(LExpression); break;
                     case Keywords.Union: LExpression = UnionClause(LExpression); break;
@@ -1849,6 +1844,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<cursor definition> ::=
 				<expression> [<order clause> | <browse clause>] [<cursor capabilities>] [<cursor isolation>] [<cursor type>]
 		*/
+		// TODO: Should the on clause be put in here too?
 		//<expression> [<order clause> | <browse clause>] [<on clause>] [<cursor capabilities>] [<cursor isolation>] [<cursor type>]
 		protected CursorDefinition CursorDefinition()
 		{
@@ -1861,11 +1857,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.Order: LExpression = OrderClause(LExpression); break;
 				case Keywords.Browse: LExpression = BrowseClause(LExpression); break;
 			}
-			
-			#if OnExpression
+
+			/*
 			if (FLexer.PeekTokenSymbol(1) == Keywords.On)
 				LExpression = OnClause(LExpression);
-			#endif
+			*/
 				
 			LCursorDefinition.Expression = LExpression;
 
@@ -2482,7 +2478,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
             return LExplodeExpression;
         }
 
-		#if OnExpression
 		/* 
 			BNF:
             <on clause> ::=
@@ -2497,7 +2492,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
             LOnExpression.ServerName = QualifiedIdentifier();
             return LOnExpression;
         }
-		#endif
 
 		protected IsExpression IsClause(Expression AExpression)
         {
@@ -5121,9 +5115,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 			<server link name> ::=
 				<qualified identifier>
-
-			<server URI> ::=
-				<string>
 		*/        
         protected CreateServerStatement CreateServerStatement()
         {

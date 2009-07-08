@@ -28,9 +28,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string Browse = "iBrowse";
         public const string Quota = "iQuota";
         public const string Explode = "iExplode";
-        #if OnExpression
         public const string On = "iOn";
-        #endif
         public const string Adorn = "iAdorn";
         public const string Redefine = "iRedefine";
         public const string Union = "iUnion";
@@ -98,11 +96,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public const string CreateAggregateOperator = "iCreateAggregateOperator";
         public const string CreateReference = "iCreateReference";
         public const string CreateConstraint = "iCreateConstraint";
-        #if OnExpression
         public const string CreateServer = "iCreateServer";
         public const string AlterServer = "iAlterServer";
         public const string DropServer = "iDropServer";
-        #endif
         public const string CreateDevice = "iCreateDevice";
         public const string AlterTable = "iAlterTable";
         public const string AlterView = "iAlterView";

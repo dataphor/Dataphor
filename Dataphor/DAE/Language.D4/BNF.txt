@@ -64,10 +64,10 @@ The same conventions found in the The Third Manifesto are used here, namely:
 		<try commit statement> |
 		<raise statement>
 
-          <select statement> ::=
-              select <cursor definition>
+	<select statement> ::=
+		select <cursor definition>
 
-          <expression> ::= 
+	<expression> ::= 
 		<modified expression term> <table operator clause list>
 
 	<table operator clause> ::=
@@ -88,10 +88,10 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<modified expression term> ::=
 		<expression term> [<language modifiers>]
 
-          <expression term> ::= 
-              <logical and expression> <logical or type operator clause list>
+	<expression term> ::= 
+		<logical and expression> <logical or type operator clause list>
 
-          <logical or type operator clause> ::=
+	<logical or type operator clause> ::=
 		<logical ternary clause> |
 		<logical binary clause> |
 		<type operator clause>
@@ -102,13 +102,13 @@ The same conventions found in the The Third Manifesto are used here, namely:
 	<logical ternary operator> ::=
 		between
 
-          <logical binary clause> ::=
+	<logical binary clause> ::=
 		<logical binary operator> <logical and expression>
 
-          <logical binary operator> ::=
-              in | or | xor | like | matches
+	<logical binary operator> ::=
+		in | or | xor | like | matches
 
-          <type operator clause> ::=
+	<type operator clause> ::=
 		<type operator> <type specifier>
 
 	<type operator> ::=

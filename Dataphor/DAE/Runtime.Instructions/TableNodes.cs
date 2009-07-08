@@ -2412,7 +2412,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	#if OnExpression
 	// operator iOn(object)	: table{}
 	public class OnNode : TableNode
 	{
@@ -2441,6 +2440,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void DetermineDataType(Plan APlan)
 		{
+			DetermineModifiers(APlan);
+			
 			// OnNode data type is copied, not reference because the plan is volatile.
 			Schema.Object LObject = Compiler.ResolveCatalogIdentifier(APlan, FOnExpression.ServerName);
 			if (LObject == null)
@@ -2450,60 +2451,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new CompilerException(CompilerException.Codes.ServerLinkExpected, FOnExpression);
 				
 			FServerLink = (Schema.ServerLink)LObject;
-			CursorSelectorExpression LExpression = new CursorSelectorExpression(new CursorDefinition(FOnExpression.Expression));
-			LExpression.CursorDefinition.Isolation = APlan.CursorContext.CursorIsolation;
-			LExpression.CursorDefinition.Capabilities = APlan.CursorContext.CursorCapabilities;
-			LExpression.CursorDefinition.CursorType = APlan.CursorContext.CursorType;
-			FExpression = new D4TextEmitter().Emit(LExpression);
 			
-			IServerExpressionPlan LPlan = APlan.ServerProcess.ServerSession.RemoteConnect(FServerLink).GetPlan(this).RemoteServerPlan;
-			
-			if (!(LPlan.DataType is Schema.TableType))
-				throw new CompilerException(CompilerException.Codes.TableExpressionExpected, FOnExpression.Expression);
+			CursorDefinition LCursorDefinition = FOnExpression.Expression as CursorDefinition;
+			if (LCursorDefinition == null)
+				LCursorDefinition = new CursorDefinition(FOnExpression.Expression);
+			FExpression = new D4TextEmitter().Emit(new SelectStatement(LCursorDefinition));
+			Schema.TableVar LTableVar = APlan.ServerProcess.RemoteConnect(FServerLink).PrepareTableVar(FExpression, new DataParams());
 			
 			FDataType = new Schema.TableType();
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
-			CopyMetaData(LPlan.DataType.MetaData);
-			CopyColumns(((Schema.TableType)LPlan.DataType).Columns);
-			DataType.DetermineRemotable();
-			CopyKeys(((Schema.TableType)LPlan.DataType).Keys);
-			CopyOrders(((Schema.TableType)LPlan.DataType).Orders);
-			// References are not derived through an on node...
-			//CopySourceReferences(((Schema.TableType)LPlan.DataType).SourceReferences);
-			//CopyTargetReferences(((Schema.TableType)LPlan.DataType).TargetReferences);
-			if (((Schema.TableType)LPlan.DataType).Order != null)
-				DataType.Order = CopyOrder(((Schema.TableType)LPlan.DataType).Order);
+			FTableVar.InheritMetaData(LTableVar.MetaData);
+			CopyTableVarColumns(LTableVar.Columns);
+			CopyKeys(LTableVar.Keys);
+			CopyOrders(LTableVar.Orders);
+			FTableVar.IsRemotable = false;
 		}
 		
 		public override void DetermineDevice(Plan APlan)
 		{
-			DetermineCharacteristics(APlan);
 			FNoDevice = true;
 		}
 
-		public override void DetermineCursorBehavior(Plan APlan)
-		{
-			IServerExpressionPlan LPlan = APlan.ServerProcess.ServerSession.RemoteConnect(FServerLink).GetPlan(this).RemoteServerPlan;
-			FCursorType = LPlan.CursorType;
-			FRequestedCursorType = APlan.CursorContext.CursorType;
-			FCursorCapabilities = LPlan.Capabilities;
-			FCursorIsolation = LPlan.Isolation;
-		}
-		
 		public override Statement EmitStatement(EmitMode AMode)
 		{
-			OnExpression LExpression = new OnExpression();
-			IServerExpressionPlan LPlan = ((Plan)APlan).RemoteSessions[this].RemotePlan;
-			LExpression.Expression = LPlan.EmitStatement(AMode);
-			LExpression.ServerName = FServerLink.Name;
-			LExpression.Modifiers = Modifiers;
-			return LExpression;
+			return FOnExpression;
 		}
 		
 		public override DataVar InternalExecute(ServerProcess AProcess)
 		{
-			OnTable LTable = new OnTable(this, AProcess);
+			LocalTable LTable = new LocalTable(this, AProcess, (TableValue)AProcess.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()).Value);
 			try
 			{
 				LTable.Open();
@@ -2515,114 +2492,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw;
 			}
 		}
-
-		protected override bool InternalDefault(Row ARow, string AColumnName, ServerProcess AProcess, bool AIsDescending)
-		{
-			return AProcess.ServerSession.RemoteConnect(FServerLink).GetPlan(this).RemoteCursor.Default(ARow, AColumnName);
-		}
-		
-		protected override bool InternalChange(Row ARow, string AColumnName, ServerProcess AProcess)
-		{
-			return AProcess.ServerSession.RemoteConnect(FServerLink).GetPlan(this).RemoteCursor.Change(ARow, AColumnName);
-		}
-		
-		protected override bool InternalValidate(Row ARow, string AColumnName, ServerProcess AProcess)
-		{
-			AProcess.ServerSession.RemoteConnect(FServerLink).GetPlan(this).RemoteCursor.Validate(ARow, AColumnName);
-		}
-		
-		protected override void InternalBeforeInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalExecuteInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalBeforeDeviceInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterDeviceInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalPrepareDeviceInsert(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalUnprepareDeviceInsert(ServerProcess AProcess)
-		{
-		}
-
-		protected override void InternalBeforeUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalExecuteUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalBeforeDeviceUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterDeviceUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalPrepareDeviceUpdate(Row AOldRow, Row ANewRow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalUnprepareDeviceUpdate(ServerProcess AProcess)
-		{
-		}
-
-		protected override void InternalBeforeDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalExecuteDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalBeforeDeviceDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalAfterDeviceDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalPrepareDeviceDelete(Row ARow, ServerProcess AProcess)
-		{
-		}
-		
-		protected override void InternalUnprepareDeviceDelete(ServerProcess AProcess)
-		{
-		}
-		
-		public override object Clone()
-		{
-			OnNode LNode = (OnNode)base.Clone();
-			LNode.ServerLink = FServerLink;
-			return LNode;
-		}
 	}
-	#endif
 	
 	public abstract class BinaryTableNode : TableNode
 	{

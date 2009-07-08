@@ -2,7 +2,8 @@
 #define AUTOUPGRADELIBRARIES in Alphora.Dataphor.DAE to have the Dataphor server automatically apply any pending upgrades on startup
 #define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
 //#define DISALLOWAMBIGUOUSNAMES in Alphora.Dataphor.DAE (currently disabled) // To prevent the compiler from allowing ambiguous names to be defined
-//#define DISALLOWMANYTOMANYOUTERJOINS in Alphora.Dataphor.DAE // Disables support for many to many outer joins
+//#define DISALLOWMANYTOMANYOUTERJOINS in Alphora.Dataphor.DAE (currently disabled) // Disables support for many to many outer joins
+//#define ENFORCERESTRICTIONPREDICATE in Alphora.Dataphor.DAE (currently disabled) // Performs restriction predicate checking by default
 #define INVERTEXCEPTIONDESCRIPTIONS in Alphora.Dataphor.Base to display error messages beginning with the innermost exception
 #define LOADFROMLIBRARIES in Alphora.Dataphor.DAE // Enables in-place library loading, instead of copying assemblies in to the bin directory
 #define LOGDDLINSTRUCTIONS in Alphora.Dataphor.DAE to have the catalog log DDL as part of the transaction (should not be turned off)

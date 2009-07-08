@@ -4,6 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 #define UseReferenceDerivation
+//#define ENFORCERESTRICTIONPREDICATE
 	
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {

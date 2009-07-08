@@ -147,6 +147,15 @@ namespace Alphora.Dataphor.DAE.Server
 			DataValue LDataValue = NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
 			return new DataVar(LDataValue.DataType, LDataValue);
 		}
+		
+		public Schema.TableVar PrepareTableVar(string AExpression, DataParams AParams)
+		{
+			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
+			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams, NativeExecutionOptions.SchemaOnly);
+			if (LResult.Value is NativeTableValue)
+				return NativeMarshal.NativeTableToTableVar(FServerProcess, (NativeTableValue)LResult.Value);
+			throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
+		}
     }
     
 	public class RemoteSessions : DisposableTypedList

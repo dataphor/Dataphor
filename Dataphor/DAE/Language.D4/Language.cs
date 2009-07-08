@@ -437,7 +437,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
         }
     }
 
-	#if OnExpression    
     public class OnExpression : Expression
     {		
 		public OnExpression() : base(){}
@@ -463,7 +462,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
             set { FServerName = value == null ? String.Empty : value; }
         }
     }
-    #endif
     
     public class AsExpression : Expression
     {

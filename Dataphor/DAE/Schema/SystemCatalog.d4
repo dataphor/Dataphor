@@ -369,6 +369,7 @@ begin
 	create operator iRightJoin(ALeftTable : table, ARightTable : table) : table class "System.RightOuterJoinNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iHaving(ALeftTable : table, ARightTable : table) : table class "System.HavingNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iWithout(ALeftTable : table, ARightTable : table) : table class "System.WithoutNode" static tags { DAE.IsBuiltin = "True" };
+	create operator iOn() : table class "System.OnNode" static tags { DAE.IsBuiltin = "True" };
 	create operator iIndexer(const AValue : String, const AIndex : Integer) : String class "System.StringIndexerNode" static tags { DAE.IsBuiltin = "True" };
 	create operator Length(const ABinary : Binary) : Long class "System.BinaryLengthNode";
 	create operator Length(const AGraphic : Graphic) : Long class "System.BinaryLengthNode";
@@ -2303,6 +2304,7 @@ begin
 	grant usage on Insert(String, Integer, String) to role User;                                                           
 	grant usage on Insert(var list, generic, Integer) to role User;                                                               
 	grant usage on InTransaction() to role User;                                                                                                
+	grant usage on iOn() to role User;                                                                            
 	grant usage on iOr(Boolean, Boolean) to role User;                                                                            
 	grant usage on iOrder(table) to role User;                                                                                                  
 	grant usage on iPower(Decimal, Decimal) to role User;                                                                         

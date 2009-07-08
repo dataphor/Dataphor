@@ -199,3 +199,8 @@ ExecuteOn('Test', 'GC.Collect();');
 if not exists (RemoteSessions where Process_ID = ProcessID() and ServerLink_Name = LibraryName() + '.Test') then
 	raise Error("RemoteSessions failed");
 drop server Test;
+
+// On Expression
+create server Test;
+select Devices on Test;
+drop server Test;

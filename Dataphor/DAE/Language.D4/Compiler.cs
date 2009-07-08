@@ -9903,9 +9903,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						case "D4IndexerExpression": LResult = CompileIndexerExpression(APlan, (D4IndexerExpression)AExpression); break;
 						case "IfExpression": LResult = CompileIfExpression(APlan, (IfExpression)AExpression); break;
 						case "CaseExpression": LResult = CompileCaseExpression(APlan, (CaseExpression)AExpression); break;
-						#if OnExpression
 						case "OnExpression": LResult = CompileOnExpression(APlan, (OnExpression)AExpression); break;
-						#endif
 						case "RenameAllExpression": LResult = CompileRenameAllExpression(APlan, (RenameAllExpression)AExpression); break;
 						case "IsExpression": LResult = CompileIsExpression(APlan, (IsExpression)AExpression); break;
 						case "AsExpression": LResult = CompileAsExpression(APlan, (AsExpression)AExpression); break;
@@ -13541,16 +13539,14 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return EmitRedefineNode(APlan, AExpression, LSourceNode, AExpression.Expressions);
 		}
 
-		#if OnExpression
 		public static PlanNode CompileOnExpression(Plan APlan, OnExpression AExpression)
 		{
-			OnNode LNode = (OnNode)FindCallNode(APlan, Instructions.On, new PlanNode[]{});
+			OnNode LNode = (OnNode)FindCallNode(APlan, AExpression, Instructions.On, new PlanNode[]{});
 			LNode.OnExpression = AExpression;
 			LNode.DetermineDataType(APlan);
 			LNode.DetermineCharacteristics(APlan);
 			return LNode;
 		}
-		#endif
 		
 		public static PlanNode EmitUnionNode(Plan APlan, Statement AStatement, PlanNode ALeftNode, PlanNode ARightNode)
 		{

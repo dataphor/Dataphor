@@ -250,13 +250,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitRedefineExpression((RedefineExpression)AExpression);
 				LEmitModifiers = false;
 			}
-			#if OnExpression
 			else if (AExpression is OnExpression)
 			{
 				EmitOnExpression((OnExpression)AExpression);
 				LEmitModifiers = false;
 			}
-			#endif
 			else if (AExpression is RenameAllExpression)
 			{
 				EmitRenameAllExpression((RenameAllExpression)AExpression);
@@ -629,7 +627,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			EmitExpression(AExpression.Expression);
 		}
 		
-		#if OnExpression
 		protected virtual void EmitOnExpression(OnExpression AExpression)
 		{
 			Append(Keywords.BeginGroup);
@@ -648,7 +645,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			EmitLanguageModifiers(AExpression);
 			Append(Keywords.EndGroup);
 		}
-		#endif
 		
 		protected virtual void EmitRenameAllExpression(RenameAllExpression AExpression)
 		{
