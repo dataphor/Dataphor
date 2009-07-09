@@ -252,7 +252,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 				using (Microsoft.Win32.RegistryKey LRegKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(CAppAutoStartRegKeyName, true))
 				{
 					if (AppAutoStart.Checked)
-						LRegKey.SetValue(CAppAutoStartRegValueName, Application.ExecutablePath + " " + ApplicationForm.CSilentMode);
+                        LRegKey.SetValue(CAppAutoStartRegValueName, Application.ExecutablePath + " " + Program.SilentMode);
 					else
 						LRegKey.DeleteValue(CAppAutoStartRegValueName, false);
 				}

@@ -10,7 +10,16 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
     public class Program
     {
 
-        public const string FCSilentMode = @"/s";
+        private static string SFSilentMode = @"/s";
+
+        public static string SilentMode
+        {
+            get
+            {
+                return SFSilentMode;
+            }
+
+        }
 
         [STAThread]
         static void Main(string[] AArgs)
@@ -23,11 +32,11 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
             if (LProcesses.Length <= 1)
             {
                 ApplicationForm LAppForm;
-                if ((AArgs.Length > 0) && (AArgs[0] == FCSilentMode))
+                if ((AArgs.Length > 0) && (AArgs[0] == SFSilentMode))
                     LAppForm = new ApplicationForm(true);
                 else
                     LAppForm = new ApplicationForm(false);
-                Application.Run();
+                Application.Run(LAppForm);
             }
         }
 
