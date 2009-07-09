@@ -21,34 +21,27 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 	[DesignerSerializer(typeof(Alphora.Dataphor.DAE.Client.Design.ActiveLastSerializer), typeof(CodeDomSerializer))]
 	public class DAEConnection : DbConnection, ICloneable
 	{
-		public DAEConnection()
-		{
-			InternalInitialize();
-		}
+		public DAEConnection() { }
 
 		public DAEConnection(IContainer AContainer)
 		{
-			InternalInitialize();
 			if (AContainer != null)
 				AContainer.Add(this);
 		}
 
-		public DAEConnection(string AConnectionString)
+		public DAEConnection(ServerAlias AAlias)
 		{
-			InternalInitialize();
-			FConnectionString = AConnectionString;
+			Alias = AAlias;
 		}
-
-		private void InternalInitialize()
+		
+		public DAEConnection(string AAliasName)
 		{
-			FSessionInfo = new SessionInfo();
-			FConnectionString = String.Empty;
+			ConnectionString = AAliasName;
 		}
 
 		protected override void Dispose(bool ADisposing)
 		{
 			Close();
-			SessionInfo = null;
 			base.Dispose(ADisposing);
 		}
 
@@ -56,7 +49,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		[DefaultValue(false)]
 		public bool Active
 		{
-			get { return (FSession != null) && (FServerProcess != null); }
+			get { return FServer != null; }
 			set 
 			{
 				if (value)
@@ -66,30 +59,29 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			}
 		}
 
-		private IServerSession FSession;
-		internal IServerSession Session { get { return FSession; } }
+		private ServerConnection FConnection;
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public ServerConnection Connection { get { return FConnection; } }
 
 		private IServer FServer;
-		internal IServer Server { get { return FServer; } }
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public IServer Server { get { return FServer; } }
+
+		private IServerSession FSession;
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public IServerSession Session { get { return FSession; } }
 
 		private IServerProcess FServerProcess;
-		internal IServerProcess ServerProcess { get { return FServerProcess; } }
-
-		private SessionInfo FSessionInfo;
-		/// <summary> The <see cref="SessionInfo"/> structure to use when connecting to the server. </summary>
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		[System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
-		[Description("Contextual information for server session initialization")]
-		[Category("Session")]
-		public SessionInfo SessionInfo
-		{
-			get { return FSessionInfo; }
-			set { FSessionInfo = value; }
-		}
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		public IServerProcess ServerProcess { get { return FServerProcess; } }
 
 		private void CheckNotConnected()
 		{
-			if ((FSession != null) && (FServerProcess != null))
+			if (FServer != null)
 				throw new ProviderException(ProviderException.Codes.ConnectionConnected);
 		}
 
@@ -103,22 +95,52 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			FConnectionTimeout = AValue;
 		}
 
-		private string FConnectionString;
-		[Description("Uri to the Dataphor server")]
+		private string FConnectionString = String.Empty;
+		/// <summary> The name of the alias to use to establish a connection to a Dataphor Server. </summary>
+		/// <remarks>
+		/// If an alias name is provided, an AliasManager will be used to retrieve the alias settings.
+		/// Setting this property will indirectly set the Alias property.
+		/// </remarks>
+		[DefaultValue("")]
 		[Category("Session")]
+		[Description("The name of the alias to use to establish a connection to a Dataphor Server.")]
 		public override string ConnectionString
 		{
 			get { return FConnectionString; }
 			set
 			{
+				CheckNotConnected();
 				if (FConnectionString != value)
 				{
-					CheckNotConnected();
+					FAlias = AliasManager.GetAlias(value);
 					FConnectionString = value;
 				}
 			}
 		}
 
+		private ServerAlias FAlias;
+		/// <summary>The alias used to establish a connection to a Dataphor Server.</summary>
+		/// <remarks>
+		/// If an AliasName is provided, it will be used to lookup the alias, and the value of this 
+		/// property will be the alias retrieved from the alias manager by name. Setting this property 
+		/// will clear the value of the ConnectionString property.
+		/// </remarks>
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public ServerAlias Alias
+		{
+			get { return FAlias; }
+			set
+			{
+				CheckNotConnected();
+				if (FAlias != value)
+				{
+					FAlias = value;
+					FConnectionString = String.Empty;
+				}
+			}
+		}
+
+		/// <summary> The database property returns the default library name. </summary>
 		public override string Database
 		{
 			get 
@@ -128,6 +150,11 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 				else
 					return String.Empty;
 			}
+		}
+
+		public override void ChangeDatabase(string ADatabaseName)
+		{
+			// Unimplemented - use the SessionInfo's namespace information
 		}
 
 		private string FDataSource = String.Empty;
@@ -140,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		{
 			get
 			{
-				if ((FSession != null) && (FServerProcess != null))
+				if (FServer != null)
 					return ConnectionState.Open;
 				else
 					return ConnectionState.Closed;
@@ -149,7 +176,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		private void CheckCanStartTransaction()
 		{
-			if ((FSession == null) || (FServerProcess == null))
+			if (FServer == null)
 				throw new ProviderException(ProviderException.Codes.BeginTransactionFailed);
 		}
 
@@ -166,6 +193,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			get { return FServerProcess != null ? FServerProcess.TransactionCount : 0; }
 		}
 		
+		// TODO: Map isolation levels
 		private System.Data.IsolationLevel FDefaultIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
 		public System.Data.IsolationLevel DefaultIsolationLevel
 		{
@@ -179,19 +207,80 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			return new DAETransaction(this, ALevel);
 		}
 
-		public override void ChangeDatabase(string ADatabaseName)
+		protected override DbCommand CreateDbCommand()
 		{
-			// Unimplemented - use the SessionInfo's namespace information
+			return new DAECommand();
+		}
+
+		public event EventHandler BeforeOpen;
+
+		protected virtual void OnBeforeOpen()
+		{
+			if (BeforeOpen != null)
+				BeforeOpen(this, EventArgs.Empty);
+		}
+
+		public event EventHandler AfterOpen;
+
+		protected virtual void OnAfterOpen()
+		{
+			if (AfterOpen != null)
+				AfterOpen(this, EventArgs.Empty);
+		}
+
+		/// <summary> True when the server, session, and process are given as part of opening. </summary>
+		private bool FForeignServer;
+
+		public override void Open()
+		{
+			if (FServer == null)
+			{
+				FForeignServer = false;
+				OnBeforeOpen();
+				if (FAlias == null)
+					throw new ProviderException(ProviderException.Codes.NoAliasSpecified);
+				FConnection = new ServerConnection(FAlias, true);
+				FServer = FConnection.Server;
+				try
+				{
+					FSession = FServer.Connect(FAlias.SessionInfo);
+					FServerProcess = FSession.StartProcess(new ProcessInfo(FAlias.SessionInfo));
+				}
+				catch
+				{
+					FServer = null;
+					FSession = null;
+					FServerProcess = null;
+					FConnection.Dispose();
+					FConnection = null;
+					throw;
+				}
+				OnAfterOpen();
+			}
+		}
+
+		public void Open(IServer AServer, IServerSession ASession, IServerProcess AProcess)
+		{
+			if (FServer == null)
+			{
+				FForeignServer = true;
+				OnBeforeOpen();
+				FServer = AServer;
+				FSession = ASession;
+				FServerProcess = AProcess;
+				OnAfterOpen();
+			}
 		}
 
 		public event EventHandler BeforeClose;
-		public event EventHandler AfterClose;
 
 		protected virtual void OnBeforeClose()
 		{
 			if (BeforeClose != null)
 				BeforeClose(this, EventArgs.Empty);
 		}
+
+		public event EventHandler AfterClose;
 
 		protected virtual void OnAfterClose()
 		{
@@ -201,104 +290,69 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override void Close()
 		{
-			if(FForeignServer) 
+			if (FServer != null)
 			{
-				try
-				{
-					OnBeforeClose();
-				}
-				finally
-				{
-					FSession = null;
-					FServer = null;
-					FServerProcess = null;
-					FForeignServer = false;
-				}
-				OnAfterClose();
-				return;
-			}
-
-			if (FSession != null)
-			{
-				try
-				{
-					OnBeforeClose();
-				}
-				finally
+				if (FForeignServer)
 				{
 					try
 					{
-						if (FServerProcess != null)
-							FSession.StopProcess(FServerProcess);
-						FServer.Disconnect(FSession);
+						OnBeforeClose();
 					}
 					finally
 					{
 						FSession = null;
+						FServer = null;
+						FServerProcess = null;
+					}
+					OnAfterClose();
+				}
+				else
+				{
+					try					
+					{
 						try
 						{
-							DAE.Server.ServerFactory.Disconnect(FServer);
+							try
+							{
+								try
+								{
+									try
+									{
+										OnBeforeClose();
+									}
+									finally
+									{
+										if (FServerProcess != null)
+											FSession.StopProcess(FServerProcess);
+									}
+								}
+								finally
+								{
+									FServerProcess = null;
+									if (FSession != null)
+										FServer.Disconnect(FSession);
+								}
+							}
+							finally
+							{
+								FSession = null;
+								DAE.Server.ServerFactory.Disconnect(FServer);
+							}
 						}
 						finally
 						{
 							FServer = null;
+							if (FConnection != null)
+								FConnection.Dispose();
 						}
 					}
+					finally
+					{
+						FConnection = null;
+					}
+					OnAfterClose();
 				}
-				OnAfterClose();
 			}
-		}
-
-		protected override DbCommand CreateDbCommand()
-		{
-			return new DAECommand();
-		}
-
-		public event EventHandler BeforeOpen;
-		public event EventHandler AfterOpen;
-
-		protected virtual void OnBeforeOpen()
-		{
-			if (BeforeOpen != null)
-				BeforeOpen(this, EventArgs.Empty);
-		}
-
-		protected virtual void OnAfterOpen()
-		{
-			if (AfterOpen != null)
-				AfterOpen(this, EventArgs.Empty);
-		}
-
-		public override void Open()
-		{
-			if (FSession == null)
-			{
-				OnBeforeOpen();
-				FServer = DAE.Server.ServerFactory.Connect(FConnectionString, TerminalServiceUtility.ClientName);
-				try
-				{
-					FSession = FServer.Connect(FSessionInfo);
-					FServerProcess = FSession.StartProcess(new ProcessInfo(FSessionInfo));
-				}
-				catch
-				{
-					DAE.Server.ServerFactory.Disconnect(FServer);
-					FServer = null;
-					throw;
-				}
-				OnAfterOpen();
-			}
-		}
-
-		private bool FForeignServer = false;
-		public void Open(IServer AServer, IServerSession ASession, IServerProcess AProcess)
-		{
-			OnBeforeOpen();
-			FForeignServer = true;
-			FServer = AServer;
-			FSession = ASession;
-			FServerProcess = AProcess;
-			OnAfterOpen();
 		}
 
 		public virtual object Clone()
@@ -306,7 +360,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			DAEConnection LNewConnection = new DAEConnection();
 			LNewConnection.ConnectionString = FConnectionString;
 			LNewConnection.SetConnectionTimeout(FConnectionTimeout);
-			LNewConnection.SessionInfo = (Alphora.Dataphor.DAE.SessionInfo)FSessionInfo.Clone();
+			LNewConnection.Alias = FAlias;
 			LNewConnection.Active = Active;
 			return LNewConnection;
 		}

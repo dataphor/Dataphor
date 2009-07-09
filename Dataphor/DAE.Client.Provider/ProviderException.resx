@@ -72,4 +72,7 @@
 	<data name="123110">
 		<value>DAETransaction: {0} failed DAEConnection was lost.</value>
 	</data>
+	<data name="123111">
+		<value>DAEConnection: No alias specified.</value>
+	</data>
 </root>

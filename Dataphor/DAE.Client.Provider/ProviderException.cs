@@ -39,7 +39,10 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			BeginTransactionFailed = 123109,
 
 			/// <summary> DAETransaction: {0} failed DAEConnection was lost. </summary>
-			ConnectionLost = 123110
+			ConnectionLost = 123110,
+
+			/// <summary>Error code 123111: "DAEConnection: No alias specified."</summary>
+			NoAliasSpecified = 123111,
 		}
 
 		// Resource manager for this exception class
