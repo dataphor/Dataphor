@@ -15,8 +15,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 	public class ApplicationForm : System.Windows.Forms.Form
 	{
 		// Do not localize
-		public const string CTrayDisplayText = "Dataphor Configuration Utility";
-		public const string CSilentMode = @"/s";
+		public const string CTrayDisplayText = "Dataphor Configuration Utility";		
 		private const string CProcessName = "DAE.Service.ConfigurationUtility";
 		private const string CRunningBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Running.gif";
 		private const string CStoppedBMPName = "Alphora.Dataphor.DAE.Service.ConfigurationUtility.Images.Stopped.gif";
@@ -284,28 +283,8 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		}
 		#endregion
 
-		[STAThread]
-		static void Main(string[] AArgs)
-		{
-			Application.ThreadException += new ThreadExceptionEventHandler(ThreadException);
-			System.Diagnostics.Process[] LProcesses;
-			// See if this is already running
-			LProcesses = System.Diagnostics.Process.GetProcessesByName("DAEConfigUtil");
-			// There will be 1 running...this one!  But any more, and we just exit.
-			if (LProcesses.Length <= 1)
-			{
-				ApplicationForm LAppForm;
-				if ((AArgs.Length > 0) && (AArgs[0] == CSilentMode))
-					LAppForm = new ApplicationForm(true);
-				else
-					LAppForm = new ApplicationForm(false);
-				Application.Run();
-			}
-		}
+		
 
-		protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
-		{
-			MessageBox.Show(AArgs.Exception.ToString());
-		}
+		
 	}
 }
