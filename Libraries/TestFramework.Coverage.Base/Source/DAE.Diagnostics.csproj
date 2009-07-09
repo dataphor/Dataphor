@@ -73,6 +73,10 @@
       <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>
       <Name>DAE.Client.Provider</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\DAE.Client\DAE.Client.csproj">
+      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
+      <Name>DAE.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE.MSSQL\DAE.MSSQL.csproj">
       <Project>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</Project>
       <Name>DAE.MSSQL</Name>
@@ -94,11 +98,10 @@
   </Target>
   <Target Name="AfterBuild">
     <ItemGroup>
-      <FilesToCopy Include="bin\Debug\**\*.*"/>
+      <FilesToCopy Include="bin\Debug\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(FilesToCopy)"   DestinationFiles="..\%(RecursiveDir)\%(Filename)%(Extension)"/>           
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFiles="..\%(RecursiveDir)\%(Filename)%(Extension)" />
   </Target>
-  
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
