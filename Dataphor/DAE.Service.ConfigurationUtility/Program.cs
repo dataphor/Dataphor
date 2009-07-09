@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
                     LAppForm = new ApplicationForm(true);
                 else
                     LAppForm = new ApplicationForm(false);
-                Application.Run(LAppForm);
+                Application.Run();
             }
         }
 
