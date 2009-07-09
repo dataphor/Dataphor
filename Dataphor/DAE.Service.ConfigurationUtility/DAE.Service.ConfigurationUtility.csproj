@@ -160,6 +160,10 @@
       <Project>{E7152100-FDC7-4BF1-957C-75051BF7D8E8}</Project>
       <Name>Frontend.Client.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
+      <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
+      <Name>Frontend.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

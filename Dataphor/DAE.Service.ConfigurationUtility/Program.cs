@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Alphora.Dataphor.Frontend.Client.Windows;
 
 
 namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
@@ -42,7 +43,14 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 
         protected static void ThreadException(object ASender, ThreadExceptionEventArgs AArgs)
         {
-            MessageBox.Show(AArgs.Exception.ToString());
+            HandleException(AArgs.Exception);
+        }
+
+        public static void HandleException(Exception AException)
+        {
+            if (AException is ThreadAbortException)
+                Thread.ResetAbort();
+            Session.HandleException(AException);
         }
     }
 }
