@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatalogStoreTest.cs" />
+    <Compile Include="Client\Provider\ConnectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="SQLStoreTest.cs">
@@ -67,6 +68,10 @@
     <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
       <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Name>BOP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\DAE.Client.Provider\DAE.Client.Provider.csproj">
+      <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>
+      <Name>DAE.Client.Provider</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE.MSSQL\DAE.MSSQL.csproj">
       <Project>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</Project>
@@ -84,9 +89,18 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
+   -->
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
+    <ItemGroup>
+      <FilesToCopy Include="bin\Debug\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)"   DestinationFiles="..\%(RecursiveDir)\%(Filename)%(Extension)"/>           
   </Target>
-  -->
+  
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>
