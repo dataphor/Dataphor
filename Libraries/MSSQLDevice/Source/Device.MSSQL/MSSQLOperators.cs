@@ -1,12 +1,306 @@
-﻿using Alphora.Dataphor.DAE.Device.SQL;
+﻿using System;
+using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
+using TableExpression=Alphora.Dataphor.DAE.Language.TSQL.TableExpression;
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
 
     #region Operators
+
+    public class MSSQLRetrieve : SQLDeviceOperator
+    {
+        public MSSQLRetrieve(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            var LTableVarNode = (TableVarNode) APlanNode;
+            TableVar LTableVar = LTableVarNode.TableVar;
+
+            if (LTableVar is BaseTableVar)
+            {
+                var LRangeVar = new SQLRangeVar(LDevicePlan.GetNextTableAlias());
+                foreach (TableVarColumn LColumn in LTableVar.Columns)
+                    LRangeVar.Columns.Add(new SQLRangeVarColumn(LColumn, LRangeVar.Name,
+                                                                LDevicePlan.Device.ToSQLIdentifier(LColumn),
+                                                                LDevicePlan.Device.ToSQLIdentifier(LColumn.Name)));
+                LDevicePlan.CurrentQueryContext().RangeVars.Add(LRangeVar);
+                var LSelectExpression = new SelectExpression();
+                // TODO: Load-time binding resolution of updlock optimizer hint: The current assumption is that if no cursor isolation level is specified and the cursor is updatable then udpate locks should be taken. 
+                // If we had a load-time binding step then the decision to take update locks could be deferred until we are certain that the query will run in an isolated transaction.
+                LSelectExpression.FromClause =
+                    new AlgebraicFromClause
+                        (
+                        new TableSpecifier
+                            (
+                            new TableExpression
+                                (
+                                MetaData.GetTag(LTableVar.MetaData, "Storage.Schema", LDevicePlan.Device.Schema),
+                                LDevicePlan.Device.ToSQLIdentifier(LTableVar),
+#if USEFASTFIRSTROW
+								(
+									LTableVarNode.Supports(CursorCapability.Updateable) && 
+									(
+										(SQLTable.CursorIsolationToIsolationLevel(LTableVarNode.CursorIsolation, ADevicePlan.Plan.ServerProcess.CurrentIsolationLevel()) == DAE.IsolationLevel.Isolated)
+									) ? 
+									"(fastfirstrow, updlock)" : 
+									"(fastfirstrow)"
+								)
+#else
+                                (
+                                    LTableVarNode.Supports(CursorCapability.Updateable) &&
+                                    (
+                                        (SQLTable.CursorIsolationToIsolationLevel(LTableVarNode.CursorIsolation,
+                                                                                  ADevicePlan.Plan.ServerProcess.
+                                                                                      CurrentIsolationLevel()) ==
+                                         IsolationLevel.Isolated)
+                                    )
+                                        ?
+                                            "(updlock)"
+                                        :
+                                            ""
+                                )
+#endif
+                                ),
+                            LRangeVar.Name
+                            )
+                        );
+
+                LSelectExpression.SelectClause = new SelectClause();
+                foreach (TableVarColumn LColumn in LTableVar.Columns)
+                    LSelectExpression.SelectClause.Columns.Add(
+                        LDevicePlan.GetRangeVarColumn(LColumn.Name, true).GetColumnExpression());
+
+                LSelectExpression.SelectClause.Distinct =
+                    (LTableVar.Keys.Count == 1) &&
+                    Convert.ToBoolean(MetaData.GetTag(LTableVar.Keys[0].MetaData, "Storage.IsImposedKey", "false"));
+                // TODO: Fix this in the DB2 and base SQL devices !!!
+
+                return LSelectExpression;
+            }
+            else
+                return LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false);
+        }
+    }
+
+    public class MSSQLToday : SQLDeviceOperator
+    {
+        public MSSQLToday(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            return new CallExpression("Round",
+                                      new Expression[]
+                                          {
+                                              new CallExpression("GetDate", new Expression[] {}), new ValueExpression(0)
+                                              ,
+                                              new ValueExpression(1)
+                                          });
+        }
+    }
+
+    public class MSSQLSubString : SQLDeviceOperator
+    {
+        public MSSQLSubString(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            return
+                new CallExpression
+                    (
+                    "Substring",
+                    new[]
+                        {
+                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                            new BinaryExpression
+                                (
+                                LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                "iAddition",
+                                new ValueExpression(1, TokenType.Integer)
+                                ),
+                            LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], false)
+                        }
+                    );
+        }
+    }
+
+    // Pos(ASubString, AString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
+    public class MSSQLPos : SQLDeviceOperator
+    {
+        public MSSQLPos(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            return
+                new BinaryExpression
+                    (
+                    new CaseExpression
+                        (
+                        new[]
+                            {
+                                new CaseItemExpression
+                                    (
+                                    new BinaryExpression
+                                        (
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        "iEqual",
+                                        new ValueExpression(String.Empty, TokenType.String)
+                                        ),
+                                    new ValueExpression(1, TokenType.Integer)
+                                    )
+                            },
+                        new CaseElseExpression
+                            (
+                            new CallExpression
+                                (
+                                "CharIndex",
+                                new[]
+                                    {
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false),
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false)
+                                    }
+                                )
+                            )
+                        ),
+                    "iSubtraction",
+                    new ValueExpression(1, TokenType.Integer)
+                    );
+        }
+    }
+
+    // IndexOf(AString, ASubString) ::= case when ASubstring = '' then 1 else CharIndex(ASubstring, AString) end - 1
+    public class MSSQLIndexOf : SQLDeviceOperator
+    {
+        public MSSQLIndexOf(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            return
+                new BinaryExpression
+                    (
+                    new CaseExpression
+                        (
+                        new[]
+                            {
+                                new CaseItemExpression
+                                    (
+                                    new BinaryExpression
+                                        (
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                        "iEqual",
+                                        new ValueExpression(String.Empty, TokenType.String)
+                                        ),
+                                    new ValueExpression(1, TokenType.Integer)
+                                    )
+                            },
+                        new CaseElseExpression
+                            (
+                            new CallExpression
+                                (
+                                "CharIndex",
+                                new[]
+                                    {
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], false),
+                                        LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[0], false)
+                                    }
+                                )
+                            )
+                        ),
+                    "iSubtraction",
+                    new ValueExpression(1, TokenType.Integer)
+                    );
+        }
+    }
+
+    // CompareText(ALeftValue, ARightValue) ::= case when Upper(ALeftValue) = Upper(ARightValue) then 0 when Upper(ALeftValue) < Upper(ARightValue) then -1 else 1 end
+    public class MSSQLCompareText : SQLDeviceOperator
+    {
+        public MSSQLCompareText(int AID, string AName)
+            : base(AID, AName)
+        {
+        }
+
+        public override Statement Translate(DevicePlan ADevicePlan, PlanNode APlanNode)
+        {
+            var LDevicePlan = (SQLDevicePlan) ADevicePlan;
+            return
+                new CaseExpression
+                    (
+                    new[]
+                        {
+                            new CaseItemExpression
+                                (
+                                new BinaryExpression
+                                    (
+                                    new CallExpression("Upper",
+                                                       new[]
+                                                           {
+                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
+                                                                                                      APlanNode.Nodes[0],
+                                                                                                      false)
+                                                           }),
+                                    "iEqual",
+                                    new CallExpression("Upper",
+                                                       new[]
+                                                           {
+                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
+                                                                                                      APlanNode.Nodes[1],
+                                                                                                      false)
+                                                           })
+                                    ),
+                                new ValueExpression(0)
+                                ),
+                            new CaseItemExpression
+                                (
+                                new BinaryExpression
+                                    (
+                                    new CallExpression("Upper",
+                                                       new[]
+                                                           {
+                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
+                                                                                                      APlanNode.Nodes[0],
+                                                                                                      false)
+                                                           }),
+                                    "iLess",
+                                    new CallExpression("Upper",
+                                                       new[]
+                                                           {
+                                                               LDevicePlan.Device.TranslateExpression(LDevicePlan,
+                                                                                                      APlanNode.Nodes[1],
+                                                                                                      false)
+                                                           })
+                                    ),
+                                new ValueExpression(-1)
+                                )
+                        },
+                    new CaseElseExpression(new ValueExpression(1))
+                    );
+        }
+    }
+
 
     // ToString(AValue) ::= Convert(varchar, AValue)
     public class MSSQLToString : SQLDeviceOperator
