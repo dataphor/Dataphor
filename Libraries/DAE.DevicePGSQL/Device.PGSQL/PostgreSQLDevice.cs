@@ -16,7 +16,6 @@ using Alphora.Dataphor.DAE.Server;
 using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement = Alphora.Dataphor.DAE.Language.PGSQL.DropIndexStatement;
 using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
-using TableExpression = Alphora.Dataphor.DAE.Language.PGSQL.TableExpression;
 
 namespace Alphora.Dataphor.Device.PGSQL
 {
