@@ -38,50 +38,52 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Server;
-	
-	/*
-		D4 to SQL translation ->
+
+    /*
+        D4 to SQL translation ->
 		
-			Retrieve - select expression with single table in the from clause
-			Restrict - adds a where clause to the expression, if it exists, conjoins to the existing clause
-			Project - if there is already a select list, push the entire expression to a nested from clause
-			Extend - add the extend columns to the current select list
-			Rename - should translate to aliasing in most cases
-			Aggregate - if there is already a select list, push the entire expression to a nested from clause
-			Union - add the right side of the expression to a union expression (always distinct)
-			Difference - unsupported
-			Join (all flavors) - add the right side of the expression to a nested from clause if necessary 
-			Order - skip unless this is the outer node
-			Browse - unsupported
-			CreateTable - direct translation
-			AlterTable - direct translation
-			DropTable - direct translation
+            Retrieve - select expression with single table in the from clause
+            Restrict - adds a where clause to the expression, if it exists, conjoins to the existing clause
+            Project - if there is already a select list, push the entire expression to a nested from clause
+            Extend - add the extend columns to the current select list
+            Rename - should translate to aliasing in most cases
+            Aggregate - if there is already a select list, push the entire expression to a nested from clause
+            Union - add the right side of the expression to a union expression (always distinct)
+            Difference - unsupported
+            Join (all flavors) - add the right side of the expression to a nested from clause if necessary 
+            Order - skip unless this is the outer node
+            Browse - unsupported
+            CreateTable - direct translation
+            AlterTable - direct translation
+            DropTable - direct translation
 			
-		Data type mapping ->
+        Data type mapping ->
 		
-			DAE Type	|	TSQL Type														|	Translation Handler
-			------------|---------------------------------------------------------------------------------------------
-			Boolean		|	bit																|	MSSQLBoolean
-			Byte		|   tinyint															|	MSSQLByte
-			SByte		|	smallint														|	SQLSByte
-			Short		|	smallint														|	SQLShort
-			UShort		|	integer															|	SQLUShort
-			Integer		|	integer															|	SQLInteger
-			UInteger	|	bigint															|	SQLUInteger
-			Long		|	bigint															|	SQLLong
-			ULong		|	decimal(20, 0)													|	SQLULong
-			Decimal		|	decimal(Storage.Precision, Storage.Scale)						|	SQLDecimal
-			TimeSpan	|	bigint															|	SQLTimeSpan
-			DateTime	|	datetime														|	MSSQLDateTime
-			Date		|	datetime														|	MSSQLDate
-			Time		|	datetime														|	MSSQLTime
-			Money		|	money															|	MSSQLMoney
-			Guid		|	uniqueidentifier												|	MSSQLGuid
-			String		|	varchar(Storage.Length)											|	SQLString
-			Binary		|	image															|	MSSQLBinary
-			SQLText		|	text															|	MSSQLText
-			MSSQLBinary |	binary(Storage.Length)											|	MSSQLMSSQLBinary
-	*/
+            DAE Type	|	TSQL Type														|	Translation Handler
+            ------------|---------------------------------------------------------------------------------------------
+            Boolean		|	bit																|	MSSQLBoolean
+            Byte		|   tinyint															|	MSSQLByte
+            SByte		|	smallint														|	SQLSByte
+            Short		|	smallint														|	SQLShort
+            UShort		|	integer															|	SQLUShort
+            Integer		|	integer															|	SQLInteger
+            UInteger	|	bigint															|	SQLUInteger
+            Long		|	bigint															|	SQLLong
+            ULong		|	decimal(20, 0)													|	SQLULong
+            Decimal		|	decimal(Storage.Precision, Storage.Scale)						|	SQLDecimal
+            TimeSpan	|	bigint															|	SQLTimeSpan
+            DateTime	|	datetime														|	MSSQLDateTime
+            Date		|	datetime														|	MSSQLDate
+            Time		|	datetime														|	MSSQLTime
+            Money		|	money															|	MSSQLMoney
+            Guid		|	uniqueidentifier												|	MSSQLGuid
+            String		|	varchar(Storage.Length)											|	SQLString
+            Binary		|	image															|	MSSQLBinary
+            SQLText		|	text															|	MSSQLText
+            MSSQLBinary |	binary(Storage.Length)											|	MSSQLMSSQLBinary
+    */
+
+    #region Device
 
     public class MSSQLDevice : SQLDevice
     {        
@@ -700,7 +702,10 @@ if not exists (select * from sysdatabases where name = '{0}')
 		}
     }
 
-	/// <summary>
+    #endregion
+    #region Connection String Builder
+
+    /// <summary>
 	/// This class is the tag translator for ADO
 	/// </summary>
 	public class MSSQLOLEDBConnectionStringBuilder : ConnectionStringBuilder
@@ -786,7 +791,11 @@ if not exists (select * from sysdatabases where name = '{0}')
 			D4.Tags LTags = base.Map(ATags);
 			return LTags;
 		}
-	}
+    }
+
+    #endregion
+
+    #region Types
 
     /// <summary>
     /// MSSQL type : bit
@@ -1448,9 +1457,13 @@ if not exists (select * from sysdatabases where name = '{0}')
 					new CaseElseExpression(new ValueExpression(1))
 				);
 		}
-	}
+    }
+    #endregion
 
-	public class MSSQLMSSQLBinaryCompareNode : InstructionNode
+
+    #region Instruction Nodes
+
+    public class MSSQLMSSQLBinaryCompareNode : InstructionNode
 	{
 		public static int Compare(Scalar ALeftValue, Scalar ARightValue)
 		{
@@ -1564,9 +1577,13 @@ if not exists (select * from sysdatabases where name = '{0}')
 			else
 				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, MSSQLMSSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value, (Scalar)AArguments[1].Value) >= 0));
 		}
-	}
-	
-	// ToString(AValue) ::= Convert(varchar, AValue)
+    }
+    #endregion
+
+    #region Operators
+
+
+    // ToString(AValue) ::= Convert(varchar, AValue)
 	public class MSSQLToString : SQLDeviceOperator
 	{
 		public MSSQLToString(int AID, string AName) : base(AID, AName) {}
@@ -2810,9 +2827,13 @@ if not exists (select * from sysdatabases where name = '{0}')
 		}
 	}
 
-	// DateTime selector is done by constructing a string representation of the value and converting it to a datetime using style 121 (ODBC Canonical)	
-	// Convert(DateTime, Convert(VarChar, AYear) + '-' + Convert(VarChar, AMonth) + '-' + Convert(VarChar, ADay) + ' ' + Convert(VarChar, AHours) + ':' + Convert(VarChar, AMinutes) + ':' + Convert(VarChar, ASeconds) + '.' + Convert(VarChar, AMilliseconds), 121)
-	public class MSSQLDateTimeSelector : SQLDeviceOperator
+	
+	
+    /// <summary>
+    ///  DateTime selector is done by constructing a string representation of the value and converting it to a datetime using style 121 (ODBC Canonical)	
+	///  Convert(DateTime, Convert(VarChar, AYear) + '-' + Convert(VarChar, AMonth) + '-' + Convert(VarChar, ADay) + ' ' + Convert(VarChar, AHours) + ':' + Convert(VarChar, AMinutes) + ':' + Convert(VarChar, ASeconds) + '.' + Convert(VarChar, AMilliseconds), 121)
+    /// </summary>
+    public class MSSQLDateTimeSelector : SQLDeviceOperator
 	{
 		public MSSQLDateTimeSelector(int AID, string AName) : base(AID, AName) {}
 		
@@ -2858,5 +2879,6 @@ if not exists (select * from sysdatabases where name = '{0}')
 				default: return null;
 			}
 		}
-	}
+    }
+    #endregion
 }
