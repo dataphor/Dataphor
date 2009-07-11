@@ -29,7 +29,7 @@ using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 namespace Alphora.Dataphor.DAE.Server
 {
 	// ServerProcess
-	public class ServerProcess : ServerChildObject, IServerProcess, IRemoteServerProcess
+	public class ServerProcess : ServerChildObject, IServerProcess
 	{
 		internal ServerProcess(ServerSession AServerSession) : base()
 		{
@@ -118,7 +118,7 @@ namespace Alphora.Dataphor.DAE.Server
 												finally
 												{
 													if (FPlans != null)
-														foreach (ServerPlanBase LPlan in FPlans)
+														foreach (ServerPlan LPlan in FPlans)
 														{
 															if (LPlan.ActiveCursor != null)
 																LPlan.ActiveCursor.Dispose();
@@ -262,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerSession FServerSession;
 		public ServerSession ServerSession { get { return FServerSession; } }
 		
-		private ServerPlanBase FProcessPlan;
+		private ServerPlan FProcessPlan;
 		
 		// ProcessID
 		private int FProcessID = -1;
@@ -319,9 +319,6 @@ namespace Alphora.Dataphor.DAE.Server
 		// IServerProcess.Session
 		IServerSession IServerProcess.Session { get { return FServerSession; } }
 		
-		// IRemoteServerProcess.Session
-		IRemoteServerSession IRemoteServerProcess.Session { get { return FServerSession; } }
-
 		// Parsing
 		private Parser FParser;		
 		private RealSQL.Parser FSQLParser;
@@ -408,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				try
 				{
-					ServerPlanBase LPlan = FPlans.DisownAt(0) as ServerPlanBase;
+					ServerPlan LPlan = FPlans.DisownAt(0) as ServerPlan;
 					if (!ServerSession.ReleaseCachedPlan(this, LPlan))
 						LPlan.Dispose();
 				}
@@ -523,12 +520,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return FServerSession.Server.Catalog.ClassLoader.CreateType(AClassDefinition);
 		}
 		
-		string IRemoteServerProcess.GetClassName(string AClassName)
-		{
-			return FServerSession.Server.Catalog.ClassLoader.Classes[AClassName].ClassName;
-		}
-		
-		private void GetFileNames(Schema.Library ALibrary, StringCollection ALibraryNames, StringCollection AFileNames, ArrayList AFileDates)
+		internal void GetFileNames(Schema.Library ALibrary, StringCollection ALibraryNames, StringCollection AFileNames, ArrayList AFileDates)
 		{
 			foreach (Schema.FileReference LReference in ALibrary.Files)
 				if (!AFileNames.Contains(LReference.FileName))
@@ -542,7 +534,7 @@ namespace Alphora.Dataphor.DAE.Server
 				GetFileNames(FServerSession.Server.Catalog.Libraries[LLibrary.Name], ALibraryNames, AFileNames, AFileDates);
 		}
 		
-		private void GetAssemblyFileNames(Schema.Library ALibrary, StringCollection AFileNames)
+		internal void GetAssemblyFileNames(Schema.Library ALibrary, StringCollection AFileNames)
 		{
 			Schema.Libraries LLibraries = new Schema.Libraries();
 			LLibraries.Add(ALibrary);
@@ -562,35 +554,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		void IRemoteServerProcess.GetFileNames(string AClassName, out string[] ALibraryNames, out string[] AFileNames, out DateTime[] AFileDates, out string[] AAssemblyFileNames)
-		{
-			Schema.RegisteredClass LClass = FServerSession.Server.Catalog.ClassLoader.Classes[AClassName];
-
-			StringCollection LLibraryNames = new StringCollection();
-			StringCollection LFileNames = new StringCollection();
-			StringCollection LAssemblyFileNames = new StringCollection();
-			ArrayList LFileDates = new ArrayList();
-			
-			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
-			Schema.Library LLibrary = FServerSession.Server.Catalog.Libraries[LClass.Library.Name];
-			GetFileNames(LLibrary, LLibraryNames, LFileNames, LFileDates);
-			GetAssemblyFileNames(LLibrary, LAssemblyFileNames);
-			
-			ALibraryNames = new string[LLibraryNames.Count];
-			LLibraryNames.CopyTo(ALibraryNames, 0);
-			
-			AFileNames = new string[LFileNames.Count];
-			LFileNames.CopyTo(AFileNames, 0);
-			
-			AFileDates = new DateTime[LFileDates.Count];
-			LFileDates.CopyTo(AFileDates, 0);
-			
-			// Return the results in reverse order to ensure that dependencies are loaded in the correct order
-			AAssemblyFileNames = new string[LAssemblyFileNames.Count];
-			for (int LIndex = LAssemblyFileNames.Count - 1; LIndex >= 0; LIndex--)
-				AAssemblyFileNames[LAssemblyFileNames.Count - LIndex - 1] = LAssemblyFileNames[LIndex];
-		}
-		
 		public string GetFullFileName(Schema.Library ALibrary, string AFileName)
 		{
 			#if LOADFROMLIBRARIES
@@ -604,11 +567,6 @@ namespace Alphora.Dataphor.DAE.Server
 			#else
 			return PathUtility.GetFullFileName(AFileName);
 			#endif
-		}
-		
-		IRemoteStream IRemoteServerProcess.GetFile(string ALibraryName, string AFileName)
-		{
-			return new CoverStream(new FileStream(GetFullFileName(FServerSession.Server.Catalog.Libraries[ALibraryName], AFileName), FileMode.Open, FileAccess.Read, FileShare.Read), true);
 		}
 		
 		// DeviceSessions		
@@ -766,17 +724,6 @@ namespace Alphora.Dataphor.DAE.Server
 			set { FProcessInfo.SuppressWarnings = value; }
 		}
 		
-		private void CleanupPlans(ProcessCleanupInfo ACleanupInfo)
-		{
-			int LPlanIndex;
-			for (int LIndex = 0; LIndex < ACleanupInfo.UnprepareList.Length; LIndex++)
-			{
-				LPlanIndex = FPlans.IndexOf((ServerChildObject)ACleanupInfo.UnprepareList[LIndex]);
-				if (LPlanIndex >= 0)
-					InternalUnprepare(FPlans[LPlanIndex]);
-			}
-		}
-
 		#if ALLOWPROCESSCONTEXT
 		private void PushProcessContext(Plan APlan)
 		{
@@ -795,7 +742,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		#endif
 		
-		private void Compile(ServerPlanBase AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression)
+		private void Compile(ServerPlan AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression)
 		{
 			PushExecutingPlan(AServerPlan);
 			try
@@ -860,9 +807,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		internal ServerPlanBase CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams)
+		internal ServerPlan CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams)
 		{
-			ServerPlanBase LPlan = new ServerStatementPlan(this);
+			ServerPlan LPlan = new ServerStatementPlan(this);
 			try
 			{
 				if (AMessages != null)
@@ -878,17 +825,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal PlanDescriptor GetPlanDescriptor(IRemoteServerStatementPlan APlan)
-		{
-			PlanDescriptor LDescriptor = new PlanDescriptor();
-			LDescriptor.ID = APlan.ID;
-			LDescriptor.CacheTimeStamp = APlan.Process.Session.Server.CacheTimeStamp;
-			LDescriptor.Statistics = APlan.Statistics;
-			LDescriptor.Messages = APlan.Messages;
-			return LDescriptor;
-		}
-		
-		private void InternalUnprepare(ServerPlanBase APlan)
+		private void InternalUnprepare(ServerPlan APlan)
 		{
 			BeginCall();
 			try
@@ -919,8 +856,8 @@ namespace Alphora.Dataphor.DAE.Server
 			return LContextName.ToString().GetHashCode();
 		}
 		
-		// IServerProcess.PrepareStatement        
-		IServerStatementPlan IServerProcess.PrepareStatement(string AStatement, DataParams AParams)
+		// PrepareStatement        
+		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
 		{
 			BeginCall();
 			try
@@ -938,7 +875,7 @@ namespace Alphora.Dataphor.DAE.Server
 					Statement LStatement = ParseStatement(AStatement, LMessages);
 					LPlan = (IServerStatementPlan)CompileStatement(LStatement, LMessages, AParams);
 					if (!LPlan.Messages.HasErrors)
-						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlanBase)LPlan);
+						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlan)LPlan);
 				}
 				#if TRACEEVENTS
 				RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
@@ -955,120 +892,27 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		// IServerProcess.UnprepareStatement
-		void IServerProcess.UnprepareStatement(IServerStatementPlan APlan)
+		// UnprepareStatement
+		public void UnprepareStatement(IServerStatementPlan APlan)
 		{
-			InternalUnprepare((ServerPlanBase)APlan);
+			InternalUnprepare((ServerPlan)APlan);
 		}
         
-		internal ServerPlanBase CompileRemoteStatement(Statement AStatement, ParserMessages AMessages, RemoteParam[] AParams)
+		// Execute
+		public void Execute(string AStatement, DataParams AParams)
 		{
-			ServerPlanBase LPlan = new RemoteServerStatementPlan(this);
-			try
-			{
-				DataParams LParams = RemoteParamsToDataParams(AParams);
-				if (AMessages != null)
-					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AStatement, LParams, false);
-				FPlans.Add(LPlan);
-				return LPlan;
-			}
-			catch
-			{
-				LPlan.Dispose();
-				throw;
-			}
-		}
-		
-		// IServerProcess.Execute
-		void IServerProcess.Execute(string AStatement, DataParams AParams)
-		{
-			IServerStatementPlan LStatementPlan = ((IServerProcess)this).PrepareStatement(AStatement, AParams);
+			IServerStatementPlan LStatementPlan = PrepareStatement(AStatement, AParams);
 			try
 			{
 				LStatementPlan.Execute(AParams);
 			}
 			finally
 			{
-				((IServerProcess)this).UnprepareStatement(LStatementPlan);
+				UnprepareStatement(LStatementPlan);
 			}
 		}
 		
-		private int GetContextHashCode(RemoteParam[] AParams)
-		{
-			StringBuilder LContextName = new StringBuilder();
-			if (FContext != null)
-				for (int LIndex = 0; LIndex < FContext.Count; LIndex++)
-					LContextName.Append(FContext.Peek(LIndex).DataType.Name);
-			if (AParams != null)
-				for (int LIndex = 0; LIndex < AParams.Length; LIndex++)
-					LContextName.Append(AParams[LIndex].TypeName);
-			return LContextName.ToString().GetHashCode();
-		}
-		
-		// IRemoteServerProcess.PrepareStatement
-		IRemoteServerStatementPlan IRemoteServerProcess.PrepareStatement(string AStatement, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
-		{
-			BeginCall();
-			try
-			{
-				CleanupPlans(ACleanupInfo);
-				int LContextHashCode = GetContextHashCode(AParams);
-				IRemoteServerStatementPlan LPlan = ServerSession.GetCachedPlan(this, AStatement, LContextHashCode) as IRemoteServerStatementPlan;
-				if (LPlan != null)
-					FPlans.Add(LPlan);
-				else
-				{
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
-					#endif
-					ParserMessages LMessages = new ParserMessages();
-					Statement LStatement = ParseStatement(AStatement, LMessages);
-					LPlan = (IRemoteServerStatementPlan)CompileRemoteStatement(LStatement, LMessages, AParams);
-					if (!((ServerPlanBase)LPlan).Plan.Messages.HasErrors)
-						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlanBase)LPlan);
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
-					#endif
-				}
-				APlanDescriptor = GetPlanDescriptor(LPlan);
-				return LPlan;
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E);
-			}
-			finally
-			{
-				EndCall();
-			}
-		}
-        
-		// IRemoteServerProcess.UnprepareStatement
-		void IRemoteServerProcess.UnprepareStatement(IRemoteServerStatementPlan APlan)
-		{
-			InternalUnprepare((ServerPlanBase)APlan);
-		}
-		
-		// IRemoteServerProcess.Execute
-		void IRemoteServerProcess.Execute(string AStatement, ref RemoteParamData AParams, ProcessCallInfo ACallInfo, ProcessCleanupInfo ACleanupInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			PlanDescriptor LDescriptor;
-			IRemoteServerStatementPlan LPlan = ((IRemoteServerProcess)this).PrepareStatement(AStatement, AParams.Params, out LDescriptor, ACleanupInfo);
-			try
-			{
-				TimeSpan LExecuteTime;
-				LPlan.Execute(ref AParams, out LExecuteTime, EmptyCallInfo());
-				LDescriptor.Statistics.ExecuteTime = LExecuteTime;
-			}
-			finally
-			{
-				((IRemoteServerProcess)this).UnprepareStatement(LPlan);
-			}
-		}
-        
-		private Schema.IDataType CopyDataType(ServerPlanBase APlan, Schema.DerivedTableVar ATableVar)
+		private Schema.IDataType CopyDataType(ServerPlan APlan, Schema.DerivedTableVar ATableVar)
 		{
 			#if TIMING
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerProcess.CopyDataType", DateTime.Now.ToString("hh:mm:ss.ffff")));
@@ -1162,9 +1006,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal ServerPlanBase CompileExpression(Statement AExpression, ParserMessages AMessages, DataParams AParams)
+		internal ServerPlan CompileExpression(Statement AExpression, ParserMessages AMessages, DataParams AParams)
 		{
-			ServerPlanBase LPlan = new ServerExpressionPlan(this);
+			ServerPlan LPlan = new ServerExpressionPlan(this);
 			try
 			{
 				if (AMessages != null)
@@ -1180,28 +1024,8 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal PlanDescriptor GetPlanDescriptor(IRemoteServerExpressionPlan APlan, RemoteParam[] AParams)
-		{
-			PlanDescriptor LDescriptor = new PlanDescriptor();
-			LDescriptor.ID = APlan.ID;
-			LDescriptor.Statistics = APlan.Statistics;
-			LDescriptor.Messages = APlan.Messages;
-			if (((ServerPlanBase)APlan).DataType is Schema.ITableType)
-			{
-				LDescriptor.Capabilities = APlan.Capabilities;
-				LDescriptor.CursorIsolation = APlan.Isolation;
-				LDescriptor.CursorType = APlan.CursorType;
-				if (((TableNode)((ServerPlanBase)APlan).Code.Nodes[0]).Order != null)
-					LDescriptor.Order = ((TableNode)((ServerPlanBase)APlan).Code.Nodes[0]).Order.Name;
-				else
-					LDescriptor.Order = String.Empty;
-			}
-			LDescriptor.Catalog = ((RemoteServerExpressionPlan)APlan).GetCatalog(AParams, out LDescriptor.ObjectName, out LDescriptor.CacheTimeStamp, out LDescriptor.ClientCacheTimeStamp, out LDescriptor.CacheChanged);
-			return LDescriptor;
-		}
-		
-		// IServerProcess.PrepareExpression
-		IServerExpressionPlan IServerProcess.PrepareExpression(string AExpression, DataParams AParams)
+		// PrepareExpression
+		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
 		{
 			BeginCall();
 			try
@@ -1218,7 +1042,7 @@ namespace Alphora.Dataphor.DAE.Server
 					ParserMessages LMessages = new ParserMessages();
 					LPlan = (IServerExpressionPlan)CompileExpression(ParseExpression(AExpression), LMessages, AParams);
 					if (!LPlan.Messages.HasErrors)
-						ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlanBase)LPlan);
+						ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlan)LPlan);
 					#if TRACEEVENTS
 					RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
 					#endif
@@ -1235,43 +1059,43 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		// IServerProcess.UnprepareExpression
-		void IServerProcess.UnprepareExpression(IServerExpressionPlan APlan)
+		// UnprepareExpression
+		public void UnprepareExpression(IServerExpressionPlan APlan)
 		{
-			InternalUnprepare((ServerPlanBase)APlan);
+			InternalUnprepare((ServerPlan)APlan);
 		}
 		
-		// IServerProcess.Evaluate
-		DataValue IServerProcess.Evaluate(string AExpression, DataParams AParams)
+		// Evaluate
+		public DataValue Evaluate(string AExpression, DataParams AParams)
 		{
-			IServerExpressionPlan LPlan = ((IServerProcess)this).PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan LPlan = PrepareExpression(AExpression, AParams);
 			try
 			{
 				return LPlan.Evaluate(AParams);
 			}
 			finally
 			{
-				((IServerProcess)this).UnprepareExpression(LPlan);
+				UnprepareExpression(LPlan);
 			}
 		}
 		
-		// IServerProcess.OpenCursor
-		IServerCursor IServerProcess.OpenCursor(string AExpression, DataParams AParams)
+		// OpenCursor
+		public IServerCursor OpenCursor(string AExpression, DataParams AParams)
 		{
-			IServerExpressionPlan LPlan = ((IServerProcess)this).PrepareExpression(AExpression, AParams);
+			IServerExpressionPlan LPlan = PrepareExpression(AExpression, AParams);
 			try
 			{
 				return LPlan.Open(AParams);
 			}
 			catch
 			{
-				((IServerProcess)this).UnprepareExpression(LPlan);
+				UnprepareExpression(LPlan);
 				throw;
 			}
 		}
 		
-		// IServerProcess.CloseCursor
-		void IServerProcess.CloseCursor(IServerCursor ACursor)
+		// CloseCursor
+		public void CloseCursor(IServerCursor ACursor)
 		{
 			IServerExpressionPlan LPlan = ACursor.Plan;
 			try
@@ -1280,234 +1104,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				((IServerProcess)this).UnprepareExpression(LPlan);
+				UnprepareExpression(LPlan);
 			}
 		}
         
-		internal ServerPlanBase CompileRemoteExpression(Statement AExpression, ParserMessages AMessages, RemoteParam[] AParams)
-		{
-			ServerPlanBase LPlan = new RemoteServerExpressionPlan(this);
-			try
-			{
-				DataParams LParams = RemoteParamsToDataParams(AParams);
-				if (AMessages != null)
-					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AExpression, LParams, true);
-				FPlans.Add(LPlan);
-				return LPlan;
-			}
-			catch 
-			{
-				LPlan.Dispose();
-				throw;
-			}
-		}
-		
-		private IRemoteServerExpressionPlan InternalPrepareRemoteExpression(string AExpression, RemoteParam[] AParams, ProcessCleanupInfo ACleanupInfo)
-		{
-			CleanupPlans(ACleanupInfo);
-			int LContextHashCode = GetContextHashCode(AParams);
-			IRemoteServerExpressionPlan LPlan = ServerSession.GetCachedPlan(this, AExpression, LContextHashCode) as IRemoteServerExpressionPlan;
-			if (LPlan != null)
-				FPlans.Add(LPlan);
-			else
-			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
-				#endif
-				ParserMessages LMessages = new ParserMessages();
-				LPlan = (IRemoteServerExpressionPlan)CompileRemoteExpression(ParseExpression(AExpression), LMessages, AParams);
-				if (!((ServerPlanBase)LPlan).Plan.Messages.HasErrors)
-					ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlanBase)LPlan);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
-				#endif
-			}
-			return LPlan;
-		}
-		
-		// IRemoteServerProcess.PrepareExpression
-		IRemoteServerExpressionPlan IRemoteServerProcess.PrepareExpression(string AExpression, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
-		{
-			BeginCall();
-			try
-			{
-				IRemoteServerExpressionPlan LPlan = InternalPrepareRemoteExpression(AExpression, AParams, ACleanupInfo);
-				APlanDescriptor = GetPlanDescriptor(LPlan, AParams);
-				return LPlan;
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E);
-			}
-			finally
-			{
-				EndCall();
-			}
-		}
-        
-		// IRemoteServerProcess.UnprepareExpression
-		void IRemoteServerProcess.UnprepareExpression(IRemoteServerExpressionPlan APlan)
-		{
-			InternalUnprepare((ServerPlanBase)APlan);
-		}
-		
-		// IRemoteServerProcess.Evaluate
-		byte[] IRemoteServerProcess.Evaluate
-		(
-			string AExpression, 
-			ref RemoteParamData AParams, 
-			out IRemoteServerExpressionPlan APlan, 
-			out PlanDescriptor APlanDescriptor, 
-			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo
-		)
-		{
-			ProcessCallInfo(ACallInfo);
-			
-			BeginCall();
-			try
-			{
-				APlan = InternalPrepareRemoteExpression(AExpression, AParams.Params, ACleanupInfo);
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E);
-			}
-			finally
-			{
-				EndCall();
-			}
-			
-			#if LOGCACHEEVENTS
-			FServerSession.Server.LogMessage(String.Format("Evaluating '{0}'.", AExpression));
-			#endif
-			
-			try
-			{
-				TimeSpan LExecuteTime;
-				byte[] LResult = APlan.Evaluate(ref AParams, out LExecuteTime, EmptyCallInfo());
-				APlanDescriptor = GetPlanDescriptor(APlan, AParams.Params);
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
-				
-				#if LOGCACHEEVENTS
-				FServerSession.Server.LogMessage("Expression evaluated.");
-				#endif
-
-				return LResult;
-			}
-			catch
-			{
-				((IRemoteServerProcess)this).UnprepareExpression(APlan);
-				throw;
-			}
-		}
-		
-		// IRemoteServerProcess.OpenCursor
-		IRemoteServerCursor IRemoteServerProcess.OpenCursor
-		(
-			string AExpression, 
-			ref RemoteParamData AParams, 
-			out IRemoteServerExpressionPlan APlan, 
-			out PlanDescriptor APlanDescriptor, 
-			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo
-		)
-		{
-			ProcessCallInfo(ACallInfo);
-
-			BeginCall();
-			try
-			{
-				APlan = InternalPrepareRemoteExpression(AExpression, AParams.Params, ACleanupInfo);
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E);
-			}
-			finally
-			{
-				EndCall();
-			}
-
-			try
-			{
-				TimeSpan LExecuteTime;
-				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out LExecuteTime, EmptyCallInfo());
-				APlanDescriptor = GetPlanDescriptor(APlan, AParams.Params);
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
-				return LCursor;
-			}
-			catch
-			{
-				((IRemoteServerProcess)this).UnprepareExpression(APlan);
-				APlan = null;
-				throw;
-			}
-		}
-		
-		// IRemoteServerProcess.OpenCursor
-		IRemoteServerCursor IRemoteServerProcess.OpenCursor
-		(
-			string AExpression,
-			ref RemoteParamData AParams,
-			out IRemoteServerExpressionPlan APlan,
-			out PlanDescriptor APlanDescriptor,
-			ProcessCallInfo ACallInfo,
-			ProcessCleanupInfo ACleanupInfo,
-			out Guid[] ABookmarks,
-			int ACount,
-			out RemoteFetchData AFetchData
-		)
-		{
-			ProcessCallInfo(ACallInfo);
-
-			BeginCall();
-			try
-			{
-				APlan = InternalPrepareRemoteExpression(AExpression, AParams.Params, ACleanupInfo);
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E);
-			}
-			finally
-			{
-				EndCall();
-			}
-			
-			try
-			{
-				TimeSpan LExecuteTime;
-				IRemoteServerCursor LCursor = APlan.Open(ref AParams, out LExecuteTime, EmptyCallInfo());
-				AFetchData = LCursor.Fetch(out ABookmarks, ACount, EmptyCallInfo());
-				APlanDescriptor = GetPlanDescriptor(APlan, AParams.Params);
-				APlanDescriptor.Statistics.ExecuteTime = LExecuteTime;
-				return LCursor;
-			}
-			catch
-			{
-				((IRemoteServerProcess)this).UnprepareExpression(APlan);
-				APlan = null;
-				throw;
-			}
-		}
-		
-		// IRemoteServerProcess.CloseCursor
-		void IRemoteServerProcess.CloseCursor(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo)
-		{
-			IRemoteServerExpressionPlan LPlan = ACursor.Plan;
-			try
-			{
-				LPlan.Close(ACursor, ACallInfo);
-			}
-			finally
-			{
-				((IRemoteServerProcess)this).UnprepareExpression(LPlan);
-			}
-		}
-		
-		private ServerScript InternalPrepareScript(string AScript)
+		// PrepareScript
+		public IServerScript PrepareScript(string AScript)
 		{
 			BeginCall();
 			try
@@ -1534,12 +1136,13 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		private void InternalUnprepareScript(ServerScript AScript)
+		// UnprepareScript
+		public void UnprepareScript(IServerScript AScript)
 		{
 			BeginCall();
 			try
 			{
-				AScript.Dispose();
+				((ServerScript)AScript).Dispose();
 			}
 			catch (Exception E)
 			{
@@ -1550,57 +1153,18 @@ namespace Alphora.Dataphor.DAE.Server
 				EndCall();
 			}
 		}
-        
-		// IServerProcess.PrepareScript
-		IServerScript IServerProcess.PrepareScript(string AScript)
-		{
-			return (IServerScript)InternalPrepareScript(AScript);
-		}
-        
-		// IServerProcess.UnprepareScript
-		void IServerProcess.UnprepareScript(IServerScript AScript)
-		{
-			InternalUnprepareScript((ServerScript)AScript);
-		}
 		
-		// IServerProcess.ExecuteScript
-		void IServerProcess.ExecuteScript(string AScript)
+		// ExecuteScript
+		public void ExecuteScript(string AScript)
 		{
-			IServerScript LScript = ((IServerProcess)this).PrepareScript(AScript);
+			IServerScript LScript = PrepareScript(AScript);
 			try
 			{
 				LScript.Execute(null);
 			}
 			finally
 			{
-				((IServerProcess)this).UnprepareScript(LScript);
-			}
-		}
-        
-		// IRemoteServerProcess.PrepareScript
-		IRemoteServerScript IRemoteServerProcess.PrepareScript(string AScript)
-		{
-			return (IRemoteServerScript)InternalPrepareScript(AScript);
-		}
-        
-		// IRemoteServerProcess.UnprepareScript
-		void IRemoteServerProcess.UnprepareScript(IRemoteServerScript AScript)
-		{
-			InternalUnprepareScript((ServerScript)AScript);
-		}
-		
-		// IRemoteServerProcess.ExecuteScript
-		void IRemoteServerProcess.ExecuteScript(string AScript, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			IServerScript LScript = ((IServerProcess)this).PrepareScript(AScript);
-			try
-			{
-				LScript.Execute(null);
-			}
-			finally
-			{
-				((IServerProcess)this).UnprepareScript(LScript);
+				UnprepareScript(LScript);
 			}
 		}
 
@@ -2045,25 +1609,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		internal void ProcessCallInfo(ProcessCallInfo ACallInfo)
-		{
-			for (int LIndex = 0; LIndex < ACallInfo.TransactionList.Length; LIndex++)
-				BeginTransaction(ACallInfo.TransactionList[LIndex]);
-		}
-		
-		internal ProcessCallInfo EmptyCallInfo()
-		{
-			ProcessCallInfo LInfo = new ProcessCallInfo();
-			LInfo.TransactionList = new IsolationLevel[0];
-			return LInfo;
-		}
-		
-		Guid IRemoteServerProcess.BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			return BeginApplicationTransaction(AShouldJoin, AIsInsert);
-		}
-		
 		// BeginApplicationTransaction
 		public Guid BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert)
 		{
@@ -2095,12 +1640,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		void IRemoteServerProcess.PrepareApplicationTransaction(Guid AID, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			PrepareApplicationTransaction(AID);
-		}
-		
 		// PrepareApplicationTransaction
 		public void PrepareApplicationTransaction(Guid AID)
 		{
@@ -2125,12 +1664,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				EndTransactionalCall(LNestingLevel, LException);
 			}
-		}
-		
-		void IRemoteServerProcess.CommitApplicationTransaction(Guid AID, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			CommitApplicationTransaction(AID);
 		}
 		
 		// CommitApplicationTransaction
@@ -2159,12 +1692,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		void IRemoteServerProcess.RollbackApplicationTransaction(Guid AID, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			RollbackApplicationTransaction(AID);
-		}
-		
 		// RollbackApplicationTransaction
 		public void RollbackApplicationTransaction(Guid AID)
 		{
@@ -2191,12 +1718,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		void IRemoteServerProcess.JoinApplicationTransaction(Guid AID, bool AIsInsert, ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			JoinApplicationTransaction(AID, AIsInsert);
-		}
-		
 		public void JoinApplicationTransaction(Guid AID, bool AIsInsert)
 		{
 			Exception LException = null;
@@ -2222,12 +1743,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				EndTransactionalCall(LNestingLevel, LException);
 			}
-		}
-		
-		void IRemoteServerProcess.LeaveApplicationTransaction(ProcessCallInfo ACallInfo)
-		{
-			ProcessCallInfo(ACallInfo);
-			LeaveApplicationTransaction();
 		}
 		
 		public void LeaveApplicationTransaction()
@@ -2300,7 +1815,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private int FExecutingThreadCount = 0;
 		
-		public ServerPlanBase ExecutingPlan
+		public ServerPlan ExecutingPlan
 		{
 			get 
 			{
@@ -2310,7 +1825,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public ServerPlanBase RootExecutingPlan
+		public ServerPlan RootExecutingPlan
 		{
 			get
 			{
@@ -2320,7 +1835,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void PushExecutingPlan(ServerPlanBase APlan)
+		public void PushExecutingPlan(ServerPlan APlan)
 		{
 			lock (this)
 			{
@@ -2328,7 +1843,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void PopExecutingPlan(ServerPlanBase APlan)
+		public void PopExecutingPlan(ServerPlan APlan)
 		{
 			lock (this)
 			{
@@ -2338,7 +1853,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Start(ServerPlanBase APlan, DataParams AParams)
+		public void Start(ServerPlan APlan, DataParams AParams)
 		{
 			PushExecutingPlan(APlan);
 			try
@@ -2354,7 +1869,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Stop(ServerPlanBase APlan, DataParams AParams)
+		public void Stop(ServerPlan APlan, DataParams AParams)
 		{
 			try
 			{
@@ -2372,7 +1887,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public DataVar Execute(ServerPlanBase APlan, PlanNode ANode, DataParams AParams)
+		public DataVar Execute(ServerPlan APlan, PlanNode ANode, DataParams AParams)
 		{	
 			DataVar LResult;
 			#if TRACEEVENTS
@@ -2607,10 +2122,10 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// ActiveCursor
-		protected ServerCursorBase FActiveCursor;
-		public ServerCursorBase ActiveCursor { get { return FActiveCursor; } }
+		protected ServerCursor FActiveCursor;
+		public ServerCursor ActiveCursor { get { return FActiveCursor; } }
 		
-		public void SetActiveCursor(ServerCursorBase AActiveCursor)
+		public void SetActiveCursor(ServerCursor AActiveCursor)
 		{
 			/*
 			if (FActiveCursor != null)
@@ -2624,101 +2139,9 @@ namespace Alphora.Dataphor.DAE.Server
 			//FActiveCursor = null;
 		}
 		
-		// Parameter Translation
-		public DataParams RemoteParamsToDataParams(RemoteParam[] AParams)
-		{
-			if ((AParams != null) && (AParams.Length > 0))
-			{
-				DataParams LParams = new DataParams();
-				foreach (RemoteParam LRemoteParam in AParams)
-					LParams.Add(new DataParam(LRemoteParam.Name, (Schema.ScalarType)ServerSession.Server.Catalog[LRemoteParam.TypeName], (Modifier)LRemoteParam.Modifier));//hack: cast to fix fixup error
-
-				return LParams;
-			}
-			else
-				return null;
-		}
-		
-		public DataParams RemoteParamDataToDataParams(RemoteParamData AParams)
-		{
-			if ((AParams.Params != null) && (AParams.Params.Length > 0))
-			{
-				DataParams LParams = new DataParams();
-				Schema.RowType LRowType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
-					LRowType.Columns.Add(new Schema.Column(AParams.Params[LIndex].Name, (Schema.ScalarType)ServerSession.Server.Catalog[AParams.Params[LIndex].TypeName]));
-					
-				Row LRow = new Row(this, LRowType);
-				try
-				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = AParams.Data.Data;
-
-					for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
-						if (LRow.HasValue(LIndex))
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, LRow[LIndex].Copy()));//Hack: cast to fix fixup error
-						else
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, null));//Hack: cast to fix fixup error
-
-					return LParams;
-				}
-				finally
-				{
-					LRow.Dispose();
-				}
-			}
-			else
-				return null;
-		}
-		
-		public void DataParamsToRemoteParamData(DataParams AParams, ref RemoteParamData ARemoteParams)
-		{
-			if (AParams != null)
-			{
-				Schema.RowType LRowType = new Schema.RowType();
-				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
-					LRowType.Columns.Add(new Schema.Column(AParams[LIndex].Name, AParams[LIndex].DataType));
-					
-				Row LRow = new Row(this, LRowType);
-				try
-				{
-					LRow.ValuesOwned = false;
-					for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
-						LRow[LIndex] = AParams[LIndex].Value;
-					
-					ARemoteParams.Data.Data = LRow.AsPhysical;
-				}
-				finally
-				{
-					LRow.Dispose();
-				}
-			}
-		}
-		
 		// Catalog
 		public Schema.DataTypes DataTypes { get { return FServerSession.Server.Catalog.DataTypes; } }
 
-		string IRemoteServerProcess.GetCatalog(string AName, out long ACacheTimeStamp, out long AClientCacheTimeStamp, out bool ACacheChanged)
-		{
-			ACacheTimeStamp = ServerSession.Server.CacheTimeStamp;
-
-			Schema.Catalog LCatalog = new Schema.Catalog();
-			LCatalog.IncludeDependencies(this, Plan.Catalog, Plan.Catalog[AName], EmitMode.ForRemote);
-			
-			#if LOGCACHEEVENTS
-			ServerSession.Server.LogMessage(String.Format("Getting catalog for data type '{0}'.", AName));
-			#endif
-
-			ACacheChanged = true;
-			string[] LRequiredObjects = ServerSession.Server.CatalogCaches.GetRequiredObjects(ServerSession, LCatalog, ACacheTimeStamp, out AClientCacheTimeStamp);
-			if (LRequiredObjects.Length > 0)
-			{
-				string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(LCatalog.EmitStatement(this, EmitMode.ForRemote, LRequiredObjects));
-				return LCatalogString;
-			}
-			return String.Empty;
-		}
-		
 		// Loading
 		private LoadingContexts FLoadingContexts;
 		

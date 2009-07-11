@@ -20,17 +20,98 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 namespace Alphora.Dataphor.DAE.Server
 {
 	// RemoteServerCursor
-	public class RemoteServerCursor : ServerCursorBase, IRemoteServerCursor
+	public class RemoteServerCursor : RemoteServerChildObject, IRemoteServerCursor
 	{
-		public RemoteServerCursor(ServerPlanBase APlan, DataParams AParams) : base(APlan, AParams){}
+		public RemoteServerCursor(RemoteServerExpressionPlan APlan, ServerCursor AServerCursor) : base()
+		{
+			FPlan = APlan;
+			FServerCursor = AServerCursor;
+			AttachServerCursor();
+		}
 		
-		public IRemoteServerExpressionPlan Plan { get { return (IRemoteServerExpressionPlan)FPlan; } } 
+		private void AttachServerCursor()
+		{
+			FServerCursor.Disposed += new EventHandler(FServerCursorDisposed);
+		}
+
+		void FServerCursorDisposed(object ASender, EventArgs AArgs)
+		{
+			DetachServerCursor();
+			FServerCursor = null;
+			Dispose();
+		}
 		
+		private void DetachServerCursor()
+		{
+			FServerCursor.Disposed -= new EventHandler(FServerCursorDisposed);
+		}
+
+		protected override void Dispose(bool ADisposing)
+		{
+			if (FServerCursor != null)
+			{
+				DetachServerCursor();
+				FServerCursor.Dispose();
+				FServerCursor = null;
+			}
+
+			base.Dispose(ADisposing);
+		}
+		
+		private RemoteServerExpressionPlan FPlan;
+		public RemoteServerExpressionPlan Plan { get { return FPlan; } }
+		
+		IRemoteServerExpressionPlan IRemoteServerCursor.Plan { get { return FPlan; } }
+		
+		private ServerCursor FServerCursor;
+		internal ServerCursor ServerCursor { get { return FServerCursor; } }
+		
+		protected Exception WrapException(Exception AException)
+		{
+			return RemoteServer.WrapException(AException);
+		}
+		
+		// IActive
+
+		// Open        
+		public void Open()
+		{
+			FServerCursor.Open();
+			// TODO: Out params
+		}
+        
+		// Close
+		public void Close()
+		{
+			FServerCursor.Close();
+		}
+        
+		// Active
+		public bool Active
+		{
+			get { return FServerCursor.Active; }
+			set { FServerCursor.Active = value; }
+		}
+        
+		// Isolation
+		public CursorIsolation Isolation { get { return FServerCursor.Isolation; } }
+		
+		// CursorType
+		public CursorType CursorType { get { return FServerCursor.CursorType; } }
+
+		// Capabilities		
+		public CursorCapability Capabilities { get { return FServerCursor.Capabilities; } }
+
+		public bool Supports(CursorCapability ACapability)
+		{
+			return FServerCursor.Supports(ACapability);
+		}
+
 		private Schema.IRowType GetRowType(RemoteRowHeader AHeader)
 		{
-			Schema.IRowType LRowType = FSourceTable.DataType.CreateRowType(false);
+			Schema.IRowType LRowType = new Schema.RowType();
 			for (int LIndex = 0; LIndex < AHeader.Columns.Length; LIndex++)
-				LRowType.Columns.Add(FSourceTable.DataType.Columns[AHeader.Columns[LIndex]].Copy());
+				LRowType.Columns.Add(FServerCursor.SourceRowType.Columns[AHeader.Columns[LIndex]].Copy());
 			return LRowType;
 		}
 		
@@ -40,117 +121,54 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteRowBody"/> structure containing the row information. </returns>
 		public RemoteRowBody Select(RemoteRowHeader AHeader, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Row LRow = new Row(FPlan.Process.ServerProcess, GetRowType(AHeader));
 				try
 				{
-					Row LRow = new Row(FPlan.ServerProcess, GetRowType(AHeader));
-					try
-					{
-						LRow.ValuesOwned = false;
-						FSourceTable.Select(LRow);
-						RemoteRowBody LBody = new RemoteRowBody();
-						LBody.Data = LRow.AsPhysical;
-						return LBody;
-					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					LRow.ValuesOwned = false;
+					FServerCursor.Select(LRow);
+					RemoteRowBody LBody = new RemoteRowBody();
+					LBody.Data = LRow.AsPhysical;
+					return LBody;
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LRow.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
 		public RemoteRowBody Select(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Row LRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 				try
 				{
-					Row LRow = new Row(FPlan.ServerProcess, FSourceRowType);
-					try
-					{
-						LRow.ValuesOwned = false;
-						FSourceTable.Select(LRow);
-						RemoteRowBody LBody = new RemoteRowBody();
-						LBody.Data = LRow.AsPhysical;
-						return LBody;
-					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					LRow.ValuesOwned = false;
+					FServerCursor.Select(LRow);
+					RemoteRowBody LBody = new RemoteRowBody();
+					LBody.Data = LRow.AsPhysical;
+					return LBody;
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LRow.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
-		// SourceFetch
-		protected int SourceFetch(Row[] ARows, Guid[] ABookmarks, int ACount)
-		{
-			int LCount = 0;
-			while (ACount != 0)
-			{
-				if (ACount > 0)
-				{
-					if ((LCount == 0) && FSourceTable.BOF() && !FSourceTable.Next())
-						break;
-
-					if ((LCount > 0) && (!FSourceTable.Next()))
-						break;
-					FSourceTable.Select(ARows[LCount]);
-					ABookmarks[LCount] = InternalGetBookmark();
-					ACount--;
-				}
-				else
-				{
-					if ((LCount == 0) && FSourceTable.EOF() && !FSourceTable.Prior())
-						break;
-						
-					if ((LCount > 0) && (!FSourceTable.Prior()))
-						break;
-					FSourceTable.Select(ARows[LCount]);
-					ABookmarks[LCount] = InternalGetBookmark();
-					ACount++;
-				}
-				LCount++;
-			}
-			return LCount;
-		}
-		
 		private RemoteFetchData InternalFetch(Schema.IRowType ARowType, Guid[] ABookmarks, int ACount)
 		{
 			Row[] LRows = new Row[Math.Abs(ACount)];
@@ -158,18 +176,19 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				for (int LIndex = 0; LIndex < LRows.Length; LIndex++)
 				{
-					LRows[LIndex] = new Row(FPlan.ServerProcess, ARowType);
+					LRows[LIndex] = new Row(FPlan.Process.ServerProcess, ARowType);
 					LRows[LIndex].ValuesOwned = false;
 				}
 				
-				int LCount = SourceFetch(LRows, ABookmarks, ACount);
+				RemoteCursorGetFlags LFlags;
+				int LCount = FServerCursor.Fetch(LRows, ABookmarks, ACount, out LFlags);
 				
 				RemoteFetchData LFetchData = new RemoteFetchData();
 				LFetchData.Body = new RemoteRowBody[LCount];
 				for (int LIndex = 0; LIndex < LCount; LIndex++)
 					LFetchData.Body[LIndex].Data = LRows[LIndex].AsPhysical;
 				
-				LFetchData.Flags = (byte)InternalGetFlags();//hack:cast to fix MSs error
+				LFetchData.Flags = (byte)LFlags; //HACK: cast to fix MSs error
 				return LFetchData;
 			}
 			finally
@@ -186,99 +205,45 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteFetchData"/> structure containing the result of the fetch. </returns>
 		public RemoteFetchData Fetch(RemoteRowHeader AHeader, out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
+
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					ABookmarks = new Guid[Math.Abs(ACount)];
-					return InternalFetch(GetRowType(AHeader), ABookmarks, ACount);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				ABookmarks = new Guid[Math.Abs(ACount)];
+				return InternalFetch(GetRowType(AHeader), ABookmarks, ACount);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
 		public RemoteFetchData Fetch(out Guid[] ABookmarks, int ACount, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					ABookmarks = new Guid[Math.Abs(ACount)];
-					return InternalFetch(FSourceRowType, ABookmarks, ACount);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				ABookmarks = new Guid[Math.Abs(ACount)];
+				return InternalFetch(FServerCursor.SourceRowType, ABookmarks, ACount);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 		
-		private RemoteCursorGetFlags InternalGetFlags()
-		{
-			RemoteCursorGetFlags LGetFlags = RemoteCursorGetFlags.None;
-			if (FSourceTable.BOF())
-				LGetFlags = LGetFlags | RemoteCursorGetFlags.BOF;
-			if (FSourceTable.EOF())
-				LGetFlags = LGetFlags | RemoteCursorGetFlags.EOF;
-			return LGetFlags;
-		}
-
 		/// <summary> Indicates whether the cursor is on the BOF crack, the EOF crack, or both, which indicates an empty cursor. </summary>
 		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the current state of the cursor. </returns>
 		public RemoteCursorGetFlags GetFlags(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalGetFlags();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.GetFlags();
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -287,49 +252,16 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteMoveData"/> structure containing the result of the move. </returns>
 		public RemoteMoveData MoveBy(int ADelta, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					int LDelta = 0;
-					while (ADelta != 0)
-					{
-						if (ADelta > 0)
-						{
-							if (!FSourceTable.Next())
-								break;
-							ADelta--;
-						}
-						else
-						{
-							if (!FSourceTable.Prior())
-								break;
-							ADelta++;
-						}
-						LDelta++;
-					}
-					RemoteMoveData LMoveData = new RemoteMoveData();
-					LMoveData.Count = LDelta;
-					LMoveData.Flags = InternalGetFlags();
-					return LMoveData;
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				RemoteMoveData LMoveData = new RemoteMoveData();
+				LMoveData.Count = FServerCursor.MoveBy(ADelta, out LMoveData.Flags);
+				return LMoveData;
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -337,30 +269,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
 		public RemoteCursorGetFlags First(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					FSourceTable.First();
-					return InternalGetFlags();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.MoveTo(true);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -368,30 +284,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the move. </returns>
 		public RemoteCursorGetFlags Last(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					FSourceTable.Last();
-					return InternalGetFlags();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.MoveTo(false);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -399,30 +299,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the reset. </returns>
 		public RemoteCursorGetFlags Reset(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					FSourceTable.Reset();
-					return InternalGetFlags();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.ResetWithFlags();
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -430,42 +314,27 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the Row to be inserted. </param>
 		public void Insert(RemoteRow ARow, BitArray AValueFlags, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Schema.RowType LType = new Schema.RowType();
+				foreach (string LString in ARow.Header.Columns)
+					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
+				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
 				try
 				{
-					Schema.RowType LType = new Schema.RowType();
-					foreach (string LString in ARow.Header.Columns)
-						LType.Columns.Add(FSourceTable.DataType.Columns[LString].Copy());
-					Row LRow = new Row(FPlan.ServerProcess, LType);
-					try
-					{
-						LRow.ValuesOwned = false;
-						LRow.AsPhysical = ARow.Body.Data;
-						FSourceTable.Insert(null, LRow, AValueFlags, false);
-					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					LRow.ValuesOwned = false;
+					LRow.AsPhysical = ARow.Body.Data;
+					FServerCursor.Insert(LRow, AValueFlags);
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LRow.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -473,71 +342,41 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <param name="ARow"> A <see cref="RemoteRow"/> structure containing the Row to be updated. </param>
 		public void Update(RemoteRow ARow, BitArray AValueFlags, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Schema.RowType LType = new Schema.RowType();
+				foreach (string LString in ARow.Header.Columns)
+					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
+				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
 				try
 				{
-					Schema.RowType LType = new Schema.RowType();
-					foreach (string LString in ARow.Header.Columns)
-						LType.Columns.Add(FSourceTable.DataType.Columns[LString].Copy());
-					Row LRow = new Row(FPlan.ServerProcess, LType);
-					try
-					{
-						LRow.ValuesOwned = false;
-						LRow.AsPhysical = ARow.Body.Data;
-						FSourceTable.Update(LRow, AValueFlags, false);
-					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					LRow.ValuesOwned = false;
+					LRow.AsPhysical = ARow.Body.Data;
+					FServerCursor.Update(LRow, AValueFlags);
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LRow.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
 		/// <summary> Deletes the current DataBuffer from the cursor. </summary>
 		public void Delete(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					FSourceTable.Delete();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				FServerCursor.Delete();
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 		
@@ -548,30 +387,15 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteRowBody"/> structure containing the data for the bookmark. </returns>
 		public Guid GetBookmark(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalGetBookmark();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.GetBookmark();
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
 			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
-			}	
 		}
 
 		/// <summary> Positions the cursor on the DataBuffer denoted by the given bookmark obtained from a previous call to <c> GetBookmark </c> . </summary>
@@ -579,32 +403,16 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the results of the goto call. </returns>
 		public unsafe RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					RemoteGotoData LGotoData = new RemoteGotoData();
-					LGotoData.Success = InternalGotoBookmark(ABookmark, AForward);
-					LGotoData.Flags = InternalGetFlags();
-					return LGotoData;
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				RemoteGotoData LGotoData = new RemoteGotoData();
+				LGotoData.Success = FServerCursor.GotoBookmark(ABookmark, AForward, out LGotoData.Flags);
+				return LGotoData;
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -614,29 +422,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> An integer value indicating whether the first bookmark was less than (negative), equal to (0) or greater than (positive) the second bookmark. </returns>
 		public unsafe int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalCompareBookmarks(ABookmark1, ABookmark2);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.CompareBookmarks(ABookmark1, ABookmark2);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -644,29 +437,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
 		public void DisposeBookmark(Guid ABookmark, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					InternalDisposeBookmark(ABookmark);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				FServerCursor.DisposeBookmark(ABookmark);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -674,69 +452,39 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <remarks> Does nothing if the bookmark does not exist, or has already been disposed. </remarks>
 		public void DisposeBookmarks(Guid[] ABookmarks, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					InternalDisposeBookmarks(ABookmarks);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				FServerCursor.DisposeBookmarks(ABookmarks);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 		
 		/// <value> Accesses the <see cref="Order"/> of the cursor. </value>
-		public string Order { get { return FSourceTable.Node.Order.Name; } }
+		public string Order { get { return FServerCursor.Order.Name; } }
         
 		/// <returns> A <see cref="RemoteRow"/> structure containing the key for current row. </returns>
 		public RemoteRow GetKey(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					Row LKey = FSourceTable.GetKey();
-					RemoteRow LRow = new RemoteRow();
-					LRow.Header = new RemoteRowHeader();
-					LRow.Header.Columns = new string[LKey.DataType.Columns.Count];
-					for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
-						LRow.Header.Columns[LIndex] = LKey.DataType.Columns[LIndex].Name;
-					LRow.Body = new RemoteRowBody();
-					LRow.Body.Data = LKey.AsPhysical;
-					return LRow;
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				Row LKey = FServerCursor.GetKey();
+				RemoteRow LRow = new RemoteRow();
+				LRow.Header = new RemoteRowHeader();
+				LRow.Header.Columns = new string[LKey.DataType.Columns.Count];
+				for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
+					LRow.Header.Columns[LIndex] = LKey.DataType.Columns[LIndex].Name;
+				LRow.Body = new RemoteRowBody();
+				LRow.Body.Data = LKey.AsPhysical;
+				return LRow;
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
@@ -745,46 +493,30 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the results of the find. </returns>
 		public RemoteGotoData FindKey(RemoteRow AKey, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Schema.RowType LType = new Schema.RowType();
+				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
+					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
+
+				Row LKey = new Row(FPlan.Process.ServerProcess, LType);
 				try
 				{
-					Schema.RowType LType = new Schema.RowType();
-					for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
-						LType.Columns.Add(FSourceTable.DataType.Columns[AKey.Header.Columns[LIndex]].Copy());
-
-					Row LKey = new Row(FPlan.ServerProcess, LType);
-					try
-					{
-						LKey.ValuesOwned = false;
-						LKey.AsPhysical = AKey.Body.Data;
-						RemoteGotoData LGotoData = new RemoteGotoData();
-						LGotoData.Success = FSourceTable.FindKey(LKey);
-						LGotoData.Flags = InternalGetFlags();
-						return LGotoData;
-					}
-					finally
-					{
-						LKey.Dispose();
-					}
+					LKey.ValuesOwned = false;
+					LKey.AsPhysical = AKey.Body.Data;
+					RemoteGotoData LGotoData = new RemoteGotoData();
+					LGotoData.Success = FServerCursor.FindKey(LKey, out LGotoData.Flags);
+					return LGotoData;
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LKey.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
@@ -793,44 +525,30 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteCursorGetFlags"/> value indicating the state of the cursor after the search. </returns>
 		public RemoteCursorGetFlags FindNearest(RemoteRow AKey, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Schema.RowType LType = new Schema.RowType();
+				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
+					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
+
+				Row LKey = new Row(FPlan.Process.ServerProcess, LType);
 				try
 				{
-					Schema.RowType LType = new Schema.RowType();
-					for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
-						LType.Columns.Add(FSourceTable.DataType.Columns[AKey.Header.Columns[LIndex]].Copy());
-
-					Row LKey = new Row(FPlan.ServerProcess, LType);
-					try
-					{
-						LKey.ValuesOwned = false;
-						LKey.AsPhysical = AKey.Body.Data;
-						FSourceTable.FindNearest(LKey);
-						return InternalGetFlags();
-					}
-					finally
-					{
-						LKey.Dispose();
-					}
+					LKey.ValuesOwned = false;
+					LKey.AsPhysical = AKey.Body.Data;
+					RemoteCursorGetFlags LFlags;
+					FServerCursor.FindNearest(LKey, out LFlags);
+					return LFlags;
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LKey.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
@@ -839,46 +557,30 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the result of the refresh. </returns>
 		public RemoteGotoData Refresh(RemoteRow ARow, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
+				Schema.RowType LType = new Schema.RowType();
+				for (int LIndex = 0; LIndex < ARow.Header.Columns.Length; LIndex++)
+					LType.Columns.Add(FServerCursor.SourceRowType.Columns[ARow.Header.Columns[LIndex]].Copy());
+
+				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
 				try
 				{
-					Schema.RowType LType = new Schema.RowType();
-					for (int LIndex = 0; LIndex < ARow.Header.Columns.Length; LIndex++)
-						LType.Columns.Add(FSourceTable.DataType.Columns[ARow.Header.Columns[LIndex]].Copy());
-
-					Row LRow = new Row(FPlan.ServerProcess, LType);
-					try
-					{
-						LRow.ValuesOwned = false;
-						LRow.AsPhysical = ARow.Body.Data;
-						RemoteGotoData LGotoData = new RemoteGotoData();
-						LGotoData.Success = FSourceTable.Refresh(LRow);
-						LGotoData.Flags = InternalGetFlags();
-						return LGotoData;
-					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					LRow.ValuesOwned = false;
+					LRow.AsPhysical = ARow.Body.Data;
+					RemoteGotoData LGotoData = new RemoteGotoData();
+					LGotoData.Success = FServerCursor.Refresh(LRow, out LGotoData.Flags);
+					return LGotoData;
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					LRow.Dispose();
 				}
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -886,52 +588,29 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns>An integer value indicating the number of rows in the cursor.</returns>
 		public int RowCount(ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return FSourceTable.RowCount();
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return FServerCursor.RowCount();
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 		
 		private RemoteProposeData InternalDefault(RemoteRowBody ARow, string AColumn)
 		{
-			Row LRow = new Row(FPlan.ServerProcess, FSourceTable.DataType.RowType);
+			Row LRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					LRow.ValuesOwned = false;
-					LRow.AsPhysical = ARow.Data;
-					RemoteProposeData LProposeData = new RemoteProposeData();
-					LProposeData.Success = ((TableNode)SourceNode).Default(FPlan.ServerProcess, null, LRow, null, AColumn);
-					LProposeData.Body = new RemoteRowBody();
-					LProposeData.Body.Data = LRow.AsPhysical;
-					return LProposeData;
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				LRow.ValuesOwned = false;
+				LRow.AsPhysical = ARow.Data;
+				RemoteProposeData LProposeData = new RemoteProposeData();
+				LProposeData.Success = FServerCursor.Default(LRow, AColumn);
+				LProposeData.Body = new RemoteRowBody();
+				LProposeData.Body.Data = LRow.AsPhysical;
+				return LProposeData;
 			}
 			finally
 			{
@@ -948,47 +627,32 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns></returns>
 		public RemoteProposeData Default(RemoteRowBody ARow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalDefault(ARow, AColumn);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return InternalDefault(ARow, AColumn);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
         
 		private RemoteProposeData InternalChange(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
 		{
-			Row LOldRow = new Row(FPlan.ServerProcess, FSourceTable.DataType.RowType);
+			Row LOldRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 			try
 			{
 				LOldRow.ValuesOwned = false;
 				LOldRow.AsPhysical = AOldRow.Data;
 				
-				Row LNewRow = new Row(FPlan.ServerProcess, FSourceTable.DataType.RowType);
+				Row LNewRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 				try
 				{
 					LNewRow.ValuesOwned = false;
 					LNewRow.AsPhysical = ANewRow.Data;
 					RemoteProposeData LProposeData = new RemoteProposeData();
-					LProposeData.Success = ((TableNode)SourceNode).Change(FPlan.ServerProcess, LOldRow, LNewRow, null, AColumn);
+					LProposeData.Success = FServerCursor.Change(LOldRow, LNewRow, AColumn);
 					LProposeData.Body = new RemoteRowBody();
 					LProposeData.Body.Data = LNewRow.AsPhysical;
 					return LProposeData;
@@ -1012,29 +676,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <returns></returns>
 		public RemoteProposeData Change(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalChange(AOldRow, ANewRow, AColumn);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return InternalChange(AOldRow, ANewRow, AColumn);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 
@@ -1042,7 +691,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			Row LOldRow = null;
 			if (AOldRow.Data != null)
-				LOldRow = new Row(FPlan.ServerProcess, FSourceTable.DataType.RowType);
+				LOldRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 			try
 			{
 				if (LOldRow != null)
@@ -1051,13 +700,13 @@ namespace Alphora.Dataphor.DAE.Server
 					LOldRow.AsPhysical = AOldRow.Data;
 				}
 				
-				Row LNewRow = new Row(FPlan.ServerProcess, FSourceTable.DataType.RowType);
+				Row LNewRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
 				try
 				{
 					LNewRow.ValuesOwned = false;
 					LNewRow.AsPhysical = ANewRow.Data;
 					RemoteProposeData LProposeData = new RemoteProposeData();
-					LProposeData.Success = ((TableNode)SourceNode).Validate(FPlan.ServerProcess, LOldRow, LNewRow, null, AColumn);
+					LProposeData.Success = FServerCursor.Validate(LOldRow, LNewRow, AColumn);
 					LProposeData.Body = new RemoteRowBody();
 					LProposeData.Body.Data = LNewRow.AsPhysical;
 					return LProposeData;
@@ -1081,29 +730,14 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <param name="AColumn"></param>
 		public RemoteProposeData Validate(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn, ProcessCallInfo ACallInfo)
 		{
-			FPlan.ServerProcess.ProcessCallInfo(ACallInfo);
-			Exception LException = null;
-			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return InternalValidate(ANewRow, AOldRow, AColumn);
-				}
-				finally
-				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
+				return InternalValidate(ANewRow, AOldRow, AColumn);
 			}
 			catch (Exception E)
 			{
-				LException = E;
 				throw WrapException(E);
-			}
-			finally
-			{
-				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
 	}

@@ -12,7 +12,7 @@
 //
 
 create device Pubs
-	reconciliation { mode = { Command }, master = device}
+	reconciliation { mode = { None }, master = device}
 	class "MSSQLDevice.MSSQLDevice"
 	attributes
 	{

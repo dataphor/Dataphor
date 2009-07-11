@@ -13,21 +13,45 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class ServerObject : IDisposableNotify
+	public class RemoteServerObject : MarshalByRefObject, IDisposableNotify
 	{
+		public const int CLeaseManagerPollTimeSeconds = 60;
+
+		static RemoteServerObject()
+		{
+			LifetimeServices.LeaseManagerPollTime = TimeSpan.FromSeconds(CLeaseManagerPollTimeSeconds);
+			LifetimeServices.LeaseTime = TimeSpan.Zero; // default lease to infinity (overridden for session)
+		}
+
 		protected virtual void Dispose(bool ADisposing)
 		{
 			#if USEFINALIZER
 			GC.SuppressFinalize(this);
 			#endif
-			DoDispose();
+			try
+			{
+				DoDispose();
+			}
+			finally
+			{
+				ILease LLease = (ILease)GetLifetimeService();
+				if (LLease != null)
+				{
+					// Calling cancel on the lease will invoke disconnect on the lease and the server object
+					LLease.GetType().GetMethod("Cancel", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(LLease, null);
+				}
+				else
+					RemotingServices.Disconnect(this);
+			}
 		}
 
 		#if USEFINALIZER
-		~ServerObject()
+		~RemoteServerObject()
 		{
 			#if THROWINFINALIZER
 			throw new BaseException(BaseException.Codes.FinalizerInvoked);
@@ -45,10 +69,10 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 	}
 	
-	public class ServerChildObject : IDisposableNotify
+	public class RemoteServerChildObject : MarshalByRefObject, IDisposableNotify
 	{
 		#if USEFINALIZER
-		~ServerChildObject()
+		~RemoteServerChildObject()
 		{
 			#if THROWINFINALIZER
 			throw new BaseException(BaseException.Codes.FinalizerInvoked);
@@ -60,7 +84,17 @@ namespace Alphora.Dataphor.DAE.Server
         
 		protected virtual void Dispose(bool ADisposing)
 		{
-			DoDispose();
+			try
+			{
+				DoDispose();
+			}
+			finally
+			{
+				ILease LLease = (ILease)GetLifetimeService();
+				if (LLease != null)
+					LLease.GetType().GetMethod("Remove", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(LLease, null);
+				RemotingServices.Disconnect(this);
+			}
 		}
 		
 		public void Dispose()
@@ -79,34 +113,35 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 	}
 
-	public class ServerChildObjects : Disposable, IList
+	[Serializable]	
+	public class RemoteServerChildObjects : Disposable, IList
 	{
 		private const int CDefaultInitialCapacity = 8;
 		private const int CDefaultRolloverCount = 20;
 		        
-		private ServerChildObject[] FItems;
+		private RemoteServerChildObject[] FItems;
 		private int FCount;
 		private bool FIsOwner = true;
 		
-		public ServerChildObjects() : base()
+		public RemoteServerChildObjects() : base()
 		{
-			FItems = new ServerChildObject[CDefaultInitialCapacity];
+			FItems = new RemoteServerChildObject[CDefaultInitialCapacity];
 		}
 		
-		public ServerChildObjects(bool AIsOwner)
+		public RemoteServerChildObjects(bool AIsOwner)
 		{
-			FItems = new ServerChildObject[CDefaultInitialCapacity];
+			FItems = new RemoteServerChildObject[CDefaultInitialCapacity];
 			FIsOwner = AIsOwner;
 		}
 		
-		public ServerChildObjects(int AInitialCapacity) : base()
+		public RemoteServerChildObjects(int AInitialCapacity) : base()
 		{
-			FItems = new ServerChildObject[AInitialCapacity];
+			FItems = new RemoteServerChildObject[AInitialCapacity];
 		}
 		
-		public ServerChildObjects(int AInitialCapacity, bool AIsOwner) : base()
+		public RemoteServerChildObjects(int AInitialCapacity, bool AIsOwner) : base()
 		{
-			FItems = new ServerChildObject[AInitialCapacity];
+			FItems = new RemoteServerChildObject[AInitialCapacity];
 			FIsOwner = AIsOwner;
 		}
 		
@@ -122,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public ServerChildObject this[int AIndex] 
+		public RemoteServerChildObject this[int AIndex] 
 		{ 
 			get
 			{ 
@@ -138,7 +173,7 @@ namespace Alphora.Dataphor.DAE.Server
 			} 
 		}
 		
-		protected int InternalIndexOf(ServerChildObject AItem)
+		protected int InternalIndexOf(RemoteServerChildObject AItem)
 		{
 			for (int LIndex = 0; LIndex < FCount; LIndex++)
 				if (FItems[LIndex] == AItem)
@@ -146,7 +181,7 @@ namespace Alphora.Dataphor.DAE.Server
 			return -1;
 		}
 		
-		public int IndexOf(ServerChildObject AItem)
+		public int IndexOf(RemoteServerChildObject AItem)
 		{
 			lock (this)
 			{
@@ -154,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool Contains(ServerChildObject AItem)
+		public bool Contains(RemoteServerChildObject AItem)
 		{
 			return IndexOf(AItem) >= 0;
 		}
@@ -177,9 +212,9 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private void InternalInsert(int AIndex, object AItem)
 		{
-			ServerChildObject LObject;
-			if (AItem is ServerChildObject)
-				LObject = (ServerChildObject)AItem;
+			RemoteServerChildObject LObject;
+			if (AItem is RemoteServerChildObject)
+				LObject = (RemoteServerChildObject)AItem;
 			else
 				throw new ServerException(ServerException.Codes.ObjectContainer);
 				
@@ -207,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (FItems.Length != AValue)
 			{
-				ServerChildObject[] LNewItems = new ServerChildObject[AValue];
+				RemoteServerChildObject[] LNewItems = new RemoteServerChildObject[AValue];
 				for (int LIndex = 0; LIndex < ((FCount > AValue) ? AValue : FCount); LIndex++)
 					LNewItems[LIndex] = FItems[LIndex];
 
@@ -249,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Remove(ServerChildObject AValue)
+		public void Remove(RemoteServerChildObject AValue)
 		{
 			lock (this)
 			{
@@ -268,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected bool FDisowning;
 		
-		public ServerChildObject Disown(ServerChildObject AValue)
+		public RemoteServerChildObject Disown(RemoteServerChildObject AValue)
 		{
 			lock (this)
 			{
@@ -285,7 +320,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public ServerChildObject SafeDisown(ServerChildObject AValue)
+		public RemoteServerChildObject SafeDisown(RemoteServerChildObject AValue)
 		{
 			lock (this)
 			{
@@ -304,11 +339,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public ServerChildObject DisownAt(int AIndex)
+		public RemoteServerChildObject DisownAt(int AIndex)
 		{
 			lock (this)
 			{
-				ServerChildObject LValue = FItems[AIndex];
+				RemoteServerChildObject LValue = FItems[AIndex];
 				FDisowning = true;
 				try
 				{
@@ -324,19 +359,19 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected virtual void ObjectDispose(object ASender, EventArgs AArgs)
 		{
-			Disown((ServerChildObject)ASender);
+			Disown((RemoteServerChildObject)ASender);
 		}
 		
-		protected virtual void Validate(ServerChildObject AObject)
+		protected virtual void Validate(RemoteServerChildObject AObject)
 		{
 		}
 		
-		protected virtual void Adding(ServerChildObject AObject, int AIndex)
+		protected virtual void Adding(RemoteServerChildObject AObject, int AIndex)
 		{
 			AObject.Disposed += new EventHandler(ObjectDispose);
 		}
 		
-		protected virtual void Removing(ServerChildObject AObject, int AIndex)
+		protected virtual void Removing(RemoteServerChildObject AObject, int AIndex)
 		{
 			AObject.Disposed -= new EventHandler(ObjectDispose);
 
@@ -345,10 +380,10 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// IList
-		object IList.this[int AIndex] { get { return this[AIndex]; } set { this[AIndex] = (ServerChildObject)value; } }
-		int IList.IndexOf(object AItem) { return (AItem is ServerChildObject) ? IndexOf((ServerChildObject)AItem) : -1; }
-		bool IList.Contains(object AItem) { return (AItem is ServerChildObject) ? Contains((ServerChildObject)AItem) : false; }
-		void IList.Remove(object AItem) { RemoveAt(IndexOf((ServerChildObject)AItem)); }
+		object IList.this[int AIndex] { get { return this[AIndex]; } set { this[AIndex] = (RemoteServerChildObject)value; } }
+		int IList.IndexOf(object AItem) { return (AItem is RemoteServerChildObject) ? IndexOf((RemoteServerChildObject)AItem) : -1; }
+		bool IList.Contains(object AItem) { return (AItem is RemoteServerChildObject) ? Contains((RemoteServerChildObject)AItem) : false; }
+		void IList.Remove(object AItem) { RemoveAt(IndexOf((RemoteServerChildObject)AItem)); }
 		bool IList.IsFixedSize { get { return false; } }
 		bool IList.IsReadOnly { get { return false; } }
 		
@@ -367,9 +402,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// IEnumerable
-		public ServerChildObjectEnumerator GetEnumerator()
+		public RemoteServerChildObjectEnumerator GetEnumerator()
 		{
-			return new ServerChildObjectEnumerator(this);
+			return new RemoteServerChildObjectEnumerator(this);
 		}
 		
 		IEnumerator IEnumerable.GetEnumerator()
@@ -377,17 +412,17 @@ namespace Alphora.Dataphor.DAE.Server
 			return GetEnumerator();
 		}
 		
-		public class ServerChildObjectEnumerator : IEnumerator
+		public class RemoteServerChildObjectEnumerator : IEnumerator
 		{
-			public ServerChildObjectEnumerator(ServerChildObjects AObjects) : base()
+			public RemoteServerChildObjectEnumerator(RemoteServerChildObjects AObjects) : base()
 			{
 				FObjects = AObjects;
 			}
 			
-			private ServerChildObjects FObjects;
+			private RemoteServerChildObjects FObjects;
 			private int FCurrent =  -1;
 
-			public ServerChildObject Current { get { return FObjects[FCurrent]; } }
+			public RemoteServerChildObject Current { get { return FObjects[FCurrent]; } }
 			
 			object IEnumerator.Current { get { return Current; } }
 			

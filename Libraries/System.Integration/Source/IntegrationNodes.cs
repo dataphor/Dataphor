@@ -57,8 +57,8 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProcess).PrepareExpression(Nodes[1].Execute(AProcess).Value.AsString, null);
 				try
 				{
-					TableNode ASourceTable = ((CursorNode)((ServerPlanBase)ASourcePlan).Code).SourceNode;
-					TableNode ATargetTable = ((CursorNode)((ServerPlanBase)ATargetPlan).Code).SourceNode;
+					TableNode ASourceTable = ((CursorNode)((ServerPlan)ASourcePlan).Code).SourceNode;
+					TableNode ATargetTable = ((CursorNode)((ServerPlan)ATargetPlan).Code).SourceNode;
 
 					return CopyTablesNode.InternalCopy(AProcess, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 				}

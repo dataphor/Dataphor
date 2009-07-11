@@ -48,9 +48,9 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class CachedPlans : List
 	{
-		public new ServerPlanBase this[int AIndex]
+		public new ServerPlan this[int AIndex]
 		{
-			get { return (ServerPlanBase)base[AIndex]; }
+			get { return (ServerPlan)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
 	}
@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private FixedSizeCache FPlans; // FixedSizeCache ( <CachedPlanHeader>, <CachedPlans> )
 		
-		private void DisposeCachedPlan(ServerProcess AProcess, ServerPlanBase APlan)
+		private void DisposeCachedPlan(ServerProcess AProcess, ServerPlan APlan)
 		{
 			try
 			{
@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private void DisposeCachedPlans(ServerProcess AProcess, CachedPlans APlans)
 		{
-			foreach (ServerPlanBase LPlan in APlans)
+			foreach (ServerPlan LPlan in APlans)
 				DisposeCachedPlan(AProcess, LPlan);
 		}
 		
@@ -99,9 +99,9 @@ namespace Alphora.Dataphor.DAE.Server
 		/// The client must call Release to return the plan to the cache.
 		/// If no plan is found, null is returned and the cache is unaffected.
 		/// </remarks>
-		public ServerPlanBase Get(ServerProcess AProcess, string AStatement, int AContextHashCode)
+		public ServerPlan Get(ServerProcess AProcess, string AStatement, int AContextHashCode)
 		{
-			ServerPlanBase LPlan = null;
+			ServerPlan LPlan = null;
 			CachedPlanHeader LHeader = GetPlanHeader(AProcess, AStatement, AContextHashCode);
 			CachedPlans LBumped = null;
 			lock (this)
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// The plan is not contained within the cache after this call, it is assumed in use by the client.
 		/// This call simply reserves storage and marks the plan as referenced for the LRU.
 		/// </remarks>
-		public void Add(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlanBase APlan)
+		public void Add(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
 		{
 			CachedPlans LBumped = null;
 			CachedPlanHeader LHeader = GetPlanHeader(AProcess, AStatement, AContextHashCode);
@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// If the plan is returned to the cache, the client is no longer responsible for the plan, it is owned by the cache.
 		/// If the plan is not returned to the cache, the cache client is responsible for disposing the plan.
 		///	</remarks>
-		public bool Release(ServerProcess AProcess, ServerPlanBase APlan)
+		public bool Release(ServerProcess AProcess, ServerPlan APlan)
 		{
 			CachedPlanHeader LHeader = APlan.Header;
 

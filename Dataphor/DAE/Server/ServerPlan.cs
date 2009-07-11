@@ -20,9 +20,9 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public abstract class ServerPlanBase : ServerChildObject, IServerPlanBase
+	public abstract class ServerPlan : ServerChildObject, IServerPlanBase, IServerPlan
 	{        
-		protected internal ServerPlanBase(ServerProcess AProcess) : base()
+		protected internal ServerPlan(ServerProcess AProcess) : base()
 		{
 			FProcess = AProcess;
 			FPlan = new Plan(AProcess);
@@ -106,6 +106,10 @@ namespace Alphora.Dataphor.DAE.Server
 		protected ServerProcess FProcess;
 		public ServerProcess ServerProcess { get { return FProcess; } }
 		
+		public IServerProcess Process  { get { return (IServerProcess)FProcess; } }
+		
+		public CompilerMessages Messages { get { return Plan.Messages; } }
+
 		public void BindToProcess(ServerProcess AProcess)
 		{
 			FProcess = AProcess;
@@ -114,10 +118,10 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// ActiveCursor
-		protected ServerCursorBase FActiveCursor;
-		public ServerCursorBase ActiveCursor { get { return FActiveCursor; } }
+		protected ServerCursor FActiveCursor;
+		public ServerCursor ActiveCursor { get { return FActiveCursor; } }
 		
-		public void SetActiveCursor(ServerCursorBase AActiveCursor)
+		public void SetActiveCursor(ServerCursor AActiveCursor)
 		{
 			if (FActiveCursor != null)
 				throw new ServerException(ServerException.Codes.PlanCursorActive);
@@ -170,13 +174,13 @@ namespace Alphora.Dataphor.DAE.Server
 	{		
 		protected override void Validate(ServerChildObject AObject)
 		{
-			if (!(AObject is ServerPlanBase))
+			if (!(AObject is ServerPlan))
 				throw new ServerException(ServerException.Codes.ServerPlanContainer);
 		}
 		
-		public new ServerPlanBase this[int AIndex]
+		public new ServerPlan this[int AIndex]
 		{
-			get { return (ServerPlanBase)base[AIndex]; }
+			get { return (ServerPlan)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
 	}

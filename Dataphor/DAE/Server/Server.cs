@@ -7,6 +7,8 @@
 //#define TRACEEVENTS // Enable this to turn on tracing
 #define ALLOWPROCESSCONTEXT
 #define LOADFROMLIBRARIES
+//#define USETHREADABORT
+//#define LOGCACHEEVENTS
 
 using System;
 using System.IO;
@@ -20,12 +22,10 @@ using System.EnterpriseServices;
 using System.Threading;
 using System.Reflection;
 using System.Resources;
-using Remoting = System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
-using System.Runtime.Remoting.Services;
 using System.Security.Principal;
 
 using Alphora.Dataphor;
+using Alphora.Dataphor.Logging;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
@@ -40,12 +40,11 @@ using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
-using Alphora.Dataphor.Logging;
 
 /*
 	DAE Object Hierarchy ->
 	
-		System.MarshalByRefObject
+		System.Object
 			|- ServerObject
 			|	|- Server
 			|	|- ServerChildObject
@@ -53,18 +52,25 @@ using Alphora.Dataphor.Logging;
 			|	|	|- ServerProcess
 			|	|	|- ServerScript
 			|	|	|- ServerBatch
-			|	|	|- ServerPlanBase
-			|	|	|	|- ServerPlan
-			|	|	|	|	|- ServerStatementPlan
-			|	|	|	|	|- ServerExpressionPlan
-			|	|	|	|- RemoteServerPlan
-			|	|	|	|	|- RemoteServerStatementPlan
-			|	|	|	|	|- RemoteServerExpressionPlan
-			|	|	|- ServerCursorBase
-			|	|	|	|- ServerCursor
-			|	|	|	|- RemoteServerCursor
-				
-	
+			|	|	|- ServerPlan
+			|	|	|	|- ServerStatementPlan
+			|	|	|	|- ServerExpressionPlan
+			|	|	|- ServerCursor
+
+ 		System.MarshalByRefObject
+			|- RemoteServerObject
+				|- RemoteServer
+				|- RemoteServerChildObject
+					|- RemoteServerConnection
+					|- RemoteServerSession
+					|- RemoteServerProcess
+					|- RemoteServerScript
+					|- RemoteServerBatch
+					|- RemoteServerPlan
+					|	|- RemoteServerStatementPlan
+					|	|- RemoteServerExpressionPlan
+					|- RemoteServerCursor				
+
 	DAE Server Transaction Management ->
 	
 		The DAE is capable of using the MS DTC through .NET Enterprise Services, if it is running on Windows 2000 or higher.  The UseDTC
@@ -89,7 +95,7 @@ namespace Alphora.Dataphor.DAE.Server
 	///		through the IServerXXX common interfaces which make up the DAE CLI.  Instances
 	///		are usually created and obtained through the <see cref="ServerFactory"/> class.
 	/// </remarks>
-	public class Server : ServerObject, IDisposable, IServer, IRemoteServer, ITrackingHandler
+	public class Server : ServerObject, IDisposable, IServer
 	{
 		// Do not localize
 		public const string CDefaultServerName = "Dataphor";
@@ -144,8 +150,6 @@ namespace Alphora.Dataphor.DAE.Server
 		public Server() : base()
 		{
 			FSessions = new ServerSessions();
-			FConnections = new ServerConnections();
-			TrackingServices.RegisterTrackingHandler(this);
 		}
         
 		public void Dispose()
@@ -159,14 +163,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				try
 				{
-					try
-					{
-						TrackingServices.UnregisterTrackingHandler(this);
-					}
-					finally
-					{
-						Stop();
-					}
+					Stop();
 				}
 				finally
 				{
@@ -239,7 +236,6 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FResourceManagers = new Hashtable();
 			FCatalog = new Schema.Catalog();
-			FCatalogCaches = new CatalogCaches();
 			RegisterResourceManager(CCatalogManagerID, FCatalog);
 			FPlanCache = new PlanCache(CDefaultPlanCacheSize);
 			if (FLockManager == null)
@@ -659,48 +655,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public bool IsRemotableExceptionClass(Exception AException)
-		{
-			return (AException is DAEException) || (AException.GetType() == typeof(DataphorException));
-		}
-		
-		public bool IsRemotableException(Exception AException)
-		{
-			if (!IsRemotableExceptionClass(AException))
-				return false;
-				
-			Exception LException = AException;
-			while (LException != null)
-			{
-				if (!IsRemotableExceptionClass(LException))
-					return false;
-				LException = LException.InnerException;
-			}
-			return true;
-		}
-		
-		public Exception EnsureRemotableException(Exception AException)
-		{
-			if (!IsRemotableException(AException))
-			{
-                SRFLogger.WriteLine(TraceLevel.Warning,"Exception is not remotable: {0}", AException);
-                Exception LInnerException = null;
-				if (AException.InnerException != null)
-					LInnerException = EnsureRemotableException(AException.InnerException);
-					
-				AException = new DataphorException(AException, LInnerException);
-			}
-			
-			return AException;
-		}
-		
-		public Exception WrapException(Exception AException, bool AIsRemoteCall)
+		public Exception WrapException(Exception AException)
 		{			
             if (FLogErrors)
 				LogError(AException);
-				
-			if (!IsRepository && AIsRemoteCall)
-				AException = EnsureRemotableException(AException);
 				
 			return AException;
 		}
@@ -779,7 +737,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			catch (Exception E)
 			{
-			    Exception LWrappedException = WrapException(E, true);
+			    Exception LWrappedException = WrapException(E);
                 throw LWrappedException;
 			}
 			finally
@@ -863,7 +821,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			catch (Exception E)
 			{
-				throw WrapException(E, true);
+				throw WrapException(E);
 			}
 			finally
 			{
@@ -1034,30 +992,15 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						try
 						{
-							try
+							if (FPlanCache != null)
 							{
-								try
-								{
-									//if (FCatalogLoaded)
-									//	SaveCatalog(false);
-								}
-								finally
-								{
-									if (FPlanCache != null)
-									{
-										FPlanCache.Clear(FSystemProcess);
-										FPlanCache = null;
-									}
-								}
-							}
-							finally
-							{
-								StopDevices();
+								FPlanCache.Clear(FSystemProcess);
+								FPlanCache = null;
 							}
 						}
 						finally
 						{
-							CloseConnections();
+							StopDevices();
 						}
 					}
 					finally
@@ -1187,82 +1130,18 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		// Catalog Caches
-		private CatalogCaches FCatalogCaches;
-		public CatalogCaches CatalogCaches { get { return FCatalogCaches; } }
-		
 		// Sessions
 		private ServerSessions FSessions;
 		internal ServerSessions Sessions { get { return FSessions; } }
 		
-		// Connections
-		private ServerConnections FConnections;
-		internal ServerConnections Connections { get { return FConnections; } }
-
-		public void DisconnectedObject(object AObject)
-		{
-			// Check if this object is a connection that needs to be disposed and dispose it if so
-			// This should not recurse because the RemotingServices.Disconnect call in the connection dispose
-			//  should not notify TrackingHandlers if the object has already been disconnected, and if the 
-			//  connection has already been disposed than it should no longer be associated with this server
-			// BTR 5/12/2005 -> Use a thread pool to perform this call so that there is no chance of blocking
-			// the lease manager.
-			ServerConnection LConnection = AObject as ServerConnection;
-			if ((LConnection != null) && (LConnection.Server == this))
-				ThreadPool.QueueUserWorkItem(new WaitCallback(DisposeConnection), LConnection);
-		}
-		
-		private void DisposeConnection(Object AStateInfo)
-		{
-			try
-			{
-				ServerConnection LConnection = AStateInfo as ServerConnection;
-				
-				LConnection.CloseSessions();
-				
-				BeginCall();	// sync here; we may be coming in on a remoting thread
-				try
-				{
-					FConnections.SafeDisown(LConnection);
-				}
-				finally
-				{
-					EndCall();
-				}
-				
-				try
-				{
-					LConnection.Dispose();
-				}
-				catch (Exception E)
-				{
-					LogError(E);
-				}
-			}
-			catch
-			{
-				// Don't allow exceptions to go unhandled... the framework will abort the application
-			}
-		}
-
-		public void UnmarshaledObject(object AObject, System.Runtime.Remoting.ObjRef ARef)
-		{
-			// nothing (part of ITrackingHandler)
-		}
-
-		public void MarshaledObject(object AObject, System.Runtime.Remoting.ObjRef ARef)
-		{
-			// nothing (part of ITrackingHandler)
-		}
-
 		private int FNextSessionID = 1;
 		private int GetNextSessionID()
 		{
 			return Interlocked.Increment(ref FNextSessionID);
 		}
 		
-		// IServer.Connect
-		IServerSession IServer.Connect(SessionInfo ASessionInfo)
+		// Connect
+		public IServerSession Connect(SessionInfo ASessionInfo)
 		{
 			BeginCall();
 			try
@@ -1277,7 +1156,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			catch (Exception E)
 			{
-				throw WrapException(E, false);
+				throw WrapException(E);
 			}
 			finally
 			{
@@ -1285,8 +1164,8 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		// IServer.Disconnect
-		void IServer.Disconnect(IServerSession ASession)
+		// Disconnect
+		public void Disconnect(IServerSession ASession)
 		{
 			try
 			{
@@ -1297,7 +1176,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				catch (Exception E)
 				{
-					throw WrapException(E, false);
+					throw WrapException(E);
 				}
 			}
 			finally
@@ -1315,107 +1194,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public IRemoteServerConnection Establish(string AConnectionName, string AHostName)
-		{
-			BeginCall();
-			try
-			{
-				CheckState(ServerState.Started);
-				ServerConnection LConnection = new ServerConnection(this, AConnectionName, AHostName);
-				try
-				{
-					FConnections.Add(LConnection);
-					return LConnection;
-				}
-				catch
-				{
-					LConnection.Dispose();
-					throw;
-				}
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E, true);
-			}
-			finally
-			{
-				EndCall();
-			}
-		}
-        
-        public void Relinquish(IRemoteServerConnection AConnection)
-        {
-			ServerConnection LConnection = AConnection as ServerConnection;
-			LConnection.CloseSessions();
-
-			BeginCall();
-			try
-			{
-				FConnections.SafeDisown(LConnection);
-			}
-			finally
-			{
-				EndCall();
-			}
-			
-			try
-			{
-				LConnection.Dispose();
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E, true);
-			}
-        }
-        
-        internal ServerSession RemoteConnect(SessionInfo ASessionInfo)
-        {
-			BeginCall();
-			try
-			{
-				#if TIMING
-				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- IRemoteServer.Connect", DateTime.Now.ToString("hh:mm:ss.ffff")));
-				#endif
-				CheckState(ServerState.Started);
-				return InternalConnect(GetNextSessionID(), ASessionInfo);
-			}
-			catch (Exception E)
-			{
-				throw WrapException(E, true);
-			}
-			finally
-			{
-				EndCall();
-			}
-        }
-        
-        internal void RemoteDisconnect(ServerSession ASession)
-        {
-			try
-			{
-				try
-				{
-					InternalDisconnect(ASession);
-				}
-				catch (Exception E)
-				{
-					throw WrapException(E, true);
-				}
-			}
-			finally
-			{
-				BeginCall();
-				try
-				{
-					FSessions.SafeDisown(ASession);
-				}
-				finally
-				{
-					EndCall();
-				}
-			}
-        }
-        
 		private Schema.User ValidateLogin(int ASessionID, SessionInfo ASessionInfo)
 		{
 			if (ASessionInfo == null)
@@ -1463,9 +1241,7 @@ namespace Alphora.Dataphor.DAE.Server
 					LCurrentLibrary = FCatalog.LoadedLibraries[CGeneralLibraryName];
 					
 				LSession.CurrentLibrary = LCurrentLibrary;
-					
-				if (ASessionInfo.CatalogCacheName != String.Empty)
-					FCatalogCaches.AddSession(LSession);
+
 				FSessions.Add(LSession);
 				return LSession;
 			}
@@ -1479,24 +1255,6 @@ namespace Alphora.Dataphor.DAE.Server
 		private void InternalDisconnect(ServerSession ASession)
 		{
 			ASession.Dispose();
-		}
-		
-		private void CloseConnections()
-		{
-			if (FConnections != null)
-			{
-				while (FConnections.Count > 0)
-				{
-					try
-					{
-						Relinquish(FConnections[0]);
-					}
-					catch (Exception E)
-					{
-						LogError(E);
-					}
-				}
-			}
 		}
 		
 		private void CloseSessions()
@@ -2377,7 +2135,6 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private void InitializeAvailableLibraries()
 		{
-
 			if (FLibraryDirectory == String.Empty)
 				LibraryDirectory = GetDefaultLibraryDirectory();
 			#if USEWATCHERS
@@ -2717,8 +2474,6 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				if (!IsRepository)
 				{
-					CatalogCaches.GatherDefaultCachedObjects(FSystemProcess.CatalogDeviceSession.GetBaseCatalogObjects());
-				
 					if (FFirstRun)
 					{
 						LogMessage("Registering system catalog...");
@@ -2730,6 +2485,12 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 				}
 			}
+		}
+		
+		internal Schema.Objects GetBaseCatalogObjects()
+		{
+			CheckState(ServerState.Started);
+			return FSystemProcess.CatalogDeviceSession.GetBaseCatalogObjects();
 		}
 		
 		private void EnsureGeneralLibraryLoaded()

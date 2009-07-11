@@ -20,10 +20,10 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	// ServerCursorBase	
-	public class ServerCursorBase : ServerChildObject, IActive
+	// ServerCursor    
+	public class ServerCursor : ServerChildObject, IServerCursor
 	{
-		public ServerCursorBase(ServerPlanBase APlan, DataParams AParams) : base()
+		public ServerCursor(ServerExpressionPlan APlan, DataParams AParams) : base() 
 		{
 			FPlan = APlan;
 			FParams = AParams;
@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Server
 				FPlan.ServerProcess.ServerSession.Server.FCursorCounter.Increment();
 			#endif
 		}
-		
+
 		private bool FDisposed;
 		
 		protected override void Dispose(bool ADisposing)
@@ -65,9 +65,13 @@ namespace Alphora.Dataphor.DAE.Server
 			return FPlan.ServerProcess.ServerSession.WrapException(AException);
 		}
 		
-		protected ServerPlanBase FPlan;
+		private ServerExpressionPlan FPlan;
+		public ServerExpressionPlan Plan { get { return FPlan; } }
+		
+		IServerExpressionPlan IServerCursor.Plan { get { return FPlan; } }
 
 		// IActive
+
 		// Open        
 		public void Open()
 		{
@@ -126,12 +130,13 @@ namespace Alphora.Dataphor.DAE.Server
 				throw new ServerException(ServerException.Codes.CursorActive);
 		}
         
-		protected PlanNode SourceNode { get { return ((ServerPlanBase)FPlan).Code.Nodes[0]; } }
+		protected PlanNode SourceNode { get { return FPlan.Code.Nodes[0]; } }
 		
 		protected DataVar FSourceObject;
 		protected DataParams FParams;
 		protected Table FSourceTable;
 		protected Schema.IRowType FSourceRowType;
+		internal Schema.IRowType SourceRowType { get { return FSourceRowType; } }
 		
 		protected IStreamManager StreamManager { get {return (FPlan is IServerPlan) ? (IStreamManager)((IServerPlan)FPlan).Process : (IStreamManager)((IRemoteServerPlan)FPlan).Process; } }
 				
@@ -144,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 
-				CursorNode LCursorNode = (CursorNode)((ServerPlanBase)FPlan).Code;
+				CursorNode LCursorNode = (CursorNode)FPlan.Code;
 				//LCursorNode.EnsureApplicationTransactionJoined(FPlan.ServerProcess);
 				FSourceObject = LCursorNode.SourceNode.Execute(FPlan.ServerProcess);
 				FSourceTable = (Table)FSourceObject.Value;
@@ -290,14 +295,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FBookmarks.Keys.CopyTo(LKeys, 0);
 			InternalDisposeBookmarks(LKeys);
 		}
-	}
-	
-	// ServerCursor    
-	public class ServerCursor : ServerCursorBase, IServerCursor
-	{
-		public ServerCursor(ServerPlanBase APlan, DataParams AParams) : base(APlan, AParams) {}
-
-		public IServerExpressionPlan Plan { get { return (IServerExpressionPlan)FPlan; } }
 
 		// cursor support		
 		public void Reset()
@@ -978,5 +975,320 @@ namespace Alphora.Dataphor.DAE.Server
 				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
 			}
 		}
+		
+		private RemoteCursorGetFlags InternalGetFlags()
+		{
+			RemoteCursorGetFlags LGetFlags = RemoteCursorGetFlags.None;
+			if (FSourceTable.BOF())
+				LGetFlags = LGetFlags | RemoteCursorGetFlags.BOF;
+			if (FSourceTable.EOF())
+				LGetFlags = LGetFlags | RemoteCursorGetFlags.EOF;
+			return LGetFlags;
+		}
+
+		internal RemoteCursorGetFlags GetFlags()
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					return InternalGetFlags();
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+
+		// Fetch
+		internal int Fetch(Row[] ARows, Guid[] ABookmarks, int ACount, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					int LCount = 0;
+					while (ACount != 0)
+					{
+						if (ACount > 0)
+						{
+							if ((LCount == 0) && FSourceTable.BOF() && !FSourceTable.Next())
+								break;
+
+							if ((LCount > 0) && (!FSourceTable.Next()))
+								break;
+							FSourceTable.Select(ARows[LCount]);
+							ABookmarks[LCount] = InternalGetBookmark();
+							ACount--;
+						}
+						else
+						{
+							if ((LCount == 0) && FSourceTable.EOF() && !FSourceTable.Prior())
+								break;
+								
+							if ((LCount > 0) && (!FSourceTable.Prior()))
+								break;
+							FSourceTable.Select(ARows[LCount]);
+							ABookmarks[LCount] = InternalGetBookmark();
+							ACount++;
+						}
+						LCount++;
+					}
+					AFlags = InternalGetFlags();
+					return LCount;
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
+		// MoveBy
+		internal int MoveBy(int ADelta, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					int LDelta = 0;
+					while (ADelta != 0)
+					{
+						if (ADelta > 0)
+						{
+							if (!FSourceTable.Next())
+								break;
+							ADelta--;
+						}
+						else
+						{
+							if (!FSourceTable.Prior())
+								break;
+							ADelta++;
+						}
+						LDelta++;
+					}
+					AFlags = InternalGetFlags();
+					return LDelta;
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
+		// MoveTo
+		internal RemoteCursorGetFlags MoveTo(bool AFirst)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					if (AFirst)
+						FSourceTable.First();
+					else
+						FSourceTable.Last();
+					return InternalGetFlags();
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
+		internal RemoteCursorGetFlags ResetWithFlags()
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					FSourceTable.Reset();
+					return InternalGetFlags();
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+
+		internal bool GotoBookmark(Guid ABookmark, bool AForward, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					bool LSuccess = InternalGotoBookmark(ABookmark, AForward);
+					AFlags = InternalGetFlags();
+					return LSuccess;
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+
+		internal bool FindKey(Row AKey, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					bool LSuccess = FSourceTable.FindKey(AKey);
+					AFlags = InternalGetFlags();
+					return LSuccess;
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
+		internal void FindNearest(Row AKey, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					FSourceTable.FindNearest(AKey);
+					AFlags = InternalGetFlags();
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
+		internal bool Refresh(Row ARow, out RemoteCursorGetFlags AFlags)
+		{
+			Exception LException = null;
+			int LNestingLevel = FPlan.ServerProcess.BeginTransactionalCall();
+			try
+			{
+				long LStartTicks = TimingUtility.CurrentTicks;
+				try
+				{
+					bool LSuccess = FSourceTable.Refresh(ARow);
+					AFlags = InternalGetFlags();
+					return LSuccess;
+				}
+				finally
+				{
+					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				}
+			}
+			catch (Exception E)
+			{
+				LException = E;
+				throw WrapException(E);
+			}
+			finally
+			{
+				FPlan.ServerProcess.EndTransactionalCall(LNestingLevel, LException);
+			}
+		}
+		
 	}
 }

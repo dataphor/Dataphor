@@ -260,6 +260,7 @@
     <Compile Include="Register.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RemoteCLI.cs" />
     <Compile Include="Runtime.Data\AdornTable.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -591,15 +592,21 @@
     <Compile Include="Server\NativeSession.cs" />
     <Compile Include="Server\Plan.cs" />
     <Compile Include="Server\PlanCache.cs" />
+    <Compile Include="Server\RemoteServer.cs" />
+    <Compile Include="Server\RemoteServerBatch.cs" />
     <Compile Include="Server\RemoteServerCursor.cs" />
+    <Compile Include="Server\RemoteServerObject.cs" />
     <Compile Include="Server\RemoteServerPlan.cs" />
+    <Compile Include="Server\RemoteServerProcess.cs" />
+    <Compile Include="Server\RemoteServerScript.cs" />
+    <Compile Include="Server\RemoteServerSession.cs" />
     <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerBatch.cs" />
     <Compile Include="Server\ServerConfiguration.cs" />
-    <Compile Include="Server\ServerConnection.cs" />
+    <Compile Include="Server\RemoteServerConnection.cs" />
     <Compile Include="Server\ServerCursor.cs" />
     <Compile Include="Server\ServerException.cs">
       <SubType>Code</SubType>

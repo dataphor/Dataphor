@@ -8,6 +8,7 @@
 #define LOADFROMLIBRARIES in Alphora.Dataphor.DAE // Enables in-place library loading, instead of copying assemblies in to the bin directory
 #define LOGDDLINSTRUCTIONS in Alphora.Dataphor.DAE to have the catalog log DDL as part of the transaction (should not be turned off)
 #define LOGFILECACHEEVENTS in Alphora.Dataphor.DAE // ??
+//#define LOGCACHEEVENTS in Alphora.Dataphor.DAE  // ??
 #define NILPROPOGATION in Alphora.Dataphor.DAE // Enables nil propagation (1 + nil = nil i/o an error)
 #define ORDERREFERENCESBYPRIORITYONLY in Frontend // Orders references by priority in derived documents
 #define RELYONCURSORFLAGSAFTERUPDATE in Alphora.Dataphor.DAE.Client "This define forces the server cursor to recognize the BOF and EOF flags by actually navigating"
@@ -41,6 +42,7 @@
 // the same string reference for each tag of a given name.
 // However, early indications are that the amount of memory saved is not significant,
 // even when dealing with large catalogs such as IBAS.
+//#define USETHREADABORT in Alphora.Dataphor.DAE (currently disabled) determines whether or not to use Thread.Abort to terminate a running process
 #define USEUNIFIEDJOINKEYINFERENCE in Alphora.Dataphor.DAE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 #define USEUPDATEVALUEFLAGS in Alphora.Dataphor.DAE // ??
 #define WRAPRUNTIMEEXCEPTIONS in Alphora.Dataphor.DAE // Determines whether or not non-Dataphor descended runtime exceptions are wrapped with a Dataphor Exception

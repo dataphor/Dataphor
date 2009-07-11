@@ -67,8 +67,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private Schema.Objects FCachedObjects = new Schema.Objects();
 		public Schema.Objects CachedObjects { get { return FCachedObjects; } }
 		
-		private ServerSessions FSessions = new ServerSessions(false);
-		public ServerSessions Sessions { get { return FSessions; } }
+		private RemoteServerSessions FSessions = new RemoteServerSessions(false);
+		public RemoteServerSessions Sessions { get { return FSessions; } }
 	}
 	
 	public class CatalogCaches : System.Object
@@ -76,14 +76,14 @@ namespace Alphora.Dataphor.DAE.Server
 		private Hashtable FCaches = new Hashtable();
 		private Schema.Catalog FDefaultCachedObjects = new Schema.Catalog();
 		
-		public void AddSession(ServerSession ASession)
+		public void AddSession(RemoteServerSession ASession)
 		{
 			lock (this)
 			{
-				CatalogCache LCache = (CatalogCache)FCaches[ASession.SessionInfo.CatalogCacheName];
+				CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
 				if (LCache == null)
 				{
-					LCache = new CatalogCache(ASession.SessionInfo.CatalogCacheName, ASession.Server.CacheTimeStamp, FDefaultCachedObjects);
+					LCache = new CatalogCache(ASession.CatalogCacheName, ASession.Server.CacheTimeStamp, FDefaultCachedObjects);
 					FCaches.Add(LCache.CacheName, LCache);
 				}
 				
@@ -91,11 +91,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void RemoveSession(ServerSession ASession)
+		public void RemoveSession(RemoteServerSession ASession)
 		{
 			lock (this)
 			{
-				CatalogCache LCache = (CatalogCache)FCaches[ASession.SessionInfo.CatalogCacheName];
+				CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
 				if (LCache != null)
 					LCache.Sessions.Remove(ASession);
 			}
@@ -111,10 +111,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public string[] GetRequiredObjects(ServerSession ASession, Schema.Catalog ACatalog, long ACacheTimeStamp, out long AClientCacheTimeStamp)
+		public string[] GetRequiredObjects(RemoteServerSession ASession, Schema.Catalog ACatalog, long ACacheTimeStamp, out long AClientCacheTimeStamp)
 		{
 			StringCollection LRequiredObjects = new StringCollection();
-			CatalogCache LCache = (CatalogCache)FCaches[ASession.SessionInfo.CatalogCacheName];
+			CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
 
 			lock (LCache)
 			{
@@ -143,9 +143,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return LResult;
 		}
 
-		public void RemovePlanDescriptor(ServerSession ASession, string ACatalogObjectName)
+		public void RemovePlanDescriptor(RemoteServerSession ASession, string ACatalogObjectName)
 		{
-			CatalogCache LCache = (CatalogCache)FCaches[ASession.SessionInfo.CatalogCacheName];
+			CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
 			if (LCache != null)
 			{
 				lock (LCache)

@@ -17,7 +17,7 @@ using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class ServerScript : ServerChildObject, IServerScript, IRemoteServerScript
+	public class ServerScript : ServerChildObject, IServerScript
 	{
 		internal ServerScript(ServerProcess AProcess, string AScript) : base()
 		{
@@ -81,27 +81,15 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerProcess FProcess;
 		public ServerProcess Process { get { return FProcess; } }
 		
+		IServerProcess IServerScript.Process { get { return FProcess; } }
+		
 		// Used by the ExecuteAsync node to indicate whether the process was implicitly created to run this script
 		private bool FShouldCleanupProcess = false;
 		public bool ShouldCleanupProcess { get { return FShouldCleanupProcess; } set { FShouldCleanupProcess = value; } }
 
-		IServerProcess IServerScript.Process { get { return (IServerProcess)FProcess; } }
-		
-		IRemoteServerProcess IRemoteServerScript.Process  { get { return (IRemoteServerProcess)FProcess; } }
-
 		// Messages
 		private ParserMessages FMessages;
-		ParserMessages IServerScript.Messages { get { return FMessages; } }
-		
-		Exception[] IRemoteServerScript.Messages
-		{
-			get
-			{
-				Exception[] LMessages = new Exception[FMessages.Count];
-				FMessages.CopyTo(LMessages);
-				return LMessages;
-			}
-		}
+		public ParserMessages Messages { get { return FMessages; } }
 		
 		public void CheckParsed()
 		{
@@ -113,19 +101,12 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerBatches FBatches; 
 		public ServerBatches Batches { get { return FBatches; } }
 
-		IServerBatches IServerScriptBase.Batches { get { return FBatches; } }
+		IServerBatches IServerScript.Batches { get { return FBatches; } }
 		
-		void IServerScript.Execute(DataParams AParams)
+		public void Execute(DataParams AParams)
 		{
 			foreach (ServerBatch LBatch in FBatches)
-				((IServerBatch)LBatch).Execute(AParams);
-		}
-		
-		void IRemoteServerScript.Execute(ref RemoteParamData AParams, ProcessCallInfo ACallInfo)
-		{
-			FProcess.ProcessCallInfo(ACallInfo);
-			foreach (ServerBatch LBatch in FBatches)
-				((IRemoteServerBatch)LBatch).Execute(ref AParams, FProcess.EmptyCallInfo());
+				LBatch.Execute(AParams);
 		}
 	}
 	

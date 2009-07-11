@@ -548,12 +548,14 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateConnections(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
+/*
 			foreach (ServerConnection LConnection in AProcess.ServerSession.Server.Connections)
 			{
 				ARow[0].AsString = LConnection.ConnectionName;
 				ARow[1].AsString = LConnection.HostName;
 				ANativeTable.Insert(AProcess, ARow);
 			}
+*/
 		}
 		
 		private void PopulateSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
@@ -634,7 +636,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		{
 			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
-					foreach (ServerPlanBase LPlan in LProcess.Plans)
+					foreach (ServerPlan LPlan in LProcess.Plans)
 					{
 						ARow[0].AsGuid = LPlan.ID;
 						ARow[1].AsInt32 = LProcess.ProcessID;

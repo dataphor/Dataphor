@@ -20,7 +20,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	public class ServerSession : ServerChildObject, IServerSession, IRemoteServerSession
+	public class ServerSession : ServerChildObject, IServerSession
 	{		
 		internal ServerSession
 		(
@@ -102,9 +102,6 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					if ((FSessionInfo != null) && (FSessionInfo.CatalogCacheName != String.Empty) && (FServer != null) && (FServer.CatalogCaches != null))
-						FServer.CatalogCaches.RemoveSession(this);
-						
 					FSessionInfo = null;
 					FSessionID = -1;
 					FUser = null;
@@ -134,16 +131,12 @@ namespace Alphora.Dataphor.DAE.Server
 		// Server
 		private Server FServer;
 		public Server Server { get { return FServer; } }
+		
+		IServer IServerSession.Server { get { return FServer; } }
         
 		// SessionID
 		private int FSessionID = -1;
 		public int SessionID  { get { return FSessionID; } }
-        
-		// IServerSession.Server
-		IServer IServerSession.Server { get { return (IServer)FServer; } }
-        
-		// IRemoteServerSession.Server
-		IRemoteServer IRemoteServerSession.Server { get { return (IRemoteServer)FServer; } }
         
 		// User        
 		private Schema.User FUser;
@@ -158,20 +151,20 @@ namespace Alphora.Dataphor.DAE.Server
 		public SessionInfo SessionInfo { get { return FSessionInfo; } }
 
 		// Plan Cache		
-		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlanBase APlan)
+		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
 		{
 			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
 				Server.PlanCache.Add(AProcess, AStatement, AContextHashCode, APlan);
 		}
 		
-		public ServerPlanBase GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
+		public ServerPlan GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
 		{
 			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
 				return Server.PlanCache.Get(AProcess, AStatement, AContextHashCode);
 			return null;
 		}
 		
-		public bool ReleaseCachedPlan(ServerProcess AProcess, ServerPlanBase APlan)
+		public bool ReleaseCachedPlan(ServerProcess AProcess, ServerPlan APlan)
 		{
 			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasSessionObjects())
 				return Server.PlanCache.Release(AProcess, APlan);
@@ -322,7 +315,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// Execution
 		internal Exception WrapException(Exception AException)
 		{
-			return FServer.WrapException(AException, (FSessionInfo == null) || (FSessionInfo.CatalogCacheName != String.Empty));
+			return FServer.WrapException(AException);
 		}
 
 		private void StopProcesses()
@@ -369,7 +362,8 @@ namespace Alphora.Dataphor.DAE.Server
 			throw new ServerException(ServerException.Codes.ProcessNotFound, AProcessID);
 		}
 
-		private ServerProcess InternalStartProcess(ProcessInfo AProcessInfo)
+		// StartProcess
+		public IServerProcess StartProcess(ProcessInfo AProcessInfo)
 		{
 			try
 			{
@@ -383,44 +377,19 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private void InternalStopProcess(ServerProcess AProcess)
+		// StopProcess
+		public void StopProcess(IServerProcess AProcess)
 		{
 			try
 			{
-				AProcess.Dispose();	// Is protected by a latch in the ServerChildObjects collection
+				((ServerProcess)AProcess).Dispose();	// Is protected by a latch in the ServerChildObjects collection
 			}
 			catch (Exception E)
 			{
 				throw WrapException(E);
 			}
 		}
-
-		// IServerSession.StartProcess
-		IServerProcess IServerSession.StartProcess(ProcessInfo AProcessInfo)
-		{
-			return (IServerProcess)InternalStartProcess(AProcessInfo);
-		}
 		
-		// IServerSession.StopProcess
-		void IServerSession.StopProcess(IServerProcess AProcess)
-		{
-			InternalStopProcess((ServerProcess)AProcess);
-		}
-		
-		// IRemoteServerSession.StartProcess
-		IRemoteServerProcess IRemoteServerSession.StartProcess(ProcessInfo AProcessInfo, out int AProcessID)
-		{
-			ServerProcess LProcess = InternalStartProcess(AProcessInfo);
-			AProcessID = LProcess.ProcessID;
-			return (IRemoteServerProcess)LProcess;
-		}
-		
-		// IRemoteServerSession.StopProcess
-		void IRemoteServerSession.StopProcess(IRemoteServerProcess AProcess)
-		{
-			InternalStopProcess((ServerProcess)AProcess);
-		}
-
 		internal void RemoveDeferredConstraintChecks(Schema.TableVar ATableVar)
 		{
 			if (FProcesses != null)

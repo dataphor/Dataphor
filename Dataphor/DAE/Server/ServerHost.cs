@@ -37,11 +37,12 @@ namespace Alphora.Dataphor.DAE.Server
 			ChannelServices.RegisterChannel(FChannel, false);
 			try
 			{
+				FRemoteServer = new RemoteServer(AServer);
 				RemotingServices.Marshal
 				(
-					AServer, 
+					FRemoteServer, 
 					AServer.Name,
-					typeof(Server)
+					typeof(RemoteServer)
 				);
 				FServer = AServer;
 
@@ -76,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					if (FServer != null)
 					{
-						RemotingServices.Disconnect(FServer);
+						RemotingServices.Disconnect(FRemoteServer);
 						FServer = null;
 					}
 				}
@@ -106,6 +107,12 @@ namespace Alphora.Dataphor.DAE.Server
 		public Server Server
 		{
 			get { return FServer; }
+		}
+		
+		private RemoteServer FRemoteServer;
+		public RemoteServer RemoteServer
+		{
+			get { return FRemoteServer; }
 		}
 		
 		private NativeServer FNativeServer;

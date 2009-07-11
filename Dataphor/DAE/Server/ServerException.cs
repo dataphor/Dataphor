@@ -271,8 +271,10 @@ namespace Alphora.Dataphor.DAE.Server
 			InstanceNotFound = 106189,
 			
 			/// <summary>Error code 106190: "Unable to connect to listener on "{0}"."</summary>
-			UnableToConnectToListener = 106190
-
+			UnableToConnectToListener = 106190,
+			
+			/// <summary>Error code 106191: "Only objects of type "{0}" may be added to this container."</summary>
+			TypedObjectContainer = 106191,
 		}
 		
 		// Resource manager for this exception class
