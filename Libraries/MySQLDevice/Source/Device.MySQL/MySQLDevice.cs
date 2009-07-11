@@ -78,6 +78,8 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			Binary		|	blob															|	SQLBinary
 	*/
 
+    #region Device
+
     public class MySQLDevice : SQLDevice
     {        
 		public MySQLDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID){}
@@ -259,7 +261,11 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 		}
     }
 
-	/// <summary>
+    #endregion
+
+    #region Connection Builder
+
+    /// <summary>
 	/// This class is the tag translator for MySQL
 	/// </summary>
 	public class MySQLConnectionStringBuilder : ConnectionStringBuilder
@@ -284,6 +290,10 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return LTags;
 		}
 	}
+
+    #endregion
+
+    #region Types
 
     /// <summary>
     /// MySQL type : bit
@@ -484,8 +494,12 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			return "image";
 		}
     }
-    
-//	public class MySQLToday : SQLDeviceOperator
+
+    #endregion
+
+    #region Operators
+
+    //	public class MySQLToday : SQLDeviceOperator
 //	{
 //		public MySQLToday() : base(){}
 //		public MySQLToday(Operator AOperator, D4.ClassDefinition AClassDefinition) : base(AOperator, AClassDefinition){}
@@ -2748,5 +2762,6 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 //				)
 //			);
 		}
-	}
+    }
+    #endregion
 }
