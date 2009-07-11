@@ -278,7 +278,7 @@ namespace Alphora.Dataphor.DAE.Connection
 				}
 					
 				if (!LInParameter)
-					LResult.Append((Char.IsWhiteSpace(AStatement[LIndex]) && FShouldNormalizeWhitespace) ? ' ' : AStatement[LIndex]);
+					LResult.Append((Char.IsWhiteSpace(AStatement[LIndex]) && !LInString && FShouldNormalizeWhitespace) ? ' ' : AStatement[LIndex]);
 				else
 					LParameterName.Append(AStatement[LIndex]);
 			}
