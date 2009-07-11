@@ -59,15 +59,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FMajorVersion = value; }
         }
 
-        public bool IsPostgreSQL70
-        {
-            set
-            {
-                if (value)
-                    FMajorVersion = 7;
-            }
-            get { return FMajorVersion == 7; }
-        }
+        
 
         public bool IsAccess { set; get; }
 
@@ -161,7 +153,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 #else
                 RunScript(AProcess,
                           String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false",
-                                        IsPostgreSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
+                                        "false", IsAccess.ToString().ToLower()));
 #endif
             }
         }
@@ -236,7 +228,7 @@ if not exists (select * from sysdatabases where name = '{0}')
                 EnsureDatabase(AProcess);
 
             // Run the initialization script, if specified
-            if ((!IsPostgreSQL70) && ShouldEnsureOperators)
+            if (ShouldEnsureOperators)
                 EnsureOperators(AProcess);
         }
 
@@ -503,12 +495,8 @@ if not exists (select * from sysdatabases where name = '{0}')
 									{2}
 								order by so.name, si.indid, sik.keyno
 						",
-                            IsPostgreSQL70
-                                ? "0 as IsDescending"
-                                : "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
-                            IsPostgreSQL70
-                                ? String.Empty
-                                : "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
+                             "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
+                             "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
                             ATableVar == null
                                 ? String.Empty
                                 : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar))
