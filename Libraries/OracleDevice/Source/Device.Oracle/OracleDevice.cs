@@ -51,8 +51,10 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			Binary		|	blob															|	SQLBinary
 	*/
 
-	
-	public class OracleDevice : SQLDevice
+
+    #region Device
+
+    public class OracleDevice : SQLDevice
 	{
 		public OracleDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
 		{
@@ -377,7 +379,11 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 		}
 	}
 
-	public class OracleOLEDBConnectionStringBuilder : ConnectionStringBuilder
+    #endregion
+
+    #region Connection String Builder
+
+    public class OracleOLEDBConnectionStringBuilder : ConnectionStringBuilder
 	{
 		public OracleOLEDBConnectionStringBuilder()
 		{
@@ -407,6 +413,1064 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			FLegend.AddOrUpdate("Password", "PWD");
 		}
 	}
+
+    #endregion
+
+    #region Types
+    /// <summary>
+    /// Oracle type : number(20, 0)
+    /// D4 type : System.TimeSpan
+    /// </summary>
+    public class OracleTimeSpan : SQLScalarType
+    {
+        public OracleTimeSpan(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {										  
+            return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
+        }
+		
+        public override object FromScalar(Scalar AValue)
+        {
+            return AValue.AsTimeSpan.Ticks;
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(20, 0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(20, 0)";
+        }
+    }
+
+    public class OracleBoolean : SQLScalarType
+    {
+        public OracleBoolean(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            return new Scalar(AProcess, ScalarType, Convert.ToBoolean(AValue));
+        }
+
+        public override object FromScalar(Scalar AValue)
+        {
+            return (AValue.AsBoolean ? 1.0 : 0.0);
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(1, 0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(1, 0)";
+        }
+    }
+
+    public class OracleInteger : SQLScalarType
+    {
+        public OracleInteger(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            return new Scalar(AProcess, ScalarType, Convert.ToInt32(AValue));
+        }
+
+        public override object FromScalar(Scalar AValue)
+        {
+            return (decimal)AValue.AsInt32;
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(10,0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(10, 0)";
+        }
+    }
+
+#if UseUnsignedIntegers
+	public class OracleUInteger : SQLScalarType
+	{
+		public OracleUInteger() : base(){}
+
+		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		{
+			return Scalar.FromUInt32(AProcess, Convert.ToUInt32((decimal)AValue));
+		}
+
+		public override object FromScalar(Scalar AValue)
+		{
+			return (decimal)AValue.ToUInt32();
+		}
+
+		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
+		{
+			return new SQLNumericType(10, 0);
+		}
+
+		public override string DomainName(TableVarColumn AColumn)
+		{
+			return "number(10, 0)";
+		}
+	}
+#endif
+
+    public class OracleShort : SQLScalarType
+    {
+        public OracleShort(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            return new Scalar(AProcess, ScalarType, Convert.ToInt16((decimal)AValue));
+        }
+
+        public override object FromScalar(Scalar AValue)
+        {
+            return (decimal)AValue.AsInt16;
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(5, 0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(5, 0)";
+        }
+    }
+
+#if UseUnsignedIntegers
+	public class OracleUShort : SQLScalarType
+	{
+		public OracleUShort() : base(){}
+
+		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		{
+			return Scalar.FromUInt16(AProcess, Convert.ToUInt16((decimal)AValue));
+		}
+
+		public override object FromScalar(Scalar AValue)
+		{
+			return (decimal)AValue.ToUInt16();
+		}
+
+		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
+		{
+			return new SQLNumericType(5, 0);
+		}
+
+		public override string DomainName(TableVarColumn AColumn)
+		{
+			return "number(5, 0)";
+		}
+	}
+#endif
+
+    public class OracleByte : SQLScalarType
+    {
+        public OracleByte(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            return new Scalar(AProcess, ScalarType, Convert.ToByte((decimal)AValue));
+        }
+
+        public override object FromScalar(Scalar AValue)
+        {
+            return (decimal)AValue.AsByte;
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(3, 0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(3, 0)";
+        }
+    }
+
+#if UseUnsignedIntegers
+	public class OracleSByte : SQLScalarType
+	{
+		public OracleSByte() : base(){}
+
+		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		{
+			return Scalar.FromSByte(AProcess, Convert.ToSByte((decimal)AValue));
+		}
+
+		public override object FromScalar(Scalar AValue)
+		{
+			return (decimal)AValue.ToSByte();
+		}
+
+		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
+		{
+			return new SQLNumericType(3, 0);
+		}
+
+		public override string DomainName(TableVarColumn AColumn)
+		{
+			return "number(3, 0)";
+		}
+	}
+#endif
+
+    public class OracleLong : SQLScalarType
+    {
+        public OracleLong(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            return new Scalar(AProcess, ScalarType, Convert.ToInt64((decimal)AValue));
+        }
+
+        public override object FromScalar(Scalar AValue)
+        {
+            return (decimal)AValue.AsInt64;
+        }
+
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLNumericType(20, 0);
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "number(20, 0)";
+        }
+    }
+	
+    public class OracleString : SQLString
+    {
+        public OracleString(int AID, string AName) : base(AID, AName) {}
+		
+        /*
+			Oracle cannot distinguish between an empty string and a null once the empty string has been inserted into a table.
+			To get around this problem, we translate all empty strings to blank strings of length 1.
+		*/
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            if ((AValue is string) && ((string)AValue == " "))
+                return new Scalar(AProcess, ScalarType, "");
+            else
+                return new Scalar(AProcess, ScalarType, (string)AValue);
+        }
+		
+        public override object FromScalar(Scalar AValue)
+        {
+            string LValue = AValue.AsString;
+            if (LValue == String.Empty)
+                return " ";
+            else
+                return LValue;
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return String.Format("varchar2({0})", GetLength(AMetaData));
+        }
+    }
+	
+    public class OracleSQLText : SQLScalarType
+    {
+        public OracleSQLText(int AID, string AName) : base(AID, AName) {}
+
+        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        {
+            if ((AValue is string) && ((string)AValue == " "))
+                return new Scalar(AProcess, ScalarType, "");
+            else
+                return new Scalar(AProcess, ScalarType, (string)AValue);
+        }
+		
+        public override object FromScalar(Scalar AValue)
+        {
+            string LValue = AValue.AsString;
+            if (LValue == String.Empty)
+                return " ";
+            else
+                return LValue;
+        }
+		
+        public override Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
+        {
+            using (StreamReader LReader = new StreamReader(AStream))
+            {
+                string LValue = LReader.ReadToEnd();
+                if (LValue == " ")
+                    LValue = String.Empty;
+                Streams.Conveyor LConveyor = ScalarType.GetConveyor(AProcess);
+                MemoryStream LStream = new MemoryStream(LConveyor.GetSize(LValue));
+                LStream.SetLength(LStream.GetBuffer().Length);
+                LConveyor.Write(LValue, LStream.GetBuffer(), 0);
+                return LStream;
+            }
+        }
+		
+        public override SQLType GetSQLType(D4.MetaData AMetaData)
+        {
+            return new SQLTextType();
+        }
+
+        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
+        {
+            return "clob";
+        }
+    }
+
+    #endregion
+
+    #region Operators
+
+    public class EnsureOperatorDDL
+    {
+        public EnsureOperatorDDL(string ACreateStatement) : base()
+        {
+            CreateStatement = ACreateStatement;
+        }
+		
+        public string CreateStatement;
+    }
+	
+    public class OracleDDL
+    {
+        public static ArrayList EnsureOperatorDDLCommands = new ArrayList();
+		
+        static OracleDDL()
+        {
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_Frac (AValue IN NUMBER)
+  RETURN NUMBER
+  IS
+    LReturnVal NUMBER(28, 8);
+  BEGIN
+    LReturnVal := AValue - TRUNC(AValue, 0);
+    RETURN(LReturnVal);
+  END;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_LogB (AValue in NUMBER, ABase in NUMBER)
+  RETURN NUMBER
+  IS
+    LReturnVal NUMBER(28, 8);
+  BEGIN
+    LReturnVal := LN(AValue) / LN(ABase);
+    RETURN (LReturnVal);
+  END;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_Random
+  RETURN NUMBER
+  IS
+    LReturnVal NUMBER(28,8);
+  BEGIN
+    LReturnVal := DAE_Frac(ABS(DBMS_RANDOM.RANDOM) / 100000000);
+    DBMS_RANDOM.TERMINATE;
+    return LReturnVal;
+  END;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_Factorial(AValue in int)
+  return number
+  is 
+    LReturnVal NUMBER(28,8);
+  begin
+    LReturnVal := 1;
+    for i in 1..AValue loop
+      LReturnVal := LReturnVal * i;
+    end loop;
+    return LReturnVal;
+  end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSReadSecond(ATimeSpan in number)
+	return number
+	is 
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (10000000 * 60)) * 60);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSReadMinute(ATimeSpan in number)
+	return number
+	is 
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (600000000 * 60)) * 60);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSReadHour(ATimeSpan in number)
+	return number
+	is 
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (36000000000 * 24)) * 24);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSReadDay(ATimeSpan in number)
+	return number
+	is 
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := TRUNC(ATimeSpan / 864000000000);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSWriteMillisecond(ATimeSpan in number, APart int)
+	return number
+	is
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 10000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSWriteSecond(ATimeSpan in number, APart int)
+	return number
+	is
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 10000000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSWriteMinute(ATimeSpan in number, APart int)
+	return number
+	is
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 600000000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSWriteHour(ATimeSpan in number, APart int)
+	return number
+	is
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 36000000000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSWriteDay(ATimeSpan in number, APart int)
+	return number
+	is
+		LReturnVal number(20,0);
+	begin
+		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 864000000000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_AddYears(ADateTime in date, AYears in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := ADD_MONTHS(ADateTime, AYears * 12);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_Today
+	return date
+	is
+		LReturnVal date;
+	begin
+		LReturnVal := TRUNC(SysDate);
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DaysInMonth(AYear in integer, AMonth in int)
+	return integer
+	is
+		LReturnVal int;
+	begin
+		/*LDate := To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD');cannot create variables*/
+		LReturnVal := Last_Day(To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD')) - To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD') + 1;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_IsLeapYear(AYear in int)
+	return int
+	is 
+		LReturnVal int;
+	begin
+		LReturnVal := To_Date('01/03/' || To_Char(AYear),'dd/mm/yyyy') - To_Date('28/02/' || To_Char(AYear),'dd/mm/yyyy') - 1;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadDay(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'dd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadMonth(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'mm');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadYear(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'yyyy');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+//			EnsureOperatorDDLCommands.Add
+//			(
+//				new EnsureOperatorDDL
+//				(
+//					@"
+//create or replace function DAE_DTReadHour(ADateTime in date)
+//	return int
+//	is
+//		LReturnVal int;
+//	begin
+//		LReturnVal := To_Char(ADateTime, 'hh');
+//		return LReturnVal;
+//	end;
+//					"
+//				)
+//			);
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadMinute(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'mi');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadSecond(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTReadMillisecond(ADateTime in date)
+	return int
+	is
+		LReturnVal int;
+	begin
+		LReturnVal := 0;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DayOfYear(ADateTime in date)
+	return int
+	is 
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'ddd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DayOfWeek(ADateTime in date)
+	return int
+	is 
+		LReturnVal int;
+	begin
+		LReturnVal := To_Char(ADateTime, 'd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteMillisecond(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := ADateTime;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteSecond(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(APart), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteMinute(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(APart) || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteHour(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(APart) || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteDay(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(APart) || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteMonth(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(APart) || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTWriteYear(ADateTime in date, APart in int)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := To_Date(To_Char(APart) || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_TSDateTime(ATimeSpan in number)
+	return date
+	is 
+		LReturnVal Date;
+	begin
+		LReturnVal := round((ATimeSpan - 630822816000000000)/864000000000,0) + To_Date(20000101 * 100000 + round(mod(ATimeSpan/10000000 , 86400),0), 'yyyy dd mm sssss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DTTimeSpan(ADateTime in date)
+	return number
+	is 
+		LReturnVal number;
+	begin
+		LReturnVal := 631139040000000000 + ((ADateTime - To_Date('01-JAN-2001')) * 86400 + to_char(ADateTime,'sssss')) * 10000000;
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector1(AYear in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date(AYear * 10000 + 0101, 'yyyy mm dd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector2(AYear in int, AMonth in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date(AYear * 10000 + AMonth * 100 + 01, 'yyyy mm dd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector3(AYear in int, AMonth in int, ADay in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date(AYear * 10000 + AMonth * 100 + ADay, 'yyyy mm dd');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector4(AYear in int, AMonth in int, ADay in int, AHour in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date((AYear * 1000000 + AMonth * 10000 + ADay * 100 + AHour), 'yyyy mm dd hh24');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector5(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date((AYear * 100000000 + AMonth * 1000000 + ADay * 10000 + AHour * 100 + AMinute), 'yyyy mm dd hh24 mi');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector6(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int, ASecond in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date((AYear * 10000000000 + AMonth * 100000000 + ADay * 1000000 + AHour * 10000 + AMinute * 100 + ASecond), 'yyyy mm dd hh24 mi ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+
+            EnsureOperatorDDLCommands.Add
+                (
+                new EnsureOperatorDDL
+                    (
+                    @"
+create or replace function DAE_DateTimeSelector7(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int, ASecond in int, AMillisecond in int)
+	return date
+	is 
+		LReturnVal date;
+	begin
+		LReturnVal := to_Date((AYear * 10000000000 + AMonth * 100000000 + ADay * 1000000 + AHour * 10000 + AMinute * 100 + ASecond), 'yyyy mm dd hh24 mi ss');
+		return LReturnVal;
+	end;
+					"
+                    )
+                );
+        }
+    }
 
     public class OracleRetrieve : SQLDeviceOperator
     {
@@ -623,1054 +1687,5 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 		}
     }
 
-	/// <summary>
-	/// Oracle type : number(20, 0)
-	/// D4 type : System.TimeSpan
-	/// </summary>
-	public class OracleTimeSpan : SQLScalarType
-	{
-		public OracleTimeSpan(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{										  
-			return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
-		}
-		
-		public override object FromScalar(Scalar AValue)
-		{
-			return AValue.AsTimeSpan.Ticks;
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(20, 0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(20, 0)";
-		}
-	}
-
-	public class OracleBoolean : SQLScalarType
-	{
-		public OracleBoolean(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return new Scalar(AProcess, ScalarType, Convert.ToBoolean(AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (AValue.AsBoolean ? 1.0 : 0.0);
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(1, 0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(1, 0)";
-		}
-	}
-
-	public class OracleInteger : SQLScalarType
-	{
-		public OracleInteger(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			 return new Scalar(AProcess, ScalarType, Convert.ToInt32(AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.AsInt32;
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(10,0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(10, 0)";
-		}
-	}
-
-	#if UseUnsignedIntegers
-	public class OracleUInteger : SQLScalarType
-	{
-		public OracleUInteger() : base(){}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return Scalar.FromUInt32(AProcess, Convert.ToUInt32((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.ToUInt32();
-		}
-
-		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(10, 0);
-		}
-
-		public override string DomainName(TableVarColumn AColumn)
-		{
-			return "number(10, 0)";
-		}
-	}
-	#endif
-
-	public class OracleShort : SQLScalarType
-	{
-		public OracleShort(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt16((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.AsInt16;
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(5, 0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(5, 0)";
-		}
-	}
-
-	#if UseUnsignedIntegers
-	public class OracleUShort : SQLScalarType
-	{
-		public OracleUShort() : base(){}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return Scalar.FromUInt16(AProcess, Convert.ToUInt16((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.ToUInt16();
-		}
-
-		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(5, 0);
-		}
-
-		public override string DomainName(TableVarColumn AColumn)
-		{
-			return "number(5, 0)";
-		}
-	}
-	#endif
-
-	public class OracleByte : SQLScalarType
-	{
-		public OracleByte(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return new Scalar(AProcess, ScalarType, Convert.ToByte((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.AsByte;
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(3, 0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(3, 0)";
-		}
-	}
-
-	#if UseUnsignedIntegers
-	public class OracleSByte : SQLScalarType
-	{
-		public OracleSByte() : base(){}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return Scalar.FromSByte(AProcess, Convert.ToSByte((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.ToSByte();
-		}
-
-		public override SQLType GetSQLType(ScalarType AScalarType, D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(3, 0);
-		}
-
-		public override string DomainName(TableVarColumn AColumn)
-		{
-			return "number(3, 0)";
-		}
-	}
-	#endif
-
-	public class OracleLong : SQLScalarType
-	{
-		public OracleLong(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt64((decimal)AValue));
-		}
-
-		public override object FromScalar(Scalar AValue)
-		{
-			return (decimal)AValue.AsInt64;
-		}
-
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLNumericType(20, 0);
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "number(20, 0)";
-		}
-	}
-	
-	public class OracleString : SQLString
-	{
-		public OracleString(int AID, string AName) : base(AID, AName) {}
-		
-		/*
-			Oracle cannot distinguish between an empty string and a null once the empty string has been inserted into a table.
-			To get around this problem, we translate all empty strings to blank strings of length 1.
-		*/
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			if ((AValue is string) && ((string)AValue == " "))
-				return new Scalar(AProcess, ScalarType, "");
-			else
-				return new Scalar(AProcess, ScalarType, (string)AValue);
-		}
-		
-		public override object FromScalar(Scalar AValue)
-		{
-			string LValue = AValue.AsString;
-			if (LValue == String.Empty)
-				return " ";
-			else
-				return LValue;
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return String.Format("varchar2({0})", GetLength(AMetaData));
-		}
-	}
-	
-	public class OracleSQLText : SQLScalarType
-	{
-		public OracleSQLText(int AID, string AName) : base(AID, AName) {}
-
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
-		{
-			if ((AValue is string) && ((string)AValue == " "))
-				return new Scalar(AProcess, ScalarType, "");
-			else
-				return new Scalar(AProcess, ScalarType, (string)AValue);
-		}
-		
-		public override object FromScalar(Scalar AValue)
-		{
-			string LValue = AValue.AsString;
-			if (LValue == String.Empty)
-				return " ";
-			else
-				return LValue;
-		}
-		
-		public override Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
-		{
-			using (StreamReader LReader = new StreamReader(AStream))
-			{
-				string LValue = LReader.ReadToEnd();
-				if (LValue == " ")
-					LValue = String.Empty;
-				Streams.Conveyor LConveyor = ScalarType.GetConveyor(AProcess);
-				MemoryStream LStream = new MemoryStream(LConveyor.GetSize(LValue));
-				LStream.SetLength(LStream.GetBuffer().Length);
-				LConveyor.Write(LValue, LStream.GetBuffer(), 0);
-				return LStream;
-			}
-		}
-		
-		public override SQLType GetSQLType(D4.MetaData AMetaData)
-		{
-			return new SQLTextType();
-		}
-
-        protected override string InternalNativeDomainName(D4.MetaData AMetaData)
-		{
-			return "clob";
-		}
-	}
-
-	public class EnsureOperatorDDL
-	{
-		public EnsureOperatorDDL(string ACreateStatement) : base()
-		{
-			CreateStatement = ACreateStatement;
-		}
-		
-		public string CreateStatement;
-	}
-	
-	public class OracleDDL
-	{
-		public static ArrayList EnsureOperatorDDLCommands = new ArrayList();
-		
-		static OracleDDL()
-		{
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_Frac (AValue IN NUMBER)
-  RETURN NUMBER
-  IS
-    LReturnVal NUMBER(28, 8);
-  BEGIN
-    LReturnVal := AValue - TRUNC(AValue, 0);
-    RETURN(LReturnVal);
-  END;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_LogB (AValue in NUMBER, ABase in NUMBER)
-  RETURN NUMBER
-  IS
-    LReturnVal NUMBER(28, 8);
-  BEGIN
-    LReturnVal := LN(AValue) / LN(ABase);
-    RETURN (LReturnVal);
-  END;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_Random
-  RETURN NUMBER
-  IS
-    LReturnVal NUMBER(28,8);
-  BEGIN
-    LReturnVal := DAE_Frac(ABS(DBMS_RANDOM.RANDOM) / 100000000);
-    DBMS_RANDOM.TERMINATE;
-    return LReturnVal;
-  END;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_Factorial(AValue in int)
-  return number
-  is 
-    LReturnVal NUMBER(28,8);
-  begin
-    LReturnVal := 1;
-    for i in 1..AValue loop
-      LReturnVal := LReturnVal * i;
-    end loop;
-    return LReturnVal;
-  end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSReadSecond(ATimeSpan in number)
-	return number
-	is 
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (10000000 * 60)) * 60);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSReadMinute(ATimeSpan in number)
-	return number
-	is 
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (600000000 * 60)) * 60);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSReadHour(ATimeSpan in number)
-	return number
-	is 
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := TRUNC(DAE_Frac(ATimeSpan / (36000000000 * 24)) * 24);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSReadDay(ATimeSpan in number)
-	return number
-	is 
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := TRUNC(ATimeSpan / 864000000000);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSWriteMillisecond(ATimeSpan in number, APart int)
-	return number
-	is
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 10000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSWriteSecond(ATimeSpan in number, APart int)
-	return number
-	is
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 10000000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSWriteMinute(ATimeSpan in number, APart int)
-	return number
-	is
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 600000000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSWriteHour(ATimeSpan in number, APart int)
-	return number
-	is
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 36000000000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSWriteDay(ATimeSpan in number, APart int)
-	return number
-	is
-		LReturnVal number(20,0);
-	begin
-		LReturnVal := ATimeSpan + (APart - DAE_TSReadMillisecond(ATimeSpan)) * 864000000000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_AddYears(ADateTime in date, AYears in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := ADD_MONTHS(ADateTime, AYears * 12);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_Today
-	return date
-	is
-		LReturnVal date;
-	begin
-		LReturnVal := TRUNC(SysDate);
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DaysInMonth(AYear in integer, AMonth in int)
-	return integer
-	is
-		LReturnVal int;
-	begin
-		/*LDate := To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD');cannot create variables*/
-		LReturnVal := Last_Day(To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD')) - To_Date(1 + AMonth * 100 + AYear * 10000,'YYYY MM DD') + 1;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_IsLeapYear(AYear in int)
-	return int
-	is 
-		LReturnVal int;
-	begin
-		LReturnVal := To_Date('01/03/' || To_Char(AYear),'dd/mm/yyyy') - To_Date('28/02/' || To_Char(AYear),'dd/mm/yyyy') - 1;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadDay(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'dd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadMonth(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'mm');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadYear(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'yyyy');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-//			EnsureOperatorDDLCommands.Add
-//			(
-//				new EnsureOperatorDDL
-//				(
-//					@"
-//create or replace function DAE_DTReadHour(ADateTime in date)
-//	return int
-//	is
-//		LReturnVal int;
-//	begin
-//		LReturnVal := To_Char(ADateTime, 'hh');
-//		return LReturnVal;
-//	end;
-//					"
-//				)
-//			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadMinute(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'mi');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadSecond(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTReadMillisecond(ADateTime in date)
-	return int
-	is
-		LReturnVal int;
-	begin
-		LReturnVal := 0;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DayOfYear(ADateTime in date)
-	return int
-	is 
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'ddd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DayOfWeek(ADateTime in date)
-	return int
-	is 
-		LReturnVal int;
-	begin
-		LReturnVal := To_Char(ADateTime, 'd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteMillisecond(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := ADateTime;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteSecond(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(APart), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteMinute(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(APart) || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteHour(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(APart) || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteDay(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(APart) || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteMonth(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(ADateTime,'yyyy') || '/' || To_Char(APart) || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTWriteYear(ADateTime in date, APart in int)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := To_Date(To_Char(APart) || '/' || To_Char(ADateTime,'mm') || '/' || To_Char(ADateTime,'dd') || ' ' || To_Char(ADateTime,'hh24') || ':' || To_Char(ADateTime,'mi') || ':' || to_Char(ADateTime,'ss'), 'yyyy/mm/dd hh24:mi:ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_TSDateTime(ATimeSpan in number)
-	return date
-	is 
-		LReturnVal Date;
-	begin
-		LReturnVal := round((ATimeSpan - 630822816000000000)/864000000000,0) + To_Date(20000101 * 100000 + round(mod(ATimeSpan/10000000 , 86400),0), 'yyyy dd mm sssss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DTTimeSpan(ADateTime in date)
-	return number
-	is 
-		LReturnVal number;
-	begin
-		LReturnVal := 631139040000000000 + ((ADateTime - To_Date('01-JAN-2001')) * 86400 + to_char(ADateTime,'sssss')) * 10000000;
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector1(AYear in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date(AYear * 10000 + 0101, 'yyyy mm dd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector2(AYear in int, AMonth in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date(AYear * 10000 + AMonth * 100 + 01, 'yyyy mm dd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector3(AYear in int, AMonth in int, ADay in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date(AYear * 10000 + AMonth * 100 + ADay, 'yyyy mm dd');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector4(AYear in int, AMonth in int, ADay in int, AHour in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date((AYear * 1000000 + AMonth * 10000 + ADay * 100 + AHour), 'yyyy mm dd hh24');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector5(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date((AYear * 100000000 + AMonth * 1000000 + ADay * 10000 + AHour * 100 + AMinute), 'yyyy mm dd hh24 mi');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector6(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int, ASecond in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date((AYear * 10000000000 + AMonth * 100000000 + ADay * 1000000 + AHour * 10000 + AMinute * 100 + ASecond), 'yyyy mm dd hh24 mi ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-
-			EnsureOperatorDDLCommands.Add
-			(
-				new EnsureOperatorDDL
-				(
-					@"
-create or replace function DAE_DateTimeSelector7(AYear in int, AMonth in int, ADay in int, AHour in int, AMinute in int, ASecond in int, AMillisecond in int)
-	return date
-	is 
-		LReturnVal date;
-	begin
-		LReturnVal := to_Date((AYear * 10000000000 + AMonth * 100000000 + ADay * 1000000 + AHour * 10000 + AMinute * 100 + ASecond), 'yyyy mm dd hh24 mi ss');
-		return LReturnVal;
-	end;
-					"
-				)
-			);
-		}
-	}
+    #endregion
 }
