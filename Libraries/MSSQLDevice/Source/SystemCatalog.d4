@@ -181,7 +181,9 @@ begin
 		create operator System.iSubtraction(System.TimeSpan, System.TimeSpan) static tags {{ Storage.TranslationString = "(cast({{0}}-{{1}} as bigint))", DAE.IsSystem = "true" }},
 	    create operator System.iSubtraction(System.Time,System.TimeSpan)  static tags {{ Storage.TranslationString = "DateAdd(ss,((cast({{1}} as BigInt) % cast(36000000000 as BigInt))) / -10000000, DateAdd(hh, (cast({{1}} as BigInt) / cast(-36000000000 as BigInt)), cast({{0}} as DateTime)))", DAE.IsSystem = "true" }},
 
-		create operator System.iSubtraction(System.DateTime,System.DateTime) static tags {{ Storage.TranslationString = "(((floor(cast({{0}}-{{1}} as bigint)) * 24 + DatePart(hh,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 60 + DatePart(mi,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 60 + DatePart(ss,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 10000000", DAE.IsSystem = "true" }},
+		create operator System.iSubtraction(System.DateTime,System.DateTime) static tags {{ Storage.TranslationString = "cast(DateDiff(s, {{1}}, {{0}}) as bigint) * 10000000", DAE.IsSystem = "true" }},
+		// BTR 7/13/2009 - The implementation below assumes the difference will be a positive value. The above definition corrects this issue (and is more efficient).
+		//create operator System.iSubtraction(System.DateTime,System.DateTime) static tags {{ Storage.TranslationString = "(((floor(cast({{0}}-{{1}} as bigint)) * 24 + DatePart(hh,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 60 + DatePart(mi,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 60 + DatePart(ss,dateadd(dd,floor(cast({{0}}-{{1}} as bigint)) + 1,{{0}}-{{1}}))) * 10000000", DAE.IsSystem = "true" }},
 		
 		
 		create operator System.iAddition(System.Date,System.TimeSpan) static tags {{ Storage.TranslationString = "DateAdd(dd, {{1}} / 864000000000, {{0}})", DAE.IsSystem = "true" }},

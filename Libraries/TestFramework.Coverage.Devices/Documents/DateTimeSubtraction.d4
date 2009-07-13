@@ -1,0 +1,80 @@
+alter device Pubs alter reconciliation { mode = { command } };
+try
+	create table Test in Pubs { ID : Integer };
+finally
+	alter device Pubs alter reconciliation { mode = { none } };
+end;
+try
+	insert row { 1 ID } into Test;
+	
+	// Day granularity
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 0, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 2, 0, 0, 0);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('Day granularity failed');
+	end;
+		
+	// Hour granularity
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 0, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 1, 1, 0, 0);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('Hour granularity failed');
+	end;
+		
+	// Minute granularity
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 0, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 1, 0, 1, 0);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('Minute granularity failed');
+	end;
+		
+	// Second granularity
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 0, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 1, 0, 0, 1);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('Second granularity failed');
+	end;
+		
+	// 1 minute, mid-day
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 12, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 1, 12, 1, 0);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('1 Minute, mid-day failed');
+	end;
+		
+	// half-day + 1 minute
+	begin
+		var LDateTime1 := DateTime(2009, 7, 1, 0, 0, 0);
+		var LDateTime2 := DateTime(2009, 7, 1, 12, 1, 0);
+		var LD4Row := row { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 };
+		var LSQLRow := (Test where ID = 1 { LDateTime1 - LDateTime2 Result1, LDateTime2 - LDateTime1 Result2 })[];
+		if LD4Row <> LSQLRow then
+			raise Error('Half-day + 1 minute failed');
+	end;
+finally	
+	alter device Pubs alter reconciliation { mode = { command } };
+	try
+		drop table Test;
+	finally
+		alter device Pubs alter reconciliation { mode = { none } };
+	end;
+end;
+
+
+
+
