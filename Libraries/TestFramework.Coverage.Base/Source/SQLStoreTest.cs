@@ -1,12 +1,20 @@
-﻿#define USESQLCONNECTION
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+#define USESQLCONNECTION
 
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Store.MSSQL;
 using Alphora.Dataphor.DAE.Store.SQLCE;
+
 using NUnit.Framework;
 
 namespace Alphora.Dataphor.DAE.Diagnostics
