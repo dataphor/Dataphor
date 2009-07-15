@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C9B535D4-E7D3-4009-857C-82CC8CC2013C}</ProjectGuid>
+    <ProjectGuid>fc9cbb6b-16d7-473f-af45-5e9c4159f9d8</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DAE.ServerTests</RootNamespace>
-    <AssemblyName>DAE.ServerTests</AssemblyName>
+    <RootNamespace>DAE.ClientTests</RootNamespace>
+    <AssemblyName>DAE.ClientTests</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,43 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\nunit.mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.3409.40585, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\pnunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CatalogStoreTest.cs" />
-    <Compile Include="Client\Provider\ConnectionTest.cs" />
-    <Compile Include="CoverageTest.cs" />
+    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SQLStoreTest.cs" />
-    <Compile Include="TestUtility.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">
-      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
-      <Name>Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\BOP\BOP.csproj">
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
-      <Name>BOP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\DAE\DAE.csproj">
-      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
-      <Name>DAE</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
