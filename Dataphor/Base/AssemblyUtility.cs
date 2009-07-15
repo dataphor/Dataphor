@@ -16,59 +16,19 @@ namespace Alphora.Dataphor
 	///	</remarks>
 	public class AssemblyUtility
 	{
-		static bool FInnerResolveAssembly;
 		// Error code = A01XXX
 		static AssemblyUtility()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
-			FInnerResolveAssembly = false;
 		}
 
-		private static Assembly InnerResolveAssembly(Assembly AAssembly, string AAssemblyName)
-		{
-			FInnerResolveAssembly = true;
-			Assembly LReturnAssembly;
-
-			AssemblyName[] LAssemblies = AAssembly.GetReferencedAssemblies();
-			for (int LIndex = 0; LIndex < LAssemblies.Length; LIndex++)
-			{
-				if (String.Compare(LAssemblies[LIndex].Name, AAssemblyName, true) == 0)
-				{
-					LReturnAssembly = Assembly.Load(LAssemblies[LIndex]);
-					FInnerResolveAssembly = false;
-					return LReturnAssembly;
-				}
-			}
-
-			for (int LIndex = 0; LIndex < LAssemblies.Length; LIndex++)
-			{
-				LReturnAssembly = InnerResolveAssembly(Assembly.Load(LAssemblies[LIndex]), AAssemblyName);
-				FInnerResolveAssembly = false;
-				return LReturnAssembly;
-			}
-			
-			FInnerResolveAssembly = false;
-			return null;
-		}
-		
 		public static Assembly ResolveAssembly(object AObject, ResolveEventArgs AArgs)
 		{
-			Assembly LResolvedAssembly;
-
-			if (FInnerResolveAssembly == true)
-				return null;
-
 			foreach (Assembly LAssembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				AssemblyName LAssemblyName = LAssembly.GetName();
 				if ((String.Compare(LAssemblyName.ToString(), AArgs.Name, true) == 0) || (String.Compare(LAssemblyName.Name, AArgs.Name, true) == 0))
 					return LAssembly;
-				else
-				{
-					LResolvedAssembly = InnerResolveAssembly(LAssembly, AArgs.Name);
-					if (LResolvedAssembly != null)
-						return LResolvedAssembly;
-				}
 			}
 			return null;
 		}
