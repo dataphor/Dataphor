@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D0C89AD5-D4CA-4249-9AB1-BC8A07AC2561}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -95,11 +95,6 @@
       <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.Client.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Alphora.Dataphor.DAE.Connection">
-      <Name>Alphora.Dataphor.DAE.Connection</Name>
-      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.Connection.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -123,6 +118,12 @@
     <Compile Include="Samples.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
+      <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
+      <Name>DAE.Connection</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
