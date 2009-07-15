@@ -4,6 +4,11 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
+#define USECONNECTIONPOOLING
+#define USESQLOLEDB
+//#define USEOLEDBCONNECTION
+//#define USEADOCONNECTION
+
 using System;
 using System.Globalization;
 using System.IO;
@@ -21,11 +26,6 @@ using Alphora.Dataphor.DAE.Server;
 using ColumnExpression=Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement=Alphora.Dataphor.DAE.Language.TSQL.DropIndexStatement;
 using SelectStatement=Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
-
-#define USECONNECTIONPOOLING
-#define USESQLOLEDB
-//#define USEOLEDBCONNECTION
-//#define USEADOCONNECTION
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
