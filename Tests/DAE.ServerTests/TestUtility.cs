@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		{
 			ServerConfiguration LTestConfiguration = new ServerConfiguration();
 			LTestConfiguration.Name = AInstanceName;
-			LTestConfiguration.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), "Libraries");
+			LTestConfiguration.LibraryDirectories = Path.Combine(Path.GetDirectoryName(PathUtility.GetInstallationDirectory()), "Libraries");
 			LTestConfiguration.PortNumber = 8090;
 			switch (ACatalogStoreType)
 			{

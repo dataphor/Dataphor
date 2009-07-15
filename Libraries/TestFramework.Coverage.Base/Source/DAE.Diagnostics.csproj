@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -33,34 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Utilities\NUnit-2.5.0.9122\framework\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Utilities\NUnit-2.5.0.9122\framework\nunit.mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.3409.40585, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Utilities\NUnit-2.5.0.9122\framework\pnunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CatalogStoreTest.cs" />
-    <Compile Include="Client\Provider\ConnectionTest.cs" />
-    <Compile Include="CoverageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.cs" />
-    <Compile Include="SQLStoreTest.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="TestNodes.cs" />
-    <Compile Include="TestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
@@ -70,22 +51,6 @@
     <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
       <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Name>BOP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE.Client.Provider\DAE.Client.Provider.csproj">
-      <Project>{2A36CE97-A296-462A-8C3F-C194F1A2D758}</Project>
-      <Name>DAE.Client.Provider</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE.Client\DAE.Client.csproj">
-      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
-      <Name>DAE.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE.MSSQL\DAE.MSSQL.csproj">
-      <Project>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</Project>
-      <Name>DAE.MSSQL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
-      <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
-      <Name>DAE.SQLCE</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>

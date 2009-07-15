@@ -97,7 +97,7 @@ if exists ((ObjectDependencies over { Dependency_Object_ID } rename { Dependency
 
 // Test that the dependents of every object can be enumerated and displayed
 begin
-	var LCursor : cursor(table { Name : Name }) := cursor(CatalogObjects over { Name });
+	var LCursor : cursor(table { Name : Name }) := cursor(CatalogObjects over { Name } return 10); // TODO: Full coverage should not limit to the first 10 rows, but this takes about 30 minutes to run otherwise
 	try
 		var LDependencies : String;
 		while LCursor.Next() do
