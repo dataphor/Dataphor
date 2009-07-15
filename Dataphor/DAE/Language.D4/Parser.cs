@@ -492,7 +492,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 case Keywords.Group:
                 case Keywords.Return:
                 case Keywords.Explode:
-                case Keywords.On:
                 case Keywords.Adorn:
                 case Keywords.Redefine:
                 case Keywords.Union:
@@ -506,6 +505,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 case Keywords.Having:
                 case Keywords.Without:
                 case Keywords.Lookup: return true;
+
+                case Keywords.On:
+					switch (FLexer.PeekTokenSymbol(2))
+					{
+						case Keywords.Insert:
+						case Keywords.Update:
+						case Keywords.Delete: return false;
+					}
+					return true;
+					
 				case Keywords.BeginList: 
 					switch (FLexer.PeekTokenSymbol(2))
 					{
@@ -598,7 +607,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
                     case Keywords.Group: LExpression = AggregateClause(LExpression); break;
                     case Keywords.Return: LExpression = QuotaClause(LExpression); break;
                     case Keywords.Explode: LExpression = ExplodeClause(LExpression); break;
-                    case Keywords.On: LExpression = OnClause(LExpression); break;
+                    case Keywords.On: 
+						if ((FLexer.PeekTokenSymbol(2) != Keywords.Insert) && (FLexer.PeekTokenSymbol(2) != Keywords.Update) && (FLexer.PeekTokenSymbol(2) != Keywords.Delete))
+							LExpression = OnClause(LExpression); 
+					break;
                     case Keywords.Adorn: LExpression = AdornClause(LExpression); break;
                     case Keywords.Redefine: LExpression = RedefineClause(LExpression); break;
                     case Keywords.Union: LExpression = UnionClause(LExpression); break;
