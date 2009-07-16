@@ -1145,7 +1145,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					if (LQueryExpression.SelectExpression == null)
 						LQueryExpression.SelectExpression = LSelectExpression;
 					else
-						LQueryExpression.TableOperators.Add(new TableOperatorExpression(TableOperator.Union, LSelectExpression));
+						LQueryExpression.TableOperators.Add(new TableOperatorExpression(TableOperator.Union, false, LSelectExpression));
 				}
 			}
 			return LQueryExpression;
