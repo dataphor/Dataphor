@@ -342,6 +342,7 @@ namespace Alphora.Dataphor.DAE.Client
 				case "Decimal" : return AProcess.DataTypes.SystemDecimal;
 				case "DateTime" : return AProcess.DataTypes.SystemDateTime;
 				case "TimeSpan" : return AProcess.DataTypes.SystemTimeSpan;
+				case "Guid" : return AProcess.DataTypes.SystemGuid;
 				default : throw new ClientException(ClientException.Codes.InvalidParamType, AType.Name);
 			}
 		}
