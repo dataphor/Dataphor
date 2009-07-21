@@ -33,15 +33,15 @@
   <ItemGroup>
     <Reference Include="Alphora.Dataphor, Version=2.2.3476.36306, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dataphor\bin\Alphora.Dataphor.dll</HintPath>
+      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.dll</HintPath>
     </Reference>
     <Reference Include="Alphora.Dataphor.BOP, Version=2.2.3476.36307, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dataphor\bin\Alphora.Dataphor.BOP.dll</HintPath>
+      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.BOP.dll</HintPath>
     </Reference>
     <Reference Include="Alphora.Dataphor.DAE, Version=2.2.3476.36308, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dataphor\bin\Alphora.Dataphor.DAE.dll</HintPath>
+      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=2.0.4.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -58,7 +58,7 @@
     <Compile Include="Register.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Connection\Source\DAE.Connection.csproj">
+    <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
       <Name>DAE.Connection</Name>
     </ProjectReference>
