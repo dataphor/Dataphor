@@ -22,8 +22,8 @@
 create table DAEServerInfo
 (
 	ID nchar(2) not null default 'ID', --check (ID = 'ID'),
-	Name nvarchar(200) not null,
-	Version nvarchar(20) not null,
+	Name character varying(200) not null,
+	Version character varying(20) not null,
 	MaxConcurrentProcesses int not null,
 	ProcessWaitTimeout int not null,
 	ProcessTerminationTimeout int not null,
@@ -40,9 +40,9 @@ create table DAEServerInfo
 
 create table DAEUsers
 (
-	ID nvarchar(200) not null,
-	Name nvarchar(200) not null,
-	Data nvarchar(200) null,
+	ID character varying(200) not null,
+	Name character varying(200) not null,
+	Data character varying(200) null,
 	constraint PK_DAEUsers primary key (ID)
 	--reference Users_Groups { Group_Name } references Groups { Name }
 )
@@ -56,7 +56,7 @@ create table DAEUsers
 
 create table DAELoadedLibraries
 (
-	Library_Name nvarchar(200) not null,
+	Library_Name character varying(200) not null,
 	constraint PK_DAELoadedLibraries primary key (Library_Name)
 	--reference LoadedLibraries_Libraries { Library_Name } references Libraries { Name }
 )
@@ -71,8 +71,8 @@ create table DAELoadedLibraries
 
 create table DAELibraryDirectories
 (
-	Library_Name nvarchar(200) not null,
-	Directory nvarchar(200) not null,
+	Library_Name character varying(200) not null,
+	Directory character varying(200) not null,
 	constraint PK_DAELibraryDirectories primary key (Library_Name)
 	--reference LibraryDirectories_Libraries { Library_Name } references Libraries { Name }
 )
@@ -86,8 +86,8 @@ create table DAELibraryDirectories
 
 create table DAELibraryVersions
 (
-	Library_Name nvarchar(200) not null,
-	VersionNumber nvarchar(40) not null,
+	Library_Name character varying(200) not null,
+	VersionNumber character varying(40) not null,
 	constraint PK_DAELibraryVersions primary key (Library_Name)
 	--reference LibraryVersions_Libraries { Library_Name } references Libraries { Name }
 )
@@ -101,8 +101,8 @@ create table DAELibraryVersions
 
 create table DAELibraryOwners
 (
-	Library_Name nvarchar(200) not null,
-	Owner_User_ID nvarchar(200) not null,
+	Library_Name character varying(200) not null,
+	Owner_User_ID character varying(200) not null,
 	constraint PK_DAELibraryOwners primary key (Library_Name)
 	--reference LibraryOwners_Libraries { Library_Name } references Libraries { Name }
 	--reference LibraryOwners_Users { Owner_User_ID } references Users { ID }
@@ -118,11 +118,11 @@ create table DAELibraryOwners
 create table DAEObjects
 (
 	ID int not null,
-	Name nvarchar(200) not null,
-	Library_Name nvarchar(200) not null,
-	DisplayName nvarchar(200) not null,
-	Description nvarchar(200) not null,
-	Type nvarchar(80) not null,
+	Name character varying(200) not null,
+	Library_Name character varying(200) not null,
+	DisplayName character varying(200) not null,
+	Description character varying(200) not null,
+	Type character varying(80) not null,
 	IsSystem tinyint not null default 0, -- check (IsSystem in (0, 1)),
 	IsRemotable tinyint not null default 0, -- check (IsRemotable in (0, 1)),
 	IsGenerated tinyint not null default 0, -- check (IsGenerated in (0, 1)),
@@ -176,9 +176,9 @@ create index IDX_DAEObjectDependencies_Dependency_Object_ID on DAEObjectDependen
 create table DAECatalogObjects
 (
 	ID int not null,
-	Name nvarchar(200) not null,
-	Library_Name nvarchar(200) not null,
-	Owner_User_ID nvarchar(200) not null,
+	Name character varying(200) not null,
+	Library_Name character varying(200) not null,
+	Owner_User_ID character varying(200) not null,
 	constraint PK_DAECatalogObjects primary key (ID)
 	--reference CatalogObjects_Objects { ID } references Objects { ID },
 	--reference CatalogObjects_Users { Owner_User_ID } references Users { ID }
@@ -204,7 +204,7 @@ create unique index UIDX_DAECatalogObjects_Name on DAECatalogObjects (Name)
 create table DAECatalogObjectNames
 (
 	Depth int not null,
-	Name nvarchar(200) not null, --This is the name of the object specified by ID with name dequalified Depth times
+	Name character varying(200) not null, --This is the name of the object specified by ID with name dequalified Depth times
 	ID int not null,
 	constraint PK_DAECatalogObjectNames primary key (Depth, Name, ID)
 	--reference CatalogObjectNames_CatalogObjects { ID } references CatalogObjects { ID }
@@ -256,7 +256,7 @@ create table DAEScalarTypes
 
 create table DAEOperatorNames
 (
-	Name nvarchar(200) not null,
+	Name character varying(200) not null,
 	constraint PK_DAEOperatorNames primary key (Name)
 )
 ;
@@ -272,8 +272,8 @@ create table DAEOperatorNames
 create table DAEOperatorNameNames
 (
 	Depth int not null,
-	Name nvarchar(200) not null, --This is the operator name (not just the name) of the operator specified by ID with name dequalified Depth times
-	OperatorName nvarchar(200) not null,
+	Name character varying(200) not null, --This is the operator name (not just the name) of the operator specified by ID with name dequalified Depth times
+	OperatorName character varying(200) not null,
 	constraint PK_DAEOperatorNameNames primary key (Depth, Name, OperatorName)
 	--reference OperatorNameNames { OperatorName } references OperatorNames { Name }
 )
@@ -291,7 +291,7 @@ create index IDX_DAEOperatorNameNames_OperatorName on DAEOperatorNameNames (Oper
 create table DAEOperators
 (
 	ID int not null,
-	OperatorName nvarchar(200) not null,
+	OperatorName character varying(200) not null,
 	Signature ntext not null,
 	constraint PK_DAEOperators primary key (ID)
 	--reference Operators_OperatorNames { OperatorName } references OperatorNames { Name },
@@ -349,8 +349,8 @@ create table DAEApplicationTransactionTableMaps
 
 create table DAEApplicationTransactionOperatorNameMaps
 (
-	Source_OperatorName nvarchar(200) not null,
-	Translated_OperatorName nvarchar(200) not null,
+	Source_OperatorName character varying(200) not null,
+	Translated_OperatorName character varying(200) not null,
 	constraint PK_DAEApplicationTransactionOperatorNameMaps primary key (Source_OperatorName)
 )
 ;
@@ -380,7 +380,7 @@ create index IDX_DAEApplicationTransactionOperatorMaps_Translated_Operator_ID on
 
 create table DAEUserRoles
 (
-	User_ID nvarchar(200) not null,
+	User_ID character varying(200) not null,
 	Role_ID int not null,
 	constraint PK_DAEUserRoles primary key (User_ID, Role_ID)
 	--reference UserRoles_Users { User_ID } references Users { ID },
@@ -401,8 +401,8 @@ create index IDX_DAEUserRoles_Role_ID on DAEUserRoles (Role_ID)
 
 create table DAERights
 (
-	Name nvarchar(200) not null,
-	Owner_User_ID nvarchar(200) not null,
+	Name character varying(200) not null,
+	Owner_User_ID character varying(200) not null,
 	Catalog_Object_ID int not null,
 	constraint PK_DAERights primary key (Name)
 	--reference Rights_Users { Owner_User_ID } references Users { ID }
@@ -425,7 +425,7 @@ create index IDX_DAERights_Catalog_Object_ID on DAERights (Catalog_Object_ID)
 create table DAERoleRightAssignments
 (
 	Role_ID int not null,
-	Right_Name nvarchar(200) not null,
+	Right_Name character varying(200) not null,
 	IsGranted tinyint not null default 0, -- check (IsGranted in (0, 1)),
 	constraint PK_DAERoleRightAssignments primary key (Role_ID, Right_Name)
 	--reference RoleRightAssignments_Roles { Role_ID } references Roles { ID },
@@ -444,8 +444,8 @@ create index IDX_DAERoleRightAssignments_Right_Name on DAERoleRightAssignments (
 
 create table DAEUserRightAssignments
 (
-	User_ID nvarchar(200) not null,
-	Right_Name nvarchar(200) not null,
+	User_ID character varying(200) not null,
+	Right_Name character varying(200) not null,
 	IsGranted tinyint not null default 0, -- check (IsGranted in (0, 1)),
 	constraint PK_DAEUserRightAssignments primary key (User_ID, Right_Name)
 	--reference UserRightAssignments_Users { User_ID } references Users { ID },
@@ -466,8 +466,8 @@ create table DAEDevices
 (
 	ID int not null,
 	ResourceManagerID int not null,
-	ReconciliationMaster nvarchar(20) not null,
-	ReconciliationMode nvarchar(80) not null,
+	ReconciliationMaster character varying(20) not null,
+	ReconciliationMode character varying(80) not null,
 	constraint PK_DAEDevices primary key (ID)
 	--reference Devices_CatalogObjects (ID) references CatalogObjects (ID)
 )
@@ -481,11 +481,11 @@ create table DAEDevices
 
 create table DAEDeviceUsers
 (
-	User_ID nvarchar(200) not null,
+	User_ID character varying(200) not null,
 	Device_ID int not null,
-	UserID nvarchar(200) not null,
-	Data nvarchar(200) not null,
-	ConnectionParameters nvarchar(500) not null,
+	UserID character varying(200) not null,
+	Data character varying(200) not null,
+	ConnectionParameters character varying(500) not null,
 	constraint PK_DAEDeviceUsers primary key (User_ID, Device_ID)
 	--reference DeviceUsers_Users { User_ID } references Users { ID },
 	--reference DeviceUsers_Devices { Device_ID } references Devices { ID },
