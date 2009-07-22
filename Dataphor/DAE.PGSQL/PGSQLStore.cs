@@ -24,53 +24,10 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 	{
 		/// <summary>Initializes the store, ensuring that an instance of the server is running and a database is attached.</summary>
         protected override void InternalInitialize()
-		{
-			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
-			LBuilder.ConnectionString = ConnectionString;
-			
-            FSupportsMARS = LBuilder.ContainsKey("MultipleActiveResultSets") && (bool)LBuilder["MultipleActiveResultSets"];
+        {
+            FSupportsMARS = false;
             FSupportsUpdatableCursor = false;
-            
-            if (FShouldEnsureDatabase)
-            {
-				string LDatabaseName = null;
-				if (LBuilder.ContainsKey("Initial Catalog"))
-				{
-					LDatabaseName = (string)LBuilder["Initial Catalog"];
-					LBuilder["Initial Catalog"] = "master";
-				}
-				else if (LBuilder.ContainsKey("Database"))
-				{
-					LDatabaseName = (string)LBuilder["Database"];
-					LBuilder["Database"] = "master";
-				}
-				
-				if (!String.IsNullOrEmpty(LDatabaseName))
-				{
-					if (!Parser.IsValidIdentifier(LDatabaseName))
-						throw new ArgumentException("Database name specified in store connection string is not a valid identifier.");
-						
-					try
-					{
-						#if USESQLCONNECTION
-                        PostgreSQLConnection LConnection = new PostgreSQLConnection(LBuilder.ConnectionString);
-						LConnection.Execute(String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", LDatabaseName));
-						#else
-						SqlConnection LConnection = new SqlConnection(LBuilder.ConnectionString);
-						LConnection.Open();
-						SqlCommand LCommand = LConnection.CreateCommand();
-						LCommand.CommandType = CommandType.Text;
-						LCommand.CommandText = String.Format("if not exists (select * from sysdatabases where name = '{0}') create database {0}", LDatabaseName);
-						LCommand.ExecuteNonQuery();
-						#endif
-					}
-					catch
-					{
-						// Do not rethrow, this does not necessarily indicate failure, let the non-existence of the database throw later
-					}
-				}
-			}
-		}
+        }
 		
 		private bool FShouldEnsureDatabase = true;
 		public bool ShouldEnsureDatabase
