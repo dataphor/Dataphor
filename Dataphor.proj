@@ -1,4 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+	Dataphor build.  Example Usage:
+		msbuild Dataphor.proj /p:Configuration=BaseDebug
+-->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -8,14 +12,6 @@
 		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" />
 	</Target>
 
-	<PropertyGroup>
-		<LibrariesConfiguration>$(Configuration)</LibrariesConfiguration>
-		<LibrariesConfiguration Condition=" '$(LibrariesConfiguration)' == 'Debug' ">BaseDebug</LibrariesConfiguration>
-	</PropertyGroup>
-	<Target Name="BuildLibraries">
-		<MSBuild Projects="Libraries\Libraries.sln" Properties="Configuration=$(LibrariesConfiguration)" />
-	</Target>
-	
 	<ItemGroup>
 		<BinFiles Include="Dataphor\bin\*.*" Exclude="**\*.pdb" />
 	</ItemGroup>
@@ -54,6 +50,6 @@
 		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
 	</Target>
 
-	<Target Name="Build" DependsOnTargets="BuildDataphor; BuildLibraries; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	<Target Name="Build" DependsOnTargets="BuildDataphor; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
 	</Target>
 </Project>
