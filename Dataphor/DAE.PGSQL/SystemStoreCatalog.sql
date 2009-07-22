@@ -123,16 +123,16 @@ create table DAEObjects
 	DisplayName character varying(200) not null,
 	Description character varying(200) not null,
 	Type character varying(80) not null,
-	IsSystem tinyint not null default 0, -- check (IsSystem in (0, 1)),
-	IsRemotable tinyint not null default 0, -- check (IsRemotable in (0, 1)),
-	IsGenerated tinyint not null default 0, -- check (IsGenerated in (0, 1)),
-	IsATObject tinyint not null default 0, -- check (IsATObject in (0, 1)),
-	IsSessionObject tinyint not null default 0, -- check (IsSessionObject in (0, 1)),
-	IsPersistent tinyint not null default 0, -- check (IsPersistent in (0, 1)),
+	IsSystem smallint not null default 0, -- check (IsSystem in (0, 1)),
+	IsRemotable smallint not null default 0, -- check (IsRemotable in (0, 1)),
+	IsGenerated smallint not null default 0, -- check (IsGenerated in (0, 1)),
+	IsATObject smallint not null default 0, -- check (IsATObject in (0, 1)),
+	IsSessionObject smallint not null default 0, -- check (IsSessionObject in (0, 1)),
+	IsPersistent smallint not null default 0, -- check (IsPersistent in (0, 1)),
 	Catalog_Object_ID int null,
 	Parent_Object_ID int null,
 	Generator_Object_ID int null,
-	ServerData ntext,
+	ServerData text,
 	constraint PK_DAEObjects primary key (ID)
 	--reference Objects_Objects { Parent_Object_ID } references Objects { ID },
 	--reference Objects_Libraries { Library_Name } references Libraries { Name }
@@ -292,7 +292,7 @@ create table DAEOperators
 (
 	ID int not null,
 	OperatorName character varying(200) not null,
-	Signature ntext not null,
+	Signature text not null,
 	constraint PK_DAEOperators primary key (ID)
 	--reference Operators_OperatorNames { OperatorName } references OperatorNames { Name },
 	--reference Operators_CatalogObjects { ID } references CatalogObjects { ID },
@@ -426,7 +426,7 @@ create table DAERoleRightAssignments
 (
 	Role_ID int not null,
 	Right_Name character varying(200) not null,
-	IsGranted tinyint not null default 0, -- check (IsGranted in (0, 1)),
+	IsGranted smallint not null default 0, -- check (IsGranted in (0, 1)),
 	constraint PK_DAERoleRightAssignments primary key (Role_ID, Right_Name)
 	--reference RoleRightAssignments_Roles { Role_ID } references Roles { ID },
 	--reference RoleRightAssignmetns_Right { Right_Name } references Rights { Name }
@@ -446,7 +446,7 @@ create table DAEUserRightAssignments
 (
 	User_ID character varying(200) not null,
 	Right_Name character varying(200) not null,
-	IsGranted tinyint not null default 0, -- check (IsGranted in (0, 1)),
+	IsGranted smallint not null default 0, -- check (IsGranted in (0, 1)),
 	constraint PK_DAEUserRightAssignments primary key (User_ID, Right_Name)
 	--reference UserRightAssignments_Users { User_ID } references Users { ID },
 	--reference UserRightAssignments_Rights { Right_Name } references Rights { Name }
