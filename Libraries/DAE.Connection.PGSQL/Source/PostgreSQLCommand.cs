@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Connection.PGSQL
                 {
                     switch (((SQLIntegerType)LParameter.Type).ByteCount)
                     {
-                        case 1: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Char; break;
+                        case 1: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
                         case 2: LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Smallint; break;
                         case 8 :
                             LNpgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Numeric; 
