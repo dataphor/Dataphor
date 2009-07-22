@@ -13,6 +13,8 @@ using System.Collections.Generic;
 
 #if USESQLCONNECTION
 using Alphora.Dataphor.DAE.Connection;
+using Alphora.Dataphor.DAE.Connection.PGSQL;
+
 #else
 using System.Data;
 using System.Data.Common;
@@ -28,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 		#if USESQLCONNECTION
 		protected override SQLConnection InternalCreateConnection()
 		{
-			return new MSSQLConnection(Store.ConnectionString);
+			return new PostgreSQLConnection(Store.ConnectionString);
 		}
 		#else
         protected override DbConnection InternalCreateConnection()
