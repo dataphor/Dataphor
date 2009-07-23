@@ -516,7 +516,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					else
 					{
 						object LValue = FBuffer[FBuffer.Count - 1][FKeyIndexes[LIndex]];
-						DAE.Runtime.Data.Scalar LScalar;
+						object LScalar;
 						if (IsNull(LValue))
 							LScalar = null;
 						else

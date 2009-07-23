@@ -22,1141 +22,857 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	/// <remarks> operator iBitwiseNot(byte) : byte </remarks>
-    public class ByteBitwiseNotNode : InstructionNode
+    public class ByteBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemByte, (byte)~AArguments[0].Value.AsByte));
+				return (byte)~(byte)AArgument1;
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseNot(sbyte) : sbyte </remarks>
-    public class SByteBitwiseNotNode : InstructionNode
+    public class SByteBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromSByte((sbyte)~AArguments[0].Value.AsSByte()));
+				return (sbyte)~(sbyte)AArgument1;
 		}
     }
     #endif
     
 	/// <remarks> operator iBitwiseNot(short) : short </remarks>
-    public class ShortBitwiseNotNode : InstructionNode
+    public class ShortBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemShort, (short)~AArguments[0].Value.AsInt16));
+				return (short)~(short)AArgument1;
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseNot(ushort) : ushort </remarks>
-    public class UShortBitwiseNotNode : InstructionNode
+    public class UShortBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromUInt16((ushort)~AArguments[0].Value.AsUInt16()));
+				return (ushort)~(ushort)AArgument1;
 		}
     }
     #endif
     
 	/// <remarks> operator iBitwiseNot(int) : int </remarks>
-    public class IntegerBitwiseNotNode : InstructionNode
+    public class IntegerBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, ~AArguments[0].Value.AsInt32));
+				return ~(int)AArgument1;
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseNot(uint) : uint </remarks>
-    public class UIntegerBitwiseNotNode : InstructionNode
+    public class UIntegerBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromUInt32(~AArguments[0].Value.AsUInt32()));
+				return ~(uint)AArgument1;
 		}
     }
     #endif
     
 	/// <remarks> operator iBitwiseNot(long) : long </remarks>
-    public class LongBitwiseNotNode : InstructionNode
+    public class LongBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemLong, ~AArguments[0].Value.AsInt64));
+				return ~(long)AArgument1;
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseNot(ulong) : ulong </remarks>
-    public class ULongBitwiseNotNode : InstructionNode
+    public class ULongBitwiseNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromUInt64(~AArguments[0].Value.AsUInt64()));
+				return ~(ulong)AArgument1;
 		}
     }
     #endif
 
 	/// <remarks> operator iBitwiseAnd(byte, byte) : byte </remarks>
-    public class ByteBitwiseAndNode : InstructionNode
+    public class ByteBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemByte, 
-						(byte)
-						(
-							AArguments[0].Value.AsByte &
-							AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(byte)AArgument1 &
+						(byte)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseAnd(sbyte, sbyte) : sbyte </remarks>
-    public class SByteBitwiseAndNode : InstructionNode
+    public class SByteBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() &
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() &
+						(sbyte)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iBitwiseAnd(short, short) : short </remarks>
-    public class ShortBitwiseAndNode : InstructionNode
+    public class ShortBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemShort, 
-						(short)
-						(
-							AArguments[0].Value.AsInt16 &
-							AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(short)AArgument1 &
+						(short)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseAnd(ushort, ushort) : ushort </remarks>
-    public class UShortBitwiseAndNode : InstructionNode
+    public class UShortBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() &
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() &
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iBitwiseAnd(integer, integer) : integer </remarks>
-    public class IntegerBitwiseAndNode : InstructionNode
+    public class IntegerBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemInteger, 
-						AArguments[0].Value.AsInt32 &
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 & (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseAnd(uinteger, uinteger) : uinteger </remarks>
-    public class UIntegerBitwiseAndNode : InstructionNode
+    public class UIntegerBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
-					(
-						AArguments[0].Value.AsUInt32() &
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+				return (uint)AArgument1() & (uint)AArgument2;
 		}
     }
     #endif
 
 	/// <remarks> operator iBitwiseAnd(long, long) : long </remarks>
-    public class LongBitwiseAndNode : InstructionNode
+    public class LongBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemLong, 
-						AArguments[0].Value.AsInt64 &
-						AArguments[1].Value.AsInt64
-					)
-				);
+				return (long)AArgument1 & (long)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iBitwiseAnd(ulong, ulong) : ulong </remarks>
-    public class ULongBitwiseAndNode : InstructionNode
+    public class ULongBitwiseAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() &
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() &
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iBitwiseOr(byte, byte) : byte </remarks>
-    public class ByteBitwiseOrNode : InstructionNode
+    public class ByteBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemByte, 
-						(byte)
-						(
-							AArguments[0].Value.AsByte |
-							AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(byte)AArgument1 |
+						(byte)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iBitwiseOr(sbyte, sbyte) : sbyte </remarks>
-    public class SByteBitwiseOrNode : InstructionNode
+    public class SByteBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							(byte)AArguments[0].Value.AsSByte() |
-							(byte)AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(byte)(sbyte)AArgument1() |
+						(byte)(sbyte)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iBitwiseOr(short, short) : short </remarks>
-    public class ShortBitwiseOrNode : InstructionNode
+    public class ShortBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemShort, 
-						(short)
-						(
-							(ushort)AArguments[0].Value.AsInt16 |
-							(ushort)AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(ushort)(short)AArgument1 |
+						(ushort)(short)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iBitwiseOr(ushort, ushort) : ushort </remarks>
-    public class UShortBitwiseOrNode : InstructionNode
+    public class UShortBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() |
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() |
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iBitwiseOr(integer, integer) : integer </remarks>
-    public class IntegerBitwiseOrNode : InstructionNode
+    public class IntegerBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemInteger, 
-						AArguments[0].Value.AsInt32 |
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 | (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iBitwiseOr(uinteger, uinteger) : uinteger </remarks>
-    public class UIntegerBitwiseOrNode : InstructionNode
+    public class UIntegerBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() |
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+						(uint)AArgument1() |
+						(uint)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iBitwiseOr(long, long) : long </remarks>
-    public class LongBitwiseOrNode : InstructionNode
+    public class LongBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemLong, 
-						AArguments[0].Value.AsInt64 |
-						AArguments[1].Value.AsInt64
-					)
-				);
+				return (long)AArgument1 | (long)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iBitwiseOr(ulong, ulong) : ulong </remarks>
-    public class ULongBitwiseOrNode : InstructionNode
+    public class ULongBitwiseOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() |
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() |
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks>operator iBitwiseXor(byte, byte) : byte </remarks>
-    public class ByteBitwiseXorNode : InstructionNode
+    public class ByteBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemByte, 
-						(byte)
-						(
-							AArguments[0].Value.AsByte ^
-							AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(byte)AArgument1 ^
+						(byte)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks>operator iBitwiseXor(sbyte, sbyte) : sbyte </remarks>
-    public class SByteBitwiseXorNode : InstructionNode
+    public class SByteBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() ^
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() ^
+						(sbyte)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks>operator iBitwiseXor(short, short) : short </remarks>
-    public class ShortBitwiseXorNode : InstructionNode
+    public class ShortBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemShort, 
-						(short)
-						(
-							AArguments[0].Value.AsInt16 ^
-							AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(short)AArgument1 ^
+						(short)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks>operator iBitwiseXor(ushort, ushort) : ushort </remarks>
-    public class UShortBitwiseXorNode : InstructionNode
+    public class UShortBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() ^
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() ^
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks>operator iBitwiseXor(integer, integer) : integer </remarks>
-    public class IntegerBitwiseXorNode : InstructionNode
+    public class IntegerBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemInteger, 
-						AArguments[0].Value.AsInt32 ^
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 ^ (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks>operator iBitwiseXor(uinteger, uinteger) : uinteger </remarks>
-    public class UIntegerBitwiseXorNode : InstructionNode
+    public class UIntegerBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() ^
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+						(uint)AArgument1() ^
+						(uint)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks>operator iBitwiseXor(long, long) : long </remarks>
-    public class LongBitwiseXorNode : InstructionNode
+    public class LongBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemLong, 
-						AArguments[0].Value.AsInt64 ^
-						AArguments[1].Value.AsInt64
-					)
-				);
+				return (long)AArgument1 ^ (long)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks>operator iBitwiseXor(ulong, ulong) : ulong </remarks>
-    public class ULongBitwiseXorNode : InstructionNode
+    public class ULongBitwiseXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() ^
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() ^
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iLeftShift(byte, integer) : byte </remarks>
-    public class ByteShiftLeftNode : InstructionNode
+    public class ByteShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemByte, 
-						(byte)
-						(
-							AArguments[0].Value.AsByte <<
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(byte)AArgument1 <<
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iLeftShift(sbyte, integer) : sbyte </remarks>
-    public class SByteShiftLeftNode : InstructionNode
+    public class SByteShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() <<
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(sbyte)AArgument1() <<
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iLeftShift(short, integer) : short </remarks>
-    public class ShortShiftLeftNode : InstructionNode
+    public class ShortShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemShort,
-						(short)
-						(
-							AArguments[0].Value.AsInt16 <<
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(short)AArgument1 <<
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers
     /// <remarks> operator iLeftShift(ushort, integer) : ushort </remarks>
-    public class UShortShiftLeftNode : InstructionNode
+    public class UShortShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() <<
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(ushort)AArgument1() <<
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iLeftShift(integer, integer) : integer </remarks>
-    public class IntegerShiftLeftNode : InstructionNode
+    public class IntegerShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemInteger, 
-						AArguments[0].Value.AsInt32 <<
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 << (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iLeftShift(uinteger, integer) : uinteger </remarks>
-    public class UIntegerShiftLeftNode : InstructionNode
+    public class UIntegerShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() <<
-						AArguments[1].Value.AsInt32
-					)
-				);
+						(uint)AArgument1 <<
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator iLeftShift(long, integer) : long </remarks>
-    public class LongShiftLeftNode : InstructionNode
+    public class LongShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemLong, 
-						AArguments[0].Value.AsInt64 <<
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (long)AArgument1 << (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator iLeftShift(ulong, integer) : ulong </remarks>
-    public class ULongShiftLeftNode : InstructionNode
+    public class ULongShiftLeftNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() <<
-						AArguments[1].Value.AsInt32
-					)
-				);
+						(ulong)AArgument1() <<
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator >>(byte, integer) : byte </remarks>
-    public class ByteShiftRightNode : InstructionNode
+    public class ByteShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemByte, 
-						(byte)
-						(
-							AArguments[0].Value.AsByte >>
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(byte)AArgument1 >>
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator >>(sbyte, integer) : sbyte </remarks>
-    public class SByteShiftRightNode : InstructionNode
+    public class SByteShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() >>
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(sbyte)AArgument1() >>
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator >>(short, integer) : short </remarks>
-    public class ShortShiftRightNode : InstructionNode
+    public class ShortShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						AProcess.DataTypes.SystemShort, 
-						(short)
-						(
-							AArguments[0].Value.AsInt16 >>
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(short)AArgument1 >>
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator >>(ushort, integer) : ushort </remarks>
-    public class UShortShiftRightNode : InstructionNode
+    public class UShortShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() >>
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(ushort)AArgument1() >>
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator >>(integer, integer) : integer </remarks>
-    public class IntegerShiftRightNode : InstructionNode
+    public class IntegerShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemInteger, 
-						AArguments[0].Value.AsInt32 >>
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 >> (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator >>(uinteger, integer) : uinteger </remarks>
-    public class UIntegerShiftRightNode : InstructionNode
+    public class UIntegerShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() >>
-						AArguments[1].Value.AsInt32
-					)
-				);
+						(uint)AArgument1() >>
+						(int)AArgument2
+					);
 		}
     }
     #endif
 
     /// <remarks> operator >>(long, integer) : long </remarks>
-    public class LongShiftRightNode : InstructionNode
+    public class LongShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						AProcess.DataTypes.SystemLong, 
-						AArguments[0].Value.AsInt64 >>
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (long)AArgument1 >> (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
     /// <remarks> operator >>(ulong, integer) : ulong </remarks>
-    public class ULongShiftRightNode : InstructionNode
+    public class ULongShiftRightNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() >>
-						AArguments[1].Value.AsInt32
-					)
-				);
+						(ulong)AArgument1 >>
+						(int)AArgument2
+					);
 		}
     }
     #endif

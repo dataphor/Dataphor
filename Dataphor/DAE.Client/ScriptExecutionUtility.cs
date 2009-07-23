@@ -148,8 +148,12 @@ namespace Alphora.Dataphor.DAE.Client
 				else
 					if (LPlan.DataType is DAE.Schema.IRowType)
 						ResultsFromRow((Row)LValue, LResult);
+					else if (LPlan.DataType is DAE.Schema.IListType)
+						ResultsFromList((ListValue)LValue, LResult);
+					else if (LPlan.DataType is DAE.Schema.IScalarType)
+						LResult.Append(((Scalar)LValue).AsDisplayString);
 					else
-						LResult.Append(LValue.AsDisplayString);
+						LResult.Append(String.Format("<Unknown Result Type: {0}>", LPlan.DataType.Name));
 				LResult.Append("\r\n");
 			}
 			return LRowCount;
@@ -240,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Client
 					string LValue;
 					try
 					{
-						LValue = ARow[LColumnIndex].AsDisplayString;
+						LValue = ARow.GetValue(LColumnIndex).ToString();
 					}
 					catch (Exception LException)
 					{
@@ -317,7 +321,15 @@ namespace Alphora.Dataphor.DAE.Client
 			ReadRow(ARow, LResultColumns);
 			BuildResults(LResultColumns, AResults);
 		}
-
+		
+		private static void ResultsFromList(ListValue AList, StringBuilder AResults)
+		{
+			ResultColumn[] LResultColumns = new ResultColumn[] { new ResultColumn("Elements") };
+			for (int LIndex = 0; LIndex < AList.Count(); LIndex++)
+				LResultColumns[0].Add(AList.GetValue(LIndex).ToString());
+			BuildResults(LResultColumns, AResults);
+		}
+		
 		/// <summary> Used internally by the TextExpressionWriter to buffer string data which has been read. </summary>
 		private struct ResultColumn
 		{

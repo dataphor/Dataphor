@@ -277,7 +277,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if (AParams[LIndex].Modifier != Modifier.In)
 						{
 							if (LRow.HasValue(LIndex))
-								AParams[LIndex].Value = LRow[LIndex].Copy();
+								AParams[LIndex].Value = DataValue.CopyValue(FInternalProcess, LRow[LIndex]);
 							else
 								AParams[LIndex].Value = null;
 						}

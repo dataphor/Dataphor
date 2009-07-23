@@ -488,16 +488,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the source expression
 				// Open a table for the target expression
 				// Insert each row of the source expression into the target expression
-				DataVar LSource = Nodes[0].Execute(AProcess);
+				object LSource = Nodes[0].Execute(AProcess);
 
-				DataVar LTarget;
+				object LTarget;
 				bool LSaveIsInsert = AProcess.IsInsert; 
 				bool LSaveIsOpeningInsertCursor = AProcess.IsOpeningInsertCursor; 
 				AProcess.IsInsert = true; // To indicate to application transactions that data should not be populated
@@ -512,11 +512,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.IsOpeningInsertCursor = LSaveIsOpeningInsertCursor;
 				}
 
-				if (LSource.DataType is Schema.IRowType)
+				if (LSource is Row)
 				{
-					using (Row LRow = (Row)LSource.Value)
+					using (Row LRow = (Row)LSource)
 					{
-						using (Table LTargetTable = (Table)LTarget.Value)
+						using (Table LTargetTable = (Table)LTarget)
 						{
 							if (InsertedUpdate)
 							{
@@ -575,11 +575,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				else
 				{
-					using (Table LSourceTable = ((Table)LSource.Value))
+					using (Table LSourceTable = ((Table)LSource))
 					{
-						using (Row LRow = new Row(AProcess, ((Schema.TableType)LSource.DataType).RowType))
+						using (Row LRow = new Row(AProcess, LSourceTable.DataType.RowType))
 						{
-							using (Table LTargetTable = ((Table)LTarget.Value))
+							using (Table LTargetTable = ((Table)LTarget))
 							{
 								// TODO: Make sure LSource is static if it is referenced by the expression of LTarget
 								if (InsertedUpdate)
@@ -699,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public string ColumnName;
 		#endif
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			return Nodes[0].Execute(AProcess);
 		}
@@ -770,7 +770,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(((Schema.TableType)Nodes[0].DataType).RowType));
+				APlan.Symbols.Push(new Symbol(((Schema.TableType)Nodes[0].DataType).RowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -811,14 +811,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Nodes[LIndex].BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// for each row in the table, update the value of each column to the given expression
-				DataVar LTarget = Nodes[0].Execute(AProcess);
-				using (Table LTable = (Table)LTarget.Value)
+				using (Table LTable = (Table)Nodes[0].Execute(AProcess))
 				{
 					Row LOldRow = new Row(AProcess, LTable.DataType.RowType);
 					try
@@ -826,7 +825,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						Row LNewRow = new Row(AProcess, LTable.DataType.RowType);
 						try
 						{
-							DataVar LOldRowObject = new DataVar(String.Empty, LOldRow.DataType, LOldRow);
 							if (LTable.Next())
 							{
 								#if USEUPDATEVALUEFLAGS
@@ -842,24 +840,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								{
 									LTable.Select(LOldRow);
 									LTable.Select(LNewRow);
-									AProcess.Context.Push(LOldRowObject);
+									AProcess.Context.Push(LOldRow);
 									try
 									{
 										for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
 										{
-											DataVar LObject = Nodes[LIndex].Execute(AProcess);
+											object LObject = Nodes[LIndex].Execute(AProcess);
 											try
 											{
 												#if USECOLUMNLOCATIONBINDING
-												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject.Value;
+												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject;
 												#else
-												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject.Value;
+												LNewRow[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject;
 												#endif
 											}
 											finally
 											{
-												if (LObject.Value != null)
-													LObject.Value.Dispose();
+												DataValue.DisposeValue(AProcess, LObject);
 											}
 										}
 									}
@@ -934,7 +931,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(Nodes[0].DataType));
+					APlan.Symbols.Push(new Symbol(Nodes[0].DataType));
 					try
 					{
 						foreach (UpdateColumnExpression LExpression in FColumnExpressions)
@@ -966,7 +963,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(Nodes[0].DataType));
+					APlan.Symbols.Push(new Symbol(Nodes[0].DataType));
 					try
 					{
 						for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -986,29 +983,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				base.InternalDetermineBinding(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (!IsGeneric)
 			{
-				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location).Value;
-				AProcess.Context.Push(new DataVar(LTarget.DataType, LTarget));
+				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location);
+				AProcess.Context.Push(LTarget);
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
 					{
-						DataVar LObject = Nodes[LIndex].Execute(AProcess);
+						object LObject = Nodes[LIndex].Execute(AProcess);
 						try
 						{
 							#if USECOLUMNLOCATIONBINDING
-							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject.Value;
+							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnLocation] = LObject;
 							#else
-							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject.Value;
+							LTarget[((UpdateColumnNode)Nodes[LIndex]).ColumnName] = LObject;
 							#endif
 						}
 						finally
 						{
-							if (LObject.Value != null)
-								LObject.Value.Dispose();
+							DataValue.DisposeValue(AProcess, LObject);
 						}
 					}
 				}
@@ -1019,16 +1015,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
-				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location).Value;
+				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location);
 				UpdateColumnNode[] LColumnNodes = new UpdateColumnNode[FColumnExpressions.Count];
 				AProcess.Plan.EnterRowContext();
 				try
 				{
-					AProcess.Plan.Symbols.Push(new DataVar(LTarget.DataType, LTarget));
+					AProcess.Plan.Symbols.Push(new Symbol(LTarget.DataType));
 					try
 					{
 						for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
-							LColumnNodes[LIndex] = Compiler.EmitUpdateColumnNode(AProcess.Plan, FColumnExpressions[LIndex], new ValueNode(Nodes[LIndex + 1].Execute(AProcess).Value));
+							LColumnNodes[LIndex] = Compiler.EmitUpdateColumnNode(AProcess.Plan, FColumnExpressions[LIndex], new ValueNode(Nodes[LIndex + 1].DataType, Nodes[LIndex + 1].Execute(AProcess)));
 					}
 					finally
 					{
@@ -1040,20 +1036,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.Plan.ExitRowContext();
 				}
 				
-				AProcess.Context.Push(new DataVar(LTarget.DataType, LTarget));
+				AProcess.Context.Push(LTarget);
 				try
 				{
 					for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
 					{
-						DataVar LObject = LColumnNodes[LIndex].Execute(AProcess);
+						object LObject = LColumnNodes[LIndex].Execute(AProcess);
 						try
 						{
-							LTarget[LColumnNodes[LIndex].ColumnName] = LObject.Value;
+							LTarget[LColumnNodes[LIndex].ColumnName] = LObject;
 						}
 						finally
 						{
-							if (LObject.Value != null)
-								LObject.Value.Dispose();
+							DataValue.DisposeValue(AProcess, LObject);
 						}
 					}
 				}
@@ -1139,38 +1134,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// delete all the rows
-				DataVar LSource = Nodes[0].Execute(AProcess);
-				using (Table LTable = (Table)LSource.Value)
+				using (Table LTable = (Table)Nodes[0].Execute(AProcess))
 				{
-					Row LRow = new Row(AProcess, LTable.DataType.RowType);
-					try
+					if (LTable.Next())
 					{
-						DataVar LRowObject = new DataVar(String.Empty, LRow.DataType, LRow);
-						if (LTable.Next())
+						while (true)
 						{
-							while (true)
-							{
-								LTable.Delete(Unchecked);
-								if (LTable.CursorType == CursorType.Static)
-									LTable.Next();
-									
-								if (LTable.EOF())
-									break;
-							}
+							LTable.Delete(Unchecked);
+							if (LTable.CursorType == CursorType.Static)
+								LTable.Next();
+								
+							if (LTable.EOF())
+								break;
 						}
-						
-						return null;
 					}
-					finally
-					{
-						LRow.Dispose();
-					}
+					
+					return null;
 				}
 			}
 			
@@ -1222,7 +1207,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Order = new Schema.Order(FTableVar.FindClusteringKey(), APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LTable = new LocalTable(this, AProcess);
 			try
@@ -1231,19 +1216,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// Insert each row from the arguments into this new table
 				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
 				{
-					DataVar LRowObject = Nodes[LIndex].Execute(AProcess);
+					Row LRow = (Row)Nodes[LIndex].Execute(AProcess);
 					try
 					{
-						LTable.FNativeTable.Insert(AProcess, (Row)LRowObject.Value); // Insert directly into the native table value to avoid the updatable capability check
+						LTable.FNativeTable.Insert(AProcess, LRow); // Insert directly into the native table value to avoid the updatable capability check
 					}
 					finally
 					{
-						LRowObject.Value.Dispose();
+						LRow.Dispose();
 					}
 				}
 
 				LTable.First();
-				return new DataVar(LTable.DataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -1312,9 +1297,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = SourceNode.DataType;
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{	
-			Table LTable = SourceNode.Execute(AProcess).Value as Table;
+			Table LTable = SourceNode.Execute(AProcess) as Table;
 			LTable.Open();
 			try
 			{
@@ -1334,7 +1319,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LNativeTable.Insert(AProcess, LRow);
 					}
 				}
-				return new DataVar(DataType, new TableValue(AProcess, LNativeTable));
+				return new TableValue(AProcess, LNativeTable);
 			}
 			finally
 			{
@@ -1383,16 +1368,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Order = FTableVar.FindClusteringOrder(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			TableValue LTableValue = Nodes[0].Execute(AProcess).Value as TableValue;
+			TableValue LTableValue = Nodes[0].Execute(AProcess) as TableValue;
 			TableScan LTable = new TableValueScan(this, AProcess);
 			LTable.NativeTable = LTableValue.AsNative as NativeTable;
 			LTable.Key = LTable.NativeTable.TableVar.FindClusteringOrder(AProcess.Plan);
 			LTable.Direction = ScanDirection.Forward;
 			LTable.Open();
 
-			return new DataVar(DataType, LTable);
+			return LTable;
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -1405,7 +1390,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			StackReferenceNode LNode = Nodes[0] as StackReferenceNode;
 			if (LNode != null)
 			{
-				TableValue LTableValue = AProcess.Context.Peek(LNode.Location).Value as TableValue;
+				TableValue LTableValue = AProcess.Context.Peek(LNode.Location) as TableValue;
 				if (LTableValue != null)
 					return LTableValue.AsNative as NativeTable;
 			}
@@ -1845,7 +1830,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice);
 		}
@@ -1918,7 +1903,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FJoinATNode == null)
 			{
 				Schema.RowType LKeyType = new Schema.RowType(FTableVar.FindClusteringKey().Columns);
-				APlan.Symbols.Push(new DataVar("ATRow", ARowType));
+				APlan.Symbols.Push(new Symbol("ATRow", ARowType));
 				try
 				{
 					InsertStatement LInsertStatement =
@@ -2012,7 +1997,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FTableVar.SourceTableName != null)
 			{
 				EnsureJoinATNode(AProcess.Plan, (Schema.RowType)ARow.DataType);
-				AProcess.Context.Push(new DataVar("ATRow", ARow.DataType, ARow));
+				AProcess.Context.Push(ARow);
 				try
 				{
 					FJoinATNode.Execute(AProcess);
@@ -2203,7 +2188,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			return Nodes[0].Execute(AProcess);
 		}
@@ -2478,13 +2463,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FOnExpression;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			LocalTable LTable = new LocalTable(this, AProcess, (TableValue)AProcess.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()).Value);
+			LocalTable LTable = new LocalTable(this, AProcess, (TableValue)AProcess.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()));
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

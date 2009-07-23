@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			using (DAE.Runtime.Data.DataValue LNodeTable = DataSession.Evaluate(CApplicationNodeTableExpression, LParams))
 			{
 				NodeTypeTable.Clear();
-				NodeTypeTable.LoadFromString(LNodeTable.AsString);
+				NodeTypeTable.LoadFromString(((DAE.Runtime.Data.Scalar)LNodeTable).AsString);
 			}
 			ValidateNodeTypeTable();
 
@@ -142,7 +142,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			string LDocumentString = null;
 			using (DAE.Runtime.Data.DataValue LStartingDocument = DataSession.Evaluate(CPrepareApplicationExpression, LParams))
 			{
-				LDocumentString = LStartingDocument.AsString;
+				LDocumentString = ((DAE.Runtime.Data.Scalar)LStartingDocument).AsString;
 			}
 
 			// Load the files required to register any nodes, if necessary				
@@ -162,7 +162,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						while (LCursor.Next())
 						{
 							LCursor.Select(LRow);
-							((DAE.Server.LocalServer)DataSession.Server).GetFile((DAE.Server.LocalProcess)LCursor.Plan.Process, LRow["Library_Name"].AsString, LRow["Name"].AsString, LRow["TimeStamp"].AsDateTime);
+							((DAE.Server.LocalServer)DataSession.Server).GetFile((DAE.Server.LocalProcess)LCursor.Plan.Process, (string)LRow["Library_Name"], (string)LRow["Name"], (DateTime)LRow["TimeStamp"]);
 						}
 					}
 				}

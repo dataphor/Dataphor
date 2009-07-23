@@ -32,8 +32,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Process).Value;
-			FRightTable = (Table)Node.Nodes[1].Execute(Process).Value;
+			FLeftTable = (Table)Node.Nodes[0].Execute(Process);
+			FRightTable = (Table)Node.Nodes[1].Execute(Process);
 			FBOF = true;
         }
         
@@ -156,16 +156,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Row FLeftRow;
 		protected Row FRightRow;
-		protected DataVar FLeftRowVar;
-		protected DataVar FRightRowVar;
 
         protected override void InternalOpen()
         {
 			base.InternalOpen();
 			FLeftRow = new Row(Process, FLeftTable.DataType.RowType);
-			FLeftRowVar = new DataVar(String.Empty, FLeftRow.DataType, FLeftRow);
 			FRightRow = new Row(Process, FRightTable.DataType.RowType);
-			FRightRowVar = new DataVar(String.Empty, FRightRow.DataType, FRightRow);
         }
         
         protected override void InternalClose()
@@ -187,14 +183,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected bool RowsEqual()
         {
-			Process.Context.Push(FRightRowVar);
+			Process.Context.Push(FRightRow);
 			try
 			{
-				Process.Context.Push(FLeftRowVar);
+				Process.Context.Push(FLeftRow);
 				try
 				{
-					DataVar LObject = Node.EqualNode.Execute(Process);
-					return (LObject.Value != null) && !LObject.Value.IsNil && LObject.Value.AsBoolean;
+					object LObject = Node.EqualNode.Execute(Process);
+					return (LObject != null) && (bool)LObject;
 				}
 				finally
 				{

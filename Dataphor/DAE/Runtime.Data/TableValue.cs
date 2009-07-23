@@ -45,7 +45,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				01-05 -> Number of rows
 				06-XX -> N row values written using Row physical representation
 		*/
-		
 		private ArrayList FRowList;
 		private ArrayList FSizeList;
 		
@@ -172,14 +171,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				throw new RuntimeException(RuntimeException.Codes.TableNodeRequired);
 			FNode = ANode;
 		}
-        
+		
 		protected override void Dispose(bool ADisposing)
 		{
 			Close();
 			base.Dispose(ADisposing);
 			FNode = null;
 		}
-
+        
 		// Process		
 		public new ServerProcess Process { get { return base.Process.GetServerProcess(); } }
 		
@@ -600,8 +599,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
 		protected virtual void InternalUpdate(Row ARow, BitArray AValueFlags, bool AUnchecked)
 		{
-			Row LRow = Select();
-			try
+			using (Row LRow = Select())
 			{
 				Node.Update(Process, LRow, ARow, AValueFlags, Isolation != CursorIsolation.Isolated, AUnchecked);
 				if (CursorType == CursorType.Dynamic)
@@ -609,10 +607,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					ARow.CopyTo(LRow);
 					OptimisticRefresh(LRow);
 				}
-			}
-			finally
-			{
-				LRow.Dispose();
 			}
 		}
         
@@ -636,16 +630,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
 		protected virtual void InternalDelete(bool AUnchecked)
 		{
-			Row LRow = Select();
-			try
+			using (Row LRow = Select())
 			{
 				Node.Delete(Process, LRow, Isolation != CursorIsolation.Isolated, AUnchecked);
 				if (CursorType == CursorType.Dynamic)
 					OptimisticRefresh(LRow);
-			}
-			finally
-			{
-				LRow.Dispose();
 			}
 		}
 		

@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			return new ApplicationNode(this, ARow["Main.ID"].AsString, ARow["Main.Description"].AsString);
+			return new ApplicationNode(this, (string)ARow["Main.ID"], (string)ARow["Main.Description"]);
 		}
 		
 		protected override string AddDocument()
@@ -138,7 +138,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
 		{
-			return (ARow["Main.ID"].AsString == FID);
+			return ((string)ARow["Main.ID"] == FID);
 		}
 
 		public override string GetFilter()

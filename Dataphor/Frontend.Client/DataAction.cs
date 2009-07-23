@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.Frontend.Client
 					LRowType.Columns.Add(new DAE.Schema.Column(FColumnName, (Source.DataView.TableType.Columns[FColumnName]).DataType));
 					using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.DataView.Process, LRowType))
 					{
-						LRow[FColumnName].AsString = FValue;
+						((DAE.Runtime.Data.Scalar)LRow.GetValue(FColumnName)).AsString = FValue;
 						if (Mode == FindActionMode.Nearest)
 							Source.DataView.FindNearest(LRow);
 						else
@@ -455,7 +455,7 @@ namespace Alphora.Dataphor.Frontend.Client
 							{
 								DAE.Schema.Column LColumn = LColumns[i];
 								DataField LField = LArgument.Source.DataView.Fields[LColumn.Name];
-								LField.Value = LParam.Value;
+								LField.AsNative = LParam.Value;
 							}
 						}
 					}

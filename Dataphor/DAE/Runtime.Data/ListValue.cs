@@ -12,6 +12,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Streams;
+	using System.Text;
 	
 	public class DataTypeList : System.Object
 	{
@@ -540,21 +541,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public DataValue this[int AIndex]
+		public DataValue GetValue(int AIndex)
 		{
-			get { return FromNativeList(Process, DataType, FList, AIndex); }
+			return FromNativeList(Process, DataType, FList, AIndex);
+		}
+		
+		public void SetValue(int AIndex, DataValue AValue)
+		{
+			this[AIndex] = AValue;
+		}
+		
+		public object this[int AIndex]
+		{
+			get 
+			{ 
+				if (FList.DataTypes[AIndex] is Schema.IScalarType)
+					return FList.Values[AIndex];
+				return FromNativeList(Process, DataType, FList, AIndex); 
+			}
 			set
 			{
 				DisposeValueAt(AIndex);
-				if (value != null)
+				
+				DataValue LValue = value as DataValue;
+				if (LValue != null)
 				{
-					FList.DataTypes[AIndex] = value.DataType;
-					FList.Values[AIndex] = value.CopyNative();
+					FList.DataTypes[AIndex] = LValue.DataType;
+					FList.Values[AIndex] = LValue.CopyNative();
 				}
 				else
 				{
 					FList.DataTypes[AIndex] = DataType.ElementType;
-					FList.Values[AIndex] = null;
+					FList.Values[AIndex] = value;
 				}
 			}
 		}
@@ -567,33 +585,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public int Add(DataValue AValue)
+		public int Add(object AValue)
 		{
 			int LIndex = FList.DataTypes.Count;
-			if (AValue != null)
+			DataValue LValue = AValue as DataValue;
+			if (LValue != null)
 			{
-				FList.DataTypes.Add(AValue.DataType);
-				FList.Values.Add(AValue.CopyNative());
+				FList.DataTypes.Add(LValue.DataType);
+				FList.Values.Add(LValue.CopyNative());
 			}
 			else
 			{
 				FList.DataTypes.Add(DataType.ElementType);
-				FList.Values.Add(null);
+				FList.Values.Add(AValue);
 			}
 			return LIndex;
 		}
 		
-		public void Insert(int AIndex, DataValue AValue)
+		public void Insert(int AIndex, object AValue)
 		{
-			if (AValue != null)
+			DataValue LValue = AValue as DataValue;
+			if (LValue != null)
 			{
-				FList.DataTypes.Insert(AIndex, AValue.DataType);
-				FList.Values.Insert(AIndex, AValue.CopyNative());
+				FList.DataTypes.Insert(AIndex, LValue.DataType);
+				FList.Values.Insert(AIndex, LValue.CopyNative());
 			}
 			else
 			{
 				FList.DataTypes.Insert(AIndex, DataType.ElementType);
-				FList.Values.Insert(AIndex, null);
+				FList.Values.Insert(AIndex, AValue);
 			}
 		}
 		
@@ -624,6 +644,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				LNewList.Values.Add(DataValue.CopyNative(Process, FList.DataTypes[LIndex], FList.Values[LIndex]));
 			}
 			return LNewList;
+		}
+
+		public override string ToString()
+		{
+			StringBuilder LResult = new StringBuilder();
+			LResult.AppendFormat("list({0}) {{ ", this.DataType.ElementType.Name);
+			for (int LIndex = 0; LIndex < Count(); LIndex++)
+			{
+				if (LIndex > 0)
+					LResult.Append(", ");
+				LResult.Append(GetValue(LIndex).ToString());
+			}
+			if (Count() > 0)
+				LResult.Append(" ");
+			LResult.Append("}");
+			return LResult.ToString();
 		}
 	}
 }

@@ -170,7 +170,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AlterNode.AlterMetaData(APlan, LNewColumn, LExpression.AlterMetaData, true);
 				LNewColumn.ReadOnly = Convert.ToBoolean(MetaData.GetTag(LNewColumn.MetaData, "Frontend.ReadOnly", LNewColumn.ReadOnly.ToString()));
 
-				APlan.Symbols.Push(new DataVar(Keywords.Value, LNewColumn.DataType));
+				APlan.Symbols.Push(new Symbol(Keywords.Value, LNewColumn.DataType));
 				try
 				{
 					foreach (ConstraintDefinition LConstraint in LExpression.Constraints)
@@ -516,13 +516,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AdornTable LTable = new AdornTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected void InternalValidateColumnConstraints(Row ARow, Schema.TableVarColumn AColumn, ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar(AColumn.DataType, ARow[AColumn.Name]));
+			AProcess.Context.Push(ARow[AColumn.Name]);
 			try
 			{
 				foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)

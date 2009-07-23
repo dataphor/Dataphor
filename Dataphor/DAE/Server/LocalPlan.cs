@@ -240,10 +240,9 @@ namespace Alphora.Dataphor.DAE.Server
 								{
 									if (FParams != null)
 										foreach (DataParam LParam in FParams)
-											LPlan.Symbols.Push(new DataVar(LParam.Name, LParam.DataType));
+											LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
 											
-									for (int LIndex = FProcess.FInternalProcess.Context.Count - 1; LIndex >= 0; LIndex--)
-										LPlan.Symbols.Push(FProcess.FInternalProcess.Context[LIndex]);
+									FProcess.FInternalProcess.PushProcessContext(LPlan);
 									FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
 								}
 								finally

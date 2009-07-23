@@ -257,7 +257,7 @@ order by libname, memname, indxname, indxpos
 	// It could be moved if we abstract ADO functionality to a common device.
 	public interface IADOFilterLiteralBuilder
 	{
-		string ToLiteral(Scalar AValue);
+		string ToLiteral(object AValue);
 	}
 	
 	public class SASDeviceSession : SQLDeviceSession
@@ -334,7 +334,7 @@ order by libname, memname, indxname, indxpos
 						LColumn = ATableVar.Columns[ARow.DataType.Columns[LIndex].Name];
 						LScalarType = (SQLScalarType)Device.DeviceScalarTypes[LColumn.DataType];
 						LNames[LIndex] = Device.ToSQLIdentifier(LColumn);
-						LValues[LIndex] = ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar((Scalar)ARow[LIndex]) : null;
+						LValues[LIndex] = ARow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(ARow[LIndex]) : null;
 					}
 
 					LCursor.Insert(LNames, LValues);
@@ -408,7 +408,7 @@ order by libname, memname, indxname, indxpos
 						LColumn = ATableVar.Columns[ANewRow.DataType.Columns[LIndex].Name];
 						LScalarType = (SQLScalarType)Device.DeviceScalarTypes[LColumn.DataType];
 						LNames[LIndex] = Device.ToSQLIdentifier(LColumn);
-						LValues[LIndex] = ANewRow.HasValue(LIndex) ? LScalarType.ParameterFromScalar((Scalar)ANewRow[LIndex]) : null;
+						LValues[LIndex] = ANewRow.HasValue(LIndex) ? LScalarType.ParameterFromScalar(ANewRow[LIndex]) : null;
 					}
 
 					LCursor.Update(LNames, LValues);
@@ -536,14 +536,14 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASBoolean(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToBoolean(AValue));
+			return Convert.ToBoolean(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (AValue.AsBoolean ? 1 : 0);
+			return ((bool)AValue ? 1 : 0);
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -556,9 +556,9 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return (AValue.AsBoolean ? 1 : 0).ToString();
+			return ((bool)AValue ? 1 : 0).ToString();
 		}
 	}
 
@@ -566,14 +566,14 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASByte(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToByte(AValue));
+			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsByte;
+			return (byte)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -586,9 +586,9 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsByte.ToString();
+			return ((byte)AValue).ToString();
 		}
 	}
 
@@ -596,14 +596,14 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASShort(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt16(AValue));
+			return Convert.ToInt16(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt16;
+			return (short)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -616,9 +616,9 @@ order by libname, memname, indxname, indxpos
 			return "smallint";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsInt16.ToString();
+			return ((short)AValue).ToString();
 		}
 	}
 
@@ -626,14 +626,14 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASInteger(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			 return new Scalar(AProcess, ScalarType, Convert.ToInt32(AValue));
+			 return Convert.ToInt32(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt32;
+			return (int)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -646,9 +646,9 @@ order by libname, memname, indxname, indxpos
 			return "integer";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsInt32.ToString();
+			return ((int)AValue).ToString();
 		}
 	}
 
@@ -656,14 +656,14 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASLong(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt64(AValue));
+			return Convert.ToInt64(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt64;
+			return (long)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -676,9 +676,9 @@ order by libname, memname, indxname, indxpos
 			return "decimal(20, 0)";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsInt64.ToString();
+			return ((long)AValue).ToString();
 		}
 	}
 
@@ -690,14 +690,14 @@ order by libname, memname, indxname, indxpos
     {
 		public SASDecimal(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue));
+			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDecimal;
+			return (decimal)AValue;
 		}
 		
 		public byte GetPrecision(D4.MetaData AMetaData)
@@ -726,9 +726,9 @@ order by libname, memname, indxname, indxpos
 				);
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsDecimal.ToString();
+			return ((decimal)AValue).ToString();
 		}
     }
 
@@ -740,14 +740,14 @@ order by libname, memname, indxname, indxpos
     {
 		public SASTimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
+			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsTimeSpan.Ticks;
+			return ((TimeSpan)AValue).Ticks;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -760,9 +760,9 @@ order by libname, memname, indxname, indxpos
 			return "numeric(20, 0)";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsTimeSpan.Ticks.ToString();
+			return ((TimeSpan)AValue).Ticks.ToString();
 		}
     }
     
@@ -785,19 +785,19 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores datetime values as a numeric value representing the number of seconds since Jan 1, 1960.
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 		
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue)));
+			return new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime.Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
+			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -810,9 +810,9 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=DATETIME18. INFORMAT=DATETIME18.";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return String.Format("#{0}#", AValue.AsDateTime.ToString(DateTimeFormat));
+			return String.Format("#{0}#", ((DateTime)AValue).ToString(DateTimeFormat));
 		}
     }
 
@@ -835,19 +835,19 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores Date values as a numeric value representing the number of days since January 1, 1960.
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, new DateTime(1960, 1, 1).AddDays(Convert.ToDouble(AValue)));
+			return new DateTime(1960, 1, 1).AddDays(Convert.ToDouble(AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime.Subtract(new DateTime(1960, 1, 1)).TotalDays;
+			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalDays;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -860,9 +860,9 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=DATE9. INFORMAT=DATE9.";
 		}
 
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return String.Format("#{0}#", AValue.AsDateTime.ToString(DateFormat));
+			return String.Format("#{0}#", ((DateTime)AValue).ToString(DateFormat));
 		}
     }
 
@@ -885,20 +885,20 @@ order by libname, memname, indxname, indxpos
 		
 		// SAS stores time values in the same way as a date time (as near as I can tell, the docs don't actually say).
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			DateTime LDateTime = new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue));
-			return new Scalar(AProcess, ScalarType, new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond));
+			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime.Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
+			return ((DateTime)AValue).Subtract(new DateTime(1960, 1, 1)).TotalSeconds;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -911,9 +911,9 @@ order by libname, memname, indxname, indxpos
 			return "date FORMAT=TIME8. INFORMAT=TIME8.";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return String.Format("#{0}#", AValue.AsDateTime.ToString(TimeFormat));
+			return String.Format("#{0}#", ((DateTime)AValue).ToString(TimeFormat));
 		}
     }
 
@@ -925,14 +925,14 @@ order by libname, memname, indxname, indxpos
     {
 		public SASMoney(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue));
+			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDecimal;
+			return (decimal)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -945,9 +945,9 @@ order by libname, memname, indxname, indxpos
 			return "decimal(28, 8)";
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return AValue.AsDecimal.ToString();
+			return ((decimal)AValue).ToString();
 		}
     }
 
@@ -957,7 +957,7 @@ order by libname, memname, indxname, indxpos
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		//public SASGuid(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
 			return String.Format("'{0}'", FromScalar(AValue));
 		}
@@ -971,14 +971,14 @@ order by libname, memname, indxname, indxpos
     {
 		public SASString(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (string)AValue);
+			return (string)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsString;
+			return (string)AValue;
 		}
 		
 		protected string GetLength(D4.MetaData AMetaData, ScalarType AScalarType)
@@ -1001,9 +1001,9 @@ order by libname, memname, indxname, indxpos
 			return String.Format("varchar({0})", GetLength(AMetaData).ToString());
 		}
 		
-		string IADOFilterLiteralBuilder.ToLiteral(Scalar AValue)
+		string IADOFilterLiteralBuilder.ToLiteral(object AValue)
 		{
-			return String.Format("'{0}'", AValue.AsString.Replace("'", "''"));
+			return String.Format("'{0}'", ((string)AValue).Replace("'", "''"));
 		}
     }
     

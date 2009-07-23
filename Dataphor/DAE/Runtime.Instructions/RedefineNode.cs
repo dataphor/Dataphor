@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan.EnterRowContext();
 						try
 						{
-							APlan.Symbols.Push(new DataVar(SourceTableType.RowType));
+							APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
 							try
 							{
 								// Add a column for each expression
@@ -267,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceTableType.RowType));
+				APlan.Symbols.Push(new Symbol(SourceTableType.RowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -284,13 +284,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			RedefineTable LTable = new RedefineTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -339,7 +339,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							if (!AIsDefault || !ARow.HasValue(LColumnIndex))
 							{
-								ARow[LColumnIndex] = Nodes[LIndex + 1].Execute(AProcess).Value;
+								ARow[LColumnIndex] = Nodes[LIndex + 1].Execute(AProcess);
 								LChanged = true;
 							}
 						}

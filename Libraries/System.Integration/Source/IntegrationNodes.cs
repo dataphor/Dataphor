@@ -19,42 +19,33 @@ using Alphora.Dataphor.DAE.Language.D4;
 namespace Alphora.Dataphor.Libraries.System.Integration
 {
 	// operator Insert(ASource : table, ATarget : table) : String
-	public class InsertNode : InstructionNode
+	public class InsertNode : InstructionNodeBase
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			return
-				new DataVar
+				IntegrationHelper.Copy
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess,
-						(Schema.IScalarType)FDataType,
-						IntegrationHelper.Copy
-						(
-							AProcess,
-							(TableNode)Nodes[0],
-							(TableNode)Nodes[1],
-							new GenerateStatementHandler(IntegrationHelper.GenerateInsertStatement)
-						)
-					)
+					AProcess,
+					(TableNode)Nodes[0],
+					(TableNode)Nodes[1],
+					new GenerateStatementHandler(IntegrationHelper.GenerateInsertStatement)
 				);
 		}
 	}
 
 	// operator Copy(ASourceExpression : String, ATargetExpression : String, AKeyColumnNames : String, AInsertOnly : Boolean) : String
-	public class CopyNode : InstructionNode
+	public class CopyNode : InstructionNodeBase
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? Nodes[2].Execute(AProcess).Value.AsString : null;
-			bool AInsertOnly = Nodes.Count > 3 ? Nodes[3].Execute(AProcess).Value.AsBoolean : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProcess) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProcess) : false;
 			
-			IServerExpressionPlan ASourcePlan = ((IServerProcess)AProcess).PrepareExpression(Nodes[0].Execute(AProcess).Value.AsString, null);
+			IServerExpressionPlan ASourcePlan = ((IServerProcess)AProcess).PrepareExpression((string)Nodes[0].Execute(AProcess), null);
 			try
 			{
-				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProcess).PrepareExpression(Nodes[1].Execute(AProcess).Value.AsString, null);
+				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProcess).PrepareExpression((string)Nodes[1].Execute(AProcess), null);
 				try
 				{
 					TableNode ASourceTable = ((CursorNode)((ServerPlan)ASourcePlan).Code).SourceNode;
@@ -77,12 +68,12 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASource : table, ATarget : table, AKeyColumnNames : String, AInsertOnly : Boolean) : String
 	// operator Copy(ASource : table, ATarget : table, AKeyColumnNames : String) : String
 	// operator Copy(ASource : table, ATarget : table) : String
-	public class CopyTablesNode : InstructionNode
+	public class CopyTablesNode : InstructionNodeBase
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? Nodes[2].Execute(AProcess).Value.AsString : null;
-			bool AInsertOnly = Nodes.Count > 3 ? Nodes[3].Execute(AProcess).Value.AsBoolean : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProcess) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProcess) : false;
 
 			TableNode ASourceTable = (TableNode)Nodes[0];
 			TableNode ATargetTable = (TableNode)Nodes[1];
@@ -90,35 +81,26 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			return InternalCopy(AProcess, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 		}
 
-		internal static DataVar InternalCopy(ServerProcess AProcess, Schema.IDataType ADataType, TableNode ASourceTable, TableNode ATargetTable, string AKeyColumnNames, bool AInsertOnly)
+		internal static object InternalCopy(ServerProcess AProcess, Schema.IDataType ADataType, TableNode ASourceTable, TableNode ATargetTable, string AKeyColumnNames, bool AInsertOnly)
 		{
 			return
-				new DataVar
+				IntegrationHelper.Copy
 				(
-					ADataType,
-					new Scalar
-					(
-						AProcess,
-						(Schema.IScalarType)ADataType,
-						IntegrationHelper.Copy
-						(
-							AProcess,
-							ASourceTable,
-							ATargetTable,
-							delegate(TableNode ASourceTableInner, TableNode ATargetTableInner, Expression ATargetExpression)
-							{
-								return
-									IntegrationHelper.GenerateConditionedInsertStatement
-									(
-										ASourceTableInner,
-										ATargetTableInner,
-										ATargetExpression,
-										AInsertOnly,
-										AKeyColumnNames
-									);
-							}
-						)
-					)
+					AProcess,
+					ASourceTable,
+					ATargetTable,
+					delegate(TableNode ASourceTableInner, TableNode ATargetTableInner, Expression ATargetExpression)
+					{
+						return
+							IntegrationHelper.GenerateConditionedInsertStatement
+							(
+								ASourceTableInner,
+								ATargetTableInner,
+								ATargetExpression,
+								AInsertOnly,
+								AKeyColumnNames
+							);
+					}
 				);
 		}
 	}
@@ -159,12 +141,13 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 						Context LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
 						try
 						{
-							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess).Value;
+							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess);
 							try
 							{
 								LSource.Open();
 
 								// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
+								// There is a MarshalRow call in the LocalProcess, would that solve this problem?
 								using (Row LRow = new Row(LTargetProcess, ASourceTable.DataType.CreateRowType()))
 								{
 									DataParams LParams = new DataParams();
@@ -336,7 +319,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			{
 				if (LResult.Length > 0)
 					LResult.Append(", ");
-				LResult.Append(LColumn.Column.Name + " := " + (ARow.HasValue(LColumn.Column.Name) ? ARow[LColumn.Column.Name].AsDisplayString : "<nil>"));
+				LResult.Append(LColumn.Column.Name + " := " + (ARow.HasValue(LColumn.Column.Name) ? (string)ARow[LColumn.Column.Name] : "<nil>"));
 			}
 			return "{ " + LResult.ToString() + " }";
 		}

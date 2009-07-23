@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			return new ReferenceNode(this, ARow["Name"].AsString);
+			return new ReferenceNode(this, (string)ARow["Name"]);
 		}
 		
 	}

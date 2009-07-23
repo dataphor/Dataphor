@@ -400,29 +400,29 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			if (!LRow.HasValue(AIndex))
 				return DBNull.Value;
 			else
-				return LRow[AIndex].AsNative;
+				return LRow[AIndex];
 		}
 
 		public override object this[int AIndex] { get { return GetNativeValue(AIndex); } }
 
 		public override bool GetBoolean(int AIndex)
 		{
-			return InternalRow[AIndex].AsBoolean;
+			return (bool)InternalRow[AIndex];
 		}
 
 		public override byte GetByte(int AIndex)
 		{
-			return InternalRow[AIndex].AsByte;
+			return (byte)InternalRow[AIndex];
 		}
 
 		public sbyte GetSByte(int AIndex)
 		{
-			return Convert.ToSByte(InternalRow[AIndex].AsByte);
+			return Convert.ToSByte((byte)InternalRow[AIndex]);
 		}
 
 		public override long GetBytes(int AIndex, long ASourceOffset, byte[] ATarget, int ATargetOffset, int ACount)
 		{
-			Stream LStream = InternalRow[AIndex].OpenStream();
+			Stream LStream = InternalRow.GetValue(AIndex).OpenStream();
 			try
 			{
 				LStream.Position = ASourceOffset;
@@ -436,12 +436,12 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override char GetChar(int AIndex)
 		{
-			return InternalRow[AIndex].AsString[0];
+			return ((string)InternalRow[AIndex])[0];
 		}
 
 		public override long GetChars(int AIndex, long ASourceOffset, char[] ATarget, int ATargetOffset, int ACount)
 		{
-			string LValue = InternalRow[AIndex].AsString;
+			string LValue = (string)InternalRow[AIndex];
 			LValue.CopyTo((int)ASourceOffset, ATarget, ATargetOffset, ACount);
 			return ATarget.Length;
 		}
@@ -453,22 +453,22 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override DateTime GetDateTime(int AIndex)
 		{
-			return InternalRow[AIndex].AsDateTime;
+			return (DateTime)InternalRow[AIndex];
 		}
 
 		public TimeSpan GetTimeSpan(int AIndex)
 		{
-			return InternalRow[AIndex].AsTimeSpan;
+			return (TimeSpan)InternalRow[AIndex];
 		}
 
 		public override Decimal GetDecimal(int AIndex)
 		{
-			return InternalRow[AIndex].AsDecimal;
+			return (decimal)InternalRow[AIndex];
 		}
 
 		public override Double GetDouble(int AIndex)
 		{
-			return Convert.ToDouble(InternalRow[AIndex].AsDecimal);
+			return Convert.ToDouble((decimal)InternalRow[AIndex]);
 		}
 
 		public override Type GetFieldType(int AIndex)
@@ -478,42 +478,42 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override Single GetFloat(int AIndex)
 		{
-			return Convert.ToSingle(InternalRow[AIndex].AsDecimal);
+			return Convert.ToSingle((decimal)InternalRow[AIndex]);
 		}
 
 		public override Guid GetGuid(int AIndex)
 		{
-			return InternalRow[AIndex].AsGuid;
+			return (Guid)InternalRow[AIndex];
 		}
 
 		public override Int16 GetInt16(int AIndex)
 		{
-			return InternalRow[AIndex].AsInt16;
+			return (short)InternalRow[AIndex];
 		}
 
 		public UInt16 GetUInt16(int AIndex)
 		{
-			return Convert.ToUInt16(InternalRow[AIndex].AsInt16);
+			return Convert.ToUInt16((short)InternalRow[AIndex]);
 		}
 
 		public override Int32 GetInt32(int AIndex)
 		{
-			return InternalRow[AIndex].AsInt32;
+			return (int)InternalRow[AIndex];
 		}
 
 		public UInt32 GetUInt32(int AIndex)
 		{
-			return Convert.ToUInt32(InternalRow[AIndex].AsInt32);
+			return Convert.ToUInt32((int)InternalRow[AIndex]);
 		}
 
 		public override Int64 GetInt64(int AIndex)
 		{
-			return InternalRow[AIndex].AsInt64;
+			return (long)InternalRow[AIndex];
 		}
 
 		public UInt64 GetUInt64(int AIndex)
 		{
-			return Convert.ToUInt64(InternalRow[AIndex].AsInt64);
+			return Convert.ToUInt64((long)InternalRow[AIndex]);
 		}
 
 		public override string GetName(int AIndex)
@@ -528,7 +528,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 
 		public override string GetString(int AIndex)
 		{
-			return InternalRow[AIndex].AsString;
+			return (string)InternalRow[AIndex];
 		}
 
 		public override object GetValue(int AIndex)

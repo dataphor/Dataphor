@@ -10,7 +10,7 @@ create table DateTimeTest
 {
 	ID: Integer,
 	TestDateTime: DateTime,
-	key{ID}
+	key { ID }
 };
 
 begin

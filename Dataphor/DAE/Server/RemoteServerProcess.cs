@@ -4,10 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
-
 using System;
 using System.IO;
 using System.Text;
@@ -588,7 +584,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 					for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
 						if (LRow.HasValue(LIndex))
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, LRow[LIndex].Copy()));//Hack: cast to fix fixup error
+							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, DataValue.CopyValue(FServerProcess, LRow[LIndex])));//Hack: cast to fix fixup error
 						else
 							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, null));//Hack: cast to fix fixup error
 

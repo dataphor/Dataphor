@@ -4,10 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +11,7 @@ using System.Text;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -65,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if (LPlan.DataType is Schema.TableType)
 							LPlan.Close(LPlan.Open(AParams));
 						else
-							LPlan.Evaluate(AParams).Dispose();
+							DataValue.DisposeValue(this.Script.Process, LPlan.Evaluate(AParams));
 					}
 					finally
 					{

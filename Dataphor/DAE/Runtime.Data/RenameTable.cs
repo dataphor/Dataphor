@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process).Value;
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
         }
         

@@ -278,8 +278,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			PushNewRow(AProcess, ARow);
 			try
 			{
-				DataVar LObject = FLeftExistsNode.Execute(AProcess);
-				return LObject.Value.AsBoolean;
+				return (bool)FLeftExistsNode.Execute(AProcess);
 			}
 			finally
 			{
@@ -293,8 +292,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			PushNewRow(AProcess, ARow);
 			try
 			{
-				DataVar LObject = FRightExistsNode.Execute(AProcess);
-				return LObject.Value.AsBoolean;
+				return (bool)FRightExistsNode.Execute(AProcess);
 			}
 			finally
 			{
@@ -327,7 +325,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new DataVar(DataType.NewRowType));
+										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
 										try
 										{
 											FLeftExistsNode =
@@ -416,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new DataVar(DataType.NewRowType));
+										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
 										try
 										{
 											FRightExistsNode =
@@ -609,10 +607,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					try
 					{
 						if (FExpression != null)
@@ -623,7 +621,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							Nodes.Add(LPlanNode);
 						}
 						else
-							Nodes.Add(new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemBoolean, true)));
+							Nodes.Add(new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, true));
 					}
 					finally
 					{
@@ -657,10 +655,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, Keywords.Right)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -921,13 +919,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class HavingNode : SemiTableNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			HavingTable LTable = (HavingTable)Activator.CreateInstance(FSemiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProcess}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -964,13 +962,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class WithoutNode : SemiTableNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			WithoutTable LTable = (WithoutTable)Activator.CreateInstance(FSemiTableAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProcess}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -1821,10 +1819,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						if (FExpression != null)
@@ -1835,7 +1833,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							Nodes.Add(LPlanNode);
 						}
 						else
-							Nodes.Add(new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemBoolean, true)));
+							Nodes.Add(new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, true));
 						
 					}
 					finally
@@ -1872,10 +1870,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -1950,8 +1948,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected Row SelectLeftRow(ServerProcess AProcess)
 		{
 			EnsureLeftSelectNode(AProcess.Plan);
-			DataVar LObject = FLeftSelectNode.Execute(AProcess);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)FLeftSelectNode.Execute(AProcess))
 			{
 				LTable.Open();
 				if (LTable.Next())
@@ -1964,8 +1961,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected bool SelectLeftRow(ServerProcess AProcess, Row ARow)
 		{
 			EnsureLeftSelectNode(AProcess.Plan);
-			DataVar LObject = FLeftSelectNode.Execute(AProcess);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)FLeftSelectNode.Execute(AProcess))
 			{
 				LTable.Open();
 				if (LTable.Next())
@@ -1980,8 +1976,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected Row SelectRightRow(ServerProcess AProcess)
 		{
 			EnsureRightSelectNode(AProcess.Plan);
-			DataVar LObject = FRightSelectNode.Execute(AProcess);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)FRightSelectNode.Execute(AProcess))
 			{
 				LTable.Open();
 				if (LTable.Next())
@@ -1994,8 +1989,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected bool SelectRightRow(ServerProcess AProcess, Row ARow)
 		{
 			EnsureRightSelectNode(AProcess.Plan);
-			DataVar LObject = FRightSelectNode.Execute(AProcess);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)FRightSelectNode.Execute(AProcess))
 			{
 				LTable.Open();
 				if (LTable.Next())
@@ -2032,7 +2026,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new DataVar(DataType.NewRowType));
+										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
 										try
 										{
 											FLeftSelectNode =
@@ -2116,7 +2110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.EnterRowContext();
 									try
 									{
-										APlan.Symbols.Push(new DataVar(DataType.NewRowType));
+										APlan.Symbols.Push(new Symbol(DataType.NewRowType));
 										try
 										{
 											FRightSelectNode =
@@ -2217,13 +2211,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FClearRight = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			JoinTable LTable = (JoinTable)Activator.CreateInstance(FJoinAlgorithm, System.Reflection.BindingFlags.Default, null, new object[]{this, AProcess}, System.Globalization.CultureInfo.CurrentCulture);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -2283,18 +2277,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					ANewRow.CopyTo(LLeftRow);
-					AProcess.Context.Push(new DataVar(String.Empty, LLeftRow.DataType, LLeftRow));
+					AProcess.Context.Push(LLeftRow);
 					try
 					{
 						Row LRightRow = new Row(AProcess, RightTableType.RowType);
 						try
 						{
 							ANewRow.CopyTo(LRightRow);
-							AProcess.Context.Push(new DataVar(String.Empty, LRightRow.DataType, LRightRow));
+							AProcess.Context.Push(LRightRow);
 							try
 							{
-								DataVar LObject = Nodes[2].Execute(AProcess);
-								if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+								object LObject = Nodes[2].Execute(AProcess);
+								if ((LObject != null) && !(bool)LObject)
 									throw new RuntimeException(RuntimeException.Codes.RowViolatesJoinPredicate);
 							}
 							finally
@@ -2671,7 +2665,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
-			DataVar LOldRow = new DataVar(String.Empty, AOldRow.DataType, AOldRow);
 			if (FUpdateLeftToRight)
 			{	
 				if (PropagateUpdateLeft)
@@ -2834,7 +2827,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         protected bool HasRow(Row ARow)
         {
 			if (FRowExistsColumnIndex >= 0)
-				return ARow.HasValue(TableVar.Columns[FRowExistsColumnIndex].Name) && ARow[TableVar.Columns[FRowExistsColumnIndex].Name].AsBoolean;
+				return ARow.HasValue(TableVar.Columns[FRowExistsColumnIndex].Name) && (bool)ARow[TableVar.Columns[FRowExistsColumnIndex].Name];
 			else
 				return HasValues(ARow);
         }
@@ -3264,7 +3257,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!ANewRow.HasValue(LRowIndex))
 				{
 					LChanged = true;
-					ANewRow[LRowIndex].AsBoolean = false;
+					ANewRow[LRowIndex] = false;
 				}
 			}
 			
@@ -3425,14 +3418,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if (!AProcess.ServerSession.Server.IsRepository && RetrieveRight)
 							{
 								EnsureRightSelectNode(AProcess.Plan);
-								using (Table LTable = FRightSelectNode.Execute(AProcess).Value as Table)
+								using (Table LTable = FRightSelectNode.Execute(AProcess) as Table)
 								{
 									LTable.Open();
 									if (LTable.Next())
 									{
 										LTable.Select(ANewRow);
 										if (HasRowExistsColumn() && !LIsRowExistsColumn)
-											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = true;
+											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
 
 										if (PropagateChangeRight)
 											foreach (Schema.Column LColumn in RightTableType.Columns)
@@ -3442,7 +3435,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									{
 										if (!LIsRowExistsColumn)
 											if (HasRowExistsColumn())
-												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = false;
+												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
 											else
 											{
 												// Clear any of/all of columns
@@ -3537,7 +3530,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (HasValues(ANewRow))
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = true;
+								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
 								
 							foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
 							{
@@ -3554,7 +3547,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						else
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = false;
+								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
 								
 							if (ClearRight)
 								foreach (Schema.TableVarColumn LColumn in RightTableVar.Columns)
@@ -3648,7 +3641,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
-			DataVar LOldRow = new DataVar(String.Empty, AOldRow.DataType, AOldRow);
 			if (FUpdateLeftToRight)
 			{
 				if (PropagateUpdateLeft)
@@ -4071,10 +4063,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftTableType.Columns, FIsNatural ? Keywords.Left : String.Empty)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(RightTableType.Columns, FIsNatural ? Keywords.Right : String.Empty)));
 					try
 					{
 						Nodes[2].DetermineBinding(APlan);
@@ -4123,7 +4115,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!ANewRow.HasValue(LRowIndex))
 				{
 					LChanged = true;
-					ANewRow[LRowIndex].AsBoolean = false;
+					ANewRow[LRowIndex] = false;
 				}
 			}
 
@@ -4285,14 +4277,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if (!AProcess.ServerSession.Server.IsRepository && RetrieveLeft)
 							{
 								EnsureLeftSelectNode(AProcess.Plan);
-								using (Table LTable = FLeftSelectNode.Execute(AProcess).Value as Table)
+								using (Table LTable = FLeftSelectNode.Execute(AProcess) as Table)
 								{
 									LTable.Open();
 									if (LTable.Next())
 									{
 										LTable.Select(ANewRow);
 										if (HasRowExistsColumn() && !LIsRowExistsColumn)
-											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = true;
+											ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
 
 										if (PropagateChangeLeft)
 											foreach (Schema.Column LColumn in LeftTableType.Columns)
@@ -4302,7 +4294,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									{
 										if (!LIsRowExistsColumn)
 											if (HasRowExistsColumn())
-												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = false;
+												ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
 											else
 											{
 												// Clear any of/all of columns
@@ -4397,7 +4389,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (HasValues(ANewRow))
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = true;
+								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = true;
 								
 							foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
 							{
@@ -4414,7 +4406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						else
 						{
 							if (HasRowExistsColumn())
-								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name].AsBoolean = false;
+								ANewRow[DataType.Columns[FRowExistsColumnIndex].Name] = false;
 								
 							if (ClearLeft)
 								foreach (Schema.TableVarColumn LColumn in LeftTableVar.Columns)
@@ -4507,7 +4499,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
-			DataVar LOldRow = new DataVar(String.Empty, AOldRow.DataType, AOldRow);
 			if (FUpdateLeftToRight)
 			{
 				if (PropagateUpdateLeft)

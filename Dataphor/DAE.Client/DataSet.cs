@@ -1365,7 +1365,7 @@ namespace Alphora.Dataphor.DAE.Client
 			InternalInitializeRow(LTargetRow);
 		}
 		
-		protected internal void ChangeColumn(DataField AField, DataValue AValue)
+		protected internal void ChangeColumn(DataField AField, Scalar AValue)
 		{
 			Edit();
 			Row LActiveRow = FBuffer[FActiveOffset].Row;
@@ -2454,17 +2454,17 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		// Value Access
-		/// <summary>Gets or sets the current value of this field as a DataValue.</summary>
+		/// <summary>Gets or sets the current value of this field as a Scalar.</summary>
 		/// <remarks>Setting this value will cause field and dataset level validation and change events to be invoked.
 		/// The validate event is invoked first, followed by the change event. If an exception is thrown during the 
 		/// validation event, the field will not be set to the new value. However, if an exception is thrown during
 		/// the change event, the field will still be set to the new value.</remarks>
-		public DataValue Value
+		public Scalar Value
 		{
 			get
 			{
 				CheckHasValue();
-				return FDataSet.ActiveRow[FColumnIndex];
+				return (Scalar)FDataSet.ActiveRow.GetValue(FColumnIndex);
 			}
 			set
 			{
@@ -2478,22 +2478,22 @@ namespace Alphora.Dataphor.DAE.Client
 		/// <summary>Retrieves the old value for this field during a change or validate event.</summary>
 		/// <remarks>This value is only available during a change or validate event. A ClientException exception will be
 		/// thrown if this property is accessed at any other time.</remarks>
-		public DataValue OldValue
+		public Scalar OldValue
 		{
 			get
 			{
-				return FDataSet.OldRow[FColumnIndex];
+				return (Scalar)FDataSet.OldRow.GetValue(FColumnIndex);
 			}
 		}
 
 		/// <summary>Retrieves the original value for this field prior to any changes made during the edit.</summary>
 		/// <remarks>This value is only available when the dataset is in edit state. A ClientException exception will be
 		/// thrown if this property is accessed at any other time.</remarks>		
-		public DataValue OriginalValue
+		public Scalar OriginalValue
 		{
 			get
 			{
-				return FDataSet.OriginalRow[FColumnIndex];
+				return (Scalar)FDataSet.OriginalRow.GetValue(FColumnIndex);
 			}
 		}
 		
@@ -2517,6 +2517,24 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			Value = null;
 		}
+		
+		public object AsNative
+		{
+			get
+			{
+				CheckDataSetNotEmpty();
+				if (HasValue())
+					return Value.AsNative;
+				return null;
+			}
+			set
+			{
+				CheckDataSetNotEmpty();
+				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				LValue.AsNative = value; // Has to be done thiw way in order to fire the appropriate dataset events
+				Value = LValue;
+			}
+		}
 
 		public bool AsBoolean
 		{
@@ -2531,7 +2549,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsBoolean = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsBoolean = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2548,7 +2566,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsBoolean(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsBoolean(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2565,7 +2583,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsByte = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsByte = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2582,7 +2600,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsByte(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsByte(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2599,7 +2617,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsDecimal = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsDecimal = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2616,7 +2634,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsDecimal(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsDecimal(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2633,7 +2651,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsTimeSpan = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsTimeSpan = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2650,7 +2668,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsTimeSpan(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsTimeSpan(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2667,7 +2685,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsDateTime = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsDateTime = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2684,7 +2702,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsDateTime(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsDateTime(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2715,7 +2733,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsInt16 = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsInt16 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2732,7 +2750,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsInt16(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsInt16(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2749,7 +2767,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsInt32 = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsInt32 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2766,7 +2784,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsInt32(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsInt32(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2783,7 +2801,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsInt64 = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsInt64 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2800,7 +2818,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsInt64(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsInt64(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2817,7 +2835,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsString = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsString = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2834,7 +2852,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsString(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsString(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		
@@ -2851,7 +2869,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsDisplayString = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsDisplayString = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2869,7 +2887,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				CheckDataSetNotEmpty();
 				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-				LValue.AsGuid = value; // Has to be done this way in order to use the native accessor functionality
+				LValue.AsGuid = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
 		}
@@ -2886,7 +2904,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckDataSetNotEmpty();
 			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
-			LValue.SetAsGuid(ARepresentationName, AValue); // Has to be done this way in order to use the native accessor functionality
+			LValue.SetAsGuid(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
 		

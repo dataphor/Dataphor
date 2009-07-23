@@ -37,28 +37,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
         
         // SourceTable
-        protected DataVar FSourceObject;
         protected Table FSourceTable;
         protected Row FSourceRow;
         protected Row FCurrentRow;
         protected Row FLastRow;
-        protected DataVar FCurrentObject;
-        protected DataVar FLastObject;
         
         protected bool FCrack;
         
         // Table Support
         protected override void InternalOpen()
         {
-			FSourceObject = Node.Nodes[0].Execute(Process);
-			FSourceTable = (Table)FSourceObject.Value;
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			FSourceRow = new Row(Process, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
 			if (Node.DistinctRequired)
 			{
 				FCurrentRow = new Row(Process, Node.DataType.RowType);
-				FCurrentObject = new DataVar(String.Empty, FCurrentRow.DataType, FCurrentRow);
 				FLastRow = new Row(Process, Node.DataType.RowType);
-				FLastObject = new DataVar(String.Empty, FLastRow.DataType, FLastRow);
 				FCrack = true;
 			}
         }
@@ -121,14 +115,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							break;
 						}
 						
-						Process.Context.Push(FCurrentObject);
+						Process.Context.Push(FCurrentRow);
 						try
 						{
-							Process.Context.Push(FLastObject);
+							Process.Context.Push(FLastRow);
 							try
 							{
-								DataVar LEqual = Node.EqualNode.Execute(Process);
-								if ((LEqual.Value == null) || LEqual.Value.IsNil || !LEqual.Value.AsBoolean)
+								object LEqual = Node.EqualNode.Execute(Process);
+								if ((LEqual == null) || !(bool)LEqual)
 									break;
 							}
 							finally

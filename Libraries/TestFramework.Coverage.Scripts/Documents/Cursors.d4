@@ -8,9 +8,11 @@
 create table TestServerSettings from ServerSettings;
 TestSearchable('TestServerSettings browse by { }', 'TestServerSettings');
 drop table TestServerSettings;
-create table TestTableVars from TableVars;
-TestSearchable('TableVars browse by { ID }', 'TestTableVars');
-drop table TestTableVars;
+begin
+	create table TestTableVars from TableVars;
+	TestSearchable('TableVars browse by { ID }', 'TestTableVars');
+	drop table TestTableVars;
+end;
 
 // Browsing on an empty key
 create table TestEmptyKey { Name : String, key { } };

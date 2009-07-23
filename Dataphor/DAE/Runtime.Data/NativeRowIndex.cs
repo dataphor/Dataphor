@@ -611,11 +611,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					else
 					{
 					*/
-						AProcess.Context.Push(new DataVar(AIndexKeyRowType.Columns[LIndex].DataType, DataValue.FromNativeRow(AProcess, AIndexKeyRowType, AIndexKey, LIndex)));
-						AProcess.Context.Push(new DataVar(ACompareKeyRowType.Columns[LIndex].DataType, DataValue.FromNativeRow(AProcess, ACompareKeyRowType, ACompareKey, LIndex)));
+						AProcess.Context.Push(AIndexKey.Values[LIndex]);
+						AProcess.Context.Push(ACompareKey.Values[LIndex]);
 						LResult = Key.Columns[LIndex].Ascending ? 
-							Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess).Value.AsInt32 : 
-							-(Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess).Value.AsInt32);
+							(int)Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess) : 
+							-(int)(Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess));
 						AProcess.Context.Pop();
 						AProcess.Context.Pop();
 					//} 

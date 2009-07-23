@@ -84,10 +84,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				finally
 				{
 					if (FContext != null)
-					{
-						FContext.Dispose();
 						FContext = null;
-					}
 				}
 			}
 			finally
@@ -102,10 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			FContext = new Context(AProcess.Context.MaxStackDepth, AProcess.Context.MaxCallDepth);
 			for (int LIndex = AProcess.Context.Count - 1; LIndex >= 0; LIndex--)
-			{
-				DataVar LVar = AProcess.Context.Peek(LIndex);
-				FContext.Push(new DataVar(LVar.Name, LVar.DataType, LVar.Value == null ? null : LVar.Value.Copy()));
-			}
+				FContext.Push(DataValue.CopyValue(AProcess, AProcess.Context.Peek(LIndex)));
 		}
 		
 		public void SwitchContext(ServerProcess AProcess)

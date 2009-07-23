@@ -5,8 +5,6 @@
 */
 
 //#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
 //#define USETHREADABORT
 //#define LOGCACHEEVENTS
 
@@ -1764,7 +1762,7 @@ namespace Alphora.Dataphor.DAE.Server
 					while (LCursor.Next())
 					{
 						LCursor.Select(LRow);
-						Schema.Device LDevice = AProcess.CatalogDeviceSession.ResolveCatalogObject(LRow[0/*"ID"*/].AsInt32) as Schema.Device;
+						Schema.Device LDevice = AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0/*"ID"*/]) as Schema.Device;
 						if ((LDevice != null) && (LDevice.ClassDefinition.Attributes.Count > 0))
 							LBlock.Statements.Add(SaveSystemDeviceSettings(LDevice));
 					}
@@ -1795,7 +1793,7 @@ namespace Alphora.Dataphor.DAE.Server
 					while (LCursor.Next())
 					{
 						LCursor.Select(LRow);
-						switch (LRow[0/*"ID"*/].AsString)
+						switch ((string)LRow[0/*"ID"*/])
 						{
 							case Server.CSystemUserID : break;
 							case Server.CAdminUserID : 
@@ -1804,7 +1802,7 @@ namespace Alphora.Dataphor.DAE.Server
 							break;
 							
 							default :
-								Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(LRow[0/*"ID"*/].AsString);
+								Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)LRow[0/*"ID"*/]);
 								LResult.AppendFormat("CreateUserWithEncryptedPassword('{0}', '{1}', '{2}');\r\n", LUser.ID, LUser.Name, LUser.Password);
 							break;
 						}
@@ -1828,8 +1826,8 @@ namespace Alphora.Dataphor.DAE.Server
 					while (LCursor.Next())
 					{
 						LCursor.Select(LRow);
-						Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(LRow[0/*"User_ID"*/].AsString);
-						Schema.Device LDevice = (Schema.Device)AProcess.CatalogDeviceSession.ResolveCatalogObject(LRow[1/*"Device_ID"*/].AsInt32);
+						Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)LRow[0/*"User_ID"*/]);
+						Schema.Device LDevice = (Schema.Device)AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[1/*"Device_ID"*/]);
 						Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
 						LResult.AppendFormat("CreateDeviceUserWithEncryptedPassword('{0}', '{1}', '{2}', '{3}', '{4}');\r\n", LDeviceUser.User.ID, LDeviceUser.Device.Name, LDeviceUser.DeviceUserID, LDeviceUser.DevicePassword, LDeviceUser.ConnectionParameters);
 					}
@@ -1853,7 +1851,7 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						LCursor.Select(LRow);
 						
-						LResult.AppendFormat("AddUserToRole('{0}', '{1}');\r\n", LRow[0/*"User_ID"*/].AsString, LRow[1/*"Role_Name"*/].AsString);
+						LResult.AppendFormat("AddUserToRole('{0}', '{1}');\r\n", (string)LRow[0/*"User_ID"*/], (string)LRow[1/*"Role_Name"*/]);
 					}
 				}
 			}
@@ -1875,10 +1873,10 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						LCursor.Select(LRow);
 						
-						if (LRow[2/*"IsGranted"*/].AsBoolean)
-							LResult.AppendFormat("GrantRightToUser('{0}', '{1}');\r\n", LRow[1/*"Right_Name"*/].AsString, LRow[0/*"User_ID"*/].AsString);
+						if ((bool)LRow[2/*"IsGranted"*/])
+							LResult.AppendFormat("GrantRightToUser('{0}', '{1}');\r\n", (string)LRow[1/*"Right_Name"*/], (string)LRow[0/*"User_ID"*/]);
 						else
-							LResult.AppendFormat("RevokeRightFromUser('{0}', '{1}');\r\n", LRow[1/*"Right_Name"*/].AsString, LRow[0/*"User_ID"*/].AsString);						
+							LResult.AppendFormat("RevokeRightFromUser('{0}', '{1}');\r\n", (string)LRow[1/*"Right_Name"*/], (string)LRow[0/*"User_ID"*/]);						
 					}
 				}
 			}

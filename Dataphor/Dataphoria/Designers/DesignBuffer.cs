@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override string LoadData()
 		{
-			using (DAE.Runtime.Data.DataValue LScalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.Load('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
+			using (DAE.Runtime.Data.Scalar LScalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.Load('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
 			{
 				return LScalar.AsString;
 			}
@@ -209,7 +209,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override void LoadData(Stream AData)
 		{
-			using (DAE.Runtime.Data.DataValue LScalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.LoadBinary('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
+			using (DAE.Runtime.Data.Scalar LScalar = Dataphoria.FrontendSession.Pipe.RequestDocument(String.Format(".Frontend.LoadBinary('{0}', '{1}')", DAE.Schema.Object.EnsureRooted(LibraryName), DAE.Schema.Object.EnsureRooted(DocumentName))))
 			{
 				AData.Position = 0;
 				Stream LStream = LScalar.OpenStream();
@@ -226,47 +226,45 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		private void InternalSaveData(object AData, bool ABinary)
 		{
+			if (ABinary)
+				throw new NotSupportedException("InternalSaveData called with ABinary true");
+
 			DAE.Schema.ScalarType LType;
 			if (ABinary)
 				LType = Dataphoria.FrontendSession.Pipe.Process.DataTypes.SystemBinary;
 			else
 				LType = Dataphoria.FrontendSession.Pipe.Process.DataTypes.SystemString;
 			Frontend.Client.Pipe LPipe = Dataphoria.FrontendSession.Pipe;
-			using (DAE.Runtime.Data.Scalar LLibraryName = new DAE.Runtime.Data.Scalar(LPipe.Process, LPipe.Process.DataTypes.SystemName, DAE.Schema.Object.EnsureRooted(LibraryName)))
+			object LData = AData;
+/*
+ * I don't believe this ever worked (creating a Scalar with a Stream directly)
+			using 
+			(
+				DAE.Runtime.Data.Scalar LData = 
+					(
+						ABinary ? 
+						new DAE.Runtime.Data.Scalar(LPipe.Process, LType, (Stream)AData) :
+						new DAE.Runtime.Data.Scalar(LPipe.Process, LType, AData)
+					)
+			)
 			{
-				using (DAE.Runtime.Data.Scalar LDocumentName = new DAE.Runtime.Data.Scalar(LPipe.Process, LPipe.Process.DataTypes.SystemName, DAE.Schema.Object.EnsureRooted(DocumentName)))
+*/
+				DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
+				LParams.Add(new DAE.Runtime.DataParam("LibraryName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(LibraryName)));
+				LParams.Add(new DAE.Runtime.DataParam("DocumentName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(DocumentName)));
+				LParams.Add(new DAE.Runtime.DataParam("DocumentType", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DocumentType));
+				LParams.Add(new DAE.Runtime.DataParam("Data", LType, DAE.Language.Modifier.Const, LData));
+				
+				DAE.IServerStatementPlan LPlan = LPipe.Process.PrepareStatement(".Frontend.CreateAndSave(LibraryName, DocumentName, DocumentType, Data)", LParams);
+				try
 				{
-					using (DAE.Runtime.Data.Scalar LDocumentType = new DAE.Runtime.Data.Scalar(LPipe.Process, LPipe.Process.DataTypes.SystemString, DocumentType))
-					{
-						using 
-						(
-							DAE.Runtime.Data.Scalar LData = 
-								(
-									ABinary ? 
-									new DAE.Runtime.Data.Scalar(LPipe.Process, LType, (Stream)AData) :
-									new DAE.Runtime.Data.Scalar(LPipe.Process, LType, AData)
-								)
-						)
-						{
-							DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-							LParams.Add(new DAE.Runtime.DataParam("LibraryName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, LLibraryName));
-							LParams.Add(new DAE.Runtime.DataParam("DocumentName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, LDocumentName));
-							LParams.Add(new DAE.Runtime.DataParam("DocumentType", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, LDocumentType));
-							LParams.Add(new DAE.Runtime.DataParam("Data", LType, DAE.Language.Modifier.Const, LData));
-							
-							DAE.IServerStatementPlan LPlan = LPipe.Process.PrepareStatement(".Frontend.CreateAndSave(LibraryName, DocumentName, DocumentType, Data)", LParams);
-							try
-							{
-								LPlan.Execute(LParams);
-							}
-							finally
-							{
-								LPipe.Process.UnprepareStatement(LPlan);
-							}
-						}
-					}
+					LPlan.Execute(LParams);
 				}
-			}
+				finally
+				{
+					LPipe.Process.UnprepareStatement(LPlan);
+				}
+//			}
 		}
 	}
 

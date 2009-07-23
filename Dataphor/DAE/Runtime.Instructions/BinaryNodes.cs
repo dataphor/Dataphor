@@ -22,69 +22,97 @@ using Schema = Alphora.Dataphor.DAE.Schema;
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	// operator Length(const ABinary : Binary) : Long
-	public class BinaryLengthNode : InstructionNode
+	public class BinaryLengthNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
-			else
+			if (AArgument1 == null)
+				return null;
 			#endif
-				if (((Scalar)AArguments[0].Value).IsNative)
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsByteArray.Length));
-				else
+
+			if (AArgument1 is byte[])
+				return ((byte[])AArgument1).Length;
+			if (AArgument1 is StreamID)
+			{
+				Stream LStream = AProcess.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
+				try
 				{
-					Stream LStream = AArguments[0].Value.OpenStream();
-					try
-					{
-						return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LStream.Length));
-					}
-					finally
-					{
-						LStream.Close();
-					}
+					return LStream.Length;
 				}
+				finally
+				{
+					LStream.Close();
+				}
+			}
+			
+			Scalar LScalar = (Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument1);
+			if (LScalar.IsNative)
+				return LScalar.AsByteArray.Length;
+			else
+			{
+				Stream LStream = LScalar.OpenStream();
+				try
+				{
+					return LStream.Length;
+				}
+				finally
+				{
+					LStream.Close();
+				}
+			}
 		}
 	}
 
 	/// <remarks> operator iEqual(Binary, Binary) : Boolean; </remarks>
-	public class BinaryEqualNode : InstructionNode
+	public class BinaryEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
 			{
-				byte[] LLeftByteArray = null;
-				Stream LLeftStream = null;
-				if (((Scalar)AArguments[0].Value).IsNative)
+				if ((AArgument1 is byte[]) && (AArgument2 is byte[]))
 				{
-					LLeftByteArray = AArguments[0].Value.AsByteArray;
-					LLeftStream = new MemoryStream(LLeftByteArray, 0, LLeftByteArray.Length, false, true);
+					byte[] LLeftByteArray = (byte[])AArgument1;
+					byte[] LRightByteArray = (byte[])AArgument2;
+					
+					if (LLeftByteArray.Length != LRightByteArray.Length)
+						return false;
+						
+					for (int LIndex = 0; LIndex < LLeftByteArray.Length; LIndex++)
+						if (LLeftByteArray[LIndex] != LRightByteArray[LIndex])
+							return false;
+						
+					return true;
 				}
+				
+				Stream LLeftStream = null;
+				Stream LRightStream = null;
+				
+				if (AArgument1 is StreamID)
+					LLeftStream = AProcess.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
 				else
-					LLeftStream = AArguments[0].Value.OpenStream();
+					LLeftStream = ((Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument1)).OpenStream();
 				try
 				{
-					byte[] LRightByteArray = null;
-					Stream LRightStream = null;
-					if (((Scalar)AArguments[1].Value).IsNative)
-					{
-						LRightByteArray = AArguments[1].Value.AsByteArray;
-						LRightStream = new MemoryStream(LRightByteArray, 0, LRightByteArray.Length, false, true);
-					}
+					if (AArgument2 is StreamID)
+						LRightStream = AProcess.StreamManager.Open((StreamID)AArgument2, LockMode.Exclusive);
 					else
-						LRightStream = AArguments[1].Value.OpenStream();
+						LRightStream = ((Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument2)).OpenStream();
 					try
 					{
+						#if USESTREAMLENGTHWHENCOMPARINGSTREAMS
+						bool LEqual = LLeftStream.Length == LRightStream.Length; // TODO: Will this force a full read of the stream
+						#else
 						bool LEqual = true;
+						#endif
 						int LLeftByte;
 						int LRightByte;
-						while (true)
+						while (LEqual)
 						{
 							LLeftByte = LLeftStream.ReadByte();
 							LRightByte = LRightStream.ReadByte();
@@ -99,7 +127,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								break;
 						}
 						
-						return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LEqual));
+						return LEqual;
 					}
 					finally
 					{
@@ -109,7 +137,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				finally
 				{
 					LLeftStream.Close();
-				}
+				}	
 			}
 		}
 	}

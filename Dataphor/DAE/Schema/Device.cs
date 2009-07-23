@@ -225,10 +225,10 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract Scalar ToScalar(IServerProcess AProcess, object AValue);
+		public abstract object ToScalar(IServerProcess AProcess, object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract object FromScalar(Scalar AValue);
+		public abstract object FromScalar(object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for stream access data types.</summary>
 		public virtual Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
@@ -861,7 +861,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				try
 				{
 					DataParams LParams = new DataParams();
-					LParams.Add(new DataParam("ADeviceID", AProcess.DataTypes.SystemInteger, Modifier.In, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, ID)));
+					LParams.Add(new DataParam("ADeviceID", AProcess.DataTypes.SystemInteger, Modifier.In, ID));
 					IServerExpressionPlan LPlan = 
 						((IServerProcess)AProcess).PrepareExpression
 						(
@@ -880,7 +880,7 @@ namespace Alphora.Dataphor.DAE.Schema
 							{
 								using (Row LRow = LCursor.Select())
 								{
-									LServerCatalog.Add(AProcess.CatalogDeviceSession.ResolveCatalogObject(LRow[0].AsInt32));
+									LServerCatalog.Add(AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0]));
 								}
 							}
 						}
@@ -1562,12 +1562,12 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Execute
-        protected virtual DataVar InternalExecute(DevicePlan ADevicePlan)
+        protected virtual object InternalExecute(DevicePlan ADevicePlan)
         {
 			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, ADevicePlan.Node.GetType().Name);
         }
         
-        public DataVar Execute(DevicePlan ADevicePlan)
+        public object Execute(DevicePlan ADevicePlan)
         {
 			if (ADevicePlan.Node is DropTableNode)
 				RemoveTransactionReferences(((DropTableNode)ADevicePlan.Node).Table);

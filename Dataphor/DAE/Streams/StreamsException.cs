@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Streams
 			InvalidRowDataFormat = 112113,
 
 			/// <summary>Error code 112114: "Scalar AValue size exceeds maximum byte array size."</summary>
-			ScalarValueOverflow = 112114,
+			ScalarOverflow = 112114,
 
 			/// <summary>Error code 112115: "Row value size exceeds maximum byte array size."</summary>
 			RowValueOverflow = 112115,

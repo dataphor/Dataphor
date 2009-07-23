@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+//#define USECLEANUPNODES // Part of cleanup processing, currently disabled because cleanup processing is done with InstructionNodeBase.CleanupOperand
+
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -27,13 +30,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		Passing an argument by reference (var, out or const) is not a copy.  For local
 		table variables this is accomplished as it is for all other variable types, by 
-		referencing the DataVar from the current stack frame in the argument set.
+		referencing the object from the current stack frame in the argument set.
 		Non-local table variables cannot be passed by reference.
 	*/
-	public abstract class InstructionNode : PlanNode
+	public abstract class InstructionNodeBase : PlanNode
 	{
         // constructor
-        public InstructionNode() : base(){}
+        public InstructionNodeBase() : base() {}
         
 		// Operator
 		// The operator this node is implementing
@@ -87,8 +90,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
+		#if USECLEANUPNODES
 		protected PlanNodes FCleanupNodes;
 		public PlanNodes CleanupNodes { get { return FCleanupNodes; } }
+		#endif
 		
 		public override void DetermineCharacteristics(Plan APlan)
 		{
@@ -135,7 +140,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					case Modifier.Var :
 						if (Nodes[LIndex] is ParameterNode)
 							Nodes[LIndex] = Nodes[LIndex].Nodes[0];
-						
+							
 						if (!(Nodes[LIndex] is StackReferenceNode) || APlan.Symbols[((StackReferenceNode)Nodes[LIndex]).Location].IsConstant)
 							throw new CompilerException(CompilerException.Codes.ConstantObjectCannotBePassedByReference, APlan.CurrentStatement(), Operator.Operands[LIndex].Name);
 
@@ -158,9 +163,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void InternalDetermineBinding(Plan APlan)
 		{
 			base.InternalDetermineBinding(APlan);
+			
+			#if USECLEANUPNODES
 			if (CleanupNodes != null)
 				foreach (PlanNode LNode in CleanupNodes)
 					LNode.DetermineBinding(APlan);
+			#endif
 		}
 		
 		public override void BindToProcess(Plan APlan)
@@ -183,10 +191,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
 				
-				LocalBuilder LArguments = AGenerator.DeclareLocal(typeof(DataVar[]));
+				LocalBuilder LArguments = AGenerator.DeclareLocal(typeof(object[]));
 				
 				AGenerator.Emit(OpCodes.Ldc_I4, Nodes.Count);
-				AGenerator.Emit(OpCodes.Newarr, typeof(DataVar));
+				AGenerator.Emit(OpCodes.Newarr, typeof(object));
 				AGenerator.Emit(OpCodes.Stloc, LArguments);
 				
 				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
@@ -199,11 +207,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AGenerator.Emit(OpCodes.Stelem_Ref);
 				}
 				
+				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					AGenerator.BeginExceptionBlock();
+				#endif
 				
 				EmitInstructionIL(APlan, AGenerator, AExecutePath, LArguments);
 				
+				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 				{
 					AGenerator.BeginFinallyBlock();
@@ -219,14 +230,153 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 					AGenerator.EndExceptionBlock();
 				}
+				#endif
 			}
 			else
 				base.EmitIL(APlan, AGenerator, AExecutePath);
-		}		
+		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		// TODO: This should be compiled and added as cleanup nodes
+		// TODO: Handle var arguments for more than just stack references
+		protected void CleanupOperand(ServerProcess AProcess, Schema.SignatureElement ASignatureElement, PlanNode AArgumentNode, object AArgumentValue)
 		{
-			DataVar[] LArguments = new DataVar[Nodes.Count];
+			switch (ASignatureElement.Modifier)
+			{
+				case Modifier.In :
+					DataValue.DisposeValue(AProcess, AArgumentValue);
+				break;
+					
+				case Modifier.Var :
+					if (AArgumentNode.DataType is Schema.ScalarType)
+						AArgumentValue = ((Schema.ScalarType)AArgumentNode.DataType).ValidateValue(AProcess, AArgumentValue, FOperator);
+					AProcess.Context.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
+				break;
+			}
+		}
+		
+		public override string Category
+		{
+			get { return "Instruction"; }
+		}
+	}
+	
+	public abstract class NilaryInstructionNode : InstructionNodeBase
+	{
+		public abstract object NilaryInternalExecute(ServerProcess AProcess);
+
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			#if USECLEANUPNODES
+			try
+			{
+			#endif
+
+				return NilaryInternalExecute(AProcess);
+
+			#if USECLEANUPNODES
+			}
+			finally
+			{
+				if (FCleanupNodes != null)
+					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
+						FCleanupNodes[LIndex].Execute(AProcess);
+			}
+			#endif
+		}
+	}
+	
+	public abstract class UnaryInstructionNode : InstructionNodeBase
+	{
+		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1);
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			object LArgument = Nodes[0].Execute(AProcess);
+			try
+			{
+				return InternalExecute(AProcess, LArgument);
+			}
+			finally
+			{
+				if (Operator != null)
+					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument);
+				
+				#if USECLEANUPNODES
+				if (FCleanupNodes != null)
+					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
+						FCleanupNodes[LIndex].Execute(AProcess);
+				#endif
+			}
+		}
+	}
+	
+	public abstract class BinaryInstructionNode : InstructionNodeBase
+	{
+		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2);
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			object LArgument1 = Nodes[0].Execute(AProcess);
+			object LArgument2 = Nodes[1].Execute(AProcess);
+			try
+			{
+				return InternalExecute(AProcess, LArgument1, LArgument2);
+			}
+			finally
+			{
+				if (Operator != null) 
+				{
+					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument1);
+					CleanupOperand(AProcess, Operator.Signature[1], Nodes[1], LArgument2);
+				}
+					
+				#if USECLEANUPNODES
+				if (FCleanupNodes != null)
+					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
+						FCleanupNodes[LIndex].Execute(AProcess);
+				#endif
+			}
+		}
+	}
+	
+	public abstract class TernaryInstructionNode : InstructionNodeBase
+	{
+		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3);
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			object LArgument1 = Nodes[0].Execute(AProcess);
+			object LArgument2 = Nodes[1].Execute(AProcess);
+			object LArgument3 = Nodes[2].Execute(AProcess);
+			try
+			{
+				return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+			}
+			finally
+			{
+				if (Operator != null) 
+				{
+					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument1);
+					CleanupOperand(AProcess, Operator.Signature[1], Nodes[1], LArgument2);
+					CleanupOperand(AProcess, Operator.Signature[2], Nodes[2], LArgument3);
+				}
+					
+				#if USECLEANUPNODES
+				if (FCleanupNodes != null)
+					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
+						FCleanupNodes[LIndex].Execute(AProcess);
+				#endif
+			}
+		}
+	}
+	
+	public abstract class InstructionNode : InstructionNodeBase
+	{
+		public abstract object InternalExecute(ServerProcess AProcess, object[] AArguments);
+
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			object[] LArguments = new object[Nodes.Count];
 			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
 				LArguments[LIndex] = Nodes[LIndex].Execute(AProcess);
 			try
@@ -235,20 +385,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
+				// TODO: Compile the dispose calls and var argument assignment calls
 				if (Operator != null)
-					for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-						if ((LArguments[LIndex] != null) && (LArguments[LIndex].Value != null) && (Operator.Signature[LIndex].Modifier == Modifier.In))
-							LArguments[LIndex].Value.Dispose();
-					
+					for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
+						CleanupOperand(AProcess, Operator.Signature[LIndex], Nodes[LIndex], LArguments[LIndex]);
+
+				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
 						FCleanupNodes[LIndex].Execute(AProcess);
+				#endif
 			}
-		}
-
-		public override string Category
-		{
-			get { return "Instruction"; }
 		}
 	}
 }

@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			string LResult;
 			INode LNode;
-			using (DAE.Runtime.Data.DataValue LScalar = Pipe.RequestDocument(ADocument))
+			using (DAE.Runtime.Data.Scalar LScalar = Pipe.RequestDocument(ADocument))
 			{
 				LResult = LScalar.AsString;
 			}

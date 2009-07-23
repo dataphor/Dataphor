@@ -26,21 +26,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new ExtendNode Node { get { return (ExtendNode)FNode; } }
         
-		protected DataVar FSourceObject;        
 		protected Table FSourceTable;
 		protected Row FSourceRow;
         
         protected override void InternalOpen()
         {
-			FSourceObject = Node.Nodes[0].Execute(Process);
+			FSourceTable = Node.Nodes[0].Execute(Process) as Table;
 			try
 			{
-				FSourceTable = (Table)FSourceObject.Value;
 				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
 			}
 			catch
 			{
-				FSourceObject.Value.Dispose();
+				FSourceTable.Dispose();
+				FSourceTable = null;
 				throw;
 			}
         }
@@ -71,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             FSourceRow.CopyTo(ARow);
             int LIndex;
             int LColumnIndex;
-	        Process.Context.Push(new DataVar(String.Empty, FSourceRow.DataType, FSourceRow));
+	        Process.Context.Push(FSourceRow);
             try
             {
 				for (LIndex = 1; LIndex < Node.Nodes.Count; LIndex++)
@@ -79,10 +78,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.ExtendColumnOffset + LIndex - 1].Name);
 					if (LColumnIndex >= 0)
 					{
-						DataVar LObject = Node.Nodes[LIndex].Execute(Process);
-						if (LObject.DataType is Schema.ScalarType)
-							((Schema.ScalarType)LObject.DataType).ValidateValue(Process, LObject);
-						ARow[LColumnIndex] = LObject.Value;
+						object LObject = Node.Nodes[LIndex].Execute(Process);
+						if (ARow.DataType.Columns[LColumnIndex].DataType is Schema.ScalarType)
+							LObject = ((Schema.ScalarType)ARow.DataType.Columns[LColumnIndex].DataType).ValidateValue(Process, LObject);
+						ARow[LColumnIndex] = LObject;
 					}
 				}
             }

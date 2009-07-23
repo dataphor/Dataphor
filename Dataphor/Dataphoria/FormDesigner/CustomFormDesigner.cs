@@ -146,7 +146,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private XmlDocument LoadDocument(string ADocument)
         {
             var LResult = new XmlDocument();
-            using (DataValue LResultData = FrontendSession.Pipe.RequestDocument(ADocument))
+            using (Scalar LResultData = FrontendSession.Pipe.RequestDocument(ADocument))
             {
                 try
                 {

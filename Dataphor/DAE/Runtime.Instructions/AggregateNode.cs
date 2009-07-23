@@ -106,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(DataType.CreateRowType(Keywords.Source)));
+				APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Source)));
 				try
 				{
 					Schema.RowType LRowType = new Schema.RowType(LCompareKey.Columns);
@@ -136,7 +136,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						int LStackDisplacement = ((AggregateCallNode)LAggregateNode).Operator.Initialization.StackDisplacement + 1; // add 1 to account for the result variable
 						LStackDisplacement += LColumnNames.Length;
 						for (int LIndex = 0; LIndex < LStackDisplacement; LIndex++)
-							APlan.Symbols.Push(new DataVar(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
+							APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
 						try
 						{
 							// Walk LSourceNode (assuming an n-length list of unary table operators) until FSourceNode is found
@@ -212,7 +212,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceTableType.CreateRowType(Keywords.Source)));
+				APlan.Symbols.Push(new Symbol(SourceTableType.CreateRowType(Keywords.Source)));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)	
@@ -258,13 +258,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AggregateTable LTable = new AggregateTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

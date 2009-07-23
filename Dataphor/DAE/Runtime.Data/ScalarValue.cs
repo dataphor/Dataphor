@@ -39,868 +39,64 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override void Dispose(bool ADisposing)
 		{
-			if (FStreamID != StreamID.Null)
+			if (!IsNative && (StreamID != StreamID.Null))
 			{
 				if (ValuesOwned)
-					Process.Deallocate(FStreamID);
-				FStreamID = StreamID.Null;
+					Process.Deallocate(StreamID);
+				StreamID = StreamID.Null;
 			}
 			base.Dispose(ADisposing);
 		}
 		
+		private bool FIsNative;		
+		private StreamID FStreamID;
+		private object FValue;
+
 		public new Schema.ScalarType DataType { get { return (Schema.ScalarType)base.DataType; } }
 
-		private bool FIsNative;		
-		/// <summary>Indicates whether the value for this scalar is stored in its native representation.</summary>
 		public override bool IsNative { get { return FIsNative; } }
-		
+
 		protected void CheckNonNative()
 		{
 			if (IsNative)
 				throw new RuntimeException(RuntimeException.Codes.UnableToProvideStreamAccess, DataType.Name);
 		}
 		
-		private StreamID FStreamID;
+		protected virtual object Value
+		{
+			get { return FIsNative ? FValue : FStreamID; }
+			set
+			{
+				FIsNative = !(value is StreamID);
+				if (!FIsNative)
+				{
+					FStreamID = (StreamID)value;
+					FValue = null;
+				}
+				else
+				{
+					FStreamID = StreamID.Null;
+					FValue = value;
+				}
+			}
+		}
+
 		/// <summary>Returns the stream id that contains the data for the physical representation of this scalar.</summary>
-		public virtual StreamID StreamID 
+		public StreamID StreamID 
 		{ 
 			get 
 			{ 
 				CheckNonNative();
-				return FStreamID; 
+				return (StreamID)Value; 
 			} 
 			set 
 			{ 
 				CheckNonNative();
-				if (ValuesOwned && (FStreamID != StreamID.Null))
-					Process.Deallocate(StreamID);
-				FStreamID = value; 
+				if (ValuesOwned && ((StreamID)Value != StreamID.Null))
+					Process.Deallocate((StreamID)Value);
+				Value = value; 
 			}
 		}
-
-		private object FValue;
-		
-		public override bool IsNil
-		{
-			get
-			{
-				if (FIsNative)
-					return FValue == null;
-				else
-					return FStreamID == StreamID.Null;
-			}
-		}
-		
-		public override object AsNative
-		{
-			get
-			{
-				if (FIsNative)
-				{
-					if (FValue == null)
-						throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-					return FValue;
-				}
-				
-				if (FStreamID == StreamID.Null)
-					throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-				
-				Stream LStream = OpenStream();
-				try
-				{
-					Conveyor LConveyor = DataType.GetConveyor(Process);
-					if (LConveyor.IsStreaming)
-						return LConveyor.Read(LStream);
-					else
-					{
-						byte[] LValue = new byte[(int)LStream.Length];
-						LStream.Read(LValue, 0, LValue.Length);
-						return LConveyor.Read(LValue, 0);
-					}
-				}
-				finally
-				{
-					LStream.Close();
-				}
-			}
-			set
-			{
-				if (FIsNative)
-					FValue = value;
-				else
-				{
-					if (FStreamID == StreamID.Null)
-						FStreamID = Process.Allocate();
-						
-					Stream LStream = OpenStream();
-					try
-					{
-						LStream.SetLength(0);
-						Conveyor LConveyor = DataType.GetConveyor(Process);
-						if (LConveyor.IsStreaming)
-							LConveyor.Write(value, LStream);
-						else
-						{
-							byte[] LValue = new byte[LConveyor.GetSize(value)];
-							LConveyor.Write(value, LValue, 0);
-							LStream.Write(LValue, 0, LValue.Length);
-						}
-					}
-					finally
-					{
-						LStream.Close();
-					}
-				}
-			}
-		}
-
-		public override bool AsBoolean
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsBoolean.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsBoolean, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (bool)FValue;
-					}
-					return (bool)AsNative;
-				}
-				
-				return (bool)DataType.GetRepresentation(NativeAccessors.AsBoolean).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsBoolean.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsBoolean, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsBoolean).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBoolean, value));
-			}
-		}
-		
-		public override bool GetAsBoolean(string ARepresentationName)
-		{
-			return (bool)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsBoolean(string ARepresentationName, bool AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBoolean, AValue));
-		}
-
-		public override byte AsByte
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsByte.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByte, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (byte)FValue;
-					}
-					return (byte)AsNative;
-				}
-				
-				return (byte)DataType.GetRepresentation(NativeAccessors.AsByte).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsByte.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByte, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsByte).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemByte, value));
-			}
-		}
-
-		public override byte GetAsByte(string ARepresentationName)
-		{
-			return (byte)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsByte(string ARepresentationName, byte AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemByte, AValue));
-		}
-
-		public override short AsInt16
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt16.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt16, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (short)FValue;
-					}
-					return (short)AsNative;
-				}
-				
-				return (short)DataType.GetRepresentation(NativeAccessors.AsInt16).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt16.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt16, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsInt16).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemShort, value));
-			}
-		}
-
-		public override short GetAsInt16(string ARepresentationName)
-		{
-			return (short)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsInt16(string ARepresentationName, short AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemShort, AValue));
-		}
-
-		public override int AsInt32
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt32.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt32, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (int)FValue;
-					}
-					return (int)AsNative;
-				}
-				
-				return (int)DataType.GetRepresentation(NativeAccessors.AsInt32).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt32.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt32, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsInt32).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemInteger, value));
-			}
-		}
-
-		public override int GetAsInt32(string ARepresentationName)
-		{
-			return (int)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsInt32(string ARepresentationName, int AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemInteger, AValue));
-		}
-
-		public override long AsInt64
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt64.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt64, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (long)FValue;
-					}
-					return (long)AsNative;
-				}
-				
-				return (long)DataType.GetRepresentation(NativeAccessors.AsInt64).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsInt64.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsInt64, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsInt64).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemLong, value));
-			}
-		}
-
-		public override long GetAsInt64(string ARepresentationName)
-		{
-			return (long)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsInt64(string ARepresentationName, long AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemLong, AValue));
-		}
-
-		public override decimal AsDecimal
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsDecimal.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsDecimal, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (decimal)FValue;
-					}
-					return (decimal)AsNative;
-				}
-				
-				return (decimal)DataType.GetRepresentation(NativeAccessors.AsDecimal).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsDecimal.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsDecimal, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsDecimal).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDecimal, value));
-			}
-		}
-
-		public override decimal GetAsDecimal(string ARepresentationName)
-		{
-			return (decimal)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsDecimal(string ARepresentationName, decimal AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDecimal, AValue));
-		}
-
-		public override TimeSpan AsTimeSpan
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsTimeSpan.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsTimeSpan, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (TimeSpan)FValue;
-					}
-					return (TimeSpan)AsNative;
-				}
-				
-				return (TimeSpan)DataType.GetRepresentation(NativeAccessors.AsTimeSpan).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsTimeSpan.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsTimeSpan, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsTimeSpan).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemTimeSpan, value));
-			}
-		}
-
-		public override TimeSpan GetAsTimeSpan(string ARepresentationName)
-		{
-			return (TimeSpan)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemTimeSpan, AValue));
-		}
-
-		public override DateTime AsDateTime
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsDateTime.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsDateTime, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (DateTime)FValue;
-					}
-					return (DateTime)AsNative;
-				}
-				
-				return (DateTime)DataType.GetRepresentation(NativeAccessors.AsDateTime).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsDateTime.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsDateTime, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsDateTime).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDateTime, value));
-			}
-		}
-
-		public override DateTime GetAsDateTime(string ARepresentationName)
-		{
-			return (DateTime)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsDateTime(string ARepresentationName, DateTime AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDateTime, AValue));
-		}
-
-		public override Guid AsGuid
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsGuid.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsGuid, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (Guid)FValue;
-					}
-					return (Guid)AsNative;
-				}
-				
-				return (Guid)DataType.GetRepresentation(NativeAccessors.AsGuid).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsGuid.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsGuid, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsGuid).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemGuid, value));
-			}
-		}
-
-		public override Guid GetAsGuid(string ARepresentationName)
-		{
-			return (Guid)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsGuid(string ARepresentationName, Guid AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemGuid, AValue));
-		}
-
-		public override String AsString
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsString.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsString, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (String)FValue;
-					}
-					return (String)AsNative;
-				}
-				
-				return (String)DataType.GetRepresentation(NativeAccessors.AsString).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsString.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsString, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsString).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemString, value));
-			}
-		}
-
-		public override string GetAsString(string ARepresentationName)
-		{
-			return (string)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsString(string ARepresentationName, string AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemString, AValue));
-		}
-
-		public override string AsDisplayString
-		{
-			get { return (string)DataType.GetRepresentation(NativeAccessors.AsDisplayString).GetAsNative(Process.GetServerProcess(), this); }
-			set { DataType.GetRepresentation(NativeAccessors.AsDisplayString).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemString, value)); }
-		}
-
-		public override Exception AsException
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsException.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsException, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (Exception)FValue;
-					}
-					return (Exception)AsNative;
-				}
-				
-				return (Exception)DataType.GetRepresentation(NativeAccessors.AsException).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsException.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsException, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-						AsNative = value;
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsException).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemError, value));
-			}
-		}
-
-		public override Exception GetAsException(string ARepresentationName)
-		{
-			return (Exception)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsException(string ARepresentationName, Exception AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemError, AValue));
-		}
-
-		public override byte[] AsByteArray
-		{
-			get
-			{
-				if ((DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true))
-				{
-					if (IsNative)
-					{
-						if (FValue == null)
-							throw new RuntimeException(RuntimeException.Codes.NilEncountered);
-						return (byte[])FValue;
-					}
-
-					Stream LStream = OpenStream();
-					try
-					{
-						byte[] LValue = new byte[LStream.Length];
-						LStream.Read(LValue, 0, (int)LStream.Length);
-						return LValue;
-					}
-					finally
-					{
-						LStream.Close();
-					}
-				}
-				
-				return (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
-			}
-			set
-			{
-				if ((DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true))
-				{
-					if (IsNative)
-						FValue = value;
-					else
-					{
-						Stream LStream = OpenStream();
-						try
-						{
-							LStream.Write(value, 0, value.Length);
-						}
-						finally
-						{
-							LStream.Close();
-						}
-					}
-				}
-				else
-					DataType.GetRepresentation(NativeAccessors.AsByteArray).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBinary, value));
-			}
-		}
-
-		public override byte[] GetAsByteArray(string ARepresentationName)
-		{
-			return (byte[])DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), this);
-		}
-		
-		public override void SetAsByteArray(string ARepresentationName, byte[] AValue)
-		{
-			DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBinary, AValue));
-		}
-
-		public override string AsBase64String
-		{
-			get { return Convert.ToBase64String(AsByteArray); }
-			set { AsByteArray = Convert.FromBase64String(value); }
-		}
-		
-		private Stream FWriteStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
-		private DataValue FWriteValue; // saves the row instantiated to write the compound value if this is a compound scalar
-		
-		public unsafe override int GetPhysicalSize(bool AExpandStreams)
-		{
-			int LSize = 1; // Scalar header
-			if (!IsNil)
-			{
-				if (IsNative)
-				{
-					if (DataType.IsCompound)
-					{
-						FWriteValue = DataValue.FromNative(Process, DataType.CompoundRowType, FValue);
-						return LSize + FWriteValue.GetPhysicalSize(AExpandStreams);
-					}
-					else
-					{
-						Streams.Conveyor LConveyor = DataType.GetConveyor(Process);
-						if (LConveyor.IsStreaming)
-						{
-							FWriteStream = new MemoryStream(64);
-							LConveyor.Write(FValue, FWriteStream);
-							return LSize + (int)FWriteStream.Length;
-						}
-						return LSize + LConveyor.GetSize(FValue);
-					}
-				}
-					
-				if (AExpandStreams)
-				{
-					FWriteStream = Process.Open(StreamID, LockMode.Exclusive);
-					return LSize + (int)FWriteStream.Length;
-				}
-
-				return LSize + sizeof(StreamID);
-			}
-			return LSize;
-		}
-
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
-		{
-			// Write scalar header
-			byte LHeader = (byte)(IsNil ? 0 : 1);
-			LHeader |= (byte)(IsNative ? 2 : 0);
-			LHeader |= (byte)(AExpandStreams ? 4 : 0);
-			ABuffer[AOffset] = LHeader;
-			AOffset++;
-
-			if (!IsNil)
-			{
-				if (IsNative)
-				{
-					if (DataType.IsCompound)
-					{
-						FWriteValue.WriteToPhysical(ABuffer, AOffset, AExpandStreams);
-						FWriteValue.Dispose();
-						FWriteValue = null;
-					}
-					else
-					{
-						Streams.Conveyor LConveyor = DataType.GetConveyor(Process);
-						if (LConveyor.IsStreaming)
-						{
-							FWriteStream.Position = 0;
-							FWriteStream.Read(ABuffer, AOffset, (int)FWriteStream.Length);
-							FWriteStream.Close();
-						}
-						else
-							LConveyor.Write(FValue, ABuffer, AOffset);
-					}
-				}
-				else
-				{
-					if (AExpandStreams)
-					{
-						FWriteStream.Position = 0;
-						FWriteStream.Read(ABuffer, AOffset, (int)FWriteStream.Length);
-						FWriteStream.Close();
-					}
-					else
-					{
-						fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-						{
-							*((StreamID*)LBufferPtr) = (StreamID)FStreamID;
-						}
-					}
-				}
-			}
-		}
-
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
-		{
-			// Clear current value
-			if (ValuesOwned && (FStreamID != StreamID.Null))
-				Process.Deallocate(FStreamID);
-
-			// Read scalar header
-			byte LHeader = ABuffer[AOffset];
-			AOffset++;
-			FIsNative = (LHeader & 2) != 0;
-			if ((LHeader & 1) != 0) // if not nil
-			{
-				if (FIsNative)
-				{
-					if (DataType.IsCompound)
-					{
-						using (Row LRow = (Row)DataValue.FromPhysical(Process, DataType.CompoundRowType, ABuffer, AOffset))
-						{
-							FValue = LRow.AsNative;
-							LRow.ValuesOwned = false;
-						}
-					}
-					else
-					{
-						Streams.Conveyor LConveyor = DataType.GetConveyor(Process);
-						if (LConveyor.IsStreaming)
-						{
-							Stream LStream = new MemoryStream(ABuffer, AOffset, ABuffer.Length - AOffset, false, true);
-							FValue = LConveyor.Read(LStream);
-							LStream.Close();
-						}
-						else
-						{
-							FValue = LConveyor.Read(ABuffer, AOffset);
-						}
-					}
-				}
-				else
-				{
-					if ((LHeader & 4) != 0) // if expanded form
-					{
-						FStreamID = Process.Allocate();
-						Stream LStream = Process.Open(FStreamID, LockMode.Exclusive);
-						LStream.Write(ABuffer, AOffset, ABuffer.Length - AOffset);
-						LStream.Close();
-					}
-					else
-					{
-						fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-						{
-							FStreamID = *((StreamID*)LBufferPtr);
-						}
-					}
-				}
-			}
-			else
-			{
-				if (FIsNative)
-					FValue = null;
-				else
-					FStreamID = StreamID.Null;
-			}
-		}
-		
-		/// <summary>Opens a stream to read the data for this value. If this instance is native, the stream will be read only.</summary>
-		public override Stream OpenStream()
-		{
-			if (IsNative)
-			{
-				byte[] LValue = 
-					(DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true)
-						? (byte[])FValue
-						: (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
-				return new MemoryStream(LValue, 0, LValue.Length, false, true);
-			}
-			return Process.Open(StreamID, LockMode.Exclusive);
-		}
-		
-		public override Stream OpenStream(string ARepresentationName)
-		{
-			return DataType.Representations[ARepresentationName].GetAsDataValue(Process.GetServerProcess(), this).OpenStream();
-		}
-
-		public override object CopyNativeAs(Schema.IDataType ADataType)
-		{
-			if (IsNative)
-			{
-				ICloneable LCloneable = FValue as ICloneable;
-				if (LCloneable != null)
-					return LCloneable.Clone();
-					
-				if (DataType.IsCompound)
-					return DataValue.CopyNative(Process, DataType.CompoundRowType, FValue);
-					
-				return FValue;
-			}
-
-			if (StreamID == StreamID.Null)
-				return StreamID;
-			return Process.Reference(StreamID);
-		}
-	}
-
-	/// <summary>A scalar value which is currently contained inside a native row or list.</summary>	
-	public abstract class InternedScalar : Scalar
-	{
-		public InternedScalar(IServerProcess AProcess, Schema.IScalarType ADataType) : base(AProcess, ADataType, null)
-		{
-			ValuesOwned = false;
-		}
-		
-		/// <summary>Indicates whether the value for this scalar is stored in its native representation.</summary>
-		public override bool IsNative { get { return !(Value is StreamID); } }
-		
-		/// <summary>Returns the stream id that contains the data for the physical representation of this scalar.</summary>
-		public override StreamID StreamID 
-		{ 
-			get 
-			{
-				CheckNonNative();
-				return (StreamID)Value; 
-			} 
-			set
-			{
-				CheckNonNative();
-				if (ValuesOwned && (StreamID != StreamID.Null))
-					Process.Deallocate(StreamID);
-				Value = value;
-			}
-		}
-		
-		protected abstract object Value { get; set; }
 
 		public override bool IsNil
 		{
@@ -976,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public override bool AsBoolean
+		public bool AsBoolean
 		{
 			get
 			{
@@ -991,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (bool)AsNative;
 				}
 				
-				return (bool)DataType.GetRepresentation(NativeAccessors.AsBoolean).GetAsNative(Process.GetServerProcess(), this);
+				return (bool)DataType.GetRepresentation(NativeAccessors.AsBoolean).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1003,11 +199,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsBoolean).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBoolean, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsBoolean).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
+		
+		public bool GetAsBoolean(string ARepresentationName)
+		{
+			return (bool)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsBoolean(string ARepresentationName, bool AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
 
-		public override byte AsByte
+		public byte AsByte
 		{
 			get
 			{
@@ -1022,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (byte)AsNative;
 				}
 				
-				return (byte)DataType.GetRepresentation(NativeAccessors.AsByte).GetAsNative(Process.GetServerProcess(), this);
+				return (byte)DataType.GetRepresentation(NativeAccessors.AsByte).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1034,11 +240,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsByte).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemByte, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsByte).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override short AsInt16
+		public byte GetAsByte(string ARepresentationName)
+		{
+			return (byte)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsByte(string ARepresentationName, byte AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public short AsInt16
 		{
 			get
 			{
@@ -1053,7 +269,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (short)AsNative;
 				}
 				
-				return (short)DataType.GetRepresentation(NativeAccessors.AsInt16).GetAsNative(Process.GetServerProcess(), this);
+				return (short)DataType.GetRepresentation(NativeAccessors.AsInt16).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1065,11 +281,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsInt16).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemShort, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsInt16).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override int AsInt32
+		public short GetAsInt16(string ARepresentationName)
+		{
+			return (short)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsInt16(string ARepresentationName, short AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public int AsInt32
 		{
 			get
 			{
@@ -1084,7 +310,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (int)AsNative;
 				}
 				
-				return (int)DataType.GetRepresentation(NativeAccessors.AsInt32).GetAsNative(Process.GetServerProcess(), this);
+				return (int)DataType.GetRepresentation(NativeAccessors.AsInt32).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1096,11 +322,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsInt32).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemInteger, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsInt32).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override long AsInt64
+		public int GetAsInt32(string ARepresentationName)
+		{
+			return (int)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsInt32(string ARepresentationName, int AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public long AsInt64
 		{
 			get
 			{
@@ -1115,7 +351,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (long)AsNative;
 				}
 				
-				return (long)DataType.GetRepresentation(NativeAccessors.AsInt64).GetAsNative(Process.GetServerProcess(), this);
+				return (long)DataType.GetRepresentation(NativeAccessors.AsInt64).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1127,11 +363,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsInt64).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemLong, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsInt64).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override decimal AsDecimal
+		public long GetAsInt64(string ARepresentationName)
+		{
+			return (long)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsInt64(string ARepresentationName, long AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public decimal AsDecimal
 		{
 			get
 			{
@@ -1146,7 +392,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (decimal)AsNative;
 				}
 				
-				return (decimal)DataType.GetRepresentation(NativeAccessors.AsDecimal).GetAsNative(Process.GetServerProcess(), this);
+				return (decimal)DataType.GetRepresentation(NativeAccessors.AsDecimal).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1158,11 +404,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsDecimal).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDecimal, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsDecimal).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override TimeSpan AsTimeSpan
+		public decimal GetAsDecimal(string ARepresentationName)
+		{
+			return (decimal)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsDecimal(string ARepresentationName, decimal AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public TimeSpan AsTimeSpan
 		{
 			get
 			{
@@ -1177,7 +433,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (TimeSpan)AsNative;
 				}
 				
-				return (TimeSpan)DataType.GetRepresentation(NativeAccessors.AsTimeSpan).GetAsNative(Process.GetServerProcess(), this);
+				return (TimeSpan)DataType.GetRepresentation(NativeAccessors.AsTimeSpan).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1189,11 +445,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsTimeSpan).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemTimeSpan, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsTimeSpan).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override DateTime AsDateTime
+		public TimeSpan GetAsTimeSpan(string ARepresentationName)
+		{
+			return (TimeSpan)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public DateTime AsDateTime
 		{
 			get
 			{
@@ -1208,7 +474,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (DateTime)AsNative;
 				}
 				
-				return (DateTime)DataType.GetRepresentation(NativeAccessors.AsDateTime).GetAsNative(Process.GetServerProcess(), this);
+				return (DateTime)DataType.GetRepresentation(NativeAccessors.AsDateTime).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1220,11 +486,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsDateTime).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemDateTime, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsDateTime).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override Guid AsGuid
+		public DateTime GetAsDateTime(string ARepresentationName)
+		{
+			return (DateTime)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsDateTime(string ARepresentationName, DateTime AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public Guid AsGuid
 		{
 			get
 			{
@@ -1239,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (Guid)AsNative;
 				}
 				
-				return (Guid)DataType.GetRepresentation(NativeAccessors.AsGuid).GetAsNative(Process.GetServerProcess(), this);
+				return (Guid)DataType.GetRepresentation(NativeAccessors.AsGuid).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1251,11 +527,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsGuid).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemGuid, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsGuid).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override String AsString
+		public Guid GetAsGuid(string ARepresentationName)
+		{
+			return (Guid)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsGuid(string ARepresentationName, Guid AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public String AsString
 		{
 			get
 			{
@@ -1270,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (String)AsNative;
 				}
 				
-				return (String)DataType.GetRepresentation(NativeAccessors.AsString).GetAsNative(Process.GetServerProcess(), this);
+				return (String)DataType.GetRepresentation(NativeAccessors.AsString).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1282,17 +568,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsString).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemString, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsString).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override string AsDisplayString
+		public string GetAsString(string ARepresentationName)
 		{
-			get { return (string)DataType.GetRepresentation(NativeAccessors.AsDisplayString).GetAsNative(Process.GetServerProcess(), this); }
-			set { DataType.GetRepresentation(NativeAccessors.AsDisplayString).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemString, value)); }
+			return (string)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsString(string ARepresentationName, string AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
 		}
 
-		public override Exception AsException
+		public string AsDisplayString
+		{
+			get { return (string)DataType.GetRepresentation(NativeAccessors.AsDisplayString).GetAsNative(Process.GetServerProcess(), Value); }
+			set { Value = DataType.GetRepresentation(NativeAccessors.AsDisplayString).SetAsNative(Process.GetServerProcess(), Value, value); }
+		}
+
+		public Exception AsException
 		{
 			get
 			{
@@ -1307,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return (Exception)AsNative;
 				}
 				
-				return (Exception)DataType.GetRepresentation(NativeAccessors.AsException).GetAsNative(Process.GetServerProcess(), this);
+				return (Exception)DataType.GetRepresentation(NativeAccessors.AsException).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1319,11 +615,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						AsNative = value;
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsException).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemError, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsException).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
-		public override byte[] AsByteArray
+		public Exception GetAsException(string ARepresentationName)
+		{
+			return (Exception)DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsException(string ARepresentationName, Exception AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public byte[] AsByteArray
 		{
 			get
 			{
@@ -1349,7 +655,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 				
-				return (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
+				return (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), Value);
 			}
 			set
 			{
@@ -1371,10 +677,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 				else
-					DataType.GetRepresentation(NativeAccessors.AsByteArray).SetAsNative(Process.GetServerProcess(), this, new Scalar(Process, Process.DataTypes.SystemBinary, value));
+					Value = DataType.GetRepresentation(NativeAccessors.AsByteArray).SetAsNative(Process.GetServerProcess(), Value, value);
 			}
 		}
 
+		public byte[] GetAsByteArray(string ARepresentationName)
+		{
+			return (byte[])DataType.Representations[ARepresentationName].GetAsNative(Process.GetServerProcess(), Value);
+		}
+		
+		public void SetAsByteArray(string ARepresentationName, byte[] AValue)
+		{
+			Value = DataType.Representations[ARepresentationName].SetAsNative(Process.GetServerProcess(), Value, AValue);
+		}
+
+		public string AsBase64String
+		{
+			get { return Convert.ToBase64String(AsByteArray); }
+			set { AsByteArray = Convert.FromBase64String(value); }
+		}
+		
 		private Stream FWriteStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
 		private DataValue FWriteValue; // saves the row instantiated to write the compound value if this is a compound scalar
 		
@@ -1468,9 +790,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
 			// Clear current value
-			if (ValuesOwned && (StreamID != StreamID.Null))
+			if (ValuesOwned && !IsNative && (StreamID != StreamID.Null))
 				Process.Deallocate(StreamID);
-				
+
 			// Read scalar header
 			byte LHeader = ABuffer[AOffset];
 			AOffset++;
@@ -1533,7 +855,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (IsNative)
 			{
-				byte[] LValue =
+				byte[] LValue = 
 					(DataType.NativeType == NativeAccessors.AsByteArray.NativeType) && !DataType.HasRepresentation(NativeAccessors.AsByteArray, true)
 						? (byte[])Value
 						: (byte[])DataType.GetRepresentation(NativeAccessors.AsByteArray).GetAsNative(Process.GetServerProcess(), this);
@@ -1542,6 +864,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return Process.Open(StreamID, LockMode.Exclusive);
 		}
 		
+		public override Stream OpenStream(string ARepresentationName)
+		{
+			return DataType.Representations[ARepresentationName].GetAsDataValue(Process.GetServerProcess(), AsNative).OpenStream();
+		}
+
 		public override object CopyNativeAs(Schema.IDataType ADataType)
 		{
 			if (IsNative)
@@ -1555,11 +882,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					
 				return Value;
 			}
-			
+
 			if (StreamID == StreamID.Null)
 				return StreamID;
 			return Process.Reference(StreamID);
 		}
+
+		public override string ToString()
+		{
+			return AsDisplayString;
+		}
+	}
+	
+	/// <summary>A scalar value which is currently contained inside a native row or list.</summary>	
+	public abstract class InternedScalar : Scalar
+	{
+		public InternedScalar(IServerProcess AProcess, Schema.IScalarType ADataType) : base(AProcess, ADataType)
+		{
+			ValuesOwned = false;
+		}
+
+		/// <summary>Indicates whether the value for this scalar is stored in its native representation.</summary>
+		public override bool IsNative { get { return !(Value is StreamID); } }
 	}
 	
 	public class RowInternedScalar : InternedScalar

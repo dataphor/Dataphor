@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				if (FProperties.Count > 1)
 					throw new SchemaException(SchemaException.Codes.InvalidConversionRepresentation, Name, FScalarType.Name);
 					
-				APlan.Symbols.Push(new DataVar("AValue", FScalarType));
+				APlan.Symbols.Push(new Symbol("AValue", FScalarType));
 				try
 				{
 					FReadNode = Compiler.Bind(APlan, Compiler.EmitPropertyReadNode(APlan, new StackReferenceNode("AValue", FScalarType, 0, true), ScalarType, FProperties[0]));
@@ -434,10 +434,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				if (FProperties.Count > 1)
 					throw new SchemaException(SchemaException.Codes.InvalidConversionRepresentation, Name, FScalarType.Name);
 					
-				APlan.Symbols.Push(new DataVar("AValue", FScalarType));
+				APlan.Symbols.Push(new Symbol("AValue", FScalarType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar("ANewValue", FProperties[0].DataType));
+					APlan.Symbols.Push(new Symbol("ANewValue", FProperties[0].DataType));
 					try
 					{
 						FWriteNode = Compiler.Bind(APlan, Compiler.EmitPropertyWriteNode(APlan, null, FProperties[0], new StackReferenceNode("ANewValue", FProperties[0].DataType, 0, true), new StackReferenceNode("AValue", FScalarType, 1, true))).Nodes[1];
@@ -454,13 +454,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-        public DataValue GetAsDataValue(ServerProcess AProcess, DataValue AValue)
+        public DataValue GetAsDataValue(ServerProcess AProcess, object AValue)
         {
 			EnsureReadNode(AProcess.Plan);
-			AProcess.Context.Push(new DataVar(AValue.DataType, AValue));
+			AProcess.Context.Push(AValue);
 			try
 			{
-				return FReadNode.Execute(AProcess).Value;
+				return DataValue.FromNative(AProcess, ScalarType, FReadNode.Execute(AProcess));
 			}
 			finally
 			{
@@ -468,13 +468,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-        public object GetAsNative(ServerProcess AProcess, DataValue AValue)
+        public object GetAsNative(ServerProcess AProcess, object AValue)
         {
 			EnsureReadNode(AProcess.Plan);
-			AProcess.Context.Push(new DataVar(AValue.DataType, AValue));
+			AProcess.Context.Push(AValue);
 			try
 			{
-				return FReadNode.Execute(AProcess).Value.AsNative;
+				return FReadNode.Execute(AProcess);
 			}
 			finally
 			{
@@ -482,16 +482,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-        public void SetAsNative(ServerProcess AProcess, DataValue AValue, DataValue ANewValue)
+        public object SetAsNative(ServerProcess AProcess, object AValue, object ANewValue)
         {
 			EnsureWriteNode(AProcess.Plan);
-			AProcess.Context.Push(new DataVar(AValue.DataType, AValue));
+			AProcess.Context.Push(AValue);
 			try
 			{
-				AProcess.Context.Push(new DataVar(ANewValue.DataType, ANewValue));
+				AProcess.Context.Push(ANewValue);
 				try
 				{
-					AValue.AsNative = FWriteNode.Execute(AProcess).Value.AsNative;
+					return FWriteNode.Execute(AProcess);
 				}
 				finally
 				{
@@ -1964,34 +1964,40 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Conversions FImplicitConversions = new Conversions();
 		public Conversions ImplicitConversions { get { return FImplicitConversions; } }
 		
-		public void ValidateValue(ServerProcess AProcess, DataVar AValue)
+		public object ValidateValue(ServerProcess AProcess, object AValue)
+		{
+			return ValidateValue(AProcess, AValue, null);
+		}
+		
+		public object ValidateValue(ServerProcess AProcess, object AValue, Schema.Operator AFromOperator)
 		{
 			AProcess.Context.Push(AValue);
 			try
 			{
 				TableNode.ValidateScalarTypeConstraints(AProcess, this, false);
-				TableNode.ExecuteScalarTypeValidateHandlers(AProcess, this);
+				TableNode.ExecuteScalarTypeValidateHandlers(AProcess, this, AFromOperator);
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AValue = AProcess.Context.Pop();
 			}
+			
+			return AValue;
 		}
 		
-		public DataVar DefaultValue(ServerProcess AProcess)
+		public object DefaultValue(ServerProcess AProcess)
 		{
 			// ScalarType level default trigger handlers
-			DataVar LVar = new DataVar(this, new Scalar(AProcess, this, null));
-			AProcess.Context.Push(LVar);
+			AProcess.Context.Push(null);
 			try
 			{
 				if (FEventHandlers != null)
 					foreach (Schema.EventHandler LHandler in FEventHandlers)
 						if ((LHandler.EventType & EventType.Default) != 0)
 						{
-							DataVar LResult = LHandler.PlanNode.Execute(AProcess);
-							if ((LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean)
-								return LVar;
+							object LResult = LHandler.PlanNode.Execute(AProcess);
+							if ((LResult != null) && (bool)LResult)
+								return AProcess.Context.Peek(0);
 						}
 			}
 			finally

@@ -3,6 +3,9 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+#define USEDATATYPESINNATIVEROW
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {	
 	using System;
@@ -150,248 +153,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>Indicates whether disposal of the value should deallocate any resources associated with the value.</summary>
 		public bool ValuesOwned = true;
 
-		/// <summary>Gets or sets this value as a native boolean using the boolean representation of the type, if avaiable.</summary>		
-		public virtual bool AsBoolean 
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemBoolean); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemBoolean, DataType.Name); } 
-		}
-
-		/// <summary>Gets this value as a native boolean using the given representation of the type.</summary>		
-		public virtual bool GetAsBoolean(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemBoolean);
-		}
-
-		/// <summary>Sets this value as a native boolean using the given representation of the type.</summary>		
-		public virtual void SetAsBoolean(string ARepresentationName, bool AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemBoolean, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native byte using the byte representation of the type, if avaiable.</summary>		
-		public virtual byte AsByte
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemByte); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemByte, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native byte using the given representation of the type.</summary>		
-		public virtual byte GetAsByte(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemByte);
-		}
-
-		/// <summary>Sets this value as a native byte using the given representation of the type.</summary>		
-		public virtual void SetAsByte(string ARepresentationName, byte AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemByte, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native int16 using the int16 representation of the type, if avaiable.</summary>		
-		public virtual short AsInt16
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemShort); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemShort, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native short using the given representation of the type.</summary>		
-		public virtual short GetAsInt16(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemShort);
-		}
-
-		/// <summary>Sets this value as a native short using the given representation of the type.</summary>		
-		public virtual void SetAsInt16(string ARepresentationName, short AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemShort, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native int32 using the int32 representation of the type, if avaiable.</summary>		
-		public virtual int AsInt32
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemInteger); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemInteger, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native integer using the given representation of the type.</summary>		
-		public virtual int GetAsInt32(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemInteger);
-		}
-
-		/// <summary>Sets this value as a native integer using the given representation of the type.</summary>		
-		public virtual void SetAsInt32(string ARepresentationName, int AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemInteger, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native int64 using the int64 representation of the type, if avaiable.</summary>		
-		public virtual long AsInt64
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemLong); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemLong, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native long using the given representation of the type.</summary>		
-		public virtual long GetAsInt64(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemLong);
-		}
-
-		/// <summary>Sets this value as a native long using the given representation of the type.</summary>		
-		public virtual void SetAsInt64(string ARepresentationName, long AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemLong, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native decimal using the decimal representation of the type, if avaiable.</summary>		
-		public virtual Decimal AsDecimal
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemDecimal); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemDecimal, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native decimal using the given representation of the type.</summary>		
-		public virtual Decimal GetAsDecimal(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemDecimal);
-		}
-
-		/// <summary>Sets this value as a native decimal using the given representation of the type.</summary>		
-		public virtual void SetAsDecimal(string ARepresentationName, Decimal AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemDecimal, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native timespan using the timespan representation of the type, if avaiable.</summary>		
-		public virtual TimeSpan AsTimeSpan
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemTimeSpan); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemTimeSpan, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native timespan using the given representation of the type.</summary>		
-		public virtual TimeSpan GetAsTimeSpan(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemTimeSpan);
-		}
-
-		/// <summary>Sets this value as a native timespan using the given representation of the type.</summary>		
-		public virtual void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemTimeSpan, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native datetime using the datetime representation of the type, if avaiable.</summary>		
-		public virtual DateTime AsDateTime
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemDateTime); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemDateTime, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native datetime using the given representation of the type.</summary>		
-		public virtual DateTime GetAsDateTime(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemDateTime);
-		}
-
-		/// <summary>Sets this value as a native datetime using the given representation of the type.</summary>		
-		public virtual void SetAsDateTime(string ARepresentationName, DateTime AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemDateTime, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native guid using the guid representation of the type, if avaiable.</summary>		
-		public virtual Guid AsGuid
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemGuid); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemGuid, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native guid using the given representation of the type.</summary>		
-		public virtual Guid GetAsGuid(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemGuid);
-		}
-
-		/// <summary>Sets this value as a native guid using the given representation of the type.</summary>		
-		public virtual void SetAsGuid(string ARepresentationName, Guid AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemGuid, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native string using the string representation of the type, if avaiable.</summary>		
-		public virtual string AsString
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemString); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemString, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native string using the given representation of the type.</summary>		
-		public virtual string GetAsString(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemString);
-		}
-
-		/// <summary>Sets this value as a native string using the given representation of the type.</summary>		
-		public virtual void SetAsString(string ARepresentationName, string AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemString, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native string using the display string representation of the type, if avaiable.</summary>		
-		public virtual string AsDisplayString
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemString); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemString, DataType.Name); } 
-		}
-		
-		/// <summary>Gets or sets this value as a native byte array using the binary representation of the type, if avaiable.</summary>		
-		public virtual byte[] AsByteArray
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemBinary); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemBinary, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native byte[] using the given representation of the type.</summary>		
-		public virtual byte[] GetAsByteArray(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemBinary);
-		}
-
-		/// <summary>Sets this value as a native byte[] using the given representation of the type.</summary>		
-		public virtual void SetAsByteArray(string ARepresentationName, byte[] AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemBinary, DataType.Name);
-		}
-		
-		/// <summary>Gets or sets this value as a native string using the base 64 string representation of the type, if avaiable.</summary>		
-		public virtual string AsBase64String
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemBinary); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemBinary, DataType.Name); } 
-		}
-		
-		/// <summary>Gets or sets this value as a native exception using the exception representation of the type, if avaiable.</summary>		
-		public virtual Exception AsException
-		{ 
-			get { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemError); } 
-			set { throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemError, DataType.Name); } 
-		}
-		
-		/// <summary>Gets this value as a native exception using the given representation of the type.</summary>		
-		public virtual Exception GetAsException(string ARepresentationName)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, DataType.Name, Schema.DataTypes.CSystemError);
-		}
-
-		/// <summary>Sets this value as a native exception using the given representation of the type.</summary>		
-		public virtual void SetAsException(string ARepresentationName, Exception AValue)
-		{
-			throw new RuntimeException(RuntimeException.Codes.UnableToConvertValue, Schema.DataTypes.CSystemError, DataType.Name);
-		}
-		
 		/// <summary>Indicates whether or not this value is initialized.</summary>
 		public abstract bool IsNil { get; }
 
@@ -484,6 +245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			// This code is duplicated in the Copy and FromNative methods for performance...
 			object LValue = CopyNativeAs(ADataType);
+
 			Schema.IScalarType LScalarType = ADataType as Schema.IScalarType;
 			if (LScalarType != null)
 			{
@@ -532,6 +294,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			// This code is duplicated in the FromNative and CopyAs methods for performance...
 			object LValue = CopyNative();
 			Schema.IScalarType LScalarType = DataType as Schema.IScalarType;
+
 			if (LScalarType != null)
 			{
 				if (LValue is StreamID)
@@ -574,10 +337,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			throw new RuntimeException(RuntimeException.Codes.InvalidValueType, DataType == null ? "<null>" : DataType.GetType().Name);
 		}
 		
-		public DataValue Copy(IServerProcess AProcess)
+		public object Copy(IServerProcess AProcess)
 		{
 			// This code is duplicated in the FromNative and CopyAs methods for performance...
 			object LValue = CopyNative();
+
 			Schema.IScalarType LScalarType = DataType as Schema.IScalarType;
 			if (LScalarType != null)
 			{
@@ -587,7 +351,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LScalar.ValuesOwned = true;
 					return LScalar;
 				}
-				return new Scalar(AProcess, LScalarType, LValue);
+				return new Scalar(Process, LScalarType, LValue);
 			}
 				
 			Schema.IRowType LRowType = DataType as Schema.IRowType;
@@ -628,6 +392,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return CopyNativeAs(DataType);
 		}
 		
+		public static Schema.IScalarType NativeTypeToScalarType(ServerProcess AProcess, Type AType)
+		{
+			if (AType == NativeAccessors.AsBoolean.NativeType) return AProcess.DataTypes.SystemBoolean;
+			if (AType == NativeAccessors.AsByte.NativeType) return AProcess.DataTypes.SystemByte;
+			if (AType == NativeAccessors.AsByteArray.NativeType) return AProcess.DataTypes.SystemBinary;
+			if (AType == NativeAccessors.AsDateTime.NativeType) return AProcess.DataTypes.SystemDateTime;
+			if (AType == NativeAccessors.AsDecimal.NativeType) return AProcess.DataTypes.SystemDecimal;
+			if (AType == NativeAccessors.AsException.NativeType) return AProcess.DataTypes.SystemError;
+			if (AType == NativeAccessors.AsGuid.NativeType) return AProcess.DataTypes.SystemGuid;
+			if (AType == NativeAccessors.AsInt16.NativeType) return AProcess.DataTypes.SystemShort;
+			if (AType == NativeAccessors.AsInt32.NativeType) return AProcess.DataTypes.SystemInteger;
+			if (AType == NativeAccessors.AsInt64.NativeType) return AProcess.DataTypes.SystemLong;
+			if (AType == NativeAccessors.AsString.NativeType) return AProcess.DataTypes.SystemString;
+			if (AType == NativeAccessors.AsTimeSpan.NativeType) return AProcess.DataTypes.SystemTimeSpan;
+			return AProcess.DataTypes.SystemScalar;
+		}
+		
+		public static DataValue FromNative(ServerProcess AProcess, object AValue)
+		{
+			if (AValue == null)
+				return new Scalar(AProcess, AProcess.DataTypes.SystemScalar, null);
+				
+			if (AValue is StreamID)
+				return new Scalar(AProcess, AProcess.DataTypes.SystemScalar, (StreamID)AValue);
+				
+			return new Scalar(AProcess, NativeTypeToScalarType(AProcess, AValue.GetType()), AValue);
+		}
+		
 		/// <summary>Returns the host representation of the given native value.  This is a by-reference operation.</summary>		
 		public static DataValue FromNative(IServerProcess AProcess, Schema.IDataType ADataType, object AValue)
 		{
@@ -666,9 +458,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public static DataValue FromNativeRow(IServerProcess AProcess, Schema.IRowType ARowType, NativeRow ANativeRow, int ANativeRowIndex)
 		{
 			// This code is duplicated in the Copy method and the FromNative overloads for performance
+			#if USEDATATYPESINNATIVEROW
 			Schema.IDataType LDataType = ANativeRow.DataTypes[ANativeRowIndex];
 			if (LDataType == null)
 				LDataType = ARowType.Columns[ANativeRowIndex].DataType;
+			#else
+			Schema.IDataType LDataType = ARowType.Columns[ANativeRowIndex].DataType;
+			#endif
 
 			Schema.IScalarType LScalarType = LDataType as Schema.IScalarType;
 			if (LScalarType != null)
@@ -799,8 +595,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				NativeRow LNewRow = new NativeRow(LRowType.Columns.Count);
 				for (int LIndex = 0; LIndex < LRowType.Columns.Count; LIndex++)
 				{
+					#if USEDATATYPESINNATIVEROW
 					LNewRow.DataTypes[LIndex] = LNativeRow.DataTypes[LIndex];
 					LNewRow.Values[LIndex] = CopyNative(AProcess, LNativeRow.DataTypes[LIndex], LNativeRow.Values[LIndex]);
+					#else
+					LNewRow.Values[LIndex] = CopyNative(AProcess, LRowType.Columns[LIndex].DataType, LNativeRow.Values[LIndex]);
+					#endif
 				}
 				return LNewRow;
 			}
@@ -868,10 +668,105 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public new bool ToString()
+		public static object CopyValue(IServerProcess AProcess, object AValue)
 		{
-			Error.Fail("ToString will not work on a DataValue, use the AsString accessor instead.");
-			return false;
+			DataValue LValue = AValue as DataValue;
+			if (LValue != null)
+				return LValue.Copy();
+				
+			ICloneable LCloneable = AValue as ICloneable;
+			if (LCloneable != null)
+				return LCloneable.Clone();
+				
+			if (AValue is StreamID)
+				return AProcess.Reference((StreamID)AValue);
+				
+			NativeRow LNativeRow = AValue as NativeRow;
+			if (LNativeRow != null)
+			{
+				NativeRow LNewRow = new NativeRow(LNativeRow.Values.Length);
+				for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
+					LNewRow.Values[LIndex] = CopyValue(AProcess, LNativeRow.Values[LIndex]);
+				return LNewRow;
+			}
+			
+			return AValue;
+		}
+		
+		public static void DisposeValue(IServerProcess AProcess, object AValue)
+		{
+			DataValue LValue = AValue as DataValue;
+			if (LValue != null)
+			{
+				LValue.Dispose();
+				return;
+			}
+			
+			if (AValue is StreamID)
+			{
+				AProcess.Deallocate((StreamID)AValue);
+				return;
+			}
+			
+			NativeRow LNativeRow = AValue as NativeRow;
+			if (LNativeRow != null)
+			{
+				for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
+					DisposeValue(AProcess, LNativeRow.Values[LIndex]);
+				return;
+			}
+		}
+		
+		/// <summary>
+		/// Compares two native values directly.
+		/// </summary>
+		/// <remarks>
+		/// The method expects both values to be non-null.
+		/// The method uses direct comparison, it does not attempt to invoke the D4 equality operator for the values.
+		/// </remarks>
+		/// <returns>True if the values are equal, false otherwise.</returns>
+		public static bool NativeValuesEqual(ServerProcess AProcess, object LOldValue, object LCurrentValue)
+		{
+			if ((LOldValue is StreamID) && (LCurrentValue is StreamID))
+			{
+				Stream LOldStream = AProcess.StreamManager.Open((StreamID)LOldValue, LockMode.Exclusive);
+				try
+				{
+					Stream LCurrentStream = AProcess.StreamManager.Open((StreamID)LCurrentValue, LockMode.Exclusive);
+					try
+					{
+						bool LValuesEqual = true;
+						int LOldByte;
+						int LCurrentByte;
+						while (LValuesEqual)
+						{
+							LOldByte = LOldStream.ReadByte();
+							LCurrentByte = LCurrentStream.ReadByte();
+							
+							if (LOldByte != LCurrentByte)
+							{
+								LValuesEqual = false;
+								break;
+							}
+							
+							if (LOldByte == -1)
+								break;
+						}
+						
+						return LValuesEqual;
+					}
+					finally
+					{
+						LCurrentStream.Close();
+					}
+				}
+				finally
+				{
+					LOldStream.Close();
+				}
+			}
+			
+			return LOldValue.Equals(LCurrentValue);
 		}
 	}
 }

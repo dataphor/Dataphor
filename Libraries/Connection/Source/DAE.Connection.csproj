@@ -90,11 +90,6 @@
       <Private>False</Private>
       <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.dll</HintPath>
     </Reference>
-    <Reference Include="Alphora.Dataphor.DAE.SQLCE, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.SQLCE.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -117,6 +112,12 @@
     <Compile Include="Register.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
+      <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
+      <Name>DAE.SQLCE</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

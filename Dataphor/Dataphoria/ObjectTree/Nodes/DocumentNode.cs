@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
 		{
-			return (ARow["Main.Name"].AsString == FDocumentName) && (ARow["Main.Type_ID"].AsString == FDocumentType);
+			return ((string)ARow["Main.Name"] == FDocumentName) && ((string)ARow["Main.Type_ID"] == FDocumentType);
 		}
 
 		public override string GetFilter()

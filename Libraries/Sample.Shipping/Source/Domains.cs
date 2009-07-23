@@ -24,14 +24,14 @@ namespace Alphora.Shipping
     {
 		public SQLCoordinate(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, StringToCoordinate((string)AValue));
+			return StringToCoordinate((string)AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return CoordinateToString((Coordinate)AValue.AsNative);
+			return CoordinateToString((Coordinate)AValue);
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)

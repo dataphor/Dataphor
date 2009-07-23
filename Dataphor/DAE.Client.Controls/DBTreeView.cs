@@ -509,11 +509,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		protected void ClearParams()
 		{
 			foreach (Runtime.DataParam LParam in FParams)
-			{
-				if (LParam.Value != null)
-					LParam.Value.Dispose();
 				LParam.Value = null;
-			}
 		}
 		
 		private bool FClearingNodes;
@@ -569,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 										LRow.CopyTo(LKey);
 										LColumnIndex = LRow.DataType.Columns.IndexOf(ColumnName);
 										if (LRow.HasValue(LColumnIndex))
-											LText = LRow[LColumnIndex].AsDisplayString;
+											LText = ((Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
 										else
 											LText = CNoValueText;
 									}
@@ -611,9 +607,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					LCompareValue = String.Empty;
 					if (AKey1.HasValue(AKey2.DataType.Columns[LIndex].Name))
-						LCompareValue = AKey1[AKey2.DataType.Columns[LIndex].Name].AsDisplayString;
+						LCompareValue = ((Scalar)AKey1.GetValue(AKey2.DataType.Columns[LIndex].Name)).AsDisplayString;
 					
-					if (AKey2[LIndex].AsDisplayString != LCompareValue)
+					if (((Scalar)AKey2.GetValue(LIndex)).AsDisplayString != LCompareValue)
 						return false;
 				}
 				return true;
@@ -805,9 +801,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					LCompareValue = String.Empty;
 					if (AKey.HasValue(FKey.DataType.Columns[LIndex].Name))
-						LCompareValue = AKey[FKey.DataType.Columns[LIndex].Name].AsDisplayString;
+						LCompareValue = ((Scalar)AKey.GetValue(FKey.DataType.Columns[LIndex].Name)).AsDisplayString;
 					
-					if (FKey[LIndex].AsDisplayString != LCompareValue)
+					if (((Scalar)FKey.GetValue(LIndex)).AsDisplayString != LCompareValue)
 						return false;
 				}
 				return true;
@@ -903,7 +899,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 							if (LColumnIndex < 0)
 								throw new ControlsException(ControlsException.Codes.DataColumnNotFound, DBTreeView.ColumnName);
 							if (LRow.HasValue(LColumnIndex))
-								LText = LRow[LColumnIndex].AsDisplayString;
+								LText = ((Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
 							else
 								LText = DBTreeView.CNoValueText;
 								

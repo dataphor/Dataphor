@@ -27,27 +27,27 @@ namespace Alphora.Dataphor.Libraries.System.Internet
     // operator System.Internet.SendEmail(const ASmtpServer: System.String, const AFromEmailAddress: System.String, const AToEmailAddress: System.String, const ASubject: System.String, const AMessage: System.String, const AHtmlAlternateView : String);
     public class SendEmailNode : InstructionNode
 	{
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
         {       
             //MailMessage constructor does not support semi-colon seperated list of "To" addresses
             MailMessage LMailMessage = new MailMessage();       
-            LMailMessage.From = new MailAddress(AArguments[1].Value.AsString);
-            foreach (string LEmailAddress in AArguments[2].Value.AsString.Split(';'))
+            LMailMessage.From = new MailAddress((string)AArguments[1]);
+            foreach (string LEmailAddress in ((string)AArguments[2]).Split(';'))
                 LMailMessage.To.Add(new MailAddress(LEmailAddress.Trim()));
-            LMailMessage.Subject = AArguments[3].Value.AsString;
+            LMailMessage.Subject = (string)AArguments[3];
             
             //if using AlternateView don't set Body properties (this and the order of the addition of the AlternateViews has an effect on what some clients display).
-            if ((AArguments.Length == 6) && (!AArguments[5].DataType.Is(AProcess.DataTypes.SystemBoolean)))
+            if ((AArguments.Length == 6) && (!Operator.Operands[5].DataType.Is(AProcess.DataTypes.SystemBoolean)))
             {        
-                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(AArguments[4].Value.AsString, null, MediaTypeNames.Text.Plain));   
-                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(AArguments[5].Value.AsString, null, MediaTypeNames.Text.Html));               
+                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[4], null, MediaTypeNames.Text.Plain));   
+                LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[5], null, MediaTypeNames.Text.Html));               
             }          
             else
             {
-                LMailMessage.Body = AArguments[4].Value.AsString;
-                LMailMessage.IsBodyHtml = (AArguments.Length == 6) ? AArguments[5].Value.AsBoolean : false;
+                LMailMessage.Body = (string)AArguments[4];
+                LMailMessage.IsBodyHtml = (AArguments.Length == 6) ? (bool)AArguments[5] : false;
             }
-            new SmtpClient(AArguments[0].Value.AsString).Send(LMailMessage);
+            new SmtpClient((string)AArguments[0]).Send(LMailMessage);
             return null;
         }
 	}
@@ -55,57 +55,57 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator HTMLAttributeEncode(const AValue : String) : String
 	public class HTMLAttributeEncodeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, HttpUtility.HtmlAttributeEncode(AArguments[0].Value.AsString)));
+			return HttpUtility.HtmlAttributeEncode((string)AArguments[0]);
 		}
 	}
 
 	// operator HTMLEncode(const AValue : String) : String
 	public class HTMLEncodeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, HttpUtility.HtmlEncode(AArguments[0].Value.AsString)));
+			return HttpUtility.HtmlEncode((string)AArguments[0]);
 		}
 	}
 
 	// operator HTMLDecode(const AValue : String) : String
 	public class HTMLDecodeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, HttpUtility.HtmlDecode(AArguments[0].Value.AsString)));
+			return HttpUtility.HtmlDecode((string)AArguments[0]);
 		}
 	}
 
 	// operator URLEncode(const AValue : String) : String
 	public class URLEncodeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, HttpUtility.UrlEncode(AArguments[0].Value.AsString)));
+			return HttpUtility.UrlEncode((string)AArguments[0]);
 		}
 	}
 
 	// operator URLDecode(const AValue : String) : String
 	public class URLDecodeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, HttpUtility.UrlDecode(AArguments[0].Value.AsString)));
+			return HttpUtility.UrlDecode((string)AArguments[0]);
 		}
 	}
 
 	// operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
 	public class PostHTTPNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
 			string LResult;
 			
-			string LURL = AArguments[0].Value.AsString;
-			Table LFields = (Table)AArguments[1].Value;
+			string LURL = (string)AArguments[0];
+			Table LFields = (Table)AArguments[1];
 
 			// Build the URL encoding for the body
 			StringBuilder LBody = new StringBuilder();
@@ -118,9 +118,9 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					if (LBody.Length > 0)
 						LBody.Append("&");
 					
-					LBody.Append(HttpUtility.UrlEncode(LRow["FieldName"].AsString));
+					LBody.Append(HttpUtility.UrlEncode((string)LRow["FieldName"]));
 					LBody.Append("=");
-					LBody.Append(HttpUtility.UrlEncode(LRow["Value"].AsString));
+					LBody.Append(HttpUtility.UrlEncode((string)LRow["Value"]));
 				}
 			}
 			
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				LReader.Close();
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LResult));
+			return LResult;
 		}
 	}
 
@@ -264,9 +264,9 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{	
-			XmlTextReader LReader = new XmlTextReader(new StringReader(AArguments[0].Value.AsString));
+			XmlTextReader LReader = new XmlTextReader(new StringReader((string)AArguments[0]));
 			LReader.WhitespaceHandling = WhitespaceHandling.None;
 			
 			// Move to the root element
@@ -286,7 +286,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				throw;
 			}
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LDocumentID));
+			return LDocumentID;
 		}
 	}
 
@@ -308,11 +308,11 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					)
 			)
 			{
-				string LNamespaceAlias = LElement["NamespaceAlias"].AsString;
+				string LNamespaceAlias = (string)LElement["NamespaceAlias"];
 				if (LNamespaceAlias != String.Empty)
 					LNamespaceAlias = LNamespaceAlias + ":";
 
-				AWriter.WriteStartElement(LNamespaceAlias + LElement["Name"].AsString);
+				AWriter.WriteStartElement(LNamespaceAlias + (string)LElement["Name"]);
 			}
 
 			// Write any default namespace changes
@@ -337,7 +337,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				while (LAliases.Next())
 				{
 					using (Row LRow = LAliases.Select())
-						AWriter.WriteAttributeString("xmlns:" + LRow["NamespaceAlias"].AsString, LRow["URI"].AsString);
+						AWriter.WriteAttributeString("xmlns:" + (string)LRow["NamespaceAlias"], (string)LRow["URI"]);
 				}
 			}
 			finally
@@ -358,10 +358,10 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				{
 					using (Row LRow = LAttributes.Select())
 					{
-						string LAlias = LRow["NamespaceAlias"].AsString;
+						string LAlias = (string)LRow["NamespaceAlias"];
 						if (LAlias != String.Empty)
 							LAlias = LAlias + ":";
-						AWriter.WriteAttributeString(LAlias + LRow["Name"].AsString, LRow["Value"].AsString);
+						AWriter.WriteAttributeString(LAlias + (string)LRow["Name"], (string)LRow["Value"]);
 					}
 				}
 			}
@@ -395,14 +395,14 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 					{
 						if (LRow.HasValue("Content_Element_ID"))	// Content
 						{
-							if (LRow["Type"].AsByte == 0)
-								AWriter.WriteString(LRow["Content"].AsString);
+							if ((byte)LRow["Type"] == 0)
+								AWriter.WriteString((string)LRow["Content"]);
 							else
-								AWriter.WriteCData(LRow["Content"].AsString);
+								AWriter.WriteCData((string)LRow["Content"]);
 						}
 						else	// Child element
 						{
-							WriteElement(AProcess, AWriter, LRow["Child_Element_ID"].AsGuid);
+							WriteElement(AProcess, AWriter, (Guid)LRow["Child_Element_ID"]);
 						}
 					}
 				}
@@ -416,7 +416,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			AWriter.WriteEndElement();
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{			
 			StringWriter LText = new StringWriter();
 			XmlTextWriter LWriter = new XmlTextWriter(LText);
@@ -424,19 +424,21 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			// Find the root element
 			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProcess, "ADocumentID", AArguments[0].Value.AsGuid));
+			LParams.Add(DataParam.Create(AProcess, "ADocumentID", (Guid)AArguments[0]));
 			Guid LRootElementID =
-				((IServerProcess)AProcess).Evaluate
-				(
-					"Root_Element_ID from row from (XMLDocument where ID = ADocumentID)",
-					LParams
+				((Scalar)
+					((IServerProcess)AProcess).Evaluate
+					(
+						"Root_Element_ID from row from (XMLDocument where ID = ADocumentID)",
+						LParams
+					)
 				).AsGuid;
 
 			// Write the root element
 			WriteElement(AProcess, LWriter, LRootElementID);
 
 			LWriter.Flush();
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LText.ToString()));
+			return LText.ToString();
 		}
 	}
 }

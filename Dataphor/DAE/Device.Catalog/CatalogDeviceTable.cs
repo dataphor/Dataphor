@@ -74,7 +74,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			foreach (CatalogPlanParameter LPlanParameter in FDevicePlanNode.PlanParameters)
 			{
 				FCommand.Parameters.Add(LPlanParameter.SQLParameter);
-				LPlanParameter.SQLParameter.Value = GetSQLValue(LPlanParameter.PlanNode.Execute(Session.ServerProcess).Value as Scalar);
+				LPlanParameter.SQLParameter.Value = GetSQLValue(LPlanParameter.PlanNode.DataType, LPlanParameter.PlanNode.Execute(Session.ServerProcess));
 			}
 
 			// Open a cursor from the command
@@ -107,15 +107,15 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private object GetSQLValue(Scalar AValue)
+		private object GetSQLValue(Schema.IDataType ADataType, object AValue)
 		{
-			if (AValue.IsNil)
+			if (AValue == null)
 				return null;
 			
-			if (AValue.DataType.Is(Session.Catalog.DataTypes.SystemBoolean))
-				return AValue.AsBoolean ? 1 : 0;
+			if (ADataType.Is(Session.Catalog.DataTypes.SystemBoolean))
+				return (bool)AValue ? 1 : 0;
 				
-			return AValue.AsNative;
+			return AValue;
 		}
 		
 		private object GetNativeValue(object AValue)
@@ -135,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				int LColumnIndex = Node.DataType.Columns.IndexOfName(ARow.DataType.Columns[LIndex].Name);
 				if (LColumnIndex >= 0)
-					ARow[LIndex].AsNative = GetNativeValue(FCursor[LColumnIndex]);
+					ARow[LIndex] = GetNativeValue(FCursor[LColumnIndex]);
 			}
 		}
 

@@ -126,9 +126,9 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			try
 			{
 				if (FValue != null)
-					ARow[FColumnName].AsString = FValue;
+					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = FValue;
 				else
-					ARow[FColumnName].AsString = String.Empty;	// Assume that if we are included in the search, that we are blank
+					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = String.Empty;	// Assume that if we are included in the search, that we are blank
 				FConversionFailed = false;
 				return true;
 			}

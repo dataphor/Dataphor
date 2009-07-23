@@ -3,7 +3,6 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-#define LOADFROMLIBRARIES
 
 using System;
 using System.IO;
@@ -29,10 +28,10 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Frontend.Create(const ALibraryName : Name, const AName : Name, const ADocumentType : String);
 	public class CreateNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			LDevice.CreateDocument(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString, AArguments[2].Value.AsString, true);
+			LDevice.CreateDocument(AProcess, (string)AArguments[0], (string)AArguments[1], (string)AArguments[2], true);
 			return null;
 		}
 	}
@@ -40,10 +39,10 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Frontend.Delete(const ALibraryName : Name, const AName : Name);
 	public class DeleteNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			LDevice.DeleteDocument(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString, true);
+			LDevice.DeleteDocument(AProcess, (string)AArguments[0], (string)AArguments[1], true);
 			return null;
 		}
 	}
@@ -51,16 +50,16 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Frontend.Rename(const AOldLibraryName : Name, const AOldName : Name, const ANewLibraryName : Name, const ANewName : Name);
 	public class RenameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
 			LDevice.RenameDocument
 			(
 				AProcess, 
-				AArguments[0].Value.AsString, 
-				AArguments[1].Value.AsString,
-				AArguments[2].Value.AsString,
-				AArguments[3].Value.AsString,
+				(string)AArguments[0], 
+				(string)AArguments[1],
+				(string)AArguments[2],
+				(string)AArguments[3],
 				true
 			);
 			return null;
@@ -70,33 +69,24 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Frontend.Exists(const AOldLibraryName : Name, const AOldName : Name, const ANewLibraryName : Name, const ANewName : Name);
 	public class ExistsNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LDevice.HasDocument(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString)));
+			return LDevice.HasDocument(AProcess, (string)AArguments[0], (string)AArguments[1]);
 		}
 	}
 	
 	// operator Frontend.Load(const ALibraryName : Name, const AName : Name) : String;
 	public class LoadNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				FrontendDevice.GetFrontendDevice(AProcess).LoadDocument
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						FrontendDevice.GetFrontendDevice(AProcess).LoadDocument
-						(
-							AProcess, 
-							AArguments[0].Value.AsString, 
-							AArguments[1].Value.AsString
-						)
-					)
+					AProcess, 
+					(string)AArguments[0], 
+					(string)AArguments[1]
 				);
 		}
 	}
@@ -104,23 +94,14 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator LoadAndProcess(const ALibraryName : Name, const AName : Name) : String
 	public class LoadAndProcessNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				FrontendDevice.GetFrontendDevice(AProcess).LoadAndProcessDocument
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						FrontendDevice.GetFrontendDevice(AProcess).LoadAndProcessDocument
-						(
-							AProcess, 
-							AArguments[0].Value.AsString, 
-							AArguments[1].Value.AsString
-						)
-					)
+					AProcess, 
+					(string)AArguments[0], 
+					(string)AArguments[1]
 				);
 		}
 	}
@@ -128,22 +109,13 @@ namespace Alphora.Dataphor.Frontend.Server
 	// create operator Merge(const AForm : String, const ADelta : String) : String
 	public class MergeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				FrontendDevice.GetFrontendDevice(AProcess).Merge
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						FrontendDevice.GetFrontendDevice(AProcess).Merge
-						(
-							AArguments[0].Value.AsString, 
-							AArguments[1].Value.AsString
-						)
-					)
+					(string)AArguments[0], 
+					(string)AArguments[1]
 				);
 		}
 	}
@@ -151,22 +123,13 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Difference(const AForm : String, const ADelta : String) : String
 	public class DifferenceNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				FrontendDevice.GetFrontendDevice(AProcess).Difference
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						FrontendDevice.GetFrontendDevice(AProcess).Difference
-						(
-							AArguments[0].Value.AsString, 
-							AArguments[1].Value.AsString
-						)
-					)
+					(string)AArguments[0], 
+					(string)AArguments[1]
 				);
 		}
 	}
@@ -174,22 +137,13 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator LoadCustomization(const ADilxDocument : String) : String
 	public class LoadCustomizationNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				FrontendDevice.GetFrontendDevice(AProcess).LoadCustomization
 				(
-					FDataType,
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						FrontendDevice.GetFrontendDevice(AProcess).LoadCustomization
-						(
-							AProcess, 
-							AArguments[0].Value.AsString
-						)
-					)
+					AProcess, 
+					(string)AArguments[0]
 				);
 		}
 	}
@@ -199,59 +153,52 @@ namespace Alphora.Dataphor.Frontend.Server
 	{
 		public const int CNativeSizeThreshold = 4096;
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LScalar;
 			FrontendDevice LFrontendDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			MemoryStream LData = LFrontendDevice.LoadBinary(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString);
+			MemoryStream LData = LFrontendDevice.LoadBinary(AProcess, (string)AArguments[0], (string)AArguments[1]);
 
 			if (LData.Length > CNativeSizeThreshold)
-			{
-				LScalar = new Scalar(AProcess, (Schema.ScalarType)FDataType, LFrontendDevice.RegisterBinary(AProcess, LData));
-				LScalar.ValuesOwned = true;
-			}
+				return LFrontendDevice.RegisterBinary(AProcess, LData);
 			else
-				LScalar = new Scalar(AProcess, (Schema.ScalarType)FDataType, LData.GetBuffer());
-
-			return new DataVar(FDataType, LScalar);
+				return LData.GetBuffer();
 		}
 	}
 
 	// operator Frontend.Image(const ALibraryName : Name, const AName : Name) : Graphic;
 	public class ImageNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LScalar;
 			FrontendDevice LFrontendDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			MemoryStream LData = LFrontendDevice.LoadBinary(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString);
+			MemoryStream LData = LFrontendDevice.LoadBinary(AProcess, (string)AArguments[0], (string)AArguments[1]);
 
 			if (LData.Length > LoadBinaryNode.CNativeSizeThreshold)
-			{
-				LScalar = new Scalar(AProcess, (Schema.ScalarType)FDataType, LFrontendDevice.RegisterBinary(AProcess, LData));
-				LScalar.ValuesOwned = true;
-			}
+				return LFrontendDevice.RegisterBinary(AProcess, LData);
 			else
-				LScalar = new Scalar(AProcess, (Schema.ScalarType)FDataType, LData.GetBuffer());
-
-			return new DataVar(FDataType, LScalar);
+				return LData.GetBuffer();
 		}
 	}
 
 	// operator Frontend.Save(const ALibraryName : Name, const AName : Name, const ADocument : Scalar);
 	public class SaveNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			if (AArguments[2].DataType.Is(AProcess.DataTypes.SystemString))
-				LDevice.SaveDocument(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+			if (AArguments[2] is string)
+				LDevice.SaveDocument(AProcess, (string)AArguments[0], (string)AArguments[1], (string)AArguments[2]);
 			else
 			{
-				Stream LStream = AArguments[2].Value.OpenStream();
+				Stream LStream = 
+				(
+					AArguments[2] is byte[] 
+						? new Scalar(AProcess, AProcess.DataTypes.SystemBinary, AArguments[2])
+						: new Scalar(AProcess, AProcess.DataTypes.SystemBinary, (StreamID)AArguments[2])
+				).OpenStream();
 				try
 				{
-					LDevice.SaveBinary(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString, LStream);
+					LDevice.SaveBinary(AProcess, (string)AArguments[0], (string)AArguments[1], LStream);
 				}
 				finally
 				{
@@ -265,20 +212,10 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator GetDocumentType(const ALibraryName : Name, const AName : Name) : String
 	public class GetDocumentTypeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			return 
-				new DataVar
-				(
-					FDataType,
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						LDevice.GetDocumentType(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString)
-					)
-				);
+			return LDevice.GetDocumentType(AProcess, (string)AArguments[0], (string)AArguments[1]);
 		}
 	}
 	
@@ -288,30 +225,30 @@ namespace Alphora.Dataphor.Frontend.Server
 		public const string CDefaultPageType = "Browse";
 		public const bool CDefaultElaborate = true;
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LQuery = AArguments[0].Value.AsString;
+			string LQuery = (string)AArguments[0];
 			string LPageType = CDefaultPageType;
 			string LMasterKeyNames = String.Empty;
 			string LDetailKeyNames = String.Empty;
 			bool LElaborate = CDefaultElaborate;
 			if (AArguments.Length >= 2)
 			{
-				if (AArguments[1].DataType.Equals(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Equals(AProcess.DataTypes.SystemString))
 				{
-					LPageType = AArguments[1].Value.AsString;
+					LPageType = (string)AArguments[1];
 					if (AArguments.Length == 3)
-						LElaborate = AArguments[2].Value.AsBoolean;
+						LElaborate = (bool)AArguments[2];
 					else if (AArguments.Length >= 4)
 					{
-						LMasterKeyNames = AArguments[2].Value.AsString;
-						LDetailKeyNames = AArguments[3].Value.AsString;
+						LMasterKeyNames = (string)AArguments[2];
+						LDetailKeyNames = (string)AArguments[3];
 						if (AArguments.Length == 5)
-							LElaborate = AArguments[4].Value.AsBoolean;
+							LElaborate = (bool)AArguments[4];
 					}
 				}
 				else
-					LElaborate = AArguments[1].Value.AsBoolean;
+					LElaborate = (bool)AArguments[1];
 			}
 			FrontendServer LServer = FrontendServer.GetFrontendServer(AProcess.ServerSession.Server);
 			FrontendSession LSession = LServer.GetFrontendSession(AProcess.ServerSession);
@@ -336,7 +273,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			else
 				LDocument = BuildInterface(AProcess, LSeed);
 				
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LDocument.OuterXml));
+			return LDocument.OuterXml;
 		}	
 
 		protected XmlDocument BuildInterface(ServerProcess AProcess, DerivationSeed ASeed)
@@ -349,19 +286,19 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator ExecuteScript(const ALibraryName : Name, const ADocumentName : Name);
 	public class ExecuteScriptNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			string LLibraryName;
 			string LDocumentName;
 			if (AArguments.Length == 2)
 			{
-				LLibraryName = AArguments[0].Value.AsString;
-				LDocumentName = AArguments[1].Value.AsString;
+				LLibraryName = (string)AArguments[0];
+				LDocumentName = (string)AArguments[1];
 			}
 			else
 			{
 				LLibraryName = AProcess.Plan.CurrentLibrary.Name;
-				LDocumentName = AArguments[0].Value.AsString;
+				LDocumentName = (string)AArguments[0];
 			}
 			
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
@@ -399,9 +336,9 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Refresh(const ALibraryName : Name);
 	public class RefreshNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			FrontendDevice.GetFrontendDevice(AProcess).RefreshDocuments(AProcess, AArguments[0].Value.AsString);
+			FrontendDevice.GetFrontendDevice(AProcess).RefreshDocuments(AProcess, (string)AArguments[0]);
 			return null;
 		}
 	}
@@ -409,16 +346,16 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Copy(const ASourceLibrary : Name, const ASourceDocument : Name, const ATargetLibrary : Name, const ATargetDocument : Name);
 	public class CopyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
 			LDevice.CopyDocument
 			(
 				AProcess,
-				AArguments[0].Value.AsString,
-				AArguments[1].Value.AsString,
-				AArguments[2].Value.AsString,
-				AArguments[3].Value.AsString
+				(string)AArguments[0],
+				(string)AArguments[1],
+				(string)AArguments[2],
+				(string)AArguments[3]
 			);
 			return null;
 		}
@@ -427,16 +364,16 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator Move(const ASourceLibrary : Name, const ASourceDocument : Name, const ATargetLibrary : Name, const ATargetDocument : Name);
 	public class MoveNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendDevice LDevice = FrontendDevice.GetFrontendDevice(AProcess);
 			LDevice.MoveDocument
 			(
 				AProcess,
-				AArguments[0].Value.AsString,
-				AArguments[1].Value.AsString,
-				AArguments[2].Value.AsString,
-				AArguments[3].Value.AsString
+				(string)AArguments[0],
+				(string)AArguments[1],
+				(string)AArguments[2],
+				(string)AArguments[3]
 			);
 			return null;
 		}
@@ -445,7 +382,7 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator ClearDerivationCache();
 	public class ClearDerivationCacheNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			FrontendServer.GetFrontendServer(AProcess.ServerSession.Server).GetFrontendSession(AProcess.ServerSession).ClearDerivationCache();
 			return null;
@@ -455,25 +392,25 @@ namespace Alphora.Dataphor.Frontend.Server
 	// operator GetCRC32(AValue : generic) : Integer
 	public class GetCRC32Node : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			int LResult;
-			DataValue LValue = AArguments[0].Value;
+			DataValue LValue = AArguments[0] as DataValue;
+			if (LValue == null)
+				LValue = DataValue.FromNative(AProcess, AArguments[0]);
+
 			if (LValue.IsPhysicalStreaming)
 			{
 				using (Stream LStream = LValue.OpenStream())
 				{
-					LResult = (int)CRC32Utility.GetCRC32(LStream);
+					return (int)CRC32Utility.GetCRC32(LStream);
 				}
 			}
 			else
 			{
 				byte[] LPhysical = new byte[LValue.GetPhysicalSize(true)];
 				LValue.WriteToPhysical(LPhysical, 0, true);
-				LResult = (int)CRC32Utility.GetCRC32(LPhysical);
+				return (int)CRC32Utility.GetCRC32(LPhysical);
 			}
-
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LResult));
 		}
 	}
 	
@@ -507,9 +444,9 @@ namespace Alphora.Dataphor.Frontend.Server
 		{
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
-				ARow["Library_Name"].AsString = ALibrary.Name;
-				ARow["Name"].AsString = LFile.FileName;
-				ARow["TimeStamp"].AsDateTime = File.GetLastWriteTimeUtc(AProcess.GetFullFileName(ALibrary, LFile.FileName));
+				ARow["Library_Name"] = ALibrary.Name;
+				ARow["Name"] = LFile.FileName;
+				ARow["TimeStamp"] = File.GetLastWriteTimeUtc(AProcess.GetFullFileName(ALibrary, LFile.FileName));
 				if (!ATable.FindKey(ARow))
 					ATable.Insert(ARow);
 			}
@@ -518,9 +455,9 @@ namespace Alphora.Dataphor.Frontend.Server
 				PopulateRequiredFiles(AProcess, AProcess.Plan.Catalog.Libraries[LLibrary.Name], ATable, ARow);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			using (Table LLibraries = (Table)Nodes[0].Execute(AProcess).Value)
+			using (Table LLibraries = (Table)Nodes[0].Execute(AProcess))
 			{
 				LocalTable LResult = new LocalTable(this, AProcess);
 				try
@@ -537,14 +474,14 @@ namespace Alphora.Dataphor.Frontend.Server
 							while (LLibraries.Next())
 							{
 								LLibraries.Select(LLibraryRow);
-								PopulateRequiredFiles(AProcess, AProcess.Plan.Catalog.Libraries[LLibraryRow["Library_Name"].AsString], LResult, LRow);
+								PopulateRequiredFiles(AProcess, AProcess.Plan.Catalog.Libraries[(string)LLibraryRow["Library_Name"]], LResult, LRow);
 							}
 						}
 					}
 					
 					LResult.First();
 					
-					return new DataVar(LResult.DataType, LResult);
+					return LResult;
 				}
 				catch
 				{

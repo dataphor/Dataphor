@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			The Plan object is passed to the Execute node, and contains the Stack.
 			Arguments are prepared by the InstructionNode class for virtual invocation.
 			
-			How do we get everything to work the same way, using DataVars for all variables
+			How do we get everything to work the same way, using the same mechanism for all variables
 			and allowing catalog and stack referenced variables to be used orthogonally to
 			parameter modifiers and assignment statements.
 			
@@ -587,7 +587,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			// Prepare the stack for compilation with the given context
 			if (AParams != null)
 				foreach (DataParam LParam in AParams)
-					APlan.Symbols.Push(new DataVar(LParam.Name, LParam.DataType));
+					APlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
 			
 			PlanNode LNode = null;
 			try
@@ -601,6 +601,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					try
 					{
 						LNode = CompileStatement(APlan, AStatement);
+						APlan.ServerProcess.ReportProcessContext(APlan.Symbols);
 					}
 					finally
 					{
@@ -999,7 +1000,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 				PlanNode LSelectorNode = CompileExpression(APlan, LStatement.Expression);
 				PlanNode LEqualNode = null;
-				APlan.Symbols.Push(new DataVar(LSelectorNode.DataType));
+				APlan.Symbols.Push(new Symbol(LSelectorNode.DataType));
 				try
 				{
 					LNode.Nodes.Add(LSelectorNode);
@@ -1009,7 +1010,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						CaseItemNode LCaseItemNode = new CaseItemNode();
 						PlanNode LWhenNode = CompileTypedExpression(APlan, LCaseItemStatement.WhenExpression, LSelectorNode.DataType);
 						LCaseItemNode.Nodes.Add(LWhenNode);
-						APlan.Symbols.Push(new DataVar(LWhenNode.DataType));
+						APlan.Symbols.Push(new Symbol(LWhenNode.DataType));
 						try
 						{
 							if (LEqualNode == null)
@@ -1136,7 +1137,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 								#endif
 							}
 						}
-						APlan.Symbols.Push(new DataVar(LNode.Statement.VariableName, LNode.VariableType));
+						APlan.Symbols.Push(new Symbol(LNode.Statement.VariableName, LNode.VariableType));
 					}
 					else
 					{
@@ -1232,7 +1233,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 			{
-				if (APlan.Symbols.ErrorVar == null)
+				if (!APlan.InErrorContext)
 					throw new CompilerException(CompilerException.Codes.InvalidRaiseContext, AStatement);
 			}
 			LNode.DetermineCharacteristics(APlan);
@@ -1255,7 +1256,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			TryExceptNode LNode = new TryExceptNode();
 			LNode.Nodes.Add(CompileFrameNode(APlan, LStatement.TryStatement));
 
-			APlan.Symbols.ErrorVar = new DataVar(APlan.Catalog.DataTypes.SystemError);
+			APlan.EnterErrorContext();
 			try
 			{
 				foreach (GenericErrorHandler LHandler in LStatement.ErrorHandlers)
@@ -1275,7 +1276,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						if (LHandler is ParameterizedErrorHandler)
 						{
 							LErrorNode.VariableName = ((ParameterizedErrorHandler)LHandler).VariableName;
-							APlan.Symbols.Push(new DataVar(LErrorNode.VariableName, LErrorNode.ErrorType));
+							APlan.Symbols.Push(new Symbol(LErrorNode.VariableName, LErrorNode.ErrorType));
 						}
 						LErrorNode.Nodes.Add(CompileStatement(APlan, LHandler.Statement));
 						LErrorNode.DetermineCharacteristics(APlan);
@@ -1291,7 +1292,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			finally
 			{
-				APlan.Symbols.ErrorVar = null;
+				APlan.ExitErrorContext();
 			}
 		}
 		
@@ -1360,7 +1361,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LNode.VariableType = LVariableType;
 				if (LStatement.Expression != null)
 				{
-					APlan.Symbols.Push(new DataVar(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
+					APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
 					try
 					{
 						LNode.Nodes.Add(EnsureTableValueNode(APlan, CompileTypedExpression(APlan, LStatement.Expression, LNode.VariableType)));
@@ -1371,13 +1372,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					}
 				}
 				LNode.DetermineCharacteristics(APlan);
-				APlan.Symbols.Push(new DataVar(LNode.VariableName, LNode.VariableType));
+				APlan.Symbols.Push(new Symbol(LNode.VariableName, LNode.VariableType));
 				return LNode;
 			}
 			else if (LStatement.Expression != null)
 			{
 				PlanNode LValueNode;
-				APlan.Symbols.Push(new DataVar(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
+				APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
 				try
 				{
 					LValueNode = EnsureTableValueNode(APlan, CompileExpression(APlan, LStatement.Expression));
@@ -1394,7 +1395,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LNode.VariableType = LValueNode.DataType;
 				LNode.Nodes.Add(LValueNode);
 				LNode.DetermineCharacteristics(APlan);
-				APlan.Symbols.Push(new DataVar(LNode.VariableName, LNode.VariableType));
+				APlan.Symbols.Push(new Symbol(LNode.VariableName, LNode.VariableType));
 				return LNode;
 			}
 			else
@@ -1440,9 +1441,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 		
 		// When an identifier is encountered ->
-		//	The stack is searched for a DataVar bound to the name specified by the identifier
+		//	The stack is searched for a Symbol with the name specified by the identifier
 		//		StackReferenceNode location bound to the entry found in the stack.
-		//  The stack is searched for a DataVar bound to a RowType descendant containing a column with the name specified by the identifier
+		//  The stack is searched for a Symbol with a RowType descendant containing a column with the name specified by the identifier
 		//		StackColumnReferenceNode location bound to the entry found in the stack.
 		//	The heap is searched for a Schema.Object bound to the name specified by the identifier
 		//		If the object found is a base table variable
@@ -1977,8 +1978,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		//		<error>
 		//		
 		//	Identifier Resolution ->
-		//		The stack is searched for a DataVar name bound to the given identifier
-		//		The stack is searched for a DataVar with a RowType value containing a column named the given identifier
+		//		The stack is searched for a symbol name bound to the given identifier
+		//		The stack is searched for a symbol with a RowType value containing a column named the given identifier
 		//		The heap is searched for a SchemaObject named Identifier
 		//		The catalog is searched for a SchemaObject named DefaultNameSpace.Identifier
 		//		The catalog is searched for a SchemaObject named Identifier
@@ -2163,7 +2164,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LNode.Nodes.Add(EnsureTableValueNode(APlan, ASourceNode));
 				LNode.DetermineCharacteristics(APlan);
 				LBlockNode.Nodes.Add(LNode);
-				APlan.Symbols.Push(new DataVar(LNode.VariableName, LNode.VariableType));
+				APlan.Symbols.Push(new Symbol(LNode.VariableName, LNode.VariableType));
 				
 				// Delete the data from the target variable
 				DeleteNode LDeleteNode = new DeleteNode();
@@ -2229,7 +2230,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LVariableNode.Nodes.Add(ASourceNode);
 			LVariableNode.DetermineCharacteristics(APlan);
 			LBlockNode.Nodes.Add(LVariableNode);
-			APlan.Symbols.Push(new DataVar(LVariableNode.VariableName, LVariableNode.VariableType));
+			APlan.Symbols.Push(new Symbol(LVariableNode.VariableName, LVariableNode.VariableType));
 
 			UpdateStatement LStatement = new UpdateStatement((Expression)LTargetNode.EmitStatement(EmitMode.ForCopy), new UpdateColumnExpression[]{new UpdateColumnExpression(new IdentifierExpression(LIdentifier), new IdentifierExpression(LVariableNode.VariableName))});
 			LStatement.Line = AStatement.Line;
@@ -2572,7 +2573,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(LTargetTableVar.DataType.RowType));
+					APlan.Symbols.Push(new Symbol(LTargetTableVar.DataType.RowType));
 					try
 					{
 						UpdateColumnNode LColumnNode;
@@ -2952,7 +2953,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		public static Schema.RowConstraint CompileRowConstraint(Plan APlan, Schema.TableVar ATableVar, ConstraintDefinition AConstraint)
 		{
-			PlanNode LConstraintNode;
 			Schema.RowConstraint LNewConstraint = new Schema.RowConstraint(Schema.Object.GetObjectID(AConstraint.MetaData), AConstraint.ConstraintName);
 			LNewConstraint.Library = ATableVar.Library == null ? null : APlan.CurrentLibrary;
 			LNewConstraint.IsGenerated = AConstraint.IsGenerated || ATableVar.IsGenerated;
@@ -2966,23 +2966,40 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(String.Empty, ATableVar.DataType.RowType));
+					APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.RowType));
 					try
 					{
-						LConstraintNode = CompileBooleanExpression(APlan, AConstraint.Expression);
+						PlanNode LConstraintNode = CompileBooleanExpression(APlan, AConstraint.Expression);
 						if (!(LConstraintNode.IsFunctional && LConstraintNode.IsDeterministic))
 							throw new CompilerException(CompilerException.Codes.InvalidConstraintExpression, AConstraint.Expression);
 
 						LConstraintNode = OptimizeNode(APlan, LConstraintNode);
 						LConstraintNode = BindNode(APlan, LConstraintNode);							
 						LNewConstraint.Node = LConstraintNode;
+						
+						string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Insert);
+						if (!String.IsNullOrEmpty(LCustomMessage))
+						{
+							try
+							{
+								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+								LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+								LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+								LNewConstraint.ViolationMessageNode = LViolationMessageNode;
+							}
+							catch (Exception LException)
+							{
+								throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
+							}
+						}
+						
 						LNewConstraint.DetermineRemotable(APlan.ServerProcess);
 							
 						if (!LNewConstraint.IsRemotable)
 							LNewConstraint.ConstraintType = Schema.ConstraintType.Database;
 							
 						// Verify the custom violation message and report dependencies from it
-						LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint);
+						//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint);
 
 						return LNewConstraint;
 					}
@@ -3020,7 +3037,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					if (AConstraint.OnInsertExpression != null)
 					{
-						APlan.Symbols.Push(new DataVar(String.Empty, ATableVar.DataType.NewRowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.NewRowType));
 						try
 						{
 							LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnInsertExpression);
@@ -3031,8 +3048,24 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							LConstraintNode = BindNode(APlan, LConstraintNode);							
 							LNewConstraint.OnInsertNode = LConstraintNode;
 
+							string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Insert);
+							if (!String.IsNullOrEmpty(LCustomMessage))
+							{
+								try
+								{
+									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+									LNewConstraint.OnInsertViolationMessageNode = LViolationMessageNode;
+								}
+								catch (Exception LException)
+								{
+									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
+								}
+							}
+							
 							// Verify the custom violation message and report dependencies from it
-							LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint.OnInsertExpression);
+							//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint.OnInsertExpression);
 						}
 						finally
 						{
@@ -3042,10 +3075,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					
 					if (AConstraint.OnUpdateExpression != null)
 					{
-						APlan.Symbols.Push(new DataVar(String.Empty, ATableVar.DataType.OldRowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.OldRowType));
 						try
 						{
-							APlan.Symbols.Push(new DataVar(String.Empty, ATableVar.DataType.NewRowType));
+							APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.NewRowType));
 							try
 							{
 								LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnUpdateExpression);
@@ -3056,8 +3089,24 @@ namespace Alphora.Dataphor.DAE.Language.D4
 								LConstraintNode = BindNode(APlan, LConstraintNode);							
 								LNewConstraint.OnUpdateNode = LConstraintNode;
 
+								string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Update);
+								if (!String.IsNullOrEmpty(LCustomMessage))
+								{
+									try
+									{
+										PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+										LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+										LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+										LNewConstraint.OnUpdateViolationMessageNode = LViolationMessageNode;
+									}
+									catch (Exception LException)
+									{
+										throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
+									}
+								}
+								
 								// Verify the custom violation message and report dependencies from it
-								LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Update, AConstraint.OnUpdateExpression);
+								//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Update, AConstraint.OnUpdateExpression);
 							}
 							finally
 							{
@@ -3072,7 +3121,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					
 					if (AConstraint.OnDeleteExpression != null)
 					{
-						APlan.Symbols.Push(new DataVar(String.Empty, ATableVar.DataType.OldRowType));
+						APlan.Symbols.Push(new Symbol(String.Empty, ATableVar.DataType.OldRowType));
 						try
 						{
 							LConstraintNode = CompileBooleanExpression(APlan, AConstraint.OnDeleteExpression);
@@ -3083,8 +3132,24 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							LConstraintNode = BindNode(APlan, LConstraintNode);							
 							LNewConstraint.OnDeleteNode = LConstraintNode;
 
+							string LCustomMessage = LNewConstraint.GetCustomMessage(Schema.Transition.Delete);
+							if (!String.IsNullOrEmpty(LCustomMessage))
+							{
+								try
+								{
+									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+									LNewConstraint.OnDeleteViolationMessageNode = LViolationMessageNode;
+								}
+								catch (Exception LException)
+								{
+									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
+								}
+							}
+							
 							// Verify the custom violation message and report dependencies from it
-							LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Delete, AConstraint.OnDeleteExpression);
+							//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Delete, AConstraint.OnDeleteExpression);
 						}
 						finally
 						{
@@ -3390,11 +3455,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return LBlockNode == null ? ANode : LBlockNode;
 		}
 		
-		public static PlanNode CompileDeallocateVariablesNode(Plan APlan, PlanNode ANode, DataVar AResultVar)
+		public static PlanNode CompileDeallocateVariablesNode(Plan APlan, PlanNode ANode, Symbol AResultVar)
 		{
 			BlockNode LBlockNode = null;
 			for (int LIndex = 0; LIndex < APlan.Symbols.Count; LIndex++)
-				if (!Object.ReferenceEquals(AResultVar, APlan.Symbols[LIndex]) && APlan.Symbols[LIndex].DataType.IsDisposable)
+				if ((APlan.Symbols[LIndex].Name != AResultVar.Name) && APlan.Symbols[LIndex].DataType.IsDisposable)
 				{
 					if (LBlockNode == null)
 					{
@@ -4316,10 +4381,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
 				APlan.AttachDependency(AScalarType);
 				
-				APlan.Symbols.Push(new DataVar("AValue", AScalarType));
+				APlan.Symbols.Push(new Symbol("AValue", AScalarType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(Keywords.Result, LOperator.ReturnDataType));
+					APlan.Symbols.Push(new Symbol(Keywords.Result, LOperator.ReturnDataType));
 					try
 					{
 						PlanNode LAnySpecialNode = null;
@@ -4346,7 +4411,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						#endif
 
 						if (LAnySpecialNode == null)
-							LAnySpecialNode = new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemBoolean, false));
+							LAnySpecialNode = new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, false);
 							
 						foreach (Schema.Special LSpecial in AScalarType.Specials)
 						{
@@ -4401,7 +4466,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				APlan.AttachDependency(AScalarType);
 
-				APlan.Symbols.Push(new DataVar(Keywords.Result, LOperator.ReturnDataType));
+				APlan.Symbols.Push(new Symbol(Keywords.Result, LOperator.ReturnDataType));
 				try
 				{
 					LOperator.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, LOperator.ReturnDataType, 0), AValueNode);
@@ -4437,10 +4502,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
 				APlan.AttachDependency(AScalarType);
 
-				APlan.Symbols.Push(new DataVar("AValue", AScalarType));
+				APlan.Symbols.Push(new Symbol("AValue", AScalarType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(Keywords.Result, LOperator.ReturnDataType));
+					APlan.Symbols.Push(new Symbol(Keywords.Result, LOperator.ReturnDataType));
 					try
 					{
 						PlanNode LPlanNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode("AValue", AScalarType, 1), Instructions.Equal, AValueNode);
@@ -4477,12 +4542,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (!AScalarType.IsCompound)
 			{
 				Schema.ScalarType LComponentType = (Schema.ScalarType)FindSystemRepresentation(AScalarType).Properties[0].DataType;
-				PlanNode[] LArguments = new PlanNode[]{new ValueNode(new Scalar(APlan.ServerProcess, LComponentType, null)), new ValueNode(new Scalar(APlan.ServerProcess, LComponentType, null))};
+				PlanNode[] LArguments = new PlanNode[]{new ValueNode(LComponentType, null), new ValueNode(LComponentType, null)};
 
 				PlanNode LPlanNode = Compiler.EmitCallNode(APlan, Instructions.Equal, LArguments, false, true);
 				if (LPlanNode != null)
 				{
-					Schema.Operator LComponentOperator = ((InstructionNode)LPlanNode).Operator;
+					Schema.Operator LComponentOperator = ((InstructionNodeBase)LPlanNode).Operator;
 					Schema.Operator LOperator = new Schema.Operator(Schema.Object.Qualify(Instructions.Equal, AScalarType.Library.Name));
 					LOperator.IsGenerated = true;
 					LOperator.Generator = AScalarType;
@@ -4517,7 +4582,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LPlanNode = Compiler.EmitCallNode(APlan, Instructions.Compare, LArguments, false, true);
 				if (LPlanNode != null)
 				{
-					Schema.Operator LComponentOperator = ((InstructionNode)LPlanNode).Operator;
+					Schema.Operator LComponentOperator = ((InstructionNodeBase)LPlanNode).Operator;
 					Schema.Operator LOperator = new Schema.Operator(Schema.Object.Qualify(Instructions.Compare, AScalarType.Library.Name));
 					LOperator.IsGenerated = true;
 					LOperator.Generator = AScalarType;
@@ -4648,7 +4713,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.PushCreationObject(AConstraint);
 			try
 			{
-				APlan.Symbols.Push(new DataVar(Keywords.Value, ADataType));
+				APlan.Symbols.Push(new Symbol(Keywords.Value, ADataType));
 				try
 				{
 					AConstraint.Node = CompileBooleanExpression(APlan, AConstraintDefinition.Expression);
@@ -4661,8 +4726,28 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (!AConstraint.IsRemotable)
 						throw new CompilerException(CompilerException.Codes.NonRemotableConstraintExpression, AConstraintDefinition.Expression);
 						
+					string LCustomMessage = AConstraint.GetCustomMessage(Schema.Transition.Insert);
+					if (!String.IsNullOrEmpty(LCustomMessage))
+					{
+						try
+						{
+							PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+							LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+							LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+							AConstraint.ViolationMessageNode = LViolationMessageNode;
+						}
+						catch (Exception LException)
+						{
+							throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraintDefinition, LException, AConstraint.Name);
+						}
+					}
+					
+					AConstraint.DetermineRemotable(APlan.ServerProcess);
+					if (!AConstraint.IsRemotable)
+						throw new CompilerException(CompilerException.Codes.NonRemotableCustomConstraintMessage, AConstraintDefinition);
+						
 					// Verify the violation message for the constraint, and report any dependencies
-					AConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraintDefinition);
+					//AConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraintDefinition);
 						
 					return AConstraint;
 				}
@@ -5155,10 +5240,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					string LLeftIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Left);
 					string LRightIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Right);
-					APlan.Symbols.Push(new DataVar(LLeftIdentifier, ADataType));
+					APlan.Symbols.Push(new Symbol(LLeftIdentifier, ADataType));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(LRightIdentifier, ADataType));
+						APlan.Symbols.Push(new Symbol(LRightIdentifier, ADataType));
 						try
 						{
 							PlanNode LNode = CompileExpression(APlan, ASortDefinition.Expression);
@@ -5211,10 +5296,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					{
 						string LLeftIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Left);
 						string LRightIdentifier = Schema.Object.Qualify(Keywords.Value, Keywords.Right);
-						APlan.Symbols.Push(new DataVar(LLeftIdentifier, ADataType));
+						APlan.Symbols.Push(new Symbol(LLeftIdentifier, ADataType));
 						try
 						{
-							APlan.Symbols.Push(new DataVar(LRightIdentifier, ADataType));
+							APlan.Symbols.Push(new Symbol(LRightIdentifier, ADataType));
 							try
 							{
 								PlanNode LNode = CompileExpression(APlan, new BinaryExpression(new IdentifierExpression(LLeftIdentifier), Instructions.Compare, new IdentifierExpression(LRightIdentifier)));
@@ -5426,26 +5511,25 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			try
 			{
 				Schema.Operand LOperand;
-				DataVar[] LParameters = new DataVar[AOperator.Operands.Count];
 				for (int LIndex = 0; LIndex < AOperator.Operands.Count; LIndex++)
 				{
 					LOperand = AOperator.Operands[LIndex];
-					LParameters[LIndex] = new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const);
-					APlan.Symbols.Push(LParameters[LIndex]);
+					APlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 				}
 				
-				DataVar LResultVar = null;
+				int LStackDepth = AOperator.Operands.Count;
+				
 				if (AOperator.ReturnDataType != null)
 				{
-					LResultVar = new DataVar(Keywords.Result, AOperator.ReturnDataType);
-					APlan.Symbols.Push(LResultVar);
+					APlan.Symbols.Push(new Symbol(Keywords.Result, AOperator.ReturnDataType));
+					LStackDepth++;
 				}
 						
 				LBlock = CompileStatement(APlan, AStatement);
 				LBlock = OptimizeNode(APlan, LBlock);
 
-				for (int LIndex = 0; LIndex < LParameters.Length; LIndex++)
-					if (!LParameters[LIndex].IsModified && (AOperator.Operands[LIndex].Modifier == Modifier.In))
+				for (int LIndex = 0; LIndex < AOperator.Operands.Count; LIndex++)
+					if (!APlan.Symbols[AOperator.Operands.Count - 1 - LIndex].IsModified && (AOperator.Operands[LIndex].Modifier == Modifier.In))
 					{
 						AOperator.Operands[LIndex].Modifier = Modifier.Const;
 						AOperator.OperandsChanged();
@@ -5453,34 +5537,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 				// Dispose variables allocated within the block
 				BlockNode LBlockNode = null;
-				for (int LIndex = 0; LIndex < APlan.Symbols.Count; LIndex++)
+				for (int LIndex = 0; LIndex < APlan.Symbols.Count - LStackDepth; LIndex++)
 				{
 					if (APlan.Symbols[LIndex].DataType.IsDisposable)
 					{
-						bool LShouldDispose = true;
-						for (int LParameterIndex = 0; LParameterIndex < LParameters.Length; LParameterIndex++)
+						if (LBlockNode == null)
 						{
-							if (Object.ReferenceEquals(APlan.Symbols[LIndex], LParameters[LParameterIndex]))
-							{
-								// Parameter disposal is handled by the InstructionNode
-								LShouldDispose = false;
-								break;
-							}
+							LBlockNode = new BlockNode();
+							LBlockNode.Nodes.Add(LBlock);
 						}
-						
-						if (Object.ReferenceEquals(APlan.Symbols[LIndex], LResultVar))
-							LShouldDispose = false;
-						
-						if (LShouldDispose)
-						{
-							if (LBlockNode == null)
-							{
-								LBlockNode = new BlockNode();
-								LBlockNode.Nodes.Add(LBlock);
-							}
 
-							LBlockNode.Nodes.Add(new DeallocateVariableNode(LIndex));
-						}
+						LBlockNode.Nodes.Add(new DeallocateVariableNode(LIndex));
 					}
 				}
 				
@@ -5504,11 +5571,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				for (int LIndex = 0; LIndex < AOperator.Operands.Count; LIndex++)
 				{
 					LOperand = AOperator.Operands[LIndex];
-					APlan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+					APlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 				}
 					
 				if (AOperator.ReturnDataType != null)
-					APlan.Symbols.Push(new DataVar(Keywords.Result, AOperator.ReturnDataType));
+					APlan.Symbols.Push(new Symbol(Keywords.Result, AOperator.ReturnDataType));
 						
 				return BindNode(APlan, ABlock);
 			}
@@ -5866,7 +5933,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						APlan.Symbols.PushWindow(0);
 						try
 						{
-							DataVar LResultVar = new DataVar(Keywords.Result, LOperator.ReturnDataType);
+							Symbol LResultVar = new Symbol(Keywords.Result, LOperator.ReturnDataType);
 							APlan.Symbols.Push(LResultVar);
 
 							int LSymbolCount = APlan.Symbols.Count;
@@ -5895,7 +5962,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 								try
 								{
 									foreach (Schema.Operand LOperand in LOperator.Operands)
-										APlan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+										APlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 
 									LOperator.Aggregation.BlockNode = CompileDeallocateFrameVariablesNode(APlan, CompileStatement(APlan, LStatement.Aggregation.Block));
 								}
@@ -5926,7 +5993,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						APlan.Symbols.PushWindow(0);
 						try
 						{
-							APlan.Symbols.Push(new DataVar(Keywords.Result, LOperator.ReturnDataType));
+							APlan.Symbols.Push(new Symbol(Keywords.Result, LOperator.ReturnDataType));
 							
 							if (LStatement.Initialization.ClassDefinition == null)
 							{
@@ -5940,7 +6007,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 								try
 								{
 									foreach (Schema.Operand LOperand in LOperator.Operands)
-										APlan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+										APlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 
 									LOperator.Aggregation.BlockNode = OptimizeNode(APlan, LOperator.Aggregation.BlockNode);
 									LOperator.Aggregation.BlockNode = BindNode(APlan, LOperator.Aggregation.BlockNode);
@@ -6052,7 +6119,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 												LPlan.Plan.Symbols.PushWindow(0);
 												try
 												{
-													DataVar LResultVar = new DataVar(Keywords.Result, AOperator.ReturnDataType);
+													Symbol LResultVar = new Symbol(Keywords.Result, AOperator.ReturnDataType);
 													LPlan.Plan.Symbols.Push(LResultVar);
 													
 													if (AOperator.Initialization.ClassDefinition == null)
@@ -6068,7 +6135,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 														try
 														{
 															foreach (Schema.Operand LOperand in AOperator.Operands)
-																LPlan.Plan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+																LPlan.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 
 															LAggregationNode = CompileDeallocateFrameVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
 														}
@@ -6089,7 +6156,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 												LPlan.Plan.Symbols.PushWindow(0);
 												try
 												{
-													LPlan.Plan.Symbols.Push(new DataVar(Keywords.Result, AOperator.ReturnDataType));
+													LPlan.Plan.Symbols.Push(new Symbol(Keywords.Result, AOperator.ReturnDataType));
 
 													if (AOperator.Initialization.ClassDefinition == null)
 														LInitializationNode = BindNode(LPlan.Plan, OptimizeNode(LPlan.Plan, LInitializationNode));
@@ -6100,7 +6167,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 														try
 														{
 															foreach (Schema.Operand LOperand in AOperator.Operands)
-																LPlan.Plan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+																LPlan.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 															LAggregationNode = BindNode(LPlan.Plan, OptimizeNode(LPlan.Plan, LAggregationNode));
 														}
 														finally
@@ -6244,10 +6311,27 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 						LNode.Constraint.Node = OptimizeNode(APlan, LNode.Constraint.Node);						
 						LNode.Constraint.Node = BindNode(APlan, LNode.Constraint.Node);						
+
+						string LCustomMessage = LNode.Constraint.GetCustomMessage();
+						if (!String.IsNullOrEmpty(LCustomMessage))
+						{
+							try
+							{
+								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+								LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
+								LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
+								LNode.Constraint.ViolationMessageNode = LViolationMessageNode;
+							}
+							catch (Exception LException)
+							{
+								throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, LStatement.Expression, LException, LNode.Constraint.Name);
+							}
+						}
+						
 						LNode.Constraint.DetermineRemotable(APlan.ServerProcess);
 						
 						// Verify the violation message and report dependencies for it.
-						LNode.Constraint.GetViolationMessage(APlan.ServerProcess, AStatement);
+						//LNode.Constraint.GetViolationMessage(APlan.ServerProcess, AStatement);
 						
 						return LNode;
 					}
@@ -6489,7 +6573,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							&& (((Schema.ScalarType)AReference.SourceKey.Columns[LIndex].DataType).Specials.Count > 0);
 				}
 				
-				APlan.Symbols.Push(new DataVar(AReference.SourceTable.DataType.NewRowType));
+				APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.NewRowType));
 				try
 				{
 					PlanNode LNode = 
@@ -6544,10 +6628,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(AReference.SourceTable.DataType.OldRowType));
+				APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.OldRowType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(AReference.SourceTable.DataType.NewRowType));
+					APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.NewRowType));
 					try
 					{
 						Schema.IRowType LNewSourceRowType = new Schema.RowType(AReference.SourceKey.Columns, Keywords.New);
@@ -6654,10 +6738,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(AReference.TargetTable.DataType.OldRowType));
+				APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.OldRowType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(AReference.TargetTable.DataType.NewRowType));
+					APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.NewRowType));
 					try
 					{
 						Schema.IRowType LOldTargetRowType = new Schema.RowType(AReference.TargetKey.Columns, Keywords.Old);
@@ -6720,7 +6804,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(AReference.TargetTable.DataType.OldRowType));
+				APlan.Symbols.Push(new Symbol(AReference.TargetTable.DataType.OldRowType));
 				try
 				{
 					PlanNode LNode = 
@@ -6769,15 +6853,15 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar("AOldRow", AReference.TargetTable.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar("ANewRow", AReference.TargetTable.DataType.RowType));
+					APlan.Symbols.Push(new Symbol("ANewRow", AReference.TargetTable.DataType.RowType));
 					try
 					{
 						PlanNode LConditionNode = CompileExpression(APlan, new UnaryExpression(Instructions.Not, BuildKeyEqualExpression(APlan, "AOldRow", "ANewRow", AReference.TargetKey.Columns, AReference.TargetKey.Columns)));
 						UpdateNode LUpdateNode = new UpdateNode();
-						APlan.Symbols.Push(new DataVar(((Schema.ITableType)ASourceNode.DataType).RowType));
+						APlan.Symbols.Push(new Symbol(((Schema.ITableType)ASourceNode.DataType).RowType));
 						try
 						{
 							LUpdateNode.Nodes.Add(EmitUpdateConditionNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, "", "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
@@ -6835,11 +6919,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar("AOldRow", AReference.TargetTable.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
 				try
 				{
 					DeleteNode LNode = new DeleteNode();
-					APlan.Symbols.Push(new DataVar(AReference.SourceTable.DataType.RowType));
+					APlan.Symbols.Push(new Symbol(AReference.SourceTable.DataType.RowType));
 					try
 					{
 						LNode.Nodes.Add(EmitRestrictNode(APlan, ASourceNode, CompileExpression(APlan, BuildKeyEqualExpression(APlan, "", "AOldRow", AReference.SourceKey.Columns, AReference.TargetKey.Columns))));
@@ -6889,14 +6973,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar("AOldRow", AReference.TargetTable.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
 				try
 				{
 					if (AIsUpdate)
-						APlan.Symbols.Push(new DataVar("ANewRow", AReference.TargetTable.DataType.RowType));
+						APlan.Symbols.Push(new Symbol("ANewRow", AReference.TargetTable.DataType.RowType));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(LVarNode.VariableName, LVarNode.VariableType));
+						APlan.Symbols.Push(new Symbol(LVarNode.VariableName, LVarNode.VariableType));
 						try
 						{
 							LIfNode.Nodes.Add
@@ -6940,7 +7024,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							LIfNode.Nodes.Add(CompileSetNodeForReference(APlan, ASourceNode, AReference, AExpressionNodes));
 
 							RaiseNode LRaiseNode = new RaiseNode();
-							LRaiseNode.Nodes.Add(EmitUnaryNode(APlan, "System.Error", new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemString, new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, AReference.Name, AReference.TargetTable.Name, String.Empty).Message)))); // Schema.Constraint.GetViolationMessage(AReference.MetaData)).Message))));
+							LRaiseNode.Nodes.Add(EmitUnaryNode(APlan, "System.Error", new ValueNode(APlan.ServerProcess.DataTypes.SystemString, new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, AReference.Name, AReference.TargetTable.Name, String.Empty).Message))); // Schema.Constraint.GetViolationMessage(AReference.MetaData)).Message))));
 							LIfNode.Nodes.Add(BindNode(APlan, LRaiseNode));
 							LIfNode.DetermineDevice(APlan);
 							LBlockNode.Nodes.Add(LIfNode);
@@ -6984,7 +7068,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			try
 			{
 				UpdateNode LNode = new UpdateNode();
-				APlan.Symbols.Push(new DataVar(((Schema.ITableType)ASourceNode.DataType).RowType));
+				APlan.Symbols.Push(new Symbol(((Schema.ITableType)ASourceNode.DataType).RowType));
 				try
 				{
 					LNode.Nodes.Add
@@ -7051,10 +7135,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar("AOldRow", AReference.TargetTable.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar("ANewRow", AReference.TargetTable.DataType.RowType));
+					APlan.Symbols.Push(new Symbol("ANewRow", AReference.TargetTable.DataType.RowType));
 					try
 					{
 						return CompileSetNodeForReference(APlan, ASourceNode, AReference, AExpressionNodes);
@@ -7080,7 +7164,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar("AOldRow", AReference.TargetTable.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("AOldRow", AReference.TargetTable.DataType.RowType));
 				try
 				{
 					return CompileSetNodeForReference(APlan, ASourceNode, AReference, AExpressionNodes);
@@ -7265,10 +7349,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(((TableNode)LSourceNode).DataType.CreateRowType(Keywords.Source)));
+					APlan.Symbols.Push(new Symbol(((TableNode)LSourceNode).DataType.CreateRowType(Keywords.Source)));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(((TableNode)LTargetNode).DataType.CreateRowType(Keywords.Target)));
+						APlan.Symbols.Push(new Symbol(((TableNode)LTargetNode).DataType.CreateRowType(Keywords.Target)));
  						try
 						{
 							BitArray LIsNilable = new BitArray(AReference.SourceKey.Columns.Count);
@@ -9387,7 +9471,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				for (int LIndex = LArguments.Length - 1; LIndex >= 0; LIndex--)
 				{
-					APlan.Symbols.Push(new DataVar(LArguments[LIndex].DataType));
+					APlan.Symbols.Push(new Symbol(LArguments[LIndex].DataType));
 				}
 				try
 				{
@@ -9642,11 +9726,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 					AInstruction, 
 					new PlanNode[]
 					{
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemString, ARightName))}),
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, ARightName)}),
 						#if USEISTRING
-						new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemIString, AGrantee))
+						new ValueNode(APlan.ServerProcess.DataTypes.SystemIString, AGrantee)
 						#else
-						new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemString, AGrantee))
+						new ValueNode(APlan.ServerProcess.DataTypes.SystemString, AGrantee)
 						#endif
 					}
 				);
@@ -9661,8 +9745,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 					AInstruction,
 					new PlanNode[]
 					{
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemString, ARightName))}),
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemString, AGrantee))})
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, ARightName)}),
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, AGrantee)})
 					}
 				);
 		}
@@ -10030,7 +10114,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand = 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Equal, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Equal, new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Equal, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10050,7 +10134,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand < 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Less, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Less, new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Less, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10060,7 +10144,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand <= 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.InclusiveLess, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveLess, new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveLess, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10070,7 +10154,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand > 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Greater, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.Greater, new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.Greater, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10080,7 +10164,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand >= 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.InclusiveGreater, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveGreater, new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveGreater, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10102,7 +10186,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							Instructions.Equal,
 							new PlanNode[]{ALeftOperand, ARightOperand}
 						),
-						new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 0)),
+						new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0),
 						EmitConditionNode
 						(
 							APlan,
@@ -10113,8 +10197,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 								Instructions.Less,
 								new PlanNode[]{ALeftOperand, ARightOperand}
 							),
-							new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, -1)),
-							new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemInteger, 1))
+							new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, -1),
+							new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 1)
 						)
 					);
 					
@@ -10771,8 +10855,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 				LNode = new CallNode();
 			}
 
-			if (LNode is InstructionNode)
-				((InstructionNode)LNode).Operator = AOperator;
+			if (LNode is InstructionNodeBase)
+				((InstructionNodeBase)LNode).Operator = AOperator;
 
 			LNode.DataType = AOperator.ReturnDataType;
 			for (int LIndex = 0; LIndex < AArguments.Length; LIndex++)
@@ -10799,7 +10883,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						LActualArgumentNode = LActualArgumentNode.Nodes[0];
 						
 					if (LActualArgumentNode is StackReferenceNode)
-						APlan.Symbols[((StackReferenceNode)LActualArgumentNode).Location].IsModified = true;
+						APlan.Symbols.SetIsModified(((StackReferenceNode)LActualArgumentNode).Location);
 					else if (LActualArgumentNode is TableVarNode)
 						((TableVarNode)LActualArgumentNode).TableVar.IsModified = true;
 				}
@@ -11063,7 +11147,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							{
 								int LStackDisplacement = LAggregateNode.Operator.Initialization.StackDisplacement + LAggregateNode.Operator.Operands.Count + 1; // add 1 to account for the result variable
 								for (int LStackIndex = 0; LStackIndex < LStackDisplacement; LStackIndex++)
-									APlan.Symbols.Push(new DataVar(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
+									APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
 								try
 								{
 									LAggregateNode.Nodes[0] = EnsureTableNode(APlan, CompileExpression(APlan, (Expression)LAggregateNode.Nodes[0].EmitStatement(EmitMode.ForCopy)));
@@ -11097,7 +11181,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 								{
 									int LStackDisplacement = LAggregateNode.Operator.Initialization.StackDisplacement + 1; // add 1 to account for the result variable
 									for (int LStackIndex = 0; LStackIndex < LStackDisplacement; LStackIndex++)
-										APlan.Symbols.Push(new DataVar(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
+										APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
 									try
 									{
 										LAggregateNode.Nodes[0] = EnsureTableNode(APlan, CompileExpression(APlan, (Expression)LAggregateNode.Nodes[0].EmitStatement(EmitMode.ForCopy)));
@@ -11469,7 +11553,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				PlanNode LSelectorNode = CompileExpression(APlan, LExpression.Expression);
 				PlanNode LEqualNode = null;
-				DataVar LSelectorVar = new DataVar(LSelectorNode.DataType);
+				Symbol LSelectorVar = new Symbol(LSelectorNode.DataType);
 				LNode.Nodes.Add(LSelectorNode);
 
 				foreach (CaseItemExpression LCaseItemExpression in LExpression.CaseItems)
@@ -11482,7 +11566,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						APlan.Symbols.Push(LSelectorVar);
 						try
 						{
-							APlan.Symbols.Push(new DataVar(LWhenNode.DataType));
+							APlan.Symbols.Push(new Symbol(LWhenNode.DataType));
 							try
 							{
 								LEqualNode = EmitBinaryNode(APlan, new StackReferenceNode(LSelectorNode.DataType, 1, true), Instructions.Equal, new StackReferenceNode(LWhenNode.DataType, 0, true));
@@ -12089,7 +12173,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(String.Empty, ((Schema.ITableType)ASourceNode.DataType).RowType));
+				APlan.Symbols.Push(new Symbol(String.Empty, ((Schema.ITableType)ASourceNode.DataType).RowType));
 				try
 				{
 					PlanNode LConditionNode = CompileExpression(APlan, AExpression);
@@ -13069,7 +13153,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(((Schema.ITableType)LRootNode.DataType).Columns, Keywords.Parent)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ITableType)LRootNode.DataType).Columns, Keywords.Parent)));
 				try
 				{
 					LParentNode = CompileExpression(APlan, LByExpression);
@@ -14054,9 +14138,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 			return LNode;
 		}
 		
-		public static Context SnapshotSymbols(Plan APlan)
+		public static Symbols SnapshotSymbols(Plan APlan)
 		{
-			Context LSymbols = new Context(APlan.Symbols.MaxStackDepth, APlan.Symbols.MaxCallDepth);
+			Symbols LSymbols = new Symbols(APlan.Symbols.MaxStackDepth, APlan.Symbols.MaxCallDepth);
 			for (int LIndex = APlan.Symbols.Count - 1; LIndex >= 0; LIndex--)
 				LSymbols.Push(APlan.Symbols.Peek(LIndex));
 

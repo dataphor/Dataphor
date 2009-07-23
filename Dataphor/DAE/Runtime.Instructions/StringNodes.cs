@@ -22,22 +22,22 @@ using Schema = Alphora.Dataphor.DAE.Schema;
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
 	// operator iIndexer(const AString : string, const AIndex : integer) : string
-	public class StringIndexerNode : InstructionNode
+	public class StringIndexerNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 			
-			string LString = AArguments[0].Value.AsString;
-			int LIndex = AArguments[1].Value.AsInt32;
+			string LString = (string)AArgument1;
+			int LIndex = (int)AArgument2;
 			
 			if ((LIndex < 0) || (LIndex >= LString.Length))
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, String.Empty));
+				return String.Empty;
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToString(LString[LIndex])));
+			return Convert.ToString(LString[LIndex]);
 		}
 
 		public override Statement EmitStatement(EmitMode AMode)
@@ -51,96 +51,89 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 
 	// operator Length(AString : System.String) : System.Integer
-	public class StringLengthNode : InstructionNode
+	public class StringLengthNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.Length));
+			return ((string)AArgument1).Length;
 		}
 	}
 	
 	// operator SubString(AString : System.String, AStart : System.String) : System.String
-	// operator SubString(AString : System.String, AStart : System.String, ALength : System.Integer) : System.String
-	public class StringSubStringNode : InstructionNode
+	public class StringSubStringNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || ((AArguments.Length == 3) && ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 			
-			string LString = AArguments[0].Value.AsString;
-			int LStartIndex = AArguments[1].Value.AsInt32;
+			string LString = (string)AArgument1;
+			int LStartIndex = (int)AArgument2;
 			if (LStartIndex > LString.Length)
 				LStartIndex = LString.Length;
 			else if (LStartIndex < 0)
 				LStartIndex = 0;
-			int LLength;
-			if (AArguments.Length > 2)
-			{
-				LLength = AArguments[2].Value.AsInt32;
-				if ((LStartIndex + LLength) > LString.Length)
-					LLength = LString.Length - LStartIndex;
-			}
-			else
+			return LString.Substring(LStartIndex, LString.Length - LStartIndex);
+		}
+	}
+	
+	// operator SubString(AString : System.String, AStart : System.String, ALength : System.Integer) : System.String
+	public class StringSubStringTernaryNode : TernaryInstructionNode
+	{
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
+		{
+			#if NILPROPOGATION
+			if (AArgument1 == null || AArgument2 == null || AArgument3 == null)
+				return null;
+			#endif
+			
+			string LString = (string)AArgument1;
+			int LStartIndex = (int)AArgument2;
+			if (LStartIndex > LString.Length)
+				LStartIndex = LString.Length;
+			else if (LStartIndex < 0)
+				LStartIndex = 0;
+
+			int LLength = (int)AArgument3;
+			if ((LStartIndex + LLength) > LString.Length)
 				LLength = LString.Length - LStartIndex;
 				
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.Substring(LStartIndex, LLength)));
+			return LString.Substring(LStartIndex, LLength);
 		}
 	}
 	
 	// operator Pos(ASubString : System.String, AString : System.String) : System.Integer
-	public class StringPosNode : InstructionNode
+	public class StringPosNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					StringUtility.IndexOf(AArguments[1].Value.AsString, AArguments[0].Value.AsString)
-				)
-			);
+			return StringUtility.IndexOf((string)AArgument2, (string)AArgument1);
 		}
 	}
 
 	#if USEISTRING	
-	public class IStringPosNode : InstructionNode
+	public class IStringPosNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					AArguments[1].Value.AsString.ToUpper().IndexOf
-					(
-						AArguments[0].Value.AsString.ToUpper()
-					)
-				)
-			);
+			return ((string)AArgument2).ToUpper().IndexOf(((string)AArgument1).ToUpper());
 		}
 	}
 	#endif
@@ -149,18 +142,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator PadLeft(AString : System.String, ATotalLength : System.Integer, APadChar : System.String)
 	public class StringPadLeftNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || ((AArguments.Length == 3) && ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || ((AArguments.Length == 3) && (AArguments[2] == null)))
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
 			if (AArguments.Length == 3)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.PadLeft(AArguments[1].Value.AsInt32, AArguments[2].Value.AsString[0])));
+				return ((string)AArguments[0]).PadLeft((int)AArguments[1], ((string)AArguments[2])[0]);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.PadLeft(AArguments[1].Value.AsInt32)));
+				return ((string)AArguments[0]).PadLeft((int)AArguments[1]);
 		}
 	}
 	
@@ -168,65 +160,64 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator PadRight(AString : System.String, ATotalLength : System.Integer, APadChar : System.String)
 	public class StringPadRightNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || ((AArguments.Length == 3) && ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || ((AArguments.Length == 3) && (AArguments[2] == null)))
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
 			if (AArguments.Length == 3)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.PadRight(AArguments[1].Value.AsInt32, AArguments[2].Value.AsString[0])));
+				return ((string)AArguments[0]).PadRight((int)AArguments[1], ((string)AArguments[2])[0]);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.PadRight(AArguments[1].Value.AsInt32)));
+				return ((string)AArguments[0]).PadRight((int)AArguments[1]);
 		}
 	}
 
 	// operator Insert(AString : System.String, AStartIndex : System.Integer, AInsertString : System.String) : System.String
-	public class StringInsertNode : InstructionNode
+	public class StringInsertNode : TernaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null || AArgument3 == null)
+				return null;
 			#endif
 			
-			string LString = AArguments[0].Value.AsString;
-			int LStartIndex = AArguments[1].Value.AsInt32;
+			string LString = (string)AArgument1;
+			int LStartIndex = (int)AArgument2;
 			if (LStartIndex > LString.Length)
 				LStartIndex = LString.Length;
 			else if (LStartIndex < 0)
 				LStartIndex = 0;
 				
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.Insert(LStartIndex, AArguments[2].Value.AsString)));
+			return LString.Insert(LStartIndex, (string)AArgument3);
 		}
 	}
 	
 	// operator Remove(AString : System.String, AStartIndex : System.Integer, ALength : System.Integer) : System.String
-	public class StringRemoveNode : InstructionNode
+	public class StringRemoveNode : TernaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null || AArgument3 == null)
+				return null;
 			#endif
 			
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArgument1;
 
-			int LStartIndex = AArguments[1].Value.AsInt32;
+			int LStartIndex = (int)AArgument2;
 			if (LStartIndex > LString.Length)
 				LStartIndex = LString.Length;
 			else if (LStartIndex < 0)
 				LStartIndex = 0;
 
-			int LLength = AArguments[2].Value.AsInt32;
+			int LLength = (int)AArgument3;
 			if ((LStartIndex + LLength) > LString.Length)
 				LLength = LString.Length - LStartIndex;
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString.Remove(LStartIndex, LLength)));
+			return LString.Remove(LStartIndex, LLength);
 		}
 	}
 	
@@ -235,33 +226,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Split(const AString : String, const ADelimiters : list(String)) : list(String);
 	public class StringSplitNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || ((AArguments.Length > 1) && ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || ((AArguments.Length > 1) && (AArguments[1] == null)))
+				return null;
 			#endif
 			
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArguments[0];
 			string[] LDelimiters;
 			if (AArguments.Length == 1)
 				LDelimiters = new string[]{",", ";"};
-			else if (AArguments[1].DataType is Schema.ListType)
+			else if (Operator.Operands[1].DataType is Schema.ListType)
 			{
-				ListValue LDelimiterList = (ListValue)AArguments[1].Value;
+				ListValue LDelimiterList = (ListValue)AArguments[1];
 				LDelimiters = new string[LDelimiterList.Count()];
 				for (int LIndex = 0; LIndex < LDelimiterList.Count(); LIndex++)
 				{
 					#if NILPROPOGATION
-					if ((LDelimiterList[LIndex] == null) || LDelimiterList[LIndex].IsNil)
-						return new DataVar(FDataType, null);
+					if (LDelimiterList[LIndex] == null)
+						return null;
 					#endif
 
-					LDelimiters[LIndex] = LDelimiterList[LIndex].AsString;
+					LDelimiters[LIndex] = (string)LDelimiterList[LIndex];
 				}
 			}
 			else
-				LDelimiters = new string[]{AArguments[1].Value.AsString};
+				LDelimiters = new string[]{(string)AArguments[1]};
 				
 			ListValue LValue = new ListValue(AProcess, (Schema.ListType)FDataType);
 			
@@ -282,10 +273,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LDelimeterLength = LDelimiters[i].Length;
 					}
 				}
-				LValue.Add(new Scalar(AProcess, AProcess.DataTypes.SystemString, LString.Substring(LStart, (LFirst < 0 ? LString.Length : LFirst) - LStart)));
+				LValue.Add(LString.Substring(LStart, (LFirst < 0 ? LString.Length : LFirst) - LStart));
 			} while ((LFirst >= 0) && (((LFirst - LStart) + LDelimeterLength) > 0));
 			
-			return new DataVar(FDataType, LValue);
+			return LValue;
 		}
 	}
 	
@@ -293,29 +284,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Concat(const AStrings : list(String), const ADelimiter : String) : String;
 	public class StringConcatNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || ((AArguments.Length > 1) && ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || ((AArguments.Length > 1) && (AArguments[1] == null)))
+				return null;
 			#endif
 
-			string LDelimiter = AArguments.Length > 1 ? AArguments[1].Value.AsString : "";			
+			string LDelimiter = AArguments.Length > 1 ? (string)AArguments[1] : "";			
 			StringBuilder LResult = new StringBuilder();
-			ListValue LStrings = (ListValue)AArguments[0].Value;
+			ListValue LStrings = (ListValue)AArguments[0];
 			for (int LIndex = 0; LIndex < LStrings.Count(); LIndex++)
 			{
 				#if NILPROPOGATION
-				if ((LStrings[LIndex] == null) || LStrings[LIndex].IsNil)
-					return new DataVar(FDataType, null);
+				if (LStrings[LIndex] == null)
+					return null;
 				#endif
 				
 				if (LIndex > 0)
 					LResult.Append(LDelimiter);
-				LResult.Append(LStrings[LIndex].AsString);
+				LResult.Append(LStrings[LIndex]);
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LResult.ToString()));
+			return LResult.ToString();
 		}
 	}
 	
@@ -323,35 +314,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator Replace(AString : System.String, AOldString : System.String, ANewString : System.String, ACaseSensitive : System.Boolean) : System.String
     public class StringReplaceNode : InstructionNode
 	{
-        private bool NilFound(DataValue A)
-        {
-            if ((A == null) || A.IsNil) return true; else return false;
-        }
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if (
-                NilFound(AArguments[0].Value) ||
-                NilFound(AArguments[1].Value) ||
-                NilFound(AArguments[2].Value) ||
-                (AArguments.Length == 4) && (NilFound(AArguments[3].Value)) // NOTE: relies on short-circuit evaluation
-               )
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || (AArguments[1] == null) || (AArguments[2] == null) || ((AArguments.Length == 4) && (AArguments[3] == null)))
+				return null;
 			#endif
-            if ((AArguments.Length == 3) || ((AArguments.Length) == 4 && (AArguments[3].Value.AsBoolean == true)))
-            {
-                return new DataVar(FDataType, 
-                                   new Scalar(AProcess, (Schema.ScalarType)FDataType, StringUtility.Replace(AArguments[0].Value.AsString, 
-                                                                                                            AArguments[1].Value.AsString, 
-                                                                                                            AArguments[2].Value.AsString)));
-            }
+            if ((AArguments.Length == 3) || ((AArguments.Length) == 4 && (bool)AArguments[3]))
+				return StringUtility.Replace((string)AArguments[0], (string)AArguments[1], (string)AArguments[2]);
             else
             {
-                string LString = AArguments[0].Value.AsString;
-			    string LOldString = AArguments[1].Value.AsString.ToUpper();
+                string LString = (string)AArguments[0];
+			    string LOldString = ((string)AArguments[1]).ToUpper();
 			    if (LOldString.Length > 0)
 			    {
-				    string LNewString = AArguments[2].Value.AsString;
+				    string LNewString = (string)AArguments[2];
 				    int LCurrentIndex = LString.ToUpper().IndexOf(LOldString);
 				    while ((LCurrentIndex >= 0) && (LCurrentIndex < LString.Length))
 				    {
@@ -359,7 +336,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					    LCurrentIndex = LString.ToUpper().IndexOf(LOldString, LCurrentIndex + LNewString.Length);
 				    }
 			    }
-			    return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString));
+			    return LString;
             }
         }
 	}
@@ -368,18 +345,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Replace(AString : System.String, AOldString : System.String, ANewString : System.String) : System.String
 	public class IStringReplaceNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
-			string LOldString = AArguments[1].Value.AsString.ToUpper();
+			string LString = (string)AArguments[0];
+			string LOldString = (string)AArguments[1].ToUpper();
 			if (LOldString.Length > 0)
 			{
-				string LNewString = AArguments[2].Value.AsString;
+				string LNewString = (string)AArguments[2];
 				int LCurrentIndex = LString.ToUpper().IndexOf(LOldString);
 				while ((LCurrentIndex >= 0) && (LCurrentIndex < LString.Length))
 				{
@@ -387,172 +364,133 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LCurrentIndex = LString.ToUpper().IndexOf(LOldString, LCurrentIndex + LNewString.Length);
 				}
 			}
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LString));
+			return LString;
 		}
 	}
 	#endif
 	
 	// operator Trim(AString : System.String) : System.String
-	public class StringTrimNode : InstructionNode
+	public class StringTrimNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.Trim()));
+			return ((string)AArgument1).Trim();
 		}
 	}
 	
 	// operator TrimLeft(AString : System.String) : System.String
-	public class StringTrimLeftNode : InstructionNode
+	public class StringTrimLeftNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.TrimStart(null)));
+			return ((string)AArgument1).TrimStart(null);
 		}
 	}
 	
 	// operator TrimRight(AString : System.String) : System.String
-	public class StringTrimRightNode : InstructionNode
+	public class StringTrimRightNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.TrimEnd(null)));
+			return ((string)AArgument1).TrimEnd(null);
 		}
 	}
 	
 	// operator LastPos(ASubString : System.String, AString : System.String) : System.Integer
-	public class StringLastPosNode : InstructionNode
+	public class StringLastPosNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					StringUtility.LastIndexOf(AArguments[1].Value.AsString, AArguments[0].Value.AsString)
-				)
-			);
+			return StringUtility.LastIndexOf((string)AArgument2, (string)AArgument1);
 		}
 	}
 	
 	#if USEISTRING
-	public class IStringLastPosNode : InstructionNode
+	public class IStringLastPosNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					AArguments[1].Value.AsString.ToUpper().LastIndexOf
-					(
-						AArguments[0].Value.AsString.ToUpper()
-					)
-				)
-			);
+			return (string)AArgument2.ToUpper().LastIndexOf((string)AArgument1.ToUpper());
 		}
 	}
 	#endif
 	
-	public class StringIndexOfNode : InstructionNode
+	public class StringIndexOfNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					StringUtility.IndexOf(AArguments[0].Value.AsString, AArguments[1].Value.AsString)
-				)
-			);
+			return StringUtility.IndexOf((string)AArgument1, (string)AArgument2);
 		}
 	}
 
 	public class StringIndexOfStartNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArguments[0];
 			int LResult;
 			if (LString == String.Empty)
 				LResult = -1;
 			else
 			{
-				int LStartIndex = AArguments[2].Value.AsInt32;
+				int LStartIndex = (int)AArguments[2];
 				if (LStartIndex > LString.Length)
 					LStartIndex = LString.Length;
 				else if (LStartIndex < 0)
 					LStartIndex = 0;
-				LResult = StringUtility.IndexOf(LString, AArguments[1].Value.AsString, LStartIndex);
+				LResult = StringUtility.IndexOf(LString, (string)AArguments[1], LStartIndex);
 			}
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					LResult
-				)
-			);
+			return LResult;
 		}
 	}
 
 	public class StringIndexOfStartLengthNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil || (AArguments[3].Value == null) || AArguments[3].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
-			int LStartIndex = AArguments[2].Value.AsInt32;
-			int LLength = AArguments[3].Value.AsInt32;
+			string LString = (string)AArguments[0];
+			int LStartIndex = (int)AArguments[2];
+			int LLength = (int)AArguments[3];
 			int LResult;
 			if ((LString == String.Empty) || (LStartIndex >= LString.Length))
 			{
@@ -566,107 +504,68 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LStartIndex = 0;
 				if ((LStartIndex + LLength) > LString.Length)
 					LLength = LString.Length - LStartIndex;
-				LResult = StringUtility.IndexOf(LString, AArguments[1].Value.AsString, LStartIndex, LLength);
+				LResult = StringUtility.IndexOf(LString, (string)AArguments[1], LStartIndex, LLength);
 			}
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					LResult
-				)
-			);
+			return LResult;
 		}
 	}
 
-	public class StringStartsWith : InstructionNode
+	public class StringStartsWith : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess,
-					(Schema.ScalarType)FDataType,
-					AArguments[0].Value.AsString.StartsWith(AArguments[1].Value.AsString)
-				)
-			);
+			return ((string)AArgument1).StartsWith((string)AArgument2);
 		}
 	}
 	
-	public class StringEndsWith : InstructionNode
+	public class StringEndsWith : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess,
-					(Schema.ScalarType)FDataType,
-					AArguments[0].Value.AsString.EndsWith(AArguments[1].Value.AsString)
-				)
-			);
+			return ((string)AArgument1).EndsWith((string)AArgument2);
 		}
 	}
 	
 	#if USEISTRING
-	public class IStringIndexOfNode : InstructionNode
+	public class IStringIndexOfNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					AArguments[0].Value.AsString.ToUpper().IndexOf
-					(
-						AArguments[1].Value.AsString.ToUpper()
-					)
-				)
-			);
+			return ((string)AArgument1).ToUpper().IndexOf((string)AArgument2.ToUpper());
 		}
 	}
 	#endif
 	
 	public class StringIndexOfAnyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || ((AArguments.Length > 2) && ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)) || ((AArguments.Length > 3) && ((AArguments[3].Value == null) || AArguments[3].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || ((AArguments.Length > 2) && (AArguments[2] == null)) || ((AArguments.Length > 3) && (AArguments[3] == null)))
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArguments[0];
 
 			int LStartIndex;
 			if (AArguments.Length > 2)
 			{
-				LStartIndex = AArguments[2].Value.AsInt32;
+				LStartIndex = (int)AArguments[2];
 				if (LStartIndex < 0)
 					LStartIndex = 0;
 			}
@@ -676,7 +575,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LLength;
 			if (AArguments.Length > 3)
 			{
-				LLength = AArguments[3].Value.AsInt32;
+				LLength = (int)AArguments[3];
 				if (LLength < 0)
 					throw new RuntimeException(RuntimeException.Codes.InvalidLength, ErrorSeverity.Application);
 				if ((LStartIndex + LLength) > LString.Length)
@@ -688,42 +587,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LResult = -1;
 			if ((LLength != 0) && (LString != String.Empty) && (LStartIndex < LString.Length))
 			{
-				ListValue LAnyOf = (ListValue)AArguments[1].Value;
+				ListValue LAnyOf = (ListValue)AArguments[1];
 				for (int LIndex = 0; LIndex < LAnyOf.Count(); LIndex++)
 				{
 					#if NILPROPOGATION
-					if ((LAnyOf[LIndex] == null) || LAnyOf[LIndex].IsNil)
-						return new DataVar(FDataType, null);
+					if (LAnyOf[LIndex] == null)
+						return null;
 					#endif
 
-					int LIndexOf = StringUtility.IndexOf(LString, LAnyOf[LIndex].AsString, LStartIndex, LLength);
+					int LIndexOf = StringUtility.IndexOf(LString, (string)LAnyOf[LIndex], LStartIndex, LLength);
 					if ((LIndexOf >= 0) && ((LResult < 0) || (LIndexOf < LResult)))
 						LResult = LIndexOf;
 				}
 			}			
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LResult));
+			return LResult;
 		}
 	}
 	
 	#if USEISTRING
 	public class IStringIndexOfAnyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 
 			int LIndexOf = -1;
-			string LString = AArguments[0].Value.AsString.ToUpper();
-			ListValue LAnyOf = (ListValue)AArguments[1].Value;
+			string LString = ((string)AArguments[0]).ToUpper();
+			ListValue LAnyOf = (ListValue)AArguments[1];
 			for (int LIndex = 0; LIndex < LAnyOf.Length(); LIndex++)
 			{
 				#if NILPROPOGATION
-				if ((LAnyOf[LIndex] == null) || LAnyOf[LIndex].IsNil)
-					return new DataVar(FDataType, null);
+				if ((LAnyOf[LIndex] == null))
+					return null;
 				#endif
 
 				LIndexOf = LString.IndexOf(LAnyOf[LIndex].AsString.ToUpper());
@@ -731,80 +630,62 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					break;
 			}
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIndexOf));
+			return LIndexOf;
 		}
 	}
 	#endif
 	
-	public class StringLastIndexOfNode : InstructionNode
+	public class StringLastIndexOfNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					StringUtility.LastIndexOf(AArguments[0].Value.AsString, AArguments[1].Value.AsString)
-				)
-			);
+			return StringUtility.LastIndexOf((string)AArgument1, (string)AArgument2);
 		}
 	}
 
-	public class StringLastIndexOfStartNode : InstructionNode
+	public class StringLastIndexOfStartNode : TernaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null || AArgument3 == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArgument1;
 			int LResult;
 			if (LString == String.Empty)
 				LResult = -1;
 			else
 			{
-				int LStartIndex = AArguments[2].Value.AsInt32;
+				int LStartIndex = (int)AArgument3;
 				if (LStartIndex > (LString.Length - 1))
 					LStartIndex = (LString.Length - 1);
 				else if (LStartIndex < -1)
 					LStartIndex = -1;
-				LResult = StringUtility.LastIndexOf(LString, AArguments[1].Value.AsString, LStartIndex);
+				LResult = StringUtility.LastIndexOf(LString, (string)AArgument2, LStartIndex);
 			}
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					LResult
-				)
-			);
+			return LResult;
 		}
 	}
 
 	public class StringLastIndexOfStartLengthNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil || (AArguments[3].Value == null) || AArguments[3].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
-			int LStartIndex = AArguments[2].Value.AsInt32;
-			int LLength = AArguments[3].Value.AsInt32;
+			string LString = (string)AArguments[0];
+			int LStartIndex = (int)AArguments[2];
+			int LLength = (int)AArguments[3];
 			int LResult;
 			if ((LStartIndex < 0) || (LString == String.Empty))
 			{
@@ -818,63 +699,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LStartIndex = (LString.Length - 1);
 				if ((LStartIndex - LLength) < -1)
 					LLength = LStartIndex + 1;
-				LResult = StringUtility.LastIndexOf(LString, AArguments[1].Value.AsString, LStartIndex, LLength);	// will throw if ALength < 0
+				LResult = StringUtility.LastIndexOf(LString, (string)AArguments[1], LStartIndex, LLength);	// will throw if ALength < 0
 			}
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					LResult
-				)
-			);
+			return LResult;
 		}
 	}
 
 	#if USEISTRING
-	public class IStringLastIndexOfNode : InstructionNode
+	public class IStringLastIndexOfNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar
-				(
-					AProcess, 
-					(Schema.ScalarType)FDataType,
-					AArguments[0].Value.AsString.ToUpper().LastIndexOf
-					(
-						AArguments[1].Value.AsString.ToUpper()
-					)
-				)
-			);
+			return ((string)AArgument1).ToUpper().LastIndexOf(((string)AArgument2).ToUpper());
 		}
 	}
 	#endif
 	
 	public class StringLastIndexOfAnyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || ((AArguments.Length > 2) && ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)) || ((AArguments.Length > 3) && ((AArguments[3].Value == null) || AArguments[3].Value.IsNil)))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || ((AArguments.Length > 2) && (AArguments[2] == null)) || ((AArguments.Length > 3) && (AArguments[3] == null)))
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
+			string LString = (string)AArguments[0];
 
 			int LStartIndex;
 			if (AArguments.Length > 2)
 			{
-				LStartIndex = AArguments[2].Value.AsInt32;
+				LStartIndex = (int)AArguments[2];
 				if (LStartIndex >= LString.Length)
 					LStartIndex = LString.Length - 1;
 			}
@@ -884,7 +744,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LLength;
 			if (AArguments.Length > 3)
 			{
-				LLength = AArguments[3].Value.AsInt32;
+				LLength = (int)AArguments[3];
 				if (LLength < 0)
 					throw new RuntimeException(RuntimeException.Codes.InvalidLength, ErrorSeverity.Application);
 				if ((LStartIndex - LLength) < -1)
@@ -896,42 +756,42 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LResult = -1;
 			if ((LLength != 0) && (LString != String.Empty) && (LStartIndex >= 0))
 			{
-				ListValue LAnyOf = (ListValue)AArguments[1].Value;
+				ListValue LAnyOf = (ListValue)AArguments[1];
 				for (int LIndex = 0; LIndex < LAnyOf.Count(); LIndex++)
 				{
 					#if NILPROPOGATION
-					if ((LAnyOf[LIndex] == null) || LAnyOf[LIndex].IsNil)
-						return new DataVar(FDataType, null);
+					if (LAnyOf[LIndex] == null)
+						return null;
 					#endif
 
-					int LIndexOf = StringUtility.LastIndexOf(LString, LAnyOf[LIndex].AsString, LStartIndex, LLength);
+					int LIndexOf = StringUtility.LastIndexOf(LString, (string)LAnyOf[LIndex], LStartIndex, LLength);
 					if ((LIndexOf >= 0) && ((LResult < 0) || (LIndexOf > LResult)))
 						LResult = LIndexOf;
 				}
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LResult));
+			return LResult;
 		}
 	}
 	
 	#if USEISTRING
 	public class IStringLastIndexOfAnyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 
 			int LLastIndexOf = -1;
-			string LString = AArguments[0].Value.AsString.ToUpper();
-			ListValue LAnyOf = (ListValue)AArguments[1].Value;
+			string LString = (string)AArguments[0].ToUpper();
+			ListValue LAnyOf = (ListValue)AArguments[1];
 			for (int LIndex = 0; LIndex < LAnyOf.Count(); LIndex++)
 			{
 				#if NILPROPOGATION
-				if ((LAnyOf[LIndex] == null) || LAnyOf[LIndex].IsNil)
-					return new DataVar(FDataType, null);
+				if (LAnyOf[LIndex] == null)
+					return null;
 				#endif
 
 				LLastIndexOf = LString.LastIndexOf(LAnyOf[LIndex].AsString.ToUpper());
@@ -939,25 +799,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					break;
 			}
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLastIndexOf));
+			return LLastIndexOf;
 		}
 	}
 	#endif
 	
 	// operator CountOf(AString : System.String, ASubString : System.String) : System.Integer
-	public class StringCountOfNode : InstructionNode
+	public class StringCountOfNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
-#endif
+			#if NILPROPOGATION
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
+			#endif
 
 			int LFound = 0;
 			int LTotalFinds = 0;
-			string LString = AArguments[0].Value.AsString;
-			string LSubString = AArguments[1].Value.AsString;
+			string LString = (string)AArgument1;
+			string LSubString = (string)AArgument2;
 
 			for (int i = 0; i < LString.Length; i++) 
 			{
@@ -970,48 +830,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 					break;
 			}
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LTotalFinds));
+			return LTotalFinds;
 		}
 	}
 
 	// operator Upper(string) : string;
-	public class StringUpperNode : InstructionNode
+	public class StringUpperNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.ToUpper())
-			);
+			return ((string)AArgument1).ToUpper();
 		}
 	}
 	
 	// operator Lower(string) : string;
-	public class StringLowerNode : InstructionNode
+	public class StringLowerNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
-			return new DataVar
-			(
-				FDataType,
-				new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.ToLower())
-			);
+			return ((string)AArgument1).ToLower();
 		}
 	}
 	
 	// operator iLike(string, string) : boolean
-	public class StringLikeNodeBase : InstructionNode
+	public abstract class StringLikeNodeBase : BinaryInstructionNode
 	{
 		protected const int CRegexCacheSize = 20;
 		protected static FixedSizeCache FRegexCache = new FixedSizeCache(CRegexCacheSize);
@@ -1073,127 +925,125 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class StringLikeNode : StringLikeNodeBase
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
-			string LPattern = TransformString(AArguments[1].Value.AsString);
+			string LString = (string)AArgument1;
+			string LPattern = TransformString((string)AArgument2);
 			Regex LRegex = GetRegex(LPattern);
 			Match LMatch = LRegex.Match(LString);
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LMatch.Success && (LMatch.Index == 0)));
+			return LMatch.Success && (LMatch.Index == 0);
 		}
 	}
 	
 	#if USEISTRING
 	public class IStringLikeNode : StringLikeNodeBase
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			string LString = AArguments[0].Value.AsString;
-			string LPattern = TransformString(AArguments[1].Value.AsString);
+			string LString = (string)AArgument1;
+			string LPattern = TransformString((string)AArgument2);
 			Match LMatch = Regex.Match(LString, LPattern, RegexOptions.IgnoreCase);
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LMatch.Success && (LMatch.Index == 0)));
+			return LMatch.Success && (LMatch.Index == 0);
 		}
 	}
 	#endif
 	
 	// operator iMatches(string, string) : boolean
-	public class StringMatchesNode : InstructionNode
+	public class StringMatchesNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, StringLikeNodeBase.GetRegex(AArguments[1].Value.AsString).IsMatch(AArguments[0].Value.AsString)));
+			return StringLikeNodeBase.GetRegex((string)AArgument2).IsMatch((string)AArgument1);
 		}
 	}
 	
 	#if USEISTRING
-	public class IStringMatchesNode : InstructionNode
+	public class IStringMatchesNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Regex.IsMatch(AArguments[0].Value.AsString, AArguments[1].Value.AsString, RegexOptions.IgnoreCase)));
+			return Regex.IsMatch((string)AArgument1, (string)AArgument2, RegexOptions.IgnoreCase);
 		}
 	}
 	#endif
 	
 	// operator CompareText(string, string) : integer
-	public class StringCompareTextNode : InstructionNode
+	public class StringCompareTextNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 
-			string LLeftValue = AArguments[0].Value.AsString;
-			string LRightValue = AArguments[1].Value.AsString;
-			return new DataVar
-			(
-				FDataType,
-				new Scalar(AProcess, (Schema.ScalarType)FDataType, String.Compare(LLeftValue, LRightValue, true))
-			);
+			return String.Compare((string)AArgument1, (string)AArgument2, true);
 		}
 	}
 	
 	// Unicode representation
 	// operator System.String.Unicode(const AUnicode : list(System.Integer)) : System.String;
-	public class SystemStringUnicodeNode : InstructionNode
+	public class SystemStringUnicodeNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[0].Value;
+				ListValue LList = (ListValue)AArgument1;
 				byte[] LEncodedValue = new byte[LList.Count() * 2];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 				{
-					LEncodedValue[LIndex * 2] = (byte)(LList[LIndex].AsInt32);
-					LEncodedValue[LIndex * 2 + 1] = (byte)(LList[LIndex].AsInt32 >> 8);
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex * 2] = (byte)((int)LList[LIndex]);
+					LEncodedValue[LIndex * 2 + 1] = (byte)((int)LList[LIndex] >> 8);
 				}
 				Decoder LDecoder = UnicodeEncoding.Unicode.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
 	
 	// operator System.String.ReadUnicode(const AValue : System.String) : list(Sytem.Integer);
-	public class SystemStringReadUnicodeNode : InstructionNode
+	public class SystemStringReadUnicodeNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				string LString = AArguments[0].Value.AsString;
+				string LString = (string)AArgument1;
 				char[] LDecodedValue = new char[LString.Length];
 				LString.CopyTo(0, LDecodedValue, 0, LString.Length);
 				Encoder LEncoder = UnicodeEncoding.Unicode.GetEncoder();
@@ -1202,74 +1052,84 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ListValue LListValue = new ListValue(AProcess, (Schema.ListType)FDataType);
 				for (int LIndex = 0; LIndex < LEncodedValue.Length; LIndex++)
 					if ((LIndex % 2) == 1)
-						LListValue.Add(new Scalar(AProcess, AProcess.DataTypes.SystemInteger, (LEncodedValue[LIndex - 1]) + (LEncodedValue[LIndex] << 8)));
-				return new DataVar(FDataType, LListValue);
+						LListValue.Add((LEncodedValue[LIndex - 1]) + (LEncodedValue[LIndex] << 8));
+				return LListValue;
 			}
 		}
 	}
 	
 	// operator System.String.WriteUnicode(const AValue : System.String, const AUnicode : list(System.Integer)) : System.String;
-	public class SystemStringWriteUnicodeNode : InstructionNode
+	public class SystemStringWriteUnicodeNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[1].Value;
+				ListValue LList = (ListValue)AArgument2;
 				byte[] LEncodedValue = new byte[LList.Count() * 2];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 				{
-					LEncodedValue[LIndex * 2] = (byte)(LList[LIndex].AsInt32);
-					LEncodedValue[LIndex * 2 + 1] = (byte)(LList[LIndex].AsInt32 >> 8);
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex * 2] = (byte)((int)LList[LIndex]);
+					LEncodedValue[LIndex * 2 + 1] = (byte)((int)LList[LIndex] >> 8);
 				}
 				Decoder LDecoder = UnicodeEncoding.Unicode.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
 	
 	// UTF8 representation
 	// operator System.String.UTF8(const AUTF8 : list(System.Byte)) : System.String;
-	public class SystemStringUTF8Node : InstructionNode
+	public class SystemStringUTF8Node : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[0].Value;
+				ListValue LList = (ListValue)AArgument1;
 				byte[] LEncodedValue = new byte[LList.Count()];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-					LEncodedValue[LIndex] = LList[LIndex].AsByte;
+				{
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex] = (byte)LList[LIndex];
+				}
 				Decoder LDecoder = UnicodeEncoding.UTF8.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
 	
 	// operator System.String.ReadUTF8(const AValue : System.String) : list(System.Byte);
-	public class SystemStringReadUTF8Node : InstructionNode
+	public class SystemStringReadUTF8Node : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				string LString = AArguments[0].Value.AsString;
+				string LString = (string)AArgument1;
 				char[] LDecodedValue = new char[LString.Length];
 				LString.CopyTo(0, LDecodedValue, 0, LString.Length);
 				Encoder LEncoder = UnicodeEncoding.UTF8.GetEncoder();
@@ -1277,71 +1137,83 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LEncoder.GetBytes(LDecodedValue, 0, LDecodedValue.Length, LEncodedValue, 0, true);
 				ListValue LListValue = new ListValue(AProcess, (Schema.ListType)FDataType);
 				for (int LIndex = 0; LIndex < LDecodedValue.Length; LIndex++)
-					LListValue.Add(new Scalar(AProcess, AProcess.DataTypes.SystemByte, LEncodedValue[LIndex]));
-				return new DataVar(FDataType, LListValue);
+					LListValue.Add(LEncodedValue[LIndex]);
+				return LListValue;
 			}
 		}
 	}
 	
 	// operator System.String.WriteUTF8(const AValue : System.String, const AUTF8 : list(System.Byte)) : System.String;
-	public class SystemStringWriteUTF8Node : InstructionNode
+	public class SystemStringWriteUTF8Node : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[1].Value;
+				ListValue LList = (ListValue)AArgument2;
 				byte[] LEncodedValue = new byte[LList.Count()];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-					LEncodedValue[LIndex] = LList[LIndex].AsByte;
+				{
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex] = (byte)LList[LIndex];
+				}
 				Decoder LDecoder = UnicodeEncoding.UTF8.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
 	
 	// ASCII representation
 	// operator System.String.ASCII(const AASCII : list(System.Byte)) : System.String;
-	public class SystemStringASCIINode : InstructionNode
+	public class SystemStringASCIINode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[0].Value;
+				ListValue LList = (ListValue)AArgument1;
 				byte[] LEncodedValue = new byte[LList.Count()];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-					LEncodedValue[LIndex] = LList[LIndex].AsByte;
+				{
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex] = (byte)LList[LIndex];
+				}
 				Decoder LDecoder = UnicodeEncoding.ASCII.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
 	
 	// operator System.String.ReadASCII(const AValue : System.String) : list(System.Byte);
-	public class SystemStringReadASCIINode : InstructionNode
+	public class SystemStringReadASCIINode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 
 			{
-				string LString = AArguments[0].Value.AsString;
+				string LString = (string)AArgument1;
 				char[] LDecodedValue = new char[LString.Length];
 				LString.CopyTo(0, LDecodedValue, 0, LString.Length);
 				Encoder LEncoder = UnicodeEncoding.ASCII.GetEncoder();
@@ -1349,31 +1221,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LEncoder.GetBytes(LDecodedValue, 0, LDecodedValue.Length, LEncodedValue, 0, true);
 				ListValue LListValue = new ListValue(AProcess, (Schema.ListType)FDataType);
 				for (int LIndex = 0; LIndex < LDecodedValue.Length; LIndex++)
-					LListValue.Add(new Scalar(AProcess, AProcess.DataTypes.SystemByte, LEncodedValue[LIndex]));
-				return new DataVar(FDataType, LListValue);
+					LListValue.Add(LEncodedValue[LIndex]);
+				return LListValue;
 			}
 		}
 	}
 	
 	// operator System.String.WriteASCII(const AValue : System.String, const AASCII : list(System.Byte)) : System.String;
-	public class SystemStringWriteASCIINode : InstructionNode
+	public class SystemStringWriteASCIINode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
 
 			{
-				ListValue LList = (ListValue)AArguments[1].Value;
+				ListValue LList = (ListValue)AArgument2;
 				byte[] LEncodedValue = new byte[LList.Count()];
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-					LEncodedValue[LIndex] = LList[LIndex].AsByte;
+				{
+					#if NILPROPOGATION
+					if (LList[LIndex] == null)
+						return null;
+					#endif
+					LEncodedValue[LIndex] = (byte)LList[LIndex];
+				}
 				Decoder LDecoder = UnicodeEncoding.ASCII.GetDecoder();
 				char[] LDecodedValue = new char[LDecoder.GetCharCount(LEncodedValue, 0, LEncodedValue.Length)];
 				LDecoder.GetChars(LEncodedValue, 0, LEncodedValue.Length, LDecodedValue, 0);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new String(LDecodedValue)));
+				return new String(LDecodedValue);
 			}
 		}
 	}
@@ -1382,16 +1260,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsUpper(const AValue : String, const AIndex : Integer) : Boolean;
 	public class StringIsUpperNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length == 1)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null)
+					return null;
 				#endif
 				
-				string LValue = AArguments[0].Value.AsString;
+				string LValue = (string)AArguments[0];
 				bool LIsUpper = true;
 				for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 					if (Char.IsLetter(LValue, LIndex) && !Char.IsUpper(LValue, LIndex))
@@ -1400,21 +1278,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 				
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIsUpper));
+				return LIsUpper;
 			}
 			else
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null || AArguments[1] == null)
+					return null;
 				#endif
 				
-				string LString = AArguments[0].Value.AsString;
-				int LIndex = AArguments[1].Value.AsInt32;
+				string LString = (string)AArguments[0];
+				int LIndex = (int)AArguments[1];
 				if ((LIndex < 0) || (LIndex >= LString.Length))
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, false));
+					return false;
 
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Char.IsUpper(LString, LIndex)));
+				return Char.IsUpper(LString, LIndex);
 			}
 		}
 	}
@@ -1423,16 +1301,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsLower(const AValue : String, const AIndex : Integer) : Boolean;
 	public class StringIsLowerNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length == 1)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null)
+					return null;
 				#endif
 
-				string LValue = AArguments[0].Value.AsString;
+				string LValue = (string)AArguments[0];
 				bool LIsLower = true;
 				for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 					if (Char.IsLetter(LValue, LIndex) && !Char.IsLower(LValue, LIndex))
@@ -1441,21 +1319,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 					
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIsLower));	
+				return LIsLower;	
 			}
 			else
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null || AArguments[1] == null)
+					return null;
 				#endif
 
-				string LString = AArguments[0].Value.AsString;
-				int LIndex = AArguments[1].Value.AsInt32;
+				string LString = (string)AArguments[0];
+				int LIndex = (int)AArguments[1];
 				if ((LIndex < 0) || (LIndex >= LString.Length))
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, false));
+					return false;
 
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Char.IsLower(LString, LIndex)));
+				return Char.IsLower(LString, LIndex);
 			}
 		}
 	}
@@ -1464,16 +1342,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsLetter(const AValue : String, const AIndex : Integer) : Boolean;
 	public class StringIsLetterNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length == 1)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null)
+					return null;
 				#endif
 
-				string LValue = AArguments[0].Value.AsString;
+				string LValue = (string)AArguments[0];
 				bool LIsLetter = true;
 				for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 					if (!Char.IsLetter(LValue, LIndex))
@@ -1482,21 +1360,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 					
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIsLetter));	
+				return LIsLetter;	
 			}
 			else
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null || AArguments[1] == null)
+					return null;
 				#endif
 
-				string LString = AArguments[0].Value.AsString;
-				int LIndex = AArguments[1].Value.AsInt32;
+				string LString = (string)AArguments[0];
+				int LIndex = (int)AArguments[1];
 				if ((LIndex < 0) || (LIndex >= LString.Length))
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, false));
+					return false;
 
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Char.IsLetter(LString, LIndex)));
+				return Char.IsLetter(LString, LIndex);
 			}
 		}
 	}
@@ -1505,16 +1383,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsDigit(const AValue : String, const AIndex : Integer) : Boolean;
 	public class StringIsDigitNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length == 1)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null)
+					return null;
 				#endif
 
-				string LValue = AArguments[0].Value.AsString;
+				string LValue = (string)AArguments[0];
 				bool LIsDigit = true;
 				for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 					if (!Char.IsDigit(LValue, LIndex))
@@ -1523,21 +1401,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 					
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIsDigit));	
+				return LIsDigit;	
 			}
 			else
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null || AArguments[1] == null)
+					return null;
 				#endif
 
-				string LString = AArguments[0].Value.AsString;
-				int LIndex = AArguments[1].Value.AsInt32;
+				string LString = (string)AArguments[0];
+				int LIndex = (int)AArguments[1];
 				if ((LIndex < 0) || (LIndex >= LString.Length))
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, false));
+					return false;
 
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Char.IsDigit(LString, LIndex)));
+				return Char.IsDigit(LString, LIndex);
 			}
 		}
 	}
@@ -1546,16 +1424,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.IsLetterOrDigit(const AValue : String, const AIndex : Integer) : Boolean;
 	public class StringIsLetterOrDigitNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length == 1)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null)
+					return null;
 				#endif
 
-				string LValue = AArguments[0].Value.AsString;
+				string LValue = (string)AArguments[0];
 				bool LIsLetterOrDigit = true;
 				for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 					if (!Char.IsLetterOrDigit(LValue, LIndex))
@@ -1564,21 +1442,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 					
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIsLetterOrDigit));	
+				return LIsLetterOrDigit;	
 			}
 			else
 			{
 				#if NILPROPOGATION
-				if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[0] == null || AArguments[1] == null)
+					return null;
 				#endif
 
-				string LString = AArguments[0].Value.AsString;
-				int LIndex = AArguments[1].Value.AsInt32;
+				string LString = (string)AArguments[0];
+				int LIndex = (int)AArguments[1];
 				if ((LIndex < 0) || (LIndex >= LString.Length))
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, false));
+					return false;
 
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Char.IsLetterOrDigit(LString, LIndex)));
+				return Char.IsLetterOrDigit(LString, LIndex);
 			}
 		}
 	}
@@ -1587,10 +1465,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.EnsureUpper(var AValue : IString);
 	public class IStringEnsureUpperNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value != null) && !AArguments[0].Value.IsNil)
-				AArguments[0].Value = new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.ToUpper());
+				AArguments[0].Value = new Scalar(AProcess, (Schema.ScalarType)FDataType, (string)AArguments[0].ToUpper());
 			return null;
 		}
 	}
@@ -1598,10 +1476,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator System.EnsureLower(var AValue : IString);
 	public class IStringEnsureLowerNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value != null) && !AArguments[0].Value.IsNil)
-				AArguments[0].Value = new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsString.ToLower());
+				AArguments[0].Value = new Scalar(AProcess, (Schema.ScalarType)FDataType, (string)AArguments[0].ToLower());
 			return null;
 		}
 	}

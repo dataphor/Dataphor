@@ -288,13 +288,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return Nodes[0].EmitStatement(AMode);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			RenameTable LTable = new RenameTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

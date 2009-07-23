@@ -483,9 +483,11 @@
     <Compile Include="Runtime\Context.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime\DataParam.cs" />
     <Compile Include="Runtime\DataVar.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime\Frame.cs" />
     <Compile Include="Runtime\LockManager.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -495,6 +497,9 @@
     <Compile Include="Runtime\Semaphore.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime\Stack.cs" />
+    <Compile Include="Runtime\StackWindow.cs" />
+    <Compile Include="Runtime\Symbols.cs" />
     <Compile Include="Schema\Assembly.cs">
       <SubType>Code</SubType>
     </Compile>

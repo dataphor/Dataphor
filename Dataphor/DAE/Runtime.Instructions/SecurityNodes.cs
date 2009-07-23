@@ -38,9 +38,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.InsertRight(ARightName, LUser.ID);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			CreateRight(AProcess, AArguments[0].Value.AsString, (AArguments.Length == 2) ? AArguments[1].Value.AsString : AProcess.Plan.User.ID);
+			CreateRight(AProcess, (string)AArguments[0], (AArguments.Length == 2) ? (string)AArguments[1] : AProcess.Plan.User.ID);
 			return null;
 		}
     }
@@ -60,9 +60,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.DeleteRight(ARightName);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			DropRight(AProcess, AArguments[0].Value.AsString);
+			DropRight(AProcess, (string)AArguments[0]);
 			return null;
 		}
     }
@@ -70,16 +70,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RightExists(ARightName : string) : boolean; </remarks>
     public class SystemRightExistsNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.CatalogDeviceSession.RightExists(AArguments[0].Value.AsString)));
+			return AProcess.CatalogDeviceSession.RightExists((string)AArguments[0]);
 		}
     }
 
     /// <remarks>operator CreateGroup(const AGroupName : String, const AParentGroupName : String); </remarks>
     public class SystemCreateGroupNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -89,9 +89,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator CreateRole(const ARoleName : Name);    
     public class SystemCreateRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = new Schema.Role(Schema.Object.Qualify(AArguments[0].Value.AsString, AProcess.Plan.CurrentLibrary.Name));
+			Schema.Role LRole = new Schema.Role(Schema.Object.Qualify((string)AArguments[0], AProcess.Plan.CurrentLibrary.Name));
 			LRole.Owner = AProcess.Plan.User;
 			LRole.Library = AProcess.Plan.CurrentLibrary;
 			AProcess.CatalogDeviceSession.InsertRole(LRole);
@@ -102,9 +102,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator DropRole(const ARoleName : Name);
     public class SystemDropRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as Schema.Role;
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
@@ -117,12 +117,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RoleExists(ARoleName : string) : boolean; </remarks>
     public class SystemRoleExistsNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
-				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, false);
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LObject is Schema.Role));
+				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], false);
+				return LObject is Schema.Role;
 			}
 		}
     }
@@ -130,23 +130,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator RoleHasRight(ARoleName : String, ARightName : Name) : System.Boolean; </remarks>
     public class SystemRoleHasRightNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as Schema.Role;
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.CatalogDeviceSession.RoleHasRight(LRole, AArguments[1].Value.AsString)));
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as Schema.Role;
+			return AProcess.CatalogDeviceSession.RoleHasRight(LRole, (string)AArguments[1]);
 		}
     }
 
     /// <remarks>operator CreateUser(AUserID : String, AUserName : String, APassword : String); </remarks>
     public class SystemCreateUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			AProcess.Plan.CheckRight(Schema.RightNames.CreateUser);
-			string LUserID = AArguments[0].Value.AsString;
+			string LUserID = (string)AArguments[0];
 			if (AProcess.CatalogDeviceSession.UserExists(LUserID))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, LUserID);
-			Schema.User LUser = new Schema.User(LUserID, AArguments[1].Value.AsString, Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString));
+			Schema.User LUser = new Schema.User(LUserID, (string)AArguments[1], Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
 			AProcess.CatalogDeviceSession.InsertUser(LUser);
 			AProcess.CatalogDeviceSession.InsertUserRole(LUser.ID, AProcess.ServerSession.Server.UserRole.ID);
 			return null;
@@ -157,13 +157,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator CreateUserWithEncryptedPassword(AUserID : string, AUserName : string, AEncryptedPassword : string, AGroupName : String); </remarks> // Deprecated
     public class SystemCreateUserWithEncryptedPasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			AProcess.Plan.CheckRight(Schema.RightNames.CreateUser);
-			string LUserID = AArguments[0].Value.AsString;
+			string LUserID = (string)AArguments[0];
 			if (AProcess.CatalogDeviceSession.UserExists(LUserID))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateUserID, LUserID);
-			Schema.User LUser = new Schema.User(LUserID, AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+			Schema.User LUser = new Schema.User(LUserID, (string)AArguments[1], (string)AArguments[2]);
 			AProcess.CatalogDeviceSession.InsertUser(LUser);
 			AProcess.CatalogDeviceSession.InsertUserRole(LUser.ID, AProcess.ServerSession.Server.UserRole.ID);
 			return null;
@@ -173,11 +173,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetPassword(AUserID : string, APassword : string); </remarks>
     public class SystemSetPasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LUserID = AArguments[0].Value.AsString;
+			string LUserID = (string)AArguments[0];
 			AProcess.Plan.CheckAuthorized(LUserID);
-			AProcess.CatalogDeviceSession.SetUserPassword(LUserID, Schema.SecurityUtility.EncryptPassword(AArguments[1].Value.AsString));
+			AProcess.CatalogDeviceSession.SetUserPassword(LUserID, Schema.SecurityUtility.EncryptPassword((string)AArguments[1]));
 			return null;
 		}
     }
@@ -185,11 +185,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetEncryptedPassword(AUserID : string, AEncryptedPassword : string); </remarks>
     public class SystemSetEncryptedPasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LUserID = AArguments[0].Value.AsString;
+			string LUserID = (string)AArguments[0];
 			AProcess.Plan.CheckAuthorized(LUserID);
-			AProcess.CatalogDeviceSession.SetUserPassword(LUserID, AArguments[1].Value.AsString);
+			AProcess.CatalogDeviceSession.SetUserPassword(LUserID, (string)AArguments[1]);
 			return null;
 		}
     }
@@ -197,13 +197,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator ChangePassword(AOldPassword : string, ANewPassword : string); </remarks>
     public class SystemChangePasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			Schema.User LUser = AProcess.ServerSession.User;
-			if (String.Compare(AArguments[0].Value.AsString, Schema.SecurityUtility.DecryptPassword(LUser.Password), true) != 0)
+			if (String.Compare((string)AArguments[0], Schema.SecurityUtility.DecryptPassword(LUser.Password), true) != 0)
 				throw new ServerException(ServerException.Codes.InvalidPassword);
 
-			AProcess.CatalogDeviceSession.SetUserPassword(LUser.ID, Schema.SecurityUtility.EncryptPassword(AArguments[1].Value.AsString));
+			AProcess.CatalogDeviceSession.SetUserPassword(LUser.ID, Schema.SecurityUtility.EncryptPassword((string)AArguments[1]));
 			return null;
 		}
     }
@@ -211,12 +211,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetUserName(AUserID : string, AUserName : string); </remarks>
     public class SystemSetUserNameNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LUserID = AArguments[0].Value.AsString;
+			string LUserID = (string)AArguments[0];
 			if (String.Compare(AProcess.ServerSession.User.ID, LUserID, true) != 0)
 				AProcess.Plan.CheckAuthorized(LUserID);
-			AProcess.CatalogDeviceSession.SetUserName(LUserID, AArguments[1].Value.AsString);
+			AProcess.CatalogDeviceSession.SetUserName(LUserID, (string)AArguments[1]);
 			return null;
 		}
     }
@@ -224,9 +224,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropUser(AUserID : string); </remarks>
     public class SystemDropUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
 			
 			if ((String.Compare(LUser.ID, Server.Server.CSystemUserID, true) == 0) || (String.Compare(LUser.ID, Server.Server.CAdminUserID, true) == 0))
 				throw new ServerException(ServerException.Codes.CannotDropSystemUsers);
@@ -252,19 +252,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator UserExists(AUserID : string) : boolean; </remarks>
     public class SystemUserExistsNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.CatalogDeviceSession.UserExists(AArguments[0].Value.AsString)));
+			return AProcess.CatalogDeviceSession.UserExists((string)AArguments[0]);
 		}
     }
     
     // operator AddUserToRole
     public class SystemAddUserToRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Role;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
@@ -278,10 +278,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator RemoveUserFromRole
     public class SystemRemoveUserFromRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Role;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 				
@@ -296,7 +296,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator AddGroupToRole(const AGroupName : String, const ARoleName : Name, const AInherited : Boolean);
     public class SystemAddGroupToRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -313,12 +313,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.GrantRightToRole(ARightName, ARole.ID);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Role;
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
-			GrantRight(AProcess, AArguments[0].Value.AsString, LRole);
+			GrantRight(AProcess, (string)AArguments[0], LRole);
 			return null;
 		}
     }
@@ -326,11 +326,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SafeGrantRightToRole(ARightName : String, ARoleName : Name); </remarks>
     public class SystemSafeGrantRightToRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, false) as Schema.Role;
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], false) as Schema.Role;
 			if (LRole != null)
-				SystemGrantRightToRoleNode.GrantRight(AProcess, AArguments[0].Value.AsString, LRole);
+				SystemGrantRightToRoleNode.GrantRight(AProcess, (string)AArguments[0], LRole);
 			return null;
 		}
     }
@@ -338,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator SafeGrantRightToGroup(ARightName : String, AGroupName : String, AInherited : Boolean, AApplyRecursively : Boolean, AIncludeUsers : Boolean); </remarks>
     public class SystemSafeGrantRightToGroupNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			// Deprecated, stubbed for backwards compatibility
 			return null;
@@ -357,10 +357,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.GrantRightToUser(ARightName, AUser.ID);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString);
-			GrantRight(AProcess, LUser, AArguments[0].Value.AsString);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
+			GrantRight(AProcess, LUser, (string)AArguments[0]);
 			return null;
 		}
     }
@@ -370,11 +370,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeGrantRightToUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString, false);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1], false);
 			if (LUser != null)
-				SystemGrantRightToUserNode.GrantRight(AProcess, LUser, AArguments[0].Value.AsString);
+				SystemGrantRightToUserNode.GrantRight(AProcess, LUser, (string)AArguments[0]);
 			return null;
 		}
     }
@@ -391,12 +391,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.RevokeRightFromRole(ARightName, ARole.ID);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Role;
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
-			RevokeRight(AProcess, AArguments[0].Value.AsString, LRole);
+			RevokeRight(AProcess, (string)AArguments[0], LRole);
 			return null;
 		}
     }
@@ -406,11 +406,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeRevokeRightFromRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, false) as Schema.Role;
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], false) as Schema.Role;
 			if (LRole != null)
-				SystemRevokeRightFromRoleNode.RevokeRight(AProcess, AArguments[0].Value.AsString, LRole);
+				SystemRevokeRightFromRoleNode.RevokeRight(AProcess, (string)AArguments[0], LRole);
 			return null;
 		}
     }
@@ -427,10 +427,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.RevokeRightFromUser(ARightName, AUser.ID);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString);
-			RevokeRight(AProcess, AArguments[0].Value.AsString, LUser);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
+			RevokeRight(AProcess, (string)AArguments[0], LUser);
 			return null;
 		}
     }
@@ -440,11 +440,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     ///	</remarks>
     public class SystemSafeRevokeRightFromUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString, false);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1], false);
 			if (LUser != null)
-				SystemRevokeRightFromUserNode.RevokeRight(AProcess, AArguments[0].Value.AsString, LUser);
+				SystemRevokeRightFromUserNode.RevokeRight(AProcess, (string)AArguments[0], LUser);
 			return null;
 		}
     }
@@ -452,10 +452,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RevertRightForRole(ARightName : Name, ARoleName : Name);</remarks>
     public class SystemRevertRightForRoleNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LRightName = AArguments[0].Value.AsString;
-			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Role;
+			string LRightName = (string)AArguments[0];
+			Schema.Role LRole = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Role;
 			if (LRole == null)
 				throw new CompilerException(CompilerException.Codes.RoleIdentifierExpected);
 
@@ -469,10 +469,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator RevertRightForUser(ARightName : String, AUserID : String);</remarks>
     public class SystemRevertRightForUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LRightName = AArguments[0].Value.AsString;
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString);
+			string LRightName = (string)AArguments[0];
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
 			AProcess.Plan.CheckAuthorized(LUser.ID);
 			AProcess.Plan.CheckRight(LRightName);
 			AProcess.CatalogDeviceSession.RevertRightForUser(LRightName, LUser.ID);
@@ -524,14 +524,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.CatalogObject LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, false) as Schema.CatalogObject;
+			Schema.CatalogObject LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], false) as Schema.CatalogObject;
 			if ((LObject == null) && !AProcess.ServerSession.Server.LoadingFullCatalog) // This check is for backwards compatibility with d4c files. A d4c file persists an object's owner as a SetObjectOwner call with the old style mangled name of the operator.
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, LObject.Name);
 			if (LObject != null)
 			{
-				Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString);
+				Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
 				if (AProcess.Plan.User.ID != LUser.ID)
 					AProcess.Plan.CheckAuthorized(LUser.ID);
 				if (!LObject.IsOwner(AProcess.Plan.User))
@@ -545,11 +545,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator SetRightOwner(ARightName : Name, AUserID : String); </remarks>
     public class SystemSetRightOwnerNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LRightName = AArguments[0].Value.AsString;
+			string LRightName = (string)AArguments[0];
 			Schema.Right LRight = AProcess.CatalogDeviceSession.ResolveRight(LRightName);
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[1].Value.AsString);
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
 			if (LRight.IsGenerated)
 				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, LRight.Name);
 				
@@ -566,10 +566,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator UserHasRight(AUserID : String, ARightName : Name) : System.Boolean; </remarks>
     public class SystemUserHasRightNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.CatalogDeviceSession.UserHasRight(LUser.ID, AArguments[1].Value.AsString)));
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			return AProcess.CatalogDeviceSession.UserHasRight(LUser.ID, (string)AArguments[1]);
 		}
     }
 
@@ -577,10 +577,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator CreateDeviceUser(AUserID : string, ADeviceName : System.Name, ADeviceUserID : string, ADevicePassword : string, AConnectionString : string); </remarks>
 	public class SystemCreateDeviceUserNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -591,9 +591,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AProcess.CatalogDeviceSession.DeviceUserExists(LDevice, LUser))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, LUser.ID, LDevice.Name);
 				
-			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, AArguments[2].Value.AsString, Schema.SecurityUtility.EncryptPassword(AArguments[3].Value.AsString));
-			if ((AArguments.Length == 5) && (AArguments[4].Value != null) && !AArguments[4].Value.IsNil)
-				LDeviceUser.ConnectionParameters = AArguments[4].Value.AsString;				
+			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, (string)AArguments[2], Schema.SecurityUtility.EncryptPassword((string)AArguments[3]));
+			if ((AArguments.Length == 5) && (AArguments[4] != null))
+				LDeviceUser.ConnectionParameters = (string)AArguments[4];				
 			
 			AProcess.CatalogDeviceSession.InsertDeviceUser(LDeviceUser);	
 			return null;
@@ -604,10 +604,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator CreateDeviceUserWithEncryptedPassword(AUserID : String, ADeviceName : System.Name, ADeviceUserID : String, ADevicePassword : String, AConnectionString : String); </remarks>
 	public class SystemCreateDeviceUserWithEncryptedPasswordNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -618,9 +618,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AProcess.CatalogDeviceSession.DeviceUserExists(LDevice, LUser))
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateDeviceUser, LUser.ID, LDevice.Name);
 
-			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, AArguments[2].Value.AsString, AArguments[3].Value.AsString);
-			if ((AArguments.Length == 5) && (AArguments[4].Value != null) && !AArguments[4].Value.IsNil)
-				LDeviceUser.ConnectionParameters = AArguments[4].Value.AsString;
+			Schema.DeviceUser LDeviceUser = new Schema.DeviceUser(LUser, LDevice, (string)AArguments[2], (string)AArguments[3]);
+			if ((AArguments.Length == 5) && (AArguments[4] != null))
+				LDeviceUser.ConnectionParameters = (string)AArguments[4];
 
 			AProcess.CatalogDeviceSession.InsertDeviceUser(LDeviceUser);
 			return null;
@@ -630,10 +630,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserID(AUserID : string, ADeviceName : System.Name, ADeviceUserID : string); </remarks>
     public class SystemSetDeviceUserIDNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -642,8 +642,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProcess.Plan.CheckAuthorized(LUser.ID);
 			AProcess.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
 			Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			AProcess.CatalogDeviceSession.SetDeviceUserID(LDeviceUser, AArguments[2].Value.AsString);
-			//LDeviceUser.DeviceUserID = AArguments[2].Value.AsString;
+			AProcess.CatalogDeviceSession.SetDeviceUserID(LDeviceUser, (string)AArguments[2]);
+			//LDeviceUser.DeviceUserID = (string)AArguments[2];
 			//AProcess.CatalogDeviceSession.UpdateDeviceUser(LDeviceUser);
 			return null;
 		}
@@ -652,10 +652,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserConnectionParameters(AUserID : string, ADeviceName : System.Name, AConnectionParameters : String); </remarks>
     public class SystemSetDeviceUserConnectionParametersNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -664,8 +664,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProcess.Plan.CheckAuthorized(LUser.ID);
 			AProcess.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
 			Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			AProcess.CatalogDeviceSession.SetDeviceUserConnectionParameters(LDeviceUser, AArguments[2].Value.AsString);
-			//LDeviceUser.ConnectionParameters = AArguments[2].Value.AsString;
+			AProcess.CatalogDeviceSession.SetDeviceUserConnectionParameters(LDeviceUser, (string)AArguments[2]);
+			//LDeviceUser.ConnectionParameters = (string)AArguments[2];
 			//AProcess.CatalogDeviceSession.UpdateDeviceUser(LDeviceUser);
 			return null;
 		}
@@ -674,10 +674,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator SetDeviceUserPassword(AUserID : string, ADeviceName : System.Name, ADevicePassword : string); </remarks>
     public class SystemSetDeviceUserPasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -686,8 +686,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProcess.Plan.CheckAuthorized(LUser.ID);
 			AProcess.Plan.CheckRight(LDevice.GetRight(Schema.RightNames.MaintainUsers));
 			Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			AProcess.CatalogDeviceSession.SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString));
-			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
+			AProcess.CatalogDeviceSession.SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
+			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			//AProcess.CatalogDeviceSession.UpdateDeviceUser(LDeviceUser);
 			return null;
 		}
@@ -696,9 +696,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator ChangeDeviceUserPasswordNode(ADeviceName : System.Name, AOldPassword : string, ANewPassword : string); </remarks>
     public class SystemChangeDeviceUserPasswordNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as Schema.Device;
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			Schema.User LUser = AProcess.ServerSession.User;
@@ -706,10 +706,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.Plan.User.ID);
 				
 			Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser);
-			if (String.Compare(AArguments[1].Value.AsString, Schema.SecurityUtility.DecryptPassword(LDeviceUser.DevicePassword), true) != 0)
+			if (String.Compare((string)AArguments[1], Schema.SecurityUtility.DecryptPassword(LDeviceUser.DevicePassword), true) != 0)
 				throw new ServerException(ServerException.Codes.InvalidPassword);
-			AProcess.CatalogDeviceSession.SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString));
-			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword(AArguments[2].Value.AsString);
+			AProcess.CatalogDeviceSession.SetDeviceUserPassword(LDeviceUser, Schema.SecurityUtility.EncryptPassword((string)AArguments[2]));
+			//LDeviceUser.DevicePassword = Schema.SecurityUtility.EncryptPassword((string)AArguments[2]);
 			//AProcess.CatalogDeviceSession.UpdateDeviceUser(LDeviceUser);
 			return null;
 		}
@@ -718,10 +718,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DropDeviceUser(AUserID : string, ADeviceName : System.Name); </remarks>
     public class SystemDropDeviceUserNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			if (LUser.IsSystemUser())
@@ -738,14 +738,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator DeviceUserExists(AUserID : string, ADeviceName : System.Name) : boolean; </remarks>
     public class SystemDeviceUserExistsNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser(AArguments[0].Value.AsString);
-			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.Device;
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
+			Schema.Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 			Schema.DeviceUser LDeviceUser = AProcess.CatalogDeviceSession.ResolveDeviceUser(LDevice, LUser, false);
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LDeviceUser != null));
+			return LDeviceUser != null;
 		}
     }
 
@@ -753,14 +753,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	///  <para>Note: Decrypt is deterministic and repeatable because it always yields the same result.</para> </remarks>
 	public class SystemDecryptStringNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Schema.SecurityUtility.DecryptString((String)AArguments[0].Value.AsNative)));
+			return Schema.SecurityUtility.DecryptString((String)AArguments[0]);
 		}
     }
 
@@ -768,14 +768,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	///  <para>Note: Encrypt is not deterministic or repeatable because it includes a random SALT in the result.</para> </remarks>
 	public class SystemEncryptStringNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Schema.SecurityUtility.EncryptString(AArguments[0].Value.AsString)));
+			return Schema.SecurityUtility.EncryptString((string)AArguments[0]);
 		}
     }
 }

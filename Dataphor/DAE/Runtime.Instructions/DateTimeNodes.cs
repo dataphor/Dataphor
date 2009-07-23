@@ -19,678 +19,598 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	// TimeSpan Selectors
 	/// <remarks>operator System.TimeSpan.Ticks(ATicks : Long) : TimeSpan;</remarks>
-	public class SystemTimeSpanTicksSelectorNode : InstructionNode
+	public class SystemTimeSpanTicksSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsInt64)));
+				return new TimeSpan((long)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.Milliseconds(AMilliseconds : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanMillisecondsSelectorNode : InstructionNode
+	public class SystemTimeSpanMillisecondsSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromMilliseconds((double)AArguments[0].Value.AsDecimal)));
+				return TimeSpan.FromMilliseconds((double)(decimal)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.Seconds(ASeconds : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanSecondsSelectorNode : InstructionNode
+	public class SystemTimeSpanSecondsSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromSeconds((double)AArguments[0].Value.AsDecimal)));
+				return TimeSpan.FromSeconds((double)(decimal)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.Minutes(AMinutes : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanMinutesSelectorNode : InstructionNode
+	public class SystemTimeSpanMinutesSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromMinutes((double)AArguments[0].Value.AsDecimal)));
+				return TimeSpan.FromMinutes((double)(decimal)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.Hours(AMinutes : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanHoursSelectorNode : InstructionNode
+	public class SystemTimeSpanHoursSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromHours((double)AArguments[0].Value.AsDecimal)));
+				return TimeSpan.FromHours((double)(decimal)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.Days(ADays : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanDaysSelectorNode : InstructionNode
+	public class SystemTimeSpanDaysSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromDays((double)AArguments[0].Value.AsDecimal)));
+				return TimeSpan.FromDays((double)(decimal)AArgument);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanMillisecondsSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil ||
-				(AArguments[4].Value == null) || AArguments[4].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null) ||
+				(AArguments[4] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							AArguments[3].Value.AsInt32
-						).Add(TimeSpan.FromTicks((long)(TimeSpan.TicksPerMillisecond * (double)AArguments[4].Value.AsDecimal)))
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2],
+						(int)AArguments[3]
+					).Add(TimeSpan.FromTicks((long)(TimeSpan.TicksPerMillisecond * (double)(decimal)AArguments[4])));
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer) : TimeSpan;</remarks>
 	public class SystemTimeSpanTimeSpanSecondsSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							AArguments[3].Value.AsInt32,
-							0
-						)
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2],
+						(int)AArguments[3],
+						0
+					);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer, AMinutes : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanMinutesSelectorNode : InstructionNode
+	public class SystemTimeSpanTimeSpanMinutesSelectorNode : TernaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil
+				(AArgument1 == null) ||
+				(AArgument2 == null) ||
+				(AArgument3 == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							0,
-							0
-						)
-					)
-				);
+						(int)AArgument1,
+						(int)AArgument2,
+						(int)AArgument3,
+						0,
+						0
+					);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer, AHours : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanHoursSelectorNode : InstructionNode
+	public class SystemTimeSpanTimeSpanHoursSelectorNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil
+				(AArgument1 == null) ||
+				(AArgument2 == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							0,
-							0,
-							0
-						)
-					)
-				);
+						(int)AArgument1,
+						(int)AArgument2,
+						0,
+						0,
+						0
+					);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpan(ADays : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanDaysSelectorNode : InstructionNode
+	public class SystemTimeSpanTimeSpanDaysSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil
+				(AArgument == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							AArguments[0].Value.AsInt32,
-							0,
-							0,
-							0,
-							0
-						)
-					)
-				);
+						(int)AArgument,
+						0,
+						0,
+						0,
+						0
+					);
 		}
 	}
 
 	// TimeSpan Accessors
 	/// <remarks>operator System.TimeSpan.TicksReadTicks(AValue : TimeSpan) : Long;</remarks>
-	public class SystemTimeSpanTicksReadTicksNode : InstructionNode
+	public class SystemTimeSpanTicksReadTicksNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Ticks));
+				return ((TimeSpan)AArgument).Ticks;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TicksWriteTicks(AValue : TimeSpan, ATicks : Long) : TimeSpan;</remarks>
-	public class SystemTimeSpanTicksWriteTicksNode : InstructionNode
+	public class SystemTimeSpanTicksWriteTicksNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[1].Value.AsInt64)));
+				return new TimeSpan((long)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.MillisecondsReadMilliseconds(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanMillisecondsReadMillisecondsNode : InstructionNode
+	public class SystemTimeSpanMillisecondsReadMillisecondsNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)AArguments[0].Value.AsTimeSpan.TotalMilliseconds));
+				return (decimal)((TimeSpan)AArgument).TotalMilliseconds;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.MillisecondsWriteMilliseconds(AValue : TimeSpan, AMilliseconds : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanMillisecondsWriteMillisecondsNode : InstructionNode
+	public class SystemTimeSpanMillisecondsWriteMillisecondsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromTicks((long)(AArguments[1].Value.AsDecimal * TimeSpan.TicksPerMillisecond))));
+				return TimeSpan.FromTicks((long)((decimal)AArgument2 * TimeSpan.TicksPerMillisecond));
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.SecondsReadSeconds(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanSecondsReadSecondsNode : InstructionNode
+	public class SystemTimeSpanSecondsReadSecondsNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)AArguments[0].Value.AsTimeSpan.TotalSeconds));
+				return (decimal)((TimeSpan)AArgument).TotalSeconds;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.SecondsWriteSeconds(AValue : TimeSpan, ASeconds : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanSecondsWriteSecondsNode : InstructionNode
+	public class SystemTimeSpanSecondsWriteSecondsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromSeconds((double)AArguments[1].Value.AsDecimal)));
+				return TimeSpan.FromSeconds((double)(decimal)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.MinutesReadMinutes(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanMinutesReadMinutesNode : InstructionNode
+	public class SystemTimeSpanMinutesReadMinutesNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)AArguments[0].Value.AsTimeSpan.TotalMinutes));
+				return (decimal)((TimeSpan)AArgument).TotalMinutes;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.MinutesWriteMinutes(AValue : TimeSpan, AMinutes : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanMinutesWriteMinutesNode : InstructionNode
+	public class SystemTimeSpanMinutesWriteMinutesNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromMinutes((double)AArguments[1].Value.AsDecimal)));
+				return TimeSpan.FromMinutes((double)(decimal)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.HoursReadHours(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanHoursReadHoursNode : InstructionNode
+	public class SystemTimeSpanHoursReadHoursNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)AArguments[0].Value.AsTimeSpan.TotalHours));
+				return (decimal)((TimeSpan)AArgument).TotalHours;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.HoursWriteHours(AValue : TimeSpan, AHours : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanHoursWriteHoursNode : InstructionNode
+	public class SystemTimeSpanHoursWriteHoursNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromHours((double)AArguments[1].Value.AsDecimal)));
+				return TimeSpan.FromHours((double)(decimal)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.DaysReadDays(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanDaysReadDaysNode : InstructionNode
+	public class SystemTimeSpanDaysReadDaysNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)AArguments[0].Value.AsTimeSpan.TotalDays));
+				return (decimal)((TimeSpan)AArgument).TotalDays;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.DaysWriteDays(AValue : TimeSpan, ADays : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanDaysWriteDaysNode : InstructionNode
+	public class SystemTimeSpanDaysWriteDaysNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpan.FromDays((double)AArguments[1].Value.AsDecimal)));
+				return TimeSpan.FromDays((double)(decimal)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanReadDay(AValue : TimeSpan) : Integer;</remarks>
-	public class SystemTimeSpanTimeSpanReadDayNode : InstructionNode
+	public class SystemTimeSpanTimeSpanReadDayNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Days));
+				return ((TimeSpan)AArgument).Days;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteDay(AValue : TimeSpan, ADay : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanWriteDayNode : InstructionNode
+	public class SystemTimeSpanTimeSpanWriteDayNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				TimeSpan LTimeSpan = AArguments[0].Value.AsTimeSpan;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				TimeSpan LTimeSpan = (TimeSpan)AArgument1;
+				return 
+					new TimeSpan
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							LTimeSpan.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTimeSpan.Days) * 
-									TimeSpan.TicksPerDay
-								)
-						)
-					)
-				);
+						LTimeSpan.Ticks +
+							(
+								((int)AArgument2 - LTimeSpan.Days) * 
+								TimeSpan.TicksPerDay
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanReadHour(AValue : TimeSpan) : Integer;</remarks>
-	public class SystemTimeSpanTimeSpanReadHourNode : InstructionNode
+	public class SystemTimeSpanTimeSpanReadHourNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Hours));
+				return ((TimeSpan)AArgument).Hours;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteHour(AValue : TimeSpan, AHour : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanWriteHourNode : InstructionNode
+	public class SystemTimeSpanTimeSpanWriteHourNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				TimeSpan LTimeSpan = AArguments[0].Value.AsTimeSpan;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				TimeSpan LTimeSpan = (TimeSpan)AArgument1;
+				return 
+					new TimeSpan
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							LTimeSpan.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTimeSpan.Hours) * 
-									TimeSpan.TicksPerHour
-								)
-						)
-					)
-				);
+						LTimeSpan.Ticks +
+							(
+								((int)AArgument2 - LTimeSpan.Hours) * 
+								TimeSpan.TicksPerHour
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanReadMinute(AValue : TimeSpan) : Integer;</remarks>
-	public class SystemTimeSpanTimeSpanReadMinuteNode : InstructionNode
+	public class SystemTimeSpanTimeSpanReadMinuteNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Minutes));
+				return ((TimeSpan)AArgument).Minutes;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteMinute(AValue : TimeSpan, AMinute : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanWriteMinuteNode : InstructionNode
+	public class SystemTimeSpanTimeSpanWriteMinuteNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				TimeSpan LTimeSpan = AArguments[0].Value.AsTimeSpan;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				TimeSpan LTimeSpan = (TimeSpan)AArgument1;
+				return 
+					new TimeSpan
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							LTimeSpan.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTimeSpan.Minutes) * 
-									TimeSpan.TicksPerMinute
-								)
-						)
-					)
-				);
+						LTimeSpan.Ticks +
+							(
+								((int)AArgument2 - LTimeSpan.Minutes) * 
+								TimeSpan.TicksPerMinute
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanReadSecond(AValue : TimeSpan) : Integer;</remarks>
-	public class SystemTimeSpanTimeSpanReadSecondNode : InstructionNode
+	public class SystemTimeSpanTimeSpanReadSecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Seconds));
+				return ((TimeSpan)AArgument).Seconds;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteSecond(AValue : TimeSpan, ASecond : Integer) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanWriteSecondNode : InstructionNode
+	public class SystemTimeSpanTimeSpanWriteSecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				TimeSpan LTimeSpan = AArguments[0].Value.AsTimeSpan;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				TimeSpan LTimeSpan = (TimeSpan)AArgument1;
+				return 
+					new TimeSpan
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
-						(
-							LTimeSpan.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTimeSpan.Seconds) * 
-									TimeSpan.TicksPerSecond
-								)
-						)
-					)
-				);
+						LTimeSpan.Ticks +
+							(
+								((int)AArgument2 - LTimeSpan.Seconds) * 
+								TimeSpan.TicksPerSecond
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanReadMillisecond(AValue : TimeSpan) : Decimal;</remarks>
-	public class SystemTimeSpanTimeSpanReadMillisecondNode : InstructionNode
+	public class SystemTimeSpanTimeSpanReadMillisecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond));
+				return ((TimeSpan)AArgument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
 	
 	/// <remarks>operator System.TimeSpan.TimeSpanWriteMillisecond(AValue : TimeSpan, AMillisecond : Decimal) : TimeSpan;</remarks>
-	public class SystemTimeSpanTimeSpanWriteMillisecondNode : InstructionNode
+	public class SystemTimeSpanTimeSpanWriteMillisecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				return 
+					new TimeSpan
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new TimeSpan
+						(long)
 						(
-							(long)
-							(
-								(AArguments[0].Value.AsTimeSpan.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-								(AArguments[1].Value.AsDecimal * TimeSpan.TicksPerMillisecond)
-							)					
-						)
-					)
-				);
+							(((TimeSpan)AArgument1).Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+							((decimal)AArgument2 * TimeSpan.TicksPerMillisecond)
+						)					
+					);
 		}
 	}
 
 	// DateTime Selectors
 	/// <remarks>operator System.DateTime.Ticks(ATicks : Long) : DateTime;</remarks>
-	public class SystemDateTimeTicksSelectorNode : InstructionNode
+	public class SystemDateTimeTicksSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsInt64;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = (long)AArgument;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
@@ -698,585 +618,497 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil ||
-				(AArguments[4].Value == null) || AArguments[4].Value.IsNil ||
-				(AArguments[5].Value == null) || AArguments[5].Value.IsNil ||
-				(AArguments[6].Value == null) || AArguments[6].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null) ||
+				(AArguments[4] == null) ||
+				(AArguments[5] == null) ||
+				(AArguments[6] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							AArguments[3].Value.AsInt32,
-							AArguments[4].Value.AsInt32,
-							AArguments[5].Value.AsInt32
-						).AddTicks((long)(AArguments[6].Value.AsDecimal * TimeSpan.TicksPerMillisecond))
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2],
+						(int)AArguments[3],
+						(int)AArguments[4],
+						(int)AArguments[5]
+					).AddTicks((long)((decimal)AArguments[6] * TimeSpan.TicksPerMillisecond));
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer, AHours : Integer, AMinutes : Integer, ASeconds : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeSecondsSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil ||
-				(AArguments[4].Value == null) || AArguments[4].Value.IsNil ||
-				(AArguments[5].Value == null) || AArguments[5].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null) ||
+				(AArguments[4] == null) ||
+				(AArguments[5] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							AArguments[3].Value.AsInt32,
-							AArguments[4].Value.AsInt32,
-							AArguments[5].Value.AsInt32
-						)
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2],
+						(int)AArguments[3],
+						(int)AArguments[4],
+						(int)AArguments[5]
+					);
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer, AHours : Integer, AMinutes : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeMinutesSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil ||
-				(AArguments[4].Value == null) || AArguments[4].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null) ||
+				(AArguments[4] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							AArguments[3].Value.AsInt32,
-							AArguments[4].Value.AsInt32,
-							0,
-							0
-						)
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2],
+						(int)AArguments[3],
+						(int)AArguments[4],
+						0,
+						0
+					);
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTime(AYears : Integer, AMonths : Integer, ADays : Integer) : DateTime;</remarks>
 	public class SystemDateTimeDateTimeDaysSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32
-						)
-					)
-				);
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2]
+					);
 		}
 	}
 	
 	// Explicit Cast Operators
 	/// <remarks>operator System.DateTime.DateTime(ATimeSpan : TimeSpan) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeNode : InstructionNode
+	public class SystemDateTimeDateTimeNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsTimeSpan.Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = ((TimeSpan)AArgument).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 
 	// DateTime Accessors
 	/// <remarks>operator System.DateTime.TicksReadTicks(AValue : DateTime) : Long;</remarks>
-	public class SystemDateTimeTicksReadTicksNode : InstructionNode
+	public class SystemDateTimeTicksReadTicksNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Ticks));
+				return ((DateTime)AArgument).Ticks;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.TicksWriteTicks(AValue : DateTime, ATicks : Long) : DateTime;</remarks>
-	public class SystemDateTimeTicksWriteTicksNode : InstructionNode
+	public class SystemDateTimeTicksWriteTicksNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[1].Value.AsInt64;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = (long)AArgument2;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadYear(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadYearNode : InstructionNode
+	public class SystemDateTimeDateTimeReadYearNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Year));
+				return ((DateTime)AArgument).Year;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteYear(AValue : DateTime, AYear : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteYearNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteYearNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							AArguments[1].Value.AsInt32, 
-							LDateTime.Month, 
-							LDateTime.Day
-						).AddTicks(LDateTime.TimeOfDay.Ticks)
-					)
-				);
+						(int)AArgument2, 
+						LDateTime.Month, 
+						LDateTime.Day
+					).AddTicks(LDateTime.TimeOfDay.Ticks);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadMonth(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadMonthNode : InstructionNode
+	public class SystemDateTimeDateTimeReadMonthNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Month));
+				return ((DateTime)AArgument).Month;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteMonth(AValue : DateTime, AMonth : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteMonthNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteMonthNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LDateTime.Year,
-							AArguments[1].Value.AsInt32, 
-							LDateTime.Day
-						).AddTicks(LDateTime.TimeOfDay.Ticks)
-					)
-				);
+						LDateTime.Year,
+						(int)AArgument2, 
+						LDateTime.Day
+					).AddTicks(LDateTime.TimeOfDay.Ticks);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadDay(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadDayNode : InstructionNode
+	public class SystemDateTimeDateTimeReadDayNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Day));
+				return ((DateTime)AArgument).Day;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteDay(AValue : DateTime, ADay : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteDayNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteDayNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LDateTime.Year,
-							LDateTime.Month, 
-							AArguments[1].Value.AsInt32
-						).AddTicks(LDateTime.TimeOfDay.Ticks)
-					)
-				);
+						LDateTime.Year,
+						LDateTime.Month, 
+						(int)AArgument2
+					).AddTicks(LDateTime.TimeOfDay.Ticks);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadHour(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadHourNode : InstructionNode
+	public class SystemDateTimeDateTimeReadHourNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Hour));
+				return ((DateTime)AArgument).Hour;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteHour(AValue : DateTime, AHour : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteHourNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteHourNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LDateTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LDateTime.Hour) * 
-									TimeSpan.TicksPerHour
-								)
-						)
-					)
-				);
+						LDateTime.Ticks +
+							(
+								((int)AArgument2 - LDateTime.Hour) * 
+								TimeSpan.TicksPerHour
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadMinute(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadMinuteNode : InstructionNode
+	public class SystemDateTimeDateTimeReadMinuteNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Minute));
+				return ((DateTime)AArgument).Minute;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteMinute(AValue : DateTime, AMinute : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteMinuteNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteMinuteNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LDateTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LDateTime.Minute) *
-									TimeSpan.TicksPerMinute
-								)
-						)
-					)
-				);
+						LDateTime.Ticks +
+							(
+								((int)AArgument2 - LDateTime.Minute) *
+								TimeSpan.TicksPerMinute
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadSecond(AValue : DateTime) : Integer;</remarks>
-	public class SystemDateTimeDateTimeReadSecondNode : InstructionNode
+	public class SystemDateTimeDateTimeReadSecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Second));
+				return ((DateTime)AArgument).Second;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteSecond(AValue : DateTime, ASecond : Integer) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteSecondNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteSecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LDateTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LDateTime.Second) *
-									TimeSpan.TicksPerSecond
-								)
-						)
-					)
-				);
+						LDateTime.Ticks +
+							(
+								((int)AArgument2 - LDateTime.Second) *
+								TimeSpan.TicksPerSecond
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeReadMillisecond(AValue : DateTime) : Decimal;</remarks>
-	public class SystemDateTimeDateTimeReadMillisecondNode : InstructionNode
+	public class SystemDateTimeDateTimeReadMillisecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond));
+				return ((DateTime)AArgument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
 	
 	/// <remarks>operator System.DateTime.DateTimeWriteMillisecond(AValue : DateTime, AMillisecond : Decimal) : DateTime;</remarks>
-	public class SystemDateTimeDateTimeWriteMillisecondNode : InstructionNode
+	public class SystemDateTimeDateTimeWriteMillisecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LDateTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LDateTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							(LDateTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-							(long)(AArguments[1].Value.AsDecimal * TimeSpan.TicksPerMillisecond)
-						)
-					)
-				);
+						(LDateTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+						(long)((decimal)AArgument2 * TimeSpan.TicksPerMillisecond)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.Date.Ticks(ATicks : Long) : Date;</remarks>
-	public class SystemDateTicksSelectorNode : InstructionNode
+	public class SystemDateTicksSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsInt64;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay))));
+				long LTicks = (long)AArgument;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 			}
 		}
 	}
 
 	/// <remarks>operator System.Date.TicksReadTicks(AValue : Date) : Long;</remarks>
-	public class SystemDateTicksReadTicksNode : InstructionNode
+	public class SystemDateTicksReadTicksNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Ticks));
+				return ((DateTime)AArgument).Ticks;
 		}
 	}
 	
 	/// <remarks>operator System.Date.TicksWriteTicks(AValue : Date, ATicks : Long) : Date;</remarks>
-	public class SystemDateTicksWriteTicksNode : InstructionNode
+	public class SystemDateTicksWriteTicksNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[1].Value.AsInt64;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay))));
+				long LTicks = (long)AArgument2;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 			}
 		}
 	}
-	
+
 	/// <remarks>operator System.Time.Ticks(ATicks : Long) : Time;</remarks>
-	public class SystemTimeTicksSelectorNode : InstructionNode
+	public class SystemTimeTicksSelectorNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsInt64 % TimeSpan.TicksPerDay;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = (long)AArgument % TimeSpan.TicksPerDay;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
@@ -1284,1542 +1116,1481 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer, ASeconds : Integer, AMilliseconds : Integer) : Time;</remarks>
 	public class SystemTimeTimeMillisecondsSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil ||
-				(AArguments[3].Value == null) || AArguments[3].Value.IsNil
+				(AArguments[0] == null) ||
+				(AArguments[1] == null) ||
+				(AArguments[2] == null) ||
+				(AArguments[3] == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							1,
-							1,
-							1,
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32
-						).AddTicks((long)(AArguments[3].Value.AsDecimal * TimeSpan.TicksPerMillisecond) )
-					)
-				);
+						1,
+						1,
+						1,
+						(int)AArguments[0],
+						(int)AArguments[1],
+						(int)AArguments[2]
+					).AddTicks((long)((decimal)AArguments[3] * TimeSpan.TicksPerMillisecond));
 		}
 	}
 	
 	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer, ASeconds : Integer) : Time;</remarks>
-	public class SystemTimeTimeSecondsSelectorNode : InstructionNode
+	public class SystemTimeTimeSecondsSelectorNode : TernaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil ||
-				(AArguments[2].Value == null) || AArguments[2].Value.IsNil
+				(AArgument1 == null) ||
+				(AArgument2 == null) ||
+				(AArgument3 == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							1,
-							1,
-							1,
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							AArguments[2].Value.AsInt32,
-							0
-						)
-					)
-				);
+						1,
+						1,
+						1,
+						(int)AArgument1,
+						(int)AArgument2,
+						(int)AArgument3,
+						0
+					);
 		}
 	}
 	
 	/// <remarks>operator System.Time.Time(AHours : Integer, AMinutes : Integer) : Time;</remarks>
-	public class SystemTimeTimeMinutesSelectorNode : InstructionNode
+	public class SystemTimeTimeMinutesSelectorNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if 
 			(
-				(AArguments[0].Value == null) || AArguments[0].Value.IsNil ||
-				(AArguments[1].Value == null) || AArguments[1].Value.IsNil
+				(AArgument1 == null) ||
+				(AArgument2 == null)
 			)
-				return new DataVar(DataType);
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					DataType,
-					new Scalar
+				return 
+					new DateTime
 					(
-						AProcess, 
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							1,
-							1,
-							1,
-							AArguments[0].Value.AsInt32,
-							AArguments[1].Value.AsInt32,
-							0,
-							0
-						)
-					)
-				);
+						1,
+						1,
+						1,
+						(int)AArgument1,
+						(int)AArgument2,
+						0,
+						0
+					);
 		}
 	}
 	
 	// Time Accessors
 	/// <remarks>operator System.Time.TicksReadTicks(AValue : Time) : Long;</remarks>
-	public class SystemTimeTicksReadTicksNode : InstructionNode
+	public class SystemTimeTicksReadTicksNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Ticks));
+				return ((DateTime)AArgument).Ticks;
 		}
 	}
 	
 	/// <remarks>operator System.Time.TicksWriteTicks(AValue : Time, ATicks : Long) : Time;</remarks>
-	public class SystemTimeTicksWriteTicksNode : InstructionNode
+	public class SystemTimeTicksWriteTicksNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[1].Value.AsInt64 % TimeSpan.TicksPerDay;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = (long)AArgument2 % TimeSpan.TicksPerDay;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeReadHour(AValue : Time) : Integer;</remarks>
-	public class SystemTimeTimeReadHourNode : InstructionNode
+	public class SystemTimeTimeReadHourNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Hour));
+				return ((DateTime)AArgument).Hour;
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeWriteHour(AValue : Time, AHour : Integer) : Time;</remarks>
-	public class SystemTimeTimeWriteHourNode : InstructionNode
+	public class SystemTimeTimeWriteHourNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTime.Hour) *
-									TimeSpan.TicksPerHour
-								)
-						)
-					)
-				);
+						LTime.Ticks +
+							(
+								((int)AArgument2 - LTime.Hour) *
+								TimeSpan.TicksPerHour
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeReadMinute(AValue : Time) : Integer;</remarks>
-	public class SystemTimeTimeReadMinuteNode : InstructionNode
+	public class SystemTimeTimeReadMinuteNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Minute));
+				return ((DateTime)AArgument).Minute;
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeWriteMinute(AValue : Time, AMinute : Integer) : Time;</remarks>
-	public class SystemTimeTimeWriteMinuteNode : InstructionNode
+	public class SystemTimeTimeWriteMinuteNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTime.Minute) *
-									TimeSpan.TicksPerMinute
-								)
-						)
-					)
-				);
+						LTime.Ticks +
+							(
+								((int)AArgument2 - LTime.Minute) *
+								TimeSpan.TicksPerMinute
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeReadSecond(AValue : Time) : Integer;</remarks>
-	public class SystemTimeTimeReadSecondNode : InstructionNode
+	public class SystemTimeTimeReadSecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Second));
+				return ((DateTime)AArgument).Second;
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeWriteSecond(AValue : Time, ASecond : Integer) : Time;</remarks>
-	public class SystemTimeTimeWriteSecondNode : InstructionNode
+	public class SystemTimeTimeWriteSecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							LTime.Ticks +
-								(
-									(AArguments[1].Value.AsInt32 - LTime.Second) *
-									TimeSpan.TicksPerSecond
-								)
-						)
-					)
-				);
+						LTime.Ticks +
+							(
+								((int)AArgument2 - LTime.Second) *
+								TimeSpan.TicksPerSecond
+							)
+					);
 			}
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeReadMillisecond(AValue : Time) : Decimal;</remarks>
-	public class SystemTimeTimeReadMillisecondNode : InstructionNode
+	public class SystemTimeTimeReadMillisecondNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond ));
+				return ((DateTime)AArgument).Ticks % TimeSpan.TicksPerSecond / (decimal)TimeSpan.TicksPerMillisecond;
 		}
 	}
 	
 	/// <remarks>operator System.Time.TimeWriteMillisecond(AValue : Time, AMillisecond : Decimal) : Time;</remarks>
-	public class SystemTimeTimeWriteMillisecondNode : InstructionNode
+	public class SystemTimeTimeWriteMillisecondNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LTime = AArguments[0].Value.AsDateTime;
-				return new DataVar
-				(
-					DataType, 
-					new Scalar
+				DateTime LTime = (DateTime)AArgument1;
+				return 
+					new DateTime
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						new DateTime
-						(
-							(LTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
-							(long)(AArguments[1].Value.AsDecimal * TimeSpan.TicksPerMillisecond)
-						)
-					)
-				);
+						(LTime.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond) +
+						(long)((decimal)AArgument2 * TimeSpan.TicksPerMillisecond)
+					);
 			}
 		}
 	}
 
 	// Conversions		
 	/// <remarks>operator ToTimeSpan(AString : String) : TimeSpan;</remarks>
-	public class StringToTimeSpanNode : InstructionNode
+	public class StringToTimeSpanNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpanAsStringSelectorNode.StringToTimeSpan(AArguments[0].Value.AsString)));
+				return TimeSpanAsStringSelectorNode.StringToTimeSpan((String)AArgument);
 		}
 	}
 
 	/// <remarks>operator ToDateTime(AString : string) : DateTime;</remarks>
-	public class StringToDateTimeNode : InstructionNode
+	public class StringToDateTimeNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = DateTime.Parse(AArguments[0].Value.AsString).Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = DateTime.Parse((String)AArgument).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 
 	/// <remarks>operator ToDate(AString : string) : Date;</remarks>
-	public class StringToDateNode : InstructionNode
+	public class StringToDateNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Parse(AArguments[0].Value.AsString).Date));
+				return DateTime.Parse((String)AArgument).Date;
 		}
 	}
 	
 	/// <remarks>operator ToTime(AString : string) : Time;</remarks>
-	public class StringToTimeNode : InstructionNode
+	public class StringToTimeNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = DateTime.Parse("1/1/0001 " + AArguments[0].Value.AsString).Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = DateTime.Parse("1/1/0001 " + (String)AArgument).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 
 	/// <remarks>operator ToString(ATimeSpan : TimeSpan) : String;</remarks>
-	public class TimeSpanToStringNode : InstructionNode
+	public class TimeSpanToStringNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpanAsStringSelectorNode.TimeSpanToString(AArguments[0].Value.AsTimeSpan)));
+				return TimeSpanAsStringSelectorNode.TimeSpanToString((TimeSpan)AArgument);
 		}
 	}
 	
 	/// <remarks>operator ToString(ADateTime : DateTime) : String;</remarks>
-	public class DateTimeToStringNode : InstructionNode
+	public class DateTimeToStringNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("G")));
+				return ((DateTime)AArgument).ToString("G");
 		}
 	}
 	
 	/// <remarks>operator ToString(ATime : Time) : String;</remarks>
-	public class TimeToStringNode : InstructionNode
+	public class TimeToStringNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("T")));
+				return ((DateTime)AArgument).ToString("T");
 		}
 	}
 
 	/// <remarks>operator ToString(ADate : Date) : String;</remarks>
-	public class DateToStringNode : InstructionNode
+	public class DateToStringNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("d")));
+				return ((DateTime)AArgument).ToString("d");
 		}
 	}
 	
 	/// <remarks>operator DatePart(ADateTime : DateTime) : DateTime;</remarks>
-	public class DatePartNode : InstructionNode
+	public class DatePartNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.Date));
+				return ((DateTime)AArgument).Date;
 		}
 	}
 	
 	/// <remarks>operator TimePart(ADateTime : DateTime) : DateTime;</remarks>
-	public class TimePartNode : InstructionNode
+	public class TimePartNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(AArguments[0].Value.AsDateTime.TimeOfDay.Ticks)));
+				return new DateTime(((DateTime)AArgument).TimeOfDay.Ticks);
 		}
 	}
 
 	// Miscellaneous
 	/// <remarks>operator DateTime() : DateTime;</remarks>
-	public class DateTimeNode : InstructionNode
+	public class DateTimeNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
 			long LTicks;
 			if (AProcess.InTransaction)
 				LTicks = AProcess.RootTransaction.StartTime.Ticks;
 			else
 				LTicks = DateTime.Now.Ticks;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 	}
 	
 	/// <remarks>operator ActualDateTime() : DateTime;</remarks>
-	public class ActualDateTimeNode : InstructionNode
+	public class ActualDateTimeNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
 			long LTicks = DateTime.Now.Ticks;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 	}
 	
 	/// <remarks>operator Date() : Date;</remarks>
-	public class DateNode : InstructionNode
+	public class DateNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.InTransaction)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AProcess.RootTransaction.StartTime.Date));
+				return AProcess.RootTransaction.StartTime.Date;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Today));
+				return DateTime.Today;
 		}
 	}
 	
 	/// <remarks>operator ActualDate() : Date;</remarks>
-	public class ActualDateNode : InstructionNode
+	public class ActualDateNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Today));
+			return DateTime.Today;
 		}
 	}
 	
 	/// <remarks>operator Time() : Time; </remarks>
-	public class TimeNode : InstructionNode
+	public class TimeNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
 			long LTicks;
 			if (AProcess.InTransaction)
 				LTicks = AProcess.RootTransaction.StartTime.TimeOfDay.Ticks;
 			else
 				LTicks = DateTime.Now.Ticks;
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 	}
 
 	/// <remarks>operator ActualTime() : Time; </remarks>
-	public class ActualTimeNode : InstructionNode
+	public class ActualTimeNode : NilaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
 			long LTicks = DateTime.Now.Ticks;
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+			return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 		}
 	}
 
 	/// <remarks>operator DayOfWeek(ADateTime : DateTime) : Integer;</remarks>
-	public class DayOfWeekNode : InstructionNode
+	public class DayOfWeekNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (int)AArguments[0].Value.AsDateTime.DayOfWeek));
+				return (int)((DateTime)AArgument).DayOfWeek;
 		}
 	}
 
 	/// <remarks>operator DayOfYear(ADateTime : DateTime) : Integer;</remarks>
-	public class DayOfYearNode : InstructionNode
+	public class DayOfYearNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.DayOfYear));
+				return ((DateTime)AArgument).DayOfYear;
 		}
 	}
 
 	/// <remarks>operator DaysInMonth(AYear : Integer, AMonth : Integer) : Integer;</remarks>
-	public class DaysInMonthNode : InstructionNode
+	public class DaysInMonthNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.DaysInMonth(AArguments[0].Value.AsInt32, AArguments[1].Value.AsInt32)));
+				return DateTime.DaysInMonth((int)AArgument1, (int)AArgument2);
 		}
 	}
 
 	/// <remarks>operator IsLeapYear(AYear : Integer) : Boolean;</remarks>
-	public class IsLeapYearNode : InstructionNode
+	public class IsLeapYearNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.IsLeapYear(AArguments[0].Value.AsInt32)));
+				return DateTime.IsLeapYear((int)AArgument);
 		}
 	}
 	
 	/// <remarks>operator Duration(ATimeSpan : TimeSpan) : TimeSpan;</remarks>
-	public class DurationNode : InstructionNode
+	public class DurationNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan.Duration()));
+				return ((TimeSpan)AArgument).Duration();
 		}
 	}
 
 	/// <remarks>operator AddMonths(ADateTime : DateTime, AMonths : integer) : DateTime;</remarks>
-	public class DateTimeAddMonthsNode : InstructionNode
+	public class DateTimeAddMonthsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.AddMonths(AArguments[1].Value.AsInt32)));
+				return ((DateTime)AArgument1).AddMonths((int)AArgument2);
 		}
 	}	
 	
 	/// <remarks>operator MonthsBetween(AStartDateTime : DateTime, AEndDateTime : DateTime) : Integer;</remarks>
-	public class DateTimeMonthsBetweenNode : InstructionNode
+	public class DateTimeMonthsBetweenNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LStartDate = AArguments[0].Value.AsDateTime;
-				DateTime LEndDate = AArguments[1].Value.AsDateTime;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((LEndDate.Year - LStartDate.Year) * 12) + (LEndDate.Month - LStartDate.Month)));
+				DateTime LStartDate = (DateTime)AArgument1;
+				DateTime LEndDate = (DateTime)AArgument2;
+				return ((LEndDate.Year - LStartDate.Year) * 12) + (LEndDate.Month - LStartDate.Month);
 			}
 		}
 	}
 	
 	/// <remarks>operator AddYears(ADateTime : DateTime, AYears : integer) : DateTime;</remarks>
-	public class DateTimeAddYearsNode : InstructionNode
+	public class DateTimeAddYearsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.AddYears(AArguments[1].Value.AsInt32)));
+				return ((DateTime)AArgument1).AddYears((int)AArgument2);
 		}
 	}
 
 	/// <remarks>operator YearsBetween(AStartDateTime : DateTime, AEndDateTime : DateTime) : Integer;</remarks>
-	public class DateTimeYearsBetweenNode : InstructionNode
+	public class DateTimeYearsBetweenNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				DateTime LStartDate = AArguments[0].Value.AsDateTime;
-				DateTime LEndDate = AArguments[1].Value.AsDateTime;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (LEndDate.Year - LStartDate.Year)));
+				DateTime LStartDate = (DateTime)AArgument1;
+				DateTime LEndDate = (DateTime)AArgument2;
+				return (LEndDate.Year - LStartDate.Year);
 			}
 		}
 	}
 	
 	/// <remarks>operator AddMonths(ADate : Date, AMonths : integer) : Date;</remarks>
-	public class DateAddMonthsNode : InstructionNode
+	public class DateAddMonthsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.AddMonths(AArguments[1].Value.AsInt32)));
+				return ((DateTime)AArgument1).AddMonths((int)AArgument2);
 		}
 	}	
 	
 	/// <remarks>operator AddYears(ADate : Date, AYears : integer) : Date;</remarks>
-	public class DateAddYearsNode : InstructionNode
+	public class DateAddYearsNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.AddYears(AArguments[1].Value.AsInt32)));
+				return ((DateTime)AArgument1).AddYears((int)AArgument2);
 		}
 	}
 
 	// Arithmetic		
 	/// <remarks>operator iNegate(AValue : TimeSpan) : TimeSpan;</remarks>
-	public class TimeSpanNegateNode : InstructionNode
+	public class TimeSpanNegateNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -AArguments[0].Value.AsTimeSpan));
+				return -(TimeSpan)AArgument;
 		}
 	}
 	
 	/// <remarks>operator iAddition(ALeftValue : TimeSpan, ARightValue : TimeSpan) : TimeSpan;</remarks>
-	public class TimeSpanAdditionNode : InstructionNode
+	public class TimeSpanAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan + AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 + (TimeSpan)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iAddition(ALeftValue : DateTime, ARightValue : TimeSpan) : DateTime;</remarks>
-	public class DateTimeTimeSpanAdditionNode : InstructionNode
+	public class DateTimeTimeSpanAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsDateTime.Ticks + AArguments[1].Value.AsTimeSpan.Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = ((DateTime)AArgument1).Ticks + ((TimeSpan)AArgument2).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator iAddition(ALeftValue : Date, ARightValue : TimeSpan) : Date;</remarks>
-	public class DateTimeSpanAdditionNode : InstructionNode
+	public class DateTimeSpanAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsDateTime.Ticks + AArguments[1].Value.AsTimeSpan.Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay))));
+				long LTicks = ((DateTime)AArgument1).Ticks + ((TimeSpan)AArgument2).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 			}
 		}
 	}
 	
-	/// <remarks>operator iAddition(ALeftValue : TimeSpan, ARightValue : TimeSpan) : DateTime;</remarks>
-	public class TimeTimeSpanAdditionNode : InstructionNode
+	/// <remarks>operator iAddition(ALeftValue : Time, ARightValue : TimeSpan) : DateTime;</remarks>
+	public class TimeTimeSpanAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = (AArguments[0].Value.AsDateTime.Ticks + AArguments[1].Value.AsTimeSpan.Ticks) % TimeSpan.TicksPerDay;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = (((DateTime)AArgument1).Ticks + ((TimeSpan)AArgument2).Ticks) % TimeSpan.TicksPerDay;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : TimeSpan, ARightValue : TimeSpan) : TimeSpan;</remarks>
-	public class TimeSpanSubtractionNode : InstructionNode
+	public class TimeSpanSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan - AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 - (TimeSpan)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : DateTime, ARightValue : DateTime) : TimeSpan;</remarks>
-	public class DateTimeSubtractionNode : InstructionNode
+	public class DateTimeSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsDateTime.Ticks - AArguments[1].Value.AsDateTime.Ticks)));
+				return new TimeSpan(((DateTime)AArgument1).Ticks - ((DateTime)AArgument2).Ticks);
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : Date, ARightValue : Date) : TimeSpan;</remarks>
-	public class DateSubtractionNode : InstructionNode
+	public class DateSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsDateTime.Ticks - AArguments[1].Value.AsDateTime.Ticks)));
+				return new TimeSpan(((DateTime)AArgument1).Ticks - ((DateTime)AArgument2).Ticks);
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : Time, ARightValue : Time) : TimeSpan;</remarks>
-	public class TimeSubtractionNode : InstructionNode
+	public class TimeSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsDateTime.Ticks - AArguments[1].Value.AsDateTime.Ticks)));
+				return new TimeSpan(((DateTime)AArgument1).Ticks - ((DateTime)AArgument2).Ticks);
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : DateTime, ARightValue : TimeSpan) : DateTime;</remarks>
-	public class DateTimeTimeSpanSubtractionNode : InstructionNode
+	public class DateTimeTimeSpanSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsDateTime.Ticks - AArguments[1].Value.AsTimeSpan.Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = ((DateTime)AArgument1).Ticks - ((TimeSpan)AArgument2).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : Date, ARightValue : TimeSpan) : Date;</remarks>
-	public class DateTimeSpanSubtractionNode : InstructionNode
+	public class DateTimeSpanSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = AArguments[0].Value.AsDateTime.Ticks - AArguments[1].Value.AsTimeSpan.Ticks;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay))));
+				long LTicks = ((DateTime)AArgument1).Ticks - ((TimeSpan)AArgument2).Ticks;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
 			}
 		}
 	}
 	
 	/// <remarks>operator iSubtraction(ALeftValue : Time, ARightValue : TimeSpan) : DateTime;</remarks>
-	public class TimeTimeSpanSubtractionNode : InstructionNode
+	public class TimeTimeSpanSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
 			{
-				long LTicks = ((AArguments[0].Value.AsDateTime.Ticks + TimeSpan.TicksPerDay) - (AArguments[1].Value.AsTimeSpan.Ticks % TimeSpan.TicksPerDay)) % TimeSpan.TicksPerDay;
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond))));
+				long LTicks = ((((DateTime)AArgument1).Ticks + TimeSpan.TicksPerDay) - (((TimeSpan)AArgument2).Ticks % TimeSpan.TicksPerDay)) % TimeSpan.TicksPerDay;
+				return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
 			}
 		}
 	}
 	
 	/// <remarks>operator iMultiplication(ALeftValue : TimeSpan, ARightValue : Integer) : TimeSpan;</remarks>
-	public class TimeSpanIntegerMultiplicationNode : InstructionNode
+	public class TimeSpanIntegerMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsTimeSpan.Ticks * AArguments[1].Value.AsInt32)));
+				return new TimeSpan(((TimeSpan)AArgument1).Ticks * (int)AArgument2);
 		}
 	}
 	
-	/// <remarks>operator iMultiplication(ALeftValue : Integer, ARightValue : TimeSpan) : DateTIme;</remarks>
-	public class IntegerTimeSpanMultiplicationNode : InstructionNode
+	/// <remarks>operator iMultiplication(ALeftValue : Integer, ARightValue : TimeSpan) : DateTime;</remarks>
+	public class IntegerTimeSpanMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsInt32 * AArguments[1].Value.AsTimeSpan.Ticks)));
+				return new TimeSpan((int)AArgument1 * ((TimeSpan)AArgument2).Ticks);
 		}
 	}
 	
 	/// <remarks>operator iMultiplication(ALeftValue : TimeSpan, ARightValue : Decimal) : TimeSpan;</remarks>
-	public class TimeSpanDecimalMultiplicationNode : InstructionNode
+	public class TimeSpanDecimalMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(Convert.ToInt64(AArguments[0].Value.AsTimeSpan.Ticks * AArguments[1].Value.AsDecimal))));
+				return new TimeSpan(Convert.ToInt64(((TimeSpan)AArgument1).Ticks * (decimal)AArgument2));
 		}
 	}
 	
-	/// <remarks>operator iMultiplication(ALeftValue : Decimal, ARightValue : TimeSpan) : DateTIme;</remarks>
-	public class DecimalTimeSpanMultiplicationNode : InstructionNode
+	/// <remarks>operator iMultiplication(ALeftValue : Decimal, ARightValue : TimeSpan) : DateTime;</remarks>
+	public class DecimalTimeSpanMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(Convert.ToInt64(AArguments[0].Value.AsDecimal * AArguments[1].Value.AsTimeSpan.Ticks))));
+				return new TimeSpan(Convert.ToInt64((decimal)AArgument1 * ((TimeSpan)AArgument2).Ticks));
 		}
 	}
 	
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : Integer) : TimeSpan;</remarks>
-	public class TimeSpanIntegerDivisionNode : InstructionNode
+	public class TimeSpanIntegerDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsTimeSpan.Ticks / AArguments[1].Value.AsInt32)));
+				return new TimeSpan(((TimeSpan)AArgument1).Ticks / (int)AArgument2);
 		}
 	}
 	
 	/// <remarks>operator iDivision(ALeftValue : Integer, ARightValue : TimeSpan) : TimeSpan;</remarks>
-	public class IntegerTimeSpanDivisionNode : InstructionNode
+	public class IntegerTimeSpanDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(AArguments[0].Value.AsInt32 / AArguments[1].Value.AsTimeSpan.Ticks)));
+				return new TimeSpan((int)AArgument1 / ((TimeSpan)AArgument2).Ticks);
 		}
 	}
 	
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : Decimal) : TimeSpan;</remarks>
-	public class TimeSpanDecimalDivisionNode : InstructionNode
+	public class TimeSpanDecimalDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(Convert.ToInt64(AArguments[0].Value.AsTimeSpan.Ticks / AArguments[1].Value.AsDecimal))));
+				return new TimeSpan(Convert.ToInt64(((TimeSpan)AArgument1).Ticks / (decimal)AArgument2));
 		}
 	}
 	
 	/// <remarks>operator iDivision(ALeftValue : Decimal, ARightValue : TimeSpan) : TimeSpan;</remarks>
-	public class DecimalTimeSpanDivisionNode : InstructionNode
+	public class DecimalTimeSpanDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new TimeSpan(Convert.ToInt64(AArguments[0].Value.AsDecimal / AArguments[1].Value.AsTimeSpan.Ticks))));
+				return new TimeSpan(Convert.ToInt64((decimal)AArgument1 / ((TimeSpan)AArgument2).Ticks));
 		}
 	}
 	
 	/// <remarks>operator iDivision(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Decimal;</remarks>
-	public class TimeSpanTimeSpanDivisionNode : InstructionNode
+	public class TimeSpanTimeSpanDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (decimal)(AArguments[0].Value.AsTimeSpan.Ticks) / (decimal)(AArguments[1].Value.AsTimeSpan.Ticks)));
+				return (decimal)((TimeSpan)AArgument1).Ticks / (decimal)((TimeSpan)AArgument2).Ticks;
 		}
 	}
 	
 	/// <remarks>operator iEqual(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanEqualNode : InstructionNode
+	public class TimeSpanEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan == AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 == (TimeSpan)AArgument2;
 		}
 	}
 	
-	public class DateTimeEqualNode : InstructionNode
+	public class DateTimeEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime == AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 == (DateTime)AArgument2;
 		}
 	}
 	
-	public class DateEqualNode : InstructionNode
+	public class DateEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime == AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 == (DateTime)AArgument2;
 		}
 	}
 	
-	public class TimeEqualNode : InstructionNode
+	public class TimeEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime == AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 == (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iNotEqual(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanNotEqualNode : InstructionNode
+	public class TimeSpanNotEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan != AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 != (TimeSpan)AArgument2;
 		}
 	}
 	
-	public class DateTimeNotEqualNode : InstructionNode
+	public class DateTimeNotEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime != AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 != (DateTime)AArgument2;
 		}
 	}
 	
-	public class DateNotEqualNode : InstructionNode
+	public class DateNotEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime != AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 != (DateTime)AArgument2;
 		}
 	}
 	
-	public class TimeNotEqualNode : InstructionNode
+	public class TimeNotEqualNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime != AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 != (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iGreater(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanGreaterNode : InstructionNode
+	public class TimeSpanGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan > AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 > (TimeSpan)AArgument2;
 		}
 	}
 	
-	public class DateTimeGreaterNode : InstructionNode
+	public class DateTimeGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime > AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 > (DateTime)AArgument2;
 		}
 	}
 	
-	public class DateGreaterNode : InstructionNode
+	public class DateGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime > AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 > (DateTime)AArgument2;
 		}
 	}
 	
-	public class TimeGreaterNode : InstructionNode
+	public class TimeGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime > AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 > (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iInclusiveGreater(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanInclusiveGreaterNode : InstructionNode
+	public class TimeSpanInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan >= AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 >= (TimeSpan)AArgument2;
 		}
 	}
 	
-	public class DateTimeInclusiveGreaterNode : InstructionNode
+	public class DateTimeInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime >= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 >= (DateTime)AArgument2;
 		}
 	}
 	
-	public class DateInclusiveGreaterNode : InstructionNode
+	public class DateInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime >= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 >= (DateTime)AArgument2;
 		}
 	}
 	
-	public class TimeInclusiveGreaterNode : InstructionNode
+	public class TimeInclusiveGreaterNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime >= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 >= (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iLess(ALeftValue : DateTime, ARightValue : DateTime) : Boolean;</remarks>
-	public class DateTimeLessNode : InstructionNode
+	public class DateTimeLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime < AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 < (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iLess(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanLessNode : InstructionNode
+	public class TimeSpanLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan < AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 < (TimeSpan)AArgument2;
 		}
 	}
 
-	public class DateLessNode : InstructionNode
+	public class DateLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime < AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 < (DateTime)AArgument2;
 		}
 	}
 	
-	public class TimeLessNode : InstructionNode
+	public class TimeLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime < AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 < (DateTime)AArgument2;
 		}
 	}
 	
 	/// <remarks>operator iInclusiveLess(ALeftValue : TimeSpan, ARightValue : TimeSpan) : Boolean;</remarks>
-	public class TimeSpanInclusiveLessNode : InstructionNode
+	public class TimeSpanInclusiveLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsTimeSpan <= AArguments[1].Value.AsTimeSpan));
+				return (TimeSpan)AArgument1 <= (TimeSpan)AArgument2;
 		}
 	}
 
-	public class DateTimeInclusiveLessNode : InstructionNode
+	public class DateTimeInclusiveLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime <= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 <= (DateTime)AArgument2;
 		}
 	}
 
-	public class DateInclusiveLessNode : InstructionNode
+	public class DateInclusiveLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime <= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 <= (DateTime)AArgument2;
 		}
 	}
 
-	public class TimeInclusiveLessNode : InstructionNode
+	public class TimeInclusiveLessNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(DataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
 			#endif
-				return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime <= AArguments[1].Value.AsDateTime));
+				return (DateTime)AArgument1 <= (DateTime)AArgument2;
 		}
 	}
 
 	public class TimeSpanInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
     
 	public class DateTimeInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDateTime, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
     
 	public class DateInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDate, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
     
 	public class TimeSpanSumAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = 
-					new Scalar
-					(
-						AProcess, 
-						AProcess.DataTypes.SystemTimeSpan, 
-						AProcess.Context[1].Value.IsNil ? 
-							AProcess.Context[0].Value.AsTimeSpan : 
-							(AProcess.Context[1].Value.AsTimeSpan + AProcess.Context[0].Value.AsTimeSpan)
-					);
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = 
+					(AProcess.Context[1] == null) ? 
+						(TimeSpan)AProcess.Context[0] : 
+						((TimeSpan)AProcess.Context[1] + (TimeSpan)AProcess.Context[0]);
 			return null;
 		}
 	}
 	
 	public class TimeSpanMinInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class DateTimeMinInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDateTime, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 
 	public class TimeMinInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTime, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 
 	public class DateMinInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDate, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class TimeSpanMinAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsTimeSpan < AProcess.Context[1].Value.AsTimeSpan))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((TimeSpan)AProcess.Context[0] < (TimeSpan)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class DateTimeMinAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime < AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] < (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
 
 	public class TimeMinAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime < AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] < (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class DateMinAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime < AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] < (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class TimeSpanMaxInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class DateTimeMaxInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDateTime, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class TimeMaxInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTime, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class DateMaxInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDate, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
 	
 	public class TimeSpanMaxAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsTimeSpan > AProcess.Context[1].Value.AsTimeSpan))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((TimeSpan)AProcess.Context[0] > (TimeSpan)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class DateTimeMaxAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime > AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] > (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class TimeMaxAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime > AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] > (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class DateMaxAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDateTime > AProcess.Context[1].Value.AsDateTime))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || ((DateTime)AProcess.Context[0] > (DateTime)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
@@ -2828,25 +2599,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new DataVar("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar("LCounter", AProcess.Plan.Catalog.DataTypes.SystemInteger, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0)));
-			AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, TimeSpan.Zero);
+			AProcess.Context.Push(0);
+			AProcess.Context[1] = TimeSpan.Zero;
 			return null;
 		}
 	}
 	
 	public class TimeSpanAvgAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
+			if (AProcess.Context[0] != null)
 			{
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[1].Value.AsInt32 + 1));
-				AProcess.Context[2].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, AProcess.Context[2].Value.AsTimeSpan + AProcess.Context[0].Value.AsTimeSpan);
+				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
+				AProcess.Context[2] = (TimeSpan)AProcess.Context[2] + (TimeSpan)AProcess.Context[0];
 			}
 			return null;
 		}
@@ -2854,12 +2625,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class TimeSpanAvgFinalizationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0].Value.AsInt32 == 0)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, null);
+			if ((int)AProcess.Context[0] == 0)
+				AProcess.Context[1] = null;
 			else
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemTimeSpan, new TimeSpan(AProcess.Context[1].Value.AsTimeSpan.Ticks / AProcess.Context[0].Value.AsInt32));
+				AProcess.Context[1] = new TimeSpan(((TimeSpan)AProcess.Context[1]).Ticks / (int)AProcess.Context[0]);
 			return null;
 		}
 	}

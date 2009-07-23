@@ -131,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceTableType.CreateRowType(Keywords.Parent)));
+				APlan.Symbols.Push(new Symbol(SourceTableType.CreateRowType(Keywords.Parent)));
 				try
 				{
 					Nodes[2].DetermineBinding(APlan);
@@ -162,13 +162,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Order = new Schema.Order(TableVar.FindClusteringKey(), APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			ExplodeTable LTable = new ExplodeTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

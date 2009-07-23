@@ -482,8 +482,8 @@ namespace Alphora.Dataphor.Dataphoria
 			string LDocumentType;
 			using 
 			(
-				DAE.Runtime.Data.DataValue LDocumentTypeValue = 
-					EvaluateQuery
+				DAE.Runtime.Data.Scalar LDocumentTypeValue = 
+					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(
@@ -631,8 +631,8 @@ namespace Alphora.Dataphor.Dataphoria
 						throw new DataphoriaException(DataphoriaException.Codes.NoDefaultDesignerForDocumentType, ADocumentTypeID);
 					LCursor.Select(LRow);
 					DesignerInfo LResult = new DesignerInfo();
-					LResult.ID = LRow["ID"].AsString;
-					LResult.ClassName = LRow["ClassName"].AsString;
+					LResult.ID = (string)LRow["ID"];
+					LResult.ClassName = (string)LRow["ClassName"];
 					return LResult;
 				}
 				finally
@@ -730,7 +730,7 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Evaluates a D4 expression that returns a D4 document, and shows the document in an editor. </summary>
 		public TextEditor.TextEditor EvaluateAndEdit(string AExpression, string ADocumentTypeID)
 		{
-			using (DAE.Runtime.Data.DataValue LScript = EvaluateQuery(AExpression))
+			using (DAE.Runtime.Data.Scalar LScript = (DAE.Runtime.Data.Scalar)EvaluateQuery(AExpression))
 			{
 				return NewEditor(LScript.AsString, ADocumentTypeID);
 			}
@@ -894,7 +894,7 @@ namespace Alphora.Dataphor.Dataphoria
 					while (LCursor.Next())
 					{
 						LCursor.Select(LRow);
-						LFilter.AppendFormat("|{1} (*.{0})|*.{0}", LRow["ID"].AsString, LRow["Description"].AsString);
+						LFilter.AppendFormat("|{1} (*.{0})|*.{0}", (string)LRow["ID"], (string)LRow["Description"]);
 					}
 				}
 				finally
@@ -931,7 +931,7 @@ namespace Alphora.Dataphor.Dataphoria
 						LCursor.Select(LRow);
 						if (LFilter.Length > 0)
 							LFilter.Append('|');
-						LFilter.AppendFormat("{1} (*.{0})|*.{0}", LRow["ID"].AsString, LRow["Description"].AsString);
+						LFilter.AppendFormat("{1} (*.{0})|*.{0}", (string)LRow["ID"], (string)LRow["Description"]);
 					}
 				}
 				finally
@@ -1185,8 +1185,8 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			using 
 			(
-				DAE.Runtime.Data.DataValue LDocumentExistsData = 
-					EvaluateQuery
+				DAE.Runtime.Data.Scalar LDocumentExistsData = 
+					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(
@@ -1260,7 +1260,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public string GetCurrentLibraryName()
 		{
-			using (DAE.Runtime.Data.DataValue LScalar = EvaluateQuery("LibraryName()"))
+			using (DAE.Runtime.Data.Scalar LScalar = (DAE.Runtime.Data.Scalar)EvaluateQuery("LibraryName()"))
 			{
 				return LScalar.AsDisplayString;
 			}
@@ -1270,8 +1270,8 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			using 
 			(
-				DAE.Runtime.Data.DataValue LDefaultTypeData = 
-					EvaluateQuery
+				DAE.Runtime.Data.Scalar LDefaultTypeData = 
+					(DAE.Runtime.Data.Scalar)EvaluateQuery
 					(
 						String.Format
 						(

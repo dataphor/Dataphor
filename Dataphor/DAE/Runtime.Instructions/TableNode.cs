@@ -747,9 +747,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// Used to snapshot the stack to allow for run-time compilation of the concurrency and update nodes
-		protected Context FSymbols;
+		protected Symbols FSymbols;
 		
-		protected void PushSymbols(Plan APlan, Context ASymbols)
+		protected void PushSymbols(Plan APlan, Symbols ASymbols)
 		{
 			APlan.Symbols.PushWindow(0);
 			APlan.EnterRowContext();
@@ -757,7 +757,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.Symbols.Push(ASymbols.Peek(LIndex));
 		}
 		
-		protected void PopSymbols(Plan APlan, Context ASymbols)
+		protected void PopSymbols(Plan APlan, Symbols ASymbols)
 		{
 			for (int LIndex = ASymbols.Count - 1; LIndex >= 0; LIndex--)
 				APlan.Symbols.Pop();
@@ -822,7 +822,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							AProcess.Plan.EnterRowContext();
 							try
 							{
-								AProcess.Plan.Symbols.Push(new DataVar("ASelectRow", DataType.RowType));
+								AProcess.Plan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
 								try
 								{
 									AProcess.Plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
@@ -936,10 +936,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					APlan.EnterRowContext();
 					try
 					{
-						APlan.Symbols.Push(new DataVar(DataType.OldRowType));
+						APlan.Symbols.Push(new Symbol(DataType.OldRowType));
 						try
 						{
-							APlan.Symbols.Push(new DataVar(DataType.RowType));
+							APlan.Symbols.Push(new Symbol(DataType.RowType));
 							try
 							{
 								if (TableVar.Owner != null)
@@ -1241,27 +1241,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (ARow != null)
 			{
 				Row LRow = new Row(AProcess, DataType.RowType, (NativeRow)ARow.AsNative);
-				AProcess.Context.Push(new DataVar(String.Empty, LRow.DataType, LRow));
+				AProcess.Context.Push(LRow);
 			}
 			else
-				AProcess.Context.Push(new DataVar(DataType.RowType, null));
+				AProcess.Context.Push(null);
 		}
 		
 		public void PushNewRow(ServerProcess AProcess, Row ARow)
 		{
 			Row LRow = new Row(AProcess, DataType.NewRowType, (NativeRow)ARow.AsNative);
-			AProcess.Context.Push(new DataVar(String.Empty, LRow.DataType, LRow));
+			AProcess.Context.Push(LRow);
 		}
 		
 		public void PushOldRow(ServerProcess AProcess, Row ARow)
 		{
 			Row LOldRow = new Row(AProcess, DataType.OldRowType, (NativeRow)ARow.AsNative);
-			AProcess.Context.Push(new DataVar(LOldRow.DataType, LOldRow));
+			AProcess.Context.Push(LOldRow);
 		}
 
 		public void PopRow(ServerProcess AProcess)
 		{
-			Row LRow = (Row)AProcess.Context.Pop().Value;
+			Row LRow = (Row)AProcess.Context.Pop();
 			if (LRow != null)
 				LRow.Dispose();
 		}
@@ -1278,10 +1278,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FSymbols != null)
 			{
 				EnsureSelectNode(AProcess);
-				AProcess.Context.Push(new DataVar(ARow.DataType, ARow));
+				AProcess.Context.Push(ARow);
 				try
 				{
-					using (Table LTable = (Table)FSelectNode.Execute(AProcess).Value)
+					using (Table LTable = (Table)FSelectNode.Execute(AProcess))
 					{
 						if (LTable.Next())
 							return LTable.Select();
@@ -1309,10 +1309,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FSymbols != null)
 			{
 				EnsureFullSelectNode(AProcess);
-				AProcess.Context.Push(new DataVar(ARow.DataType, ARow));
+				AProcess.Context.Push(ARow);
 				try
 				{
-					using (Table LTable = (Table)FFullSelectNode.Execute(AProcess).Value)
+					using (Table LTable = (Table)FFullSelectNode.Execute(AProcess))
 					{
 						if (LTable.Next())
 							return LTable.Select();
@@ -1346,8 +1346,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProcess);
 			#endif
-			DataValue LOldValue;
-			DataValue LCurrentValue;
+			object LOldValue;
+			object LCurrentValue;
 			
 			bool LRowsEqual = true;
 			int LColumnIndex;
@@ -1363,50 +1363,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LOldValue = AOldRow[LIndex];
 							LCurrentValue = ACurrentRow[LColumnIndex];
 							#if USENATIVECONCURRENCYCOMPARE
-							if (LOldValue.IsNative && LCurrentValue.IsNative)
-								LRowsEqual = LOldValue.AsNative.Equals(LCurrentValue.AsNative);
-							else
-							{
-								Stream LOldStream = LOldValue.OpenStream();
-								try
-								{
-									Stream LCurrentStream = LCurrentValue.OpenStream();
-									try
-									{
-										int LOldByte;
-										int LCurrentByte;
-										while (true)
-										{
-											LOldByte = LOldStream.ReadByte();
-											LCurrentByte = LCurrentStream.ReadByte();
-											
-											if (LOldByte != LCurrentByte)
-											{
-												LRowsEqual = false;
-												break;
-											}
-											
-											if (LOldByte == -1)
-												break;
-										}
-									}
-									finally
-									{
-										LCurrentStream.Close();
-									}
-								}
-								finally
-								{
-									LOldStream.Close();
-								}
-							}
+							LRowsEqual = DataValue.NativeValuesEqual(AProcess, LOldValue, LCurrentValue);
 							#else
-							AProcess.Context.Push(new DataVar(LOldValue.DataType, LOldValue));
-							AProcess.Context.Push(new DataVar(LCurrentValue.DataType, LCurrentValue));
+							AProcess.Context.Push(LOldValue);
+							AProcess.Context.Push(LCurrentValue);
 							try
 							{
-								Scalar LResult = (Scalar)FConcurrencyNodes[LColumnIndex].Execute(AProcess).Value;
-								LRowsEqual = (LResult != null) && !LResult.IsNil && LResult.AsBoolean;
+								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProcess);
+								LRowsEqual = (LResult != null) && (bool)LResult;
 							}
 							finally
 							{
@@ -1543,7 +1507,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PushRow(AProcess, ARow);
 				try
 				{
-					DataVar LPerformVar = new DataVar(AProcess.DataTypes.SystemBoolean, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LPerform));
+					object LPerformVar = LPerform;
 					AProcess.Context.Push(LPerformVar);
 					try
 					{
@@ -1566,10 +1530,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						LPerformVar = AProcess.Context.Pop();
 					}
-					LPerform = ((Scalar)LPerformVar.Value).AsBoolean;
-					LPerformVar.Value.Dispose();
+					LPerform = (LPerformVar != null) && (bool)LPerformVar;
 				}
 				finally
 				{
@@ -1671,7 +1634,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					PushRow(AProcess, ANewRow);
 					try
 					{
-						DataVar LPerformVar = new DataVar(AProcess.DataTypes.SystemBoolean, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LPerform));
+						object LPerformVar = LPerform;
 						AProcess.Context.Push(LPerformVar);
 						try
 						{
@@ -1694,10 +1657,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Context.Pop();
+							LPerformVar = AProcess.Context.Pop();
 						}
-						LPerform = ((Scalar)LPerformVar.Value).AsBoolean;
-						LPerformVar.Value.Dispose();
+						LPerform = (LPerformVar != null) && (bool)LPerformVar;
 					}
 					finally
 					{
@@ -1804,7 +1766,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PushRow(AProcess, ARow);
 				try
 				{
-					DataVar LPerformVar = new DataVar(AProcess.DataTypes.SystemBoolean, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LPerform));
+					object LPerformVar = LPerform;
 					AProcess.Context.Push(LPerformVar);
 					try
 					{
@@ -1812,10 +1774,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						LPerformVar = AProcess.Context.Pop();
 					}
-					LPerform = ((Scalar)LPerformVar.Value).AsBoolean;
-					LPerformVar.Value.Dispose();
+					LPerform = (LPerformVar != null) && (bool)LPerformVar;
 				}
 				finally
 				{
@@ -1936,8 +1897,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Given AOldRow and ANewRow, propagate a validate if necessary based on the difference between the row values
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProcess);
-			DataValue LOldValue;
-			DataValue LNewValue;
 			#endif
 			
 			int LDifferentColumnIndex = -1;
@@ -1953,20 +1912,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (ANewRow.HasValue(LColumnIndex))
 						{
 							#if USENATIVECONCURRENCYCOMPARE
-							if (!AOldRow[LIndex].AsNative.Equals(ANewRow[LColumnIndex].AsNative))
+							if (!(DataValue.NativeValuesEqual(AProcess, AOldRow[LIndex], ANewRow[LColumnIndex])))
 								if (LDifferentColumnIndex >= 0)
 									LRowsEqual = false;
 								else
 									LDifferentColumnIndex = LColumnIndex;
 							#else
-							LOldValue = AOldRow[LIndex];
-							LNewValue = ANewRow[LColumnIndex];
-							AProcess.Context.Push(new DataVar(LOldValue.DataType, LOldValue));
-							AProcess.Context.Push(new DataVar(LNewValue.DataType, LNewValue));
+							AProcess.Context.Push(AOldRow[LIndex]);
+							AProcess.Context.Push(ANewRow[LColumnIndex]);
 							try
 							{
-								Scalar LResult = (Scalar)FConcurrencyNodes[LColumnIndex].Execute(AProcess).Value;
-								if (!((LResult != null) && !LResult.IsNil && LResult.AsBoolean))
+								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProcess);
+								if (!((LResult != null) && (bool)LResult))
 									if (LDifferentColumnIndex >= 0)
 										LRowsEqual = false;
 									else
@@ -2140,18 +2097,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!ARow.HasValue(LRowIndex) && ((AValueFlags == null) || !AValueFlags[LRowIndex]))
 				{
 					// Column level default trigger handlers
-					DataVar LVar = new DataVar(ATableVar.Columns[LIndex].DataType, null);
-					AProcess.Context.Push(LVar);
+					AProcess.Context.Push(null);
 					try
 					{
 						if (ATableVar.Columns[LIndex].HasHandlers(AProcess))
 							foreach (Schema.EventHandler LHandler in ATableVar.Columns[LIndex].EventHandlers)
 								if ((LHandler.EventType & EventType.Default) != 0)
 								{
-									DataVar LResult = LHandler.PlanNode.Execute(AProcess);
-									if ((LResult != null) && (LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean)
+									object LResult = LHandler.PlanNode.Execute(AProcess);
+									if ((LResult != null) && (bool)LResult)
 									{
-										ARow[LRowIndex] = LVar.Value;
+										ARow[LRowIndex] = AProcess.Context.Peek(0);
 										if (AValueFlags != null)
 											AValueFlags[LRowIndex] = true;
 										return true;
@@ -2166,8 +2122,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// Column level default
 					if (ATableVar.Columns[LIndex].Default != null)
 					{
-						DataVar LObject = ATableVar.Columns[LIndex].Default.Node.Execute(AProcess);
-						ARow[LRowIndex] = LObject.Value;
+						ARow[LRowIndex] = ATableVar.Columns[LIndex].Default.Node.Execute(AProcess);
 						if (AValueFlags != null)
 							AValueFlags[LRowIndex] = true;
 						return true;
@@ -2177,17 +2132,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Schema.ScalarType LScalarType = ATableVar.Columns[LIndex].DataType as Schema.ScalarType;
 					if (LScalarType != null)
 					{
-						AProcess.Context.Push(LVar);
+						AProcess.Context.Push(null);
 						try
 						{
 							if (LScalarType.HasHandlers(AProcess))
 								foreach (Schema.EventHandler LHandler in LScalarType.EventHandlers)
 									if ((LHandler.EventType & EventType.Default) != 0)
 									{
-										DataVar LResult = LHandler.PlanNode.Execute(AProcess);
-										if ((LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean)
+										object LResult = LHandler.PlanNode.Execute(AProcess);
+										if ((LResult != null) && (bool)LResult)
 										{
-											ARow[LRowIndex] = LVar.Value;
+											ARow[LRowIndex] = AProcess.Context.Peek(0);
 											if (AValueFlags != null)
 												AValueFlags[LRowIndex] = true;
 											return true;
@@ -2202,8 +2157,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						// Scalar type level default													   
 						if (LScalarType.Default != null)
 						{
-							DataVar LObject = LScalarType.Default.Node.Execute(AProcess);
-							ARow[LRowIndex] = (Scalar)LObject.Value;
+							ARow[LRowIndex] = LScalarType.Default.Node.Execute(AProcess);
 							if (AValueFlags != null)
 								AValueFlags[LRowIndex] = true;
 							return true;
@@ -2220,8 +2174,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.EventHandler LEventHandler in AHandlers)
 				if ((LEventHandler.EventType & EventType.Change) != 0)
 				{
-					DataVar LResult = LEventHandler.PlanNode.Execute(AProcess);
-					LChanged = ((LResult != null) && (LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean) || LChanged;
+					object LResult = LEventHandler.PlanNode.Execute(AProcess);
+					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
 				}
 			return LChanged;
 		}
@@ -2244,11 +2198,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AColumnName != String.Empty)
 			{
 				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-				AProcess.Context.Push(new DataVar(AOldRow.DataType, AOldRow));
+				AProcess.Context.Push(AOldRow);
 				try
 				{
-					DataVar LNewVar = new DataVar(ANewRow.DataType, ANewRow);
-					AProcess.Context.Push(LNewVar);
+					AProcess.Context.Push(ANewRow);
 					try
 					{
 						bool LChanged = false;
@@ -2260,12 +2213,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								if (ExecuteChangeHandlers(AProcess, ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].EventHandlers))
 									LChanged = true;
 								
-							if (LChanged && (!Object.ReferenceEquals(ANewRow, LNewVar.Value)))
+							if (LChanged && (!Object.ReferenceEquals(ANewRow, AProcess.Context.Peek(0))))
 							{
-								Row LRow = (Row)LNewVar.Value;
+								Row LRow = (Row)AProcess.Context.Peek(0);
 								LRow.CopyTo(ANewRow);
 								LRow.ValuesOwned = false;
 								LRow.Dispose();
+								AProcess.Context.Poke(0, ANewRow);
 							}
 						}
 						finally
@@ -2281,17 +2235,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType is Schema.ScalarType)
 						{
-							AProcess.Context.Push(new DataVar(AColumnName, AOldRow.DataType.Columns[LRowIndex].DataType, AOldRow[LRowIndex]));
+							AProcess.Context.Push(AOldRow[LRowIndex]);
 							try
 							{
-								LNewVar = new DataVar(AColumnName, ANewRow.DataType.Columns[LRowIndex].DataType, ANewRow[LRowIndex]);
-								AProcess.Context.Push(LNewVar);
+								AProcess.Context.Push(ANewRow[LRowIndex]);
 								try
 								{
 									bool LColumnChanged = ExecuteScalarTypeChangeHandlers(AProcess, (Schema.ScalarType)ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType);
 									if (LColumnChanged)
 									{
-										ANewRow[LRowIndex] = LNewVar.Value;
+										ANewRow[LRowIndex] = AProcess.Context.Peek(0);
 										if (AValueFlags != null)
 											AValueFlags[LRowIndex] = true;
 										LChanged = true;
@@ -2325,8 +2278,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				int LRowIndex;
 				bool LChanged = false;
-				DataVar LNewVar = new DataVar(ANewRow.DataType, ANewRow);
-				AProcess.Context.Push(LNewVar);
+				AProcess.Context.Push(ANewRow);
 				try
 				{
 					foreach (Schema.TableVarColumn LColumn in ATableVar.Columns)
@@ -2345,13 +2297,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								if (LColumnChanged)
 								{
 									LChanged = true;
-									if (!Object.ReferenceEquals(ANewRow, LNewVar.Value))
+									if (!Object.ReferenceEquals(ANewRow, AProcess.Context.Peek(0)))
 									{
-										Row LRow = (Row)LNewVar.Value;
+										Row LRow = (Row)AProcess.Context.Peek(0);
 										LRow.CopyTo(ANewRow);
 										LRow.ValuesOwned = false;
 										LRow.Dispose();
-										LNewVar.Value = ANewRow;
+										AProcess.Context.Poke(0, ANewRow);
 									}
 								}
 							}
@@ -2368,18 +2320,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 							if (LColumn.DataType is Schema.ScalarType)
 							{
-								AProcess.Context.Push(new DataVar(LColumn.Name, LColumn.DataType, AOldRow[LRowIndex]));
+								AProcess.Context.Push(AOldRow[LRowIndex]);
 								try
 								{
-									DataVar LScalarVar = new DataVar(LColumn.Name, LColumn.DataType, ANewRow[LRowIndex]);
-									AProcess.Context.Push(LScalarVar);
+									AProcess.Context.Push(ANewRow[LRowIndex]);
 									try
 									{
 										LColumnChanged = ExecuteScalarTypeChangeHandlers(AProcess, (Schema.ScalarType)LColumn.DataType);
 											
 										if (LColumnChanged)
 										{
-											ANewRow[LRowIndex] = LScalarVar.Value;
+											ANewRow[LRowIndex] = AProcess.Context.Peek(0);
 											if (AValueFlags != null)
 												AValueFlags[LRowIndex] = true;
 											LChanged = true;
@@ -2408,21 +2359,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static bool ExecuteValidateHandlers(ServerProcess AProcess, Schema.EventHandlers AHandlers)
 		{
+			return ExecuteValidateHandlers(AProcess, AHandlers, null);
+		}
+		
+		public static bool ExecuteValidateHandlers(ServerProcess AProcess, Schema.EventHandlers AHandlers, Schema.Operator AFromOperator)
+		{
 			bool LChanged = false;
 			foreach (Schema.EventHandler LEventHandler in AHandlers)
-				if ((LEventHandler.EventType & EventType.Validate) != 0)
+				if (((LEventHandler.EventType & EventType.Validate) != 0) && ((AFromOperator == null) || (AFromOperator.Name != LEventHandler.Operator.Name)))
 				{
-					DataVar LResult = LEventHandler.PlanNode.Execute(AProcess);
-					LChanged = ((LResult != null) && (LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean) || LChanged;
+					object LResult = LEventHandler.PlanNode.Execute(AProcess);
+					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
 				}
 			return LChanged;
 		}
 		
 		public static bool ExecuteScalarTypeValidateHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType)
 		{
+			return ExecuteScalarTypeValidateHandlers(AProcess, AScalarType, null);
+		}
+		
+		public static bool ExecuteScalarTypeValidateHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Operator AFromOperator)
+		{
 			bool LChanged = false;
 			if (AScalarType.HasHandlers(AProcess))
-				LChanged = ExecuteValidateHandlers(AProcess, AScalarType.EventHandlers);
+				LChanged = ExecuteValidateHandlers(AProcess, AScalarType.EventHandlers, AFromOperator);
 			#if USETYPEINHERITANCE
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
 				LChanged = ExecuteScalarTypeValidateHandlers(AProcess, LParentType) || LChanged;
@@ -2439,10 +2400,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
 				if (ANewRow.HasValue(LRowIndex))
 				{
-					AProcess.Context.Push(new DataVar(AOldRow == null ? ATableVar.DataType.RowType : AOldRow.DataType, AOldRow));
+					AProcess.Context.Push(AOldRow);
 					try
 					{
-						AProcess.Context.Push(new DataVar(ANewRow.DataType, ANewRow));
+						AProcess.Context.Push(ANewRow);
 						try
 						{
 							bool LChanged = false;
@@ -2450,11 +2411,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							if (LColumn.HasHandlers(AProcess))
 								LChanged = ExecuteValidateHandlers(AProcess, LColumn.EventHandlers);
 							int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(AColumnName);
-							AProcess.Context.Push(new DataVar(Keywords.Value, ANewRow.DataType.Columns[LRowIndex].DataType, LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null));
+							AProcess.Context.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
 							try
 							{
-								DataVar LNewVar = new DataVar(Keywords.Value, ANewRow.DataType.Columns[LRowIndex].DataType, ANewRow[LRowIndex]);
-								AProcess.Context.Push(LNewVar);
+								AProcess.Context.Push(ANewRow[LRowIndex]);
 								try
 								{
 									bool LColumnChanged;
@@ -2465,7 +2425,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 									if (LColumnChanged)
 									{
-										ANewRow[LRowIndex] = LNewVar.Value;
+										ANewRow[LRowIndex] = AProcess.Context.Peek(0);
 										LChanged = true;
 									}
 
@@ -2500,10 +2460,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// If there is no column name, this call is the validation for an insert, and should only be allowed to have no value if the column is nilable
 				int LRowIndex;
-				AProcess.Context.Push(new DataVar(AOldRow == null ? ATableVar.DataType.RowType : AOldRow.DataType, AOldRow));
+				AProcess.Context.Push(AOldRow);
 				try
 				{
-					AProcess.Context.Push(new DataVar(ANewRow.DataType, ANewRow));
+					AProcess.Context.Push(ANewRow);
 					try
 					{
 						bool LChanged = false;
@@ -2537,11 +2497,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 
 									int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(LColumn.Name);
-									AProcess.Context.Push(new DataVar(Keywords.Value, LColumn.DataType, LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null));
+									AProcess.Context.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
 									try
 									{
-										DataVar LNewVar = new DataVar(Keywords.Value, LColumn.DataType, ANewRow[LRowIndex]);
-										AProcess.Context.Push(LNewVar);
+										AProcess.Context.Push(ANewRow[LRowIndex]);
 										try
 										{
 											if (LColumn.DataType is Schema.ScalarType)
@@ -2551,7 +2510,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 											if (LColumnChanged)
 											{
-												ANewRow[LRowIndex] = LNewVar.Value;
+												ANewRow[LRowIndex] = AProcess.Context.Peek(0);
 												if (AValueFlags != null)
 													AValueFlags[LRowIndex] = true;
 												LChanged = true;
@@ -2669,9 +2628,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateInsertConstraints(ServerProcess AProcess)
 		{
 			if (AProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProcess.AddInsertTableVarCheck(TableVar, (Row)AProcess.Context.Peek(0).Value);
+				AProcess.AddInsertTableVarCheck(TableVar, (Row)AProcess.Context.Peek(0));
 
-			PushRow(AProcess, (Row)AProcess.Context.Peek(0).Value);
+			PushRow(AProcess, (Row)AProcess.Context.Peek(0));
 			try
 			{			
 				Schema.RowConstraint LConstraint;
@@ -2705,9 +2664,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateUpdateConstraints(ServerProcess AProcess, BitArray AValueFlags)
 		{
 			if (AProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
-				AProcess.AddUpdateTableVarCheck(TableVar, (Row)AProcess.Context.Peek(1).Value, (Row)AProcess.Context.Peek(0).Value);
+				AProcess.AddUpdateTableVarCheck(TableVar, (Row)AProcess.Context.Peek(1), (Row)AProcess.Context.Peek(0));
 			
-			PushRow(AProcess, (Row)AProcess.Context.Peek(0).Value);
+			PushRow(AProcess, (Row)AProcess.Context.Peek(0));
 			try
 			{
 				Schema.RowConstraint LConstraint;
@@ -2741,7 +2700,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual void ValidateDeleteConstraints(ServerProcess AProcess)
 		{
 			if (AProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProcess.AddDeleteTableVarCheck(TableVar, (Row)AProcess.Context.Peek(0).Value);
+				AProcess.AddDeleteTableVarCheck(TableVar, (Row)AProcess.Context.Peek(0));
 
 			foreach (Schema.Constraint LConstraint in TableVar.DeleteConstraints)
 				if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred))
@@ -2772,9 +2731,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								if (LHandler.IsDeferred && AProcess.InTransaction)
 									switch (AEventType)
 									{
-										case EventType.AfterInsert : AProcess.CurrentTransaction.AddInsertHandler(LHandler, (Row)AProcess.Context.Peek(0).Value); LInvoked = true; break;
-										case EventType.AfterUpdate : AProcess.CurrentTransaction.AddUpdateHandler(LHandler, (Row)AProcess.Context.Peek(1).Value, (Row)AProcess.Context.Peek(0).Value); LInvoked = true; break;
-										case EventType.AfterDelete : AProcess.CurrentTransaction.AddDeleteHandler(LHandler, (Row)AProcess.Context.Peek(0).Value); LInvoked = true; break;
+										case EventType.AfterInsert : AProcess.CurrentTransaction.AddInsertHandler(LHandler, (Row)AProcess.Context.Peek(0)); LInvoked = true; break;
+										case EventType.AfterUpdate : AProcess.CurrentTransaction.AddUpdateHandler(LHandler, (Row)AProcess.Context.Peek(1), (Row)AProcess.Context.Peek(0)); LInvoked = true; break;
+										case EventType.AfterDelete : AProcess.CurrentTransaction.AddDeleteHandler(LHandler, (Row)AProcess.Context.Peek(0)); LInvoked = true; break;
 										default : break; // only after handlers should be deferred to transaction commit
 									}
 
@@ -2821,7 +2780,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					PushRow(AProcess, ANewRow);
 					try
 					{
-						AProcess.Context.Push(new DataVar(AProcess.Plan.Catalog.DataTypes.SystemString, new Scalar(AProcess, AProcess.DataTypes.SystemString, AColumnName)));
+						AProcess.Context.Push(AColumnName);
 						try
 						{
 							bool LChanged = false;
@@ -2832,8 +2791,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										ANewRow.BeginModifiedContext();
 									try
 									{
-										DataVar LObject = LHandler.PlanNode.Execute(AProcess);
-										if ((LObject != null) && (LObject.Value != null) && !LObject.Value.IsNil && LObject.Value.DataType.Is(AProcess.DataTypes.SystemBoolean) && LObject.Value.AsBoolean)
+										object LObject = LHandler.PlanNode.Execute(AProcess);
+										if ((LObject != null) && (bool)LObject)
 											LChanged = true;
 									}
 									finally
@@ -2875,7 +2834,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PushRow(AProcess, ARow);
 				try
 				{
-					AProcess.Context.Push(new DataVar(AProcess.Plan.Catalog.DataTypes.SystemString, new Scalar(AProcess, AProcess.DataTypes.SystemString, AColumnName)));
+					AProcess.Context.Push(AColumnName);
 					try
 					{
 						bool LChanged = false;
@@ -2886,8 +2845,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									ARow.BeginModifiedContext();
 								try
 								{
-									DataVar LResult = LHandler.PlanNode.Execute(AProcess);
-									if ((LResult != null) && (LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean)
+									object LResult = LHandler.PlanNode.Execute(AProcess);
+									if ((LResult != null) && (bool)LResult)
 										LChanged = true;
 								}
 								finally
@@ -2927,7 +2886,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					PushRow(AProcess, ANewRow);
 					try
 					{
-						AProcess.Context.Push(new DataVar(AProcess.Plan.Catalog.DataTypes.SystemString, new Scalar(AProcess, AProcess.DataTypes.SystemString, AColumnName)));
+						AProcess.Context.Push(AColumnName);
 						try
 						{
 							bool LChanged = false;
@@ -2938,8 +2897,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										ANewRow.BeginModifiedContext();
 									try
 									{
-										DataVar LResult = LHandler.PlanNode.Execute(AProcess);
-										if ((LResult != null) && (LResult.Value != null) && !LResult.Value.IsNil && LResult.DataType.Is(AProcess.DataTypes.SystemBoolean) && LResult.Value.AsBoolean)
+										object LResult = LHandler.PlanNode.Execute(AProcess);
+										if ((LResult != null) && (bool)LResult)
 											LChanged = true;
 									}
 									finally
@@ -3027,9 +2986,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
 			{
 				if (ARow.HasValue(LIndex))
-					LRowNode.Nodes.Add(new ValueNode(ARow[LIndex]));
+					LRowNode.Nodes.Add(new ValueNode(ARow.DataType.Columns[LIndex].DataType, ARow[LIndex]));
 				else
-					LRowNode.Nodes.Add(new ValueNode(null));
+					LRowNode.Nodes.Add(new ValueNode(ARow.DataType.Columns[LIndex].DataType, null));
 				LSourceNode.DataType.Columns.Add(ARow.DataType.Columns[LIndex].Copy());
 			}
 
@@ -3064,7 +3023,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(
 							ANewRow.DataType.Columns[LColumnIndex].DataType,
 							DataType.Columns.IndexOf(ANewRow.DataType.Columns[LColumnIndex].Name),
-							new ValueNode(ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
+							new ValueNode(ANewRow.DataType.Columns[LColumnIndex].DataType, ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
 						)
 					);
 				#else
@@ -3074,14 +3033,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						(
 							ANewRow.DataType.Columns[LColumnIndex].DataType,
 							ANewRow.DataType.Columns[LColumnIndex].Name,
-							new ValueNode(ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
+							new ValueNode(ANewRow.DataType.Columns[LColumnIndex].DataType, ANewRow.HasValue(LColumnIndex) ? ANewRow[LColumnIndex] : null)
 						)
 					);
 				#endif
 			}
 			try
 			{
-				AProcess.Context.Push(new DataVar(String.Empty, AOldRow.DataType, AOldRow));
+				AProcess.Context.Push(AOldRow);
 				try
 				{
 					// Execute the Update Statement
@@ -3106,7 +3065,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CheckModifySupported();
 			EnsureModifyNodes(AProcess.Plan);
 			
-			AProcess.Context.Push(new DataVar(String.Empty, ARow.DataType, ARow));
+			AProcess.Context.Push(ARow);
 			try
 			{
 				AProcess.DeviceExecute(FDevice, FDeleteNode);
@@ -3142,8 +3101,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected virtual bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending) { return false; }
 		protected virtual bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName) { return false; }
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { throw new RuntimeException(RuntimeException.Codes.TableNodeInternalExecute); }
-		public override DataVar InternalExecute(ServerProcess AProcess) { throw new RuntimeException(RuntimeException.Codes.TableNodeInternalExecute); }
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { throw new RuntimeException(RuntimeException.Codes.TableNodeInternalExecute); }
+		public override object InternalExecute(ServerProcess AProcess) { throw new RuntimeException(RuntimeException.Codes.TableNodeInternalExecute); }
 		
 		// PopulateNode
 		protected TableNode FPopulateNode;
@@ -3179,7 +3138,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual void InferPopulateNode(Plan APlan) { }
 		
-		protected override DataVar ProtectedExecute(ServerProcess AProcess)
+		protected override object ProtectedExecute(ServerProcess AProcess)
 		{
 			if ((FPopulateNode != null) && !AProcess.IsInsert)
 				ApplicationTransactionUtility.JoinExpression(AProcess, AProcess.ApplicationTransactionID, FPopulateNode, this);

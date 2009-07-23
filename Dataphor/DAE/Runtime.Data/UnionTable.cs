@@ -26,8 +26,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new UnionNode Node { get { return (UnionNode)FNode; } }
         
-		protected DataVar FLeftObject;
-		protected DataVar FRightObject;
 		protected Table FLeftTable;
 		protected Table FRightTable;
 		protected Row FSourceRow;
@@ -37,25 +35,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected override void InternalOpen()
         {
 			FSourceRow = new Row(Process, Node.DataType.RowType);
-			FLeftObject = Node.Nodes[0].Execute(Process);
+			FLeftTable = Node.Nodes[0].Execute(Process) as Table;
 			try
 			{
-				FLeftTable = (Table)FLeftObject.Value;
+				FRightTable = Node.Nodes[1].Execute(Process) as Table;
 			}
 			catch
 			{
-				((Table)FLeftObject.Value).Dispose();
-				throw;
-			}
-
-			FRightObject = Node.Nodes[1].Execute(Process);
-			try
-			{
-				FRightTable = (Table)FRightObject.Value;
-			}
-			catch
-			{
-				((Table)FRightObject.Value).Dispose();
+				FLeftTable.Dispose();
 				throw;
 			}
 			

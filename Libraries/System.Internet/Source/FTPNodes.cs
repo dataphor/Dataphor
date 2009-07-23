@@ -21,11 +21,11 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadBinary(AURL : String, AUser : String, APassword : String) : Binary
 	public class FTPDownloadBinaryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
+			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 1)
-				LRequest.Credentials = new NetworkCredential(AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+				LRequest.Credentials = new NetworkCredential((string)AArguments[1], (string)AArguments[2]);
 			
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
 			LRequest.UsePassive = false;
@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				StreamUtility.CopyStream(LResponseStream, LCopyStream);
 				byte[] LData = new byte[LCopyStream.Length];
 				Buffer.BlockCopy(LCopyStream.GetBuffer(), 0, LData, 0, LData.Length);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LData));
+				return LData;
 			}
 			finally
 			{
@@ -52,11 +52,11 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadText(AURL : String, AUser : String, APassword : String) : String
 	public class FTPDownloadTextNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
+			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 1)
-				LRequest.Credentials = new NetworkCredential(AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+				LRequest.Credentials = new NetworkCredential((string)AArguments[1], (string)AArguments[2]);
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
 			LRequest.UsePassive = false;
 			FtpWebResponse LResponse = (FtpWebResponse)LRequest.GetResponse();
@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			try
 			{
 				StreamReader LReader = new StreamReader(LResponseStream);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LReader.ReadToEnd()));
+				return LReader.ReadToEnd();
 			}
 			finally
 			{
@@ -79,11 +79,11 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPUploadText(AURL : String, AData : String, AUser : String, APassword : String)
 	public class FTPUploadNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
+			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 2)
-				LRequest.Credentials = new NetworkCredential(AArguments[2].Value.AsString, AArguments[3].Value.AsString);
+				LRequest.Credentials = new NetworkCredential((string)AArguments[2], (string)AArguments[3]);
 			LRequest.Method = WebRequestMethods.Ftp.UploadFile;
 			LRequest.Proxy = null;
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
@@ -91,12 +91,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			Stream LRequestStream = LRequest.GetRequestStream();
 			try
 			{
-				if (AArguments[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
 					using (StreamWriter LWriter = new StreamWriter(LRequestStream))
-						LWriter.Write(AArguments[1].Value.AsString);
+						LWriter.Write((string)AArguments[1]);
 				else
 				{
-					byte[] LValue = AArguments[1].Value.AsByteArray;
+					byte[] LValue = AArguments[1] is byte[] ? (byte[])AArguments[1] : new Scalar(AProcess, (Schema.IScalarType)Operator.Operands[1].DataType, AArguments[1]).AsByteArray;
 					LRequestStream.Write(LValue, 0, LValue.Length);
 				}
 				((FtpWebResponse)LRequest.GetResponse()).Close();
@@ -136,16 +136,16 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				TableVar.Orders.Add(Order);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			string LUser = "";
 			string LPassword = "";
 			if (Nodes.Count > 1)
 			{
-				LUser = Nodes[1].Execute(AProcess).Value.AsString;
-				LPassword = Nodes[2].Execute(AProcess).Value.AsString;
+				LUser = (string)Nodes[1].Execute(AProcess);
+				LPassword = (string)Nodes[2].Execute(AProcess);
 			}
-			string LListing = GetDirectoryListing(Nodes[0].Execute(AProcess).Value.AsString, LUser, LPassword);
+			string LListing = GetDirectoryListing((string)Nodes[0].Execute(AProcess), LUser, LPassword);
 
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -164,10 +164,10 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 						int LNextOffset = LListing.IndexOf('\n', LOffset + 1);
 						if (LNextOffset < 0)
 							LNextOffset = LListing.Length;
-						LRow[0].AsString = LListing.Substring(LOffset, LNextOffset - LOffset).Trim(new char[] { '\r', '\n', ' ' });
+						LRow[0] = LListing.Substring(LOffset, LNextOffset - LOffset).Trim(new char[] { '\r', '\n', ' ' });
 						LOffset = LNextOffset;
 
-						if (LRow[0].AsString.Trim() != "")
+						if (((string)LRow[0]).Trim() != "")
 							try
 							{
 								LResult.Insert(LRow);
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 				LResult.First();
 
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -220,13 +220,13 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRename(AURL : String, ANewName : String, AUser : String, APassword : String)
 	public class FTPRenameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create(AArguments[0].Value.AsString);
+			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 2)
-				LRequest.Credentials = new NetworkCredential(AArguments[2].Value.AsString, AArguments[3].Value.AsString);
+				LRequest.Credentials = new NetworkCredential((string)AArguments[2], (string)AArguments[3]);
 			LRequest.Method = WebRequestMethods.Ftp.Rename;
-			LRequest.RenameTo = AArguments[1].Value.AsString;
+			LRequest.RenameTo = (string)AArguments[1];
 			// HACK: Apparently there is a defect in the framework that results in an error under certain timing if the following line isn't here:
 			LRequest.UsePassive = false;
 			((FtpWebResponse)LRequest.GetResponse()).Close();
@@ -238,12 +238,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDeleteFile(AURL : String, AUser : String, APassword : String)
 	public class FTPDeleteFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.DeleteFile, AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.DeleteFile, (string)AArguments[1], (string)AArguments[2]);
 			else
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.DeleteFile);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.DeleteFile);
 			return null;
 		}
 	}
@@ -252,12 +252,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPMakeDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPMakeDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.MakeDirectory, AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.MakeDirectory, (string)AArguments[1], (string)AArguments[2]);
 			else
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.MakeDirectory);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.MakeDirectory);
 			return null;
 		}
 	}
@@ -266,12 +266,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRemoveDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPRemoveDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.RemoveDirectory, AArguments[1].Value.AsString, AArguments[2].Value.AsString);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.RemoveDirectory, (string)AArguments[1], (string)AArguments[2]);
 			else
-				FTPHelper.CallSimpleFTP(AArguments[0].Value.AsString, WebRequestMethods.Ftp.RemoveDirectory);
+				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.RemoveDirectory);
 			return null;
 		}
 	}

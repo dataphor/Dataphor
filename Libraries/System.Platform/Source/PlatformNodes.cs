@@ -17,24 +17,25 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Language.D4;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Streams;
 
 namespace Alphora.Dataphor.Libraries.System.Platform
 {
 	// operator FileExists(const AFileName : FileName) : Boolean
 	public class FileExistsNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, File.Exists(AArguments[0].Value.AsString)));
+			return File.Exists((string)AArguments[0]);
 		}
 	}
 
 	// operator DeleteFile(const AFileName : FileName)
 	public class DeleteFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.Delete(AArguments[0].Value.AsString);
+			File.Delete((string)AArguments[0]);
 			return null;
 		}
 	}
@@ -43,9 +44,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CopyFile(const ASourceFileName : FileName, const ATargetFileName : FileName, const AOverwrite : Boolean)
 	public class CopyFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.Copy(AArguments[0].Value.AsString, AArguments[1].Value.AsString, AArguments.Length == 3 ? AArguments[2].Value.AsBoolean : false);
+			File.Copy((string)AArguments[0], (string)AArguments[1], AArguments.Length == 3 ? (bool)AArguments[2] : false);
 			return null;
 		}
 	}
@@ -55,22 +56,32 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CreateBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class CreateFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			using (FileStream LFile = File.Create(AArguments[0].Value.AsString))
+			using (FileStream LFile = File.Create((string)AArguments[0]))
 			{	
 				if (AArguments.Length == 2)
-					if (AArguments[1].DataType.Is(AProcess.DataTypes.SystemString))
+					if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
 					{
 						using (StreamWriter LWriter = new StreamWriter(LFile))
 						{
-							LWriter.Write(AArguments[1].Value.AsString);
+							LWriter.Write((string)AArguments[1]);
 						}
 					}
 					else
 					{
-						byte[] LValue = AArguments[1].Value.AsByteArray;
-						LFile.Write(LValue, 0, LValue.Length);
+						if (AArguments[1] is StreamID)
+						{
+							using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+							{
+								StreamUtility.CopyStream(LSourceStream, LFile);
+							}
+						}
+						else
+						{
+							byte[] LValue = (byte[])AArguments[1];
+							LFile.Write(LValue, 0, LValue.Length);
+						}
 					}
 			}
 			return null;
@@ -81,21 +92,31 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator AppendBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class AppendFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			using (FileStream LFile = File.Open(AArguments[0].Value.AsString, FileMode.Append, FileAccess.Write, FileShare.Read))
+			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Append, FileAccess.Write, FileShare.Read))
 			{
-				if (AArguments[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
 				{
 					using (StreamWriter LWriter = new StreamWriter(LFile))
 					{
-						LWriter.Write(AArguments[1].Value.AsString);
+						LWriter.Write((string)AArguments[1]);
 					}
 				}
 				else
 				{
-					byte[] LValue = AArguments[1].Value.AsByteArray;
-					LFile.Write(LValue, 0, LValue.Length);
+					if (AArguments[1] is StreamID)
+					{
+						using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						{
+							StreamUtility.CopyStream(LSourceStream, LFile);
+						}
+					}
+					else
+					{
+						byte[] LValue = (byte[])AArguments[1];
+						LFile.Write(LValue, 0, LValue.Length);
+					}
 				}
 			}
 			return null;
@@ -105,11 +126,11 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadTextFile(const AFileName : FileName) : String
 	public class LoadTextFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			using (StreamReader LReader = File.OpenText(AArguments[0].Value.AsString))
+			using (StreamReader LReader = File.OpenText((string)AArguments[0]))
 			{
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LReader.ReadToEnd()));
+				return LReader.ReadToEnd();
 			}
 		}
 	}
@@ -117,13 +138,13 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadBinaryFile(const AFileName : FileName) : Binary
 	public class LoadBinaryFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			using (FileStream LFile = File.OpenRead(AArguments[0].Value.AsString))
+			using (FileStream LFile = File.OpenRead((string)AArguments[0]))
 			{
 				byte[] LValue = new byte[LFile.Length];
 				LFile.Read(LValue, 0, LValue.Length);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LValue));
+				return LValue;
 			}
 		}
 	}
@@ -132,21 +153,31 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SaveBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class SaveFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			using (FileStream LFile = File.Open(AArguments[0].Value.AsString, FileMode.Truncate, FileAccess.Write, FileShare.Read))
+			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Truncate, FileAccess.Write, FileShare.Read))
 			{
-				if (AArguments[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
 				{
 					using (StreamWriter LWriter = new StreamWriter(LFile))
 					{
-						LWriter.Write(AArguments[1].Value.AsString);
+						LWriter.Write((string)AArguments[1]);
 					}
 				}
 				else
 				{
-					byte[] LValue = AArguments[1].Value.AsByteArray;
-					LFile.Write(LValue, 0, LValue.Length);
+					if (AArguments[1] is StreamID)
+					{
+						using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						{
+							StreamUtility.CopyStream(LSourceStream, LFile);
+						}
+					}
+					else
+					{
+						byte[] LValue = (byte[])AArguments[1];
+						LFile.Write(LValue, 0, LValue.Length);
+					}
 				}
 			}
 			return null;
@@ -156,9 +187,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveFile(const ASourceFileName : FileName, const ATargetFileName : FileName)
 	public class MoveFileNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.Move(AArguments[0].Value.AsString, AArguments[1].Value.AsString);
+			File.Move((string)AArguments[0], (string)AArguments[1]);
 			return null;
 		}
 	}
@@ -166,72 +197,72 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DirectoryExists(const ADirectoryName : FileName) : Boolean
 	public class DirectoryExistsNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Directory.Exists(AArguments[0].Value.AsString)));
+			return Directory.Exists((string)AArguments[0]);
 		}
 	}
 	
 	// operator GetFileName(const AFileName : FileName) : FileName
 	public class GetFileNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.GetFileName(AArguments[0].Value.AsString)));
+			return Path.GetFileName((string)AArguments[0]);
 		}
 	}
 	
 	// operator GetDirectoryName(const AFileName : FileName) : FileName
 	public class GetDirectoryNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.GetDirectoryName(AArguments[0].Value.AsString)));
+			return Path.GetDirectoryName((string)AArguments[0]);
 		}
 	}
 	
 	// operator GetFileExtension(const AFileName : FileName) : FileName
 	public class GetFileExtensionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.GetExtension(AArguments[0].Value.AsString)));
+			return Path.GetExtension((string)AArguments[0]);
 		}
 	}
 	
 	// operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName
 	public class ChangeFileExtensionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.ChangeExtension(AArguments[0].Value.AsString, AArguments[1].Value.AsString)));
+			return Path.ChangeExtension((string)AArguments[0], (string)AArguments[1]);
 		}
 	}
 	
 	// operator FileNameHasExtension(const AFileName : FileName) : Boolean
 	public class FileNameHasExtensionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.HasExtension(AArguments[0].Value.AsString)));
+			return Path.HasExtension((string)AArguments[0]);
 		}
 	}
 	
 	// operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName
 	public class CombinePathNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Path.Combine(AArguments[0].Value.AsString, AArguments[1].Value.AsString)));
+			return Path.Combine((string)AArguments[0], (string)AArguments[1]);
 		}
 	}
 	
 	// operator CreateDirectory(const ADirectoryName : FileName)
 	public class CreateDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Directory.CreateDirectory(AArguments[0].Value.AsString);
+			Directory.CreateDirectory((string)AArguments[0]);
 			return null;
 		}
 	}
@@ -239,9 +270,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DeleteDirectory(const ADirectoryName : FileName)
 	public class DeleteDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Directory.Delete(AArguments[0].Value.AsString);
+			Directory.Delete((string)AArguments[0]);
 			return null;
 		}
 	}
@@ -249,9 +280,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveDirectory(const ASourceDirectoryName : FileName, const ATargetDirectoryName : FileName)
 	public class MoveDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Directory.Move(AArguments[0].Value.AsString, AArguments[1].Value.AsString);
+			Directory.Move((string)AArguments[0], (string)AArguments[1]);
 			return null;
 		}
 	}
@@ -259,18 +290,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetAttributes(const APath : FileName) : Integer
 	public class GetAttributesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, File.GetAttributes(AArguments[0].Value.AsString)));
+			return File.GetAttributes((string)AArguments[0]);
 		}
 	}
 	
 	// operator SetAttributes(const APath : FileName, const AAttributes : Integer);
 	public class SetAttributesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.SetAttributes(AArguments[0].Value.AsString, (FileAttributes)AArguments[1].Value.AsInt32);
+			File.SetAttributes((string)AArguments[0], (FileAttributes)(int)AArguments[1]);
 			return null;
 		}
 	}
@@ -278,18 +309,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCreationTime(const APath : FileName) : DateTime;
 	public class GetCreationTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, File.GetCreationTime(AArguments[0].Value.AsString)));
+			return File.GetCreationTime((string)AArguments[0]);
 		}
 	}
 	
 	// operator SetCreationTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetCreationTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.SetCreationTime(AArguments[0].Value.AsString, AArguments[1].Value.AsDateTime);
+			File.SetCreationTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
 		}
 	}
@@ -297,18 +328,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastWriteTime(const APath : FileName) : DateTime;
 	public class GetLastWriteTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, File.GetLastWriteTime(AArguments[0].Value.AsString)));
+			return File.GetLastWriteTime((string)AArguments[0]);
 		}
 	}
 	
 	// operator SetLastWriteTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastWriteTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.SetLastWriteTime(AArguments[0].Value.AsString, AArguments[1].Value.AsDateTime);
+			File.SetLastWriteTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
 		}
 	}
@@ -316,18 +347,18 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastAccessTime(const APath : FileName) : DateTime;
 	public class GetLastAccessTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, File.GetLastAccessTime(AArguments[0].Value.AsString)));
+			return File.GetLastAccessTime((string)AArguments[0]);
 		}
 	}
 	
 	// operator SetLastAccessTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastAccessTimeNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			File.SetLastAccessTime(AArguments[0].Value.AsString, AArguments[1].Value.AsDateTime);
+			File.SetLastAccessTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
 		}
 	}
@@ -356,7 +387,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -371,7 +402,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 					string[] LDrives = Directory.GetLogicalDrives();
 					for (int LIndex = 0; LIndex < LDrives.Length; LIndex++)
 					{
-						LRow[0].AsString = LDrives[LIndex];
+						LRow[0] = LDrives[LIndex];
 						LResult.Insert(LRow);
 					}
 				}
@@ -382,7 +413,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -417,7 +448,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -429,10 +460,10 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				try
 				{
 					LRow.ValuesOwned = false;
-					string[] LDirectories = Directory.GetDirectories(Nodes[0].Execute(AProcess).Value.AsString, Nodes.Count == 2 ? Nodes[1].Execute(AProcess).Value.AsString : "*");
+					string[] LDirectories = Directory.GetDirectories((string)Nodes[0].Execute(AProcess), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProcess) : "*");
 					for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
 					{
-						LRow[0].AsString = LDirectories[LIndex];
+						LRow[0] = LDirectories[LIndex];
 						LResult.Insert(LRow);
 					}
 				}
@@ -443,7 +474,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -478,7 +509,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -490,10 +521,10 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				try
 				{
 					LRow.ValuesOwned = false;
-					string[] LFiles = Directory.GetFiles(Nodes[0].Execute(AProcess).Value.AsString, Nodes.Count == 2 ? Nodes[1].Execute(AProcess).Value.AsString : "*");
+					string[] LFiles = Directory.GetFiles((string)Nodes[0].Execute(AProcess), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProcess) : "*");
 					for (int LIndex = 0; LIndex < LFiles.Length; LIndex++)
 					{
-						LRow[0].AsString = LFiles[LIndex];
+						LRow[0] = LFiles[LIndex];
 						LResult.Insert(LRow);
 					}
 				}
@@ -504,7 +535,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -520,50 +551,50 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }, const AStartAs : row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) : row { ExitCode : Integer, Output : String, Errors : String };
     public class PlatformExecuteNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			using (Process LProcess = new Process())
 			{
-				LProcess.StartInfo.FileName = AArguments[0].Value.AsString;
-				LProcess.StartInfo.Arguments = AArguments.Length > 1 ? AArguments[1].Value.AsString : String.Empty;
+				LProcess.StartInfo.FileName = (string)AArguments[0];
+				LProcess.StartInfo.Arguments = AArguments.Length > 1 ? (string)AArguments[1] : String.Empty;
 				LProcess.StartInfo.UseShellExecute = false;
 				bool LRedirectOutput = true;
 				bool LRedirectErrors = true;
 				if (AArguments.Length > 2)
 				{
-					Row LSettings = (Row)AArguments[2].Value;
+					Row LSettings = (Row)AArguments[2];
 					if (LSettings != null)
 					{
 						if (LSettings.HasValue("WorkingDirectory"))
-							LProcess.StartInfo.WorkingDirectory = LSettings["WorkingDirectory"].AsString;
+							LProcess.StartInfo.WorkingDirectory = (string)LSettings["WorkingDirectory"];
 						if (LSettings.HasValue("NoWindow"))
-							LProcess.StartInfo.CreateNoWindow = LSettings["NoWindow"].AsBoolean;
+							LProcess.StartInfo.CreateNoWindow = (bool)LSettings["NoWindow"];
 						if (LSettings.HasValue("WindowStyle"))
-							LProcess.StartInfo.WindowStyle = (ProcessWindowStyle)LSettings["WindowStyle"].AsInt32;	//Enum.Parse(typeof(ProcessWindowStyle), 
+							LProcess.StartInfo.WindowStyle = (ProcessWindowStyle)(int)LSettings["WindowStyle"];	//Enum.Parse(typeof(ProcessWindowStyle), 
 						if (LSettings.HasValue("RedirectOutput"))
-							LRedirectOutput = LSettings["RedirectOutput"].AsBoolean;
+							LRedirectOutput = (bool)LSettings["RedirectOutput"];
 						if (LSettings.HasValue("RedirectErrors"))
-							LRedirectErrors = LSettings["RedirectErrors"].AsBoolean;
+							LRedirectErrors = (bool)LSettings["RedirectErrors"];
 					}
 					if (AArguments.Length > 3)
 					{
-						LSettings = (Row)AArguments[3].Value;
+						LSettings = (Row)AArguments[3];
 						if (LSettings != null)
 						{
 							if (LSettings.HasValue("UserName"))
-								LProcess.StartInfo.UserName = LSettings["UserName"].AsString;
+								LProcess.StartInfo.UserName = (string)LSettings["UserName"];
 							if (LSettings.HasValue("Password"))
 							{
 								Security.SecureString LPassword = new Security.SecureString();
-								foreach (char LChar in LSettings["Password"].AsString)
+								foreach (char LChar in (string)LSettings["Password"])
 									LPassword.AppendChar(LChar);
 								LPassword.MakeReadOnly();
 								LProcess.StartInfo.Password = LPassword;
 							}
 							if (LSettings.HasValue("Domain"))
-								LProcess.StartInfo.Domain = LSettings["Domain"].AsString;
+								LProcess.StartInfo.Domain = (string)LSettings["Domain"];
 							if (LSettings.HasValue("LoadUserProfile"))
-								LProcess.StartInfo.LoadUserProfile = LSettings["LoadUserProfile"].AsBoolean;
+								LProcess.StartInfo.LoadUserProfile = (bool)LSettings["LoadUserProfile"];
 						}
 					}
 				}
@@ -588,19 +619,19 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 
 				Row LRow = new Row(AProcess, (Schema.IRowType)FDataType);
 				if (LRedirectOutput)
-					LRow["Output"].AsString = FOutput.ToString();
+					LRow["Output"] = FOutput.ToString();
 				else
 					LRow.ClearValue("Output");
 				if (((Schema.IRowType)FDataType).Columns.ContainsName("Errors"))
 				{
 					if (LRedirectErrors)
-						LRow["Errors"].AsString = FErrors.ToString();
+						LRow["Errors"] = FErrors.ToString();
 					else
 						LRow.ClearValue("Errors");
 				}
-				LRow["ExitCode"].AsInt32 = LProcess.ExitCode;
+				LRow["ExitCode"] = LProcess.ExitCode;
 				
-				return new DataVar(FDataType, LRow);
+				return LRow;
 			}
 		}
 
@@ -624,9 +655,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetCurrentDirectory(const APath : String)
     public class SetCurrentDirectoryNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Environment.CurrentDirectory = AArguments[0].Value.AsString;
+			Environment.CurrentDirectory = (string)AArguments[0];
 			return null;
 		}
     }
@@ -634,9 +665,9 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCurrentDirectory() : String
     public class GetCurrentDirectoryNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Environment.CurrentDirectory));
+			return Environment.CurrentDirectory;
 		}
     }
 }

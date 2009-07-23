@@ -75,31 +75,41 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			} 
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataVar LVar = Nodes[0].Execute(AProcess);
+			Table LTable = Nodes[0].Execute(AProcess) as Table;
 			#if NILPROPOGATION
-			if ((LVar.Value == null) || LVar.Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LTable == null))
+				return null;
 			#endif
-
-			using (Table LTable = (Table)LVar.Value)
+			try
 			{
 				LTable.Open();
 				if (LTable.Next())
 				{
 					Row LRow = LTable.Select();
-					if (LTable.Next())
-						throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
-					return new DataVar(String.Empty, FDataType, LRow);
+					try
+					{
+						if (LTable.Next())
+							throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
+						return LRow;
+					}
+					catch
+					{
+						LRow.Dispose();
+						throw;
+					}
 				}
 				else
 					#if NILPROPOGATION
-					return new DataVar(FDataType, null);
+					return null;
 					#else
 					throw new RuntimeException(RuntimeException.Codes.RowTableEmpty);
 					#endif
+			}
+			finally
+			{
+				LTable.Dispose();
 			}
 		}
 		
@@ -174,20 +184,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private bool FShouldDisposeSource = true;
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataVar LVar = Nodes[0].Execute(AProcess);
+			object LObject = Nodes[0].Execute(AProcess);
 			#if NILPROPOGATION
-			if ((LVar.Value == null) || LVar.Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (LObject == null)
+				return null;
 			#endif
-			
-			try
+
+			Table LTable = LObject as Table;
+			if (LTable != null)
 			{
-				if (LVar.DataType is Schema.TableType)
+				try
 				{
-					Table LTable = (Table)LVar.Value;
 					LTable.Open();
 					if (LTable.Next())
 					{
@@ -198,15 +207,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
 							#if USECOLUMNLOCATIONBINDING
 							if (LRow.HasValue(Location))
-								return new DataVar(FDataType, LRow[Location]);
+								return LRow[Location].AsNative;
 							else
-								return new DataVar(FDataType, null);
+								return null;
 							#else
 							int LColumnIndex = LRow.DataType.Columns.IndexOf(Identifier);
 							if (LRow.HasValue(LColumnIndex))
-								return new DataVar(FDataType, LRow[LColumnIndex].Copy());
+								return LRow[LColumnIndex];
 							else
-								return new DataVar(FDataType, null);
+								return null;
 							#endif
 						}
 						finally
@@ -216,32 +225,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					else
 						#if NILPROPOGATION
-						return new DataVar(FDataType, null);
+						return null;
 						#else
 						throw new RuntimeException(RuntimeException.Codes.ColumnTableEmpty);
 						#endif
 				}
-				else
+				finally
 				{
-					Row LRow = (Row)LVar.Value;
+					if (FShouldDisposeSource)
+						LTable.Dispose();
+				}
+			}
+			else
+			{
+				Row LRow = (Row)LObject;
+				try
+				{
 					#if USECOLUMNLOCATIONBINDING
 					if (LRow.HasValue(Location))
-						return new DataVar(FDataType, ((Row)LVar.Value)[Location]);
+						return LRow[Location].AsNative;
 					else
-						return new DataVar(FDataType, null);
+						return null;
 					#else
 					int LColumnIndex = LRow.DataType.Columns.IndexOf(Identifier);
 					if (LRow.HasValue(LColumnIndex))
-						return new DataVar(FDataType, LRow[LColumnIndex].Copy());
+						return LRow[LColumnIndex];
 					else
-						return new DataVar(FDataType, null);
+						return null;
 					#endif
 				}
-			}
-			finally
-			{
-				if (FShouldDisposeSource)
-					LVar.Value.Dispose();
+				finally
+				{
+					if (FShouldDisposeSource)
+						LRow.Dispose();
+				}
 			}
 		}
 		
@@ -252,7 +269,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 	
     // operator iExists(table) : bool
-    public class ExistsNode : InstructionNode
+    public class ExistsNode : InstructionNodeBase
     {
 		public override void DetermineDataType(Plan APlan)
 		{
@@ -260,18 +277,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataVar LVar = Nodes[0].Execute(AProcess);
+			Table LTable = Nodes[0].Execute(AProcess) as Table;
 			#if NILPROPOGATION
-			if ((LVar.Value == null) || LVar.Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (LTable == null)
+				return null;
 			#endif
-			using (Table LTable = (Table)LVar.Value)
+			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, !LTable.IsEmpty()));
+				return !LTable.IsEmpty();
+			}
+			finally
+			{
+				LTable.Dispose();
 			}
 		}
     }

@@ -4,10 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
-
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -223,7 +219,12 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				CheckCompiled();
-				return ServerProcess.Execute(this, Code, AParams).Value;
+				object LResult = ServerProcess.Execute(this, Code, AParams);
+				DataValue LDataValue = LResult as DataValue;
+				if (LDataValue != null)
+					return LDataValue;
+					
+				return DataValue.FromNative(FProcess, this.DataType, LResult);
 			}
 			catch (Exception E)
 			{

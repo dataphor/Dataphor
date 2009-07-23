@@ -422,7 +422,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			}
 		}
 
-		protected override DataVar InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
 		{
 			PlanNode LPlanNode = ADevicePlan.Node;
 			if (LPlanNode is BaseTableVarNode)
@@ -433,7 +433,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 					LScan.NativeTable = EnsureNativeTable(((BaseTableVarNode)LPlanNode).TableVar);
 					LScan.Key = LScan.NativeTable.ClusteredIndex.Key;
 					LScan.Open();
-					return new DataVar(String.Empty, LScan.DataType, LScan);
+					return LScan;
 				}
 				catch
 				{
@@ -451,7 +451,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 					LScan.Direction = ((OrderNode)LPlanNode).ScanDirection;
 					LScan.Node.Order = ((OrderNode)LPlanNode).Order;
 					LScan.Open();
-					return new DataVar(String.Empty, LScan.DataType, LScan);
+					return LScan;
 				}
 				catch
 				{

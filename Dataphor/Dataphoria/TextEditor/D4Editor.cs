@@ -464,15 +464,15 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 String.Format
                     (
                     Strings.ScriptInjected,
-                    Dataphoria.EvaluateQuery("System.LibraryName();").AsString,
-                    Dataphoria.EvaluateQuery
+                    ((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery("System.LibraryName();")).AsString,
+                    ((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery
                         (
                         String.Format
                             (
                             @"System.InjectUpgrade(System.LibraryName(), ""{0}"");",
                             GetTextToExecute().Replace(@"""", @"""""")
                             )
-                        ).AsString
+                        )).AsString
                     )
                 );
         }
@@ -518,18 +518,17 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                                                                                                      LErrors);
                                                     if (LAttemptExecute)
                                                     {
-                                                        LResult.AppendFormat(Strings.PrepareSuccessful,
-                                                                             new object[]
-                                                                                 {
-                                                                                     LPlan.Statistics.PrepareTime.
-                                                                                         ToString(),
-                                                                                     LPlan.Statistics.CompileTime.
-                                                                                         ToString(),
-                                                                                     LPlan.Statistics.OptimizeTime.
-                                                                                         ToString(),
-                                                                                     LPlan.Statistics.BindingTime.
-                                                                                         ToString()
-                                                                                 });
+                                                        LResult.AppendFormat
+                                                        (
+															Strings.PrepareSuccessful,
+                                                            new object[]
+                                                            {
+																LPlan.Statistics.PrepareTime.ToString(),
+                                                                LPlan.Statistics.CompileTime.ToString(),
+                                                                LPlan.Statistics.OptimizeTime.ToString(),
+                                                                LPlan.Statistics.BindingTime.ToString()
+															}
+														);
                                                         LResult.Append("\r\n");
                                                     }
                                                 }
@@ -629,7 +628,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                     {
                         var LParams = new DataParams();
                         LParams.Add(DataParam.Create(Dataphoria.UtilityProcess, "AQuery", GetTextToExecute()));
-                        LPlan = Dataphoria.EvaluateQuery("ShowPlan(AQuery)", LParams).AsString;
+                        LPlan = ((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery("ShowPlan(AQuery)", LParams)).AsString;
                     }
                     finally
                     {

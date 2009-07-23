@@ -23,18 +23,18 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
         private void ExecuteClicked(object ASender, EventArgs AArgs)
         {
             using 
-                (
-                DAE.Runtime.Data.DataValue LScript = 
-                    Dataphoria.FrontendSession.Pipe.RequestDocument
-                        (
-                        String.Format
-                            (
-                            ".Frontend.Load('{0}', '{1}')", 
-                            DAE.Schema.Object.EnsureRooted(LibraryName), 
-                            DAE.Schema.Object.EnsureRooted(DocumentName)
-                            )
-                        )
-                )
+			(
+				DAE.Runtime.Data.Scalar LScript = 
+					Dataphoria.FrontendSession.Pipe.RequestDocument
+					(
+						String.Format
+						(
+							".Frontend.Load('{0}', '{1}')", 
+							DAE.Schema.Object.EnsureRooted(LibraryName), 
+							DAE.Schema.Object.EnsureRooted(DocumentName)
+						)
+					)
+			)
             {
                 Dataphoria.ExecuteScript(LScript.AsString);
             }

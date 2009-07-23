@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FServerProcess = AServerProcess;
 			FCatalogLocks = new ArrayList();
-			FSymbols = new Context(FServerProcess.Context.MaxStackDepth, FServerProcess.Context.MaxCallDepth);
+			FSymbols = new Symbols(FServerProcess.Context.MaxStackDepth, FServerProcess.Context.MaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
 		}
@@ -64,10 +64,7 @@ namespace Alphora.Dataphor.DAE.Server
 					finally
 					{
 						if (FSymbols != null)
-						{
-							FSymbols.Dispose();
 							FSymbols = null;
-						}
 					}
 				}
 				finally
@@ -179,8 +176,22 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Symbols        
-		protected Context FSymbols;
-		public Context Symbols { get { return FSymbols; } }
+		protected Symbols FSymbols;
+		public Symbols Symbols { get { return FSymbols; } }
+		
+		// InErrorContext
+		protected int FErrorContextCount;
+		public bool InErrorContext { get { return FErrorContextCount > 0; } }
+		
+		public void EnterErrorContext()
+		{
+			FErrorContextCount++;
+		}
+		
+		public void ExitErrorContext()
+		{
+			FErrorContextCount--;
+		}
         
 		// LoopContext
 		protected int FLoopCount;

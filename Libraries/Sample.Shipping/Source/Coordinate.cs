@@ -88,19 +88,19 @@ namespace Alphora.Shipping
 	// operator Degree(ADegrees : integer, AMinutes : integer, ASeconds : decimal) : Degree;
 	public class DegreeSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null) || (AArguments[2].Value == null))
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, CoordinateUtility.GetDegree(AArguments[0].Value.AsInt32, AArguments[1].Value.AsInt32, AArguments[2].Value.AsDecimal)));
+				return CoordinateUtility.GetDegree((int)AArguments[0], (int)AArguments[1], (decimal)AArguments[2])));
 		}
 	}
 	
 	// operator ReadDegreesPart(ADegree : Degree) : integer;
 	public class DegreesPartReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -115,7 +115,7 @@ namespace Alphora.Shipping
 	// operator WriteDegreesPart(ADegree : Degree, AValue : integer) : Degree;
 	public class DegreesPartWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -123,7 +123,7 @@ namespace Alphora.Shipping
 			{
 				Scalar LDegree = (Scalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, CoordinateUtility.GetDegree(((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetMinutes(LValue), CoordinateUtility.GetSeconds(LValue))));
+				return CoordinateUtility.GetDegree(((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetMinutes(LValue), CoordinateUtility.GetSeconds(LValue))));
 			}
 		}
 	}
@@ -131,7 +131,7 @@ namespace Alphora.Shipping
 	// operator ReadMinutesPart(ADegree : Degree) : integer;
 	public class MinutesPartReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -146,7 +146,7 @@ namespace Alphora.Shipping
 	// operator WriteMinutesPart(ADegree : Degree, AValue : integer) : Degree;
 	public class MinutesPartWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -154,7 +154,7 @@ namespace Alphora.Shipping
 			{
 				Scalar LDegree = (Scalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), ((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetSeconds(LValue))));
+				return CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), ((Scalar)AArguments[1].Value).ToInt32(), CoordinateUtility.GetSeconds(LValue))));
 			}
 		}
 	}
@@ -162,7 +162,7 @@ namespace Alphora.Shipping
 	// operator ReadSecondsPart(ADegree : Degree) : decimal;
 	public class SecondsPartReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -177,7 +177,7 @@ namespace Alphora.Shipping
 	// operator WriteSecondsPart(ADegree : Degree, AValue : decimal) : Degree;
 	public class SecondsPartWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -185,7 +185,7 @@ namespace Alphora.Shipping
 			{
 				Scalar LDegree = (Scalar)AArguments[0].Value;
 				decimal LValue = ((DegreeConveyor)LDegree.Conveyor).GetValue(LDegree);
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), CoordinateUtility.GetMinutes(LValue), ((Scalar)AArguments[1].Value).ToDecimal())));
+				return CoordinateUtility.GetDegree(CoordinateUtility.GetDegrees(LValue), CoordinateUtility.GetMinutes(LValue), ((Scalar)AArguments[1].Value).ToDecimal())));
 			}
 		}
 	}
@@ -193,19 +193,19 @@ namespace Alphora.Shipping
 	// operator Degrees(ADegrees : decimal) : Degree;
 	public class DegreesSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((Scalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
 	// operator ReadDegrees(ADegree : Degree) : decimal;
 	public class DegreesReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -220,85 +220,85 @@ namespace Alphora.Shipping
 	// operator WriteDegrees(ADegree : Degree, AValue : decimal) : Degree;
 	public class DegreesWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((Scalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 */
 	
 	// operator Coordinate(ALatitude : Degree, ALongitude : Degree) : Coordinate;
-	public class CoordinateSelector : InstructionNode
+	public class CoordinateSelector : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-				return new DataVar(FDataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Coordinate(AArguments[0].Value.AsDecimal, AArguments[1].Value.AsDecimal)));
+				return new Coordinate((decimal)AArgument1, (decimal)AArgument2);
 		}
 	}
 	
 	// operator ReadLatitude(ACoordinate : Coordinate) : Degree;
-	public class LatitudeReadAccessor : InstructionNode
+	public class LatitudeReadAccessor : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
-			if (AArguments[0].Value == null)
-				return new DataVar(FDataType);
+			if (AArgument1 == null)
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Coordinate)AArguments[0].Value.AsNative).Latitude));
+				return ((Coordinate)AArgument1).Latitude;
 		}
 	}
 	
 	// operator WriteLatitude(ACoordinate : Coordinate, ALatitude : Degree) : Coordinate;
-	public class LatitudeWriteAccessor : InstructionNode
+	public class LatitudeWriteAccessor : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-				return new DataVar(FDataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Coordinate(AArguments[1].Value.AsDecimal, ((Coordinate)AArguments[0].Value.AsNative).Longitude)));
+				return new Coordinate((decimal)AArgument2, ((Coordinate)AArgument1).Longitude);
 		}
 	}
 	
 	// operator ReadLongitude(ACoordinate : Coordinate) : Degree;
-	public class LongitudeReadAccessor : InstructionNode
+	public class LongitudeReadAccessor : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
-			if (AArguments[0].Value == null)
-				return new DataVar(FDataType);
+			if (AArgument1 == null)
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Coordinate)AArguments[0].Value.AsNative).Longitude));
+				return ((Coordinate)AArgument1).Longitude;
 		}
 	}
 	
 	// operator WriteLongitude(ACoordinate : Coordinate, ALongitude : Degree) : Coordinate;
-	public class LongitudeWriteAccessor : InstructionNode
+	public class LongitudeWriteAccessor : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-				return new DataVar(FDataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Coordinate(((Coordinate)AArguments[0].Value.AsNative).Latitude, AArguments[1].Value.AsDecimal)));
+				return new Coordinate(((Coordinate)AArgument1).Latitude, (decimal)AArgument2);
 		}
 	}
 	
 	// operator iCompare(ACoordinate1 : Coordinate, ACoordinate2 : Coordinate) : integer;
-	public class CoordinateCompare : InstructionNode
+	public class CoordinateCompare : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-				return new DataVar(FDataType);
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Coordinate)AArguments[0].Value.AsNative).CompareTo((Coordinate)AArguments[1].Value.AsNative)));
+				return ((Coordinate)AArgument1).CompareTo((Coordinate)AArgument2);
 		}
 	}
 	
@@ -306,7 +306,7 @@ namespace Alphora.Shipping
 	// operator Miles(AMiles : decimal) : Distance;
 	public class MilesSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -318,7 +318,7 @@ namespace Alphora.Shipping
 	// operator ReadMiles(ADistance : Distance) : decimal;
 	public class MilesReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -330,7 +330,7 @@ namespace Alphora.Shipping
 	// operator WriteMiles(ADistance : Distance, AMiles : decimal) : Distance;
 	public class MilesWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
@@ -342,7 +342,7 @@ namespace Alphora.Shipping
 	// operator Kilometers(AKilometers : decimal) : Distance;
 	public class KilometersSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -354,7 +354,7 @@ namespace Alphora.Shipping
 	// operator ReadKilometers(ADistance : Distance) : decimal;
 	public class KilometersReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
@@ -366,7 +366,7 @@ namespace Alphora.Shipping
 	// operator WriteKilometers(ADistance : Distance, AKilometers : decimal) : Distance;
 	public class KilometersWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
@@ -378,7 +378,7 @@ namespace Alphora.Shipping
 	// operator Distance(AFromCoordinate : Coordinate, AToCoordinate : Coordinate) : Distance
 	public class DistanceNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -394,25 +394,25 @@ namespace Alphora.Shipping
 	// operator Percent(APercent : decimal) : Degree;
 	public class PercentSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((Scalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
 	// operator ReadPercent(APercent : Percent) : decimal;
 	public class PercentReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
 			{
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((Scalar)AArguments[0].Value).ToDecimal()));
 			}
 		}
 	}
@@ -420,19 +420,19 @@ namespace Alphora.Shipping
 	// operator WritePercent(APercent : Percent, AValue : decimal) : Percent;
 	public class PercentWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((Scalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 	
 	// operator Percent(AQuotient : decimal, ADivisor : decimal) : Percent;
 	public class PercentNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -444,7 +444,7 @@ namespace Alphora.Shipping
 	// operator iMultiplication(AValue : decimal, APercent : Percent) : decimal;
 	public class DecimalPercentMultiplicationNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -456,7 +456,7 @@ namespace Alphora.Shipping
 	// operator iMultiplication(APercent : Percent, ADecimal : decimal) : decimal;
 	public class PercentDecimalMultiplicationNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
 				return new DataVar(FDataType);
@@ -468,25 +468,25 @@ namespace Alphora.Shipping
 	// operator DollarsPerMile(AAmount : money) : ShippingRate;
 	public class DollarsPerMileSelector : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((Scalar)AArguments[0].Value).ToDecimal()));
 		}
 	}
 	
 	// operator ReadRate(ARate : ShippingRate) : money;
 	public class RateReadAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[0].Value == null)
 				return new DataVar(FDataType);
 			else
 			{
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[0].Value).ToDecimal()));
+				return ((Scalar)AArguments[0].Value).ToDecimal()));
 			}
 		}
 	}
@@ -494,12 +494,12 @@ namespace Alphora.Shipping
 	// operator WriteRate(ARate : ShippingRate, AValue : money) : ShippingRate;
 	public class RateWriteAccessor : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1].Value == null)
 				return new DataVar(FDataType);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Scalar)AArguments[1].Value).ToDecimal()));
+				return ((Scalar)AArguments[1].Value).ToDecimal()));
 		}
 	}
 */

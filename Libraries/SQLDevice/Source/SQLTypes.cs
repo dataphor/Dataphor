@@ -20,9 +20,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLScalarType(int AID, string AName) : base(AID, AName) {}
 		
-		public virtual string ToLiteral(Scalar AValue)
+		public virtual string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
 			object LValue = FromScalar(AValue);
@@ -34,12 +34,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LValue.ToString();
 		}
 		
-		public virtual Scalar ParameterToScalar(IServerProcess AProcess, object AValue)
+		public virtual object ParameterToScalar(IServerProcess AProcess, object AValue)
 		{
 			return ToScalar(AProcess, AValue);
 		}
 		
-		public virtual object ParameterFromScalar(Scalar AValue)
+		public virtual object ParameterFromScalar(object AValue)
 		{
 			return FromScalar(AValue);
 		}
@@ -182,25 +182,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLBoolean(int AID, string AName) : base(AID, AName) {}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsBoolean ? "1" : "0";
+			return (bool)AValue ? "1" : "0";
 		}
 		
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			if (AValue is bool)
-				return new Scalar(AProcess, ScalarType, (bool)AValue);
-			else
-				return new Scalar(AProcess, ScalarType, Convert.ToBoolean(AValue));
+				return AValue;
+			return Convert.ToBoolean(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsBoolean ? 1 : 0;
+			return (bool)AValue ? 1 : 0;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -222,22 +221,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLByte(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToByte(AValue));
+			return Convert.ToByte(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return Convert.ToInt16(AValue.AsByte);
+			return Convert.ToInt16((byte)AValue);
 		}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsByte.ToString(NumberFormatInfo.InvariantInfo);
+			return ((byte)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -260,14 +259,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLSByte() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return Scalar.FromSByte((sbyte)(short)AValue);
+			return (sbyte)(short)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (short)AValue.ToSByte();
+			return (short)(sbyte)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -290,23 +289,23 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLShort(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			//AS400 is returning AValue as Int32. Cannot cast as short so it is necessary to explicitly convert AValue to an Int16.
-			return new Scalar(AProcess, ScalarType, Convert.ToInt16(AValue));
+			return Convert.ToInt16(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt16;
+			return (short)AValue;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsInt16.ToString(NumberFormatInfo.InvariantInfo);
+			return ((short)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -329,14 +328,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLUShort() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return Scalar.FromUInt16((ushort)((int)AValue));
+			return (ushort)((int)AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (int)AValue.ToUInt16();
+			return (int)(uint)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -359,22 +358,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLInteger(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt32(AValue));
+			return Convert.ToInt32(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt32;
+			return (int)AValue;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsInt32.ToString(NumberFormatInfo.InvariantInfo);
+			return ((int)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -397,19 +396,19 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLUInteger() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			// According to the documentation, as well as the type parameter of the ADO field, this
 			// value should be being returned as a uint, however it is coming back as a decimal.
 			if (AValue is long)
-				return Scalar.FromUInt32(AProcess, (uint)(long)AValue);
+				return (uint)(long)AValue;
 			else
-				return Scalar.FromUInt32(AProcess, Convert.ToUInt32((decimal)AValue));
+				return Convert.ToUInt32((decimal)AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (long)AValue.ToUInt32();
+			return (long)(uint)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -432,23 +431,23 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLLong(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			// translation problem from ADO, documentation says this will be a long, but it is in fact a decimal
-			return new Scalar(AProcess, ScalarType, Convert.ToInt64(AValue));
+			return Convert.ToInt64(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsInt64;
+			return (long)AValue;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsInt64.ToString(NumberFormatInfo.InvariantInfo);
+			return ((long)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -471,14 +470,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLULong() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return Scalar.FromUInt64(AProcess, Convert.ToUInt64((decimal)AValue));
+			return Convert.ToUInt64((decimal)AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return Convert.ToDecimal(AValue.ToUInt64());
+			return Convert.ToDecimal((ulong)AValue);
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -501,23 +500,23 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLDecimal(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			// TODO: This should be a decimal cast but the ADOConnection is returning an integer value as the result of evaluating Avg(Integer) when the result is a whole number
-			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue)); 
+			return Convert.ToDecimal(AValue); 
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDecimal;
+			return (decimal)AValue;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo);
+			return ((decimal)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public byte GetPrecision(D4.MetaData AMetaData)
@@ -564,22 +563,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FDateTimeFormat;}
 		}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -601,23 +600,23 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLTimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			// ADO translation error: docs say this should be a long, in fact it is a decimal
-			return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
+			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsTimeSpan.Ticks;
+			return ((TimeSpan)AValue).Ticks;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsTimeSpan.Ticks.ToString(NumberFormatInfo.InvariantInfo);
+			return ((TimeSpan)AValue).Ticks.ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -648,22 +647,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FDateFormat;}
 		}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -694,23 +693,23 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return FTimeFormat; }
 		}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			DateTime LDateTime = (DateTime)AValue;
-			return new Scalar(AProcess, ScalarType, new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond));
+			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -732,22 +731,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLMoney(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue));
+			return Convert.ToDecimal(AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDecimal;
+			return (decimal)AValue;
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo);
+			return ((decimal)AValue).ToString(NumberFormatInfo.InvariantInfo);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -769,14 +768,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLGuid(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, new Guid((string)AValue));
+			return new Guid((string)AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsGuid.ToString();
+			return ((Guid)AValue).ToString();
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -798,14 +797,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLString(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (string)AValue);
+			return (string)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (String)AValue.AsNative;
+			return (String)AValue;
 		}
 		
 		protected int GetLength(D4.MetaData AMetaData)
@@ -828,14 +827,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLText(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (string)AValue);
+			return (string)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsString;
+			return (string)AValue;
 		}
 		
 		public override Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
@@ -870,24 +869,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLBinary(int AID, string AName) : base(AID, AName) {}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsString);
+			return String.Format("'{0}'", Convert.ToBase64String((byte[])AValue));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			Scalar LScalar = new Scalar(AProcess, ScalarType);
-			LScalar.AsByteArray = (byte[])AValue;
-			return LScalar;
+			return (byte[])AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsByteArray;
+			return (byte[])AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -909,24 +906,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLGraphic(int AID, string AName) : base(AID, AName) {}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsString);
+			return String.Format("'{0}'", Convert.ToBase64String((byte[])AValue));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			Scalar LScalar = new Scalar(AProcess, ScalarType);
-			LScalar.AsByteArray = (byte[])AValue;
-			return LScalar;
+			return (byte[])AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsByteArray;
+			return (byte[])AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -948,14 +943,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLVersionNumber(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, StringToVersionNumber((string)AValue));
+			return StringToVersionNumber((string)AValue);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return VersionNumberToString((VersionNumber)AValue.AsNative);
+			return VersionNumberToString((VersionNumber)AValue);
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)

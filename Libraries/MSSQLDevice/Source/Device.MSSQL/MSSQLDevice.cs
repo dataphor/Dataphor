@@ -26,6 +26,7 @@ using Alphora.Dataphor.DAE.Server;
 using ColumnExpression=Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement=Alphora.Dataphor.DAE.Language.TSQL.DropIndexStatement;
 using SelectStatement=Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
+using Alphora.Dataphor.DAE.Streams;
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
@@ -686,41 +687,44 @@ if not exists (select * from sysdatabases where name = '{0}')
 
             var LClassDefinition =
                 new ClassDefinition
-                    (
+				(
                     Device.ConnectionClass == String.Empty
                         ?
-#if USEADOCONNECTION
-						"ADOConnection.ADOConnection" : 
-#else
-#if USEOLEDBCONNECTION
-						"Connection.OLEDBConnection" :
-#else
-                    "Connection.MSSQLConnection"
-                        :
-#endif
-#endif
-                    Device.ConnectionClass
-                    );
+						#if USEADOCONNECTION
+						"ADOConnection.ADOConnection" 
+						#else
+						#if USEOLEDBCONNECTION
+						"Connection.OLEDBConnection"
+						#else
+	                    "Connection.MSSQLConnection"
+						#endif
+						#endif
+	                    : Device.ConnectionClass
+				);
+
             var LBuilderClass =
                 new ClassDefinition
-                    (
+				(
                     Device.ConnectionStringBuilderClass == String.Empty
                         ?
-#if USEADOCONNECTION
-						"MSSQLDevice.MSSQLOLEDBConnectionStringBuilder" :
-#else
-#if USEOLEDBCONNECTION
-						"MSSQLDevice.MSSQLOLEDBConnectionStringBuilder" :
-#else
-                    "MSSQLDevice.MSSQLADODotNetConnectionStringBuilder"
-                        :
-#endif
-#endif
-                    Device.ConnectionStringBuilderClass
+						#if USEADOCONNECTION
+						"MSSQLDevice.MSSQLOLEDBConnectionStringBuilder"
+						#else
+						#if USEOLEDBCONNECTION
+						"MSSQLDevice.MSSQLOLEDBConnectionStringBuilder"
+						#else
+	                    "MSSQLDevice.MSSQLADODotNetConnectionStringBuilder"
+						#endif
+						#endif
+						: Device.ConnectionStringBuilderClass
                     );
-            var LConnectionStringBuilder =
-                (ConnectionStringBuilder)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[] {});
+
+            var LConnectionStringBuilder = 
+				(ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+				(
+					LBuilderClass, 
+					new object[] {}
+				);
 
             var LTags = new Tags();
             LTags.AddOrUpdate("ServerName", Device.ServerName);
@@ -738,8 +742,11 @@ if not exists (select * from sysdatabases where name = '{0}')
             Device.GetConnectionParameters(LTags, DeviceSessionInfo);
             string LConnectionString = SQLDevice.TagsToString(LTags);
             return
-                (SQLConnection)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] {LConnectionString});
+                (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+                (
+					LClassDefinition, 
+					new object[] { LConnectionString }
+				);
         }
     }
 
@@ -754,15 +761,15 @@ if not exists (select * from sysdatabases where name = '{0}')
     {
         public MSSQLOLEDBConnectionStringBuilder()
         {
-#if USESQLOLEDB
+			#if USESQLOLEDB
             FParameters.AddOrUpdate("Provider", "SQLOLEDB");
-#else
+			#else
 			FParameters.AddOrUpdate("Provider", "MSDASQL");
-#endif
+			#endif
 
-#if !USECONNECTIONPOOLING
+			#if !USECONNECTIONPOOLING
 			FParameters.AddOrUpdate("OLE DB Services", "-2"); // Turn off OLEDB resource pooling
-#endif
+			#endif
             FLegend.AddOrUpdate("ServerName", "Data source");
             FLegend.AddOrUpdate("DatabaseName", "initial catalog");
             FLegend.AddOrUpdate("UserName", "user id");
@@ -848,25 +855,25 @@ if not exists (select * from sysdatabases where name = '{0}')
         //public MSSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public MSSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return AValue.AsBoolean ? "1" : "0";
+            return (bool)AValue ? "1" : "0";
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if (AValue is bool)
-                return new Scalar(AProcess, ScalarType, (bool) AValue);
+                return (bool)AValue;
             else
-                return new Scalar(AProcess, ScalarType, (int) AValue == 0 ? false : true);
+                return (int) AValue == 0 ? false : true;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsBoolean;
+            return (bool)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -890,16 +897,16 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             // According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
             // it is coming back as a short, I don't know why, maybe interop?
-            return new Scalar(AProcess, ScalarType, Convert.ToByte(AValue));
+            return Convert.ToByte(AValue);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsByte;
+            return (byte)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -923,14 +930,14 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue));
+            return Convert.ToDecimal(AValue);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsDecimal;
+            return (decimal)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -954,14 +961,12 @@ if not exists (select * from sysdatabases where name = '{0}')
     {
         public const string CDateTimeFormat = "yyyy/MM/dd HH:mm:ss";
 
-        public static readonly DateTime Accuracy = new DateTime((long) (TimeSpan.TicksPerMillisecond*3.33));
+        public static readonly DateTime Accuracy = new DateTime((long)(TimeSpan.TicksPerMillisecond * 3.33));
         public static readonly DateTime MinValue = new DateTime(1753, 1, 1);
 
         private string FDateTimeFormat = CDateTimeFormat;
 
-        public MSSQLDateTime(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLDateTime(int AID, string AName) : base(AID, AName) { }
 
         public string DateTimeFormat
         {
@@ -969,12 +974,12 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FDateTimeFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             if (LValue == DateTime.MinValue)
                 LValue = MinValue;
             if (LValue < MinValue)
@@ -983,19 +988,19 @@ if not exists (select * from sysdatabases where name = '{0}')
             return String.Format("'{0}'", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            var LDateTime = (DateTime) AValue;
+            var LDateTime = (DateTime)AValue;
             // If the value is equal to the device's zero date, set it to Dataphor's zero date
             if (LDateTime == MinValue)
                 LDateTime = DateTime.MinValue;
             long LTicks = LDateTime.Ticks;
-            return new Scalar(AProcess, ScalarType, new DateTime(LTicks - (LTicks%TimeSpan.TicksPerSecond)));
+            return new DateTime(LTicks - (LTicks%TimeSpan.TicksPerSecond));
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date, set it to the Device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = MinValue;
@@ -1026,9 +1031,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         private string FDateFormat = CDateFormat;
 
-        public MSSQLDate(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLDate(int AID, string AName) : base(AID, AName) { }
 
         public string DateFormat
         {
@@ -1036,12 +1039,12 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FDateFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = MSSQLDateTime.MinValue;
@@ -1051,19 +1054,19 @@ if not exists (select * from sysdatabases where name = '{0}')
             return String.Format("'{0}'", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            var LDateTime = (DateTime) AValue;
+            var LDateTime = (DateTime)AValue;
             // If the value is equal to the Device's zero date, set it to Dataphor's zero date
             if (LDateTime == MSSQLDateTime.MinValue)
                 LDateTime = DateTime.MinValue;
             long LTicks = LDateTime.Ticks;
-            return new Scalar(AProcess, ScalarType, new DateTime(LTicks - (LTicks%TimeSpan.TicksPerDay)));
+            return new DateTime(LTicks - (LTicks%TimeSpan.TicksPerDay));
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = MSSQLDateTime.MinValue;
@@ -1094,9 +1097,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         private string FTimeFormat = CTimeFormat;
 
-        public MSSQLTime(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLTime(int AID, string AName) : base(AID, AName) { }
 
         public string TimeFormat
         {
@@ -1104,34 +1105,34 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FTimeFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
             // Added 1899 years, so that a time can actually be stored. 
             // Adding 1899 years puts it at the year 1900
             // which is stored as zero in MSSQL.
             // this year value of 1900 may make some translation easier.
-            DateTime LValue = AValue.AsDateTime.AddYears(1899);
+            DateTime LValue = ((DateTime)AValue).AddYears(1899);
             if (LValue < MSSQLDateTime.MinValue)
                 throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
             return String.Format("'{0}'", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, new DateTime(((DateTime) AValue).Ticks%TimeSpan.TicksPerDay));
+            return new DateTime(((DateTime) AValue).Ticks%TimeSpan.TicksPerDay);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
             // Added 1899 years, so that a time can actually be stored. 
             // Adding 1899 years puts it at the year 1900
             // which is stored as zero in MSSQL.
             // this year value of 1900 may make some translation easier.
-            DateTime LValue = AValue.AsDateTime.AddYears(1899);
+            DateTime LValue = ((DateTime)AValue).AddYears(1899);
             if (LValue < MSSQLDateTime.MinValue)
                 throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
             return LValue;
@@ -1155,29 +1156,27 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class MSSQLGuid : SQLScalarType
     {
-        public MSSQLGuid(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLGuid(int AID, string AName) : base(AID, AName) { }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return String.Format("'{0}'", AValue.AsGuid);
+            return String.Format("'{0}'", (Guid)AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if (AValue is string)
-                return new Scalar(AProcess, ScalarType, new Guid((string) AValue));
+                return new Guid((string)AValue);
             else
-                return new Scalar(AProcess, ScalarType, (Guid) AValue);
+                return (Guid)AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsGuid;
+            return (Guid)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -1197,9 +1196,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class MSSQLText : SQLText
     {
-        public MSSQLText(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLText(int AID, string AName) : base(AID, AName) { }
 
         //public MSSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public MSSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1216,9 +1213,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class MSSQLBinary : SQLBinary
     {
-        public MSSQLBinary(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLBinary(int AID, string AName) : base(AID, AName) { }
 
         //public MSSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public MSSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1235,9 +1230,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class MSSQLGraphic : SQLGraphic
     {
-        public MSSQLGraphic(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLGraphic(int AID, string AName) : base(AID, AName) { }
 
         //public MSSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public MSSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1254,26 +1247,24 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class MSSQLMSSQLBinary : SQLScalarType
     {
-        public MSSQLMSSQLBinary(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public MSSQLMSSQLBinary(int AID, string AName) : base(AID, AName) { }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return String.Format("'{0}'", AValue.AsString);
+            return String.Format("'{0}'", Convert.ToBase64String((byte[])AValue));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, AValue);
+            return (byte[])AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsByteArray;
+            return (byte[])AValue;
         }
 
         protected int GetLength(MetaData AMetaData)
@@ -1296,20 +1287,20 @@ if not exists (select * from sysdatabases where name = '{0}')
 
     #region Instruction Nodes
 
-    public class MSSQLMSSQLBinaryCompareNode : InstructionNode
+    public class MSSQLMSSQLBinaryCompareNode : BinaryInstructionNode
     {
-        public static int Compare(Scalar ALeftValue, Scalar ARightValue)
+        public static int Compare(ServerProcess AProcess, object ALeftValue, object ARightValue)
         {
-            Stream LLeftStream = ALeftValue.IsNative
-                                     ? new MemoryStream(ALeftValue.AsByteArray, 0, ALeftValue.AsByteArray.Length, false,
-                                                        true)
-                                     : ALeftValue.OpenStream();
+            Stream LLeftStream = 
+				ALeftValue is byte[]
+					? new MemoryStream((byte[])ALeftValue, 0, ((byte[])ALeftValue).Length, false, true)
+					: AProcess.StreamManager.Open((StreamID)ALeftValue, LockMode.Exclusive);
             try
             {
-                Stream LRightStream = ARightValue.IsNative
-                                          ? new MemoryStream(ARightValue.AsByteArray, 0, ARightValue.AsByteArray.Length,
-                                                             false, true)
-                                          : ARightValue.OpenStream();
+                Stream LRightStream = 
+					ARightValue is byte[]
+						? new MemoryStream((byte[])ARightValue, 0, ((byte[])ARightValue).Length, false, true)
+						: AProcess.StreamManager.Open((StreamID)ARightValue, LockMode.Exclusive);
                 try
                 {
                     int LLeftByte;
@@ -1343,98 +1334,78 @@ if not exists (select * from sysdatabases where name = '{0}')
             }
         }
 
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              Compare((Scalar) AArguments[0].Value, (Scalar) AArguments[1].Value)));
+                return Compare(AProcess, AArgument1, AArgument2);
         }
     }
 
-    public class MSSQLMSSQLBinaryEqualNode : InstructionNode
+    public class MSSQLMSSQLBinaryEqualNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) == 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) == 0;
         }
     }
 
-    public class MSSQLMSSQLBinaryNotEqualNode : InstructionNode
+    public class MSSQLMSSQLBinaryNotEqualNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) != 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) != 0;
         }
     }
 
-    public class MSSQLMSSQLBinaryLessNode : InstructionNode
+    public class MSSQLMSSQLBinaryLessNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) < 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) < 0;
         }
     }
 
-    public class MSSQLMSSQLBinaryInclusiveLessNode : InstructionNode
+    public class MSSQLMSSQLBinaryInclusiveLessNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) <= 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) <= 0;
         }
     }
 
-    public class MSSQLMSSQLBinaryGreaterNode : InstructionNode
+    public class MSSQLMSSQLBinaryGreaterNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) > 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) > 0;
         }
     }
 
-    public class MSSQLMSSQLBinaryInclusiveGreaterNode : InstructionNode
+    public class MSSQLMSSQLBinaryInclusiveGreaterNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType) FDataType,
-                                              MSSQLMSSQLBinaryCompareNode.Compare((Scalar) AArguments[0].Value,
-                                                                                  (Scalar) AArguments[1].Value) >= 0));
+                return MSSQLMSSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) >= 0;
         }
     }
 

@@ -203,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		#if USEINTERNALID
-		private void IndexInsert(ServerProcess AProcess, NativeRowTree AIndex, Row ARow, Scalar AInternalID)
+		private void IndexInsert(ServerProcess AProcess, NativeRowTree AIndex, Row ARow, Guid AInternalID)
 		#else
 		private void IndexInsert(ServerProcess AProcess, NativeRowTree AIndex, Row ARow)
 		#endif
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						else
 						#endif
 						{
-							LColumnIndex = ARow.GetIndexOfColumn(LKey.DataType.Columns[LIndex].Name);
+							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LKey.DataType.Columns[LIndex].Name);
 							if (ARow.HasValue(LColumnIndex))
 								LKey[LIndex] = ARow[LColumnIndex];
 							else
@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						else
 						#endif
 						{
-							LColumnIndex = ARow.GetIndexOfColumn(LData.DataType.Columns[LIndex].Name);
+							LColumnIndex = ARow.DataType.Columns.GetIndexOfColumn(LData.DataType.Columns[LIndex].Name);
 							if (ARow.HasValue(LColumnIndex))
 								LData[LIndex] = ARow[LColumnIndex];
 							else
@@ -269,7 +269,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			// Insert the row into all indexes
 			#if USEINTERNALID
-			Scalar LInternalID = new Scalar(AProcess, (Schema.IScalarType)FInternalIDColumn.DataType, Guid.NewGuid());
+			Guid LInternalID = Guid.NewGuid();
 			IndexInsert(AProcess, ClusteredIndex, ARow, LInternalID);
 			foreach (NativeRowTree LIndex in NonClusteredIndexes)
 				IndexInsert(AProcess, LIndex, ARow, LInternalID);

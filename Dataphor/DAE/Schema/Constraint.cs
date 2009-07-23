@@ -110,98 +110,25 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LMessage;
 		}
 		
+		protected abstract PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition);
 		public string GetViolationMessage(ServerProcess AProcess, Transition ATransition)
 		{
-			return GetViolationMessage(AProcess, GetCustomMessage(ATransition), null, null);
-		}
-		
-		public string GetViolationMessage(ServerProcess AProcess, Transition ATransition, Statement AConstraintDefinition)
-		{
-			return GetViolationMessage(AProcess, GetCustomMessage(ATransition), this, AConstraintDefinition);
-		}
-		
-		/// <summary>Compiles or evaluates the custom violation message given in AMessage.</summary>
-		/// <remarks>
-		/// This method expects the stack to be prepared as appropriate for the type of constraint for which the message is being generated.
-		/// If AConstraint is specified, AConstraintDefinition must be specified as well.
-		/// If AConstraint is specified, then this call is a compile-time verification of the message syntax, and the message will not be evaluated,
-		/// and any compile-time errors will be thrown out of this call.
-		/// If AConstraint is not specified, this is the run-time evaluation of the message.
-		/// </remarks>
-		public static string GetViolationMessage(ServerProcess AProcess, string AMessage, Schema.Object AConstraint, Statement AConstraintDefinition)
-		{
-			if (AMessage != String.Empty)
+			try
 			{
-				try
+				PlanNode LNode = GetViolationMessageNode(AProcess, ATransition);
+				if (LNode != null)
 				{
-					ServerStatementPlan LPlan = new ServerStatementPlan(AProcess);
-					try
-					{
-						Context LContext = AProcess.Context;
-						if (AConstraint != null)
-						{
-							LPlan.Plan.PushCreationObject(AConstraint);
-							LContext = AProcess.Plan.Symbols;
-						}
-						try
-						{
-							AProcess.PushExecutingPlan(LPlan);
-							try
-							{
-								// Push current context onto the symbols for the new plan
-								LPlan.Plan.EnterRowContext();
-								DataVar LVar;
-								for (int LIndex = LContext.Count - 1; LIndex >= 0; LIndex--)
-								{
-									LVar = LContext.Peek(LIndex);
-									LPlan.Plan.Symbols.Push(new DataVar(LVar.Name == String.Empty ? Keywords.Value : LVar.Name, LVar.DataType));
-								}
-								
-								// BTR 10/9/2006 ->
-								// Setting this to true changes the binding to allow variable hiding. 
-								// Without this, the error message expression evaluation will get an ambiguous resolve because of the state of the stack.
-								LPlan.Plan.Symbols.AllowExtraWindowAccess = true; 
-
-								#if USEISTRING
-								PlanNode LExpressionNode = Compiler.CompileTypedExpression(LPlan.Plan, new D4.Parser().ParseExpression(AMessage), AProcess.DataTypes.SystemIString);
-								#else
-								PlanNode LExpressionNode = Compiler.CompileTypedExpression(LPlan.Plan, new D4.Parser().ParseExpression(AMessage), AProcess.DataTypes.SystemString);
-								#endif
-								LExpressionNode = Compiler.BindNode(LPlan.Plan, LExpressionNode);
-								if (AConstraint == null)
-									AMessage = LExpressionNode.Execute(AProcess).Value.AsString;
-							}
-							finally
-							{
-								AProcess.PopExecutingPlan(LPlan);
-							}
-						}
-						finally
-						{
-							if (AConstraint != null)
-								LPlan.Plan.PopCreationObject();
-						}
-					}
-					finally
-					{
-						LPlan.Dispose();
-					}
+					string LMessage = (string)LNode.Execute(AProcess);
+					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
+						LMessage = LMessage + '.';
+					return LMessage;
 				}
-				catch (Exception LException)
-				{
-					AMessage = String.Format("Errors occurred attempting to generate custom error message: {0}", LException.Message);
-					if (AConstraint != null)
-						throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraintDefinition, LException, AConstraint.Name);
-				}
+				return String.Empty;
 			}
-			
-			if (AMessage != String.Empty)
+			catch (Exception LException)
 			{
-				if (AMessage[AMessage.Length - 1] != '.')
-					AMessage = AMessage + '.';
+				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, LException.Message);
 			}
-
-			return AMessage;
 		}
 		
 		public abstract void Validate(ServerProcess AProcess, Transition ATransition);
@@ -217,6 +144,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get { return FNode; }
 			set { FNode = value; }
+		}
+		
+		// Violation
+		private PlanNode FViolationMessageNode;
+		public PlanNode ViolationMessageNode
+		{
+			get { return FViolationMessageNode; }
+			set { FViolationMessageNode = value; }
+		}
+
+		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		{
+			return FViolationMessageNode;
 		}
     }
 
@@ -285,7 +225,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override void Validate(ServerProcess AProcess, Transition ATransition)
 		{
-			DataVar LObject;
+			object LObject;
 			try
 			{
 				LObject = Node.Execute(AProcess);
@@ -295,7 +235,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingTypeConstraint, E, Name, FScalarType.Name);
 			}
 				
-			if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+			if ((LObject != null) && !(bool)LObject)
 			{
 				string LMessage = GetViolationMessage(AProcess, ATransition);
 				if (LMessage != String.Empty)
@@ -374,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override void Validate(ServerProcess AProcess, Transition ATransition)
 		{
-			DataVar LObject;
+			object LObject;
 			try
 			{
 				LObject = Node.Execute(AProcess);
@@ -384,7 +324,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingColumnConstraint, E, Name, TableVarColumn.Name, TableVarColumn.TableVar.DisplayName);
 			}
 			
-			if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+			if ((LObject != null) && !(bool)LObject)
 			{
 				string LMessage = GetViolationMessage(AProcess, ATransition);
 				if (LMessage != String.Empty)
@@ -455,6 +395,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FNode = value; }
 		}
 		
+		// ViolationMessageNode
+		private PlanNode FViolationMessageNode;
+		public PlanNode ViolationMessageNode
+		{
+			get { return FViolationMessageNode; }
+			set { FViolationMessageNode = value; }
+		}
+		
 		// ColumnFlags
 		private BitArray FColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the constraint</summary>
@@ -495,10 +443,15 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			return true;
 		}
-		
+
+		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		{
+			return FViolationMessageNode;
+		}
+
 		public override void Validate(ServerProcess AProcess, Transition ATransition)
 		{
-			DataVar LObject;
+			object LObject;
 			try
 			{
 				LObject = Node.Execute(AProcess);
@@ -508,7 +461,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingRowConstraint, E, Name, TableVar.DisplayName);
 			}
 
-			if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+			if ((LObject != null) && !(bool)LObject)
 			{
 				string LMessage = GetViolationMessage(AProcess, ATransition);
 				if (LMessage != String.Empty)
@@ -559,6 +512,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FOnInsertNode = value; }
 		}
 		
+		// OnInsertViolationMessageNode
+		private PlanNode FOnInsertViolationMessageNode;
+		public PlanNode OnInsertViolationMessageNode
+		{
+			get { return FOnInsertViolationMessageNode; }
+			set { FOnInsertViolationMessageNode = value; }
+		}
+		
 		// InsertColumnFlags
 		private BitArray FInsertColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the insert constraint</summary>
@@ -576,6 +537,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FOnUpdateNode = value; }
 		}
 		
+		// OnUpdateViolationMessageNode
+		private PlanNode FOnUpdateViolationMessageNode;
+		public PlanNode OnUpdateViolationMessageNode
+		{
+			get { return FOnUpdateViolationMessageNode; }
+			set { FOnUpdateViolationMessageNode = value; }
+		}
+		
 		// UpdateColumnFlags
 		private BitArray FUpdateColumnFlags;
 		/// <summary>If specified, indicates which columns are referenced by the update constraint</summary>
@@ -591,6 +560,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get { return FOnDeleteNode; }
 			set { FOnDeleteNode = value; }
+		}
+		
+		// OnDeleteViolationMessageNode
+		private PlanNode FOnDeleteViolationMessageNode;
+		public PlanNode OnDeleteViolationMessageNode
+		{
+			get { return FOnDeleteViolationMessageNode; }
+			set { FOnDeleteViolationMessageNode = value; }
 		}
 		
 		// DeleteColumnFlags
@@ -677,9 +654,20 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
+		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		{
+			switch (ATransition)
+			{
+				case Transition.Insert: return FOnInsertViolationMessageNode;
+				case Transition.Update: return FOnUpdateViolationMessageNode;
+				case Transition.Delete: return FOnDeleteViolationMessageNode;
+			}
+			return null;
+		}
+
 		public override void Validate(ServerProcess AProcess, Transition ATransition)
 		{
-			DataVar LObject;
+			object LObject;
 			switch (ATransition)
 			{
 				case Transition.Insert :
@@ -692,7 +680,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingInsertConstraint, E, Name, TableVar.DisplayName);
 					}
 					
-					if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+					if ((LObject != null) && !(bool)LObject)
 					{
 						string LMessage = GetViolationMessage(AProcess, ATransition);
 						if (LMessage != String.Empty)
@@ -712,7 +700,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingUpdateConstraint, E, Name, TableVar.DisplayName);
 					}
 
-					if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+					if ((LObject != null) && !(bool)LObject)
 					{
 						string LMessage = GetViolationMessage(AProcess, ATransition);
 						if (LMessage != String.Empty)
@@ -732,7 +720,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						throw new RuntimeException(RuntimeException.Codes.ErrorValidatingDeleteConstraint, E, Name, TableVar.DisplayName);
 					}
 					
-					if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+					if ((LObject != null) && !(bool)LObject)
 					{
 						string LMessage = GetViolationMessage(AProcess, ATransition);
 						if (LMessage != String.Empty)
@@ -953,6 +941,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FNode = value; }
 		}
 		
+		// ViolationMessage
+		private PlanNode FViolationMessageNode;
+		public PlanNode ViolationMessageNode 
+		{ 
+			get { return FViolationMessageNode; } 
+			set { FViolationMessageNode = value; } 
+		}
+		
 		// ConstraintType
 		public ConstraintType ConstraintType
 		{
@@ -1040,20 +1036,28 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LMessage;
 		}
 		
-		public string GetViolationMessage(ServerProcess AProcess, Statement AConstraintDefinition)
-		{
-			return Schema.Constraint.GetViolationMessage(AProcess, GetCustomMessage(), this, AConstraintDefinition);
-		}
-		
 		public string GetViolationMessage(ServerProcess AProcess)
 		{
-			return Schema.Constraint.GetViolationMessage(AProcess, GetCustomMessage(), null, null);
+			try
+			{
+				if (FViolationMessageNode != null)
+				{
+					string LMessage = (string)FViolationMessageNode.Execute(AProcess);
+					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
+						LMessage = LMessage + '.';
+					return LMessage;
+				}
+				return String.Empty;
+			}
+			catch (Exception LException)
+			{
+				return String.Format("Errors occurred attempting to generate custom error message for constraint \"{0}\": {1}", Name, LException.Message);
+			}
 		}
-
+		
 		public void Validate(ServerProcess AProcess)
 		{
-			DataVar LObject;
-			
+			object LObject;
 			try
 			{
 				LObject = Node.Execute(AProcess);
@@ -1063,7 +1067,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingCatalogConstraint, E, Name);
 			}
 			
-			if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+			if ((LObject != null) && !(bool)LObject)
 			{
 				string LMessage = GetViolationMessage(AProcess);
 				if (LMessage != String.Empty)

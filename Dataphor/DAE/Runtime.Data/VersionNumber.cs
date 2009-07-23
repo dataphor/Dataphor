@@ -290,30 +290,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber(AMajor : Integer, AMinor : Integer, ARevision : Integer, ABuild : Integer) : VersionNumber;
 	public class VersionNumberSelectorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			for (int LIndex = 0; LIndex < AArguments.Length; LIndex++)
-				if ((AArguments[LIndex].Value == null) || AArguments[LIndex].Value.IsNil)
-					return new DataVar(FDataType);
+				if (AArguments[LIndex] == null)
+					return null;
 			#endif
 
 			return 
-				new DataVar
+				new VersionNumber
 				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						new VersionNumber
-						(
-							AArguments[0].Value.AsInt32, 
-							AArguments.Length > 1 ? AArguments[1].Value.AsInt32 : -1,
-							AArguments.Length > 2 ? AArguments[2].Value.AsInt32 : -1,
-							AArguments.Length > 3 ? AArguments[3].Value.AsInt32 : -1
-						)
-					)
+					(int)AArguments[0], 
+					AArguments.Length > 1 ? (int)AArguments[1] : -1,
+					AArguments.Length > 2 ? (int)AArguments[2] : -1,
+					AArguments.Length > 3 ? (int)AArguments[3] : -1
 				);
 		}
 	}
@@ -321,192 +312,192 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadMajor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMajorReadAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).Major));
+			return ((VersionNumber)AArguments[0]).Major;
 		}
 	}
 	
 	// operator VersionNumber.WriteMajor(AValue : VersionNumber, AMajor : Integer) : VersionNumber;
 	public class VersionNumberMajorWriteAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new VersionNumber(AArguments[1].Value.AsInt32, LValue.Minor, LValue.Revision, LValue.Build)));
+			VersionNumber LValue = (VersionNumber)AArguments[0];
+			return new VersionNumber((int)AArguments[1], LValue.Minor, LValue.Revision, LValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadMinor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMinorReadAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).Minor));
+			return ((VersionNumber)AArguments[0]).Minor;
 		}
 	}
 	
 	// operator VersionNumber.WriteMinor(AValue : VersionNumber, AMinor : Integer) : VersionNumber;
 	public class VersionNumberMinorWriteAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new VersionNumber(LValue.Major, AArguments[1].Value.AsInt32, LValue.Revision, LValue.Build)));
+			VersionNumber LValue = (VersionNumber)AArguments[0];
+			return new VersionNumber(LValue.Major, (int)AArguments[1], LValue.Revision, LValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadRevision(AValue : VersionNumber) : Integer;
 	public class VersionNumberRevisionReadAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).Revision));
+			return ((VersionNumber)AArguments[0]).Revision;
 		}
 	}
 	
 	// operator VersionNumber.WriteRevision(AValue : VersionNumber, ARevision : Integer) : VersionNumber;
 	public class VersionNumberRevisionWriteAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new VersionNumber(LValue.Major, LValue.Minor, AArguments[1].Value.AsInt32, LValue.Build)));
+			VersionNumber LValue = (VersionNumber)AArguments[0];
+			return new VersionNumber(LValue.Major, LValue.Minor, (int)AArguments[1], LValue.Build);
 		}
 	}
 
 	// operator VersionNumber.ReadBuild(AValue : VersionNumber) : Integer;
 	public class VersionNumberBuildReadAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).Build));
+			return ((VersionNumber)AArguments[0]).Build;
 		}
 	}
 	
 	// operator VersionNumber.WriteBuild(AValue : VersionNumber, ABuild : Integer) : VersionNumber;
 	public class VersionNumberBuildWriteAccessorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new VersionNumber(LValue.Major, LValue.Minor, LValue.Revision, AArguments[1].Value.AsInt32)));
+			VersionNumber LValue = (VersionNumber)AArguments[0];
+			return new VersionNumber(LValue.Major, LValue.Minor, LValue.Revision, (int)AArguments[1]);
 		}
 	}
 	
     // VersionNumberAsStringSelectorNode
     public class VersionNumberAsStringSelectorNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, VersionNumber.Parse(AArguments[0].Value.AsString)));
+			return VersionNumber.Parse((string)AArguments[0]);
 		}
     }
     
     // VersionNumberAsStringReadAccessorNode
     public class VersionNumberAsStringReadAccessorNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).ToString()));
+			return ((VersionNumber)AArguments[0]).ToString();
 		}
     }
     
     // VersionNumberAsStringWriteAccessorNode
     public class VersionNumberAsStringWriteAccessorNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, VersionNumber.Parse(AArguments[1].Value.AsString)));
+			return VersionNumber.Parse((string)AArguments[1]);
 		}
     }   
 
 	// operator iCompare(ALeftValue : VersionNumber, ARightValue : VersionNumber) : Integer
 	public class VersionNumberCompareNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, VersionNumber.Compare((VersionNumber)AArguments[0].Value.AsNative, (VersionNumber)AArguments[1].Value.AsNative)));
+			return VersionNumber.Compare((VersionNumber)AArguments[0], (VersionNumber)AArguments[1]);
 		}
 	}
 
 	// operator Max(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMaxNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				if (AArguments[1] == null)
+					return null;
 				else
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[1].Value.AsNative));
-			else if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsNative));
+					return AArguments[1];
+			else if (AArguments[1] == null)
+				return AArguments[0];
 			else
 			{
-				VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-				VersionNumber RValue = (VersionNumber)AArguments[1].Value.AsNative;
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LValue > RValue ? LValue : RValue));
+				VersionNumber LValue = (VersionNumber)AArguments[0];
+				VersionNumber RValue = (VersionNumber)AArguments[1];
+				return LValue > RValue ? LValue : RValue;
 			}
 		}
 	}
@@ -514,20 +505,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator Min(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMinNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				if (AArguments[1] == null)
+					return null;
 				else
-					return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[1].Value.AsNative));
-			else if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsNative));
+					return AArguments[1];
+			else if (AArguments[1] == null)
+				return AArguments[0];
 			else
 			{
-				VersionNumber LValue = (VersionNumber)AArguments[0].Value.AsNative;
-				VersionNumber RValue = (VersionNumber)AArguments[1].Value.AsNative;
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LValue < RValue ? LValue : RValue));
+				VersionNumber LValue = (VersionNumber)AArguments[0];
+				VersionNumber RValue = (VersionNumber)AArguments[1];
+				return LValue < RValue ? LValue : RValue;
 			}
 		}
 	}
@@ -535,98 +526,98 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberEqualNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative == (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] == (VersionNumber)AArguments[1];
 		}
 	}
 
 	// create operator iNotEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberNotEqualNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative != (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] != (VersionNumber)AArguments[1];
 		}
 	}
 
 	// create operator iLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberLessNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative < (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] < (VersionNumber)AArguments[1];
 		}
 	}
 
 	// create operator iInclusiveLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveLessNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative <= (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] <= (VersionNumber)AArguments[1];
 		}
 	}
 
 	// create operator iGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberGreaterNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative > (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] > (VersionNumber)AArguments[1];
 		}
 	}
 
 	// create operator iInclusiveGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveGreaterNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (VersionNumber)AArguments[0].Value.AsNative >= (VersionNumber)AArguments[1].Value.AsNative));
+			return (VersionNumber)AArguments[0] >= (VersionNumber)AArguments[1];
 		}
 	}
 
 	// operator Compatible(const ASource : VersionNumber, const ATarget : VersionNumber) : Boolean
 	public class VersionNumberCompatibleNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, VersionNumber.Compatible((VersionNumber)AArguments[0].Value.AsNative, (VersionNumber)AArguments[1].Value.AsNative)));
+			return VersionNumber.Compatible((VersionNumber)AArguments[0], (VersionNumber)AArguments[1]);
 		}
 	}
 	
@@ -634,14 +625,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToIString(const AVersionNumber : VersionNumber) : IString;
 	public class VersionNumberToStringNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((VersionNumber)AArguments[0].Value.AsNative).ToString()));
+			return ((VersionNumber)AArguments[0]).ToString();
 		}
 	}
 	
@@ -649,14 +640,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToVersionNumber(const AString : IString) : VersionNumber;
 	public class StringToVersionNumberNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType);
+			if (AArguments[0] == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.IScalarType)FDataType, VersionNumber.Parse(AArguments[0].Value.AsString)));
+			return VersionNumber.Parse((string)AArguments[0]);
 		}
 	}
 }

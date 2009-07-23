@@ -462,18 +462,16 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
     /// </summary>
     public class OracleTimeSpan : SQLScalarType
     {
-        public OracleTimeSpan(int AID, string AName) : base(AID, AName)
+        public OracleTimeSpan(int AID, string AName) : base(AID, AName) { }
+
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
+            return new TimeSpan(Convert.ToInt64(AValue));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object FromScalar(object AValue)
         {
-            return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
-        }
-
-        public override object FromScalar(Scalar AValue)
-        {
-            return AValue.AsTimeSpan.Ticks;
+            return ((TimeSpan)AValue).Ticks;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -489,18 +487,16 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleBoolean : SQLScalarType
     {
-        public OracleBoolean(int AID, string AName) : base(AID, AName)
+        public OracleBoolean(int AID, string AName) : base(AID, AName) { }
+
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
+            return Convert.ToBoolean(AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object FromScalar(object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToBoolean(AValue));
-        }
-
-        public override object FromScalar(Scalar AValue)
-        {
-            return (AValue.AsBoolean ? 1.0 : 0.0);
+            return ((bool)AValue ? 1.0 : 0.0);
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -520,14 +516,14 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         {
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToInt32(AValue));
+            return Convert.ToInt32(AValue);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return (decimal) AValue.AsInt32;
+            return (decimal)(int)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -570,18 +566,16 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleShort : SQLScalarType
     {
-        public OracleShort(int AID, string AName) : base(AID, AName)
+        public OracleShort(int AID, string AName) : base(AID, AName) { }
+
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
+            return Convert.ToInt16((decimal)AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object FromScalar(object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToInt16((decimal) AValue));
-        }
-
-        public override object FromScalar(Scalar AValue)
-        {
-            return (decimal) AValue.AsInt16;
+            return (decimal)(short)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -624,18 +618,16 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleByte : SQLScalarType
     {
-        public OracleByte(int AID, string AName) : base(AID, AName)
+        public OracleByte(int AID, string AName) : base(AID, AName) { }
+
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
+            return Convert.ToByte((decimal)AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object FromScalar(object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToByte((decimal) AValue));
-        }
-
-        public override object FromScalar(Scalar AValue)
-        {
-            return (decimal) AValue.AsByte;
+            return (decimal)(byte)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -678,18 +670,16 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleLong : SQLScalarType
     {
-        public OracleLong(int AID, string AName) : base(AID, AName)
+        public OracleLong(int AID, string AName) : base(AID, AName) { }
+
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
+            return Convert.ToInt64((decimal)AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object FromScalar(object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToInt64((decimal) AValue));
-        }
-
-        public override object FromScalar(Scalar AValue)
-        {
-            return (decimal) AValue.AsInt64;
+            return (decimal)(long)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -705,26 +695,24 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleString : SQLString
     {
-        public OracleString(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public OracleString(int AID, string AName) : base(AID, AName) { }
 
         /*
 			Oracle cannot distinguish between an empty string and a null once the empty string has been inserted into a table.
 			To get around this problem, we translate all empty strings to blank strings of length 1.
 		*/
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if ((AValue is string) && ((string) AValue == " "))
-                return new Scalar(AProcess, ScalarType, "");
+                return "";
             else
-                return new Scalar(AProcess, ScalarType, AValue);
+                return AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            string LValue = AValue.AsString;
+            string LValue = (string)AValue;
             if (LValue == String.Empty)
                 return " ";
             else
@@ -739,21 +727,19 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     public class OracleSQLText : SQLScalarType
     {
-        public OracleSQLText(int AID, string AName) : base(AID, AName)
-        {
-        }
+        public OracleSQLText(int AID, string AName) : base(AID, AName) { }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if ((AValue is string) && ((string) AValue == " "))
-                return new Scalar(AProcess, ScalarType, "");
+                return "";
             else
-                return new Scalar(AProcess, ScalarType, AValue);
+                return AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            string LValue = AValue.AsString;
+            string LValue = (string)AValue;
             if (LValue == String.Empty)
                 return " ";
             else

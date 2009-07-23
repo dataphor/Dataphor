@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			return new DeviceNode(this, ARow["Name"].AsString, (DAE.Language.D4.ReconcileMode)Enum.Parse(typeof(DAE.Language.D4.ReconcileMode), ARow["ReconciliationMode"].AsString, true));
+			return new DeviceNode(this, (string)ARow["Name"], (DAE.Language.D4.ReconcileMode)Enum.Parse(typeof(DAE.Language.D4.ReconcileMode), (string)ARow["ReconciliationMode"], true));
 		}
 	}
 

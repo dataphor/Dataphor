@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			try
 			{
 				if (HasValue)
-					ARow[FColumnName].AsBoolean = (base.CheckState == CheckState.Checked);
+					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsBoolean = (base.CheckState == CheckState.Checked);
 				else
 					ARow.ClearValue(FColumnName);
 				return true;
@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			if (AOverwrite)
 			{
 				if (ARow.HasValue(ColumnName))
-					if (ARow[ColumnName].AsBoolean)
+					if (((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsBoolean)
 						base.CheckState = CheckState.Checked;
 					else
 						base.CheckState = CheckState.Unchecked;

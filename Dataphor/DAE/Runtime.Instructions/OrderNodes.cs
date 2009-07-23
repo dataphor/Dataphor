@@ -196,7 +196,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return (SourceNode.Order == null) || !Order.Equivalent(SourceNode.Order) || ((SourceNode.CursorCapabilities & RequestedCapabilities) != RequestedCapabilities);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (ShouldExecute())
 			{
@@ -204,7 +204,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					LTable.Open();
-					return new DataVar(String.Empty, FDataType, LTable);
+					return LTable;
 				}
 				catch
 				{
@@ -277,13 +277,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FCursorIsolation = APlan.CursorContext.CursorIsolation;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			CopyTable LTable = new CopyTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -656,7 +656,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			if (LNode == null)
-				LNode = new ValueNode(new Scalar(APlan.ServerProcess, APlan.ServerProcess.DataTypes.SystemBoolean, AInclusive));
+				LNode = new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, AInclusive);
 
 			return LNode;
 		}
@@ -676,12 +676,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(LOrigin));
+					APlan.Symbols.Push(new Symbol(LOrigin));
 					try
 					{
 						PlanNode LResultNode;
 						PlanNode LSourceNode = GetSourceNode(APlan);
-						APlan.Symbols.Push(new DataVar(DataType.RowType));
+						APlan.Symbols.Push(new Symbol(DataType.RowType));
 						try
 						{
 							LResultNode =
@@ -808,13 +808,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FBrowseVariants[AOriginIndex, AForward, AInclusive].Node;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			BrowseTable LTable = new BrowseTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

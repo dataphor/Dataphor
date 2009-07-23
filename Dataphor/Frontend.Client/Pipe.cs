@@ -57,10 +57,10 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Event to be called when the request fails. </summary>
 		public PipeErrorHandler ErrorHandler;
 
-		internal DataValue FResult;
+		internal Scalar FResult;
 		/// <summary> This will contain the data after the request is complete. </summary>
 		/// <remarks> This scalar result will automatically be Disposed by the async handler. </remarks>
-		public DataValue Result { get { return FResult; } }
+		public Scalar Result { get { return FResult; } }
 	}
 
 	/// <summary> Used to invoke a given delegate with the given arguments. </summary>
@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			return FCacheRowType;
 		}
 
-		private DataValue LoadFromCache(string ADocument, IServerProcess AProcess)
+		private Scalar LoadFromCache(string ADocument, IServerProcess AProcess)
 		{
 			byte[] LData;
 			using (Stream LStream = Cache.Reference(ADocument))
@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 			using (DAE.Runtime.Data.Row LRow = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(AProcess.GetServerProcess(), GetCacheRowType(AProcess), LData, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
 			{
-				return LRow["Value"].Copy();
+				return (Scalar)LRow.GetValue("Value").Copy();
 			}
 		}
 
@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			return false;
 		}
 
-		private void SaveToImageCache(string ADocument, IServerProcess AProcess, DataValue LResult)
+		private void SaveToImageCache(string ADocument, IServerProcess AProcess, Scalar LResult)
 		{
 			lock (ImageCache)
 			{
@@ -213,9 +213,9 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 
-		private DataValue LoadWithCache(string ADocument, IServerProcess AProcess)
+		private Scalar LoadWithCache(string ADocument, IServerProcess AProcess)
 		{
-			DataValue LResult;
+			Scalar LResult;
 			lock (Cache)
 			{
 				uint LCRC32 = Cache.GetCRC32(ADocument);
@@ -234,14 +234,14 @@ namespace Alphora.Dataphor.Frontend.Client
 						)
 					)
 				{
-					if (LRow["CRCMatches"].AsBoolean)
+					if ((bool)LRow["CRCMatches"])
 						LResult = LoadFromCache(ADocument, AProcess);
 					else
 					{
-						using (DAE.Runtime.Data.DataValue LValue = LRow["Value"])
+						using (DAE.Runtime.Data.Scalar LValue = LRow.GetValue("Value") as DAE.Runtime.Data.Scalar)
 						{
-							SaveToCache(ADocument, AProcess, LValue, (uint)LRow["ActualCRC32"].AsInt32);
-							LResult = LValue.Copy();
+							SaveToCache(ADocument, AProcess, LValue, (uint)(int)LRow["ActualCRC32"]);
+							LResult = (DAE.Runtime.Data.Scalar)LValue.Copy();
 						}
 					}
 				}
@@ -253,7 +253,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		#region Synchronous requests
 
-		private DataValue InternalRequest(string ADocument, IServerProcess AProcess)
+		private Scalar InternalRequest(string ADocument, IServerProcess AProcess)
 		{
 			bool LIsImageRequest = false;
 
@@ -269,12 +269,12 @@ namespace Alphora.Dataphor.Frontend.Client
 					}
 			}
 
-			DataValue LResult;
+			Scalar LResult;
 			
 			if (Cache != null)
 				LResult = LoadWithCache(ADocument, AProcess);
 			else
-				LResult = AProcess.Evaluate(ADocument, null);
+				LResult = (Scalar)AProcess.Evaluate(ADocument, null);
 			
 			if (LIsImageRequest)
 			{
@@ -287,7 +287,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Requests a document and returns the scalar results. </summary>
 		/// <param name="ADocument"> A document expression to request. </param>
 		/// <returns> A scalar value.  The caller must Dispose this Scalar to free it's resources. </returns>
-		public DataValue RequestDocument(string ADocument)
+		public Scalar RequestDocument(string ADocument)
 		{
 			return InternalRequest(ADocument, FSyncProcess);
 		}

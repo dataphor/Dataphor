@@ -162,52 +162,49 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					LDevicePlan.CurrentQueryContext().IsWhereClause = true;
 
-					using (Row LRow = new Row(LDevicePlan.Plan.ServerProcess, ((TableNode)APlanNode).DataType.CreateRowType()))
+					LDevicePlan.Stack.Push(new Symbol(((TableNode)APlanNode).DataType.CreateRowType()));
+					try
 					{
-						LDevicePlan.Stack.Push(new DataVar(LRow.DataType, LRow));
-						try
+						LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+						
+						Expression LExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], true);
+						
+						FilterClause LClause = null;
+						if ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
 						{
-							LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+							if (LSelectExpression.HavingClause == null)
+								LSelectExpression.HavingClause = new HavingClause();
+							LClause = LSelectExpression.HavingClause;
 							
-							Expression LExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[1], true);
+							if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInHavingClause)
+							{
+								LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the having clause contains sub-select expressions and the device does not support sub-selects in the having clause.", APlanNode));
+								LDevicePlan.IsSupported = false;
+							}
+						}
+						else
+						{
+							if (LSelectExpression.WhereClause == null)
+								LSelectExpression.WhereClause = new WhereClause();
+							LClause = LSelectExpression.WhereClause;
 							
-							FilterClause LClause = null;
-							if ((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasAggregateExpressions) != 0)
+							if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInWhereClause)
 							{
-								if (LSelectExpression.HavingClause == null)
-									LSelectExpression.HavingClause = new HavingClause();
-								LClause = LSelectExpression.HavingClause;
-								
-								if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInHavingClause)
-								{
-									LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the having clause contains sub-select expressions and the device does not support sub-selects in the having clause.", APlanNode));
-									LDevicePlan.IsSupported = false;
-								}
+								LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the where clause contains sub-select expressions and the device does not support sub-selects in the where clause.", APlanNode));
+								LDevicePlan.IsSupported = false;
 							}
-							else
-							{
-								if (LSelectExpression.WhereClause == null)
-									LSelectExpression.WhereClause = new WhereClause();
-								LClause = LSelectExpression.WhereClause;
-								
-								if (((LDevicePlan.CurrentQueryContext().ReferenceFlags & SQLReferenceFlags.HasSubSelectExpressions) != 0) && !LDevicePlan.Device.SupportsSubSelectInWhereClause)
-								{
-									LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage("Plan is not supported because the where clause contains sub-select expressions and the device does not support sub-selects in the where clause.", APlanNode));
-									LDevicePlan.IsSupported = false;
-								}
-							}
-								
-							if (LClause.Expression == null)				
-								LClause.Expression = LExpression;
-							else
-								LClause.Expression = new BinaryExpression(LClause.Expression, "iAnd", LExpression);
+						}
+							
+						if (LClause.Expression == null)				
+							LClause.Expression = LExpression;
+						else
+							LClause.Expression = new BinaryExpression(LClause.Expression, "iAnd", LExpression);
 
-							return LStatement;
-						}
-						finally
-						{
-							LDevicePlan.Stack.Pop();
-						}
+						return LStatement;
+					}
+					finally
+					{
+						LDevicePlan.Stack.Pop();
 					}
 				}
 				finally
@@ -333,43 +330,40 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				using (Row LRow = new Row(ADevicePlan.Plan.ServerProcess, LExtendNode.DataType.CreateRowType()))
+				LDevicePlan.Stack.Push(new Symbol(LExtendNode.DataType.CreateRowType()));
+				try
 				{
-					LDevicePlan.Stack.Push(new DataVar(LRow.DataType, LRow));
+					LDevicePlan.CurrentQueryContext().IsExtension = true;
+					LDevicePlan.PushScalarContext();
 					try
 					{
-						LDevicePlan.CurrentQueryContext().IsExtension = true;
-						LDevicePlan.PushScalarContext();
-						try
+						LDevicePlan.CurrentQueryContext().IsSelectClause = true;
+						int LExtendColumnIndex = 1;
+						for (int LIndex = LExtendNode.ExtendColumnOffset; LIndex < LExtendNode.DataType.Columns.Count; LIndex++)
 						{
-							LDevicePlan.CurrentQueryContext().IsSelectClause = true;
-							int LExtendColumnIndex = 1;
-							for (int LIndex = LExtendNode.ExtendColumnOffset; LIndex < LExtendNode.DataType.Columns.Count; LIndex++)
-							{
-								LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-								SQLRangeVarColumn LRangeVarColumn = 
-									new SQLRangeVarColumn
-									(
-										LTableVar.Columns[LIndex], 
-										LDevicePlan.Device.TranslateExpression(LDevicePlan, LExtendNode.Nodes[LExtendColumnIndex], false), 
-										LDevicePlan.Device.ToSQLIdentifier(LTableVar.Columns[LIndex])
-									);
-								LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
-								LDevicePlan.CurrentQueryContext().ParentContext.AddedColumns.Add(LRangeVarColumn);
-								LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
-								LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
-								LExtendColumnIndex++;
-							}
-						}
-						finally
-						{
-							LDevicePlan.PopScalarContext();
+							LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+							SQLRangeVarColumn LRangeVarColumn = 
+								new SQLRangeVarColumn
+								(
+									LTableVar.Columns[LIndex], 
+									LDevicePlan.Device.TranslateExpression(LDevicePlan, LExtendNode.Nodes[LExtendColumnIndex], false), 
+									LDevicePlan.Device.ToSQLIdentifier(LTableVar.Columns[LIndex])
+								);
+							LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
+							LDevicePlan.CurrentQueryContext().ParentContext.AddedColumns.Add(LRangeVarColumn);
+							LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
+							LSelectExpression.SelectClause.Columns.Add(LRangeVarColumn.GetColumnExpression());
+							LExtendColumnIndex++;
 						}
 					}
 					finally
 					{
-						LDevicePlan.Stack.Pop();
+						LDevicePlan.PopScalarContext();
 					}
+				}
+				finally
+				{
+					LDevicePlan.Stack.Pop();
 				}
 			}
 				
@@ -396,39 +390,36 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SelectExpression LSelectExpression = LDevicePlan.Device.EnsureUnarySelectExpression(LDevicePlan, ((TableNode)APlanNode.Nodes[0]).TableVar, LStatement, true);
 				LStatement = LSelectExpression;
 
-				using (Row LRow = new Row(ADevicePlan.Plan.ServerProcess, LRedefineNode.DataType.CreateRowType()))
+				LDevicePlan.Stack.Push(new Symbol(LRedefineNode.DataType.CreateRowType()));
+				try
 				{
-					LDevicePlan.Stack.Push(new DataVar(LRow.DataType, LRow));
+					LDevicePlan.CurrentQueryContext().IsExtension = true;
+					LDevicePlan.PushScalarContext();
 					try
 					{
-						LDevicePlan.CurrentQueryContext().IsExtension = true;
-						LDevicePlan.PushScalarContext();
-						try
+						LDevicePlan.CurrentQueryContext().IsSelectClause = true;
+						for (int LColumnIndex = 0; LColumnIndex < LTableVar.Columns.Count; LColumnIndex++)
 						{
-							LDevicePlan.CurrentQueryContext().IsSelectClause = true;
-							for (int LColumnIndex = 0; LColumnIndex < LTableVar.Columns.Count; LColumnIndex++)
+							int LRedefineIndex = ((IList)LRedefineNode.RedefineColumnOffsets).IndexOf(LColumnIndex);
+							if (LRedefineIndex >= 0)
 							{
-								int LRedefineIndex = ((IList)LRedefineNode.RedefineColumnOffsets).IndexOf(LColumnIndex);
-								if (LRedefineIndex >= 0)
-								{
-									SQLRangeVarColumn LRangeVarColumn = LDevicePlan.GetRangeVarColumn(LTableVar.Columns[LColumnIndex].Name, true);
-									LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
-									LRangeVarColumn.Expression = LDevicePlan.Device.TranslateExpression(LDevicePlan, LRedefineNode.Nodes[LRedefineIndex + 1], false);
-									LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
-									LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
-									LSelectExpression.SelectClause.Columns[LColumnIndex].Expression = LRangeVarColumn.Expression;
-								}
+								SQLRangeVarColumn LRangeVarColumn = LDevicePlan.GetRangeVarColumn(LTableVar.Columns[LColumnIndex].Name, true);
+								LDevicePlan.CurrentQueryContext().ResetReferenceFlags();
+								LRangeVarColumn.Expression = LDevicePlan.Device.TranslateExpression(LDevicePlan, LRedefineNode.Nodes[LRedefineIndex + 1], false);
+								LRangeVarColumn.ReferenceFlags = LDevicePlan.CurrentQueryContext().ReferenceFlags;
+								LDevicePlan.CurrentQueryContext().ParentContext.ReferenceFlags |= LRangeVarColumn.ReferenceFlags;
+								LSelectExpression.SelectClause.Columns[LColumnIndex].Expression = LRangeVarColumn.Expression;
 							}
-						}
-						finally
-						{
-							LDevicePlan.PopScalarContext();
 						}
 					}
 					finally
 					{
-						LDevicePlan.Stack.Pop();
+						LDevicePlan.PopScalarContext();
 					}
+				}
+				finally
+				{
+					LDevicePlan.Stack.Pop();
 				}
 			}
 
@@ -576,14 +567,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (!LIsSupported)
 					LDevicePlan.TranslationMessages.Add(new Schema.TranslationMessage(LDevicePlan.GetSubSelectNotSupportedReason(), APlanNode));
 				LDevicePlan.IsSupported = LDevicePlan.IsSupported && LIsSupported;
-				LDevicePlan.Stack.Push(new DataVar(D4.Keywords.Result, LNode.DataType));
+				LDevicePlan.Stack.Push(new Symbol(D4.Keywords.Result, LNode.DataType));
 				try
 				{
 					for (int LIndex = 0; LIndex < LNode.Operator.Initialization.StackDisplacement; LIndex++)
-						LDevicePlan.Stack.Push(new DataVar(String.Empty, ADevicePlan.Plan.Catalog.DataTypes.SystemScalar));
+						LDevicePlan.Stack.Push(new Symbol(String.Empty, ADevicePlan.Plan.Catalog.DataTypes.SystemScalar));
 						
 					for (int LIndex = 0; LIndex < LNode.AggregateColumnIndexes.Length; LIndex++)
-						LDevicePlan.Stack.Push(new DataVar(LNode.ValueNames[LIndex], LSourceTableVar.Columns[LNode.AggregateColumnIndexes[LIndex]].DataType));
+						LDevicePlan.Stack.Push(new Symbol(LNode.ValueNames[LIndex], LSourceTableVar.Columns[LNode.AggregateColumnIndexes[LIndex]].DataType));
 					try
 					{
 						LDevicePlan.PushQueryContext();
@@ -1006,28 +997,22 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								LJoinClause.JoinType = JoinType.Inner;
 						}
 
-						using (Row LLeftRow = new Row(LDevicePlan.Plan.ServerProcess, new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)))
+						LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[0]).DataType.Columns, Keywords.Left)));
+						try
 						{
-							LDevicePlan.Stack.Push(new DataVar(LLeftRow.DataType, LLeftRow));
+							LDevicePlan.Stack.Push(new Symbol(new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)));
 							try
 							{
-								using (Row LRightRow = new Row(LDevicePlan.Plan.ServerProcess, new Schema.RowType(((TableNode)APlanNode.Nodes[1]).DataType.Columns, Keywords.Right)))
-								{
-									LDevicePlan.Stack.Push(new DataVar(LRightRow.DataType, LRightRow));
-									try
-									{
-										LJoinClause.JoinExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], true);
-									}
-									finally
-									{
-										LDevicePlan.Stack.Pop();
-									}
-								}
+								LJoinClause.JoinExpression = LDevicePlan.Device.TranslateExpression(LDevicePlan, APlanNode.Nodes[2], true);
 							}
 							finally
 							{
 								LDevicePlan.Stack.Pop();
 							}
+						}
+						finally
+						{
+							LDevicePlan.Stack.Pop();
 						}
 							
 						// Translate rowexists column

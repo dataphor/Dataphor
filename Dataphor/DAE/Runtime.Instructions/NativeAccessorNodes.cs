@@ -22,449 +22,449 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
     // BooleanAsStringSelectorNode
-    public class BooleanAsStringSelectorNode : InstructionNode
+    public class BooleanAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToBoolean(AArguments[0].Value.AsString)));
+			return Convert.ToBoolean((string)AArgument1);
 		}
     }
     
     // BooleanAsStringReadAccessorNode
-    public class BooleanAsStringReadAccessorNode : InstructionNode
+    public class BooleanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsBoolean.ToString().ToLower()));
+			return ((bool)AArgument1).ToString().ToLower();
 		}
     }
     
     // BooleanAsStringWriteAccessorNode
-    public class BooleanAsStringWriteAccessorNode : InstructionNode
+    public class BooleanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToBoolean(AArguments[1].Value.AsString)));
+			return Convert.ToBoolean((string)AArgument2);
 		}
     }   
 
     // BooleanAsDisplayStringSelectorNode
-    public class BooleanAsDisplayStringSelectorNode : InstructionNode
+    public class BooleanAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToBoolean(AArguments[0].Value.AsString)));
+			return Convert.ToBoolean((string)AArgument1);
 		}
     }
     
     // BooleanAsDisplayStringReadAccessorNode
-    public class BooleanAsDisplayStringReadAccessorNode : InstructionNode
+    public class BooleanAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsBoolean.ToString()));
+			return ((bool)AArgument1).ToString();
 		}
     }
     
     // BooleanAsDisplayStringWriteAccessorNode
-    public class BooleanAsDisplayStringWriteAccessorNode : InstructionNode
+    public class BooleanAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToBoolean(AArguments[1].Value.AsString)));
+			return Convert.ToBoolean((string)AArgument2);
 		}
     }   
 
     // ByteAsStringSelectorNode
-    public class ByteAsStringSelectorNode : InstructionNode
+    public class ByteAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToByte(AArguments[0].Value.AsString)));
+			return Convert.ToByte((string)AArgument1);
 		}
     }
     
     // ByteAsStringReadAccessorNode
-    public class ByteAsStringReadAccessorNode : InstructionNode
+    public class ByteAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsByte.ToString()));
+			return ((byte)AArgument1).ToString();
 		}
     }
     
     // ByteAsStringWriteAccessorNode
-    public class ByteAsStringWriteAccessorNode : InstructionNode
+    public class ByteAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToByte(AArguments[1].Value.AsString)));
+			return Convert.ToByte((string)AArgument2);
 		}
     }   
 
     // ShortAsStringSelectorNode
-    public class ShortAsStringSelectorNode : InstructionNode
+    public class ShortAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt16(AArguments[0].Value.AsString)));
+			return Convert.ToInt16((string)AArgument1);
 		}
     }
     
     // ShortAsStringReadAccessorNode
-    public class ShortAsStringReadAccessorNode : InstructionNode
+    public class ShortAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsInt16.ToString()));
+			return ((short)AArgument1).ToString();
 		}
     }
     
     // ShortAsStringWriteAccessorNode
-    public class ShortAsStringWriteAccessorNode : InstructionNode
+    public class ShortAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt16(AArguments[1].Value.AsString)));
+			return Convert.ToInt16((string)AArgument2);
 		}
     }   
 
     // IntegerAsStringSelectorNode
-    public class IntegerAsStringSelectorNode : InstructionNode
+    public class IntegerAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt32(AArguments[0].Value.AsString)));
+			return Convert.ToInt32((string)AArgument1);
 		}
     }
     
     // IntegerAsStringReadAccessorNode
-    public class IntegerAsStringReadAccessorNode : InstructionNode
+    public class IntegerAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsInt32.ToString()));
+			return ((int)AArgument1).ToString();
 		}
     }
     
     // IntegerAsStringWriteAccessorNode
-    public class IntegerAsStringWriteAccessorNode : InstructionNode
+    public class IntegerAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt32(AArguments[1].Value.AsString)));
+			return Convert.ToInt32((string)AArgument2);
 		}
     }   
 
     // LongAsStringSelectorNode
-    public class LongAsStringSelectorNode : InstructionNode
+    public class LongAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt64(AArguments[0].Value.AsString)));
+			return Convert.ToInt64((string)AArgument1);
 		}
     }
     
     // LongAsStringReadAccessorNode
-    public class LongAsStringReadAccessorNode : InstructionNode
+    public class LongAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsInt64.ToString()));
+			return ((long)AArgument1).ToString();
 		}
     }
     
     // LongAsStringWriteAccessorNode
-    public class LongAsStringWriteAccessorNode : InstructionNode
+    public class LongAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToInt64(AArguments[1].Value.AsString)));
+			return Convert.ToInt64((string)AArgument2);
 		}
     }   
 
     // DecimalAsStringSelectorNode
-    public class DecimalAsStringSelectorNode : InstructionNode
+    public class DecimalAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToDecimal(AArguments[0].Value.AsString)));
+			return Convert.ToDecimal((string)AArgument1);
 		}
     }
     
     // DecimalAsStringReadAccessorNode
-    public class DecimalAsStringReadAccessorNode : InstructionNode
+    public class DecimalAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDecimal.ToString()));
+			return ((decimal)AArgument1).ToString();
 		}
     }
     
     // DecimalAsStringWriteAccessorNode
-    public class DecimalAsStringWriteAccessorNode : InstructionNode
+    public class DecimalAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Convert.ToDecimal(AArguments[1].Value.AsString)));
+			return Convert.ToDecimal((string)AArgument2);
 		}
     }   
 
     // GuidAsStringSelectorNode
-    public class GuidAsStringSelectorNode : InstructionNode
+    public class GuidAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Guid(AArguments[0].Value.AsString)));
+			return new Guid((string)AArgument1);
 		}
     }
     
     // GuidAsStringReadAccessorNode
-    public class GuidAsStringReadAccessorNode : InstructionNode
+    public class GuidAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsGuid.ToString()));
+			return ((Guid)AArgument1).ToString();
 		}
     }
     
     // GuidAsStringWriteAccessorNode
-    public class GuidAsStringWriteAccessorNode : InstructionNode
+    public class GuidAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Guid(AArguments[1].Value.AsString)));
+			return new Guid((string)AArgument2);
 		}
     }   
 
     // MoneyAsStringSelectorNode
-    public class MoneyAsStringSelectorNode : InstructionNode
+    public class MoneyAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Decimal.Parse(AArguments[0].Value.AsString, System.Globalization.NumberStyles.Currency)));
+			return Decimal.Parse((string)AArgument1, System.Globalization.NumberStyles.Currency);
 		}
     }
     
     // MoneyAsStringReadAccessorNode
-    public class MoneyAsStringReadAccessorNode : InstructionNode
+    public class MoneyAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDecimal.ToString()));
+			return ((decimal)AArgument1).ToString();
 		}
     }
     
     // MoneyAsDisplayStringReadAccessorNode
-    public class MoneyAsDisplayStringReadAccessorNode : InstructionNode
+    public class MoneyAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDecimal.ToString("C")));
+			return ((decimal)AArgument1).ToString("C");
 		}
     }
     
     // MoneyAsStringWriteAccessorNode
-    public class MoneyAsStringWriteAccessorNode : InstructionNode
+    public class MoneyAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Decimal.Parse(AArguments[1].Value.AsString, System.Globalization.NumberStyles.Currency)));
+			return Decimal.Parse((string)AArgument2, System.Globalization.NumberStyles.Currency);
 		}
     }   
 
     // DateTimeAsStringSelectorNode
-    public class DateTimeAsStringSelectorNode : InstructionNode
+    public class DateTimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Parse(AArguments[0].Value.AsString)));
+			return DateTime.Parse((string)AArgument1);
 		}
     }
     
     // DateTimeAsStringReadAccessorNode
-    public class DateTimeAsStringReadAccessorNode : InstructionNode
+    public class DateTimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("G")));
+			return ((DateTime)AArgument1).ToString("G");
 		}
     }
     
     // DateTimeAsStringWriteAccessorNode
-    public class DateTimeAsStringWriteAccessorNode : InstructionNode
+    public class DateTimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Parse(AArguments[1].Value.AsString)));
+			return DateTime.Parse((string)AArgument2);
 		}
     }   
 
     // DateAsStringSelectorNode
-    public class DateAsStringSelectorNode : InstructionNode
+    public class DateAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Parse(AArguments[0].Value.AsString).Date));
+			return DateTime.Parse((string)AArgument1).Date;
 		}
     }
     
     // DateAsStringReadAccessorNode
-    public class DateAsStringReadAccessorNode : InstructionNode
+    public class DateAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("d")));
+			return ((DateTime)AArgument1).ToString("d");
 		}
     }
     
     // DateAsStringWriteAccessorNode
-    public class DateAsStringWriteAccessorNode : InstructionNode
+    public class DateAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, DateTime.Parse(AArguments[1].Value.AsString).Date));
+			return DateTime.Parse((string)AArgument2).Date;
 		}
     }   
 
     // TimeSpanAsStringSelectorNode
-    public class TimeSpanAsStringSelectorNode : InstructionNode
+    public class TimeSpanAsStringSelectorNode : UnaryInstructionNode
     {
 		public static TimeSpan StringToTimeSpan(string AValue)
 		{
@@ -752,138 +752,138 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LTimeSpan;
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, StringToTimeSpan(AArguments[0].Value.AsString)));
+			return StringToTimeSpan((string)AArgument1);
 		}
     }
     
     // TimeSpanAsStringReadAccessorNode
-    public class TimeSpanAsStringReadAccessorNode : InstructionNode
+    public class TimeSpanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpanAsStringSelectorNode.TimeSpanToString(AArguments[0].Value.AsTimeSpan)));
+			return TimeSpanAsStringSelectorNode.TimeSpanToString(((TimeSpan)AArgument1));
 		}
     }
     
     // TimeSpanAsStringWriteAccessorNode
-    public class TimeSpanAsStringWriteAccessorNode : InstructionNode
+    public class TimeSpanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, TimeSpanAsStringSelectorNode.StringToTimeSpan(AArguments[1].Value.AsString)));
+			return TimeSpanAsStringSelectorNode.StringToTimeSpan((string)AArgument2);
 		}
     }   
 
     // TimeAsStringSelectorNode
-    public class TimeAsStringSelectorNode : InstructionNode
+    public class TimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(DateTime.Parse(AArguments[0].Value.AsString).TimeOfDay.Ticks)));
+			return new DateTime(DateTime.Parse((string)AArgument1).TimeOfDay.Ticks);
 		}
     }
     
     // TimeAsStringReadAccessorNode
-    public class TimeAsStringReadAccessorNode : InstructionNode
+    public class TimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsDateTime.ToString("T")));
+			return ((DateTime)AArgument1).ToString("T");
 		}
     }
     
     // TimeAsStringWriteAccessorNode
-    public class TimeAsStringWriteAccessorNode : InstructionNode
+    public class TimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument2 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new DateTime(DateTime.Parse(AArguments[1].Value.AsString).TimeOfDay.Ticks)));
+			return new DateTime(DateTime.Parse((string)AArgument2).TimeOfDay.Ticks);
 		}
     }   
 
     // BinaryAsDisplayStringSelectorNode
-    public class BinaryAsDisplayStringSelectorNode : InstructionNode
+    public class BinaryAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
     }
     
     // BinaryAsDisplayStringReadAccessorNode
-    public class BinaryAsDisplayStringReadAccessorNode : InstructionNode
+    public class BinaryAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Strings.Get("BinaryAsDisplayStringReadAccessorNode.BinaryData")));
+			return Strings.Get("BinaryAsDisplayStringReadAccessorNode.BinaryData");
 		}
     }
     
     // BinaryAsDisplayStringWriteAccessorNode
-    public class BinaryAsDisplayStringWriteAccessorNode : InstructionNode
+    public class BinaryAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
     }   
 
     // GraphicAsDisplayStringSelectorNode
-    public class GraphicAsDisplayStringSelectorNode : InstructionNode
+    public class GraphicAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}
     }
     
     // GraphicAsDisplayStringReadAccessorNode
-    public class GraphicAsDisplayStringReadAccessorNode : InstructionNode
+    public class GraphicAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Strings.Get("GraphicAsDisplayStringReadAccessorNode.GraphicData")));
+			return Strings.Get("GraphicAsDisplayStringReadAccessorNode.GraphicData");
 		}
     }
     
     // GraphicAsDisplayStringWriteAccessorNode
-    public class GraphicAsDisplayStringWriteAccessorNode : InstructionNode
+    public class GraphicAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}

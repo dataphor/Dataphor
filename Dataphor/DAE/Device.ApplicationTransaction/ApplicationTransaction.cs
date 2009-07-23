@@ -216,7 +216,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				LTransaction.BeginPopulateSource(AProcess);
 				try
 				{
-					using (Table LTable = (Table)APopulateNode.Execute(AProcess).Value)
+					using (Table LTable = (Table)APopulateNode.Execute(AProcess))
 					{
 						Row LRow = new Row(AProcess, LTable.DataType.RowType);
 						try
@@ -375,12 +375,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class BeginApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments.Length > 0)
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemGuid, AProcess.BeginApplicationTransaction(AArguments[0].Value.AsBoolean, AArguments[1].Value.AsBoolean)));
+				return AProcess.BeginApplicationTransaction((bool)AArguments[0], (bool)AArguments[1]);
 			else
-				return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemGuid, AProcess.BeginApplicationTransaction(false, false)));
+				return AProcess.BeginApplicationTransaction(false, false);
 		}
 	}
 	
@@ -390,10 +390,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class JoinApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Guid LApplicationTransactionID = AArguments[0].Value.AsGuid;
-			bool LIsInsert = AArguments[1].Value.AsBoolean;
+			Guid LApplicationTransactionID = (Guid)AArguments[0];
+			bool LIsInsert = (bool)AArguments[1];
 			AProcess.JoinApplicationTransaction(LApplicationTransactionID, LIsInsert);
 			return null;
 		}
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class LeaveApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			AProcess.LeaveApplicationTransaction();
 			return null;
@@ -414,9 +414,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 	public class PrepareApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			AProcess.PrepareApplicationTransaction(AArguments[0].Value.AsGuid);
+			AProcess.PrepareApplicationTransaction((Guid)AArguments[0]);
 			return null;
 		}
 	}
@@ -430,9 +430,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	/// </remarks>
 	public class CommitApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Guid LApplicationTransactionID = AArguments[0].Value.AsGuid;
+			Guid LApplicationTransactionID = (Guid)AArguments[0];
 			AProcess.CommitApplicationTransaction(LApplicationTransactionID);
 			return null;
 		}
@@ -445,9 +445,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class RollbackApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Guid LApplicationTransactionID = AArguments[0].Value.AsGuid;
+			Guid LApplicationTransactionID = (Guid)AArguments[0];
 			AProcess.RollbackApplicationTransaction(LApplicationTransactionID);
 			return null;
 		}
@@ -1468,7 +1468,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				AProcess.Plan.EnterRowContext();
 				try
 				{
-					AProcess.Plan.Symbols.Push(new DataVar(LOldRowType));
+					AProcess.Plan.Symbols.Push(new Symbol(LOldRowType));
 					try
 					{
 						ATableMap.HasDeletedRowNode =
@@ -2014,7 +2014,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public override NativeTables GetTables(Schema.TableVarScope AScope) { return Transaction.Tables; }
 		
-		protected override DataVar InternalExecute(DevicePlan ADevicePlan)
+		protected override object InternalExecute(DevicePlan ADevicePlan)
 		{
 			if (ADevicePlan.Node is CreateTableVarBaseNode)
 			{
@@ -2040,10 +2040,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 				try
 				{
-					ServerProcess.Context.Push(new DataVar(LRow.DataType, LRow));
+					ServerProcess.Context.Push(LRow);
 					try
 					{
-						if (!LTableMap.HasRowNode.Execute(ServerProcess).Value.AsBoolean)
+						if (!(bool)LTableMap.HasRowNode.Execute(ServerProcess))
 							base.InternalInsertRow(ATableVar, ARow, AValueFlags);
 					}
 					finally
@@ -2104,10 +2104,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 			try
 			{
-				ServerProcess.Context.Push(new DataVar(LRow.DataType, LRow));
+				ServerProcess.Context.Push(LRow);
 				try
 				{
-					if (!LTableMap.HasDeletedRowNode.Execute(ServerProcess).Value.AsBoolean)
+					if (!(bool)LTableMap.HasDeletedRowNode.Execute(ServerProcess))
 						LTableMap.DeletedRetrieveNode.Insert(ServerProcess, null, ARow, null, true);
 				}
 				finally

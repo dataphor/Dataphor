@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			try
 			{
 				if (HasValue)
-					ARow[FColumnName].AsString = Text;
+					((DAE.Runtime.Data.Scalar)ARow.GetValue(FColumnName)).AsString = Text;
 				else
 					ARow.ClearValue(FColumnName);
 				return true;
@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				if (ARow.HasValue(ColumnName))
 				{
 					SetHasValue(true);
-					Text = ARow[ColumnName].AsString;
+					Text = ((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsString;
 				}
 				else
 				{
@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				{
 					// Show partial match
 					// TODO: More intelligent mechanism for displaying partial matches
-					string LNewValue = ARow[ColumnName].AsString;
+					string LNewValue = ((DAE.Runtime.Data.Scalar)ARow.GetValue(ColumnName)).AsString;
 					if (LNewValue.ToLower().StartsWith(Text.ToLower()))
 					{
 						int LPreviousTextLength = Text.Length;

@@ -3,6 +3,8 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+//#define TRACEEVENTS // Enable this to turn on tracing
 #define LOGDDLINSTRUCTIONS
 
 using System;
@@ -1588,7 +1590,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected override DataVar InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
 		{
 			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
 			if (LDevicePlan.IsStorePlan)
@@ -1597,7 +1599,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				try
 				{
 					LTable.Open();
-					return new DataVar(String.Empty, LTable.DataType, LTable);
+					return LTable;
 				}
 				catch
 				{
@@ -1628,7 +1630,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						}
 					}
 				}
-				DataVar LResult = base.InternalExecute(ADevicePlan);
+				object LResult = base.InternalExecute(ADevicePlan);
 				if (ADevicePlan.Node is CreateTableNode)
 				{
 					Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
@@ -1706,90 +1708,90 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected void UpdateServerSettings(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			if (AOldRow["TracingEnabled"].AsBoolean ^ ANewRow["TracingEnabled"].AsBoolean)
-				ServerProcess.ServerSession.Server.TracingEnabled = ANewRow["TracingEnabled"].AsBoolean;
+			if ((bool)AOldRow["TracingEnabled"] ^ (bool)ANewRow["TracingEnabled"])
+				ServerProcess.ServerSession.Server.TracingEnabled = (bool)ANewRow["TracingEnabled"];
 				
-			if (AOldRow["LogErrors"].AsBoolean ^ ANewRow["LogErrors"].AsBoolean)
-				ServerProcess.ServerSession.Server.LogErrors = ANewRow["LogErrors"].AsBoolean;
+			if ((bool)AOldRow["LogErrors"] ^ (bool)ANewRow["LogErrors"])
+				ServerProcess.ServerSession.Server.LogErrors = (bool)ANewRow["LogErrors"];
 				
-			if (AOldRow["MaxConcurrentProcesses"].AsInt32 != ANewRow["MaxConcurrentProcesses"].AsInt32)
-				ServerProcess.ServerSession.Server.MaxConcurrentProcesses = ANewRow["MaxConcurrentProcesses"].AsInt32;
+			if ((int)AOldRow["MaxConcurrentProcesses"] != (int)ANewRow["MaxConcurrentProcesses"])
+				ServerProcess.ServerSession.Server.MaxConcurrentProcesses = (int)ANewRow["MaxConcurrentProcesses"];
 
-			if (AOldRow["ProcessWaitTimeout"].AsTimeSpan != ANewRow["ProcessWaitTimeout"].AsTimeSpan)
-				ServerProcess.ServerSession.Server.ProcessWaitTimeout = ANewRow["ProcessWaitTimeout"].AsTimeSpan;
+			if ((TimeSpan)AOldRow["ProcessWaitTimeout"] != (TimeSpan)ANewRow["ProcessWaitTimeout"])
+				ServerProcess.ServerSession.Server.ProcessWaitTimeout = (TimeSpan)ANewRow["ProcessWaitTimeout"];
 				
-			if (AOldRow["ProcessTerminateTimeout"].AsTimeSpan != ANewRow["ProcessTerminateTimeout"].AsTimeSpan)
-				ServerProcess.ServerSession.Server.ProcessTerminationTimeout = ANewRow["ProcessTerminateTimeout"].AsTimeSpan;
+			if ((TimeSpan)AOldRow["ProcessTerminateTimeout"] != (TimeSpan)ANewRow["ProcessTerminateTimeout"])
+				ServerProcess.ServerSession.Server.ProcessTerminationTimeout = (TimeSpan)ANewRow["ProcessTerminateTimeout"];
 
-			if (AOldRow["PlanCacheSize"].AsInt32 != ANewRow["PlanCacheSize"].AsInt32)
-				ServerProcess.ServerSession.Server.PlanCacheSize = ANewRow["PlanCacheSize"].AsInt32;
+			if ((int)AOldRow["PlanCacheSize"] != (int)ANewRow["PlanCacheSize"])
+				ServerProcess.ServerSession.Server.PlanCacheSize = (int)ANewRow["PlanCacheSize"];
 				
 			SaveServerSettings(ServerProcess.ServerSession.Server);
 		}
 		
 		protected void UpdateSessions(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession(ANewRow["ID"].AsInt32);
+			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["ID"]);
 			
 			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
 				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
 			
-			if (AOldRow["Current_Library_Name"].AsString != ANewRow["Current_Library_Name"].AsString)
-				LSession.CurrentLibrary = ServerProcess.CatalogDeviceSession.ResolveLoadedLibrary(ANewRow["Current_Library_Name"].AsString);
+			if ((string)AOldRow["Current_Library_Name"] != (string)ANewRow["Current_Library_Name"])
+				LSession.CurrentLibrary = ServerProcess.CatalogDeviceSession.ResolveLoadedLibrary((string)ANewRow["Current_Library_Name"]);
 				
-			if (AOldRow["DefaultIsolationLevel"].AsString != ANewRow["DefaultIsolationLevel"].AsString)
-				LSession.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), ANewRow["DefaultIsolationLevel"].AsString, true);
+			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
+				LSession.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
 
 			#if TRACEEVENTS
-			if (AOldRow["TracingEnabled"].AsBoolean ^ ANewRow["TracingEnabled"].AsBoolean)
-				ServerProcess.ServerSession.TracingEnabled = ANewRow["TracingEnabled"].AsBoolean;
+			if ((bool)AOldRow["TracingEnabled"] ^ (bool)ANewRow["TracingEnabled"])
+				ServerProcess.ServerSession.TracingEnabled = (bool)ANewRow["TracingEnabled"];
 			#endif
 				
-			if (AOldRow["DefaultUseDTC"].AsBoolean ^ ANewRow["DefaultUseDTC"].AsBoolean)
-				LSession.SessionInfo.DefaultUseDTC = ANewRow["DefaultUseDTC"].AsBoolean;
+			if ((bool)AOldRow["DefaultUseDTC"] ^ (bool)ANewRow["DefaultUseDTC"])
+				LSession.SessionInfo.DefaultUseDTC = (bool)ANewRow["DefaultUseDTC"];
 				
-			if (AOldRow["DefaultUseImplicitTransactions"].AsBoolean ^ ANewRow["DefaultUseImplicitTransactions"].AsBoolean)
-				LSession.SessionInfo.DefaultUseImplicitTransactions = ANewRow["DefaultUseImplicitTransactions"].AsBoolean;
+			if ((bool)AOldRow["DefaultUseImplicitTransactions"] ^ (bool)ANewRow["DefaultUseImplicitTransactions"])
+				LSession.SessionInfo.DefaultUseImplicitTransactions = (bool)ANewRow["DefaultUseImplicitTransactions"];
 				
-			if (AOldRow["Language"].AsString != ANewRow["Language"].AsString)
-				LSession.SessionInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), ANewRow["Language"].AsString, true);
+			if ((string)AOldRow["Language"] != (string)ANewRow["Language"])
+				LSession.SessionInfo.Language = (QueryLanguage)Enum.Parse(typeof(QueryLanguage), (string)ANewRow["Language"], true);
 
-			if (AOldRow["DefaultMaxStackDepth"].AsInt32 != ANewRow["DefaultMaxStackDepth"].AsInt32)
-				LSession.SessionInfo.DefaultMaxStackDepth = ANewRow["DefaultMaxStackDepth"].AsInt32;
+			if ((int)AOldRow["DefaultMaxStackDepth"] != (int)ANewRow["DefaultMaxStackDepth"])
+				LSession.SessionInfo.DefaultMaxStackDepth = (int)ANewRow["DefaultMaxStackDepth"];
 				
-			if (AOldRow["DefaultMaxCallDepth"].AsInt32 != ANewRow["DefaultMaxCallDepth"].AsInt32)
-				LSession.SessionInfo.DefaultMaxCallDepth = ANewRow["DefaultMaxCallDepth"].AsInt32;
+			if ((int)AOldRow["DefaultMaxCallDepth"] != (int)ANewRow["DefaultMaxCallDepth"])
+				LSession.SessionInfo.DefaultMaxCallDepth = (int)ANewRow["DefaultMaxCallDepth"];
 				
-			if (AOldRow["UsePlanCache"].AsBoolean ^ ANewRow["UsePlanCache"].AsBoolean)
-				LSession.SessionInfo.UsePlanCache = ANewRow["UsePlanCache"].AsBoolean;
+			if ((bool)AOldRow["UsePlanCache"] ^ (bool)ANewRow["UsePlanCache"])
+				LSession.SessionInfo.UsePlanCache = (bool)ANewRow["UsePlanCache"];
 
-			if (AOldRow["ShouldEmitIL"].AsBoolean ^ ANewRow["ShouldEmitIL"].AsBoolean)
-				LSession.SessionInfo.ShouldEmitIL = ANewRow["ShouldEmitIL"].AsBoolean;
+			if ((bool)AOldRow["ShouldEmitIL"] ^ (bool)ANewRow["ShouldEmitIL"])
+				LSession.SessionInfo.ShouldEmitIL = (bool)ANewRow["ShouldEmitIL"];
 		}
 		
 		protected void UpdateProcesses(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession(ANewRow["Session_ID"].AsInt32);
+			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["Session_ID"]);
 			
 			if (LSession.SessionID != ServerProcess.ServerSession.SessionID)
 				CheckUserHasRight(ServerProcess.ServerSession.User.ID, Schema.RightNames.MaintainUserSessions);
 				
-			ServerProcess LProcess = LSession.Processes.GetProcess(ANewRow["ID"].AsInt32);
+			ServerProcess LProcess = LSession.Processes.GetProcess((int)ANewRow["ID"]);
 				
-			if (AOldRow["DefaultIsolationLevel"].AsString != ANewRow["DefaultIsolationLevel"].AsString)
-				LProcess.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), ANewRow["DefaultIsolationLevel"].AsString, true);
+			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
+				LProcess.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
 
-			if (AOldRow["UseDTC"].AsBoolean ^ ANewRow["UseDTC"].AsBoolean)
-				LProcess.UseDTC = ANewRow["UseDTC"].AsBoolean;
+			if ((bool)AOldRow["UseDTC"] ^ (bool)ANewRow["UseDTC"])
+				LProcess.UseDTC = (bool)ANewRow["UseDTC"];
 				
-			if (AOldRow["UseImplicitTransactions"].AsBoolean ^ ANewRow["UseImplicitTransactions"].AsBoolean)
-				LProcess.UseImplicitTransactions = ANewRow["UseImplicitTransactions"].AsBoolean;
+			if ((bool)AOldRow["UseImplicitTransactions"] ^ (bool)ANewRow["UseImplicitTransactions"])
+				LProcess.UseImplicitTransactions = (bool)ANewRow["UseImplicitTransactions"];
 				
-			if (AOldRow["MaxStackDepth"].AsInt32 != ANewRow["MaxStackDepth"].AsInt32)
-				LProcess.Context.MaxStackDepth = ANewRow["MaxStackDepth"].AsInt32;
+			if ((int)AOldRow["MaxStackDepth"] != (int)ANewRow["MaxStackDepth"])
+				LProcess.Context.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
 				
-			if (AOldRow["MaxCallDepth"].AsInt32 != ANewRow["MaxCallDepth"].AsInt32)
-				LProcess.Context.MaxCallDepth = ANewRow["MaxCallDepth"].AsInt32;
+			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
+				LProcess.Context.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
 		}
 		
 		protected void InsertLibrary(Schema.TableVar ATableVar, Row ARow)
@@ -1799,10 +1801,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ServerProcess, 
 				new Schema.Library
 				(
-					ARow[0].AsString,
-					ARow[1].AsString,
-					(VersionNumber)ARow[2].AsNative,
-					ARow[3].AsString
+					(string)ARow[0],
+					(string)ARow[1],
+					(VersionNumber)ARow[2],
+					(string)ARow[3]
 				), 
 				false,
 				true
@@ -1811,17 +1813,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected void UpdateLibrary(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			string AOldName = AOldRow[0].AsString;
-			string ANewName = ANewRow[0].AsString;
-			VersionNumber ANewVersion = (VersionNumber)ANewRow[2].AsNative;
+			string AOldName = (string)AOldRow[0];
+			string ANewName = (string)ANewRow[0];
+			VersionNumber ANewVersion = (VersionNumber)ANewRow[2];
 			SystemRenameLibraryNode.RenameLibrary(ServerProcess, Schema.Object.EnsureRooted(AOldName), ANewName, true);
 			SystemSetLibraryDescriptorNode.ChangeLibraryVersion(ServerProcess, Schema.Object.EnsureRooted(ANewName), ANewVersion, false);
-			SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(ServerProcess, Schema.Object.EnsureRooted(ANewName), ANewRow[3].AsString, false);
+			SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(ServerProcess, Schema.Object.EnsureRooted(ANewName), (string)ANewRow[3], false);
 		}
 		
 		protected void DeleteLibrary(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemDropLibraryNode.DropLibrary(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), true);
+			SystemDropLibraryNode.DropLibrary(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), true);
 		}
 		
 		protected internal void SelectLibraryVersions(NativeTable ANativeTable, Row ARow)
@@ -1833,8 +1835,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					while (LCursor.Next())
 					{
-						ARow[0].AsString = (string)LCursor[0];
-						ARow[1].AsNative = VersionNumber.Parse((string)LCursor[1]);
+						ARow[0] = (string)LCursor[0];
+						ARow[1] = VersionNumber.Parse((string)LCursor[1]);
 						ANativeTable.Insert(ServerProcess, ARow);
 					}
 				}
@@ -1850,7 +1852,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				CatalogStoreConnection.InsertLibraryVersion(ARow[0].AsString, (VersionNumber)ARow[1].AsNative);
+				CatalogStoreConnection.InsertLibraryVersion((string)ARow[0], (VersionNumber)ARow[1]);
 			}
 			finally
 			{
@@ -1863,13 +1865,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				if (AOldRow[0].AsString != ANewRow[0].AsString)
+				if ((string)AOldRow[0] != (string)ANewRow[0])
 				{
-					CatalogStoreConnection.DeleteLibraryVersion(AOldRow[0].AsString);
-					CatalogStoreConnection.InsertLibraryVersion(ANewRow[0].AsString, (VersionNumber)ANewRow[1].AsNative);
+					CatalogStoreConnection.DeleteLibraryVersion((string)AOldRow[0]);
+					CatalogStoreConnection.InsertLibraryVersion((string)ANewRow[0], (VersionNumber)ANewRow[1]);
 				}
 				else
-					CatalogStoreConnection.UpdateLibraryVersion(AOldRow[0].AsString, (VersionNumber)ANewRow[1].AsNative);
+					CatalogStoreConnection.UpdateLibraryVersion((string)AOldRow[0], (VersionNumber)ANewRow[1]);
 			}
 			finally
 			{
@@ -1882,7 +1884,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				CatalogStoreConnection.DeleteLibraryVersion(ARow[0].AsString);
+				CatalogStoreConnection.DeleteLibraryVersion((string)ARow[0]);
 			}
 			finally
 			{
@@ -1899,8 +1901,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					while (LCursor.Next())
 					{
-						ARow[0].AsString = (string)LCursor[0];
-						ARow[1].AsString = (string)LCursor[1];
+						ARow[0] = (string)LCursor[0];
+						ARow[1] = (string)LCursor[1];
 						ANativeTable.Insert(ServerProcess, ARow);
 					}
 				}
@@ -1916,7 +1918,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				CatalogStoreConnection.InsertLibraryOwner(ARow[0].AsString, ARow[1].AsString);
+				CatalogStoreConnection.InsertLibraryOwner((string)ARow[0], (string)ARow[1]);
 			}
 			finally
 			{
@@ -1929,13 +1931,13 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				if (AOldRow[0].AsString != ANewRow[0].AsString)
+				if ((string)AOldRow[0] != (string)ANewRow[0])
 				{
-					CatalogStoreConnection.DeleteLibraryOwner(AOldRow[0].AsString);
-					CatalogStoreConnection.InsertLibraryOwner(ANewRow[0].AsString, ANewRow[1].AsString);
+					CatalogStoreConnection.DeleteLibraryOwner((string)AOldRow[0]);
+					CatalogStoreConnection.InsertLibraryOwner((string)ANewRow[0], (string)ANewRow[1]);
 				}
 				else
-					CatalogStoreConnection.UpdateLibraryOwner(AOldRow[0].AsString, ANewRow[1].AsString);
+					CatalogStoreConnection.UpdateLibraryOwner((string)AOldRow[0], (string)ANewRow[1]);
 			}
 			finally
 			{
@@ -1948,7 +1950,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(true);
 			try
 			{
-				CatalogStoreConnection.DeleteLibraryOwner(ARow[0].AsString);
+				CatalogStoreConnection.DeleteLibraryOwner((string)ARow[0]);
 			}
 			finally
 			{
@@ -1958,72 +1960,72 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected void InsertLibraryRequisite(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new LibraryReference(ARow[1].AsString, (VersionNumber)ARow[2].AsNative));
+			SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
 		}
 		
 		protected void UpdateLibraryRequisite(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			if (String.Compare(AOldRow[0].AsString, ANewRow[0].AsString) != 0)
+			if (String.Compare((string)AOldRow[0], (string)ANewRow[0]) != 0)
 			{
-				SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted(AOldRow[0].AsString), new LibraryReference(AOldRow[1].AsString, (VersionNumber)AOldRow[2].AsNative));
-				SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted(ANewRow[0].AsString), new LibraryReference(ANewRow[1].AsString, (VersionNumber)ANewRow[2].AsNative));
+				SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new LibraryReference((string)AOldRow[1], (VersionNumber)AOldRow[2]));
+				SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new LibraryReference((string)ANewRow[1], (VersionNumber)ANewRow[2]));
 			}
 			else
 				SystemSetLibraryDescriptorNode.UpdateLibraryRequisite
 				(
 					ServerProcess, 
-					Schema.Object.EnsureRooted(AOldRow[0].AsString), 
-					new LibraryReference(AOldRow[1].AsString, (VersionNumber)AOldRow[2].AsNative), 
-					new LibraryReference(ANewRow[1].AsString, (VersionNumber)ANewRow[2].AsNative)
+					Schema.Object.EnsureRooted((string)AOldRow[0]), 
+					new LibraryReference((string)AOldRow[1], (VersionNumber)AOldRow[2]), 
+					new LibraryReference((string)ANewRow[1], (VersionNumber)ANewRow[2])
 				);
 		}
 		
 		protected void DeleteLibraryRequisite(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new LibraryReference(ARow[1].AsString, (VersionNumber)ARow[2].AsNative));
+			SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
 		}
 		
 		protected void InsertLibrarySetting(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new Tag(ARow[1].AsString, ARow[2].AsString));
+			SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
 		}
 		
 		protected void UpdateLibrarySetting(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			if (String.Compare(AOldRow[0].AsString, ANewRow[0].AsString) != 0)
+			if (String.Compare((string)AOldRow[0], (string)ANewRow[0]) != 0)
 			{
-				SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted(AOldRow[0].AsString), new Tag(AOldRow[1].AsString, AOldRow[2].AsString));
-				SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted(ANewRow[0].AsString), new Tag(ANewRow[1].AsString, ANewRow[2].AsString));
+				SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new Tag((string)AOldRow[1], (string)AOldRow[2]));
+				SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new Tag((string)ANewRow[1], (string)ANewRow[2]));
 			}
 			else
 				SystemSetLibraryDescriptorNode.UpdateLibrarySetting
 				(
 					ServerProcess, 
-					Schema.Object.EnsureRooted(AOldRow[0].AsString), 
-					new Tag(AOldRow[1].AsString, AOldRow[2].AsString), 
-					new Tag(ANewRow[1].AsString, ANewRow[2].AsString)
+					Schema.Object.EnsureRooted((string)AOldRow[0]), 
+					new Tag((string)AOldRow[1], (string)AOldRow[2]), 
+					new Tag((string)ANewRow[1], (string)ANewRow[2])
 				);
 		}
 		
 		protected void DeleteLibrarySetting(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new Tag(ARow[1].AsString, ARow[2].AsString));
+			SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
 		}
 		
 		protected void InsertLibraryFile(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new FileReference(ARow[1].AsString, ARow[2].AsBoolean));
+			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 		
 		protected void UpdateLibraryFile(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted(AOldRow[0].AsString), new FileReference(AOldRow[1].AsString, AOldRow[2].AsBoolean));
-			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted(ANewRow[0].AsString), new FileReference(ANewRow[1].AsString, ANewRow[2].AsBoolean));
+			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
+			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new FileReference((string)ANewRow[1], (bool)ANewRow[2]));
 		}
 		
 		protected void DeleteLibraryFile(Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted(ARow[0].AsString), new FileReference(ARow[1].AsString, ARow[2].AsBoolean));
+			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 		
 		public void SaveServerSettings(Server.Server AServer)
@@ -5539,14 +5541,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			for (int LIndex = 0; LIndex < Device.Store.Counters.Count; LIndex++)
 			{
 			    LCounter = Device.Store.Counters[LIndex];
-			    ARow[0].AsInt32 = LIndex;
-			    ARow[1].AsString = LCounter.Operation;
-			    ARow[2].AsString = LCounter.TableName;
-			    ARow[3].AsString = LCounter.IndexName;
-			    ARow[4].AsBoolean = LCounter.IsMatched;
-			    ARow[5].AsBoolean = LCounter.IsRanged;
-			    ARow[6].AsBoolean = LCounter.IsUpdatable;
-			    ARow[7].AsTimeSpan = LCounter.Duration;
+			    ARow[0] = LIndex;
+			    ARow[1] = LCounter.Operation;
+			    ARow[2] = LCounter.TableName;
+			    ARow[3] = LCounter.IndexName;
+			    ARow[4] = LCounter.IsMatched;
+			    ARow[5] = LCounter.IsRanged;
+			    ARow[6] = LCounter.IsUpdatable;
+			    ARow[7] = LCounter.Duration;
 			    ATable.Insert(ARow);
 			}
 		}

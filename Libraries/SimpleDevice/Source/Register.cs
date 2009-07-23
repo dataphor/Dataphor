@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 			foreach (Type LType in LTypes)
 			{
 				// Node
-				if (LType.IsSubclassOf(typeof(InstructionNode)))
+				if (LType.IsSubclassOf(typeof(InstructionNodeBase)))
 					LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, Schema.Object.Unqualify(LType.Name)), LType.AssemblyQualifiedName));
 				
 				// Conveyor

@@ -4,10 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -139,13 +135,12 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeMarshal.SetDataOutputParams(FServerProcess, AParams, LParams);
 		}
 		
-		public DataVar Evaluate(string AExpression, DataParams AParams)
+		public DataValue Evaluate(string AExpression, DataParams AParams)
 		{
 			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams);
 			NativeMarshal.SetDataOutputParams(FServerProcess, AParams, LResult.Params);
-			DataValue LDataValue = NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
-			return new DataVar(LDataValue.DataType, LDataValue);
+			return NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
 		}
 		
 		public Schema.TableVar PrepareTableVar(string AExpression, DataParams AParams)

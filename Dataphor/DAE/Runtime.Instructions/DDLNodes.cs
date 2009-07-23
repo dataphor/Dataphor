@@ -217,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.CreateTable(FTable);
 			return null;
@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (FView.InvocationExpression == null)
 				Error.Fail("Derived table variable invocation expression reference is null");
@@ -289,7 +289,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public Schema.Conversion Conversion;
 		
-		public override	DataVar InternalExecute(ServerProcess AProcess)
+		public override	object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.CreateConversion(Conversion);
 			return null;
@@ -301,7 +301,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.ScalarType SourceScalarType;
 		public Schema.ScalarType TargetScalarType;
 		
-		public override	DataVar InternalExecute(ServerProcess AProcess)
+		public override	object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -344,7 +344,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FIsUnique = value; }
 		}
 		
-		public override	DataVar InternalExecute(ServerProcess AProcess)
+		public override	object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -372,7 +372,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FSort = value; }
 		}
 
-		public override	DataVar InternalExecute(ServerProcess AProcess)
+		public override	object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -406,7 +406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FIsUnique = value; }
 		}
 		
-		public override	DataVar InternalExecute(ServerProcess AProcess)
+		public override	object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -434,7 +434,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRole = value; }
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.InsertRole(FRole);
 			return null;
@@ -457,7 +457,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FStatement = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.AlterMetaData(FRole, FStatement.AlterMetaData);
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(FRole);
@@ -474,7 +474,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRole = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.DeleteRole(FRole);
 			return null;
@@ -490,7 +490,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			SystemCreateRightNode.CreateRight(AProcess, FRightName, AProcess.Plan.User.ID);
 			return null;
@@ -506,7 +506,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			SystemDropRightNode.DropRight(AProcess, FRightName);
 			return null;
@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.CreateScalarType(FScalarType);
 			return null;
@@ -585,7 +585,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.CreateOperator(FCreateOperator);
 			return null;
@@ -634,11 +634,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (FConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
 			{
-				DataVar LObject;
+				object LObject;
 
 				try
 				{
@@ -649,7 +649,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, FConstraint.Name);
 				}
 				
-				if ((LObject.Value != null) && !LObject.Value.AsBoolean)
+				if ((LObject != null) && !(bool)LObject)
 					throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, FConstraint.Name);
 			}
 			
@@ -679,12 +679,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			// Validate the catalog level enforcement constraint
 			if (!AProcess.ServerSession.Server.IsRepository && FReference.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
 			{
-				DataVar LObject;
+				object LObject;
 
 				try
 				{
@@ -695,7 +695,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, FReference.Name);
 				}
 				
-				if ((LObject.Value != null) && !LObject.Value.AsBoolean)
+				if ((LObject != null) && !(bool)LObject)
 					throw new RuntimeException(RuntimeException.Codes.ReferenceConstraintViolation, FReference.Name);
 			}
 			
@@ -722,7 +722,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			FServerLink.ApplyMetaData();
 			AProcess.CatalogDeviceSession.InsertCatalogObject(FServerLink);
@@ -745,7 +745,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.CatalogDeviceSession.CreateDevice(FNewDevice);
 			return null;
@@ -782,7 +782,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FBeforeOperatorNames = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
 			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
@@ -830,7 +830,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FBeforeOperatorNames = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
 			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
@@ -872,7 +872,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FEventSourceColumnIndex = value; }
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
 			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
@@ -1084,7 +1084,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LPlanNode = Compiler.EmitRestrictNode(AProcess.Plan, LPlanNode, new UnaryExpression(Instructions.Not, (Expression)LRowConstraint.Node.EmitStatement(EmitMode.ForCopy)));
 				LPlanNode = Compiler.EmitUnaryNode(AProcess.Plan, Instructions.Exists, LPlanNode);
 				LPlanNode = Compiler.BindNode(AProcess.Plan, Compiler.OptimizeNode(AProcess.Plan, LPlanNode));
-				DataVar LObject;
+				object LObject;
 
 				try
 				{
@@ -1095,7 +1095,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, AConstraint.Name);
 				}
 				
-				if ((LObject.Value != null) && LObject.Value.AsBoolean)
+				if ((LObject != null) && (bool)LObject)
 					throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, AConstraint.Name);
 			}
 		}
@@ -1366,7 +1366,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					)
 				);
 				
-			DataVar LObject;
+			object LObject;
 
 			try
 			{
@@ -1377,7 +1377,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, AConstraint.Name);
 			}
 
-			if (LObject.Value.AsBoolean)
+			if ((bool)LObject)
 				throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, AConstraint.Name);
 		}
 		
@@ -1461,7 +1461,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								)
 							);
 							
-						DataVar LResult;
+						object LResult;
 						try
 						{
 							LResult = LNode.Execute(AProcess);
@@ -1471,7 +1471,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new RuntimeException(RuntimeException.Codes.ErrorValidatingColumnConstraint, E, "NotNil", LColumn.Name, ATable.DisplayName);
 						}
 						
-						if ((LResult.Value == null) || LResult.Value.AsBoolean)
+						if ((LResult == null) || (bool)LResult)
 							throw new RuntimeException(RuntimeException.Codes.NonNilConstraintViolation, LColumn.Name, ATable.DisplayName);
 					}
 
@@ -1599,7 +1599,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			FTableVar = (Schema.BaseTableVar)FindObject(AProcess.Plan, FAlterTableVarStatement.TableVarName);
 			if (!AProcess.InLoadingContext())
@@ -1703,7 +1703,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.DerivedTableVar LView = (Schema.DerivedTableVar)FindObject(AProcess.Plan, FAlterTableVarStatement.TableVarName);
 			if (!AProcess.InLoadingContext())
@@ -1792,7 +1792,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LPlanNode = Compiler.EmitRestrictNode(AProcess.Plan, LPlanNode, LConstraintExpression);
 							LPlanNode = Compiler.EmitUnaryNode(AProcess.Plan, Instructions.Exists, LPlanNode);
 							LPlanNode = Compiler.BindNode(AProcess.Plan, LPlanNode);
-							DataVar LResult;
+							object LResult;
 
 							try
 							{
@@ -1803,7 +1803,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, AConstraint.Name);
 							}
 							
-							if (LResult.Value.AsBoolean)
+							if ((bool)LResult)
 								throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, AConstraint.Name);
 						}
 				}
@@ -2145,7 +2145,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.ScalarType LScalarType = (Schema.ScalarType)FindObject(AProcess.Plan, FAlterScalarTypeStatement.ScalarTypeName);
 			
@@ -2251,7 +2251,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.Operator LOperator = FindOperator(AProcess.Plan, FAlterOperatorStatement.OperatorSpecifier);
 			AProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProcess, LOperator);
@@ -2307,7 +2307,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.Operator LOperator = FindOperator(AProcess.Plan, FAlterAggregateOperatorStatement.OperatorSpecifier);
 			if (!(LOperator is Schema.AggregateOperator))
@@ -2335,7 +2335,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.Plan.Symbols.PushWindow(0);
 					try
 					{
-						DataVar LResultVar = new DataVar(Keywords.Result, LAggregateOperator.ReturnDataType);
+						Symbol LResultVar = new Symbol(Keywords.Result, LAggregateOperator.ReturnDataType);
 						AProcess.Plan.Symbols.Push(LResultVar);
 						
 						if (FAlterAggregateOperatorStatement.Initialization.AlterClassDefinition != null)
@@ -2348,7 +2348,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						try
 						{
 							foreach (Schema.Operand LOperand in LAggregateOperator.Operands)
-								AProcess.Plan.Symbols.Push(new DataVar(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+								AProcess.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 								
 							if (FAlterAggregateOperatorStatement.Aggregation.AlterClassDefinition != null)
 								AProcess.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Aggregation.ClassDefinition, FAlterAggregateOperatorStatement.Aggregation.AlterClassDefinition);
@@ -2414,7 +2414,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess (APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.CatalogConstraint LConstraint = (Schema.CatalogConstraint)FindObject(AProcess.Plan, FAlterConstraintStatement.ConstraintName);
 			
@@ -2430,7 +2430,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// Validate the new constraint
 					if (LTempConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
 					{
-						DataVar LObject;
+						object LObject;
 						try
 						{
 							LObject = LTempConstraint.Node.Execute(AProcess);
@@ -2440,7 +2440,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new RuntimeException(RuntimeException.Codes.ErrorValidatingConstraint, E, LTempConstraint.Name);
 						}
 						
-						if (!LObject.Value.AsBoolean)
+						if (!(bool)LObject)
 							throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, LTempConstraint.Name);
 					}
 					
@@ -2493,7 +2493,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess (APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (FReference == null)
 				FReference = (Schema.Reference)FindObject(AProcess.Plan, FAlterReferenceStatement.ReferenceName);
@@ -2537,7 +2537,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.ServerLink LServer = (Schema.ServerLink)FindObject(AProcess.Plan, FAlterServerStatement.ServerName);
 			
@@ -2584,7 +2584,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Schema.Device LDevice = (Schema.Device)FindObject(AProcess.Plan, FAlterDeviceStatement.DeviceName);
 			AProcess.EnsureDeviceStarted(LDevice);
@@ -2780,7 +2780,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -2832,7 +2832,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -2893,7 +2893,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Compiler.Compile(AProcess.Plan, LStatement).Execute(AProcess);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -2955,7 +2955,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (FDropOperator == null)
 				FDropOperator = Compiler.ResolveOperatorSpecifier(AProcess.Plan, FOperatorSpecifier);
@@ -2992,7 +2992,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -3033,7 +3033,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (FReference == null)
 				FReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProcess.Plan, FReferenceName);
@@ -3068,7 +3068,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{
@@ -3100,7 +3100,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			lock (AProcess.Plan.Catalog)
 			{

@@ -68,11 +68,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected void DeallocateContextVariables()
 		{
 			for (int LIndex = 0; LIndex < FContext.Count; LIndex++)
-			{
-				DataVar LDataVar = FContext[LIndex];
-				if ((LDataVar != null) && LDataVar.DataType.IsDisposable && (LDataVar.Value != null))
-					((IDisposable)LDataVar.Value).Dispose();
-			}
+				DataValue.DisposeValue(this, FContext[LIndex]);
 		}
 		#endif
 		
@@ -132,7 +128,6 @@ namespace Alphora.Dataphor.DAE.Server
 													#if ALLOWPROCESSCONTEXT
 													DeallocateContextVariables();
 													#endif
-													FContext.Dispose();
 													FContext = null;
 												}
 											}
@@ -624,7 +619,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public DataVar DeviceExecute(Schema.Device ADevice, PlanNode APlanNode)
+		public object DeviceExecute(Schema.Device ADevice, PlanNode APlanNode)
 		{	
 			if (IsReconciliationEnabled() || (APlanNode.DataType != null))
 			{
@@ -725,16 +720,32 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		#if ALLOWPROCESSCONTEXT
-		private void PushProcessContext(Plan APlan)
+		private Symbols FProcessContext = new Symbols();
+		internal Symbols ProcessContext { get { return FProcessContext; } }
+
+		internal void ReportProcessContext(Symbols ASymbols)
+		{
+			for (int LIndex = ASymbols.FrameCount - 1; LIndex >= 0; LIndex--)
+				FProcessContext.Push(ASymbols[LIndex]);
+		}
+		
+		internal void ClearProcessContext()
+		{
+			while (FProcessContext.Count > 0)
+				FProcessContext.Pop();
+		}
+		
+		internal void PushProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PushFrame();
-			for (int LIndex = FContext.Count - 1; LIndex >= 0; LIndex--)
-				APlan.Symbols.Push(FContext[LIndex]);
+			for (int LIndex = FProcessContext.Count - 1; LIndex >= 0; LIndex--)
+				APlan.Symbols.Push(FProcessContext[LIndex]);
+
 			if (FContext.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = true;
 		}
 		
-		private void PopProcessContext(Plan APlan)
+		internal void PopProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PopFrame();
 			if (FContext.AllowExtraWindowAccess)
@@ -769,11 +780,12 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						AServerPlan.Code = Compiler.Compile(AServerPlan.Plan, AStatement, AParams, AIsExpression);
 
+						#if ALLOWPROCESSCONTEXT
 						// Include dependencies for any process context that may be being referenced by the plan
 						// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-						for (int LIndex = Context.Count - 1; LIndex >= 0; LIndex--)
-							if ((AParams == null) || !AParams.Contains(Context[LIndex].Name))
-								AServerPlan.Plan.PlanCatalog.IncludeDependencies(this, AServerPlan.Plan.Catalog, Context[LIndex].DataType, EmitMode.ForRemote);
+						for (int LIndex = FProcessContext.Count - 1; LIndex >= 0; LIndex--)
+							AServerPlan.Plan.PlanCatalog.IncludeDependencies(this, AServerPlan.Plan.Catalog, FProcessContext[LIndex].DataType, EmitMode.ForRemote);
+						#endif
 
 						if (!AServerPlan.Plan.Messages.HasErrors && AIsExpression)
 						{
@@ -847,9 +859,10 @@ namespace Alphora.Dataphor.DAE.Server
 		private int GetContextHashCode(DataParams AParams)
 		{
 			StringBuilder LContextName = new StringBuilder();
-			if (FContext != null)
-				for (int LIndex = 0; LIndex < FContext.Count; LIndex++)
-					LContextName.Append(FContext.Peek(LIndex).DataType.Name);
+			#if ALLOWPROCESSCONTEXT
+			for (int LIndex = 0; LIndex < FProcessContext.Count; LIndex++)
+				LContextName.Append(FProcessContext[LIndex].DataType.Name);
+			#endif
 			if (AParams != null)
 				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
 					LContextName.Append(AParams[LIndex].DataType.Name);
@@ -1860,7 +1873,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)
-						FContext.Push(new DataVar(LParam.Name, LParam.DataType, (LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : LParam.Value.Copy()) : LParam.Value)));
+						FContext.Push(LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : DataValue.CopyValue(this, LParam.Value)) : LParam.Value);
 			}
 			catch
 			{
@@ -1876,9 +1889,9 @@ namespace Alphora.Dataphor.DAE.Server
 				if (AParams != null)
 					for (int LIndex = AParams.Count - 1; LIndex >= 0; LIndex--)
 					{
-						DataVar LDataVar = FContext.Pop();
+						object LValue = FContext.Pop();
 						if (AParams[LIndex].Modifier != Modifier.In)
-							AParams[LIndex].Value = LDataVar.Value;
+							AParams[LIndex].Value = LValue;
 					}
 			}
 			finally
@@ -1887,9 +1900,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public DataVar Execute(ServerPlan APlan, PlanNode ANode, DataParams AParams)
+		public object Execute(ServerPlan APlan, PlanNode ANode, DataParams AParams)
 		{	
-			DataVar LResult;
+			object LResult;
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.BeginExecute, "Begin Execute");
 			#endif

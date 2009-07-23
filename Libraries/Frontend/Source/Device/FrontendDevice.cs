@@ -471,9 +471,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				LRow[0].AsString = ALibrary.Name;
-				LRow[1].AsString = ADocument.Name;
-				LRow[2].AsString = ADocument.DocumentType.ID;
+				LRow[0] = ALibrary.Name;
+				LRow[1] = ADocument.Name;
+				LRow[2] = ADocument.DocumentType.ID;
 				LNativeTable.Insert(AProcess, LRow);
 			}
 			finally
@@ -491,9 +491,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			{
 				foreach (Document LDocument in ALibrary.Documents)
 				{
-					LRow[0].AsString = ALibrary.Name;
-					LRow[1].AsString = LDocument.Name;
-					LRow[2].AsString = LDocument.DocumentType.ID;
+					LRow[0] = ALibrary.Name;
+					LRow[1] = LDocument.Name;
+					LRow[2] = LDocument.DocumentType.ID;
 					LNativeTable.Insert(AProcess, LRow);
 				}
 			}
@@ -525,8 +525,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
-				LRow[0].AsString = ALibrary.Name;
-				LRow[1].AsString = ADocument.Name;
+				LRow[0] = ALibrary.Name;
+				LRow[1] = ADocument.Name;
 				if (LNativeTable.HasRow(AProcess, LRow))
 					LNativeTable.Delete(AProcess, LRow);
 			}
@@ -545,8 +545,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			{
 				foreach (Document LDocument in ALibrary.Documents)
 				{
-					LRow[0].AsString = ALibrary.Name;
-					LRow[1].AsString = LDocument.Name;
+					LRow[0] = ALibrary.Name;
+					LRow[1] = LDocument.Name;
 					if (LNativeTable.HasRow(AProcess, LRow))
 						LNativeTable.Delete(AProcess, LRow);
 				}
@@ -1227,9 +1227,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				Device.UpdateDocumentTypesBufferTimeStamp();
 				foreach (DocumentType LDocumentType in Device.DocumentTypes.Values)
 				{
-					ARow[0].AsString = LDocumentType.ID;
-					ARow[1].AsString = LDocumentType.Description;
-					ARow[2].AsString = LDocumentType.DataType;
+					ARow[0] = LDocumentType.ID;
+					ARow[1] = LDocumentType.Description;
+					ARow[2] = LDocumentType.DataType;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 			}
@@ -1243,9 +1243,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				Device.UpdateDesignersBufferTimeStamp();
 				foreach (Designer LDesigner in Device.Designers.Values)
 				{
-					ARow[0].AsString = LDesigner.ID;
-					ARow[1].AsString = LDesigner.Description;
-					ARow[2].AsString = LDesigner.ClassName;
+					ARow[0] = LDesigner.ID;
+					ARow[1] = LDesigner.Description;
+					ARow[2] = LDesigner.ClassName;
 					ANativeTable.Insert(AProcess,ARow);
 				}
 			}
@@ -1261,8 +1261,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				{
 					for (int LDesignerIndex = 0; LDesignerIndex < LDocumentType.Designers.Count; LDesignerIndex++)
 					{
-						ARow[0].AsString = LDocumentType.ID;
-						ARow[1].AsString = (string)LDocumentType.Designers[LDesignerIndex];
+						ARow[0] = LDocumentType.ID;
+						ARow[1] = (string)LDocumentType.Designers[LDesignerIndex];
 						ANativeTable.Insert(AProcess, ARow);
 					}
 				}
@@ -1289,7 +1289,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		protected override DataVar InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
 		{
 			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
 			{
@@ -1301,7 +1301,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				if (LTableVar != null)
 					PopulateTableVar(LTableVar);
 			}
-			DataVar LResult = base.InternalExecute(ADevicePlan);
+			object LResult = base.InternalExecute(ADevicePlan);
 			if (ADevicePlan.Node is CreateTableNode)
 			{
 				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
@@ -1320,9 +1320,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		protected void InsertDocumentType(Schema.TableVar ATableVar, Row ARow)
 		{
 			DocumentType LDocumentType = new DocumentType();
-			LDocumentType.ID = ARow["ID"].AsString;
-			LDocumentType.Description = ARow["Description"].AsString;
-			LDocumentType.DataType = ARow["DataType"].AsString;
+			LDocumentType.ID = (string)ARow["ID"];
+			LDocumentType.Description = (string)ARow["Description"];
+			LDocumentType.DataType = (string)ARow["DataType"];
 			Device.AcquireDirectoryLock();
 			try
 			{
@@ -1340,10 +1340,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[AOldRow["ID"].AsString];
+				DocumentType LDocumentType = Device.DocumentTypes[(string)AOldRow["ID"]];
 				Device.DocumentTypes.Remove(LDocumentType.ID);
-				LDocumentType.ID = ANewRow["ID"].AsString;
-				LDocumentType.DataType = ANewRow["DataType"].AsString;
+				LDocumentType.ID = (string)ANewRow["ID"];
+				LDocumentType.DataType = (string)ANewRow["DataType"];
 				Device.DocumentTypes.Add(LDocumentType);
 				Device.SaveDocumentTypes();
 			}
@@ -1358,7 +1358,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[ARow["ID"].AsString];
+				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["ID"]];
 				Device.DocumentTypes.Remove(LDocumentType.ID);
 				Device.SaveDocumentTypes();
 			}
@@ -1371,9 +1371,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		protected void InsertDesigner(Schema.TableVar ATableVar, Row ARow)
 		{
 			Designer LDesigner = new Designer();
-			LDesigner.ID = ARow["ID"].AsString;
-			LDesigner.Description = ARow["Description"].AsString;
-			LDesigner.ClassName = ARow["ClassName"].AsString;
+			LDesigner.ID = (string)ARow["ID"];
+			LDesigner.Description = (string)ARow["Description"];
+			LDesigner.ClassName = (string)ARow["ClassName"];
 			Device.AcquireDirectoryLock();
 			try
 			{
@@ -1391,14 +1391,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Designer LDesigner = Device.Designers[AOldRow["ID"].AsString];
-				string LNewDesignerID = ANewRow["ID"].AsString;
+				Designer LDesigner = Device.Designers[(string)AOldRow["ID"]];
+				string LNewDesignerID = (string)ANewRow["ID"];
 				if ((LDesigner.ID != LNewDesignerID) && Device.HasDocumentTypeDesigners(LDesigner.ID))
 					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, LDesigner.ID);
 				Device.Designers.Remove(LDesigner.ID);
 				LDesigner.ID = LNewDesignerID;
-				LDesigner.Description = ANewRow["Description"].AsString;
-				LDesigner.ClassName = ANewRow["ClassName"].AsString;
+				LDesigner.Description = (string)ANewRow["Description"];
+				LDesigner.ClassName = (string)ANewRow["ClassName"];
 				Device.Designers.Add(LDesigner);
 				Device.SaveDesigners();
 			}
@@ -1413,7 +1413,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				Designer LDesigner = Device.Designers[ARow["ID"].AsString];
+				Designer LDesigner = Device.Designers[(string)ARow["ID"]];
 				if (Device.HasDocumentTypeDesigners(LDesigner.ID))
 					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerIsAssociatedWithDocumentTypes, LDesigner.ID);
 				Device.Designers.Remove(LDesigner.ID);
@@ -1430,8 +1430,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[ARow["DocumentType_ID"].AsString];
-				Designer LDesigner = Device.Designers[ARow["Designer_ID"].AsString];
+				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["DocumentType_ID"]];
+				Designer LDesigner = Device.Designers[(string)ARow["Designer_ID"]];
 				LDocumentType.Designers.Add(LDesigner.ID);
 				Device.SaveDocumentTypes();
 			}
@@ -1446,10 +1446,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LOldDocumentType = Device.DocumentTypes[AOldRow["DocumentType_ID"].AsString];
-				DocumentType LNewDocumentType = Device.DocumentTypes[ANewRow["DocumentType_ID"].AsString];
-				Designer LOldDesigner = Device.Designers[AOldRow["Designer_ID"].AsString];
-				Designer LNewDesigner = Device.Designers[ANewRow["Designer_ID"].AsString];
+				DocumentType LOldDocumentType = Device.DocumentTypes[(string)AOldRow["DocumentType_ID"]];
+				DocumentType LNewDocumentType = Device.DocumentTypes[(string)ANewRow["DocumentType_ID"]];
+				Designer LOldDesigner = Device.Designers[(string)AOldRow["Designer_ID"]];
+				Designer LNewDesigner = Device.Designers[(string)ANewRow["Designer_ID"]];
 				LOldDocumentType.Designers.Remove(LOldDesigner.ID);
 				LNewDocumentType.Designers.Add(LNewDesigner.ID);
 				Device.SaveDocumentTypes();
@@ -1465,8 +1465,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.AcquireDirectoryLock();
 			try
 			{
-				DocumentType LDocumentType = Device.DocumentTypes[ARow["DocumentType_ID"].AsString];
-				Designer LDesigner = Device.Designers[ARow["Designer_ID"].AsString];
+				DocumentType LDocumentType = Device.DocumentTypes[(string)ARow["DocumentType_ID"]];
+				Designer LDesigner = Device.Designers[(string)ARow["Designer_ID"]];
 				LDocumentType.Designers.Remove(LDesigner.ID);
 				Device.SaveDocumentTypes();
 			}
@@ -1486,21 +1486,21 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.CreateDocument
 			(
 				ServerProcess, 
-				Schema.Object.EnsureRooted(ARow["Library_Name"].AsString), 
-				ARow["Name"].AsString,
-				ARow["Type_ID"].AsString,
+				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
+				(string)ARow["Name"],
+				(string)ARow["Type_ID"],
 				false
 			);
 		}
 		
 		protected void UpdateDocument(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			string LOldLibraryName = AOldRow["Library_Name"].AsString;
-			string LNewLibraryName = ANewRow["Library_Name"].AsString;
-			string LOldName = AOldRow["Name"].AsString;
-			string LNewName = ANewRow["Name"].AsString;
-			string LOldTypeID = AOldRow["Type_ID"].AsString;
-			string LNewTypeID = ANewRow["Type_ID"].AsString;
+			string LOldLibraryName = (string)AOldRow["Library_Name"];
+			string LNewLibraryName = (string)ANewRow["Library_Name"];
+			string LOldName = (string)AOldRow["Name"];
+			string LNewName = (string)ANewRow["Name"];
+			string LOldTypeID = (string)AOldRow["Type_ID"];
+			string LNewTypeID = (string)ANewRow["Type_ID"];
 			if (LOldTypeID != LNewTypeID)
 				throw new ServerException(ServerException.Codes.CannotChangeDocumentType);
 			if ((LOldLibraryName != LNewLibraryName) || (LOldName != LNewName))
@@ -1520,8 +1520,8 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			Device.DeleteDocument
 			(
 				ServerProcess, 
-				Schema.Object.EnsureRooted(ARow["Library_Name"].AsString), 
-				Schema.Object.EnsureRooted(ARow["Name"].AsString), 
+				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
+				Schema.Object.EnsureRooted((string)ARow["Name"]), 
 				false
 			);
 		}

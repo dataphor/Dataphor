@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Evaluate
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			Row LRow = new Row(AProcess, DataType);
 			try
@@ -69,21 +69,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					for (int LIndex = 0; LIndex < FSpecifiedRowType.Columns.Count; LIndex++)
 					{
-						DataVar LObject = Nodes[LIndex].Execute(AProcess);
-						if ((LObject != null) && (LObject.Value != null)) 
+						object LObject = Nodes[LIndex].Execute(AProcess);
+						if (LObject != null)
 						{
 							try
 							{
-								if (!LObject.Value.IsNil)
-								{
-									if (LObject.DataType is Schema.ScalarType)
-										((Schema.ScalarType)LObject.DataType).ValidateValue(AProcess, LObject);
-									LRow[DataType.Columns.IndexOfName(FSpecifiedRowType.Columns[LIndex].Name)] = LObject.Value;
-								}
+								if (FSpecifiedRowType.Columns[LIndex].DataType is Schema.ScalarType)
+									LObject = ((Schema.ScalarType)FSpecifiedRowType.Columns[LIndex].DataType).ValidateValue(AProcess, LObject);
+								LRow[DataType.Columns.IndexOfName(FSpecifiedRowType.Columns[LIndex].Name)] = LObject;
 							}
 							finally
 							{
-								LObject.Value.Dispose();
+								DataValue.DisposeValue(AProcess, LObject);
 							}
 						}
 					}
@@ -92,26 +89,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
 					{
-						DataVar LObject = Nodes[LIndex].Execute(AProcess);
-						if ((LObject != null) && (LObject.Value != null))
+						object LObject = Nodes[LIndex].Execute(AProcess);
+						if (LObject != null)
 						{
 							try
 							{
-								if (!LObject.Value.IsNil)
-								{
-									if (LObject.DataType is Schema.ScalarType)
-										((Schema.ScalarType)LObject.DataType).ValidateValue(AProcess, LObject);
-									LRow[LIndex] = LObject.Value;
-								}
+								if (DataType.Columns[LIndex].DataType is Schema.ScalarType)
+									LObject = ((Schema.ScalarType)DataType.Columns[LIndex].DataType).ValidateValue(AProcess, LObject);
+								LRow[LIndex] = LObject;
 							}
 							finally
 							{
-								LObject.Value.Dispose();
+								DataValue.DisposeValue(AProcess, LObject);
 							}
 						}
 					}
 				}
-				return new DataVar(String.Empty, FDataType, LRow);
+				return LRow;
 			}
 			catch
 			{
@@ -182,7 +176,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{			
-				APlan.Symbols.Push(new DataVar(SourceRowType));
+				APlan.Symbols.Push(new Symbol(SourceRowType));
 				try
 				{
 					// Add a column for each expression
@@ -220,7 +214,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceRowType));
+				APlan.Symbols.Push(new Symbol(SourceRowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -246,21 +240,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LExpression.Modifiers = Modifiers;
 			return LExpression;
 		}
-		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
-			DataVar LResult;
-			Row LSourceRow = (Row)Nodes[0].Execute(AProcess).Value;
+			return null; // Not called, required override due to abstract
+		}
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			object LResult;
+			Row LSourceRow = (Row)Nodes[0].Execute(AProcess);
 			#if NILPROPOGATION
 			if ((LSourceRow == null) || LSourceRow.IsNil)
-				return new DataVar(FDataType, null);
+				return null;
 			#endif
 			try
 			{
 				Row LNewRow = new Row(AProcess, DataType);
 				try
 				{
-					AProcess.Context.Push(new DataVar(LSourceRow.DataType, LSourceRow));
+					AProcess.Context.Push(LSourceRow);
 					try
 					{
 						LSourceRow.CopyTo(LNewRow);
@@ -268,15 +267,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						for (int LIndex = FExtendColumnOffset; LIndex < LNewRow.DataType.Columns.Count; LIndex++)
 						{
 							LResult = Nodes[LIndex - FExtendColumnOffset + 1].Execute(AProcess);
-							if ((LResult.Value != null) && !LResult.Value.IsNil)
+							if (LResult != null)
 							{
 								try
 								{
-									LNewRow[LIndex] = LResult.Value;
+									LNewRow[LIndex] = LResult;
 								}
 								finally
 								{
-									LResult.Value.Dispose();
+									DataValue.DisposeValue(AProcess, LResult);
 								}
 							}
 						}
@@ -285,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						AProcess.Context.Pop();
 					}
-					return new DataVar(LNewRow.DataType, LNewRow);
+					return LNewRow;
 				}
 				catch
 				{
@@ -339,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceRowType));
+				APlan.Symbols.Push(new Symbol(SourceRowType));
 				try
 				{
 					// Add a column for each expression
@@ -388,7 +387,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(SourceRowType));
+				APlan.Symbols.Push(new Symbol(SourceRowType));
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -405,16 +404,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
-			Row LSourceRow = (Row)Nodes[0].Execute(AProcess).Value;
+			return null; // Not called, required override due to abstract
+		}
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			Row LSourceRow = (Row)Nodes[0].Execute(AProcess);
 			#if NILPROPOGATION
 			if ((LSourceRow == null) || LSourceRow.IsNil)
-				return new DataVar(FDataType, null);
+				return null;
 			#endif
 			try
 			{
-				AProcess.Context.Push(new DataVar(LSourceRow.DataType, LSourceRow));
+				AProcess.Context.Push(LSourceRow);
 				try
 				{
 					Row LNewRow = new Row(AProcess, DataType);
@@ -435,22 +439,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
 						{
-							DataVar LResult = Nodes[LIndex + 1].Execute(AProcess);
-							if ((LResult.Value != null) && !LResult.Value.IsNil)
+							object LResult = Nodes[LIndex + 1].Execute(AProcess);
+							if ((LResult != null))
 							{
 								try
 								{
-									LNewRow[FRedefineColumnOffsets[LIndex]] = LResult.Value;
+									LNewRow[FRedefineColumnOffsets[LIndex]] = LResult;
 								}
 								finally
 								{
-									LResult.Value.Dispose();
+									DataValue.DisposeValue(AProcess, LResult);
 								}
 							}
 							else
 								LNewRow.ClearValue(FRedefineColumnOffsets[LIndex]);
 						}
-						return new DataVar(FDataType, LNewRow);
+						return LNewRow;
 					}
 					catch
 					{
@@ -553,12 +557,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
-			Row LSourceRow = (Row)AArguments[0].Value;
+			Row LSourceRow = (Row)AArgument;
 			#if NILPROPOGATION
 			if ((LSourceRow == null) || LSourceRow.IsNil)
-				return new DataVar(FDataType, null);
+				return null;
 			#endif
 			try
 			{
@@ -569,7 +573,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (LSourceRow.HasValue(LIndex) && (LIndex < LNewRow.DataType.Columns.Count))
 							LNewRow[LIndex] = LSourceRow[LIndex];
 					
-					return new DataVar(FDataType, LNewRow);
+					return LNewRow;
 				}
 				catch
 				{
@@ -599,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	public class RowJoinNode : InstructionNode
+	public class RowJoinNode : BinaryInstructionNode
 	{
 		private PlanNode FEqualNode;
 
@@ -643,10 +647,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(LeftRowType.Columns, Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(new Schema.RowType(RightRowType.Columns, Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(new Schema.RowType(RightRowType.Columns, Keywords.Right)));
 						try
 						{
 							FEqualNode = Compiler.CompileExpression(APlan, LExpression);
@@ -670,22 +674,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FEqualNode = null;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 			if (FEqualNode != null)
 			{
-				AProcess.Context.Push(AArguments[0]);
+				AProcess.Context.Push(AArgument1);
 				try
 				{
-					AProcess.Context.Push(AArguments[1]);
+					AProcess.Context.Push(AArgument2);
 					try
 					{
-						DataValue LValue = FEqualNode.Execute(AProcess).Value;
-						if ((LValue == null) || LValue.IsNil || !LValue.AsBoolean)
+						object LValue = FEqualNode.Execute(AProcess);
+						if ((LValue == null) || !(bool)LValue)
 							throw new RuntimeException(RuntimeException.Codes.InvalidRowJoin);
 					}
 					finally
@@ -701,9 +705,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Row LResult = new Row(AProcess, DataType);
 			try
 			{
-				((Row)AArguments[0].Value).CopyTo(LResult);
-				((Row)AArguments[1].Value).CopyTo(LResult);
-				return new DataVar(FDataType, LResult);
+				((Row)AArgument1).CopyTo(LResult);
+				((Row)AArgument2).CopyTo(LResult);
+				return LResult;
 			}
 			catch
 			{	
@@ -722,7 +726,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
-	public abstract class UnaryRowNode : InstructionNode
+	public abstract class UnaryRowNode : UnaryInstructionNode
 	{
 		public new Schema.RowType DataType { get { return (Schema.RowType)FDataType; } }
 		public Schema.RowType SourceRowType { get { return (Schema.RowType)Nodes[0].DataType; } }
@@ -734,18 +738,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected TypedList FColumnNames = new TypedList(typeof(string), false);
 		public TypedList ColumnNames { get { return FColumnNames; } }
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			#endif
 			
 			Row LRow = new Row(AProcess, DataType);
 			try
 			{
-				((Row)AArguments[0].Value).CopyTo(LRow);
-				return new DataVar(FDataType, LRow);
+				((Row)AArgument).CopyTo(LRow);
+				return LRow;
 			}
 			catch
 			{

@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			if (LQuotaOrderIncludesKey)
 			{
-				if ((Nodes[1].IsLiteral) && (Compiler.BindNode(APlan, Nodes[1]).Execute(APlan.ServerProcess).Value.AsInt32 == 1))
+				if ((Nodes[1].IsLiteral) && ((int)Compiler.BindNode(APlan, Nodes[1]).Execute(APlan.ServerProcess) == 1))
 				{
 					Schema.Key LKey = new Schema.Key();
 					LKey.IsInherited = true;
@@ -102,11 +102,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 				Schema.IRowType LLeftRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Left);
-				APlan.Symbols.Push(new DataVar(LLeftRowType));
+				APlan.Symbols.Push(new Symbol(LLeftRowType));
 				try
 				{
 					Schema.IRowType LRightRowType = new Schema.RowType(FQuotaOrder.Columns, Keywords.Right);
-					APlan.Symbols.Push(new DataVar(LRightRowType));
+					APlan.Symbols.Push(new Symbol(LRightRowType));
 					try
 					{
 						FEqualNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -133,10 +133,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(FQuotaOrder.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(FQuotaOrder.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(FQuotaOrder.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(FQuotaOrder.Columns, Keywords.Right)));
 					try
 					{
 						FEqualNode.DetermineBinding(APlan);
@@ -186,13 +186,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			QuotaTable LTable = new QuotaTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -220,7 +220,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (FValidateNode == null)
 			{
-				APlan.Symbols.Push(new DataVar("ARow", TableVar.DataType.RowType));
+				APlan.Symbols.Push(new Symbol("ARow", TableVar.DataType.RowType));
 				try
 				{
 					// ARow in (((table { ARow }) union <source expression>) <quota clause>)
@@ -252,8 +252,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PushRow(AProcess, ANewRow);
 				try
 				{
-					DataVar LObject = FValidateNode.Execute(AProcess);
-					if ((LObject.Value != null) && !LObject.Value.IsNil && !LObject.Value.AsBoolean)
+					object LObject = FValidateNode.Execute(AProcess);
+					if ((LObject != null) && !(bool)LObject)
 						throw new RuntimeException(RuntimeException.Codes.RowViolatesQuotaPredicate, ErrorSeverity.User);
 				}
 				finally

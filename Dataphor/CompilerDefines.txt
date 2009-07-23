@@ -22,6 +22,8 @@
 //#define TRACEEVENTS in Alphora.Dataphor.DAE (currently disabled) // Enable this to turn on tracing
 //#define USEADOCONNECTION in MSSQLDevice (currently disabled) // Uses the ADOConnection as the default connectivity implementation for the MSSQL device
 #define USEASYNCSTOPPROCESS in Alphora.Dataphor.DAE.Client to issue the stop process call asynchronously
+//#define USECLEANUPNODES in Alphora.Dataphor.DAE (currently disabled) // Part of cleanup processing, currently disabled because cleanup processing is done with InstructionNodeBase.CleanupOperand
+#define USEDATATYPESINNATIVEROW in Alphora.Dataphor.DAE // Determines whether or not the native row tracks the data type of the values it contains
 #define USECONNECTIONPOOLING in MSSQLDevice // Enables connection pooling
 #define USECONVERSIONPATHCACHE in Alphora.Dataphor.DAE // Enables the conversion path cache
 //#define UseFileStreamProvider in Alphora.Dataphor.DAE // ??
@@ -29,10 +31,10 @@
 #define USEINTERNALID in Alphora.Dataphor.DAE // This allows the internal index to store duplicates of logical values for non-unique indexes
 #define USENATIVECONCURRENCYCOMPARE // ?? Enables native object comparison when performing concurrency checks
 //#define USEOLEDBCONNECTION in MSSQLDevice (currently disabled) // Uses the OLEDBConnection as the default connectivity implementation for the MSSQL device
-#define USEOPERATORRESOLUTIONCACHE // Enables the operator resolution cache
+#define USEOPERATORRESOLUTIONCACHE int Alphora.Dataphor.DAE // Enables the operator resolution cache
 //#define UseReaderWriterLock in Alphora.Dataphor.DAE (currently disabled) // Uses the .NET reader/writer lock rather than the Dataphor semaphore
 #define UseReferenceDerivation in Alphora.Dataphor.DAE // Enables reference inference in the compiler
-#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS // Enables rooted identifiers in key expressions
+#define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS in Alphora.Dataphor.DAE // Enables rooted identifiers in key expressions
 #define USESPINLOCK in Alphora.Dataphor.DAE // ??
 #define USESQLCONNECTION in Alphora.Dataphor.DAE, store assemblies // Use an SQLConnection descendent for connectivity in the SQLStore
 #define USESQLOLEDB in MSSQLDevice // Uses the SQLOLEDB provider when using the ADO connection for MSSQL device connectivity

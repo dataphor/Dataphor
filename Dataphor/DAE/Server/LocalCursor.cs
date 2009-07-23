@@ -785,8 +785,8 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					if (ASourceRow.HasNonNativeValue(LIndex))
 					{
-						Scalar LScalar = new Scalar(ATargetRow.Process, (Schema.ScalarType)ASourceRow[LIndex].DataType);
-						Stream LSourceStream = ASourceRow[LIndex].OpenStream();
+						Scalar LScalar = new Scalar(ATargetRow.Process, (Schema.ScalarType)ASourceRow.DataType.Columns[LIndex].DataType);
+						Stream LSourceStream = ASourceRow.GetValue(LIndex).OpenStream();
 						try
 						{
 							Stream LTargetStream = LScalar.OpenStream();

@@ -64,82 +64,70 @@ namespace Alphora.Dataphor.DAE.Server
 					
 				IServerBatch LBatch = LScript.Batches[0];
 				DataParams LDataParams = NativeMarshal.NativeParamsToDataParams(FProcess, AParams);
-				try
-				{
-					NativeResult LResult = new NativeResult();
-					LResult.Params = AParams;
+				NativeResult LResult = new NativeResult();
+				LResult.Params = AParams;
 
-					if (LBatch.IsExpression())
+				if (LBatch.IsExpression())
+				{
+					IServerExpressionPlan LExpressionPlan = LBatch.PrepareExpression(LDataParams);
+					try
 					{
-						IServerExpressionPlan LExpressionPlan = LBatch.PrepareExpression(LDataParams);
-						try
+						if (LExpressionPlan.DataType is Schema.TableType)
 						{
-							if (LExpressionPlan.DataType is Schema.TableType)
+							if (AOptions != NativeExecutionOptions.SchemaOnly)
 							{
-								if (AOptions != NativeExecutionOptions.SchemaOnly)
+								IServerCursor LCursor = LExpressionPlan.Open(LDataParams);
+								try
 								{
-									IServerCursor LCursor = LExpressionPlan.Open(LDataParams);
-									try
-									{
-										LResult.Value = NativeMarshal.ServerCursorToNativeValue(FProcess, LCursor);
-									}
-									finally
-									{
-										LExpressionPlan.Close(LCursor);
-									}
+									LResult.Value = NativeMarshal.ServerCursorToNativeValue(FProcess, LCursor);
 								}
-								else
+								finally
 								{
-									LResult.Value = NativeMarshal.TableVarToNativeTableValue(FProcess, LExpressionPlan.TableVar);
+									LExpressionPlan.Close(LCursor);
 								}
 							}
 							else
 							{
-								if (AOptions != NativeExecutionOptions.SchemaOnly)
-								{
-									using (DataValue LValue = LExpressionPlan.Evaluate(LDataParams))
-									{
-										LResult.Value = NativeMarshal.DataValueToNativeValue(FProcess, LValue);
-									}
-								}
-								else
-								{
-									LResult.Value = NativeMarshal.DataTypeToNativeValue(FProcess, LExpressionPlan.DataType);
-								}
+								LResult.Value = NativeMarshal.TableVarToNativeTableValue(FProcess, LExpressionPlan.TableVar);
 							}
 						}
-						finally
-						{
-							LBatch.UnprepareExpression(LExpressionPlan);
-						}
-					}
-					else
-					{
-						IServerStatementPlan LStatementPlan = LBatch.PrepareStatement(LDataParams);
-						try
+						else
 						{
 							if (AOptions != NativeExecutionOptions.SchemaOnly)
-								LStatementPlan.Execute(LDataParams);
-						}
-						finally
-						{
-							LBatch.UnprepareStatement(LStatementPlan);
+							{
+								using (DataValue LValue = LExpressionPlan.Evaluate(LDataParams))
+								{
+									LResult.Value = NativeMarshal.DataValueToNativeValue(FProcess, LValue);
+								}
+							}
+							else
+							{
+								LResult.Value = NativeMarshal.DataTypeToNativeValue(FProcess, LExpressionPlan.DataType);
+							}
 						}
 					}
-
-					if (AOptions != NativeExecutionOptions.SchemaOnly)
-						NativeMarshal.SetNativeOutputParams(FProcess, LResult.Params, LDataParams);
-					return LResult;
+					finally
+					{
+						LBatch.UnprepareExpression(LExpressionPlan);
+					}
 				}
-				finally
+				else
 				{
-					for (int LIndex = 0; LIndex < LDataParams.Count; LIndex++)
-						if (LDataParams[LIndex].Value != null)
-						{
-							LDataParams[LIndex].Value.Dispose();
-							LDataParams[LIndex].Value = null;
-						}
+					IServerStatementPlan LStatementPlan = LBatch.PrepareStatement(LDataParams);
+					try
+					{
+						if (AOptions != NativeExecutionOptions.SchemaOnly)
+							LStatementPlan.Execute(LDataParams);
+					}
+					finally
+					{
+						LBatch.UnprepareStatement(LStatementPlan);
+					}
 				}
+
+				if (AOptions != NativeExecutionOptions.SchemaOnly)
+					NativeMarshal.SetNativeOutputParams(FProcess, LResult.Params, LDataParams);
+				return LResult;
 			}
 			finally
 			{

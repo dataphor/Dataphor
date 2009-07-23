@@ -4,9 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
 #define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
 
 using System;
 using System.Collections.Generic;
@@ -255,10 +253,12 @@ namespace Alphora.Dataphor.DAE.Server
 						
 					Block LStatement = LAllButCatalogObject.Length > 0 ? (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess, EmitMode.ForRemote, LAllButCatalogObject) : new Block();
 					
+					#if ALLOWPROCESSCONTEXT
 					// Add variable declaration statements for any process context that may be being referenced by the plan
-					for (int LIndex = ServerExpressionPlan.ServerProcess.Context.Count - 1; LIndex >= 0; LIndex--)
-						if (!ContainsParam(AParams, ServerExpressionPlan.ServerProcess.Context[LIndex].Name))
-							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.Context[LIndex].Name, ServerExpressionPlan.ServerProcess.Context[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
+					for (int LIndex = ServerExpressionPlan.ServerProcess.ProcessContext.Count - 1; LIndex >= 0; LIndex--)
+						if (!ContainsParam(AParams, ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].Name))
+							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].Name, ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
+					#endif
 					
 					Block LCatalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess, EmitMode.ForRemote, new string[]{ ACatalogObjectName });
 					LStatement.Statements.AddRange(LCatalogObjectStatement.Statements);

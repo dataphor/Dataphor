@@ -60,10 +60,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(LLeftRowType));
+					APlan.Symbols.Push(new Symbol(LLeftRowType));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(LRightRowType));
+						APlan.Symbols.Push(new Symbol(LRightRowType));
 						try
 						{
 							FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -94,10 +94,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.RowType)Nodes[0].DataType).Columns, Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.RowType)Nodes[1].DataType).Columns, Keywords.Right)));
 						try
 						{
 							FComparisonNode.DetermineBinding(APlan);
@@ -119,15 +119,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { return null; }
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataVar LLeftValue = Nodes[0].Execute(AProcess);
-			DataVar LRightValue = Nodes[1].Execute(AProcess);
+			object LLeftValue = Nodes[0].Execute(AProcess);
+			object LRightValue = Nodes[1].Execute(AProcess);
 			
 			#if NILPROPOGATION
-			if ((LLeftValue.Value == null) || LLeftValue.Value.IsNil || (LRightValue.Value == null) || LRightValue.Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LLeftValue == null) || (LRightValue == null))
+				return null;
 			#endif
 
 			if (FComparisonNode != null)
@@ -153,8 +153,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			else
 			{
 				RowEqualNode LNode = new RowEqualNode();
-				LNode.Nodes.Add(new ValueNode(LLeftValue.Value));
-				LNode.Nodes.Add(new ValueNode(LRightValue.Value));
+				LNode.Nodes.Add(new ValueNode(((Row)LLeftValue).DataType, LLeftValue));
+				LNode.Nodes.Add(new ValueNode(((Row)LRightValue).DataType, LRightValue));
 				LNode.DetermineDataType(AProcess.Plan);
 				return LNode.Execute(AProcess);
 			}
@@ -192,10 +192,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(LLeftRowType));
+				APlan.Symbols.Push(new Symbol(LLeftRowType));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(LRightRowType));
+					APlan.Symbols.Push(new Symbol(LRightRowType));
 					try
 					{
 						FComparisonNode = Compiler.CompileExpression(APlan, Compiler.BuildRowEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -223,10 +223,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
+				APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ScalarType)Nodes[0].DataType).CompoundRowType.Columns, Keywords.Left)));
 				try
 				{
-					APlan.Symbols.Push(new DataVar(new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
+					APlan.Symbols.Push(new Symbol(new Schema.RowType(((Schema.ScalarType)Nodes[1].DataType).CompoundRowType.Columns, Keywords.Right)));
 					try
 					{
 						FComparisonNode.DetermineBinding(APlan);
@@ -247,23 +247,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { return null; }
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataVar LLeftVar = Nodes[0].Execute(AProcess);
-			DataVar LRightVar = Nodes[1].Execute(AProcess);
+			object LLeftVar = Nodes[0].Execute(AProcess);
+			object LRightVar = Nodes[1].Execute(AProcess);
 			
 			#if NILPROPOGATION
-			if ((LLeftVar.Value == null) || LLeftVar.Value.IsNil || (LRightVar.Value == null) || LRightVar.Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LLeftVar == null) || (LRightVar == null))
+				return null;
 			#endif
 			
-			DataValue LLeftValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar.Value.AsNative);
-			DataValue LRightValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar.Value.AsNative);
-			AProcess.Context.Push(new DataVar(LLeftValue.DataType, LLeftValue));
+			object LLeftValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar);
+			object LRightValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar);
+			AProcess.Context.Push(LLeftValue);
 			try
 			{
-				AProcess.Context.Push(new DataVar(LRightValue.DataType, LRightValue));
+				AProcess.Context.Push(LRightValue);
 				try
 				{
 					return FComparisonNode.Execute(AProcess);

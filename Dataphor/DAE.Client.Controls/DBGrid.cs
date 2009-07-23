@@ -6285,7 +6285,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				DAEData.Row LRow = (DAEData.Row)AValue;
 				int LColumnIndex = ColumnIndex(Link);
 				if ((LColumnIndex >= 0) && LRow.HasValue(LColumnIndex))
-					DoPaintCell(LRow[LColumnIndex].AsDisplayString, AIsSelected, ARowIndex, AGraphics, ACellRect, APaddedRect, AVerticalMeasuredRect); 
+					DoPaintCell(((DAEData.Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString, AIsSelected, ARowIndex, AGraphics, ACellRect, APaddedRect, AVerticalMeasuredRect); 
 				else
 					DoPaintCell(null, AIsSelected, ARowIndex, AGraphics, ACellRect, APaddedRect, AVerticalMeasuredRect);
 			}
@@ -6401,11 +6401,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <remarks> Override this method to calculate the natural height of a row. </remarks>
 		public override int NaturalHeight(object AValue, Graphics AGraphics)
 		{
-			if ((Grid != null) && (AValue is DAEData.DataValue))
+			if ((Grid != null) && (AValue is DAEData.Scalar))
 			{
 				SizeF LSize;
 				if (AValue != null)
-					LSize = AGraphics.MeasureString(((DAEData.DataValue)AValue).AsDisplayString, Font, new SizeF(Width, MaxRowHeight > -1 ? MaxRowHeight : GridMaxRowHeight), GetStringFormat());
+					LSize = AGraphics.MeasureString(((DAEData.Scalar)AValue).AsDisplayString, Font, new SizeF(Width, MaxRowHeight > -1 ? MaxRowHeight : GridMaxRowHeight), GetStringFormat());
 				else
 					LSize = AGraphics.MeasureString("Hg", Font, new SizeF(Width, MaxRowHeight > -1 ? MaxRowHeight : GridMaxRowHeight), GetStringFormat());
 				if ((int)LSize.Height > Grid.MinRowHeight)
@@ -6533,7 +6533,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 					DAEData.Row LRow = (DAEData.Row)AValue;
 					int LColumnIndex = ColumnIndex(Link);
 					if (LRow.HasValue(LColumnIndex))
-						LValue = LRow[LColumnIndex].AsDisplayString;
+						LValue = ((DAEData.Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
 				}
 
 				Rectangle LControlRect = new Rectangle(LColumnRect.X, ARowRectangle.Y, LColumnRect.Width, ARowRectangle.Height);
@@ -6771,7 +6771,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				WinForms.ButtonState LButtonState;
 				int LColumnIndex = ColumnIndex(Link);
 				if (LRow.HasValue(LColumnIndex))
-					LButtonState = LRow[LColumnIndex].AsBoolean ? WinForms.ButtonState.Checked : WinForms.ButtonState.Normal;
+					LButtonState = ((DAEData.Scalar)LRow.GetValue(LColumnIndex)).AsBoolean ? WinForms.ButtonState.Checked : WinForms.ButtonState.Normal;
 				else
 					LButtonState = WinForms.ButtonState.Inactive;
 
@@ -7070,7 +7070,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				int LColumnIndex = ColumnIndex(Link);
 				if (LRow.HasValue(LColumnIndex))
 				{
-					Stream LStream = LRow[LColumnIndex].OpenStream();
+					Stream LStream = LRow.GetValue(LColumnIndex).OpenStream();
 					try
 					{
 						MemoryStream LCopyStream = new MemoryStream();

@@ -3,6 +3,8 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+//#define TRACEEVENTS // Enable this to turn on tracing
 #define WRAPRUNTIMEEXCEPTIONS
 
 using System;
@@ -14,6 +16,7 @@ using System.Reflection.Emit;
 using Alphora.Dataphor.DAE.Server;	
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -24,26 +27,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			PlanNode is the base class for all nodes in the processor, and introduces the methods used in the execution.
 				
-				DataVar Execute(ServerProcess AProcess)
+				object Execute(ServerProcess AProcess)
 					This method passes execution to the device if it is supported.
 					Otherwise, it passes execution to the InternalExecute(ServerProcess) method.
 				
-				abstract DataVar InternalExecute(ServerProcess AProcess)
+				abstract object InternalExecute(ServerProcess AProcess)
 				
-				virtual DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+				virtual object InternalExecute(ServerProcess AProcess, object[] AArguments)
 					This method raises on PlanNode, and is overridden by Instructions to perform their operations.
 				
 			InstructionNode is the base class for all instructions in the processor, and performs argument evaluation and virtual resolution.
 			
-				override DataVar InternalExecute(ServerProcess AProcess)
+				override object InternalExecute(ServerProcess AProcess)
 					Builds the arguments array based on the parameters in Operator, and the child nodes of the node.
 					Performs virtual resolution, if necessary
-					Calls InternalExecute(ServerProcess, DataVar[])
+					Calls InternalExecute(ServerProcess, object[])
 					Cleans up the arguments list
 					
 			CallNode is the class used to invoke D4 compiled operators, and prepares the stack prior to the call, and cleans it up afterwards.
 			
-				override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+				override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 					Pushes the arguments onto the stack, and performs a Call on the stack
 					Calls Execute on the compiled BlockNode for Operator
 					Pops the arguments off the stack and performs a return, pushing the result if necessary
@@ -54,7 +57,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 	*/
 	
-	public delegate DataVar ExecuteDelegate(ServerProcess AProcess);
+	public delegate object ExecuteDelegate(ServerProcess AProcess);
         
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
@@ -335,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// <returns>The DynamicMethod instance representing the Execute method being constructed.</returns>
 		protected DynamicMethod BeginEmitIL()
 		{
-			return new DynamicMethod(GetType().Name, typeof(DataVar), new Type[] { typeof(PlanNode), typeof(ServerProcess) }, GetType(), true);
+			return new DynamicMethod(GetType().Name, typeof(object), new Type[] { typeof(PlanNode), typeof(ServerProcess) }, GetType(), true);
 		}
 
 		/// <summary>
@@ -350,7 +353,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Execute = (ExecuteDelegate)AExecute.CreateDelegate(typeof(ExecuteDelegate), this);
 		}
 		
-		public DataVar TestExecute(ServerProcess AProcess)
+		public object TestExecute(ServerProcess AProcess)
 		{
 			return Nodes[0].Execute(AProcess);
 		}
@@ -545,7 +548,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Nodes[LIndex].BindToProcess(APlan);
 		}
 		
-		protected virtual DataVar ProtectedExecute(ServerProcess AProcess)
+		protected virtual object ProtectedExecute(ServerProcess AProcess)
 		{
 			if (FDeviceSupported)
 				return AProcess.DeviceExecute(FDevice, this);
@@ -553,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return InternalExecute(AProcess);
 		}
 		
-		protected DataVar StandardExecute(ServerProcess AProcess)
+		protected object StandardExecute(ServerProcess AProcess)
 		{
 			#if WRAPRUNTIMEEXCEPTIONS
 			try
@@ -614,12 +617,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         // Execute
         public ExecuteDelegate Execute;
         
-        public abstract DataVar InternalExecute(ServerProcess AProcess);
-
-        public virtual DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public abstract object InternalExecute(ServerProcess AProcess);
+        
+/*
+        public virtual object InternalExecute(ServerProcess AProcess, object[] AArguments)
         {
 			throw new RuntimeException(RuntimeException.Codes.InstructionExecuteNotSupported, GetType().Name);
         }
+*/
 
 		#region ShowPlan
 
@@ -706,7 +711,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class PlanNodes : System.Object, IList
 	{
-		public const int CInitialCapacity = 4;
+		public const int CInitialCapacity = 0;
 		
 		public PlanNodes() : base(){}
 
@@ -723,7 +728,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         {
 			if (FNodes.Length <= ARequiredCapacity)
 			{
-				PlanNode[] FNewNodes = new PlanNode[FNodes.Length * 2];
+				PlanNode[] FNewNodes = new PlanNode[Math.Max(FNodes.Length, 1) * 2];
 				for (int LIndex = 0; LIndex < FNodes.Length; LIndex++)
 					FNewNodes[LIndex] = FNodes[LIndex];
 				FNodes = FNewNodes;

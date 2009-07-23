@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			LibraryNode LNode = new LibraryNode(this, ARow["Main.Name"].AsString);
+			LibraryNode LNode = new LibraryNode(this, (string)ARow["Main.Name"]);
 			if (ARow.DataType.Columns.ContainsName("Main.IsLoaded"))
 				UpdateNode(LNode, ARow);
 			return LNode;
@@ -94,10 +94,10 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		private void UpdateNode(LibraryNode ANode, DAE.Runtime.Data.Row ARow)
 		{
-			ANode.Registered = ARow["Main.IsLoaded"].AsBoolean;
-			ANode.CanLoad = true; //ARow["Main.CanLoad"].AsBoolean;
-			ANode.IsSuspect = ARow["Main.IsSuspect"].AsBoolean;
-			ANode.UpgradeRequired = ARow["Main.UpgradeRequired"].AsBoolean;
+			ANode.Registered = (bool)ARow["Main.IsLoaded"];
+			ANode.CanLoad = true; //(bool)ARow["Main.CanLoad"];
+			ANode.IsSuspect = (bool)ARow["Main.IsSuspect"];
+			ANode.UpgradeRequired = (bool)ARow["Main.UpgradeRequired"];
 		}
 
 		protected override string AddDocument()
@@ -173,7 +173,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
 		{
-			return (ARow["Main.Name"].AsString == FLibraryName);
+			return ((string)ARow["Main.Name"] == FLibraryName);
 		}
 
 		public override string GetFilter()
@@ -398,7 +398,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 							while (LCursor.Next())
 							{
 								LCursor.Select(LRow);
-								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", LRow["Library_Name"].AsString));
+								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}');", (string)LRow["Library_Name"]));
 							}
 						}
 					}
@@ -430,7 +430,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						LView.First();
 						foreach (DAE.Runtime.Data.Row LRow in LView)
 						{
-							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", LRow["Library_Name"].AsString));
+							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary(\"{0}\");", (string)LRow["Library_Name"]));
 						}
 					}
 
@@ -473,7 +473,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 							while (LCursor.Next())
 							{
 								LCursor.Select(LRow);
-								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", LRow["Library_Name"].AsString));
+								Dataphoria.ExecuteScript(String.Format("RegisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
 							}
 						}
 					}
@@ -505,7 +505,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 						LView.First();
 						foreach (DAE.Runtime.Data.Row LRow in LView)
 						{
-							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", LRow["Library_Name"].AsString));
+							Dataphoria.ExecuteScript(String.Format("UnregisterLibrary('{0}', false);", (string)LRow["Library_Name"]));
 						}
 					}
 
@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 				Frontend.Client.ISource LSource = (Frontend.Client.ISource)LForm.FindNode("Libraries");
 				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(LSource.DataView.Process, LSource.DataView.TableType.RowType))
 				{
-					LRow["Name"].AsString = LibraryName;
+					LRow["Name"] = LibraryName;
 					LSource.DataView.FindKey(LRow);
 				}
 				LForm.ShowModal(Frontend.Client.FormMode.None);

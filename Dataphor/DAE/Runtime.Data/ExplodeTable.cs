@@ -43,8 +43,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected Schema.Order FSequenceOrder;
 		protected NativeTable FBuffer;
 		protected Scan FScan;
-		protected DataVar FRootObject;
-		protected DataVar FParentRowVar;
+		protected Table FRootTable;
 		protected int FSequence;
 		protected int FSequenceColumnIndex = -1;
 		protected bool FEmpty;
@@ -61,33 +60,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (ACurrentRow == null)
 			{
 				// Open the root expression, if it is not empty, save it on the cursor stack
-				FRootObject = Node.Nodes[1].Execute(Process);
-				if (!((Table)FRootObject.Value).IsEmpty())
-					FSourceTables.Push(FRootObject);
+				FRootTable = (Table)Node.Nodes[1].Execute(Process);
+				if (!FRootTable.IsEmpty())
+					FSourceTables.Push(FRootTable);
 				else
-					FRootObject.Value.Dispose();
+					FRootTable.Dispose();
 			}
 			else
 			{
 				// Otherwise, use the given row to build a parent row and open a new cursor for the child expression with that row to parameterize it
-				DataVar LObject;
 				Row LParentRow = NewParentRow(ACurrentRow);
-				DataVar LParentRowVar = new DataVar(String.Empty, LParentRow.DataType, LParentRow);
-				Process.Context.Push(LParentRowVar);
+				Process.Context.Push(LParentRow);
 				try
 				{
-					LObject = Node.Nodes[2].Execute(Process);
+					Table LTable = (Table)Node.Nodes[2].Execute(Process);
 					
 					// If it is not empty, save it on the cursor stack, and save the parent row on the parent row stack
-					if (!((Table)LObject.Value).IsEmpty())
+					if (!LTable.IsEmpty())
 					{
-						FSourceTables.Push(LObject);
-						FParentRows.Push(LParentRowVar);
+						FSourceTables.Push(LTable);
+						FParentRows.Push(LParentRow);
 					}
 					else
 					{
-						((Table)LObject.Value).Dispose();
-						LParentRowVar.Value.Dispose();
+						LTable.Dispose();
+						LParentRow.Dispose();
 					}
 				}
 				finally
@@ -99,13 +96,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected void PopSourceTable()
 		{
-			DataVar LObject = FSourceTables.Pop();
-			if (LObject != FRootObject)
-				FParentRows.Pop().Value.Dispose();
+			Table LTable = (Table)FSourceTables.Pop();
+			if (LTable != FRootTable)
+				((Row)FParentRows.Pop()).Dispose();
 			else
-				FRootObject = null;
+				FRootTable = null;
 
-			LObject.Value.Dispose();
+			LTable.Dispose();
 		}
 		
 		protected override void InternalOpen()
@@ -207,7 +204,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				while (FSourceTables.Count > 0)
 				{
 					// Retrieve the current cursor to be iterated
-					LTable = (Table)FSourceTables[0].Value;
+					LTable = (Table)FSourceTables[0];
 					bool LContextPopped = false;
 					bool LContextPushed = false;
 					if (FSourceTables.Count > 1)
@@ -233,9 +230,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							for (int LIndex = 0; LIndex < FSourceRow.DataType.Columns.Count; LIndex++)
 								FTargetRow[LIndex] = FSourceRow[LIndex];
 							if (Node.LevelColumnIndex >= 0)
-								FTargetRow[Node.LevelColumnIndex] = new Scalar(Process, Process.DataTypes.SystemInteger, FSourceTables.Count);
+								FTargetRow[Node.LevelColumnIndex] = FSourceTables.Count;
 							if (FSequenceColumnIndex >= 0)
-								FTargetRow[FSequenceColumnIndex] = new Scalar(Process, Process.DataTypes.SystemInteger, FSequence);
+								FTargetRow[FSequenceColumnIndex] = FSequence;
 								
 							FBuffer.Insert(Process, FTargetRow);
 							if (!FScan.FindKey(FTargetRow))

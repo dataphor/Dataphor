@@ -41,7 +41,7 @@ namespace DocSamples
 		public const string CExpressionExpected = @"Expression expected";
 		protected string FTitle = "";
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			// AArguments[0] is template name, may be blank
 			// AArguments[1] is the title
@@ -49,7 +49,7 @@ namespace DocSamples
 			//	throw new RuntimeException(CFilenameExpected); // output filename
 			//if (AArguments[2].Value == null)
 			//	throw new RuntimeException(CExpressionExpected); // expression to "export"
-			FTitle = AArguments[1].Value.AsString;
+			FTitle = (string)AArguments[1];
 			if (FTitle == "")
 				FTitle = "Catalog Objects Documentation";
 
@@ -57,17 +57,17 @@ namespace DocSamples
 				ProcessTable
 				(
 					AProcess, 
-					AArguments[0].Value.AsString, // template
-					AArguments[2].Value.AsString, // output file name
-					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3].Value).ID).Table
+					(string)AArguments[0], // template
+					(string)AArguments[2], // output file name
+					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
 				);
 			else
 				ProcessTable
 				(
 					AProcess, 
 					"", 
-					AArguments[2].Value.AsString, // Output file name
-					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3].Value).ID).Table
+					(string)AArguments[2], // Output file name
+					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
 				);
 
 			return(null);
@@ -135,7 +135,7 @@ namespace DocSamples
 			// non-formatted output is name \n comment \n\n
 
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 
 			// get the metadata for the row and print it
 
@@ -168,7 +168,7 @@ namespace DocSamples
 		protected virtual void WriteTopicXMLData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 
 			AOutputFile.WriteLine("		<topic name=\"{0}\">", LObject.Name);
 			AOutputFile.WriteLine("			<title>{0}</title>", LObject.Name);
@@ -200,7 +200,7 @@ namespace DocSamples
 		protected virtual void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 			AOutputFile.WriteLine("		<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", LObject.Name);
 			AOutputFile.WriteLine("		<para>");
 			//AOutputFile.WriteLine("			{0}", (LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment));
@@ -242,7 +242,7 @@ namespace DocSamples
 		protected override void WriteData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 
 			// todo: see if it is an operator, in which case may check IsBuiltin
 
@@ -261,7 +261,7 @@ namespace DocSamples
 		{
 			
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];			
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 			// todo: see if it is an operator, in which case may check IsBuiltin
 			//if (LOperator.IsSystem && ! LOperator.IsBuiltin)
 			//{
@@ -311,7 +311,7 @@ namespace DocSamples
 		{
 			D4TextEmitter Emitter = new D4TextEmitter();
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 			string LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
 			
 			string LName;
@@ -396,7 +396,7 @@ namespace DocSamples
 		protected override void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[ARow["Name"].AsString];
+			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
 			string LFilename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(LObject) + ".xml";
 			
 			if (System.IO.File.Exists(LFilename))
@@ -448,7 +448,7 @@ namespace DocSamples
 			{
 				LRow = ATable.Select();
 				//LObject = AProcess.Plan.Catalog[LRow["ID"].ToGuid()];
-				LObject = AProcess.Plan.Catalog.Objects[LRow["Name"].AsString];
+				LObject = AProcess.Plan.Catalog.Objects[(string)LRow["Name"]];
 				if (GetJustName(LObject) == GetJustName(AObject))
 				{
 					LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
@@ -576,7 +576,7 @@ namespace DocSamples
 		StreamWriter FTrace;
 
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			//if (AArguments[0].Value == null)
 			//	throw new RuntimeException(CExpressionExpected); // library name to doc
@@ -590,17 +590,17 @@ namespace DocSamples
 
 			// todo: consider append/overwrite flag and write direct to disk
 			
-			string LLibraryName = AArguments[0].Value.AsString;
-			string LTemplateFile = AArguments[1].Value.AsString;
+			string LLibraryName = (string)AArguments[0];
+			string LTemplateFile = (string)AArguments[1];
 			string LFilename = LLibraryName + ".xml";
-			string LOutputPath = AArguments[3].Value.AsString; // assumes trailing backslash
+			string LOutputPath = (string)AArguments[3]; // assumes trailing backslash
 			string LOutputFilename = Path.Combine(LOutputPath, LFilename);
 
-			FExtDocPath = AArguments[2].Value.AsString;
-			if (AArguments[4].Value == null)
+			FExtDocPath = (string)AArguments[2];
+			if (AArguments[4] == null)
 				FTraceOn = false;
 			else
-				FTraceOn = AArguments[4].Value.AsString.Equals("on");
+				FTraceOn = ((string)AArguments[4]).Equals("on");
 
 			System.IO.FileStream LStream = new System.IO.FileStream(LTemplateFile,System.IO.FileMode.Open,FileAccess.Read, FileShare.Read);
 			XmlDocument LxmlTemplate = new XmlDocument();
@@ -666,7 +666,7 @@ namespace DocSamples
 					LParam.Name = LParamName;
 					LParam.Modifier =  Alphora.Dataphor.DAE.Language.Modifier.Const;
 					LParam.DataType = ARow.DataType.Columns[LColumnName].DataType;
-					LParam.Value = (Scalar)ARow[LColumnName];
+					LParam.Value = ARow[LColumnName];
 					//LParam.ColumnName = LColumnName;
 					LParamGroup.Params.Add(LParam);
 				}
@@ -887,7 +887,7 @@ namespace DocSamples
 			// data assumed to be simple text to be inserted into the file
 			// AParamString should be this format: <fieldname>
 			if (ARow != null)
-				return(ARow[AParamString].AsString);
+				return((string)ARow[AParamString]);
 			else
 				return(String.Empty);
 		}

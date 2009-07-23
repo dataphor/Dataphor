@@ -28,15 +28,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Table FSourceTable;
 		protected Row FSourceRow;
-		protected DataVar FSourceRowVar;
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process).Value;
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			try
 			{
 				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
-				FSourceRowVar = new DataVar(String.Empty, FSourceRow.DataType, FSourceRow);
 			}
 			catch
 			{
@@ -89,11 +87,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             while (FSourceTable.Next())
             {
                 FSourceTable.Select(FSourceRow);
-                Process.Context.Push(FSourceRowVar);
+                Process.Context.Push(FSourceRow);
                 try
                 {
-					DataVar LValue = Node.Nodes[1].Execute(Process);
-					if ((LValue.Value != null) && !LValue.Value.IsNil && LValue.Value.AsBoolean)
+					object LValue = Node.Nodes[1].Execute(Process);
+					if ((LValue != null) && (bool)LValue)
 					{
 						FBOF = false;
 					    return true;
@@ -135,13 +133,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class ScanKey : System.Object
     {
-		public ScanKey(DataVar AArgument, bool AIsExclusive) : base()
+		public ScanKey(object AArgument, bool AIsExclusive) : base()
 		{
 			Argument = AArgument;
 			IsExclusive = AIsExclusive;
 		}
 		
-		public DataVar Argument;
+		public object Argument;
 		public bool IsExclusive;
     }
     
@@ -176,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FLastKeys = new ScanKey[Node.ClosedConditions.Count + Node.OpenConditions.Count];
 			}
 		
-			Process.Context.Push(new DataVar("Dummy", Process.Plan.Catalog.DataTypes.SystemScalar));
+			Process.Context.Push(null); // var Dummy : Scalar?
 			try
 			{
 				for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
@@ -190,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						if (LCondition.Count == 1)
 						{
 							FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), false);
-							FLastKeys[LIndex] = new ScanKey((DataVar)FFirstKeys[LIndex].Argument.Clone(), false);
+							FLastKeys[LIndex] = new ScanKey(FFirstKeys[LIndex].Argument, false);
 						}
 						else
 						{
@@ -199,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							{
 								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), false);
 								FLastKeys[LIndex] = new ScanKey(LCondition[1].Argument.Execute(Process), false);
-								if (!Compiler.EmitEqualNode(Process.Plan, new ValueNode(FFirstKeys[LIndex].Argument.Value), new ValueNode(FLastKeys[LIndex].Argument.Value)).Execute(Process).Value.AsBoolean)
+								if (!(bool)Compiler.EmitEqualNode(Process.Plan, new ValueNode(LCondition[0].Argument.DataType, FFirstKeys[LIndex].Argument), new ValueNode(LCondition[1].Argument.DataType, FLastKeys[LIndex].Argument)).Execute(Process))
 								{
 									FIsContradiction = true;
 									return;
@@ -228,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								FFirstKeys[LIndex] = new ScanKey(LGreaterCondition.Argument.Execute(Process), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 1 : 0].Instruction));
 								FLastKeys[LIndex] = new ScanKey(LLessCondition.Argument.Execute(Process), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 0 : 1].Instruction));
 								
-								int LCompareValue = Compiler.EmitBinaryNode(Process.Plan, new ValueNode(FLastKeys[LIndex].Argument.Value), Instructions.Compare, new ValueNode(FFirstKeys[LIndex].Argument.Value)).Execute(Process).Value.AsInt32;
+								int LCompareValue = (int)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LLessCondition.Argument.DataType, FLastKeys[LIndex].Argument), Instructions.Compare, new ValueNode(LGreaterCondition.Argument.DataType, FFirstKeys[LIndex].Argument)).Execute(Process);
 								if ((LLessCondition.Instruction == Instructions.Less) && (LGreaterCondition.Instruction == Instructions.Greater))
 								{
 									if (LCompareValue <= 0)
@@ -248,7 +246,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 						}
 
-						if ((FFirstKeys[LIndex].Argument.Value == null) || FFirstKeys[LIndex].Argument.Value.IsNil || (FLastKeys[LIndex].Argument.Value == null) || FLastKeys[LIndex].Argument.Value.IsNil)
+						if ((FFirstKeys[LIndex].Argument == null) || (FLastKeys[LIndex].Argument == null))
 						{
 							FIsContradiction = true;
 							return;
@@ -263,7 +261,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							if (Instructions.IsLessInstruction(LCondition[0].Instruction))
 							{
 								FLastKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
-								if ((FLastKeys[LIndex].Argument.Value == null) || FLastKeys[LIndex].Argument.Value.IsNil)
+								if ((FLastKeys[LIndex].Argument == null))
 								{
 									FIsContradiction = true;
 									return;
@@ -272,7 +270,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							else
 							{
 								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
-								if ((FFirstKeys[LIndex].Argument.Value == null) || FFirstKeys[LIndex].Argument.Value.IsNil)
+								if ((FFirstKeys[LIndex].Argument == null))
 								{
 									FIsContradiction = true;
 									return;
@@ -296,13 +294,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									LCompareCondition = LCondition[0];
 								}
 								
-								DataVar LEqualVar = LEqualCondition.Argument.Execute(Process);
-								DataVar LCompareVar = LCompareCondition.Argument.Execute(Process);
+								object LEqualVar = LEqualCondition.Argument.Execute(Process);
+								object LCompareVar = LCompareCondition.Argument.Execute(Process);
 								
 								if (Instructions.IsLessInstruction(LCompareCondition.Instruction))
 								{
 									FLastKeys[LIndex] = new ScanKey(LCompareVar, Instructions.IsExclusiveInstruction(LCompareCondition.Instruction));
-									if ((FLastKeys[LIndex].Argument.Value == null) || FLastKeys[LIndex].Argument.Value.IsNil)
+									if ((FLastKeys[LIndex].Argument == null))
 									{
 										FIsContradiction = true;
 										return;
@@ -311,14 +309,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								else
 								{
 									FFirstKeys[LIndex] = new ScanKey(LCompareVar, Instructions.IsExclusiveInstruction(LCompareCondition.Instruction));
-									if ((FFirstKeys[LIndex].Argument.Value == null) || FFirstKeys[LIndex].Argument.Value.IsNil)
+									if ((FFirstKeys[LIndex].Argument == null))
 									{
 										FIsContradiction = true;
 										return;
 									}
 								}
 									
-								if (!Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LEqualVar.Value), LCompareCondition.Instruction, new ValueNode(LCompareVar.Value)).Execute(Process).Value.AsBoolean)
+								if (!(bool)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LEqualCondition.Argument.DataType, LEqualVar), LCompareCondition.Instruction, new ValueNode(LCompareCondition.Argument.DataType, LCompareVar)).Execute(Process))
 								{
 									FIsContradiction = true;
 									return;
@@ -326,9 +324,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else 
 							{
-								DataVar LZeroVar = LCondition[0].Argument.Execute(Process);
-								DataVar LOneVar = LCondition[1].Argument.Execute(Process);
-								int LCompareValue = Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LZeroVar.Value), Instructions.Compare, new ValueNode(LOneVar.Value)).Execute(Process).Value.AsInt32;
+								object LZeroVar = LCondition[0].Argument.Execute(Process);
+								object LOneVar = LCondition[1].Argument.Execute(Process);
+								int LCompareValue = (int)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LCondition[0].Argument.DataType, LZeroVar), Instructions.Compare, new ValueNode(LCondition[1].Argument.DataType, LOneVar)).Execute(Process);
 								if (Instructions.IsLessInstruction(LCondition[0].Instruction))
 								{
 									// both are less instructions
@@ -342,7 +340,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									else
 										FLastKeys[LIndex] = new ScanKey(LOneVar, Instructions.IsExclusiveInstruction(LCondition[1].Instruction));
 
-									if ((FLastKeys[LIndex].Argument.Value == null) || FLastKeys[LIndex].Argument.Value.IsNil)
+									if ((FLastKeys[LIndex].Argument == null))
 									{
 										FIsContradiction = true;
 										return;
@@ -361,7 +359,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									else
 										FFirstKeys[LIndex] = new ScanKey(LOneVar, Instructions.IsExclusiveInstruction(LCondition[1].Instruction));
 
-									if ((FFirstKeys[LIndex].Argument.Value == null) || FFirstKeys[LIndex].Argument.Value.IsNil)
+									if ((FFirstKeys[LIndex].Argument == null))
 									{
 										FIsContradiction = true;
 										return;
@@ -389,8 +387,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
 				FFirstKey = new Row(Process, LRowType);
 				for (int LIndex = 0; LIndex < FFirstKeys.Length; LIndex++)
-					if (FFirstKeys[LIndex].Argument.Value != null)
-						FFirstKey[LIndex] = FFirstKeys[LIndex].Argument.Value;
+					if (FFirstKeys[LIndex].Argument != null)
+						FFirstKey[LIndex] = FFirstKeys[LIndex].Argument;
 
 				FIsFirstKeyExclusive = FFirstKeys[FFirstKeys.Length - 1].IsExclusive;
 			}
@@ -402,8 +400,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
 				FLastKey = new Row(Process, LRowType);
 				for (int LIndex = 0; LIndex < FLastKeys.Length; LIndex++)
-					if (FLastKeys[LIndex].Argument.Value != null)
-						FLastKey[LIndex] = FLastKeys[LIndex].Argument.Value;
+					if (FLastKeys[LIndex].Argument != null)
+						FLastKey[LIndex] = FLastKeys[LIndex].Argument;
 				
 				FIsLastKeyExclusive = FLastKeys[FLastKeys.Length - 1].IsExclusive;
 			}
@@ -723,11 +721,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
         }
         
-        protected int CompareKeyValues(DataValue AKeyValue1, DataValue AKeyValue2, PlanNode ACompareNode)
+        protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Context.Push(new DataVar(AKeyValue1.DataType, AKeyValue1));
-			Process.Context.Push(new DataVar(AKeyValue2.DataType, AKeyValue2));
-			int LResult = ACompareNode.Execute(Process).Value.AsInt32;
+			Process.Context.Push(AKeyValue1);
+			Process.Context.Push(AKeyValue2);
+			int LResult = (int)ACompareNode.Execute(Process);
 			Process.Context.Pop();
 			Process.Context.Pop();
 			return LResult;
@@ -990,16 +988,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			base.InternalOpen();
 			int FKeyCount = 0;
 			FKeyRow = new Row(Process, new Schema.RowType(FSourceTable.Order.Columns));
-			Process.Context.Push(new DataVar(FKeyRow.DataType, FKeyRow));
+			Process.Context.Push(FKeyRow);
 			try
 			{
-				DataVar LVar;
+				object LVar;
 				for (int LIndex = 0; LIndex < Node.FirstKeyNodes.Length; LIndex++)
 				{
 					LVar = Node.FirstKeyNodes[LIndex].Argument.Execute(Process);
-					if ((LVar.Value != null) && !LVar.Value.IsNil)
+					if ((LVar != null))
 					{
-						FKeyRow[LIndex] = LVar.Value;
+						FKeyRow[LIndex] = LVar;
 						FKeyCount++;
 					}
 				}

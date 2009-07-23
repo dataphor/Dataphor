@@ -335,7 +335,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if ((ColumnName == String.Empty) || !ACurrentRow.HasValue(ColumnName))
 				LValue = String.Empty;
 			else
-				LValue = ACurrentRow[ColumnName].AsDisplayString;
+				LValue = ((DAE.Runtime.Data.Scalar)ACurrentRow.GetValue(ColumnName)).AsDisplayString;
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(ACurrentRow, AIsActiveRow));
 
 			if (!FWordWrap)
@@ -518,7 +518,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			{
 				DAE.Runtime.Data.Row LRow = ParentGrid.DataLink.Buffer(Int32.Parse(LRowIndex));
 				if ((LRow != null) && LRow.HasValue(ColumnName))
-					using (Stream LSource = LRow[ColumnName].OpenStream())
+					using (Stream LSource = LRow.GetValue(ColumnName).OpenStream())
 					{
 						StreamUtility.CopyStream(LSource, AStream);
 					}
@@ -607,7 +607,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			bool LHasValue = ACurrentRow.HasValue(ColumnName);
 			bool LValue = false;
 			if (LHasValue)
-				LValue = ACurrentRow[ColumnName].AsBoolean;
+				LValue = ((DAE.Runtime.Data.Scalar)ACurrentRow.GetValue(ColumnName)).AsBoolean;
 
 			AWriter.AddAttribute(HtmlTextWriterAttribute.Class, GetClass(ACurrentRow, AIsActiveRow));
 			if (!ReadOnly)
@@ -744,22 +744,14 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			if (ParentGrid.DataLink.Active)
 			{
 				DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-				try
+				foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns) 
 				{
-					foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns) 
-					{
-						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
-						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
-					}
-					LParams.Add(new DAE.Runtime.DataParam("AAbove", AFromRow.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(AFromRow.Process, AFromRow.Process.DataTypes.SystemBoolean, AAbove)));
-					HostNode.Session.ExecuteScript(FScript, LParams);
-					ParentGrid.DataLink.DataSet.Refresh();
+					LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
+					LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
 				}
-				finally
-				{
-					foreach (DAE.Runtime.DataParam LParam in LParams)
-						LParam.Value.Dispose();
-				}
+				LParams.Add(new DAE.Runtime.DataParam("AAbove", AFromRow.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(AFromRow.Process, AFromRow.Process.DataTypes.SystemBoolean, AAbove)));
+				HostNode.Session.ExecuteScript(FScript, LParams);
+				ParentGrid.DataLink.DataSet.Refresh();
 			}
 		}
 

@@ -23,84 +23,78 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public sealed class BooleanUtility
 	{
-		public static DataValue Not(ServerProcess AProcess, Schema.IScalarType ADataType, DataValue AValue)
+		public static object Not(object AValue)
 		{
 			#if NILPROPOGATION
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return null;
 			else
 			#endif
-				return new Scalar(AProcess, ADataType, !AValue.AsBoolean);
+				return !((bool)AValue);
 		}
 
-		public static DataValue And(ServerProcess AProcess, Schema.IScalarType ADataType, DataValue ALeftValue, DataValue ARightValue)
+		public static object And(object ALeftValue, object ARightValue)
 		{
 			#if NILPROPOGATION
-			if ((ALeftValue == null) || ALeftValue.IsNil)
+			if ((ALeftValue == null))
 			{
-				if ((ARightValue != null) && !ARightValue.IsNil && !ARightValue.AsBoolean)
-					return new Scalar(AProcess, ADataType, false);
+				if ((ARightValue != null) && !(bool)ARightValue)
+					return false;
 				else
 					return null;
 			}
 			else
 			{
-				if (ALeftValue.AsBoolean)
-					if ((ARightValue == null) || ARightValue.IsNil)
+				if ((bool)ALeftValue)
+					if (ARightValue == null)
 						return null;
 					else
-						return new Scalar(AProcess, ADataType, ARightValue.AsBoolean);
+						return (bool)ARightValue;
 				else
-					return new Scalar(AProcess, ADataType, false);
+					return false;
 			}
 			#else
-			return new Scalar(AProcess, ADataType, ALeftValue.AsBoolean && ARightValue.AsBoolean);
+			return (bool)ALeftValue && (bool)ARightValue;
 			#endif
 		}
 		
-		public static DataValue Or(ServerProcess AProcess, Schema.IScalarType ADataType, DataValue ALeftValue, DataValue ARightValue)
+		public static object Or(object ALeftValue, object ARightValue)
 		{
 			#if NILPROPOGATION
-			if ((ALeftValue == null) || ALeftValue.IsNil)
+			if (ALeftValue == null)
 			{
-				if ((ARightValue != null) && !ARightValue.IsNil && ARightValue.AsBoolean)
-					return new Scalar(AProcess, ADataType, true);
+				if ((ARightValue != null) && (bool)ARightValue)
+					return true;
 				else
 					return null;
 			}
 			else
 			{
-				if (ALeftValue.AsBoolean)
-					return new Scalar(AProcess, ADataType, true);
-				else if ((ARightValue == null) || ARightValue.IsNil)
+				if ((bool)ALeftValue)
+					return true;
+				else if (ARightValue == null)
 					return null;
 				else
-					return new Scalar(AProcess, ADataType, ARightValue.AsBoolean);
+					return (bool)ARightValue;
 			}
 			#else
 			return new Scalar(AProcess, ADataType, ALeftValue.AsBoolean || ARightValue.AsBoolean);
 			#endif
 		}
 
-		public static DataValue Xor(ServerProcess AProcess, Schema.IScalarType ADataType, DataValue ALeftValue, DataValue ARightValue)
+		public static object Xor(object ALeftValue, object ARightValue)
 		{
 			return 
 				Or
 				(
-					AProcess, 
-					ADataType, 
 					And
 					(
-						AProcess, 
-						ADataType, 
 						ALeftValue, 
-						Not(AProcess, ADataType, ARightValue)
+						Not(ARightValue)
 					), 
 					And
 					(
-						AProcess, 
-						ADataType, 
-						Not(AProcess, ADataType, ALeftValue), 
+						Not(ALeftValue), 
 						ARightValue
 					)
 				);
@@ -108,11 +102,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 
 	/// <remarks>operator System.iNot(System.Boolean) : System.Boolean</remarks>    
-    public class BooleanNotNode : InstructionNode
+    public class BooleanNotNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
-			return new DataVar(FDataType, BooleanUtility.Not(AProcess, (Schema.IScalarType)FDataType, AArguments[0].Value));
+			return BooleanUtility.Not(AArgument);
 		}
     }
 
@@ -120,29 +114,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// operator System.iAnd(System.Boolean, System.Boolean) : System.Boolean
     /// Be aware!!! D4 does NOT do short circuit evaluation...
     /// </remarks>
-    public class BooleanAndNode : InstructionNode
+    public class BooleanAndNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			return new DataVar(FDataType, BooleanUtility.And(AProcess, (Schema.IScalarType)FDataType, AArguments[0].Value, AArguments[1].Value));
+			return BooleanUtility.And(AArgument1, AArgument2);
 		}
     }
 
     /// <remarks>operator System.iOr(System.Boolean, System.Boolean) : System.Boolean</remarks>
-    public class BooleanOrNode : InstructionNode
+    public class BooleanOrNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			return new DataVar(FDataType, BooleanUtility.Or(AProcess, (Schema.IScalarType)FDataType, AArguments[0].Value, AArguments[1].Value));
+			return BooleanUtility.Or(AArgument1, AArgument2);
 		}
     }
 
     /// <remarks>operator System.iXor(System.Boolean, System.Boolean) : System.Boolean</remarks>
-    public class BooleanXorNode : InstructionNode
+    public class BooleanXorNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			return new DataVar(FDataType, BooleanUtility.Xor(AProcess, (Schema.IScalarType)FDataType, AArguments[0].Value, AArguments[1].Value));
+			return BooleanUtility.Xor(AArgument1, AArgument2);
 		}
     }
 }

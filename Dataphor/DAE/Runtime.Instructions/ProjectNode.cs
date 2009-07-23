@@ -85,10 +85,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{	
-					APlan.Symbols.Push(new DataVar(DataType.CreateRowType(Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(DataType.CreateRowType(Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
 						try
 						{
 							FEqualNode = 
@@ -143,10 +143,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.EnterRowContext();
 				try
 				{
-					APlan.Symbols.Push(new DataVar(DataType.CreateRowType(Keywords.Left)));
+					APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Left)));
 					try
 					{
-						APlan.Symbols.Push(new DataVar(DataType.CreateRowType(Keywords.Right)));
+						APlan.Symbols.Push(new Symbol(DataType.CreateRowType(Keywords.Right)));
 						try
 						{
 							FEqualNode.DetermineBinding(APlan);
@@ -188,13 +188,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			ProjectTable LTable = new ProjectTable(this, AProcess);
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

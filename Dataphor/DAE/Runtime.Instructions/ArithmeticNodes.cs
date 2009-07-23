@@ -24,29 +24,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iNegate(sbyte) : sbyte </remarks>
-    public class SByteNegateNode : InstructionNode
+    public class SByteNegateNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromSByte((sbyte)-AArguments[0].Value.AsSByte()));
+				return (sbyte)-(sbyte)AArgument;
 			
 		}
     }
     #endif
     
 	/// <remarks> operator iNegate(short) : short </remarks>
-    public class ShortNegateNode : InstructionNode
+    public class ShortNegateNode : UnaryInstructionNode
     {
 		public ShortNegateNode() : base()
 		{
 			ShouldEmitIL = true;
 		}
 
+/*
 		protected override void EmitInstructionIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath, LocalBuilder AArguments)
 		{
 			Label LNil = AGenerator.DefineLabel();
@@ -98,2181 +99,1564 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			AGenerator.Emit(OpCodes.Newobj, typeof(DataVar).GetConstructor(new Type[] { typeof(Schema.IDataType), typeof(DataValue) }));
 		}
+*/
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (short)-AArguments[0].Value.AsInt16));
+				return (short)-(short)AArgument; // Another cast is required because the result of negating a short is an int.
 		}
     }
     
 	/// <remarks> operator iNegate(int) : int </remarks>
-    public class IntegerNegateNode : InstructionNode
+    public class IntegerNegateNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -AArguments[0].Value.AsInt32));
+				return -(int)AArgument;
 		}
     }
     
 	/// <remarks> operator iNegate(long) : long </remarks>
-    public class LongNegateNode : InstructionNode
+    public class LongNegateNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -AArguments[0].Value.AsInt64));
+				return -(long)AArgument;
 		}
     }
 
 	#if USEDOUBLE    
 	/// <remarks> operator iNegate(double) : double </remarks>    
-    public class DoubleNegateNode : InstructionNode
+    public class DoubleNegateNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, Scalar.FromDouble(-AArguments[0].Value.AsDouble()));
+				return -(double)AArgument;
 		}
     }
     #endif
 	
 	/// <remarks> operator iNegate(decimal) : decimal </remarks>    
-    public class DecimalNegateNode : InstructionNode
+    public class DecimalNegateNode : UnaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -AArguments[0].Value.AsDecimal));
+				return -(decimal)AArgument;
 		}
     }
+
     /// <remarks> operator iPower(byte, byte) : byte </remarks>
-    public class BytePowerNode : InstructionNode
+    public class BytePowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return
+					(byte)Math.Pow
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(byte)Math.Pow
-						(
-							AArguments[0].Value.AsByte, 
-							AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(byte)AArgument1, 
+						(byte)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
     /// <remarks> operator iPower(sbyte, sbyte) : sbyte </remarks>
-    public class SBytePowerNode : InstructionNode
+    public class SBytePowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)Math.Pow
 					(
-						AProcess,
-						(sbyte)Math.Pow
-						(
-							AArguments[0].Value.AsSByte(), 
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1, 
+						(sbyte)AArgument2
+					);
 		}
     }
     #endif
     
     /// <remarks> operator iPower(short, short) : short </remarks>
-    public class ShortPowerNode : InstructionNode
+    public class ShortPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)Math.Pow
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(short)Math.Pow
-						(
-							AArguments[0].Value.AsInt16, 
-							AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(short)AArgument1, 
+						(short)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
     /// <remarks> operator iPower(ushort, ushort) : ushort </remarks>
-    public class UShortPowerNode : InstructionNode
+    public class UShortPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)Math.Pow
 					(
-						(ushort)Math.Pow
-						(
-							AArguments[0].Value.AsUInt16(), 
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1, 
+						(ushort)AArgument2
+					);
 		}
     }
     #endif
     
     /// <remarks> operator iPower(integer, integer) : integer </remarks>
-    public class IntegerPowerNode : InstructionNode
+    public class IntegerPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(int)Math.Pow
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(int)Math.Pow
-						(
-							AArguments[0].Value.AsInt32, 
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(int)AArgument1, 
+						(int)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
     /// <remarks> operator iPower(uinteger, uinteger) : uinteger </remarks>
-    public class UIntegerPowerNode : InstructionNode
+    public class UIntegerPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
+					(uint)Math.Pow
 					(
-						(uint)Math.Pow
-						(
-							AArguments[0].Value.AsUInt32(), 
-							AArguments[1].Value.AsUInt32()
-						)
-					)
-				);
+						(uint)AArgument1(), 
+						(uint)AArgument2()
+					);
 		}
     }
     #endif
     
     /// <remarks> operator iPower(long, long) : long </remarks>
-    public class LongPowerNode : InstructionNode
+    public class LongPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(long)Math.Pow
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(long)Math.Pow
-						(
-							AArguments[0].Value.AsInt64, 
-							AArguments[1].Value.AsInt64
-						)
-					)
-				);
+						(long)AArgument1, 
+						(long)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
     /// <remarks> operator iPower(ulong, ulong) : ulong </remarks>
-    public class ULongPowerNode : InstructionNode
+    public class ULongPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
+					(ulong)Math.Pow
 					(
-						(ulong)Math.Pow
-						(
-							AArguments[0].Value.AsUInt64(), 
-							AArguments[1].Value.AsUInt64()
-						)
-					)
-				);
+						(ulong)AArgument1(), 
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
 
 	#if USEDOUBLE    
     /// <remarks> operator iPower(double, double) : double </remarks> 
-    public class DoublePowerNode : InstructionNode
+    public class DoublePowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
+				return 
+					Math.Pow
 					(
-						Math.Pow
-						(
-							AArguments[0].Value.AsDouble(), 
-							AArguments[1].Value.AsDouble()
-						)
-					)
-				);
+						(double)AArgument1(), 
+						(double)AArgument2()
+					);
 		}
     }
     #endif
     
     /// <remarks> operator iPower(decimal, decimal) : decimal </remarks>
-    public class DecimalPowerNode : InstructionNode
+    public class DecimalPowerNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(decimal)Math.Pow
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(decimal)Math.Pow
-						(
-							(double)AArguments[0].Value.AsDecimal, 
-							(double)AArguments[1].Value.AsDecimal
-						)
-					)
-				);
+						(double)(decimal)AArgument1, 
+						(double)(decimal)AArgument2
+					);
 		}
     }
 
 	/// <remarks> operator iMultiplication(byte, byte) : byte </remarks>    
-    public class ByteMultiplicationNode : InstructionNode
+    public class ByteMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(byte)
 						(
-							(byte)
-							(
-								AArguments[0].Value.AsByte *
-								AArguments[1].Value.AsByte
-							)
+							(byte)AArgument1 *
+							(byte)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMultiplication(sbyte, sbyte) : sbyte </remarks>    
-    public class SByteMultiplicationNode : InstructionNode
+    public class SByteMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() *
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1 *
+						(sbyte)AArgument2
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iMultiplication(short, short) : short </remarks>    
-    public class ShortMultiplicationNode : InstructionNode
+    public class ShortMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(short)
 						(
-							(short)
-							(
-								AArguments[0].Value.AsInt16 *
-								AArguments[1].Value.AsInt16
-							)
+							(short)AArgument1 *
+							(short)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMultiplication(ushort, ushort) : ushort </remarks>    
-    public class UShortMultiplicationNode : InstructionNode
+    public class UShortMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() *
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() *
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iMultiplication(integer, integer) : integer </remarks>    
-    public class IntegerMultiplicationNode : InstructionNode
+    public class IntegerMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType,
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt32 *
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(int)AArgument1 *
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMultiplication(uinteger, uinteger) : uinteger </remarks>    
-    public class UIntegerMultiplicationNode : InstructionNode
+    public class UIntegerMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return
+					(uint)
 					(
-						AArguments[0].Value.AsUInt32() *
-						AArguments[1].Value.AsUInt32()
+						(uint)AArgument1 *
+						(uint)AArgument2
 					)
-				);
 		}
     }
     #endif
 
 	/// <remarks> operator iMultiplication(long, long) : long </remarks>    
-    public class LongMultiplicationNode : InstructionNode
+    public class LongMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt64 *
-							AArguments[1].Value.AsInt64
-						)
-					)
-				);
+						(long)AArgument1 *
+						(long)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMultiplication(ulong, ulong) : ulong </remarks>    
-    public class ULongMultiplicationNode : InstructionNode
+    public class ULongMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
+					checked
 					(
-						AArguments[0].Value.AsUInt64() *
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1 *
+						(ulong)AArgument2
+					);
 		}
     }
     #endif
 
 	#if USEDOUBLE    
 	/// <remarks> operator iMultiplication(double, double) : double </remarks>    
-    public class DoubleMultiplicationNode : InstructionNode
+    public class DoubleMultiplicationNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
+				return 
 					(
-						AArguments[0].Value.AsDouble() *
-						AArguments[1].Value.AsDouble()
-					)
-				);
+						(double)AArgument1 *
+						(double)AArgument2
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iMultiplication(decimal, decimal) : decimal </remarks>    
-	public class DecimalMultiplicationNode : InstructionNode
+	public class DecimalMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal *
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 * (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iMultiplication(money, decimal) : money </remarks>    
-	public class MoneyDecimalMultiplicationNode : InstructionNode
+	public class MoneyDecimalMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal *
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 * (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iMultiplication(decimal, money) : money </remarks>    
-	public class DecimalMoneyMultiplicationNode : InstructionNode
+	public class DecimalMoneyMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal *
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 * (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iMultiplication(money, integer) : money </remarks>    
-	public class MoneyIntegerMultiplicationNode : InstructionNode
+	public class MoneyIntegerMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal *
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (decimal)AArgument1 * (int)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iMultiplication(integer, money) : money </remarks>    
-	public class IntegerMoneyMultiplicationNode : InstructionNode
+	public class IntegerMoneyMultiplicationNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsInt32 *
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (int)AArgument1 * (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iDivision(byte, byte) : decimal</remarks>    
-    public class ByteDivisionNode : InstructionNode
+    public class ByteDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(
-							(decimal)AArguments[0].Value.AsByte /
-							(decimal)AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(decimal)(byte)AArgument1 /
+						(decimal)(byte)AArgument2
+					);
 		}
     }
     
 	/// <remarks> operator iDiv(byte, byte) : byte</remarks>    
-    public class ByteDivNode : InstructionNode
+    public class ByteDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(byte)
 						(
-							(byte)
-							(
-								AArguments[0].Value.AsByte /
-								AArguments[1].Value.AsByte
-							)
+							(byte)AArgument1 /
+							(byte)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iDivision(sbyte, sbyte) : decimal</remarks>    
-    public class SByteDivisionNode : InstructionNode
+    public class SByteDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDecimal
+				return 
 					(
-						(
-							(decimal)AArguments[0].Value.AsSByte() /
-							(decimal)AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(decimal)(sbyte)AArgument1() /
+						(decimal)(sbyte)AArgument2()
+					);
 		}
     }
 
 	/// <remarks> operator iDiv(sbyte, sbyte) : sbyte </remarks>    
-    public class SByteDivNode : InstructionNode
+    public class SByteDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() /
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() /
+						(sbyte)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iDivision(short, short) : decimal</remarks>    
-    public class ShortDivisionNode : InstructionNode
+    public class ShortDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(
-							(decimal)AArguments[0].Value.AsInt16 /
-							(decimal)AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(decimal)(short)AArgument1 /
+						(decimal)(short)AArgument2
+					);
 		}
     }
 
 	/// <remarks> operator iDiv(short, short) : short </remarks>    
-    public class ShortDivNode : InstructionNode
+    public class ShortDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(short)
 						(
-							(short)
-							(
-								AArguments[0].Value.AsInt16 /
-								AArguments[1].Value.AsInt16
-							)
+							(short)AArgument1 /
+							(short)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iDivision(ushort, ushort) : decimal</remarks>    
-    public class UShortDivisionNode : InstructionNode
+    public class UShortDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDecimal
+				return 
 					(
-						(
-							(decimal)AArguments[0].Value.AsUInt16() /
-							(decimal)AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(decimal)(ushort)AArgument1() /
+						(decimal)(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iDiv(ushort, ushort) : ushort </remarks>    
-    public class UShortDivNode : InstructionNode
+    public class UShortDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() /
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() /
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iDivision(integer, integer) : decimal</remarks>    
-    public class IntegerDivisionNode : InstructionNode
+    public class IntegerDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(decimal)AArguments[0].Value.AsInt32 /
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (decimal)(int)AArgument1 / (int)AArgument2;
 		}
     }
 
 	/// <remarks> operator iDiv(integer, integer) : integer </remarks>    
-    public class IntegerDivNode : InstructionNode
+    public class IntegerDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt32 /
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(int)AArgument1 /
+						(int)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iDivision(uinteger, uinteger) : decimal</remarks>    
-    public class UIntegerDivisionNode : InstructionNode
+    public class UIntegerDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDecimal
+				return 
 					(
-						(decimal)AArguments[0].Value.AsUInt32() /
-						(decimal)AArguments[1].Value.AsUInt32()
-					)
-				);
+						(decimal)(uint)AArgument1() /
+						(decimal)(uint)AArgument2()
+					);
 		}
     }
 
 	/// <remarks> operator iDiv(uinteger, uinteger) : uinteger </remarks>    
-    public class UIntegerDivNode : InstructionNode
+    public class UIntegerDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() /
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+						(uint)AArgument1() /
+						(uint)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iDivision(long, long) : decimal</remarks>    
-    public class LongDivisionNode : InstructionNode
+    public class LongDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(decimal)AArguments[0].Value.AsInt64 /
-						(decimal)AArguments[1].Value.AsInt64
-					)
-				);
+				return (decimal)(long)AArgument1 / (decimal)(long)AArgument2;
 		}
     }
 
 	/// <remarks> operator iDiv(long, long) : long </remarks>    
-    public class LongDivNode : InstructionNode
+    public class LongDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt64 /
-							AArguments[1].Value.AsInt64
-						)
-					)
-				);
+						(long)AArgument1 /
+						(long)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iDivision(ulong, ulong) : decimal</remarks>    
-    public class ULongDivisionNode : InstructionNode
+    public class ULongDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDecimal
+				return 
 					(
-						(decimal)AArguments[0].Value.AsUInt64() /
-						(decimal)AArguments[1].Value.AsUInt64()
-					)
-				);
+						(decimal)(ulong)AArgument1() /
+						(decimal)(ulong)AArgument2()
+					);
 		}
     }
 
 	/// <remarks> operator iDiv(ulong, ulong) : ulong</remarks>    
-    public class ULongDivNode : InstructionNode
+    public class ULongDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() /
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() /
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
 
 	#if USEDOUBLE
 	/// <remarks> operator iDivision(double, double) : double </remarks>    
-    public class DoubleDivisionNode : InstructionNode
+    public class DoubleDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
+				return 
 					(
-						AArguments[0].Value.AsDouble() /
-						AArguments[1].Value.AsDouble()
-					)
-				);
+						(double)AArgument1() /
+						(double)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iDivision(decimal, decimal) : decimal </remarks>    
-    public class DecimalDivisionNode : InstructionNode
+    public class DecimalDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal /
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 / (decimal)AArgument2;
 		}
     }
 
 	/// <remarks> operator iDiv(decimal, decimal) : decimal </remarks>    
-    public class DecimalDivNode : InstructionNode
+    public class DecimalDivNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(decimal)Math.Floor
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(decimal)Math.Floor
+						checked
 						(
-							checked
+							(double)
 							(
-								(double)
-								(
-									AArguments[0].Value.AsDecimal /
-									AArguments[1].Value.AsDecimal
-								)
+								(decimal)AArgument1 /
+								(decimal)AArgument2
 							)
 						)
-					)
-				);
+					);
 		}
     }
 
 	/// <remarks> operator iDivision(Money, Money) : Decimal </remarks>    
-    public class MoneyDivisionNode : InstructionNode
+    public class MoneyDivisionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal /
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 / (decimal)AArgument2;
 		}
     }
 
 	/// <remarks> operator iDivision(money, decimal) : money </remarks>    
-	public class MoneyDecimalDivisionNode : InstructionNode
+	public class MoneyDecimalDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal /
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 / (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iDivision(decimal, money) : money </remarks>    
-	public class DecimalMoneyDivisionNode : InstructionNode
+	public class DecimalMoneyDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal /
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 / (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iDivision(money, integer) : money </remarks>    
-	public class MoneyIntegerDivisionNode : InstructionNode
+	public class MoneyIntegerDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal /
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (decimal)AArgument1 / (int)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iDivision(integer, money) : money </remarks>    
-	public class IntegerMoneyDivisionNode : InstructionNode
+	public class IntegerMoneyDivisionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsInt32 /
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (int)AArgument1 / (decimal)AArgument2;
 		}
 	}
 	
 	/// <remarks> operator iMod(byte, byte) : byte </remarks>    
-    public class ByteModNode : InstructionNode
+    public class ByteModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(byte)
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(byte)
-						(
-							AArguments[0].Value.AsByte %
-							AArguments[1].Value.AsByte
-						)
-					)
-				);
+						(byte)AArgument1 %
+						(byte)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMod(sbyte, sbyte) : sbyte </remarks>    
-    public class SByteModNode : InstructionNode
+    public class SByteModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() %
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() %
+						(sbyte)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iMod(short, short) : short </remarks>    
-    public class ShortModNode : InstructionNode
+    public class ShortModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					(short)
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						(short)
-						(
-							AArguments[0].Value.AsInt16 %
-							AArguments[1].Value.AsInt16
-						)
-					)
-				);
+						(short)AArgument1 %
+						(short)AArgument2
+					);
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMod(ushort, ushort) : ushort </remarks>    
-    public class UShortModNode : InstructionNode
+    public class UShortModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() %
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() %
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
 
 	/// <remarks> operator iMod(integer, integer) : integer </remarks>    
-    public class IntegerModNode : InstructionNode
+    public class IntegerModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsInt32 %
-						AArguments[1].Value.AsInt32
-					)
-				);
+				return (int)AArgument1 % (int)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMod(uinteger, uinteger) : uinteger </remarks>    
-    public class UIntegerModNode : InstructionNode
+    public class UIntegerModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
-					(
-						AArguments[0].Value.AsUInt32() %
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+				return (uint)AArgument1 % (uint)AArgument2;
 		}
     }
     #endif
 
 	/// <remarks> operator iMod(long, long) : long </remarks>    
-    public class LongModNode : InstructionNode
+    public class LongModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsInt64 %
-						AArguments[1].Value.AsInt64
-					)
-				);
+				return (long)AArgument1 % (long)AArgument2;
 		}
     }
 
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iMod(ulong, ulong) : ulong </remarks>    
-    public class ULongModNode : InstructionNode
+    public class ULongModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
-					(
-						AArguments[0].Value.AsUInt64() %
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+				return (ulong)AArgument1() % (ulong)AArgument2;
 		}
     }
     #endif
 
 	#if USEDOUBLE
 	/// <remarks> operator iMod(double, double) : double </remarks>    
-    public class DoubleModNode : InstructionNode
+    public class DoubleModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
-					(
-						AArguments[0].Value.AsDouble() %
-						AArguments[1].Value.AsDouble()
-					)
-				);
+				return (double)AArgument1() % (double)AArgument2;
 		}
     }
     #endif
 
 	/// <remarks> operator iMod(decimal, decimal) : decimal </remarks>    
-    public class DecimalModNode : InstructionNode
+    public class DecimalModNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal %
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 % (decimal)AArgument2;
 		}
     }
 
 	/// <remarks> operator iAddition(string, string) : string </remarks>    
-	public class StringAdditionNode : InstructionNode
+	public class StringAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsString +
-						AArguments[1].Value.AsString
-					)
-				);
+				return (string)AArgument1 + (string)AArgument2;
 		}
 	}
     
 	/// <remarks> operator iAddition(byte, byte) : byte </remarks>    
-	public class ByteAdditionNode : InstructionNode
+	public class ByteAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(byte)
 						(
-							(byte)
-							(
-								AArguments[0].Value.AsByte +
-								AArguments[1].Value.AsByte
-							)
+							(byte)AArgument1 +
+							(byte)AArgument2
 						)
-					)
-				);
+					);
 		}
 	}
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iAddition(sbyte, sbyte) : sbyte </remarks>    
-	public class SByteAdditionNode : InstructionNode
+	public class SByteAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() +
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() +
+						(sbyte)AArgument2()
+					);
 		}
 	}
 	#endif
     
 	/// <remarks> operator iAddition(short, short) : short </remarks>    
-	public class ShortAdditionNode : InstructionNode
+	public class ShortAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(short)
 						(
-							(short)
-							(
-								AArguments[0].Value.AsInt16 +
-								AArguments[1].Value.AsInt16
-							)
+							(short)AArgument1 +
+							(short)AArgument2
 						)
-					)
-				);
+					);
 		}
 	}
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iAddition(ushort, ushort) : ushort </remarks>    
-	public class UShortAdditionNode : InstructionNode
+	public class UShortAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() +
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() +
+						(ushort)AArgument2()
+					);
 		}
 	}
 	#endif
     
 	/// <remarks> operator iAddition(integer, integer) : integer </remarks>    
-	public class IntegerAdditionNode : InstructionNode
+	public class IntegerAdditionNode : BinaryInstructionNode
 	{
-		/*
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, AArguments[0].Value.AsInt32 + AArguments[1].Value.AsInt32));
-		}
-		*/
-
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments) { return null; }
-		public override DataVar InternalExecute(ServerProcess AProcess)
-		{
-			DataValue LLeftValue = Nodes[0].Execute(AProcess).Value;
-			DataValue LRightValue = Nodes[1].Execute(AProcess).Value;
-			#if NILPROPOGATION
-			if ((LLeftValue == null) || LLeftValue.IsNil || (LRightValue == null) || LRightValue.IsNil)
-				return new DataVar(FDataType, null);
-			else
-			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							LLeftValue.AsInt32 +
-							LRightValue.AsInt32
-						)
-					)
-				);
+				return checked((int)AArgument1 + (int)AArgument2);
 		}
 	}
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iAddition(uinteger, uinteger) : uinteger </remarks>    
-	public class UIntegerAdditionNode : InstructionNode
+	public class UIntegerAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() +
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+						(uint)AArgument1() +
+						(uint)AArgument2()
+					);
 		}
 	}
 	#endif
     
 	/// <remarks> operator iAddition(long, long) : long </remarks>    
-	public class LongAdditionNode : InstructionNode
+	public class LongAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt64 +
-							AArguments[1].Value.AsInt64
-						)
-					)
-				);
+						(long)AArgument1 +
+						(long)AArgument2
+					);
 		}
 	}
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iAddition(ulong, ulong) : ulong </remarks>    
-	public class ULongAdditionNode : InstructionNode
+	public class ULongAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() +
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() +
+						(ulong)AArgument2()
+					);
 		}
 	}
 	#endif
 
 	#if USEDOUBLE
 	/// <remarks> operator iAddition(double, double) : double </remarks>    
-	public class DoubleAdditionNode : InstructionNode
+	public class DoubleAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
+				return 
 					(
-						AArguments[0].Value.AsDouble() +
-						AArguments[1].Value.AsDouble()
-					)
-				);
+						(double)AArgument1() +
+						(double)AArgument2()
+					);
 		}
 	}
 	#endif
     
 	/// <remarks> operator iAddition(decimal, decimal) : decimal </remarks>    
-	public class DecimalAdditionNode : InstructionNode
+	public class DecimalAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal +
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 + (decimal)AArgument2;
 		}
 	}
     
 	/// <remarks> operator iAddition(money, money) : money </remarks>    
-	public class MoneyAdditionNode : InstructionNode
+	public class MoneyAdditionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal +
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 + (decimal)AArgument2;
 		}
 	}
     
 	/// <remarks> operator iSubtraction(byte, byte) : byte </remarks>
-    public class ByteSubtractionNode : InstructionNode
+    public class ByteSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(byte)
 						(
-							(byte)
-							(
-								AArguments[0].Value.AsByte -
-								AArguments[1].Value.AsByte
-							)
+							(byte)AArgument1 -
+							(byte)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iSubtraction(sbyte, sbyte) : sbyte </remarks>
-    public class SByteSubtractionNode : InstructionNode
+    public class SByteSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromSByte
+				return 
+					(sbyte)
 					(
-						(sbyte)
-						(
-							AArguments[0].Value.AsSByte() -
-							AArguments[1].Value.AsSByte()
-						)
-					)
-				);
+						(sbyte)AArgument1() -
+						(sbyte)AArgument2()
+					);
 		}
     }
     #endif
     
 	/// <remarks> operator iSubtraction(short, short) : short </remarks>
-    public class ShortSubtractionNode : InstructionNode
+    public class ShortSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
+						(short)
 						(
-							(short)
-							(
-								AArguments[0].Value.AsInt16 -
-								AArguments[1].Value.AsInt16
-							)
+							(short)AArgument1 -
+							(short)AArgument2
 						)
-					)
-				);
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iSubtraction(ushort, ushort) : ushort </remarks>
-    public class UShortSubtractionNode : InstructionNode
+    public class UShortSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt16
+				return 
+					(ushort)
 					(
-						(ushort)
-						(
-							AArguments[0].Value.AsUInt16() -
-							AArguments[1].Value.AsUInt16()
-						)
-					)
-				);
+						(ushort)AArgument1() -
+						(ushort)AArgument2()
+					);
 		}
     }
     #endif
     
 	/// <remarks> operator iSubtraction(integer, integer) : integer </remarks>
-    public class IntegerSubtractionNode : InstructionNode
+    public class IntegerSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt32 -
-							AArguments[1].Value.AsInt32
-						)
-					)
-				);
+						(int)AArgument1 -
+						(int)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers	
 	/// <remarks> operator iSubtraction(uinteger, uinteger) : uinteger </remarks>
-    public class UIntegerSubtractionNode : InstructionNode
+    public class UIntegerSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt32
+				return 
 					(
-						AArguments[0].Value.AsUInt32() -
-						AArguments[1].Value.AsUInt32()
-					)
-				);
+						(uint)AArgument1() -
+						(uint)AArgument2()
+					);
 		}
     }
     #endif
     
 	/// <remarks> operator iSubtraction(long, long) : long </remarks>
-    public class LongSubtractionNode : InstructionNode
+    public class LongSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
+				return 
+					checked
 					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						checked
-						(
-							AArguments[0].Value.AsInt64 -
-							AArguments[1].Value.AsInt64
-						)
-					)
-				);
+						(long)AArgument1 -
+						(long)AArgument2
+					);
 		}
     }
     
 	#if UseUnsignedIntegers
 	/// <remarks> operator iSubtraction(ulong, ulong) : ulong </remarks>
-    public class ULongSubtractionNode : InstructionNode
+    public class ULongSubtractionNode : BinaryInstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromUInt64
+				return 
 					(
-						AArguments[0].Value.AsUInt64() -
-						AArguments[1].Value.AsUInt64()
-					)
-				);
+						(ulong)AArgument1() -
+						(ulong)AArgument2()
+					);
 		}
     }
     #endif
     
 	#if USEDOUBLE
 	/// <remarks> operator iSubtraction(double, double) : double </remarks>
-	public class DoubleSubtractionNode : InstructionNode
+	public class DoubleSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					Scalar.FromDouble
+				return 
 					(
-						AArguments[0].Value.AsDouble() -
-						AArguments[1].Value.AsDouble()
-					)
-				);
+						(double)AArgument1() -
+						(double)AArgument2()
+					);
 		}
 	}
 	#endif
     
 	/// <remarks> operator iSubtraction(decimal, decimal) : decimal </remarks>
-	public class DecimalSubtractionNode : InstructionNode
+	public class DecimalSubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal -
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 - (decimal)AArgument2;
 		}
 	}
 
 	/// <remarks> operator iSubtraction(money, money) : money </remarks>    
-	public class MoneySubtractionNode : InstructionNode
+	public class MoneySubtractionNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			else
 			#endif
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess,
-						(Schema.ScalarType)FDataType,
-						AArguments[0].Value.AsDecimal -
-						AArguments[1].Value.AsDecimal
-					)
-				);
+				return (decimal)AArgument1 - (decimal)AArgument2;
 		}
 	}
 }

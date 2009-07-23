@@ -30,17 +30,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected Table FRightTable;
 		protected Row FLeftRow;
 		protected Row FRightRow;
-		protected DataVar FLeftRowVar;
-		protected DataVar FRightRowVar;
 
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Process).Value;
+			FLeftTable = (Table)Node.Nodes[0].Execute(Process);
 			FLeftRow = new Row(Process, new Schema.RowType(Node.LeftKey.Columns));
-			FLeftRowVar = new DataVar(FLeftRow.DataType, FLeftRow);
-			FRightTable = (Table)Node.Nodes[1].Execute(Process).Value;
+			FRightTable = (Table)Node.Nodes[1].Execute(Process);
 			FRightRow = new Row(Process, new Schema.RowType(Node.RightKey.Columns));
-			FRightRowVar = new DataVar(FRightRow.DataType, FRightRow);
         }
         
         protected override void InternalClose()
@@ -121,11 +117,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return CompareKeys(FLeftRow, FRightRow) == 0;
         }
 
-        protected int CompareKeyValues(DataValue AKeyValue1, DataValue AKeyValue2, PlanNode ACompareNode)
+        protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Context.Push(new DataVar(AKeyValue1.DataType, AKeyValue1));
-			Process.Context.Push(new DataVar(AKeyValue2.DataType, AKeyValue2));
-			int LResult = ACompareNode.Execute(Process).Value.AsInt32;
+			Process.Context.Push(AKeyValue1);
+			Process.Context.Push(AKeyValue2);
+			int LResult = (int)ACompareNode.Execute(Process);
 			Process.Context.Pop();
 			Process.Context.Pop();
 			return LResult;
@@ -580,7 +576,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[LOuterJoinNode.RowExistsColumnIndex].Name);
 				if (LColumnIndex >= 0)
-					ARow[LColumnIndex] = new Scalar(Process, Process.DataTypes.SystemBoolean, true);
+					ARow[LColumnIndex] = true;
 			}
         }
     }
@@ -1134,7 +1130,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
 				if (LColumnIndex >= 0)
-					ARow[LColumnIndex] = new Scalar(Process, Process.DataTypes.SystemBoolean, FRowFound);
+					ARow[LColumnIndex] = FRowFound;
 			}
 			
 			if (FRowFound)
@@ -1638,7 +1634,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				int LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RowExistsColumnIndex].Name);
 				if (LColumnIndex >= 0)
-					ARow[Node.DataType.Columns[Node.RowExistsColumnIndex].Name] = new Scalar(Process, Process.DataTypes.SystemBoolean, FRowFound);
+					ARow[Node.DataType.Columns[Node.RowExistsColumnIndex].Name] = FRowFound;
 			}
 			
 			if (FRowFound)

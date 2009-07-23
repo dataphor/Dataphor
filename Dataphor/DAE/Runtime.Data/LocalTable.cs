@@ -42,7 +42,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FNativeTable.Drop(Process);
 				FNativeTable = null;
 			}
-			base.Dispose(ADisposing);
 		}
 		
 		public new TableNode Node { get { return (TableNode)FNode; } }

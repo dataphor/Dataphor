@@ -34,32 +34,23 @@ namespace DocSamples
 	// similar to ObjectDescriptionNode
 	public class ObjectMetaDataNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			Schema.Object LObject = null;
 
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			else
 			#endif
 			{
-				if (AArguments[0].DataType.Is(AProcess.DataTypes.SystemString))
-					LObject = AProcess.Plan.Catalog.Objects[AArguments[0].Value.AsString];
-				else if (AArguments[0].DataType.Is(AProcess.DataTypes.SystemName))
-					LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString);
+				if (Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemString))
+					LObject = AProcess.Plan.Catalog.Objects[(string)AArguments[0]];
+				else if (Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemName))
+					LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0]);
 				else
-					LObject = AProcess.Plan.Catalog.Objects[AArguments[0].Value.AsInt32];
-				return new DataVar
-				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						MetaData.GetTag(LObject.MetaData, AArguments[1].Value.AsString, AArguments[2].Value.AsString)
-					)
-				);
+					LObject = AProcess.Plan.Catalog.Objects[(int)AArguments[0]];
+				return MetaData.GetTag(LObject.MetaData, (string)AArguments[1], (string)AArguments[2]);
 			}
 		}
 	}

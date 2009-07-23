@@ -28,41 +28,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public new QuotaNode Node { get { return (QuotaNode)FNode; } }
 		
-		protected DataVar FSourceObject;
 		protected Table FSourceTable;
 		protected int FSourceCount;
 		protected int FSourceCounter;
 		protected Row FSourceRow;
 		protected Row FCompareRow;
 		protected Row FLastCompareRow;
-		protected DataVar FCompareVar;
-		protected DataVar FLastCompareVar;
 		protected bool FHasLastCompareRow;
 		
         protected override void InternalOpen()
         {
-			FSourceObject = Node.Nodes[0].Execute(Process);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			try
 			{
-				FSourceTable = (Table)FSourceObject.Value;
 				FCompareRow = new Row(Process, new Schema.RowType(Node.Order.Columns));
-				FCompareVar = new DataVar(FCompareRow.DataType, FCompareRow);
 				FLastCompareRow = new Row(Process, FCompareRow.DataType);
-				FLastCompareVar = new DataVar(FLastCompareRow.DataType, FLastCompareRow);
 				FHasLastCompareRow = false;
-				DataVar LObject = Node.Nodes[1].Execute(Process);
+				object LObject = Node.Nodes[1].Execute(Process);
 				#if NILPROPOGATION
-				FSourceCount = ((LObject.Value == null) || LObject.Value.IsNil) ? 0 : LObject.Value.AsInt32;
+				FSourceCount = LObject == null ? 0 : (int)LObject;
 				#else
-				if (LObject.Value == null)
+				if (LObject == null)
 					throw new RuntimeException(RuntimeException.Codes.NilEncountered, Node);
-				FSourceCount = LObject.Value.AsInt32;
+				FSourceCount = (int)LObject;
 				#endif
 				FSourceCounter = 0;
 			}
 			catch
 			{
-				((Table)FSourceObject.Value).Dispose();
+				FSourceTable.Dispose();
+				FSourceTable = null;
 				throw;
 			}
         }
@@ -111,14 +106,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 					if (FHasLastCompareRow)
 					{		            
-						Process.Context.Push(FCompareVar);
+						Process.Context.Push(FCompareRow);
 						try
 						{
-							Process.Context.Push(FLastCompareVar);
+							Process.Context.Push(FLastCompareRow);
 							try
 							{
-								DataVar LResult = Node.EqualNode.Execute(Process);
-								if ((LResult.Value == null) || LResult.Value.IsNil || !LResult.Value.AsBoolean)
+								object LResult = Node.EqualNode.Execute(Process);
+								if ((LResult == null) || !(bool)LResult)
 								{
 									FSourceCounter++;
 									FCompareRow.CopyTo(FLastCompareRow);

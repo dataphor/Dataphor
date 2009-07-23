@@ -83,12 +83,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Scanned Difference Algorithm - Brute Force, for every row in the left, scan the right for a matching row
 			FDifferenceAlgorithm = typeof(ScannedDifferenceTable);
 			Schema.IRowType LLeftRowType = DataType.CreateRowType(Keywords.Left);
-			APlan.Symbols.Push(new DataVar(LLeftRowType));
+			APlan.Symbols.Push(new Symbol(LLeftRowType));
 			try
 			{
 				// Compile a row equality node
 				Schema.IRowType LRightRowType = DataType.CreateRowType(Keywords.Right);
-				APlan.Symbols.Push(new DataVar(LRightRowType));
+				APlan.Symbols.Push(new Symbol(LRightRowType));
 				try
 				{
 					FEqualNode = Compiler.CompileExpression(APlan, Compiler.BuildKeyEqualExpression(APlan, LLeftRowType.Columns, LRightRowType.Columns));
@@ -120,11 +120,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.InternalDetermineBinding(APlan);
 			#if UseScannedDifference
 			Schema.IRowType LLeftRowType = DataType.CreateRowType(Keywords.Left);
-			APlan.Symbols.Push(new DataVar(LLeftRowType));
+			APlan.Symbols.Push(new Symbol(LLeftRowType));
 			try
 			{
 				Schema.IRowType LRightRowType = DataType.CreateRowType(Keywords.Right);
-				APlan.Symbols.Push(new DataVar(LRightRowType));
+				APlan.Symbols.Push(new Symbol(LRightRowType));
 				try
 				{
 					FEqualNode.DetermineBinding(APlan);
@@ -200,13 +200,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected Type FDifferenceAlgorithm;
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			DifferenceTable LTable = (DifferenceTable)Activator.CreateInstance(FDifferenceAlgorithm, new object[]{this, AProcess});
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{

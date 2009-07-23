@@ -95,13 +95,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.PushWindow(0);
 			try
 			{
-				APlan.Symbols.Push(new DataVar(Keywords.Result, FDataType));
+				APlan.Symbols.Push(new Symbol(Keywords.Result, FDataType));
 				try
 				{
 					Nodes[1].DetermineBinding(APlan);
 
 					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-						APlan.Symbols.Push(new DataVar(FValueNames[LIndex], SourceNode.DataType.Columns[FAggregateColumnIndexes[LIndex]].DataType));
+						APlan.Symbols.Push(new Symbol(FValueNames[LIndex], SourceNode.DataType.Columns[FAggregateColumnIndexes[LIndex]].DataType));
 					try
 					{
 						// This AllowExtraWindowAccess call remains in the runtime because it allows the
@@ -155,7 +155,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.Context.PushWindow(0);
 			try
@@ -163,8 +163,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Table LTable = null;
 				try
 				{
-					DataVar LResult = new DataVar(Keywords.Result, FDataType, null);
-					AProcess.Context.Push(LResult);
+					AProcess.Context.Push(null); // result
+					int LStackDepth = AProcess.Context.Count;
+
 					// Initialization
 					try
 					{
@@ -176,12 +177,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Row LRow = null;
 					if (FAggregateColumnIndexes.Length > 0)
 						LRow = new Row(AProcess, SourceNode.DataType.RowType);
-					DataVar[] LValues = new DataVar[FAggregateColumnIndexes.Length];
+					//object[] LValues = new object[FAggregateColumnIndexes.Length];
 					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
 					{
 						Schema.IDataType LType = SourceNode.TableVar.Columns[FAggregateColumnIndexes[LIndex]].DataType;
-						LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
-						AProcess.Context.Push(LValues[LIndex]);
+						//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
+						AProcess.Context.Push(null);
 					}
 					try
 					{
@@ -196,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#endif
 								if (LTable == null)
 								{
-									LTable = (Table)Nodes[0].Execute(AProcess).Value;
+									LTable = (Table)Nodes[0].Execute(AProcess);
 									LTable.Open();
 								}
 
@@ -215,9 +216,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							
 							for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
 								if (LRow.HasValue(FAggregateColumnIndexes[LIndex]))
-									LValues[LIndex].Value = LRow[FAggregateColumnIndexes[LIndex]];
+									AProcess.Context.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
 								else
-									LValues[LIndex].Value = null;
+									AProcess.Context.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
 							
 							AProcess.Context.PushFrame();
 							try
@@ -247,7 +248,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					catch (ExitError){}
 					
-					return LResult;
+					return AProcess.Context.Peek(AProcess.Context.Count - LStackDepth);
 				}
 				finally
 				{
@@ -288,25 +289,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class CountInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0);
+			AProcess.Context[0] = 0;
 			return null;
 		}
 	}
 
     public class IntegerInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
     }
     
     public class EmptyFinalizationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			return null;
 		}
@@ -314,38 +315,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
     public class CountAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[0].Value.AsInt32 + 1));
+			AProcess.Context[0] = checked((int)AProcess.Context[0] + 1);
 			return null;
 		}
     }
     
     public class ObjectCountAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[1].Value.AsInt32 + 1));
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
 			return null;
 		}
     }
     
     public class IntegerSumAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value =
-					new Scalar
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] =
+					checked
 					(
-						AProcess, 
-						AProcess.DataTypes.SystemInteger,
-						checked
-						(
-							AProcess.Context[0].Value.AsInt32 +
-							(AProcess.Context[1].Value.IsNil ? 0 : AProcess.Context[1].Value.AsInt32)
-						)
+						(int)AProcess.Context[0] +
+						(AProcess.Context[1] == null ? 0 : (int)AProcess.Context[1])
 					);
 			return null;
 		}
@@ -353,34 +349,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if 
 			(
-				(AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil && 
+				AProcess.Context[0] != null && 
 				(
-					AProcess.Context[1].Value.IsNil || 
-					(AProcess.Context[0].Value.AsInt32 < AProcess.Context[1].Value.AsInt32)
+					AProcess.Context[1] == null || 
+					((int)AProcess.Context[0] < (int)AProcess.Context[1])
 				)
 			)
-				AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+				AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
     
     public class IntegerMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if 
 			(
-				(AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil && 
+				AProcess.Context[0] != null && 
 				(
-					AProcess.Context[1].Value.IsNil || 
-					(AProcess.Context[0].Value.AsInt32 > AProcess.Context[1].Value.AsInt32)
+					AProcess.Context[1] == null || 
+					((int)AProcess.Context[0] > (int)AProcess.Context[1])
 				)
 			)
-				AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+				AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
@@ -389,25 +385,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new DataVar("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar("LCounter", AProcess.Plan.Catalog.DataTypes.SystemInteger, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0)));
-			AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0);
+			AProcess.Context.Push(0);
+			AProcess.Context[1] = 0;
 			return null;
 		}
     }
     
     public class IntegerAvgAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
+			if (AProcess.Context[0] != null)
 			{
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[1].Value.AsInt32 + 1));
-				AProcess.Context[2].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[2].Value.AsInt32 + AProcess.Context[0].Value.AsInt32));
+				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
+				AProcess.Context[2] = checked((int)AProcess.Context[2] + (int)AProcess.Context[0]);
 			}
 			return null;
 		}
@@ -415,12 +411,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerAvgFinalizationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0].Value.AsInt32 == 0)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, null);
+			if ((int)AProcess.Context[0] == 0)
+				AProcess.Context[1] = null;
 			else
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, (decimal)AProcess.Context[1].Value.AsInt32 / (decimal)AProcess.Context[0].Value.AsInt32);
+				AProcess.Context[1] = (decimal)(int)AProcess.Context[1] / (decimal)(int)AProcess.Context[0];
 			return null;
 		}
     }
@@ -428,7 +424,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	#if USEDOUBLE    
     public class DoubleInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.Context[0].Value = Scalar.FromDouble((double)0.0);
 			return null;
@@ -437,7 +433,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DoubleMinInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.Context[0].Value = Scalar.FromDouble(double.MaxValue);
 			return null;
@@ -446,7 +442,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DoubleMaxInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.Context[0].Value = Scalar.FromDouble(double.MinValue);
 			return null;
@@ -455,29 +451,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DoubleSumAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[1].Value = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() + AProcess.Context[0].Value.AsDouble());
+			AProcess.Context[1] = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() + AProcess.Context[0].Value.AsDouble());
 			return null;
 		}
     }
     
     public class DoubleMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.Context[0].Value.AsDouble() < AProcess.Context[1].Value.AsDouble())
-				AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+				AProcess.Context[1] = AProcess.Context[0].Value.Copy();
 			return null;
 		}
     }
     
     public class DoubleMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (AProcess.Context[0].Value.AsDouble() > AProcess.Context[1].Value.AsDouble())
-				AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+				AProcess.Context[1] = AProcess.Context[0].Value.Copy();
 			return null;
 		}
     }
@@ -486,22 +482,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new DataVar("LCounter", Schema.DataType.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", Schema.DataType.SystemInteger));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar("LCounter", Schema.DataType.SystemInteger, Scalar.FromInt32(AProcess, 0)));
-			AProcess.Context[1].Value = Scalar.FromDouble((double)0.0);
+			AProcess.Context.Push(0);
+			AProcess.Context[1] = Scalar.FromDouble((double)0.0);
 			return null;
 		}
     }
     
     public class DoubleAvgAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[1].Value = Scalar.FromInt32(AProcess, AProcess.Context[1].Value.AsInt32 + 1);
+			AProcess.Context[1] = Scalar.FromInt32(AProcess, (int)AProcess.Context[1] + 1);
 			AProcess.Context[2].Value = Scalar.FromDouble(AProcess.Context[2].Value.AsDouble() + AProcess.Context[0].Value.AsDouble());
 			return null;
 		}
@@ -509,9 +505,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DoubleAvgFinalizationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[1].Value = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() / AProcess.Context[0].Value.AsInt32);
+			AProcess.Context[1] = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() / (int)AProcess.Context[0]);
 			return null;
 		}
     }
@@ -519,49 +515,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
     }
     
     public class DecimalSumAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = 
-					new Scalar
-					(
-						AProcess, 
-						AProcess.DataTypes.SystemDecimal, 
-						AProcess.Context[1].Value.IsNil ? 
-							AProcess.Context[0].Value.AsDecimal : 
-							(AProcess.Context[1].Value.AsDecimal + AProcess.Context[0].Value.AsDecimal)
-					);
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = 
+					AProcess.Context[1] == null ? 
+						(decimal)AProcess.Context[0] : 
+						((decimal)AProcess.Context[1] + (decimal)AProcess.Context[0]);
 			return null;
 		}
     }
     
     public class DecimalMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDecimal < AProcess.Context[1].Value.AsDecimal))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] < (decimal)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
     
     public class DecimalMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDecimal > AProcess.Context[1].Value.AsDecimal))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] > (decimal)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
@@ -570,25 +561,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new DataVar("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar("LCounter", AProcess.Plan.Catalog.DataTypes.SystemInteger, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0)));
-			AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, 0.0m);
+			AProcess.Context.Push(0);
+			AProcess.Context[1] = 0.0m;
 			return null;
 		}
     }
     
     public class DecimalAvgAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
+			if (AProcess.Context[0] != null)
 			{
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[1].Value.AsInt32 + 1));
-				AProcess.Context[2].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, AProcess.Context[2].Value.AsDecimal + AProcess.Context[0].Value.AsDecimal);
+				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
+				AProcess.Context[2] = (decimal)AProcess.Context[2] + (decimal)AProcess.Context[0];
 			}
 			return null;
 		}
@@ -596,61 +587,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalAvgFinalizationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0].Value.AsInt32 == 0)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, null);
+			if ((int)AProcess.Context[0] == 0)
+				AProcess.Context[1] = null;
 			else
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, AProcess.Context[1].Value.AsDecimal / AProcess.Context[0].Value.AsInt32);
+				AProcess.Context[1] = (decimal)AProcess.Context[1] / (int)AProcess.Context[0];
 			return null;
 		}
     }
     
 	public class MoneyInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemMoney, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
 	}
     
 	public class MoneySumAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = 
-					new Scalar
-					(
-						AProcess, 
-						AProcess.DataTypes.SystemMoney, 
-						AProcess.Context[1].Value.IsNil ? 
-							AProcess.Context[0].Value.AsDecimal :
-							(AProcess.Context[1].Value.AsDecimal + AProcess.Context[0].Value.AsDecimal)
-					);
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = 
+					AProcess.Context[1] == null ? 
+						(decimal)AProcess.Context[0] :
+						((decimal)AProcess.Context[1] + (decimal)AProcess.Context[0]);
 			return null;
 		}
 	}
 	
 	public class MoneyMinAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDecimal < AProcess.Context[1].Value.AsDecimal))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] < (decimal)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
     
 	public class MoneyMaxAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (AProcess.Context[0].Value.AsDecimal > AProcess.Context[1].Value.AsDecimal))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] > (decimal)AProcess.Context[1]))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
 	}
@@ -659,25 +645,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new DataVar("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(new DataVar("LCounter", AProcess.Plan.Catalog.DataTypes.SystemInteger, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, 0)));
-			AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, 0.0m);
+			AProcess.Context.Push(0);
+			AProcess.Context[1] = 0.0m;
 			return null;
 		}
 	}
     
 	public class MoneyAvgAggregationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
+			if (AProcess.Context[0] != null)
 			{
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemInteger, checked(AProcess.Context[1].Value.AsInt32 + 1));
-				AProcess.Context[2].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, AProcess.Context[2].Value.AsDecimal + AProcess.Context[0].Value.AsDecimal);
+				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
+				AProcess.Context[2] = (decimal)AProcess.Context[2] + (decimal)AProcess.Context[0];
 			}
 			return null;
 		}
@@ -685,65 +671,65 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class MoneyAvgFinalizationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0].Value.AsInt32 == 0)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, null);
+			if ((int)AProcess.Context[0] == 0)
+				AProcess.Context[1] = null;
 			else
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemDecimal, AProcess.Context[1].Value.AsDecimal / AProcess.Context[0].Value.AsInt32);
+				AProcess.Context[1] = (decimal)AProcess.Context[1] / (int)AProcess.Context[0];
 			return null;
 		}
 	}
 	
 	public class StringInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemString, null);
+			AProcess.Context[0] = null;
 			return null;
 		}
     }
     
     public class StringMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (String.Compare(AProcess.Context[0].Value.AsString, AProcess.Context[1].Value.AsString, false) < 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], false) < 0))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
     
     public class StringMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (String.Compare(AProcess.Context[0].Value.AsString, AProcess.Context[1].Value.AsString, false) > 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], false) > 0))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
 
     public class VersionNumberMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if ((AProcess.Context[1].Value == null) || AProcess.Context[1].Value.IsNil || (VersionNumber.Compare((VersionNumber)AProcess.Context[0].Value.AsNative, (VersionNumber)AProcess.Context[1].Value.AsNative) < 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Context[0], (VersionNumber)AProcess.Context[1]) < 0))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
     
     public class VersionNumberMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if ((AProcess.Context[1].Value == null) || AProcess.Context[1].Value.IsNil || (VersionNumber.Compare((VersionNumber)AProcess.Context[0].Value.AsNative, (VersionNumber)AProcess.Context[1].Value.AsNative) > 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if ((AProcess.Context[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Context[0], (VersionNumber)AProcess.Context[1]) > 0))
+					AProcess.Context[1] = AProcess.Context[0];
 			return null;
 		}
     }
@@ -751,7 +737,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	#if USEISTRING    
     public class IStringInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemIString, null);
 			return null;
@@ -760,22 +746,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IStringMinAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (String.Compare(AProcess.Context[0].Value.AsString, AProcess.Context[1].Value.AsString, true) < 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], true) < 0))
+					AProcess.Context[1] = AProcess.Context[0].Value.Copy();
 			return null;
 		}
     }
     
     public class IStringMaxAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				if (AProcess.Context[1].Value.IsNil || (String.Compare(AProcess.Context[0].Value.AsString, AProcess.Context[2].Value.AsString, true) > 0))
-					AProcess.Context[1].Value = AProcess.Context[0].Value.Copy();
+			if (AProcess.Context[0] != null)
+				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], AProcess.Context[2].Value.AsString, true) > 0))
+					AProcess.Context[1] = AProcess.Context[0].Value.Copy();
 			return null;
 		}
     }
@@ -783,38 +769,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class BooleanAllInitializationNode : PlanNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, true);
+			AProcess.Context[0] = true;
 			return null;
 		}
 	}
 	    
     public class BooleanAllAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.Context[1].Value.AsBoolean && AProcess.Context[0].Value.AsBoolean);
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = (bool)AProcess.Context[1] && (bool)AProcess.Context[0];
 			return null;
 		}
     }
     
     public class BooleanAnyInitializationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, false);
+			AProcess.Context[0] = false;
 			return null;
 		}
     }
     
     public class BooleanAnyAggregationNode : PlanNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((AProcess.Context[0].Value != null) && !AProcess.Context[0].Value.IsNil)
-				AProcess.Context[1].Value = new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, AProcess.Context[1].Value.AsBoolean || AProcess.Context[0].Value.AsBoolean);
+			if (AProcess.Context[0] != null)
+				AProcess.Context[1] = (bool)AProcess.Context[1] || (bool)AProcess.Context[0];
 			return null;
 		}
     }

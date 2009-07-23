@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected bool IsSargable(Plan APlan, PlanNode APlanNode)
 		{
-			InstructionNode LNode = APlanNode as InstructionNode;
+			InstructionNodeBase LNode = APlanNode as InstructionNodeBase;
 			if ((LNode != null) && (LNode.Operator != null))
 			{
 				string LColumnName = String.Empty;
@@ -204,7 +204,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							if (LNode.Nodes[1].IsContextLiteral(0))
 							{
-								FConditions[TableVar.Columns[LColumnName]].Add(new ColumnCondition(LNode.Nodes[0], Schema.Object.Unqualify(LNode.Operator.OperatorName), LNode.Nodes[1]));
+								FConditions[TableVar.Columns[LColumnName]].Add
+								(
+									new ColumnCondition
+									(
+										LNode.Nodes[0], 
+										Schema.Object.Unqualify(LNode.Operator.OperatorName), 
+										LNode.Nodes[1]
+									)
+								);
 								return true;
 							}
 							return false;
@@ -226,7 +234,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							return false;
 						}
-						else if ((LNode.Nodes[0] is InstructionNode) && (((InstructionNode)LNode.Nodes[0]).Operator != null) && (String.Compare(Schema.Object.Unqualify(((InstructionNode)LNode.Nodes[0]).Operator.OperatorName), Instructions.Compare) == 0) && (LNode.Nodes[1] is ValueNode) && LNode.Nodes[1].DataType.Is(APlan.Catalog.DataTypes.SystemInteger))
+						else if 
+						(
+							(LNode.Nodes[0] is InstructionNodeBase) 
+							&& 
+							(
+								((InstructionNodeBase)LNode.Nodes[0]).Operator != null) 
+									&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[0]).Operator.OperatorName), Instructions.Compare) == 0) 
+									&& (LNode.Nodes[1] is ValueNode) 
+									&& LNode.Nodes[1].DataType.Is(APlan.Catalog.DataTypes.SystemInteger)
+							)
 						{
 							if (IsColumnReferencing(LNode.Nodes[0].Nodes[0], ref LColumnName))
 							{
@@ -259,7 +276,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							return false;
 						}
-						else if ((LNode.Nodes[1] is InstructionNode) && (((InstructionNode)LNode.Nodes[1]).Operator != null) && (String.Compare(Schema.Object.Unqualify(((InstructionNode)LNode.Nodes[1]).Operator.OperatorName), Instructions.Compare) == 0) && (LNode.Nodes[0] is ValueNode) && LNode.Nodes[0].DataType.Is(APlan.Catalog.DataTypes.SystemInteger))
+						else if 
+						(
+							(LNode.Nodes[1] is InstructionNodeBase) 
+								&& 
+								(
+									((InstructionNodeBase)LNode.Nodes[1]).Operator != null) 
+										&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[1]).Operator.OperatorName), Instructions.Compare) == 0) 
+										&& (LNode.Nodes[0] is ValueNode) 
+										&& LNode.Nodes[0].DataType.Is(APlan.Catalog.DataTypes.SystemInteger)
+								)
 						{
 							if (IsColumnReferencing(LNode.Nodes[1].Nodes[0], ref LColumnName))
 							{
@@ -594,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.EnterRowContext();
 			try
 			{
-				APlan.Symbols.Push(new DataVar(DataType.RowType));
+				APlan.Symbols.Push(new Symbol(DataType.RowType));
 				try
 				{
 					Nodes[1].DetermineBinding(APlan);
@@ -808,13 +834,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			RestrictTable LTable = (RestrictTable)Activator.CreateInstance(FRestrictionAlgorithm, new object[]{this, AProcess});
 			try
 			{
 				LTable.Open();
-				return new DataVar(String.Empty, FDataType, LTable);
+				return LTable;
 			}
 			catch
 			{
@@ -870,9 +896,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				PushRow(AProcess, ANewRow);
 				try
 				{
-					DataVar LObject = Nodes[1].Execute(AProcess);
+					object LObject = Nodes[1].Execute(AProcess);
 					// BTR 05/03/2005 -> Because the restriction considers nil to be false, the validation should consider it false as well.
-					if ((LObject.Value == null) || LObject.Value.IsNil || !LObject.Value.AsBoolean)
+					if ((LObject == null) || !(bool)LObject)
 						throw new RuntimeException(RuntimeException.Codes.NewRowViolatesRestrictPredicate, ErrorSeverity.User);
 				}
 				finally

@@ -175,8 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		protected override void PopulateTable()
 		{
-			DataVar LObject = Node.Nodes[0].Execute(Process);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)Node.Nodes[0].Execute(Process))
 			{
 				Row LRow = new Row(Process, DataType.RowType);
 				try
@@ -207,8 +206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		protected override void PopulateTable()
 		{
-			DataVar LObject = Node.Nodes[0].Execute(Process);
-			using (Table LTable = (Table)LObject.Value)
+			using (Table LTable = (Table)Node.Nodes[0].Execute(Process))
 			{
 				Row LRow = new Row(Process, DataType.RowType);
 				try
@@ -219,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LTable.Select(LRow);
 						FRowCount++;
 						if (Node.SequenceColumnIndex >= 0)
-							LRow[Node.SequenceColumnIndex] = new Scalar(Process, Process.DataTypes.SystemInteger, FRowCount);
+							LRow[Node.SequenceColumnIndex] = FRowCount;
 						FTable.Insert(Process, LRow); // no validation is required because FTable will never be changed
 						LRow.ClearValues();
 						Process.CheckAborted();	// Yield
@@ -236,12 +234,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     public class BrowseTableItem : Disposable
     {
         // constructor
-        protected internal BrowseTableItem(BrowseTable ABrowseTable, DataVar AObject, DataVar AContextVar, Row AOrigin, bool AForward, bool AInclusive)
+        protected internal BrowseTableItem(BrowseTable ABrowseTable, Table ATable, object AContextVar, Row AOrigin, bool AForward, bool AInclusive)
         {
 			FBrowseTable = ABrowseTable;
-			FObject = AObject;
+            FTable = ATable;
 			FContextVar = AContextVar;
-            FTable = (Table)AObject.Value;
             FRow = new Row(FBrowseTable.Process, FTable.DataType.RowType);
             FOrigin = AOrigin;
             FForward = AForward;
@@ -285,13 +282,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         }
 
         // Table
-        protected DataVar FObject;
         protected Table FTable;
         public Table Table { get { return FTable; } }
         
         // ContextVar
-        protected DataVar FContextVar;
-        public DataVar ContextVar { get { return FContextVar; } }
+        protected object FContextVar;
+        public object ContextVar { get { return FContextVar; } }
 
         // Origin
         protected Row FOrigin;
@@ -546,12 +542,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected BrowseTableItem CreateTable(Row AOrigin, bool AForward, bool AInclusive)
         {
 			// Prepare the context variable to contain the origin value (0 if this is an unanchored set)
-			DataVar LContextVar;
+			object LContextVar;
 			Row LOrigin;
 			if (AOrigin == null)
 			{
 				LOrigin = null;
-				LContextVar = new DataVar(String.Empty, Process.Plan.Catalog.DataTypes.SystemInteger, new Scalar(Process, Process.DataTypes.SystemInteger, 0));
+				LContextVar = 0;
 			}
 			else
 			{
@@ -560,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else
 					LOrigin = new Row(Process, new Schema.RowType(AOrigin.DataType.Columns));
 				AOrigin.CopyTo(LOrigin);
-				LContextVar = new DataVar(String.Empty, LOrigin.DataType, LOrigin);
+				LContextVar = LOrigin;
 			}
 				
 			int LOriginIndex = ((LOrigin == null) ? -1 : LOrigin.DataType.Columns.Count - 1);
@@ -608,7 +604,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					new BrowseTableItem
 					(
 						this, 
-						LBrowseVariantNode.Execute(Process),
+						(Table)LBrowseVariantNode.Execute(Process),
 						LContextVar,
 						LOrigin, 
 						AForward, 
@@ -913,14 +909,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 				if (AIndexKey.HasValue(LIndex) && ACompareKey.HasValue(LIndex))
 				{
-					Process.Context.Push(new DataVar(AIndexKey.DataType.Columns[LIndex].DataType, AIndexKey[LIndex]));
+					Process.Context.Push(AIndexKey[LIndex]);
 					try
 					{
-						Process.Context.Push(new DataVar(AIndexKey.DataType.Columns[LIndex].DataType, ACompareKey[LIndex]));
+						Process.Context.Push(ACompareKey[LIndex]);
 						try
 						{
-							DataVar LResultVar = Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Process);
-							LResult = LResultVar.Value.AsInt32;
+							LResult = (int)Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Process);
 
 							// Swap polarity for descending columns
 							if (!Node.Order.Columns[LIndex].Ascending)

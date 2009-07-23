@@ -28,13 +28,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
 		protected Table FSourceTable;
 		protected Row FSourceRow;
-		protected DataVar FSourceRowVar;
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process).Value;
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
-			FSourceRowVar = new DataVar(FSourceRow.DataType, FSourceRow);
         }
         
         protected override void InternalClose()
@@ -50,8 +48,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FSourceRow.Dispose();
                 FSourceRow = null;
             }
-            
-            FSourceRowVar = null;
         }
         
         protected override void InternalReset()
@@ -64,12 +60,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FSourceTable.Select(FSourceRow);
 			FSourceRow.CopyTo(ARow);
 			
-			Process.Context.Push(FSourceRowVar);
+			Process.Context.Push(FSourceRow);
 			try
 			{
 				int LNodeIndex;
 				int LColumnIndex;
-				DataVar LAggregateValue;
 				for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
 				{
 					LColumnIndex = ARow.DataType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
@@ -78,8 +73,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LNodeIndex = (LIndex - Node.AggregateColumnOffset) + 1;
 						if (LNodeIndex >= 1)
 						{
-							LAggregateValue = Node.Nodes[LNodeIndex].Execute(Process);
-							ARow[LColumnIndex] = LAggregateValue.Value;
+							ARow[LColumnIndex] = Node.Nodes[LNodeIndex].Execute(Process);
 						}
 						else
 						{

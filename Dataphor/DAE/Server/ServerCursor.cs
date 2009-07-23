@@ -4,10 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
-#define LOADFROMLIBRARIES
-
 using System;
 using System.Text;
 using System.Collections;
@@ -132,7 +128,6 @@ namespace Alphora.Dataphor.DAE.Server
         
 		protected PlanNode SourceNode { get { return FPlan.Code.Nodes[0]; } }
 		
-		protected DataVar FSourceObject;
 		protected DataParams FParams;
 		protected Table FSourceTable;
 		protected Schema.IRowType FSourceRowType;
@@ -151,8 +146,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 				CursorNode LCursorNode = (CursorNode)FPlan.Code;
 				//LCursorNode.EnsureApplicationTransactionJoined(FPlan.ServerProcess);
-				FSourceObject = LCursorNode.SourceNode.Execute(FPlan.ServerProcess);
-				FSourceTable = (Table)FSourceObject.Value;
+				FSourceTable = (Table)LCursorNode.SourceNode.Execute(FPlan.ServerProcess);
 				FSourceTable.Open();
 				FSourceRowType = FSourceTable.DataType.RowType;
 				
@@ -185,7 +179,6 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							FSourceTable.Dispose();
 							FSourceTable = null;
-							FSourceObject = null;
 							FSourceRowType = null;
 						}
 					}

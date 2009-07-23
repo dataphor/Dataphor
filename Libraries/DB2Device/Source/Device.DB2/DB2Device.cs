@@ -856,14 +856,14 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2Long(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, Convert.ToInt64(AValue));
+			return Convert.ToInt64(AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return (decimal)AValue.AsInt64;
+			return (decimal)(long)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1002,14 +1002,14 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2TimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{										  
-			return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
+			return new TimeSpan(Convert.ToInt64(AValue));
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsTimeSpan.Ticks;
+			return (TimeSpan)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1087,22 +1087,22 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			get { return FDateFormat;}
 		}
 		
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1115,20 +1115,14 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "date";
 		}
 		
-		public override Scalar ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
 		{
-			return 
-				new Scalar
-				(
-					AProcess,
-					ScalarType, 
-					DateTime.ParseExact((string)AValue, DateFormat, DateTimeFormatInfo.InvariantInfo)
-				);
+			return DateTime.ParseExact((string)AValue, DateFormat, DateTimeFormatInfo.InvariantInfo);
 		}
 		
-		public override object ParameterFromScalar(Scalar AValue)
+		public override object ParameterFromScalar(object AValue)
 		{						
-			return AValue.AsDateTime.ToString(DateFormat);
+			return ((DateTime)AValue).ToString(DateFormat);
 		}
 
 		public override SQLType GetSQLParameterType(D4.MetaData AMetaData)
@@ -1159,22 +1153,22 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1205,22 +1199,22 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FDateTimeFormat = value; }
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1233,25 +1227,20 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "timestamp";
 		}
 		
-		public override Scalar ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
 		{
 			return 
-				new Scalar
+				DateTime.ParseExact
 				(
-					AProcess,
-					ScalarType, 
-					DateTime.ParseExact
-					(
-						(string)AValue, 
-						DateTimeFormat, 
-						DateTimeFormatInfo.InvariantInfo
-					)
+					(string)AValue, 
+					DateTimeFormat, 
+					DateTimeFormatInfo.InvariantInfo
 				);
 		}
 		
-		public override object ParameterFromScalar(Scalar AValue)
+		public override object ParameterFromScalar(object AValue)
 		{
-			return AValue.AsDateTime.ToString(DateTimeFormat);
+			return ((DateTime)AValue).ToString(DateTimeFormat);
 		}
 
 		public override SQLType GetSQLParameterType(D4.MetaData AMetaData)
@@ -1282,29 +1271,23 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			DateTime LDateTime = new DateTime(((TimeSpan)AValue).Ticks);
-			return 
-				new Scalar
-				(
-					AProcess, 
-					ScalarType, 
-					new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond)
-				);
+			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return new TimeSpan(AValue.AsDateTime.Ticks);
+			return new TimeSpan(((DateTime)AValue).Ticks);
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1335,29 +1318,23 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			set { FTimeFormat = value; }
 		}
 
-		public override string ToLiteral(Scalar AValue)
+		public override string ToLiteral(object AValue)
 		{
-			if ((AValue == null) || AValue.IsNil)
+			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			DateTime LDateTime = (DateTime)AValue;
-			return 
-				new Scalar
-				(
-					AProcess, 
-					ScalarType, 
-					new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond)
-				);
+			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsDateTime;
+			return (DateTime)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -1370,14 +1347,14 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "time";
 		}
 		
-		public override Scalar ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, DateTime.ParseExact((string)AValue, TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return DateTime.ParseExact((string)AValue, TimeFormat, DateTimeFormatInfo.InvariantInfo);
 		}
 		
-		public override object ParameterFromScalar(Scalar AValue)
+		public override object ParameterFromScalar(object AValue)
 		{
-			return AValue.AsDateTime.ToString(TimeFormat);
+			return ((DateTime)AValue).ToString(TimeFormat);
 		}
 
 		public override SQLType GetSQLParameterType(D4.MetaData AMetaData)

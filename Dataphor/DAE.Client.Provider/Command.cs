@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			foreach (DataParam LDAERuntimeParam in ADAERuntimeParams)
 			{
 				if ((LDAERuntimeParam.Modifier == Language.Modifier.Out) || (LDAERuntimeParam.Modifier == Language.Modifier.Var))
-					((DAEParameter)this[LDAERuntimeParam.Name]).Value = DAEParameter.NativeValue(LDAERuntimeParam.Value, (DAEConnection)FCommand.Connection);
+					((DAEParameter)this[LDAERuntimeParam.Name]).Value = LDAERuntimeParam.Value;
 			}
 		}
 
@@ -1006,12 +1006,15 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			return AValue.AsNative;
 		}
 
+/*
+ * Params use native values now, this is unnecessary
 		public static Alphora.Dataphor.DAE.Runtime.Data.DataValue DataValue(Schema.IDataType AType, object AValue, DAECommand ACommand)
 		{
 			if (AValue == null)
 				return null;
 			return Alphora.Dataphor.DAE.Runtime.Data.DataValue.FromNative(((DAEConnection)ACommand.Connection).ServerProcess, AType, AValue);
 		}
+*/
 
 		internal string Prepare(string ACommandText, DAECommand ACommand)
 		{
@@ -1023,14 +1026,14 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 					if ((Direction == ParameterDirection.Output) || (Direction == ParameterDirection.ReturnValue))
 						LRuntimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), Modifier(Direction));
 					else
-						LRuntimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), Modifier(Direction), DataValue(DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), FValue, ACommand));
+						LRuntimeParam = new DataParam(ParameterName, DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), Modifier(Direction), FValue);
 					ACommand.DAERuntimeParams.Add(LRuntimeParam);
 				}
 				else
 				{
 					LRuntimeParam = ACommand.DAERuntimeParams[ParameterName];
 					if ((Direction != ParameterDirection.Output) && (Direction != ParameterDirection.ReturnValue))
-						LRuntimeParam.Value = DataValue(DataTypeFromDAEDbType(FType, (DAEConnection)ACommand.Connection), FValue, ACommand);
+						LRuntimeParam.Value = FValue;
 				}
 			}
 			return ACommandText;

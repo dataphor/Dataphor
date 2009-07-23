@@ -34,8 +34,8 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
         protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
         {
-            string LName = ARow["Main.Name"].AsString;
-            string LType = ARow["Type_ID"].AsString;
+            string LName = (string)ARow["Main.Name"];
+            string LType = (string)ARow["Type_ID"];
             switch (LType)
             {
                 case "d4" : return new D4DocumentNode(this, LName, LType);

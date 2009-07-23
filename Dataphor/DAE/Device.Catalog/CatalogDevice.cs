@@ -384,7 +384,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 
 		protected void TranslateExpression(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, PlanNode APlanNode)
 		{
-			InstructionNode LInstructionNode = APlanNode as InstructionNode;
+			InstructionNodeBase LInstructionNode = APlanNode as InstructionNodeBase;
 			if (LInstructionNode != null)
 			{
 				if ((LInstructionNode.DataType != null) && (LInstructionNode.Operator != null))
@@ -444,7 +444,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		protected void TranslateRestrictNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, RestrictNode ARestrictNode)
 		{
-			if ((ARestrictNode.SourceNode is BaseTableVarNode) && (ARestrictNode.Nodes[1] is InstructionNode))
+			if ((ARestrictNode.SourceNode is BaseTableVarNode) && (ARestrictNode.Nodes[1] is InstructionNodeBase))
 			{
 				TranslateBaseTableVarNode(ADevicePlan, ADevicePlanNode, (BaseTableVarNode)ARestrictNode.SourceNode);
 				if (ADevicePlan.IsSupported)
@@ -527,22 +527,22 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		private void PopulateServerSettings(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
 			Server.Server LServer = AProcess.ServerSession.Server;
-			ARow[0].AsString = LServer.Name;
-			ARow[1].AsString = GetType().Assembly.GetName().Version.ToString();
-			ARow[2].AsBoolean = LServer.TracingEnabled;
-			ARow[3].AsBoolean = LServer.LogErrors;
-			ARow[4].AsInt64 = LServer.Catalog.TimeStamp;
-			ARow[5].AsInt64 = LServer.CacheTimeStamp;
-			ARow[6].AsInt64 = LServer.PlanCacheTimeStamp;
-			ARow[7].AsInt64 = LServer.DerivationTimeStamp;
-			ARow[8].AsString = LServer.InstanceDirectory;
-			ARow[9].AsString = LServer.LibraryDirectory;
-			ARow[10].AsBoolean = LServer.IsRepository;
-			ARow[11].AsBoolean = LServer.IsEmbedded;
-			ARow[12].AsInt32 = LServer.MaxConcurrentProcesses;
-			ARow[13].AsTimeSpan = LServer.ProcessWaitTimeout;
-			ARow[14].AsTimeSpan = LServer.ProcessTerminationTimeout;
-			ARow[15].AsInt32 = LServer.PlanCache.Size;
+			ARow[0] = LServer.Name;
+			ARow[1] = GetType().Assembly.GetName().Version.ToString();
+			ARow[2] = LServer.TracingEnabled;
+			ARow[3] = LServer.LogErrors;
+			ARow[4] = LServer.Catalog.TimeStamp;
+			ARow[5] = LServer.CacheTimeStamp;
+			ARow[6] = LServer.PlanCacheTimeStamp;
+			ARow[7] = LServer.DerivationTimeStamp;
+			ARow[8] = LServer.InstanceDirectory;
+			ARow[9] = LServer.LibraryDirectory;
+			ARow[10] = LServer.IsRepository;
+			ARow[11] = LServer.IsEmbedded;
+			ARow[12] = LServer.MaxConcurrentProcesses;
+			ARow[13] = LServer.ProcessWaitTimeout;
+			ARow[14] = LServer.ProcessTerminationTimeout;
+			ARow[15] = LServer.PlanCache.Size;
 			ANativeTable.Insert(AProcess, ARow);
 		}
 		
@@ -551,8 +551,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 /*
 			foreach (ServerConnection LConnection in AProcess.ServerSession.Server.Connections)
 			{
-				ARow[0].AsString = LConnection.ConnectionName;
-				ARow[1].AsString = LConnection.HostName;
+				ARow[0] = LConnection.ConnectionName;
+				ARow[1] = LConnection.HostName;
 				ANativeTable.Insert(AProcess, ARow);
 			}
 */
@@ -562,21 +562,21 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		{
 			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
 			{
-				ARow[0].AsInt32 = LSession.SessionID;
-				ARow[1].AsString = LSession.User.ID;
-				ARow[2].AsString = LSession.SessionInfo.HostName;
-				ARow[3].AsString = LSession.SessionInfo.CatalogCacheName;
-				ARow[4].AsString = LSession.CurrentLibrary.Name;
-				ARow[5].AsString = LSession.SessionInfo.DefaultIsolationLevel.ToString();
-				ARow[6].AsBoolean = LSession.SessionInfo.SessionTracingEnabled;
-				ARow[7].AsBoolean = LSession.SessionInfo.DefaultUseDTC;
-				ARow[8].AsBoolean = LSession.SessionInfo.DefaultUseImplicitTransactions;
-				ARow[9].AsString = LSession.SessionInfo.Language.ToString();
-				ARow[10].AsInt32 = LSession.SessionInfo.FetchCount;
-				ARow[11].AsInt32 = LSession.SessionInfo.DefaultMaxStackDepth;
-				ARow[12].AsInt32 = LSession.SessionInfo.DefaultMaxCallDepth;
-				ARow[13].AsBoolean = LSession.SessionInfo.UsePlanCache;
-				ARow[14].AsBoolean = LSession.SessionInfo.ShouldEmitIL;
+				ARow[0] = LSession.SessionID;
+				ARow[1] = LSession.User.ID;
+				ARow[2] = LSession.SessionInfo.HostName;
+				ARow[3] = LSession.SessionInfo.CatalogCacheName;
+				ARow[4] = LSession.CurrentLibrary.Name;
+				ARow[5] = LSession.SessionInfo.DefaultIsolationLevel.ToString();
+				ARow[6] = LSession.SessionInfo.SessionTracingEnabled;
+				ARow[7] = LSession.SessionInfo.DefaultUseDTC;
+				ARow[8] = LSession.SessionInfo.DefaultUseImplicitTransactions;
+				ARow[9] = LSession.SessionInfo.Language.ToString();
+				ARow[10] = LSession.SessionInfo.FetchCount;
+				ARow[11] = LSession.SessionInfo.DefaultMaxStackDepth;
+				ARow[12] = LSession.SessionInfo.DefaultMaxCallDepth;
+				ARow[13] = LSession.SessionInfo.UsePlanCache;
+				ARow[14] = LSession.SessionInfo.ShouldEmitIL;
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}
@@ -586,14 +586,14 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 				{
-					ARow[0].AsInt32 = LProcess.ProcessID;
-					ARow[1].AsInt32 = LSession.SessionID;
-					ARow[2].AsString = LProcess.DefaultIsolationLevel.ToString();
-					ARow[3].AsBoolean = LProcess.UseDTC;
-					ARow[4].AsBoolean = LProcess.UseImplicitTransactions;
-					ARow[5].AsInt32 = LProcess.Context.MaxStackDepth;
-					ARow[6].AsInt32 = LProcess.Context.MaxCallDepth;
-					ARow[7].AsBoolean = LProcess.ExecutingThread != null;
+					ARow[0] = LProcess.ProcessID;
+					ARow[1] = LSession.SessionID;
+					ARow[2] = LProcess.DefaultIsolationLevel.ToString();
+					ARow[3] = LProcess.UseDTC;
+					ARow[4] = LProcess.UseImplicitTransactions;
+					ARow[5] = LProcess.Context.MaxStackDepth;
+					ARow[6] = LProcess.Context.MaxCallDepth;
+					ARow[7] = LProcess.ExecutingThread != null;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 		}
@@ -611,11 +611,11 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (DictionaryEntry LEntry in LEntries)
 			{
 				LockHeader LLockHeader = (LockHeader)LEntry.Value;
-				ARow[0].AsInt32 = LLockHeader.LockID.ResourceManagerID;
-				ARow[1].AsString = LLockHeader.LockID.LockName;
-				ARow[2].AsString = LLockHeader.Semaphore.Mode.ToString();
-				ARow[3].AsInt32 = LLockHeader.Semaphore.GrantCount();
-				ARow[4].AsInt32 = LLockHeader.Semaphore.WaitCount();
+				ARow[0] = LLockHeader.LockID.ResourceManagerID;
+				ARow[1] = LLockHeader.LockID.LockName;
+				ARow[2] = LLockHeader.Semaphore.Mode.ToString();
+				ARow[3] = LLockHeader.Semaphore.GrantCount();
+				ARow[4] = LLockHeader.Semaphore.WaitCount();
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}
@@ -626,8 +626,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (ServerScript LScript in LProcess.Scripts)
 					{
-						ARow[0].AsInt32 = LScript.GetHashCode();
-						ARow[1].AsInt32 = LProcess.ProcessID;
+						ARow[0] = LScript.GetHashCode();
+						ARow[1] = LProcess.ProcessID;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 		}
@@ -638,8 +638,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (ServerPlan LPlan in LProcess.Plans)
 					{
-						ARow[0].AsGuid = LPlan.ID;
-						ARow[1].AsInt32 = LProcess.ProcessID;
+						ARow[0] = LPlan.ID;
+						ARow[1] = LProcess.ProcessID;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 		}
@@ -648,13 +648,13 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		{
 			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
 			{
-				ARow[0].AsString = LLibrary.Name;
-				ARow[1].AsString = LLibrary.Directory;
-				ARow[2] = new Scalar(AProcess, AProcess.Plan.Catalog["System.VersionNumber"] as Schema.ScalarType, LLibrary.Version);
-				ARow[3].AsString = LLibrary.DefaultDeviceName;
-				ARow[4].AsBoolean = true; //AProcess.ServerSession.Server.CanLoadLibrary(LLibrary.Name);
-				ARow[5].AsBoolean = LLibrary.IsSuspect;
-				ARow[6].AsString = LLibrary.SuspectReason;
+				ARow[0] = LLibrary.Name;
+				ARow[1] = LLibrary.Directory;
+				ARow[2] = LLibrary.Version;
+				ARow[3] = LLibrary.DefaultDeviceName;
+				ARow[4] = true; //AProcess.ServerSession.Server.CanLoadLibrary(LLibrary.Name);
+				ARow[5] = LLibrary.IsSuspect;
+				ARow[6] = LLibrary.SuspectReason;
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}											
@@ -664,9 +664,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
 				foreach (Schema.FileReference LReference in LLibrary.Files)
 				{
-					ARow[0].AsString = LLibrary.Name;
-					ARow[1].AsString = LReference.FileName;
-					ARow[2].AsBoolean = LReference.IsAssembly;
+					ARow[0] = LLibrary.Name;
+					ARow[1] = LReference.FileName;
+					ARow[2] = LReference.IsAssembly;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 		}											
@@ -676,9 +676,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
 				foreach (LibraryReference LReference in LLibrary.Libraries)
 				{
-					ARow[0].AsString = LLibrary.Name;
-					ARow[1].AsString = LReference.Name;
-					ARow[2] = new Scalar(AProcess, AProcess.Plan.Catalog["System.VersionNumber"] as Schema.ScalarType, LReference.Version); 
+					ARow[0] = LLibrary.Name;
+					ARow[1] = LReference.Name;
+					ARow[2] = LReference.Version; 
 					ANativeTable.Insert(AProcess, ARow);
 				}
 		}											
@@ -697,9 +697,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					{
 						LTag = LLibrary.MetaData.Tags[LIndex];
 					#endif
-						ARow[0].AsString = LLibrary.Name;
-						ARow[1].AsString = LTag.Name;
-						ARow[2].AsString = LTag.Value;
+						ARow[0] = LLibrary.Name;
+						ARow[1] = LTag.Name;
+						ARow[2] = LTag.Value;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 				}
@@ -719,9 +719,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		{
 			foreach (RegisteredAssembly LAssembly in AProcess.Plan.Catalog.ClassLoader.Assemblies)
 			{
-				ARow[0].AsString = LAssembly.Name.ToString();
-				ARow[1].AsString = LAssembly.Library.Name;
-				ARow[2].AsString = LAssembly.Assembly.Location;
+				ARow[0] = LAssembly.Name.ToString();
+				ARow[1] = LAssembly.Library.Name;
+				ARow[2] = LAssembly.Assembly.Location;
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}											
@@ -730,10 +730,10 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		{
 			foreach (RegisteredClass LClass in AProcess.Plan.Catalog.ClassLoader.Classes)
 			{
-				ARow[0].AsString = LClass.Name;
-				ARow[1].AsString = LClass.Library.Name;
-				ARow[2].AsString = LClass.Assembly.Name.ToString();
-				ARow[3].AsString = LClass.ClassName;
+				ARow[0] = LClass.Name;
+				ARow[1] = LClass.Library.Name;
+				ARow[2] = LClass.Assembly.Name.ToString();
+				ARow[3] = LClass.ClassName;
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}											
@@ -743,7 +743,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			List<string> LLibraryNames = AProcess.CatalogDeviceSession.SelectLoadedLibraries();
 			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
 			{
-				ARow[0].AsString = LLibraryNames[LIndex];
+				ARow[0] = LLibraryNames[LIndex];
 				ANativeTable.Insert(AProcess, ARow);
 			}
 		}
@@ -753,9 +753,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
 				foreach (Schema.SessionObject LObject in LSession.SessionObjects)
 				{
-					ARow[0].AsInt32 = LSession.SessionID;
-					ARow[1].AsString = LObject.Name;
-					ARow[2].AsString = LObject.GlobalName;
+					ARow[0] = LSession.SessionID;
+					ARow[1] = LObject.Name;
+					ARow[2] = LObject.GlobalName;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 		}
@@ -767,8 +767,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				if (LObject is Schema.ScalarType)
 					foreach (Schema.ScalarType LParentScalarType in ((Schema.ScalarType)LObject).ParentTypes)
 					{
-						ARow[0].AsString = LObject.Name;
-						ARow[1].AsString = LParentScalarType.Name;
+						ARow[0] = LObject.Name;
+						ARow[1] = LParentScalarType.Name;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 			
@@ -784,8 +784,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					Schema.ScalarType LScalarType = (Schema.ScalarType)LObject;
 					foreach (Schema.Operator LOperator in LScalarType.ExplicitCastOperators)
 					{
-						ARow[0].AsString = LScalarType.Name;
-						ARow[1].AsString = LOperator.Name;
+						ARow[0] = LScalarType.Name;
+						ARow[1] = LOperator.Name;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 				}
@@ -799,16 +799,16 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
 				{
-					ARow[0].AsInt32 = LServerLink.ID;
-					ARow[1].AsString = LServerLink.Name;
-					ARow[2].AsString = LServerLink.Library.Name;
-					ARow[3].AsString = LServerLink.Owner.ID;
-					ARow[4].AsBoolean = LServerLink.IsSystem;
-					ARow[5].AsBoolean = LServerLink.IsGenerated;
-					ARow[6].AsString = LServerLink.HostName;
-					ARow[7].AsString = LServerLink.InstanceName;
-					ARow[8].AsInt32 = LServerLink.OverridePortNumber;
-					ARow[9].AsBoolean = LServerLink.UseSessionInfo;
+					ARow[0] = LServerLink.ID;
+					ARow[1] = LServerLink.Name;
+					ARow[2] = LServerLink.Library.Name;
+					ARow[3] = LServerLink.Owner.ID;
+					ARow[4] = LServerLink.IsSystem;
+					ARow[5] = LServerLink.IsGenerated;
+					ARow[6] = LServerLink.HostName;
+					ARow[7] = LServerLink.InstanceName;
+					ARow[8] = LServerLink.OverridePortNumber;
+					ARow[9] = LServerLink.UseSessionInfo;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 			}
@@ -823,9 +823,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				{
 					foreach (ServerLinkUser LLinkUser in LServerLink.Users)
 					{
-						ARow[0].AsString = LLinkUser.UserID;
-						ARow[1].AsString = LServerLink.Name;
-						ARow[2].AsString = LLinkUser.ServerLinkUserID;
+						ARow[0] = LLinkUser.UserID;
+						ARow[1] = LServerLink.Name;
+						ARow[2] = LLinkUser.ServerLinkUserID;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 				}
@@ -838,8 +838,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (RemoteSession LRemoteSession in LProcess.RemoteSessions)
 					{
-						ARow[0].AsString = LRemoteSession.ServerLink.Name;
-						ARow[1].AsInt32 = LProcess.ProcessID;
+						ARow[0] = LRemoteSession.ServerLink.Name;
+						ARow[1] = LProcess.ProcessID;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 		}
@@ -850,8 +850,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (DeviceSession LDeviceSession in LProcess.DeviceSessions)
 					{
-						ARow[0].AsString = LDeviceSession.Device.Name;
-						ARow[1].AsInt32 = LProcess.ProcessID;
+						ARow[0] = LDeviceSession.Device.Name;
+						ARow[1] = LProcess.ProcessID;
 						ANativeTable.Insert(AProcess, ARow);
 					}
 		}
@@ -862,9 +862,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			{
 				foreach (ApplicationTransaction.ApplicationTransaction LTransaction in AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.Values)
 				{
-					ARow[0].AsGuid = LTransaction.ID;
-					ARow[1].AsInt32 = LTransaction.Session.SessionID;
-					ARow[2].AsString = LTransaction.Device.Name;
+					ARow[0] = LTransaction.ID;
+					ARow[1] = LTransaction.Session.SessionID;
+					ARow[2] = LTransaction.Device.Name;
 					ANativeTable.Insert(AProcess, ARow);
 				}
 			}

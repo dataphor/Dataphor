@@ -267,7 +267,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				return LExpression.DocumentArgs.LibraryName + "." + LExpression.DocumentArgs.DocumentName + "." 
 					+ 
 					(
-						Evaluate
+						((DAE.Runtime.Data.Scalar)Evaluate
 						(
 							String.Format
 							(
@@ -275,7 +275,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 								LExpression.DocumentArgs.LibraryName, 
 								LExpression.DocumentArgs.DocumentName
 							)
-						).AsString
+						)).AsString
 					);
 			}
 			else
@@ -354,11 +354,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					{
 						// Load the theme
 						if (LRow.HasValue("Theme"))
-							FTheme = (Theme)new BOP.Deserializer().Deserialize(LRow["Theme"].AsString, null);
+							FTheme = (Theme)new BOP.Deserializer().Deserialize((string)LRow["Theme"], null);
 
 						// Load the default form icon
 						if (LRow.HasValue("IconImage"))
-							using (Stream LIconStream = LRow["IconImage"].OpenStream())
+							using (Stream LIconStream = LRow.GetValue("IconImage").OpenStream())
 							{
 								Bitmap LBitmap = System.Drawing.Image.FromStream(LIconStream) as Bitmap;
 								if (LBitmap != null)
@@ -367,16 +367,16 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 						// Load the document cache size
 						if (LRow.HasValue("DocumentCacheSize"))
-							LDocumentCacheSize = LRow["DocumentCacheSize"].AsInt32;
+							LDocumentCacheSize = (int)LRow["DocumentCacheSize"];
 
 						// Load the image cache size
 						if (LRow.HasValue("ImageCacheSize"))
-							LImageCacheSize = LRow["ImageCacheSize"].AsInt32;
+							LImageCacheSize = (int)LRow["ImageCacheSize"];
 
 						// Load the help file
 						if (LRow.HasValue("HelpDocument"))
 						{
-							string LDocument = LRow["HelpDocument"].AsString;
+							string LDocument = (string)LRow["HelpDocument"];
 							if (LDocument != String.Empty)
 								LoadHelpDocument(LDocument);
 						}
@@ -435,8 +435,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "ALibraryName", ALibraryName));
 			using 
 			(
-				DAE.Runtime.Data.DataValue LNodeTable = 
-					DataSession.Evaluate
+				DAE.Runtime.Data.Scalar LNodeTable = 
+					(DAE.Runtime.Data.Scalar)DataSession.Evaluate
 					(
 						CLibraryNodeTypesExpression,
 						LParams
@@ -451,7 +451,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public void SetFormDesigner()
 		{
-			using (DAE.Runtime.Data.DataValue LNodeTable = DataSession.Evaluate(CFormDesignerNodeTypesExpression))
+			using (DAE.Runtime.Data.Scalar LNodeTable = (DAE.Runtime.Data.Scalar)DataSession.Evaluate(CFormDesignerNodeTypesExpression))
 			{
 				NodeTypeTable.Clear();
 				NodeTypeTable.LoadFromString(LNodeTable.AsString);
@@ -780,10 +780,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					)
 				)
 				{
-					if (!LRow["CRCMatches"].AsBoolean)
+					if (!(bool)LRow["CRCMatches"])
 					{
 						Directory.CreateDirectory(Path.GetDirectoryName(FFileName));
-						using (Stream LSourceStream = LRow["Value"].OpenStream())
+						using (Stream LSourceStream = LRow.GetValue("Value").OpenStream())
 							using (FileStream LTargetStream = new FileStream(FFileName, FileMode.Create, FileAccess.Write))
 								StreamUtility.CopyStream(LSourceStream, LTargetStream);
 					}

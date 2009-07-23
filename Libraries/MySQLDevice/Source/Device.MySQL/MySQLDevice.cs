@@ -305,17 +305,17 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLBoolean(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			if (AValue is bool)
-				return new Scalar(AProcess, ScalarType, (bool)AValue);
+				return (bool)AValue;
 			else 
-				return new Scalar(AProcess, ScalarType, (int)AValue == 0 ? false : true);
+				return (int)AValue == 0 ? false : true;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsBoolean;
+			return (bool)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -337,16 +337,16 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLByte(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
 			// According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
 			// it is coming back as a short, I don't know why, maybe interop?
-			return new Scalar(AProcess, ScalarType, Convert.ToByte((short)AValue));
+			return Convert.ToByte((short)AValue);
 		}
 
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			return AValue.AsByte;
+			return (byte)AValue;
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -373,14 +373,14 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 
 		public MySQLDateTime(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			DateTime LValue = AValue.AsDateTime;
+			DateTime LValue = (DateTime)AValue;
 			if (LValue < MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 			return LValue;
@@ -406,14 +406,14 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLDate(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			DateTime LValue = AValue.AsDateTime;
+			DateTime LValue = (DateTime)AValue;
 			if (LValue < MySQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 			return LValue;
@@ -439,14 +439,14 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLTime(int AID, string AName) : base(AID, AName) {}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IServerProcess AProcess, object AValue)
 		{
-			return new Scalar(AProcess, ScalarType, (DateTime)AValue);
+			return (DateTime)AValue;
 		}
 		
-		public override object FromScalar(Scalar AValue)
+		public override object FromScalar(object AValue)
 		{
-			DateTime LValue = AValue.AsDateTime;
+			DateTime LValue = (DateTime)AValue;
 			if (LValue < MySQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 			return new DateTime(1, 1, 1, LValue.Hour, LValue.Minute, LValue.Second, LValue.Millisecond);

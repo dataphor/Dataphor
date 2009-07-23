@@ -250,6 +250,26 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { this[IndexOfName(AColumn.Name)] = value; }
 		}
         
+		/// <summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.</summary>
+		public int IndexOfColumn(string AColumnName)
+		{
+			int LColumnIndex = IndexOfName(AColumnName);
+			if (LColumnIndex < 0)
+				LColumnIndex = IndexOf(AColumnName);
+			return LColumnIndex;
+		}
+
+		///	<summary>Returns the index of the given column name, resolving first for the full name, then for a partial match.  Throws an exception if the column name is not found.</summary>
+		public int GetIndexOfColumn(string AColumnName)
+		{
+			int LColumnIndex = IndexOfName(AColumnName);
+			if (LColumnIndex < 0)
+				LColumnIndex = IndexOf(AColumnName);
+			if (LColumnIndex < 0)
+				throw new Schema.SchemaException(Schema.SchemaException.Codes.ColumnNotFound, AColumnName);
+			return LColumnIndex;
+		}
+		
 		// ToString
         public override string ToString()
         {

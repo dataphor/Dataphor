@@ -590,7 +590,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			InvalidCustomConstraintMessage = 105285,
 			
 			/// <summary>Error code 105286: "Restriction is not sargable because the argument for column "{0}" could not be converted from type "{1}" to type "{2}", resulting in a potential reduction in performance."</summary>
-			CouldNotConvertSargableArgument = 105286
+			CouldNotConvertSargableArgument = 105286,
+			
+			/// <summary>Error code 105287: "Custom message may only reference global table variables for database-wide and transition constraints."</summary>
+			NonRemotableCustomConstraintMessage = 105287
 		}
 		
 		// Resource manager for this exception class

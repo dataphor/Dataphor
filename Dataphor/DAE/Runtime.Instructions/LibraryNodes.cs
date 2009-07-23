@@ -31,178 +31,165 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator FileReference(const AName : Name, const AIsAssembly : Boolean) : FileReference
 	public class FileReferenceNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Schema.FileReference(AArguments[0].Value.AsString, AArguments[1].Value.AsBoolean)));
+			return new Schema.FileReference((string)AArguments[0], (bool)AArguments[1]);
 		}
 	}
 	
 	// operator FileReferenceReadName(const AValue : FileReference) : String
 	public class FileReferenceReadNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			Scalar LFileScalar = (Scalar)AArguments[0].Value;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Schema.FileReference)LFileScalar.AsNative).FileName));
+			return ((Schema.FileReference)AArguments[0]).FileName;
 		}
 	}
 	
 	// operator FileReferenceWriteName(const AValue : FileReference, const AName : String) : FileReference
 	public class FileReferenceWriteNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			Scalar LFileScalar = (Scalar)AArguments[0].Value;
-			Schema.FileReference LFile = (Schema.FileReference)LFileScalar.AsNative;
-			LFile.FileName = AArguments[1].Value.AsString;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LFile));
+			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
+			LFile.FileName = (string)AArguments[1];
+			return LFile;
 		}
 	}
 	
 	// operator FileReferenceReadIsAssembly(const AValue : FileReference) : Boolean
 	public class FileReferenceReadIsAssemblyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			Scalar LFileScalar = (Scalar)AArguments[0].Value;
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, ((Schema.FileReference)LFileScalar.AsNative).IsAssembly));
+			return ((Schema.FileReference)AArguments[0]).IsAssembly;
 		}
 	}
 	
 	// operator FileReferenceWriteIsAssembly(const AValue : FileReference, const AIsAssembly : Boolean) : FileReference
 	public class FileReferenceWriteIsAssemblyNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			Scalar LFileScalar = (Scalar)AArguments[0].Value;
-			Schema.FileReference LFile = (Schema.FileReference)LFileScalar.AsNative;
-			LFile.IsAssembly = AArguments[1].Value.AsBoolean;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LFile));
+			Schema.FileReference LFile = (Schema.FileReference)AArguments[0];
+			LFile.IsAssembly = (bool)AArguments[1];
+			return LFile;
 		}
 	}
 	
 	// operator .iEqual(const ALeftValue : FileReference, const ARightValue : FileReference) : Boolean
 	public class FileReferenceEqualNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLeftScalar = (Scalar)AArguments[0].Value;
-			Scalar LRightScalar = (Scalar)AArguments[1].Value;
 			#if NILPROPOGATION
-			if ((LLeftScalar == null) || LLeftScalar.IsNil || (LRightScalar == null) || LRightScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || (AArguments[1] == null))
+				return null;
 			#endif
-			Schema.FileReference LLeftFile = (Schema.FileReference)LLeftScalar.AsNative;
-			Schema.FileReference LRightFile = (Schema.FileReference)LRightScalar.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LLeftFile.Equals(LRightFile)));
+			return ((Schema.FileReference)AArguments[0]).Equals((Schema.FileReference)AArguments[1]);
 		}
 	}
 	
 	// operator LibraryReference(const AName : Name, const AVersion : VersionNumber) : LibraryReference
 	public class LibraryReferenceNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, new Schema.LibraryReference(AArguments[0].Value.AsString, (VersionNumber)AArguments[1].Value.AsNative)));
+			return new Schema.LibraryReference((string)AArguments[0], (VersionNumber)AArguments[1]);
 		}
 	}
 	
 	// operator LibraryReferenceReadName(const AValue : LibraryReference) : Name
 	public class LibraryReferenceReadNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemString, ((Schema.LibraryReference)LLibraryScalar.AsNative).Name));
+			return ((Schema.LibraryReference)AArguments[0]).Name;
 		}
 	}
 	
 	// operator LibraryReferenceWriteName(const AValue : LibraryReference, const AName : Name) : LibraryReference
 	public class LibraryReferenceWriteNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
-			Schema.LibraryReference LLibrary = (Schema.LibraryReference)LLibraryScalar.AsNative;
-			LLibrary.Name = AArguments[1].Value.AsString;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			Schema.LibraryReference LLibrary = (Schema.LibraryReference)AArguments[0];
+			LLibrary.Name = (string)AArguments[1];
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryReferenceReadVersion(const AValue : LibraryReference) : VersionNumber
 	public class LibraryReferenceReadVersionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
-			Schema.LibraryReference LReference = (Schema.LibraryReference)LLibraryScalar.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LReference.Version));
+			Schema.LibraryReference LReference = (Schema.LibraryReference)AArguments[0];
+			return LReference.Version;
 		}
 	}
 	
 	// operator LibraryReferenceWriteVersion(const AValue : LibraryReference, const AVersion : VersionNumber) : LibraryReference
 	public class LibraryReferenceWriteVersionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.LibraryReference LLibrary = (Schema.LibraryReference)AArguments[0].Value.AsNative;
-			LLibrary.Version = (VersionNumber)AArguments[1].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			Schema.LibraryReference LLibrary = (Schema.LibraryReference)AArguments[0];
+			LLibrary.Version = (VersionNumber)AArguments[1];
+			return LLibrary;
 		}
 	}
 	
 	// operator iCompare(const ALeftValue : LibraryReference, const ARightValue : LibraryReference)
 	public class LibraryReferenceCompareNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLeftScalar = (Scalar)AArguments[0].Value;
-			Scalar LRightScalar = (Scalar)AArguments[1].Value;
 			#if NILPROPOGATION
-			if ((LLeftScalar == null) || LLeftScalar.IsNil || (LRightScalar == null) || LRightScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || (AArguments[1] == null))
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, Schema.LibraryReference.Compare((Schema.LibraryReference)LLeftScalar.AsNative, (Schema.LibraryReference)LRightScalar.AsNative)));
+			return Schema.LibraryReference.Compare((Schema.LibraryReference)AArguments[0], (Schema.LibraryReference)AArguments[1]);
 		}
 	}
 	
@@ -213,20 +200,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator LibraryDescriptor(const AName : Name, const AVersion : VersionNumber, const ADefaultDeviceName : String, const AFiles : list(FileReference), const ARequisites : list(LibraryReference), const ADirectory : String);
 	public class SystemLibraryDescriptorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = new Schema.Library(Schema.Object.EnsureUnrooted(AArguments[0].Value.AsString));
+			Schema.Library LLibrary = new Schema.Library(Schema.Object.EnsureUnrooted((string)AArguments[0]));
 			if (AArguments.Length >= 2)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[1] == null)
+					return null;
 				#endif
-				LLibrary.Version = (VersionNumber)AArguments[1].Value.AsNative;
+				LLibrary.Version = (VersionNumber)AArguments[1];
 			}
 			else
 				LLibrary.Version = new VersionNumber(-1, -1, -1, -1);
@@ -234,265 +221,237 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (AArguments.Length >= 3)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[2] == null)
+					return null;
 				#endif
-				LLibrary.DefaultDeviceName = AArguments[2].Value.AsString;
+				LLibrary.DefaultDeviceName = (string)AArguments[2];
 			}
 
 			if (AArguments.Length >= 4)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[3].Value == null) || AArguments[3].Value.IsNil || (AArguments[4].Value == null) || AArguments[4].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[3] == null || AArguments[4] == null)
+					return null;
 				#endif
-				Scalar LScalar;
-				ListValue LFiles = (ListValue)AArguments[3].Value;
-				ListValue LRequisites = (ListValue)AArguments[4].Value;
+				ListValue LFiles = (ListValue)AArguments[3];
+				ListValue LRequisites = (ListValue)AArguments[4];
 
 				for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-				{
-					LScalar = (Scalar)LFiles[LIndex];
-					LLibrary.Files.Add(LScalar.AsNative);
-				}
+					LLibrary.Files.Add(LFiles[LIndex]);
 
 				for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-				{
-					LScalar = (Scalar)LRequisites[LIndex];
-					LLibrary.Libraries.Add(LScalar.AsNative);
-				}
+					LLibrary.Libraries.Add(LRequisites[LIndex]);
 			}
 			
 			if (AArguments.Length >= 6)
 			{
 				#if NILPROPOGATION
-				if ((AArguments[5].Value == null) || AArguments[5].Value.IsNil)
-					return new DataVar(FDataType, null);
+				if (AArguments[5] == null)
+					return null;
 				#endif
-				LLibrary.Directory = AArguments[5].Value.AsString;
+				LLibrary.Directory = (string)AArguments[5];
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadName(const AValue : LibraryDescriptor) : Name;
 	public class SystemLibraryDescriptorReadNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Schema.Library)LLibraryScalar.AsNative).Name));
+			return ((Schema.Library)AArguments[0]).Name;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteName(const AValue : LibraryDescriptor, const AName : Name) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
-			LLibrary.Name = Schema.Object.EnsureUnrooted(AArguments[1].Value.AsString);
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			LLibrary.Name = Schema.Object.EnsureUnrooted((string)AArguments[1]);
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadDirectory(const AValue : LibraryDescriptor) : String;
 	public class SystemLibraryDescriptorReadDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Schema.Library)LLibraryScalar.AsNative).Directory));
+			return ((Schema.Library)AArguments[0]).Directory;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteDirectory(const AValue : LibraryDescriptor, const ADirectory : String) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteDirectoryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
-			if ((AArguments[1].Value == null) || AArguments[1].Value.IsNil)
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			if (AArguments[1] == null)
 				LLibrary.Directory = null;
 			else
-				LLibrary.Directory = AArguments[1].Value.AsString;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+				LLibrary.Directory = (string)AArguments[1];
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadDefaultDeviceName(const AValue : LibraryDescriptor) : DefaultDeviceName;
 	public class SystemLibraryDescriptorReadDefaultDeviceNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null))
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemString, ((Schema.Library)LLibraryScalar.AsNative).DefaultDeviceName));
+			return ((Schema.Library)AArguments[0]).DefaultDeviceName;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteDefaultDeviceName(const AValue : LibraryDescriptor, const ADefaultDeviceName : DefaultDeviceName) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteDefaultDeviceNameNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
-			LLibrary.DefaultDeviceName = AArguments[1].Value.AsString;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			LLibrary.DefaultDeviceName = (string)AArguments[1];
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadVersion(const AValue : LibraryDescriptor) : VersionNumber;
 	public class SystemLibraryDescriptorReadVersionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((Schema.Library)LLibraryScalar.AsNative).Version));
+			return ((Schema.Library)AArguments[0]).Version;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteVersion(const AValue : LibraryDescriptor, const AVersion : VersionNumber) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteVersionNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)AArguments[0].Value.AsNative;
-			LLibrary.Version = (VersionNumber)AArguments[1].Value.AsNative;
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			LLibrary.Version = (VersionNumber)AArguments[1];
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadFiles(const AValue : LibraryDescriptor) : list(FileReference);
 	public class SystemLibraryDescriptorReadFilesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null))
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
 			ListValue LFiles = new ListValue(AProcess, (Schema.IListType)FDataType);
 			foreach (Schema.FileReference LFileReference in LLibrary.Files)
-				LFiles.Add(new Scalar(AProcess, (Schema.ScalarType)((Schema.ListType)LFiles.DataType).ElementType, LFileReference.Clone()));
-			return new DataVar(FDataType, LFiles);
+				LFiles.Add(LFileReference.Clone());
+			return LFiles;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteFiles(const AValue : LibraryDescriptor, const AFiles : list(FileReference)) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteFilesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
-			ListValue LFiles = (ListValue)AArguments[1].Value;
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			ListValue LFiles = (ListValue)AArguments[1];
 			LLibrary.Files.Clear();
-			Scalar LScalar;
 			for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-			{
-				LScalar = (Scalar)LFiles[LIndex];
-				LLibrary.Files.Add(((Schema.FileReference)LFiles[LIndex].AsNative).Clone());
-			}
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+				LLibrary.Files.Add(((Schema.FileReference)LFiles[LIndex]).Clone());
+			return LLibrary;
 		}
 	}
 	
 	// operator LibraryDescriptorReadRequisites(const AValue : LibraryDescriptor) : list(LibraryReference);
 	public class SystemLibraryDescriptorReadRequisitesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null))
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
 			ListValue LRequisites = new ListValue(AProcess, (Schema.IListType)FDataType);
 			foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
-				LRequisites.Add(new Scalar(AProcess, (Schema.ScalarType)((Schema.ListType)LRequisites.DataType).ElementType, LReference.Clone()));
-			return new DataVar(FDataType, LRequisites);
+				LRequisites.Add(LReference.Clone());
+			return LRequisites;
 		}
 	}
 	
 	// operator LibraryDescriptorWriteRequisites(const AValue : LibraryDescriptor, const ARequisites : list(String)) : LibraryDescriptor;
 	public class SystemLibraryDescriptorWriteRequisitesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
 			#if NILPROPOGATION
-			if ((LLibraryScalar == null) || LLibraryScalar.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || AArguments[1] == null)
+				return null;
 			#endif
-			Schema.Library LLibrary = (Schema.Library)LLibraryScalar.AsNative;
-			ListValue LRequisites = (ListValue)AArguments[1].Value;
+			Schema.Library LLibrary = (Schema.Library)AArguments[0];
+			ListValue LRequisites = (ListValue)AArguments[1];
 			LLibrary.Libraries.Clear();
-			Scalar LScalar;
 			for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-			{
-				LScalar = (Scalar)LRequisites[LIndex];
-				LLibrary.Libraries.Add(((Schema.LibraryReference)LScalar.AsNative).Clone());
-			}
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LLibrary));
+				LLibrary.Libraries.Add(((Schema.LibraryReference)LRequisites[LIndex]).Clone());
+			return LLibrary;
 		}
 	}
 
     // operator iEqual(const ALeftValue : LibraryDescriptor, const ARightValue : LibraryDescriptor) : Boolean;
     public class SystemLibraryDescriptorEqualNode : InstructionNode
     {
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLeftScalar = (Scalar)AArguments[0].Value;
-			Scalar LRightScalar = (Scalar)AArguments[1].Value;
 			#if NILPROPOGATION
-			if ((LLeftScalar == null) || LLeftScalar.IsNil || (LRightScalar == null) || LRightScalar.IsNil)
-				return new DataVar(FDataType, null);
+			if ((AArguments[0] == null) || (AArguments[1] == null))
+				return null;
 			#endif
-			Schema.Library LLeftLibrary = (Schema.Library)LLeftScalar.AsNative;
-			Schema.Library LRightLibrary = (Schema.Library)LRightScalar.AsNative;
+			Schema.Library LLeftLibrary = (Schema.Library)AArguments[0];
+			Schema.Library LRightLibrary = (Schema.Library)AArguments[1];
 			bool LLibrariesEqual = 
 				(LLeftLibrary.Name == LRightLibrary.Name) && 
 				(LLeftLibrary.Directory == LRightLibrary.Directory) &&
@@ -516,7 +475,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 			}
 			
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemBoolean, LLibrariesEqual));
+			return LLibrariesEqual;
 		}
     }
 	
@@ -631,10 +590,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[0].Value;
-			CreateLibrary(AProcess, (Schema.Library)LLibraryScalar.AsNative, true, true);
+			CreateLibrary(AProcess, (Schema.Library)AArguments[0], true, true);
 			return null;
 		}
 	}
@@ -716,9 +674,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			DropLibrary(AProcess, AArguments[0].Value.AsString, true);
+			DropLibrary(AProcess, (string)AArguments[0], true);
 			return null;
 		}
 	}
@@ -822,9 +780,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			RenameLibrary(AProcess, AArguments[0].Value.AsString, AArguments[1].Value.AsString, true);
+			RenameLibrary(AProcess, (string)AArguments[0], (string)AArguments[1], true);
 			return null;
 		}
 	}
@@ -875,7 +833,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			RefreshLibraries(AProcess);
 			return null;
@@ -886,9 +844,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// Attaches all libraries found in the given directory
 	public class SystemAttachLibrariesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LLibraryDirectory = AArguments[0].Value.AsString;
+			string LLibraryDirectory = (string)AArguments[0];
 			
 			Schema.Libraries LLibraries = new Schema.Libraries();
 			Schema.Library.GetAvailableLibraries(AProcess.ServerSession.Server.InstanceDirectory, LLibraryDirectory, LLibraries, true);
@@ -908,10 +866,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator AttachLibrary(string ALibraryName, string ALibraryDirectory)
 	public class SystemAttachLibraryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LLibraryName = AArguments[0].Value.AsString;
-			string LLibraryDirectory = AArguments[1].Value.AsString;
+			string LLibraryName = (string)AArguments[0];
+			string LLibraryDirectory = (string)AArguments[1];
 			
 			AttachLibrary(AProcess, LLibraryName, LLibraryDirectory, false);
 			
@@ -930,9 +888,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator DetachLibrary(string ALibraryName)
 	public class SystemDetachLibraryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LLibraryName = AArguments[0].Value.AsString;
+			string LLibraryName = (string)AArguments[0];
 			SystemDropLibraryNode.DetachLibrary(AProcess, LLibraryName);
 			
 			return null;
@@ -942,12 +900,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator GetLibraryDescriptor(const ALibraryName : Name) : LibraryDescriptor;
 	public class SystemGetLibraryDescriptorNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			lock (AProcess.Plan.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString];
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, (Schema.Library)LLibrary.Clone()));
+				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[(string)AArguments[0]];
+				return (Schema.Library)LLibrary.Clone();
 			}
 		}
 	}
@@ -1441,10 +1399,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			Scalar LLibraryScalar = (Scalar)AArguments[1].Value;
-			SetLibraryDescriptor(AProcess, AArguments[0].Value.AsString, (Schema.Library)LLibraryScalar.AsNative, true);
+			SetLibraryDescriptor(AProcess, (string)AArguments[0], (Schema.Library)AArguments[1], true);
 			return null;
 		}
 	}
@@ -1488,13 +1445,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LTag == null ? null : LTag.Value;
 		}
 
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || (AArguments[0].Value.IsNil))
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null)
+				return null;
 			#endif
-			return new DataVar(String.Empty, FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ResolveSetting(AProcess.Plan, AArguments[0].Value.AsString)));
+			return ResolveSetting(AProcess.Plan, (string)AArguments[0]);
 		}
 	}
 	
@@ -1701,10 +1658,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LLibraryName = AArguments[0].Value.AsString;
-			bool LWithReconciliation = AArguments.Length > 1 ? AArguments[1].Value.AsBoolean : true;
+			string LLibraryName = (string)AArguments[0];
+			bool LWithReconciliation = AArguments.Length > 1 ? (bool)AArguments[1] : true;
 			lock (AProcess.Plan.Catalog.Libraries)
 			{
 				if (!AProcess.CatalogDeviceSession.IsLoadedLibrary(LLibraryName))
@@ -1726,9 +1683,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			EnsureLibraryRegistered(AProcess, AArguments[0].Value.AsString, true);
+			EnsureLibraryRegistered(AProcess, (string)AArguments[0], true);
 			return null;
 		}
 	}
@@ -1790,9 +1747,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			UnregisterLibrary(AProcess, AArguments[0].Value.AsString, AArguments.Length > 1 ? AArguments[1].Value.AsBoolean : true);
+			UnregisterLibrary(AProcess, (string)AArguments[0], AArguments.Length > 1 ? (bool)AArguments[1] : true);
 			return null;
 		}
 	}
@@ -1904,14 +1861,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			// Backwards compatibility for the persistent catalog upgrade
 			// If the server is loading full catalog, and we are calling LoadLibrary for the Security library, register the library instead.
-			if (AProcess.ServerSession.Server.LoadingFullCatalog && (AArguments[0].Value.AsString == "Security"))
+			if (AProcess.ServerSession.Server.LoadingFullCatalog && ((string)AArguments[0] == "Security"))
 				SystemRegisterLibraryNode.RegisterLibrary(AProcess, "Security", false);
 			else
-				AProcess.ServerSession.Server.LoadLibrary(AArguments[0].Value.AsString);
+				AProcess.ServerSession.Server.LoadLibrary((string)AArguments[0]);
 			return null;
 		}
 	}
@@ -2068,9 +2025,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		private static void InternalUpgradeLibrary(ServerProcess AProcess, string ALibraryName, VersionNumber ACurrentVersion, VersionNumber ATargetVersion)
 		{
 			DataParams LParams = new DataParams();
-			LParams.Add(new DataParam("ALibraryName", AProcess.Plan.Catalog.DataTypes.SystemName, Modifier.Const, new Scalar(AProcess, AProcess.Plan.Catalog.DataTypes.SystemName, ALibraryName)));
-			LParams.Add(new DataParam("ACurrentVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, new Scalar(AProcess, AProcess.Plan.Catalog["System.VersionNumber"] as Schema.ScalarType, ACurrentVersion)));
-			LParams.Add(new DataParam("ATargetVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, new Scalar(AProcess, AProcess.Plan.Catalog["System.VersionNumber"] as Schema.ScalarType, ATargetVersion)));
+			LParams.Add(new DataParam("ALibraryName", AProcess.Plan.Catalog.DataTypes.SystemName, Modifier.Const, ALibraryName));
+			LParams.Add(new DataParam("ACurrentVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, ACurrentVersion));
+			LParams.Add(new DataParam("ATargetVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, ATargetVersion));
 			IServerStatementPlan LPlan =
 				((IServerProcess)AProcess).PrepareStatement
 				(
@@ -2167,9 +2124,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			UpgradeLibraries(AProcess, LLibraryArray);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			string LLibraryName = AArguments[0].Value.AsString;
+			string LLibraryName = (string)AArguments[0];
 			Schema.LoadedLibrary LLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LLibraryName);
 			Schema.LoadedLibraries LRequisites = new Schema.LoadedLibraries();
 			GatherRequisites(LLibrary, LRequisites);
@@ -2184,7 +2141,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator UpgradeLibraries();	
 	public class SystemUpgradeLibrariesNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			SystemUpgradeLibraryNode.UpgradeLibraries(AProcess);
 			return null;
@@ -2194,16 +2151,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator UnloadLibrary(const ALibraryName : Name);
 	public class SystemUnloadLibraryNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			AProcess.ServerSession.Server.UnloadLibrary(AProcess, AArguments[0].Value.AsString);
+			AProcess.ServerSession.Server.UnloadLibrary(AProcess, (string)AArguments[0]);
 			return null;
 		}
 	}
 	
 	public class SystemSaveLibraryCatalogNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return null;
 		}
@@ -2294,7 +2251,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void PopulateUpgradeVersion(ServerProcess AProcess, Table ATable, Row ARow, VersionNumber AVersion)
 		{
-			ARow[0].AsNative = AVersion;
+			ARow[0] = AVersion;
 			ATable.Insert(ARow);
 		}
 		
@@ -2310,7 +2267,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -2322,7 +2279,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					LRow.ValuesOwned = false;
-					PopulateUpgradeVersions(AProcess, LResult, LRow, Nodes[0].Execute(AProcess).Value.AsString);
+					PopulateUpgradeVersions(AProcess, LResult, LRow, (string)Nodes[0].Execute(AProcess));
 				}
 				finally
 				{
@@ -2331,7 +2288,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -2385,7 +2342,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -2406,7 +2363,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -2458,7 +2415,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -2479,7 +2436,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -2506,23 +2463,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
+				LoadUpgrade
 				(
-					FDataType, 
-					new Scalar
-					(
-						AProcess, 
-						(Schema.ScalarType)FDataType, 
-						LoadUpgrade
-						(
-							AProcess, 
-							AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString], 
-							(VersionNumber)AArguments[1].Value.AsNative
-						)
-					)
+					AProcess, 
+					AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], 
+					(VersionNumber)AArguments[1]
 				);
 		}
 	}
@@ -2547,12 +2495,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			if ((AArguments[1].Value == null) || (AArguments[1].Value.IsNil))
-				InjectUpgradeNode.InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString], AArguments[2].Value.AsString);
+			if (AArguments[1] == null)
+				InjectUpgradeNode.InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[2]);
 			else
-				SaveUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString], (VersionNumber)AArguments[1].Value.AsNative, AArguments[2].Value.AsString);
+				SaveUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1], (string)AArguments[2]);
 			return null;
 		}
 	}
@@ -2567,9 +2515,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			File.Delete(LFileName);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			DeleteUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString], (VersionNumber)AArguments[1].Value.AsNative);
+			DeleteUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1]);
 			return null;
 		}
 	}
@@ -2597,9 +2545,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[AArguments[0].Value.AsString], AArguments[1].Value.AsString)));
+			return InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[1]);
 		}
 	}
 }

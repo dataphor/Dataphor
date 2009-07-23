@@ -88,12 +88,6 @@ namespace Alphora.Dataphor.DAE.Server
 			return LColumns;
 		}
 		
-		public static DataValue NativeValueToDataValue(IServerProcess AProcess, string ANativeDataTypeName, object ANativeValue)
-		{
-			ScalarType LScalarType = DataTypeNameToScalarType(AProcess, ANativeDataTypeName);
-			return new Scalar(AProcess, LScalarType, ANativeValue);
-		}
-		
 		public static Columns NativeColumnsToColumns(IServerProcess AProcess, NativeColumn[] ANativeColumns)
 		{
 			Columns LColumns = new Columns();
@@ -128,7 +122,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			NativeScalarValue LNativeScalar = ANativeValue as NativeScalarValue;
 			if (LNativeScalar != null)
-				return NativeValueToDataValue(AProcess, LNativeScalar.DataTypeName, LNativeScalar.Value);
+				return new Scalar(AProcess, DataTypeNameToScalarType(AProcess, LNativeScalar.DataTypeName), LNativeScalar.Value);
 			
 			NativeListValue LNativeList = ANativeValue as NativeListValue;
 			if (LNativeList != null)
@@ -149,7 +143,7 @@ namespace Alphora.Dataphor.DAE.Server
 				else
 				{
 					for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
-						LRow[LIndex] = NativeValueToDataValue(AProcess, LNativeRow.Columns[LIndex].DataTypeName, LNativeRow.Values[LIndex]);
+						LRow[LIndex] = LNativeRow.Values[LIndex];
 				}
 				return LRow;
 			}
@@ -169,7 +163,7 @@ namespace Alphora.Dataphor.DAE.Server
 						try
 						{
 							for (int LColumnIndex = 0; LColumnIndex < LNativeTable.Rows[LIndex].Length; LColumnIndex++)
-								LRow[LColumnIndex] = NativeValueToDataValue(AProcess, LNativeTable.Columns[LColumnIndex].DataTypeName, LNativeTable.Rows[LIndex][LColumnIndex]);
+								LRow[LColumnIndex] = LNativeTable.Rows[LIndex][LColumnIndex];
 							LInternalTable.Insert(AProcess, LRow);
 						}
 						catch (Exception)
@@ -240,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LNativeList.Elements = new NativeValue[LList.Count()];
 					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
-						LNativeList.Elements[LIndex] = DataValueToNativeValue(AProcess, LList[LIndex]);
+						LNativeList.Elements[LIndex] = DataValueToNativeValue(AProcess, LList.GetValue(LIndex));
 				}
 				return LNativeList;
 			}
@@ -255,7 +249,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LNativeRow.Values = new object[LNativeRow.Columns.Length];
 					for (int LIndex = 0; LIndex < LNativeRow.Values.Length; LIndex++)
-						LNativeRow.Values[LIndex] = LRow.HasValue(LIndex) ? LRow[LIndex].AsNative : null;
+						LNativeRow.Values[LIndex] = LRow[LIndex];
 				}
 				return LNativeRow;
 			}
@@ -266,26 +260,23 @@ namespace Alphora.Dataphor.DAE.Server
 				NativeTableValue LNativeTable = new NativeTableValue();
 				LNativeTable.Columns = ColumnsToNativeColumns(AProcess, LTable.DataType.Columns);
 					
-				if (!LTable.IsNil)
-				{
-					List<object[]> LNativeRows = new List<object[]>();
+				List<object[]> LNativeRows = new List<object[]>();
 
-					if (!LTable.BOF())
-						LTable.First();
-						
-					while (LTable.Next())
-					{
-						using (Row LCurrentRow = LTable.Select())
-						{
-							object[] LNativeRow = new object[LNativeTable.Columns.Length];
-							for (int LIndex = 0; LIndex < LNativeTable.Columns.Length; LIndex++)
-								LNativeRow[LIndex] = LCurrentRow.HasValue(LIndex) ? LCurrentRow[LIndex].AsNative : null;
-							LNativeRows.Add(LNativeRow);
-						}
-					}
+				if (!LTable.BOF())
+					LTable.First();
 					
-					LNativeTable.Rows = LNativeRows.ToArray();
+				while (LTable.Next())
+				{
+					using (Row LCurrentRow = LTable.Select())
+					{
+						object[] LNativeRow = new object[LNativeTable.Columns.Length];
+						for (int LIndex = 0; LIndex < LNativeTable.Columns.Length; LIndex++)
+							LNativeRow[LIndex] = LCurrentRow[LIndex];
+						LNativeRows.Add(LNativeRow);
+					}
 				}
+				
+				LNativeTable.Rows = LNativeRows.ToArray();
 				return LNativeTable;
 			}
 			
@@ -320,7 +311,7 @@ namespace Alphora.Dataphor.DAE.Server
 					ACursor.Select(LCurrentRow);
 					object[] LNativeRow = new object[LNativeTable.Columns.Length];
 					for (int LIndex = 0; LIndex < LNativeTable.Columns.Length; LIndex++)
-						LNativeRow[LIndex] = LCurrentRow.HasValue(LIndex) ? LCurrentRow[LIndex].AsNative : null;
+						LNativeRow[LIndex] = LCurrentRow[LIndex];
 					LNativeRows.Add(LNativeRow);
 				}
 			}
@@ -340,8 +331,7 @@ namespace Alphora.Dataphor.DAE.Server
 			for (int LIndex = 0; LIndex < ANativeParams.Length; LIndex++)
 			{
 				NativeParam LNativeParam = ANativeParams[LIndex];
-				DataValue LParamValue = NativeValueToDataValue(AProcess, LNativeParam.DataTypeName, LNativeParam.Value);
-				DataParam LDataParam = new DataParam(LNativeParam.Name, LParamValue.DataType, NativeCLIUtility.NativeModifierToModifier(LNativeParam.Modifier), LParamValue);
+				DataParam LDataParam = new DataParam(LNativeParam.Name, DataTypeNameToScalarType(AProcess, LNativeParam.DataTypeName), NativeCLIUtility.NativeModifierToModifier(LNativeParam.Modifier), LNativeParam.Value);
 				LDataParams.Add(LDataParam);
 			}
 			return LDataParams;
@@ -355,7 +345,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if ((LNativeParam.Modifier == NativeModifier.Var) || (LNativeParam.Modifier == NativeModifier.Out))
 				{
 					DataParam LDataParam = ADataParams[LIndex];
-					LNativeParam.Value = (LDataParam.Value == null || LDataParam.Value.IsNil) ? null : LDataParam.Value.AsNative;
+					LNativeParam.Value = LDataParam.Value;
 				}
 			}
 		}
@@ -372,7 +362,7 @@ namespace Alphora.Dataphor.DAE.Server
 						Name = LDataParam.Name, 
 						DataTypeName = DataTypeToDataTypeName(AProcess, LDataParam.DataType),
 						Modifier = NativeCLIUtility.ModifierToNativeModifier(LDataParam.Modifier),
-						Value = (LDataParam.Value == null || LDataParam.Value.IsNil) ? null : LDataParam.Value.AsNative
+						Value = LDataParam.Value
 					};
 			}
 			return LNativeParams;
@@ -384,7 +374,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				DataParam LDataParam = ADataParams[LIndex];
 				if ((LDataParam.Modifier == Modifier.Var) || (LDataParam.Modifier == Modifier.Out))
-					LDataParam.Value = NativeValueToDataValue(AProcess, ANativeParams[LIndex].DataTypeName, ANativeParams[LIndex].Value);
+					LDataParam.Value = ANativeParams[LIndex].Value;
 			}
 		}
 	}

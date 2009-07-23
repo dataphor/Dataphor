@@ -110,8 +110,8 @@ namespace Alphora.Dataphor.DAE.Client
 							break;
 						if (!Fields[LDetailColumn].IsNil)
 						{
-							object LMasterValue = ADataSet[LMasterColumn].Value.AsNative;
-							object LDetailValue = Fields[LDetailColumn].Value.AsNative;
+							object LMasterValue = ADataSet[LMasterColumn];
+							object LDetailValue = Fields[LDetailColumn];
 							if (LMasterValue is IComparable)
 								LChanged = ((IComparable)LMasterValue).CompareTo(LDetailValue) != 0;
 							else

@@ -26,24 +26,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         public new AdornNode Node { get { return (AdornNode)FNode; } }
         
-		protected DataVar FSourceObject;        
 		protected Table FSourceTable;
 		protected Row FSourceRow;
-		protected DataVar FSourceRowObject;
 		protected bool FBOF;
         
         protected override void InternalOpen()
         {
-			FSourceObject = Node.Nodes[0].Execute(Process);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
 			try
 			{
-				FSourceTable = (Table)FSourceObject.Value;
 				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
-				FSourceRowObject = new DataVar(String.Empty, FSourceRow.DataType, FSourceRow);
 			}
 			catch
 			{
-				((Table)FSourceObject.Value).Dispose();
+				FSourceTable.Dispose();
 				throw;
 			}
 			FBOF = true;

@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			return new UserNode(ARow["ID"].AsString);
+			return new UserNode((string)ARow["ID"]);
 		}
 
 		#if ALLOWMANAGEUSERS		
@@ -97,7 +97,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
 		{
-			return ARow["ID"].AsString == Text;
+			return (string)ARow["ID"] == Text;
 		}
 
 		protected override string ViewDocument()

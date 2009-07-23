@@ -26,12 +26,12 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 {
 	public class SaveTableNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as SimpleDevice;
+			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as SimpleDevice;
 			if (LDevice == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.TableVar;
+			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.TableVar;
 			if (LTableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
 			LDevice.SaveTable(AProcess, LTableVar);
@@ -41,12 +41,12 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	
 	public class LoadTableNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as SimpleDevice;
+			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as SimpleDevice;
 			if (LDevice == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.TableVar;
+			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.TableVar;
 			if (LTableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
 			LDevice.LoadTable(AProcess, LTableVar);
@@ -56,12 +56,12 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	
 	public class TruncateTableNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as SimpleDevice;
+			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as SimpleDevice;
 			if (LDevice == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.TableVar;
+			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.TableVar;
 			if (LTableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
 			LDevice.TruncateTable(AProcess, LTableVar);
@@ -71,12 +71,12 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	
 	public class BeginUpdateNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as SimpleDevice;
+			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as SimpleDevice;
 			if (LDevice == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.TableVar;
+			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.TableVar;
 			if (LTableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
 			LDevice.BeginUpdate(AProcess, LTableVar);
@@ -86,12 +86,12 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	
 	public class EndUpdateNode : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[0].Value.AsString, true) as SimpleDevice;
+			SimpleDevice LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true) as SimpleDevice;
 			if (LDevice == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.SimpleDeviceExpected);
-			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, AArguments[1].Value.AsString, true) as Schema.TableVar;
+			Schema.TableVar LTableVar = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[1], true) as Schema.TableVar;
 			if (LTableVar == null)
 				throw new SimpleDeviceException(SimpleDeviceException.Codes.TableVarExpected);
 			LDevice.EndUpdate(AProcess, LTableVar);
@@ -167,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 				AProcess.Plan.PushSecurityContext(new SecurityContext(ATableVar.Owner));
 				try
 				{
-					Table LTable = Compiler.BindNode(AProcess.Plan, Compiler.EmitBaseTableVarNode(AProcess.Plan, ATableVar)).Execute(AProcess).Value as Table;
+					Table LTable = Compiler.BindNode(AProcess.Plan, Compiler.EmitBaseTableVarNode(AProcess.Plan, ATableVar)).Execute(AProcess) as Table;
 					try
 					{
 						LTable.Open();
@@ -284,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 
 		public new SimpleDevice Device { get { return (SimpleDevice)base.Device; } }
 		
-		protected override DataVar InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
 		{
 			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
 			{
@@ -296,7 +296,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 				if (LTableVar != null)
 					Device.LoadTable(ServerProcess, LTableVar);
 			}
-			DataVar LResult = base.InternalExecute(ADevicePlan);
+			object LResult = base.InternalExecute(ADevicePlan);
 			if (ADevicePlan.Node is CreateTableNode)
 			{
 				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;

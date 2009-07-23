@@ -373,7 +373,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 								LRow.CopyTo(LKey);
 								LColumnIndex = LRow.DataType.Columns.IndexOf(ColumnName);
 								if (LRow.HasValue(LColumnIndex))
-									LText = LRow[LColumnIndex].AsDisplayString;
+									LText = ((DAE.Runtime.Data.Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
 								else
 									LText = Strings.Get("NoValue");
 							}
@@ -431,11 +431,11 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				{
 					LName2 = AKey2.DataType.Columns[LIndex].Name;
 					if (AKey1.HasValue(LName2))
-						LCompareValue = AKey1[LName2].AsString;
+						LCompareValue = ((DAE.Runtime.Data.Scalar)AKey1.GetValue(LName2)).AsString;
 					else
 						LCompareValue = String.Empty;
 
-					if (AKey2[LIndex].AsString != LCompareValue)
+					if (((DAE.Runtime.Data.Scalar)AKey2.GetValue(LIndex)).AsString != LCompareValue)
 						return false;
 				}
 				return true;
@@ -754,7 +754,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 							LRow.CopyTo(LKey);
 							LColumnIndex = LRow.DataType.Columns.IndexOf(Tree.ColumnName);
 							if (LRow.HasValue(LColumnIndex))
-								LText = LRow[LColumnIndex].AsDisplayString;
+								LText = ((DAE.Runtime.Data.Scalar)LRow.GetValue(LColumnIndex)).AsDisplayString;
 							else
 								LText = Strings.Get("NoValue");
 						}
@@ -787,10 +787,10 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				{
 					LName = FKey.DataType.Columns[LIndex].Name;
 					if (AKey.HasValue(LName))
-						LCompareValue = AKey[LName].AsString;
+						LCompareValue = ((DAE.Runtime.Data.Scalar)AKey.GetValue(LName)).AsString;
 					else
 						LCompareValue = String.Empty;
-					if (FKey[LIndex].AsString != LCompareValue)
+					if (((DAE.Runtime.Data.Scalar)FKey.GetValue(LIndex)).AsString != LCompareValue)
 						return false;
 				}
 				return true;

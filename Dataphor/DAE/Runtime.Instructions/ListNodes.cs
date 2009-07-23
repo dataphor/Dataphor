@@ -40,12 +40,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Evaluate
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			ListValue LList = new ListValue(AProcess, ListType);
 			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-				LList.Add(Nodes[LIndex].Execute(AProcess).Value);
-			return new DataVar(DataType, LList);
+				LList.Add(Nodes[LIndex].Execute(AProcess));
+			return LList;
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 
 	// operator iIndexer(const AList : list, const AIndex : integer) : generic
-	public class IndexerNode : InstructionNode
+	public class IndexerNode : BinaryInstructionNode
 	{
 		public bool ByReference;
 		
@@ -70,17 +70,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = ((Schema.ListType)Nodes[0].DataType).ElementType;
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null || AArgument2 == null)
+				return null;
 			#endif
 			
 			if (ByReference)
-				return new DataVar(FDataType, ((ListValue)AArguments[0].Value)[AArguments[1].Value.AsInt32]);
+				return ((ListValue)AArgument1)[(int)AArgument2];
 
-			return new DataVar(FDataType, ((ListValue)AArguments[0].Value)[AArguments[1].Value.AsInt32].Copy());
+			return DataValue.CopyValue(AProcess, ((ListValue)AArgument1)[(int)AArgument2]);
 		}
 
 		public override Statement EmitStatement(EmitMode AMode)
@@ -94,31 +94,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 	
 	// operator Count(const AList : list) : integer;	
-	public class ListCountNode : InstructionNode
+	public class ListCountNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArgument1 == null)
+				return null;
 			#endif
 			
-			return new DataVar(FDataType, new Scalar(AProcess, AProcess.DataTypes.SystemInteger, ((ListValue)AArguments[0].Value).Count()));
+			return ((ListValue)AArgument1).Count();
 		}
 	}
 	
 	// operator Clear(var AList : list);
-	public class ListClearNode : InstructionNode
+	public class ListClearNode : UnaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
 		{
-			((ListValue)AArguments[0].Value).Clear();
+			((ListValue)AArgument1).Clear();
 			return null;
 		}
 	}
 	
 	// operator Add(var AList : list, AValue : generic) : integer;
-	public class ListAddNode : InstructionNode
+	public class ListAddNode : BinaryInstructionNode
 	{
 		public override void DetermineDataType(Plan APlan)
 		{
@@ -133,14 +133,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineDataType(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			return new DataVar(DataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, ((ListValue)AArguments[0].Value).Add(AArguments[1].Value)));
+			return ((ListValue)AArgument1).Add(AArgument2);
 		}
 	}
 	
 	// operator Insert(var AList : list, AValue : generic, AIndex : integer);
-	public class ListInsertNode : InstructionNode
+	public class ListInsertNode : TernaryInstructionNode
 	{
 		public override void DetermineDataType(Plan APlan)
 		{
@@ -155,34 +155,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineDataType(APlan);
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
 		{
-			((ListValue)AArguments[0].Value).Insert(AArguments[2].Value.AsInt32, AArguments[1].Value);
+			((ListValue)AArgument1).Insert((int)AArgument3, AArgument2);
 			return null;
 		}
 	}
 	
 	// operator RemoveAt(var AList : list, const AIndex : integer);
-	public class ListRemoveAtNode : InstructionNode
+	public class ListRemoveAtNode : BinaryInstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			((ListValue)AArguments[0].Value).RemoveAt(AArguments[1].Value.AsInt32);
+			((ListValue)AArgument1).RemoveAt((int)AArgument2);
 			return null;
 		}
 	}
 	
-	public class BaseListIndexOfNode : InstructionNode
+	public abstract class BaseListIndexOfNode : InstructionNode
 	{
 		public PlanNode FEqualNode; // The equality node used to compare each item in the list against AValue
 		
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			APlan.Symbols.Push(new DataVar("AValue", Nodes[1].DataType));
+			APlan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
 					FEqualNode = Compiler.CompileExpression(APlan, new BinaryExpression(new IdentifierExpression("AValue"), Instructions.Equal, new IdentifierExpression("ACompareValue")));
@@ -201,10 +201,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void InternalDetermineBinding(Plan APlan)
 		{
 			base.InternalDetermineBinding(APlan);
-			APlan.Symbols.Push(new DataVar("AValue", Nodes[1].DataType));
+			APlan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
 					FEqualNode.DetermineBinding(APlan);
@@ -220,12 +220,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected DataVar InternalSearch(ServerProcess AProcess, ListValue AList, DataVar AValue, int AStartIndex, int ALength, int AIncrementor)
+		protected object InternalSearch(ServerProcess AProcess, ListValue AList, object AValue, int AStartIndex, int ALength, int AIncrementor)
 		{
 			if (ALength < 0)
 				throw new RuntimeException(RuntimeException.Codes.InvalidLength, ErrorSeverity.Application);
 			if (ALength == 0)
-				return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -1));
+				return -1;
 
 			int LStartIndex = Math.Max(Math.Min(AStartIndex, AList.Count() - 1), 0);
 			int LEndIndex = Math.Max(Math.Min(AStartIndex + ((ALength - 1) * AIncrementor), AList.Count() - 1), 0);
@@ -236,17 +236,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				int LIndex = LStartIndex;
 				while (((AIncrementor > 0) && (LIndex <= LEndIndex)) || ((AIncrementor < 0) && (LIndex >= LEndIndex)))
 				{
-					AProcess.Context.Push(new DataVar(AList[LIndex].DataType, AList[LIndex]));
+					AProcess.Context.Push(AList[LIndex]);
 					try
 					{
-						DataValue LValue = FEqualNode.Execute(AProcess).Value;
-						#if NILPROPOGATION
-						if ((LValue == null) || LValue.IsNil)
-							return new DataVar(FDataType, null);
-						#endif
-						
-						if (LValue.AsBoolean)
-							return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LIndex));
+						object LValue = FEqualNode.Execute(AProcess);
+						if ((LValue != null) && (bool)LValue)
+							return LIndex;
 					}
 					finally
 					{
@@ -260,21 +255,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProcess.Context.Pop();
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, -1));
+			return -1;
 		}
 	}
 
 	// operator IndexOf(const AList : list, const AValue : generic);
 	public class ListIndexOfNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			ListValue LList = (ListValue)AArguments[0].Value;
+			ListValue LList = (ListValue)AArguments[0];
 			return InternalSearch(AProcess, LList, AArguments[1], 0, LList.Count(), 1);
 		}
 	}
@@ -282,43 +277,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer);
 	public class ListIndexOfStartNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
+				return null;
 			#endif
 			
-			ListValue LList = (ListValue)AArguments[0].Value;
-			return InternalSearch(AProcess, LList, AArguments[1], AArguments[2].Value.AsInt32, LList.Count(), 1);
+			ListValue LList = (ListValue)AArguments[0];
+			return InternalSearch(AProcess, LList, AArguments[1], (int)AArguments[2], LList.Count(), 1);
 		}
 	}
 
 	// operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer, const ALength : Integer);
 	public class ListIndexOfStartLengthNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil || (AArguments[3].Value == null) || AArguments[3].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
+				return null;
 			#endif
 			
-			return InternalSearch(AProcess, (ListValue)AArguments[0].Value, AArguments[1], AArguments[2].Value.AsInt32, AArguments[3].Value.AsInt32, 1);
+			return InternalSearch(AProcess, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], 1);
 		}
 	}
 
 	// operator LastIndexOf(const AList : list, const AValue : generic);
 	public class ListLastIndexOfNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null)
+				return null;
 			#endif
 			
-			ListValue LList = (ListValue)AArguments[0].Value;
+			ListValue LList = (ListValue)AArguments[0];
 			return InternalSearch(AProcess, LList, AArguments[1], LList.Count() - 1, LList.Count(), -1);
 		}
 	}
@@ -326,44 +321,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer);
 	public class ListLastIndexOfStartNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
+				return null;
 			#endif
 			
-			ListValue LList = (ListValue)AArguments[0].Value;
-			return InternalSearch(AProcess, LList, AArguments[1], AArguments[2].Value.AsInt32, LList.Count(), -1);
+			ListValue LList = (ListValue)AArguments[0];
+			return InternalSearch(AProcess, LList, AArguments[1], (int)AArguments[2], LList.Count(), -1);
 		}
 	}
 
 	// operator LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer, const ALength : Integer);
 	public class ListLastIndexOfStartLengthNode : BaseListIndexOfNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			#if NILPROPOGATION
-			if ((AArguments[0].Value == null) || AArguments[0].Value.IsNil || (AArguments[1].Value == null) || AArguments[1].Value.IsNil || (AArguments[2].Value == null) || AArguments[2].Value.IsNil || (AArguments[3].Value == null) || AArguments[3].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
+				return null;
 			#endif
 			
-			return InternalSearch(AProcess, (ListValue)AArguments[0].Value, AArguments[1], AArguments[2].Value.AsInt32, AArguments[3].Value.AsInt32, -1);
+			return InternalSearch(AProcess, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], -1);
 		}
 	}
 
 	// operator Remove(var AList : list, const AValue : generic);
-	public class ListRemoveNode : InstructionNode
+	public class ListRemoveNode : BinaryInstructionNode
 	{
 		public PlanNode FEqualNode; // The equality node used to compare each item in the list against AValue
 		
 		public override void DetermineDataType(Plan APlan)
 		{
 			base.DetermineDataType(APlan);
-			APlan.Symbols.Push(new DataVar("AValue", Nodes[1].DataType));
+			APlan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
 					FEqualNode = Compiler.CompileExpression(APlan, new BinaryExpression(new IdentifierExpression("AValue"), Instructions.Equal, new IdentifierExpression("ACompareValue")));
@@ -382,10 +377,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void InternalDetermineBinding(Plan APlan)
 		{
 			base.InternalDetermineBinding(APlan);
-			APlan.Symbols.Push(new DataVar("AValue", Nodes[1].DataType));
+			APlan.Symbols.Push(new Symbol("AValue", Nodes[1].DataType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ACompareValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 				try
 				{
 					FEqualNode.DetermineBinding(APlan);
@@ -401,20 +396,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			ListValue LList = (ListValue)AArguments[0].Value;
+			ListValue LList = (ListValue)AArgument1;
 			int LListIndex = -1;
-			AProcess.Context.Push(AArguments[1]);
+			AProcess.Context.Push(AArgument2);
 			try
 			{
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 				{
-					AProcess.Context.Push(new DataVar(LList[LIndex].DataType, LList[LIndex]));
+					AProcess.Context.Push(LList[LIndex]);
 					try
 					{
-						DataValue LValue = FEqualNode.Execute(AProcess).Value;
-						if ((LValue != null) && !LValue.IsNil && LValue.AsBoolean)
+						object LValue = FEqualNode.Execute(AProcess);
+						if ((LValue != null) && (bool)LValue)
 						{
 							LListIndex = LIndex;
 							break;
@@ -431,23 +426,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AProcess.Context.Pop();
 			}
 
-			((ListValue)AArguments[0].Value).RemoveAt(LListIndex);
+			((ListValue)AArgument1).RemoveAt(LListIndex);
 			return null;
 		}
 	}
 	
 	// operator iEqual(const ALeftList : list, const ARightList : list) : Boolean;
-	public class ListEqualNode : InstructionNode
+	public class ListEqualNode : BinaryInstructionNode
 	{
 		public PlanNode FEqualNode; // The equality node used to compare successive values in the lists
 		
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			APlan.Symbols.Push(new DataVar("ALeftValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+			APlan.Symbols.Push(new Symbol("ALeftValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
 				try
 				{
 					FEqualNode = Compiler.CompileExpression(APlan, new BinaryExpression(new IdentifierExpression("ALeftValue"), Instructions.Equal, new IdentifierExpression("ARightValue")));
@@ -466,10 +461,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void InternalDetermineBinding(Plan APlan)
 		{
 			base.InternalDetermineBinding(APlan);
-			APlan.Symbols.Push(new DataVar("ALeftValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
+			APlan.Symbols.Push(new Symbol("ALeftValue", ((Schema.ListType)Nodes[0].DataType).ElementType));
 			try
 			{
-				APlan.Symbols.Push(new DataVar("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
+				APlan.Symbols.Push(new Symbol("ARightValue", ((Schema.ListType)Nodes[1].DataType).ElementType));
 				try
 				{
 					FEqualNode.DetermineBinding(APlan);
@@ -485,34 +480,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			ListValue LLeftList = (ListValue)AArguments[0].Value;
-			ListValue LRightList = (ListValue)AArguments[1].Value;
+			ListValue LLeftList = (ListValue)AArgument1;
+			ListValue LRightList = (ListValue)AArgument2;
 			#if NILPROPOGATION
-			if ((LLeftList == null) || LLeftList.IsNil || (LRightList == null) || LRightList.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LLeftList == null) || (LRightList == null))
+				return null;
 			#endif
 			
 			bool LListsEqual = LLeftList.Count() == LRightList.Count();
 			if (LListsEqual)
 			{
-				DataValue LValue;
 				for (int LIndex = 0; LIndex < LLeftList.Count(); LIndex++)
 				{
-					AProcess.Context.Push(new DataVar(LLeftList[LIndex].DataType, LLeftList[LIndex]));
+					AProcess.Context.Push(LLeftList[LIndex]);
 					try
 					{
-						AProcess.Context.Push(new DataVar(LRightList[LIndex].DataType, LRightList[LIndex]));
+						AProcess.Context.Push(LRightList[LIndex]);
 						try
 						{
-							LValue = FEqualNode.Execute(AProcess).Value;
+							object LValue = FEqualNode.Execute(AProcess);
 							#if NILPROPOGATION
-							if ((LValue == null) || LValue.IsNil)
-								return new DataVar(FDataType, null);
+							if ((LValue == null))
+								return null;
 							#endif
 
-							LListsEqual = LValue.AsBoolean;
+							LListsEqual = (bool)LValue;
 							if (!LListsEqual)
 								break;
 						}
@@ -528,7 +522,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			return new DataVar(FDataType, new Scalar(AProcess, (Schema.ScalarType)FDataType, LListsEqual));
+			return LListsEqual;
 		}
 	}
 
@@ -562,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (!Nodes[1].IsLiteral)
 						throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, 2.ToString());
-					LColumnName = Nodes[1].Execute(APlan.ServerProcess).Value.AsString;
+					LColumnName = (string)Nodes[1].Execute(APlan.ServerProcess);
 					SystemNameSelectorNode.CheckValidName(LColumnName);
 				}
 				
@@ -575,7 +569,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (!Nodes[2].IsLiteral)
 					throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, "ASequenceName");
-				LSequenceName = Nodes[2].Execute(APlan.ServerProcess).Value.AsString;
+				LSequenceName = (string)Nodes[2].Execute(APlan.ServerProcess);
 				SystemNameSelectorNode.CheckValidName(LSequenceName);
 			}
 			
@@ -601,14 +595,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return ASequenceName + (ASequencePrefix == 0 ? "" : ASequencePrefix.ToString());
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(ServerProcess AProcess)
 		{
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
 			{
 				LResult.Open();
 				
-				using (ListValue LListValue = Nodes[0].Execute(AProcess).Value as ListValue)
+				using (ListValue LListValue = Nodes[0].Execute(AProcess) as ListValue)
 				{
 					if (LListValue.DataType.ElementType is Schema.RowType)
 					{
@@ -616,7 +610,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							Row LRow = new Row(AProcess, DataType.RowType);
 							(LListValue[LIndex] as Row).CopyTo(LRow);
-							LRow[DataType.RowType.Columns.Count - 1] = new Scalar(AProcess, AProcess.Plan.Catalog.DataTypes.SystemInteger, LIndex);
+							LRow[DataType.RowType.Columns.Count - 1] = LIndex;
 							LResult.Insert(LRow);
 						}
 					}
@@ -626,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							Row LRow = new Row(AProcess, DataType.RowType);
 							LRow[0] = LListValue[LIndex];
-							LRow[1] = new Scalar(AProcess, AProcess.Plan.Catalog.DataTypes.SystemInteger, LIndex);
+							LRow[1] = LIndex;
 							LResult.Insert(LRow);
 						}
 					}
@@ -634,7 +628,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				LResult.First();
 				
-				return new DataVar(LResult.DataType, LResult);
+				return LResult;
 			}
 			catch
 			{
@@ -645,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	}
 	
 	// operator ToList(const ATable : cursor) : list
-	public class TableToListNode : InstructionNode
+	public class TableToListNode : InstructionNodeBase
 	{
 		public override void DetermineDataType(Plan APlan)
 		{
@@ -677,17 +671,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ACursor.SwitchContext(AProcess);
 			}
 		}
-		
-		public override DataVar InternalExecute(ServerProcess AProcess)
+
+		public override object InternalExecute(ServerProcess AProcess)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(AProcess).Value).ID);
+			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(AProcess)).ID);
 			try
 			{
 				ListValue LListValue = new ListValue(AProcess, (Schema.IListType)FDataType);
 				while (CursorNext(AProcess, LCursor))
 					LListValue.Add(CursorSelect(AProcess, LCursor));
 
-				return new DataVar(FDataType, LListValue);
+				return LListValue;
 			}
 			finally
 			{

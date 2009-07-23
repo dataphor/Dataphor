@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		operator iIn(AValue : generic, AList : list) : boolean
 	*/
-	public class ValueInListNode : InstructionNode
+	public class ValueInListNode : BinaryInstructionNode
 	{
 		private PlanNode FEqualNode;
 		public PlanNode EqualNode
@@ -53,37 +53,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.ListType)Nodes[1].DataType).ElementType, 0, true));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			ListValue LList = (ListValue)AArguments[1].Value;
+			ListValue LList = (ListValue)AArgument2;
 			#if NILPROPOGATION
-			if ((LList == null) || LList.IsNil || (AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LList == null) || (AArgument1 == null))
+				return null;
 			#endif
 			
-			AProcess.Context.Push(AArguments[0]);
+			AProcess.Context.Push(AArgument1);
 			try
 			{
-				DataVar LDataVar = new DataVar(((Schema.ListType)LList.DataType).ElementType);
-				AProcess.Context.Push(LDataVar);
+				AProcess.Context.Push(null);
 				try
 				{
-					DataValue LResult = new Scalar(AProcess, (Schema.ScalarType)FDataType, false);
+					object LResult = false;
 					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 					{
-						LDataVar.Value = LList[LIndex];
-						DataValue LValue = FEqualNode.Execute(AProcess).Value;
+						AProcess.Context.Poke(0, LList[LIndex]);
+						object LValue = FEqualNode.Execute(AProcess);
 						#if NILPROPOGATION
-						if ((LValue == null) || LValue.IsNil)
+						if (LValue == null)
 						{
-							LResult = LValue;
+							LResult = null;
 							continue;
 						}
 						#endif
-						if (LValue.AsBoolean)
-							return new DataVar(DataType, LValue);
+						if ((bool)LValue)
+							return LValue;
 					}
-					return new DataVar(DataType, LResult);
+					return LResult;
 				}
 				finally
 				{
@@ -101,7 +100,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator iIn(ARow : row, ATable : table) : boolean;
 	// operator iIn(AScalar : scalar, APresentation : presentation) : boolean;
 	// operator iIn(AEntry : entry, APresentation : presentation) : boolean;
-	public class InTableNode : InstructionNode
+	public class InTableNode : BinaryInstructionNode
 	{
 		private PlanNode FEqualNode;
 		public PlanNode EqualNode
@@ -142,39 +141,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.TableType)Nodes[1].DataType).RowType, 0, true));
 		}
 		
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
 		{
-			Table LTable = (Table)AArguments[1].Value;
+			Table LTable = (Table)AArgument2;
 			#if NILPROPOGATION
-			if ((LTable == null) || LTable.IsNil || (AArguments[0].Value == null) || AArguments[0].Value.IsNil)
-				return new DataVar(FDataType, null);
+			if ((LTable == null) || (AArgument1 == null))
+				return null;
 			#endif
-			AProcess.Context.Push(AArguments[0]);
+			AProcess.Context.Push(AArgument1);
 			try
 			{
 				Row LRow = new Row(AProcess, LTable.DataType.RowType);
 				try
 				{
-					DataVar LDataVar = new DataVar(LRow.DataType, LRow);
-					AProcess.Context.Push(LDataVar);
+					AProcess.Context.Push(LRow);
 					try
 					{
-						DataValue LResult = new Scalar(AProcess, (Schema.ScalarType)FDataType, false);
+						object LResult = false;
 						while (LTable.Next())
 						{
 							LTable.Select(LRow);
-							DataValue LValue = FEqualNode.Execute(AProcess).Value;
+							object LValue = FEqualNode.Execute(AProcess);
 							#if NILPROPOGATION
-							if ((LValue == null) || LValue.IsNil)
+							if (LValue == null)
 							{
 								LResult = LValue;
 								continue;
 							}
 							#endif
-							if (LValue.AsBoolean)
-								return new DataVar(DataType, LValue);
+							if ((bool)LValue)
+								return LValue;
 						}
-						return new DataVar(DataType, LResult);
+						return LResult;
 					}
 					finally
 					{

@@ -425,7 +425,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		public override bool IsEqual(DAE.Runtime.Data.Row ARow)
 		{
-			return (ARow["Name"].AsString == FObjectName);
+			return ((string)ARow["Name"] == FObjectName);
 		}
 
 		public override string GetFilter()
@@ -496,7 +496,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			}
 
 			// Emit and execute the drop script
-			using (DAE.Runtime.Data.DataValue LScript = Dataphoria.EvaluateQuery(GetScriptDropExpression()))
+			using (DAE.Runtime.Data.Scalar LScript = (DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery(GetScriptDropExpression()))
 				Dataphoria.ExecuteScript(LScript.AsString);
 
 			ParentList.Refresh();

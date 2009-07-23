@@ -26,21 +26,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public new RedefineNode Node { get { return (RedefineNode)FNode; } }
         
-		protected DataVar FSourceObject;        
 		protected Table FSourceTable;
 		protected Row FSourceRow;
         
         protected override void InternalOpen()
         {
-			FSourceObject = Node.Nodes[0].Execute(Process);
+			FSourceTable = Node.Nodes[0].Execute(Process) as Table;
 			try
 			{
-				FSourceTable = (Table)FSourceObject.Value;
 				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
 			}
 			catch
 			{
-				((Table)FSourceObject.Value).Dispose();
+				FSourceTable.Dispose();
+				FSourceTable = null;
 				throw;
 			}
         }
@@ -83,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
             }
 
-	        Process.Context.Push(new DataVar(String.Empty, FSourceRow.DataType, FSourceRow));
+	        Process.Context.Push(FSourceRow);
             try
             {
 				for (int LIndex = 0; LIndex < Node.RedefineColumnOffsets.Length; LIndex++)
@@ -91,8 +90,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RedefineColumnOffsets[LIndex]].Name);
 					if (LColumnIndex >= 0)
 					{
-						DataVar LResult = Node.Nodes[LIndex + 1].Execute(Process);
-						ARow[LColumnIndex] = LResult.Value;
+						ARow[LColumnIndex] = Node.Nodes[LIndex + 1].Execute(Process);
 					}
 				}
             }

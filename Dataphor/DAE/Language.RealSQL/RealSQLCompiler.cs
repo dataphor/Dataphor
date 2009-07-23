@@ -1011,25 +1011,16 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 	// operator RealSQLToD4(ARealSQLStatement : string) : string;
 	public class RealSQLToD4Node : InstructionNode
 	{
-		public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			return 
-				new DataVar
-				(
-					FDataType, 
-					new Scalar
+				new D4.D4TextEmitter().Emit
+				(	
+					new Compiler().Compile
 					(
-						AProcess,
-						AProcess.DataTypes.SystemString, 
-						new D4.D4TextEmitter().Emit
-						(	
-							new Compiler().Compile
-							(
-								new Parser().ParseStatement
-								(
-									AArguments[0].Value.AsString
-								)
-							)
+						new Parser().ParseStatement
+						(
+							(string)AArguments[0]
 						)
 					)
 				);

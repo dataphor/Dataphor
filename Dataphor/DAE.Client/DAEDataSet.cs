@@ -432,7 +432,7 @@ namespace Alphora.Dataphor.DAE.Client
 			foreach (DataSetDataParam LParam in FCursor.Params)
 				if (LParam is SourceDataSetDataParam)
 					if (LParam.Modifier == Modifier.Var)
-						((SourceDataSetDataParam)LParam).SourceParam.Value = (Scalar)LParam.Value;
+						((SourceDataSetDataParam)LParam).SourceParam.Value = LParam.Value;
 		}
 		
 		/// <summary> Populates a given a (non null) DataParams collection with the actual params used by the DataSet. </summary>
@@ -1123,8 +1123,8 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
-		private Scalar FValue;
-		public Scalar Value
+		private object FValue;
+		public object Value
 		{
 			get { return FValue; }
 			set
@@ -1372,7 +1372,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public override void Bind(IServerProcess AProcess)
 		{
 			if (!Source.DataSet.IsEmpty() && Source.DataSet.Fields[ColumnName].HasValue())
-				Value = Source.DataSet.Fields[ColumnName].Value.Copy(AProcess);
+				Value = Source.DataSet.Fields[ColumnName].AsNative;
 		}
 	}
 	
@@ -1387,7 +1387,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public override void Bind(IServerProcess AProcess)
 		{
-			Value = SourceParam.Value.Copy(AProcess);
+			Value = SourceParam.Value;
 		}
 	}
 }
