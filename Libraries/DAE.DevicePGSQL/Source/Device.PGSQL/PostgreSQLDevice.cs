@@ -19,8 +19,6 @@ using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 
 namespace Alphora.Dataphor.Device.PGSQL
 {
-    
-
     #region Device
 
     public class PostgreSQLDevice : SQLDevice
@@ -59,7 +57,15 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FMajorVersion = value; }
         }
 
-        
+        public bool IsPostgreSQL70
+        {
+            set
+            {
+                if (value)
+                    FMajorVersion = 7;
+            }
+            get { return FMajorVersion == 7; }
+        }
 
         public bool IsAccess { set; get; }
 
@@ -153,7 +159,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 #else
                 RunScript(AProcess,
                           String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false",
-                                        "false", IsAccess.ToString().ToLower()));
+                                        IsPostgreSQL70.ToString().ToLower(), IsAccess.ToString().ToLower()));
 #endif
             }
         }
@@ -228,7 +234,7 @@ if not exists (select * from sysdatabases where name = '{0}')
                 EnsureDatabase(AProcess);
 
             // Run the initialization script, if specified
-            if (ShouldEnsureOperators)
+            if ((!IsPostgreSQL70) && ShouldEnsureOperators)
                 EnsureOperators(AProcess);
         }
 
@@ -495,8 +501,12 @@ if not exists (select * from sysdatabases where name = '{0}')
 									{2}
 								order by so.name, si.indid, sik.keyno
 						",
-                             "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
-                             "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
+                            IsPostgreSQL70
+                                ? "0 as IsDescending"
+                                : "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
+                            IsPostgreSQL70
+                                ? String.Empty
+                                : "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
                             ATableVar == null
                                 ? String.Empty
                                 : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar))
@@ -623,41 +633,44 @@ if not exists (select * from sysdatabases where name = '{0}')
 
             var LClassDefinition =
                 new ClassDefinition
-                    (
+                (
                     Device.ConnectionClass == String.Empty
                         ?
 #if USEADOCONNECTION
-						"ADOConnection.ADOConnection" : 
+						"ADOConnection.ADOConnection" 
 #else
 #if USEOLEDBCONNECTION
-						"Connection.OLEDBConnection" :
+						"Connection.OLEDBConnection"
 #else
  "Connection.PostgreSQLConnection"
-                        :
 #endif
 #endif
- Device.ConnectionClass
-                    );
+ : Device.ConnectionClass
+                );
+
             var LBuilderClass =
                 new ClassDefinition
-                    (
+                (
                     Device.ConnectionStringBuilderClass == String.Empty
                         ?
 #if USEADOCONNECTION
-						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder" :
+						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder"
 #else
 #if USEOLEDBCONNECTION
-						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder" :
+						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder"
 #else
  "PostgreSQLDevice.PostgreSQLADODotNetConnectionStringBuilder"
-                        :
 #endif
 #endif
- Device.ConnectionStringBuilderClass
+ : Device.ConnectionStringBuilderClass
                     );
+
             var LConnectionStringBuilder =
-                (ConnectionStringBuilder)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[] { });
+                (ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+                (
+                    LBuilderClass,
+                    new object[] { }
+                );
 
             var LTags = new Tags();
             LTags.AddOrUpdate("ServerName", Device.ServerName);
@@ -675,8 +688,11 @@ if not exists (select * from sysdatabases where name = '{0}')
             Device.GetConnectionParameters(LTags, DeviceSessionInfo);
             string LConnectionString = SQLDevice.TagsToString(LTags);
             return
-                (SQLConnection)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] { LConnectionString });
+                (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+                (
+                    LClassDefinition,
+                    new object[] { LConnectionString }
+                );
         }
     }
 
@@ -786,25 +802,25 @@ if not exists (select * from sysdatabases where name = '{0}')
         //public PostgreSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public PostgreSQLBoolean(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return AValue.AsBoolean ? "1" : "0";
+            return (bool)AValue ? "1" : "0";
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if (AValue is bool)
-                return new Scalar(AProcess, ScalarType, (bool)AValue);
+                return (bool)AValue;
             else
-                return new Scalar(AProcess, ScalarType, (int)AValue == 0 ? false : true);
+                return (int)AValue == 0 ? false : true;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsBoolean;
+            return (bool)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -829,16 +845,16 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             // According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
             // it is coming back as a short, I don't know why, maybe interop?
-            return new Scalar(AProcess, ScalarType, Convert.ToByte(AValue));
+            return Convert.ToByte(AValue);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsByte;
+            return (byte)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -863,14 +879,14 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue));
+            return Convert.ToDecimal(AValue);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsDecimal;
+            return (decimal)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -899,10 +915,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         private string FDateTimeFormat = CDateTimeFormat;
 
-        public PostgreSQLDateTime(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLDateTime(int AID, string AName) : base(AID, AName) { }
 
         public string DateTimeFormat
         {
@@ -910,12 +923,12 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FDateTimeFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             if (LValue == DateTime.MinValue)
                 LValue = MinValue;
             if (LValue < MinValue)
@@ -924,19 +937,19 @@ if not exists (select * from sysdatabases where name = '{0}')
             return String.Format("'{0}'", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             var LDateTime = (DateTime)AValue;
             // If the value is equal to the device's zero date, set it to Dataphor's zero date
             if (LDateTime == MinValue)
                 LDateTime = DateTime.MinValue;
             long LTicks = LDateTime.Ticks;
-            return new Scalar(AProcess, ScalarType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond)));
+            return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerSecond));
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date, set it to the Device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = MinValue;
@@ -967,10 +980,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         private string FDateFormat = CDateFormat;
 
-        public PostgreSQLDate(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLDate(int AID, string AName) : base(AID, AName) { }
 
         public string DateFormat
         {
@@ -978,12 +988,12 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FDateFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = PostgreSQLDateTime.MinValue;
@@ -993,19 +1003,19 @@ if not exists (select * from sysdatabases where name = '{0}')
             return String.Format("'{0}'", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             var LDateTime = (DateTime)AValue;
             // If the value is equal to the Device's zero date, set it to Dataphor's zero date
             if (LDateTime == PostgreSQLDateTime.MinValue)
                 LDateTime = DateTime.MinValue;
             long LTicks = LDateTime.Ticks;
-            return new Scalar(AProcess, ScalarType, new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay)));
+            return new DateTime(LTicks - (LTicks % TimeSpan.TicksPerDay));
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            DateTime LValue = AValue.AsDateTime;
+            DateTime LValue = (DateTime)AValue;
             // If the value is equal to Dataphor's zero date (Jan, 1, 0001), set it to the device's zero date
             if (LValue == DateTime.MinValue)
                 LValue = PostgreSQLDateTime.MinValue;
@@ -1036,10 +1046,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         private string FTimeFormat = CTimeFormat;
 
-        public PostgreSQLTime(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLTime(int AID, string AName) : base(AID, AName) { }
 
         public string TimeFormat
         {
@@ -1047,34 +1054,34 @@ if not exists (select * from sysdatabases where name = '{0}')
             set { FTimeFormat = value; }
         }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
             // Added 1899 years, so that a time can actually be stored. 
             // Adding 1899 years puts it at the year 1900
             // which is stored as zero in PostgreSQL.
             // this year value of 1900 may make some translation easier.
-            DateTime LValue = AValue.AsDateTime.AddYears(1899);
+            DateTime LValue = ((DateTime)AValue).AddYears(1899);
             if (LValue < PostgreSQLDateTime.MinValue)
                 throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
             return String.Format("'{0}'", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, new DateTime(((DateTime)AValue).Ticks % TimeSpan.TicksPerDay));
+            return new DateTime(((DateTime)AValue).Ticks % TimeSpan.TicksPerDay);
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
             // Added 1899 years, so that a time can actually be stored. 
             // Adding 1899 years puts it at the year 1900
             // which is stored as zero in PostgreSQL.
             // this year value of 1900 may make some translation easier.
-            DateTime LValue = AValue.AsDateTime.AddYears(1899);
+            DateTime LValue = ((DateTime)AValue).AddYears(1899);
             if (LValue < PostgreSQLDateTime.MinValue)
                 throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
             return LValue;
@@ -1098,30 +1105,27 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class PostgreSQLGuid : SQLScalarType
     {
-        public PostgreSQLGuid(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLGuid(int AID, string AName) : base(AID, AName) { }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return String.Format("'{0}'", AValue.AsGuid);
+            return String.Format("'{0}'", (Guid)AValue);
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
             if (AValue is string)
-                return new Scalar(AProcess, ScalarType, new Guid((string)AValue));
+                return new Guid((string)AValue);
             else
-                return new Scalar(AProcess, ScalarType, (Guid)AValue);
+                return (Guid)AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsGuid;
+            return (Guid)AValue;
         }
 
         public override SQLType GetSQLType(MetaData AMetaData)
@@ -1141,10 +1145,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class PostgreSQLText : SQLText
     {
-        public PostgreSQLText(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLText(int AID, string AName) : base(AID, AName) { }
 
         //public PostgreSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public PostgreSQLText(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1161,10 +1162,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class PostgreSQLBinary : SQLBinary
     {
-        public PostgreSQLBinary(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLBinary(int AID, string AName) : base(AID, AName) { }
 
         //public PostgreSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public PostgreSQLBinary(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1181,10 +1179,7 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class PostgreSQLGraphic : SQLGraphic
     {
-        public PostgreSQLGraphic(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLGraphic(int AID, string AName) : base(AID, AName) { }
 
         //public PostgreSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
         //public PostgreSQLGraphic(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
@@ -1201,27 +1196,24 @@ if not exists (select * from sysdatabases where name = '{0}')
     /// </summary>
     public class PostgreSQLPostgreSQLBinary : SQLScalarType
     {
-        public PostgreSQLPostgreSQLBinary(int AID, string AName)
-            : base(AID, AName)
-        {
-        }
+        public PostgreSQLPostgreSQLBinary(int AID, string AName) : base(AID, AName) { }
 
-        public override string ToLiteral(Scalar AValue)
+        public override string ToLiteral(object AValue)
         {
-            if ((AValue == null) || AValue.IsNil)
+            if (AValue == null)
                 return String.Format("cast(null as {0})", DomainName());
 
-            return String.Format("'{0}'", AValue.AsString);
+            return String.Format("'{0}'", Convert.ToBase64String((byte[])AValue));
         }
 
-        public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+        public override object ToScalar(IServerProcess AProcess, object AValue)
         {
-            return new Scalar(AProcess, ScalarType, AValue);
+            return (byte[])AValue;
         }
 
-        public override object FromScalar(Scalar AValue)
+        public override object FromScalar(object AValue)
         {
-            return AValue.AsByteArray;
+            return (byte[])AValue;
         }
 
         protected int GetLength(MetaData AMetaData)
@@ -1240,9 +1232,6 @@ if not exists (select * from sysdatabases where name = '{0}')
         }
     }
 
-
     #endregion
 
-
-	
 }
