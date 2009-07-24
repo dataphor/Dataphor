@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Server
 			/// <summary>Error code 106185: "Errors occurred while deserializing client cache time stamp ({0})."</summary>
 			CacheDeserializationError = 106185,
 			
-			/// <summary>Error code 106186: "Process aborted."</sumamry>
+			/// <summary>Error code 106186: "Process aborted."</summary>
 			ProcessAborted = 106186,
 			
 			/// <summary>Error code 106187: "Check table for table "{0}" could not be created."</summary>

@@ -128,7 +128,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		// Published
 
 		/// <summary> Action to be called upon executing. </summary> <doc/>
-		/// </summary> <doc/>
+		/// <doc/>
 		/// <value> <para>IAction: The name of an action.</para>
 		/// <para>Default: empty string</para></value>
 		/// <remarks> The action identified will be executed.  An error will occur 
@@ -400,21 +400,21 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> Determines whether or not to set the OpenState of the Source on the form being shown. </summary> <doc/>
 		/// <remarks> If UseOpenState is true, the OpenState of the main Source	on the form being shown will be set before
 		/// the form is activated to the DataSetState value corresponding to the Mode being used to show the form. </remarks>
-		/// <value> <para>Boolean: True|False</param>
+		/// <value> <para>Boolean: True|False</para>
 		/// <para>Default: true</para></value>
 		bool UseOpenState { get; set; }
 
 		/// <summary> Determines whether or not to set the IsWriteOnly property of the Source on the form being shown. </summary> <doc/>
 		/// <remarks> If ManageWriteOnly is true, the IsWriteOnly property of the main Source on the form being shown will be set before
 		/// the form is activated. If the form is being shown in Insert mode, IsWriteOnly will be set to true.</remarks>
-		/// <value> <para>Boolean: True|False</param>
+		/// <value> <para>Boolean: True|False</para>
 		/// <para>Default: true</para></value>
 		bool ManageWriteOnly { get; set; }
 
 		/// <summary> Determines whether or not to set the RefreshAfterPost property of the Source on the form being shown. </summary> <doc/>
 		/// <remarks> If ManageRefreshAfterPost is true, the RefreshAfterPost property of the main Source on the form being shown will be set
 		/// before the form is activated. If the form is being shown in Insert or Edit mode, RefreshAfterPost will be set to false.</remarks>		
-		/// <value> <para>Boolean: True|False</param>
+		/// <value> <para>Boolean: True|False</para>
 		/// <para>Default: true</para></value>
 		bool ManageRefreshAfterPost { get; set; }
 		
@@ -467,7 +467,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary> An action that will be executed after the form is activated, but before it is shown. </summary> <doc/>
 		/// <remarks> This event can be used to perform processing that needs to be done on the form before it is actually
 		/// displayed to the user, but that requires access to the data on the form. </remarks>
-		/// <value> <param>IAction: The name of an action.</para>
+		/// <value> <para>IAction: The name of an action.</para>
 		/// <para>Default (None)</para></value>
 		IAction AfterFormActivated { get; set; }
 	}
@@ -561,6 +561,7 @@ namespace Alphora.Dataphor.Frontend.Client
 	///				is actually contained within a frame of the current document.
 	///				</description>
 	///			</item>
+	///		</list>
 	///		</para>
 	/// </remarks>
 	/// <example> An example can be seen in the Sample.Components library

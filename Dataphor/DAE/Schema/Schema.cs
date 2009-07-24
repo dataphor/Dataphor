@@ -1084,7 +1084,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		private List<FullObjectHeader> FHeaders = new List<FullObjectHeader>();
 		
-		/// <summary>Stores the index of the header with a given ID.<summary>
+		/// <summary>Stores the index of the header with a given ID.</summary>
 		private Dictionary<int, int> FHeaderHash = new Dictionary<int, int>();
 		
 		public void Add(FullObjectHeader AHeader)

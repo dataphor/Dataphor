@@ -2,14 +2,23 @@
 <!-- 
 	Dataphor build.  Example Usage:
 		msbuild Dataphor.proj /p:Configuration=BaseDebug
+		msbuild Dataphor.proj /p:Configuration=Release /t:Rebuild
 -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 	</PropertyGroup>
+
+	<Target Name="CleanDataphor">
+		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" Targets="Clean" />
+	</Target>
 	
 	<Target Name="BuildDataphor">
-		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" />
+		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" Targets="Build" />
+	</Target>
+
+	<Target Name="RebuildDataphor">
+		<MSBuild Projects="Dataphor\Dataphor.sln" Properties="Configuration=$(Configuration)" Targets="Rebuild" />
 	</Target>
 
 	<ItemGroup>
@@ -18,6 +27,15 @@
 	<Target Name="CopyDataphor">
 		<Message Text="Copying bin files into deploy..." />
 		<Copy SourceFiles="@(BinFiles)" DestinationFolder="Deploy\Dataphor" />
+	</Target>
+
+
+	<ItemGroup>
+		<BinFilesToDelete Include="Dataphor\bin\*.*" Exclude="**\sql*.dll;**\*.xshd;**\*.vshost.exe" />
+	</ItemGroup>
+	<Target Name="DeleteBinFiles">
+		<Message Text="Deleting bin files..." />
+		<Delete Files="@(BinFilesToDelete)"/>
 	</Target>
 
 	<ItemGroup>
@@ -51,5 +69,11 @@
 	</Target>
 
 	<Target Name="Build" DependsOnTargets="BuildDataphor; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	</Target>
+
+	<Target Name="Rebuild" DependsOnTargets="RebuildDataphor; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	</Target>
+
+	<Target Name="Clean" DependsOnTargets="DeleteBinFiles; CleanDataphor">
 	</Target>
 </Project>

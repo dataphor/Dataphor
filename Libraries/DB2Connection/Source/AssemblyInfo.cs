@@ -61,7 +61,7 @@ using System.Runtime.CompilerServices;
 //
 [assembly: AssemblyDelaySign(false)]
 #if SIGNASSEMBLIES
-[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor\\KeyFile.snk")]
+[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor\\Dataphor.snk")]
 #else
 [assembly: AssemblyKeyFile("")]
 #endif

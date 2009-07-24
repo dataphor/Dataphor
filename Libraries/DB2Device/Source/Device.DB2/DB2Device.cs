@@ -1056,7 +1056,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 //		}
 //	}
 
-	/// < summary > 
+	/// <summary> 
 	///	DB2 type : TimeStamp
 	/// D4 type : SQLDate
 	///</summary>	

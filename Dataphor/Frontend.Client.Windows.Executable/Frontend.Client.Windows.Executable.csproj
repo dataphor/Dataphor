@@ -27,7 +27,7 @@
     <ManifestCertificateThumbprint>DC4B9358A665A5D9DAC32AF64ADCFB31F352851B</ManifestCertificateThumbprint>
     <ManifestKeyFile>Frontend.Client.Windows.Executable_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <OldToolsVersion>2.0</OldToolsVersion>
     <PublishUrl>C:\Documents and Settings\Administrator\Desktop\PG ClickOnce b\</PublishUrl>

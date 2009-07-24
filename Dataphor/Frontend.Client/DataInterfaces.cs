@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// the expression.</remarks>
 		/// <example><para>With table called Phone and a master that has a column 
 		/// named ID, the Expression could be written:</para>
-		/// <para> Phone where Employee_ID = AMasterID</example>
+		/// <para> Phone where Employee_ID = AMasterID</para></example>
 		bool WriteWhereClause { get; set; }
 
 		/// <summary>A custom D4 insert statement to be used to override the 

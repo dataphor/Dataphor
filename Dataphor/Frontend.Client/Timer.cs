@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <summary>The interval, in milliseconds between each OnElapsed 
 		/// call.</summary> <doc/>
 		/// <value><para>Double</para>
-		/// <para>Default: 100</para></value></value>
+		/// <para>Default: 100</para></value>
 		/// <remarks>Setting the interval when the timer is enabled has 
 		/// the effect of resetting the interval count.</remarks>
 		int Interval { get; set; }

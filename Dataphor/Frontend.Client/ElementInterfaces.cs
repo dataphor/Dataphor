@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		/// <summary> The pre-configured height of the image. </summary> <doc/>
 		/// <value><para>Integer</para>
-		/// <para>Default: 0</value>
+		/// <para>Default: 0</para></value>
 		/// <remarks> The height in pixels. 0 (zero) indicated the natural height of
 		/// the image is to be used.</remarks>
 		int ImageHeight { get; set; }
@@ -420,6 +420,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		TitleAlignment TitleAlignment { get; set; }
 	}
 
+	/// <remarks>
 	/// The row in the dataset that is the current row is indicated on the grid.
 	/// The current row can be changed by clicking on another row.  
 	/// A grid can display any number of columns but need not display 
