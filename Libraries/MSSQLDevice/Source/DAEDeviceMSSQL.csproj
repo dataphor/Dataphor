@@ -104,6 +104,7 @@
     <Compile Include="Device.MSSQL\MSSQLDevice.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Device.MSSQL\MSSQLInstructionNodes.cs" />
     <Compile Include="Device.MSSQL\MSSQLOperators.cs" />
     <Compile Include="Device.MSSQL\Register.cs">
       <SubType>Code</SubType>
