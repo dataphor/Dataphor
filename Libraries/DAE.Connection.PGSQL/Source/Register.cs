@@ -3,6 +3,8 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+using Alphora.Dataphor.DAE.Connection.PGSQL;
+
 namespace Alphora.Dataphor.DAE.Connection.Oracle
 {
 	using System;
@@ -19,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Connection.Oracle
 		{
 			SettingsList LClasses = new SettingsList();
 
-            LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "PGSQLConnection"), typeof(OracleConnection).AssemblyQualifiedName));
+            LClasses.Add(new SettingsItem(String.Format("{0}.{1}", CD4ClassDefinitionNameSpace, "PGSQLConnection"), typeof(PostgreSQLConnection).AssemblyQualifiedName));
 			
 			return LClasses;
 		}
