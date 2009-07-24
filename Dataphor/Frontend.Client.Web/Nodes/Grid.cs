@@ -741,26 +741,16 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 
 		protected virtual void SequenceChange(DAE.Runtime.Data.Row AFromRow, DAE.Runtime.Data.Row AToRow, bool AAbove)
 		{
-			if (ParentGrid.DataLink.Active)
-			{
-				DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-				try
-				{
-					foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns) 
-					{
-						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
-						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
-					}
-					LParams.Add(new DAE.Runtime.DataParam("AAbove", AFromRow.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(AFromRow.Process, AFromRow.Process.DataTypes.SystemBoolean, AAbove)));
-					HostNode.Session.ExecuteScript(FScript, LParams);
-					ParentGrid.DataLink.DataSet.Refresh();
-				}
-				finally
-				{
-					foreach (DAE.Runtime.DataParam LParam in LParams)
-						LParam.Value.Dispose();
-				}
-			}
+			SequenceColumnUtility.SequenceChange(HostNode.Session, ParentGrid.Source, FShouldEnlist, AFromRow, AToRow, AAbove, FScript);
+		}
+
+		private bool FShouldEnlist = true;
+		[DefaultValue(true)]
+		[Description("Enlist with the application transaction if there is one active.")]
+		public bool ShouldEnlist
+		{
+			get { return FShouldEnlist; }
+			set { FShouldEnlist = value; }
 		}
 
 		private DAE.Runtime.Data.Row FMovingRow = null;

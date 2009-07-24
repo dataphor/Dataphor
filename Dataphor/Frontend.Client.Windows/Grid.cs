@@ -403,17 +403,18 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			EventArgs AArgs
 		)
 		{
-			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-			foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns) 
-			{
-				LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
-				LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
-			}
-			LParams.Add(new DAE.Runtime.DataParam("AAbove", Source.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(Source.DataView.Process, Source.DataView.Process.DataTypes.SystemBoolean, AAbove)));
-			HostNode.Session.ExecuteScript(FScript, LParams);
-			Source.DataView.Refresh();
+			SequenceColumnUtility.SequenceChange(HostNode.Session, Source, FShouldEnlist, AFromRow, AToRow, AAbove, FScript);
 		}
 
+		private bool FShouldEnlist = true;
+		[DefaultValue(true)]
+		[Description("Enlist with the application transaction when running Script, if there is one active.")]
+		public bool ShouldEnlist
+		{
+			get { return FShouldEnlist; }
+			set { FShouldEnlist = value; }
+		}
+		
 		protected override void SetColumn(DAE.Client.Controls.GridColumn AValue)
 		{
 			if (Column != null)

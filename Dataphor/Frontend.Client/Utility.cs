@@ -307,4 +307,43 @@ namespace Alphora.Dataphor.Frontend.Client
 			return LResult.ToString();
 		}
 	}
+	
+	public sealed class SequenceColumnUtility
+	{
+		public static void SequenceChange(Client.Session ASession, ISource ASource, bool AShouldEnlist, DAE.Runtime.Data.Row AFromRow, DAE.Runtime.Data.Row AToRow, bool AAbove, string AScript)
+		{
+			if (!String.IsNullOrEmpty(AScript) && ASource != null)
+			{
+				Guid LEnlistWithATID = Guid.Empty;
+
+				if (AShouldEnlist && ASource.DataView.Active && ASource.DataView.ApplicationTransactionServer != null)
+					LEnlistWithATID = ASource.DataView.ApplicationTransactionServer.ApplicationTransactionID;
+
+				DAE.IServerProcess LProcess = ASession.DataSession.ServerSession.StartProcess(new DAE.ProcessInfo(ASession.DataSession.ServerSession.SessionInfo));
+				try
+				{
+					if (LEnlistWithATID != Guid.Empty)
+						LProcess.JoinApplicationTransaction(LEnlistWithATID, false);
+
+					// Prepare arguments
+					DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
+					foreach (DAE.Schema.Column LColumn in AFromRow.DataType.Columns)
+					{
+						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
+						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
+					}
+					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(ASource.DataView.Process, ASource.DataView.Process.DataTypes.SystemBoolean, AAbove)));
+
+					ASession.ExecuteScript(LProcess, AScript, LParams);
+				}
+				finally
+				{
+					ASession.DataSession.ServerSession.StopProcess(LProcess);
+				}
+
+				ASource.DataView.Refresh();
+			}
+		}
+
+	}
 }
