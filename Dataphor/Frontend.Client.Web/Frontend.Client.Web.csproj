@@ -32,26 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Alphora.Dataphor, Version=2.1.3147.38977, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Alphora.Dataphor.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.BOP, Version=2.1.3147.38978, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Alphora.Dataphor.BOP.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.DAE, Version=2.1.3149.41709, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Alphora.Dataphor.DAE.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.DAE.Client, Version=2.1.3149.41711, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Alphora.Dataphor.DAE.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.Frontend.Client, Version=2.1.3167.31152, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\Alphora.Dataphor.Frontend.Client.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -127,11 +107,9 @@
     <Compile Include="Nodes\DataElement.cs" />
     <Compile Include="Nodes\Element.cs" />
     <Compile Include="Nodes\Form.cs">
-      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="Nodes\Frame.cs" />
     <Compile Include="Nodes\Grid.cs">
-      <SubType>Actions</SubType>
     </Compile>
     <Compile Include="Nodes\Interface.cs" />
     <Compile Include="Nodes\Lookup.cs" />
@@ -184,6 +162,28 @@
       <DependentUpon>WebClientException.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BOP\BOP.csproj">
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Name>BOP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE.Client\DAE.Client.csproj">
+      <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
+      <Name>DAE.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE\DAE.csproj">
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Name>DAE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
+      <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
+      <Name>Frontend.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

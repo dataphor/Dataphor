@@ -75,21 +75,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Alphora.Dataphor, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.BOP, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.BOP.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.DAE, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\Dataphor\bin\Alphora.Dataphor.DAE.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -117,6 +102,18 @@
     <ProjectReference Include="..\..\..\Dataphor\DAE.SQLCE\DAE.SQLCE.csproj">
       <Project>{788980F0-5A85-4F9A-9E6A-56746E7D37C7}</Project>
       <Name>DAE.SQLCE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Name>BOP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Name>DAE</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

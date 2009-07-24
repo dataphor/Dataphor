@@ -74,18 +74,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Alphora.Dataphor">
-      <Name>Alphora.Dataphor</Name>
-      <HintPath>..\bin\Alphora.Dataphor.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.BOP">
-      <Name>Alphora.Dataphor.BOP</Name>
-      <HintPath>..\bin\Alphora.Dataphor.BOP.dll</HintPath>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.DAE">
-      <Name>Alphora.Dataphor.DAE</Name>
-      <HintPath>..\bin\Alphora.Dataphor.DAE.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -163,6 +151,18 @@
     <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
       <Project>{D054B27F-366C-4C4E-BA32-472BD14DC86D}</Project>
       <Name>Frontend.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Base\Base.csproj">
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BOP\BOP.csproj">
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Name>BOP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DAE\DAE.csproj">
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Name>DAE</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
