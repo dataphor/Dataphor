@@ -55,6 +55,7 @@
     <Compile Include="Device.PGSQL\PostgreSQLDevice.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Device.PGSQL\PostgreSQLInstructionNodes.cs" />
     <Compile Include="Language.PGSQL\Emitter.cs" />
     <Compile Include="Language.PGSQL\Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
