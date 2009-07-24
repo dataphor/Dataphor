@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
 using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
 using DropIndexStatement = Alphora.Dataphor.DAE.Language.PGSQL.DropIndexStatement;
 using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
@@ -20,22 +21,20 @@ using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 namespace Alphora.Dataphor.Device.PGSQL
 {
 
-    #region Instruction Nodes
-
-    public class PostgreSQLPostgreSQLBinaryCompareNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryCompareNode : BinaryInstructionNode
     {
-        public static int Compare(Scalar ALeftValue, Scalar ARightValue)
+        public static int Compare(ServerProcess AProcess, object ALeftValue, object ARightValue)
         {
-            Stream LLeftStream = ALeftValue.IsNative
-                                     ? new MemoryStream(ALeftValue.AsByteArray, 0, ALeftValue.AsByteArray.Length, false,
-                                                        true)
-                                     : ALeftValue.OpenStream();
+            Stream LLeftStream =
+                ALeftValue is byte[]
+                    ? new MemoryStream((byte[])ALeftValue, 0, ((byte[])ALeftValue).Length, false, true)
+                    : AProcess.StreamManager.Open((StreamID)ALeftValue, LockMode.Exclusive);
             try
             {
-                Stream LRightStream = ARightValue.IsNative
-                                          ? new MemoryStream(ARightValue.AsByteArray, 0, ARightValue.AsByteArray.Length,
-                                                             false, true)
-                                          : ARightValue.OpenStream();
+                Stream LRightStream =
+                    ARightValue is byte[]
+                        ? new MemoryStream((byte[])ARightValue, 0, ((byte[])ARightValue).Length, false, true)
+                        : AProcess.StreamManager.Open((StreamID)ARightValue, LockMode.Exclusive);
                 try
                 {
                     int LLeftByte;
@@ -69,100 +68,80 @@ namespace Alphora.Dataphor.Device.PGSQL
             }
         }
 
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              Compare((Scalar)AArguments[0].Value, (Scalar)AArguments[1].Value)));
+                return Compare(AProcess, AArgument1, AArgument2);
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryEqualNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryEqualNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) == 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) == 0;
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryNotEqualNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryNotEqualNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) != 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) != 0;
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryLessNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryLessNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) < 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) < 0;
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryInclusiveLessNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryInclusiveLessNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) <= 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) <= 0;
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryGreaterNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryGreaterNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) > 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) > 0;
         }
     }
 
-    public class PostgreSQLPostgreSQLBinaryInclusiveGreaterNode : InstructionNode
+    public class PostgreSQLPostgreSQLBinaryInclusiveGreaterNode : BinaryInstructionNode
     {
-        public override DataVar InternalExecute(ServerProcess AProcess, DataVar[] AArguments)
+        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
         {
-            if ((AArguments[0].Value == null) || (AArguments[1].Value == null))
-                return new DataVar(FDataType, null);
+            if ((AArgument1 == null) || (AArgument2 == null))
+                return null;
             else
-                return new DataVar(FDataType,
-                                   new Scalar(AProcess, (ScalarType)FDataType,
-                                              PostgreSQLPostgreSQLBinaryCompareNode.Compare((Scalar)AArguments[0].Value,
-                                                                                  (Scalar)AArguments[1].Value) >= 0));
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) >= 0;
         }
     }
 
-    #endregion
+    
 }
