@@ -60,9 +60,9 @@ using System.Runtime.CompilerServices;
 //       documentation for more information on this.
 //
 [assembly: AssemblyDelaySign(false)]
-#if DEBUG
-[assembly: AssemblyKeyFile("")]
+#if SIGNASSEMBLIES
+[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor\\Dataphor.snk")]
 #else
-[assembly: AssemblyKeyFile("..\\..\\..\\..\\..\\Dataphor\\KeyFile.snk")]
+[assembly: AssemblyKeyFile("")]
 #endif
 [assembly: AssemblyKeyName("")]

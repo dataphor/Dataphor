@@ -399,7 +399,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			/// <summary>Error code 113229: "Unable to determine a clustering order for table variable "{0}" because it has no non-sparse keys defined."</summary>
 			KeyRequired = 113229,
 			
-			/// <summary>Error code 113230: "Setting "{0}" is defined in at least the following libraries: {1}."
+			/// <summary>Error code 113230: "Setting "{0}" is defined in at least the following libraries: {1}."</summary>
 			AmbiguousLibrarySetting,
 			
 			/// <summary>Error code 113231: "Library "{0}" is registered and cannot be detached."</summary>

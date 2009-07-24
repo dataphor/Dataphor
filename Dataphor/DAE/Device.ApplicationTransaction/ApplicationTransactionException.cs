@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			/// <summary>Error Code 125109: "Table variable "{0}" is participating in at least one application transaction and cannot be altered or dropped."</summary>
 			TableVariableParticipating = 125109,
 			
-			/// <sumamry>Error Code 125110: "Operator "{0}" is participating in at least one application transaction and cannot be altered or dropped."</summary>
+			/// <summary>Error Code 125110: "Operator "{0}" is participating in at least one application transaction and cannot be altered or dropped."</summary>
 			OperatorParticipating = 125110
 		}
 
