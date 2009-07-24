@@ -29,6 +29,13 @@
 		<Copy SourceFiles="@(BinFiles)" DestinationFolder="Deploy\Dataphor" />
 	</Target>
 
+	<ItemGroup>
+		<DeployFiles Include="Deploy\**\*.*" />
+	</ItemGroup>
+	<Target Name="DeleteDeploy">
+		<Delete Files="@(DeployFiles)" />
+		<RemoveDir Directories="Deploy" />
+	</Target>
 
 	<ItemGroup>
 		<BinFilesToDelete Include="Dataphor\bin\*.*" Exclude="**\sql*.dll;**\*.xshd;**\*.vshost.exe" />
@@ -68,12 +75,12 @@
 		<Copy SourceFiles="@(DocumentationFiles)" DestinationFolder="Deploy\Documentation" />
 	</Target>
 
-	<Target Name="Build" DependsOnTargets="BuildDataphor; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	<Target Name="Build" DependsOnTargets="BuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
 	</Target>
 
-	<Target Name="Rebuild" DependsOnTargets="RebuildDataphor; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
+	<Target Name="Rebuild" DependsOnTargets="RebuildDataphor; DeleteDeploy; CopyDataphor; CopyLibraries; CopyWebClient; CopyDocumentation">
 	</Target>
 
-	<Target Name="Clean" DependsOnTargets="DeleteBinFiles; CleanDataphor">
+	<Target Name="Clean" DependsOnTargets="DeleteBinFiles; CleanDataphor; DeleteDeploy">
 	</Target>
 </Project>

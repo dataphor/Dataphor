@@ -75,21 +75,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Alphora.Dataphor">
-      <Name>Alphora.Dataphor</Name>
-      <HintPath>..\..\..\Dataphor\Bin\Alphora.Dataphor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.BOP">
-      <Name>Alphora.Dataphor.BOP</Name>
-      <HintPath>..\..\..\Dataphor\Bin\Alphora.Dataphor.BOP.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Alphora.Dataphor.DAE">
-      <Name>Alphora.Dataphor.DAE</Name>
-      <HintPath>..\..\..\Dataphor\Bin\Alphora.Dataphor.DAE.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="EIDMySql">
       <Name>EIDMySql</Name>
       <HintPath>..\..\..\..\Downloads\EIDMySql-Beta Three-042902\EIDMySql.dll</HintPath>
@@ -114,6 +99,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
+      <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
+      <Name>Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
+      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
+      <Name>BOP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
+      <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
+      <Name>DAE</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
       <Name>DAE.Connection</Name>
