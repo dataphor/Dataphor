@@ -36,7 +36,7 @@
     <ManifestCertificateThumbprint>BAB73A918AEDFF9C1D1884B99CFF2A38162A40A8</ManifestCertificateThumbprint>
     <ManifestKeyFile>Dataphoria_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <OldToolsVersion>2.0</OldToolsVersion>
     <PublishUrl>\\ibas\Dataphoria\</PublishUrl>
     <Install>true</Install>
