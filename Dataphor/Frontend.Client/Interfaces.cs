@@ -190,6 +190,14 @@ namespace Alphora.Dataphor.Frontend.Client
 		///	where XXX is the name of a column in the source.</para>
 		/// </remarks>
 		string Script { get; set; }
+
+		/// <summary>Enlist with the application transaction when running Script, 
+		/// if there is one active.</summary>
+		/// <remarks>If the associated Source is involved in an application transaction, 
+		/// setting this property to true will cause the script to be ran in that 
+		/// application transaction.
+		///		<para>Default: true</para> </remarks>
+		bool ShouldEnlist { get; set; }
 	}
 
 	public interface IDataGridColumn : IGridColumn
