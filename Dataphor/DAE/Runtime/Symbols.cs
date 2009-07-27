@@ -97,7 +97,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AOffset.ToString());
 			FStack[LIndex].FIsModified = true;
 			#else
-			FStack[FCount - 1 - AOffset].IsModified = true;
+			FStack[FCount - 1 - AOffset].FIsModified = true;
 			#endif
 		}
 		

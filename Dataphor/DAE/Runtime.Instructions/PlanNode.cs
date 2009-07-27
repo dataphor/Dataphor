@@ -5,7 +5,8 @@
 */
 
 //#define TRACEEVENTS // Enable this to turn on tracing
-#define WRAPRUNTIMEEXCEPTIONS
+#define WRAPRUNTIMEEXCEPTIONS // Determines whether or not runtime exceptions are wrapped
+//#define TRACKCALLDEPTH // Determines whether or not call depth tracking is enabled
 
 using System;
 using System.Text;
@@ -264,6 +265,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 				FDeviceSupported = false;
+				
+			if (FDeviceSupported)
+				Execute = new ExecuteDelegate(DeviceExecute);
 		}
 		
 		// IgnoreUnsupported -- only applies if DataType is not null
@@ -548,12 +552,76 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Nodes[LIndex].BindToProcess(APlan);
 		}
 		
+/*
 		protected virtual object ProtectedExecute(ServerProcess AProcess)
 		{
 			if (FDeviceSupported)
 				return AProcess.DeviceExecute(FDevice, this);
 			else
 				return InternalExecute(AProcess);
+		}
+*/
+		
+		protected object DeviceExecute(ServerProcess AProcess)
+		{
+			#if WRAPRUNTIMEEXCEPTIONS
+			try
+			{
+			#endif
+				AProcess.CheckAborted();
+				#if TRACKCALLDEPTH
+				AProcess.Context.IncCallDepth();
+				try
+				{
+				#endif
+					return AProcess.DeviceExecute(FDevice, this);
+				#if TRACKCALLDEPTH
+				}
+				finally
+				{
+					AProcess.Context.DecCallDepth();
+				}
+				#endif
+			#if WRAPRUNTIMEEXCEPTIONS
+			}
+			catch (RuntimeException LRuntimeException)
+			{
+				if (!LRuntimeException.HasContext())
+					LRuntimeException.SetContext(this);
+				throw LRuntimeException;
+			}
+			catch (ControlError LControlError)
+			{
+				throw LControlError;
+			}
+			catch (NullReferenceException LNullReferenceException)
+			{
+				throw new RuntimeException(RuntimeException.Codes.NilEncountered, LNullReferenceException, this);
+			}
+			catch (DataphorException LDataphorException)
+			{
+				if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
+					throw LDataphorException;
+				else
+					throw new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
+			}
+			catch (FormatException LFormatException)
+			{
+				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LFormatException.Message, LFormatException);
+			}
+			catch (ArgumentException LArgumentException)
+			{
+				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArgumentException.Message, LArgumentException);
+			}
+			catch (ArithmeticException LArithmeticException)
+			{
+				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArithmeticException.Message, LArithmeticException);
+			}
+			catch (Exception LException)
+			{
+				throw new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
+			}
+			#endif
 		}
 		
 		protected object StandardExecute(ServerProcess AProcess)
@@ -563,15 +631,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 			#endif
 				AProcess.CheckAborted();
+				#if TRACKCALLDEPTH
 				AProcess.Context.IncCallDepth();
 				try
 				{
-					return ProtectedExecute(AProcess);
+				#endif
+					return InternalExecute(AProcess);
+				#if TRACKCALLDEPTH
 				}
 				finally
 				{
 					AProcess.Context.DecCallDepth();
 				}
+				#endif
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
 			catch (RuntimeException LRuntimeException)
@@ -619,13 +691,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
         public abstract object InternalExecute(ServerProcess AProcess);
         
-/*
-        public virtual object InternalExecute(ServerProcess AProcess, object[] AArguments)
-        {
-			throw new RuntimeException(RuntimeException.Codes.InstructionExecuteNotSupported, GetType().Name);
-        }
-*/
-
 		#region ShowPlan
 
 		public virtual string Description

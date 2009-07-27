@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	// Root node for all join and semi operators
-	public class ConditionedTableNode : BinaryTableNode
+	public abstract class ConditionedTableNode : BinaryTableNode
 	{
 		protected Schema.JoinKey FLeftKey = new Schema.JoinKey();
 		public Schema.JoinKey LeftKey

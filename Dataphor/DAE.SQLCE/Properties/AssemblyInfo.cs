@@ -34,3 +34,11 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("2.2.*")]
 [assembly: AssemblyFileVersion("2.2.*")]
+
+[assembly: AssemblyDelaySign(false)]
+#if SIGNASSEMBLIES
+[assembly: AssemblyKeyFile("..\\..\\..\\..\\Dataphor.snk")]
+#else
+[assembly: AssemblyKeyFile("")]
+#endif
+[assembly: AssemblyKeyName("")]

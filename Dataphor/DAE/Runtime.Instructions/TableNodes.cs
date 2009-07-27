@@ -1800,6 +1800,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				APlan.AddDevicePlan(LDevicePlan);
 				FDeviceSupported = true;
+				Execute = new ExecuteDelegate(TableDeviceExecute);
 				CheckDeviceRights(APlan);
 				if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
 				{

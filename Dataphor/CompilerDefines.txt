@@ -20,6 +20,7 @@
 #define SKIPBETACHECK in Alphora.Dataphor.DAE to skip the beta time bomb check
 //#define SQLSTORETIMING in Alphora.Dataphor.DAE, store assemblies (currently disabled) // Enables timing tracking on the SQL Stores (accessible via the GetStoreCounters() system operator)
 //#define TRACEEVENTS in Alphora.Dataphor.DAE (currently disabled) // Enable this to turn on tracing
+//#define TRACKCALLDEPTH in Alphora.Dataphor.DAE (currently disabled) // Determines whether or not call depth tracking is enabled
 //#define USEADOCONNECTION in MSSQLDevice (currently disabled) // Uses the ADOConnection as the default connectivity implementation for the MSSQL device
 #define USEASYNCSTOPPROCESS in Alphora.Dataphor.DAE.Client to issue the stop process call asynchronously
 //#define USECLEANUPNODES in Alphora.Dataphor.DAE (currently disabled) // Part of cleanup processing, currently disabled because cleanup processing is done with InstructionNodeBase.CleanupOperand

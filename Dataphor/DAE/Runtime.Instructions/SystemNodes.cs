@@ -2531,7 +2531,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#if ACCUMULATOR			
 			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks - LAccumulator)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 			#else
-			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond))));
+			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 			#endif			
 		}
 	}
@@ -2570,7 +2570,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#if ACCUMULATOR						
 			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks - LAccumulator)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 			#else
-			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond))));
+			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 			#endif
 		}
 	}
