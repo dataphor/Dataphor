@@ -198,6 +198,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             this.FPasteToolStripMenuItem,
             this.FDeleteToolStripMenuItem,
             this.FRenameToolStripMenuItem});
+            this.FEditToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+            this.FEditToolStripMenuItem.MergeIndex = 1;
             this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
             this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.FEditToolStripMenuItem.Text = "Edit";
@@ -206,7 +208,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
             this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCutToolStripMenuItem.Text = "Cut";
             this.FCutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -214,7 +216,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
             this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FCopyToolStripMenuItem.Text = "Copy";
             this.FCopyToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -222,7 +224,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
             this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FPasteToolStripMenuItem.Text = "Paste";
             this.FPasteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -230,7 +232,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FDeleteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Delete;
             this.FDeleteToolStripMenuItem.Name = "FDeleteToolStripMenuItem";
-            this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FDeleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FDeleteToolStripMenuItem.Text = "Delete";
             this.FDeleteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -238,7 +240,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             this.FRenameToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Rename;
             this.FRenameToolStripMenuItem.Name = "FRenameToolStripMenuItem";
-            this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.FRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.FRenameToolStripMenuItem.Text = "Rename";
             this.FRenameToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
             // 
@@ -380,10 +382,11 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             // FormDesigner
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.CausesValidation = false;
             this.ClientSize = new System.Drawing.Size(687, 518);
-            this.Controls.Add(this.FToolStrip);
             this.Controls.Add(this.FMenuStrip);
+            this.Controls.Add(this.FToolStrip);
             this.Controls.Add(this.FDockPanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormDesigner";
