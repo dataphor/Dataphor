@@ -11,7 +11,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
         {
             // Add a block delimiter on the current line
 
-            Point LPosition = ATextArea.Caret.Position;
+            TextLocation LPosition = ATextArea.Caret.Position;
             LineSegment LSegment = ATextArea.Document.GetLineSegment(LPosition.Y);
             string LTextContent = ATextArea.Document.GetText(LSegment);
 
@@ -25,7 +25,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor.BlockActions
                 ATextArea.Document.Insert(LSegment.Offset, "//*");
                 if (LPosition.X == 0)
                 {
-                    ATextArea.Caret.Position = new Point(3, LPosition.Y);
+                    ATextArea.Caret.Position = new TextLocation(3, LPosition.Y);
                     ATextArea.SetDesiredColumn();
                 }
             }

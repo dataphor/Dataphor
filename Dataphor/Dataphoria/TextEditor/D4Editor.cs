@@ -25,6 +25,7 @@ using WeifenLuo.WinFormsUI.Docking;
 using DataSet=System.Data.DataSet;
 using Image=System.Drawing.Image;
 using SD = ICSharpCode.TextEditor;
+using ICSharpCode.TextEditor;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -419,16 +420,16 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             Dataphoria.ExecuteScript("SetLanguage('D4');");
         }
 
-        private Point GetSelectionPosition()
+        private TextLocation GetSelectionPosition()
         {
             if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
                 return FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
-            return Point.Empty;
+            return TextLocation.Empty;
         }
 
         private void ProcessErrors(ErrorList AErrors)
         {
-            Point LOffset = GetSelectionPosition();
+            TextLocation LOffset = GetSelectionPosition();
 
             for (int LIndex = AErrors.Count - 1; LIndex >= 0; LIndex--)
             {
@@ -695,8 +696,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                     new DefaultSelection
                         (
                         FTextEdit.Document,
-                        new Point(0, FTextEdit.ActiveTextAreaControl.Caret.Line),
-                        new Point(LLine.Length, FTextEdit.ActiveTextAreaControl.Caret.Line)
+                        new TextLocation(0, FTextEdit.ActiveTextAreaControl.Caret.Line),
+                        new TextLocation(LLine.Length, FTextEdit.ActiveTextAreaControl.Caret.Line)
                         )
                     );
                 return true;
@@ -764,7 +765,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
                 if (ALinePos < 1)
                     ALinePos = 1;
                 FTextEdit.ActiveTextAreaControl.SelectionManager.ClearSelection();
-                FTextEdit.ActiveTextAreaControl.Caret.Position = new Point(ALinePos - 1, ALine - 1);
+                FTextEdit.ActiveTextAreaControl.Caret.Position = new TextLocation(ALinePos - 1, ALine - 1);
                 FTextEdit.ActiveTextAreaControl.Caret.ValidateCaretPos();
                 FTextEdit.ActiveTextAreaControl.TextArea.SetDesiredColumn();
                 FTextEdit.ActiveTextAreaControl.Invalidate();

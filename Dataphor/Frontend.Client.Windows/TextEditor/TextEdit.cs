@@ -13,7 +13,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using ICSharpCode.TextEditor;
 using SD = ICSharpCode.TextEditor;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public string GetLineNumberText()
 		{
-			Point LPosition = ActiveTextAreaControl.Caret.Position;
+			TextLocation LPosition = ActiveTextAreaControl.Caret.Position;
 			return String.Format
 			(
 				"Ln {0} Col {1}", 
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			BeginUpdate();
 
-			Point LOldEndPoint = Document.OffsetToPosition(Document.TextLength);
+			TextLocation LOldEndPoint = Document.OffsetToPosition(Document.TextLength);
 			
 			bool LOldReadOnly = Document.ReadOnly;
 			Document.ReadOnly = false;
@@ -101,7 +101,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Document.UndoStack.ClearAll();
 			Document.BookmarkManager.Clear();
 			Document.UpdateQueue.Clear();
-			ActiveTextAreaControl.Caret.Position = Point.Empty;
+			ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
 			ActiveTextAreaControl.ScrollToCaret();
 			EndUpdate();
 
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			Document.UndoStack.ClearAll();
 			Document.BookmarkManager.Clear();
 			Document.UpdateQueue.Clear();
-			ActiveTextAreaControl.Caret.Position = Point.Empty;
+			ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
 			EndUpdate();
 
 			Refresh();
@@ -388,6 +388,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				ActiveTextAreaControl.SelectionManager.ClearSelection();
 
 			ActiveTextAreaControl.TextArea.BeginUpdate();
+            Document.UndoStack.StartUndoGroup();
 			try
 			{
 				while (LMatch.Success && (LMatch.Index >= LStartOffset))
@@ -400,13 +401,11 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			finally
 			{
 				ActiveTextAreaControl.TextArea.EndUpdate();
+                Document.UndoStack.EndUndoGroup();
 			}
+			
 
-			// Undo the entire replace-all, not the individual replacements
-			if (LCount > 0)
-				Document.UndoStack.CombineLast(LCount);
-
-			return LCount;
+		    return LCount;
 		}
 
 		#endregion
@@ -482,7 +481,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 	{
 		public override void Execute(SD.TextArea ATextArea)
 		{
-			Point LNewPos = ATextArea.Caret.Position;
+			TextLocation LNewPos = ATextArea.Caret.Position;
 			LNewPos.X = 0;
 			if (LNewPos != ATextArea.Caret.Position) 
 			{
