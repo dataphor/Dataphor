@@ -41,8 +41,9 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
 
         public override bool HasTable(string ATableName)
         {
-            string LStatement = String.Format("select TABLENAME from PG_TABLES where TABLENAME = '{0}'", ATableName);
-            return ((int)this.ExecuteScalar(LStatement) != 0);
+            string LStatement = String.Format("select count(*) from PG_TABLES where TABLENAME = '{0}'", ATableName);
+            var LTablesWithName = (int)this.ExecuteScalar(LStatement);
+            return (LTablesWithName != 0);
         }
     }
 }
