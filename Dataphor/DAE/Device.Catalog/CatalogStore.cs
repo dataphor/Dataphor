@@ -2629,29 +2629,36 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				object[] LObject = SelectObjectRow(LDependencyList[LDependencyIndex]);
 				if (LObject != null)
 				{
-					AHeaders.Add
-					(
-						new Schema.DependentObjectHeader
-						(
-							(int)LObject[0], // ID
-							(string)LObject[1], // Name
-							(string)LObject[2], // LibraryName
-							(string)LObject[3], // DisplayName
-							(string)LObject[4], // Description
-							(string)LObject[5], // ObjectType
-							(bool)LObject[6], // IsSystem 
-							(bool)LObject[7], // IsRemotable
-							(bool)LObject[8], // IsGenerated
-							(bool)LObject[9], // IsATObject
-							(bool)LObject[10], // IsSessionObject
-							(bool)LObject[11], // IsPersistent
-							(int)LObject[12], // CatalogObjectID
-							(int)LObject[13], // ParentObjectID,
-							(int)LObject[14], // GeneratorObjectID,
-							ALevel, // Level
-							AHeaders.Count + 1 // Sequence
-						)
-					);
+				    var LID = (int)LObject[0];
+				    var LName = (string)LObject[1];
+                    var LLibraryName = (string)LObject[2];
+				    var LDisplayName = (string)LObject[3];
+				    var LDescription = (string)LObject[4];
+				    var LObjectType = (string)LObject[5];
+				    var LIsSystem = (bool)LObject[6];
+				    var LIsRemotable = (bool)LObject[7];
+				    var LIsGenerated = (bool)LObject[8];
+				    var LIsATObject = (bool)LObject[9];
+				    var LIsSessionObject = (bool)LObject[10];
+				    var LIsPersistent = (bool)LObject[11];
+				    var LCatalogObjectID = (int)LObject[12];
+				    var LParentObjectID = (int)LObject[13];
+				    var LGeneratorObjectID = (int)LObject[14];
+				    var LHeader = new Schema.DependentObjectHeader
+				        (
+                            LID, LName, 
+                            LLibraryName, LDisplayName, 
+                            LDescription, LObjectType, 
+				            LIsSystem,  LIsRemotable, 
+				            LIsGenerated, LIsATObject,
+				            LIsSessionObject, LIsPersistent, 
+				            LCatalogObjectID, LParentObjectID,
+                            LGeneratorObjectID, 
+				            ALevel,
+				            AHeaders.Count + 1 
+				        );
+				    
+                    AHeaders.Add(LHeader);
 					
 					if (ARecursive)
 						SelectObjectDependents(LDependencyList[LDependencyIndex], ALevel + 1, AHeaders, ARecursive);
