@@ -38,12 +38,12 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
             return new SqlConnection(Store.ConnectionString);
         }
         #endif
-
-        public override bool HasTable(string ATableName)
+HasTable
+        public override bool (string ATableName)
         {
-            string LStatement = String.Format("select count(*) from PG_TABLES where TABLENAME = '{0}'", ATableName);
-            var LTablesWithName = (int)this.ExecuteScalar(LStatement);
-            return (LTablesWithName != 0);
+            string LStatement = String.Format("select count(*)>0 from PG_TABLES where TABLENAME = '{0}'", ATableName);
+            bool LTableExists = (bool) this.ExecuteScalar(LStatement);
+            return LTableExists;           
         }
     }
 }
