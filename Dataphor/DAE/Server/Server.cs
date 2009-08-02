@@ -655,6 +655,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Exception WrapException(Exception AException)
 		{			
+            SRFLogger.WriteLine(TraceLevel.Verbose,"Wrapped Exception {0}",AException);
             if (FLogErrors)
 				LogError(AException);
 				
