@@ -123,12 +123,12 @@ create table DAEObjects
 	DisplayName character varying(200) not null,
 	Description character varying(200) not null,
 	Type character varying(80) not null,
-	IsSystem boolean not null default 0, -- check (IsSystem in (0, 1)),
-	IsRemotable boolean not null default 0, -- check (IsRemotable in (0, 1)),
-	IsGenerated boolean not null default 0, -- check (IsGenerated in (0, 1)),
-	IsATObject boolean not null default 0, -- check (IsATObject in (0, 1)),
-	IsSessionObject boolean not null default 0, -- check (IsSessionObject in (0, 1)),
-	IsPersistent boolean not null default 0, -- check (IsPersistent in (0, 1)),
+	IsSystem boolean not null default false, -- check (IsSystem in (0, 1)),
+	IsRemotable boolean not null default false, -- check (IsRemotable in (0, 1)),
+	IsGenerated boolean not null default false, -- check (IsGenerated in (0, 1)),
+	IsATObject boolean not null default false, -- check (IsATObject in (0, 1)),
+	IsSessionObject boolean not null default false, -- check (IsSessionObject in (0, 1)),
+	IsPersistent boolean not null default false, -- check (IsPersistent in (0, 1)),
 	Catalog_Object_ID int null,
 	Parent_Object_ID int null,
 	Generator_Object_ID int null,
@@ -426,7 +426,7 @@ create table DAERoleRightAssignments
 (
 	Role_ID int not null,
 	Right_Name character varying(200) not null,
-	IsGranted boolean not null default 0, -- check (IsGranted in (0, 1)),
+	IsGranted boolean not null default false, -- check (IsGranted in (0, 1)),
 	constraint PK_DAERoleRightAssignments primary key (Role_ID, Right_Name)
 	--reference RoleRightAssignments_Roles { Role_ID } references Roles { ID },
 	--reference RoleRightAssignmetns_Right { Right_Name } references Rights { Name }
@@ -446,7 +446,7 @@ create table DAEUserRightAssignments
 (
 	User_ID character varying(200) not null,
 	Right_Name character varying(200) not null,
-	IsGranted boolean not null default 0, -- check (IsGranted in (0, 1)),
+	IsGranted boolean not null default false, -- check (IsGranted in (0, 1)),
 	constraint PK_DAEUserRightAssignments primary key (User_ID, Right_Name)
 	--reference UserRightAssignments_Users { User_ID } references Users { ID },
 	--reference UserRightAssignments_Rights { Right_Name } references Rights { Name }
