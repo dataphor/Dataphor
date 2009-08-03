@@ -5,18 +5,23 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 
 using Alphora.Dataphor;
+using Alphora.Dataphor.Logging;
 
 namespace Alphora.Dataphor.DAE.Connection
 {
 	// Provides the behavior template for a connection to an SQL-based DBMS
 	public abstract class SQLConnection : Disposable
 	{
+
+	    private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(SQLConnection));
+
 		protected abstract SQLCommand InternalCreateCommand();
 		public SQLCommand CreateCommand(bool AIsCursor)
 		{
@@ -224,7 +229,9 @@ namespace Alphora.Dataphor.DAE.Connection
 
 		public void WrapException(Exception AException, string AStatement, bool AMustThrow)
 		{
-			if (!IsConnectionValid())
+            SRFLogger.WriteLine(TraceLevel.Verbose, "Wrapped Exception {0}", AException);
+            
+            if (!IsConnectionValid())
 			{
 				if (InTransaction)
 					FTransactionFailure = true;
