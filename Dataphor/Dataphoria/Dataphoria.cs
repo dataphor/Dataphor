@@ -35,12 +35,6 @@ namespace Alphora.Dataphor.Dataphoria
     {
         public const string CConfigurationFileName = "Dataphoria{0}.config";
 
-        private DataTree FExplorer;
-        private ErrorListView FErrorListView;
-
-        private DockContent FDockContentFExplorer;
-        private DockContent FDockContentErrorListView;
-
         public Dataphoria()
 		{
 			InitializeComponent();
@@ -50,51 +44,43 @@ namespace Alphora.Dataphor.Dataphoria
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
             FExplorer = new DataTree();
-            this.FExplorer.AllowDrop = true;
-            this.FExplorer.BorderStyle = BorderStyle.None;
-            this.FExplorer.CausesValidation = false;
-            this.FExplorer.HideSelection = false;
-            this.FExplorer.ImageIndex = 0;
-            this.FExplorer.ImageList = this.FTreeImageList;
-            
-            this.FExplorer.Name = "FExplorer";
-            this.FExplorer.SelectedImageIndex = 0;
-            this.FExplorer.ShowRootLines = false;            
-            this.FExplorer.TabIndex = 1;
-            this.FExplorer.HelpRequested += this.FExplorer_HelpRequested;
-
-            FErrorListView = new ErrorListView();
-
-			// Configure tree
+            FExplorer.AllowDrop = true;
+            FExplorer.BorderStyle = BorderStyle.None;
+            FExplorer.CausesValidation = false;
+            FExplorer.HideSelection = false;
+            FExplorer.ImageIndex = 0;
+            FExplorer.ImageList = FTreeImageList;
+            FExplorer.Name = "FExplorer";
+            FExplorer.SelectedImageIndex = 0;
+            FExplorer.ShowRootLines = false;            
+            FExplorer.TabIndex = 1;
+            FExplorer.HelpRequested += FExplorer_HelpRequested;
 			FExplorer.Dataphoria = this;
-            FExplorer.Select();
-
+			FExplorer.Select();
+			
+			FErrorListView = new ErrorListView();
             FErrorListView.OnErrorsAdded += ErrorsAdded;
             FErrorListView.OnWarningsAdded += WarningsAdded;
 
-            FDockContentFExplorer = new DockContent();
-
-            FExplorer.Dock = DockStyle.Fill;
-            FDockContentFExplorer.Controls.Add(FExplorer);
-            FDockContentFExplorer.HideOnClose = true;
-            FDockContentFExplorer.TabText = "Dataphoria Explorer";
-            FDockContentFExplorer.Text = "DataTree Explorer - Dataphoria";
-            FDockContentFExplorer.ShowHint = DockState.DockLeft;
+			FExplorer.Dock = DockStyle.Fill;
+			FDockContentExplorer = new DockContent();
+            FDockContentExplorer.Controls.Add(FExplorer);
+            FDockContentExplorer.HideOnClose = true;
+            FDockContentExplorer.TabText = "Dataphoria Explorer";
+            FDockContentExplorer.Text = "DataTree Explorer - Dataphoria";
+            FDockContentExplorer.ShowHint = DockState.DockLeft;
 
             FDockContentErrorListView = new DockContent();
 
             FErrorListView.Dock = DockStyle.Fill;
-            FDockContentFExplorer.HideOnClose = true;
+			FDockContentErrorListView.HideOnClose = true;
             FDockContentErrorListView.Controls.Add(FErrorListView);
             FDockContentErrorListView.TabText = "Dataphoria Error List";
             FDockContentErrorListView.Text = "Error List - Dataphoria";
             FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
-            FDockContentFExplorer.Show(this.FDockPanel);
+            FDockContentExplorer.Show(this.FDockPanel);
             FDockContentErrorListView.Show(this.FDockPanel);
-
-			//FTabbedMDIManager = new TabbedMDIManager();
-			//FTabbedMDIManager.AttachToMdiContainer(this);
 
 			LoadSettings();
 		}
@@ -105,6 +91,12 @@ namespace Alphora.Dataphor.Dataphoria
 			AArgs.Cancel = false;
 			base.OnClosing(AArgs);
 		}
+
+		private DataTree FExplorer;
+		private ErrorListView FErrorListView;
+
+		private DockContent FDockContentExplorer;
+		private DockContent FDockContentErrorListView;
 
 		#region Settings
 
@@ -271,10 +263,11 @@ namespace Alphora.Dataphor.Dataphoria
 								try
 								{
 									FServerNode.Expand();
-								    FDockContentFExplorer.DockState=DockState.DockLeftAutoHide;
 								    FConnectToolStripMenuItem.Visible = false;
 								    FDisconnectToolStripMenuItem.Visible = true;									
 									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
+									FDockContentExplorer.Show();
+									FExplorer.Focus();
 								}
 								catch
 								{
@@ -319,9 +312,6 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			using (StatusForm LStatusForm = new StatusForm(Strings.Disconnecting))
 			{
-				//if (FTabbedMDIManager != null)
-				//	DisposeChildren();		// Don't CloseChildren(), we already did that in Disconnect()
-
 				if (FDataSession != null)
 				{
 					try
@@ -329,7 +319,7 @@ namespace Alphora.Dataphor.Dataphoria
 						Text = Strings.DataphoriaTitle;
 						FConnectToolStripMenuItem.Visible = true;
                         FDisconnectToolStripMenuItem.Visible = false;						
-                        FDockContentFExplorer.Hide();
+                        FDockContentExplorer.Hide();
 
                         FExplorer.Nodes.Clear();
 						FServerNode = null;
@@ -1422,8 +1412,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void ShowDataphorExplorer()
 		{
-			FDockContentFExplorer.Show(FDockPanel);
-            FDockContentFExplorer.Activate();            
+			FDockContentExplorer.Show(FDockPanel);
+            FDockContentExplorer.Activate();            
 		}
 
 		public void LaunchAlphoraWebsite()
@@ -1534,9 +1524,5 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#endregion
-
-
-
-
     }
 }
