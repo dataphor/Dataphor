@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 /*
 	public abstract class NativeRowIndex : System.Object {}
 	
+	#if USETYPEDLIST
 	public class NativeRowIndexList : TypedList
 	{
 		public NativeRowIndexList() : base(typeof(NativeRowIndex)) {}
@@ -37,8 +38,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class NativeRowIndexList : BaseList<NativeRowIndex> { }
+	#endif
 */
 	
+	#if USETYPEDLIST
 	public class NativeRowTreeList : TypedList
 	{
 		public NativeRowTreeList() : base(typeof(NativeRowTree)) {}
@@ -49,6 +54,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { base[AIndex] = value; }
 		}
 
+	#else
+	public class NativeRowTreeList : BaseList<NativeRowTree>
+	{
+	#endif
 		public int IndexOf(Schema.Order AKey)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
@@ -69,6 +78,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// Provides a storage structure for the search path followed by the find key in terms of index nodes.
 	/// See the description of the FindKey method for the Index class for more information.
 	/// </remarks>
+	#if USETYPEDLIST
 	public class RowTreeSearchPath : DisposableTypedList
 	{
 		public RowTreeSearchPath() : base(typeof(RowTreeNode), true, false){}
@@ -78,9 +88,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			get { return (RowTreeNode)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+	
+	#else
+	public class RowTreeSearchPath : DisposableList<RowTreeNode>
+	{
+	#endif
 		public RowTreeNode DataNode { get { return this[Count - 1]; } }
 		
+		#if USETYPEDLIST
 		public new RowTreeNode RemoveAt(int AIndex)
 		{
 			return (RowTreeNode)base.RemoveItemAt(AIndex);
@@ -90,6 +105,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			return (RowTreeNode)base.DisownAt(AIndex);
 		}
+		#endif
 	}
 	
 	public class RowTreeNode : Disposable

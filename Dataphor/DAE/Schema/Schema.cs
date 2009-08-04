@@ -41,11 +41,11 @@ namespace Alphora.Dataphor.DAE.Schema
     /// <remarks>This class is used to track dependencies for catalog objects while they are in the cache.</remarks>
     public class ObjectList : System.Object, ICollection<int>
     {
-		private List<int> FIDs = new List<int>(4);
+		private List<int> FIDs = new List<int>(0);
 		/// <summary>Provides access to the IDs of the objects in the list, by index.</summary>
 		public List<int> IDs { get { return FIDs; } }
 		
-		private List<Schema.Object> FObjects = new List<Schema.Object>(4);
+		private List<Schema.Object> FObjects = new List<Schema.Object>(0);
 		/// <summary>Provides access to the references to the objects in the list, by index.</summary>
 		/// <remarks>Note that the object reference may be null if it has not yet been resolved to an actual object reference in the catalog.</remarks>
 		public List<Schema.Object> Objects { get { return FObjects; } }
@@ -221,6 +221,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public int ID { get { return FID; } }
 		
 		// Library
+		[Reference]
 		protected LoadedLibrary FLibrary;
 		public LoadedLibrary Library
 		{
@@ -274,6 +275,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Generator
+		[Reference]
 		private Schema.Object FGenerator;
 		/// <summary>A reference to the object that generated this object.</summary>
 		/// <remarks>Should only be accessed directly for management. To select the generator, use ResolveGenerator.</remarks>
@@ -309,7 +311,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadGeneratorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.GeneratorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FGeneratorID = Int32.Parse(LTag.Value);
 		}
 		
@@ -328,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadIsGenerated()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsGenerated");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FIsGenerated = Boolean.Parse(LTag.Value);
 		}
 
@@ -363,6 +365,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public virtual bool IsPersistent { get { return false; } }
 
 		// Objects that this object depends on
+		[Reference]
 		private ObjectList FDependencies;
 		public ObjectList Dependencies 
 		{ 
@@ -718,7 +721,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public static int GetObjectID(MetaData AMetaData)
 		{
 			Tag LTag = MetaData.RemoveTag(AMetaData, "DAE.ObjectID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				return Int32.Parse(LTag.Value);
 			return GetNextObjectID();
 		}
@@ -886,6 +889,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return (LObject != null) && (FID == LObject.ID);
 		}
 		
+		[Reference]
 		private Schema.Object FObject;
 		public Schema.Object ResolveObject(ServerProcess AProcess)
 		{
@@ -1231,6 +1235,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public string OwnerID { get { return FOwnerID; } }
 	}
 	
+	#if USETYPEDLIST
     public class IntegerList : System.Object
     {
 		public const int CDefaultInitialCapacity = 4;
@@ -1340,7 +1345,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return IndexOf(AValue) >= 0;
 		}
     }
-    
+
     public class Hashtables : System.Object
     {
 		public const int CDefaultInitialCapacity = 4;
@@ -1444,14 +1449,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			return IndexOf(AValue) >= 0;
 		}
     }
+	#else
+	public class IntegerList : BaseList<int> { }
 
-	public delegate void SchemaObjectListEventHandler(object ASender, Object AItem);
+	public class Hashtables : BaseList<Hashtable> { }
+	#endif
 
     public class Objects : System.Object, IList
     {
 		private const int CDefaultInitialCapacity = 0;
-		private const int CDefaultLowerBoundGrowth = 4;
-		private const int CDefaultRolloverCount = 20;
+		private const int CDefaultLowerBoundGrowth = 1;
+		private const int CDefaultRolloverCount = 100;
 		
 		private Object[] FItems;
 		private int FCount;
@@ -1916,15 +1924,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public event SchemaObjectListEventHandler OnValidate;
-		public event SchemaObjectListEventHandler OnAdding;
-		public event SchemaObjectListEventHandler OnRemoving;
-		
 		protected virtual void Validate(Object AObject)
 		{
-			if (OnValidate != null)
-				OnValidate(this, AObject);
-				
 			#if USEOBJECTVALIDATE
 			if (AObject.Name == String.Empty)
 				throw new SchemaException(SchemaException.Codes.ObjectNameRequired);
@@ -1995,9 +1996,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		protected virtual void Adding(Object AObject, int AIndex)
 		{
-			if (OnAdding != null)
-				OnAdding(this, AObject);
-				
 			if (IsRolledOver)
 			{
 				for (int LIndex = AIndex + 1; LIndex < Count; LIndex++)
@@ -2016,9 +2014,6 @@ namespace Alphora.Dataphor.DAE.Schema
 				for (int LIndex = AIndex + 1; LIndex < Count; LIndex++)
 					UpdateObjectIndex(this[LIndex], LIndex, LIndex - 1);
 			}
-			
-			if (OnRemoving != null)
-				OnRemoving(this, AObject);
 		}
 
 		protected Hashtables FNameIndex;
@@ -2212,6 +2207,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Owner
+		[Reference]
 		protected User FOwner;
 		public User Owner
 		{

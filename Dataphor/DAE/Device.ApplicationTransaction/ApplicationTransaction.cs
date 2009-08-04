@@ -172,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			if ((ANode is TableVarNode) && (((TableVarNode)ANode).TableVar.IsATObject))
 				((TableVarNode)ANode).ExplicitBind = true;
 				
-			for (int LIndex = 0; LIndex < ANode.Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < ANode.NodeCount; LIndex++)
 				SetExplicitBind(ANode.Nodes[LIndex]);
 		}
 		
@@ -1664,6 +1664,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		public abstract void Dispose(ServerProcess AProcess);
 	}
 	
+	#if USETYPEDLIST
 	public class Operations : TypedList
 	{
 		public Operations() : base(typeof(Operation)){}
@@ -1673,6 +1674,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			get { return (Operation)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
+	#else
+	public class Operations : BaseList<Operation>
+	{
+	#endif
 	}
 	
 	public class InsertOperation : Operation
@@ -1875,6 +1880,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class ApplicationTransactionDeviceTransactions : TypedList
 	{
 		public ApplicationTransactionDeviceTransactions() : base(typeof(ApplicationTransactionDeviceTransaction)){}
@@ -1884,7 +1890,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			get { return (ApplicationTransactionDeviceTransaction)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class ApplicationTransactionDeviceTransactions : BaseList<ApplicationTransactionDeviceTransaction>
+	{
+	#endif
 		public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
 			Add(new ApplicationTransactionDeviceTransaction(AIsolationLevel));
@@ -1894,7 +1904,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		public void EndTransaction(bool ASuccess)
 		{
 			if (ASuccess && (Count > 1))
-				this[Count - 2].Transactions.Add(RemoveItemAt(Count - 1));
+			{
+				ApplicationTransactionDeviceTransaction LTransaction = this[Count - 1];
+				this[Count - 2].Transactions.Add(LTransaction);
+				RemoveAt(Count - 1);
+			}
 			else
 				RemoveAt(Count - 1);
 		}

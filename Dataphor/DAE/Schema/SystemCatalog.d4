@@ -736,6 +736,7 @@ begin
 	create operator StartProcess() : Integer class "System.SystemStartProcessNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator StopProcess(const AProcessID : Integer) class "System.SystemStopProcessNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator GC.Collect() class "System.SystemCollectNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator GC.GetTotalMemory() : Long class "System.SystemGetTotalMemoryNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator SessionID() : Integer class "System.SystemSessionIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsDeterministic = "False" };
 	create operator ProcessID() : Integer class "System.SystemProcessIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsDeterministic = "False" };
 	create operator UserID() : UserID class "System.SystemUserIDNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsDeterministic = "False" };
@@ -826,6 +827,9 @@ begin
 	create operator Diagnostics.EnsureDeviceStarted(const AName : Name) class "System.SystemEnsureDeviceStartedNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ClearOperatorResolutionCache() class "System.SystemClearOperatorResolutionCacheNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ClearConversionPathCache() class "System.SystemClearConversionPathCacheNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	create operator Diagnostics.GetInstanceSize(const AReference : String, const AMode : String) : Integer class "System.SystemGetInstanceSizeNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+	create operator Diagnostics.GetInstanceSizes(const AReference : String, const AMode : String) : table { DeclaringType : Name, FieldName : Name, FieldType : Name, FieldSize : Integer } class "System.SystemGetInstanceSizesNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+	create operator Diagnostics.GetPlanCount() : Integer class "System.GetPlanCountNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "True", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	create operator RealSQLToD4(const ARealSQLStatement : String) : String class "System.RealSQLToD4Node" static tags { DAE.IsRemotable = "False" };
 	create operator SetLanguage(const ALanguage : String) class "System.SystemSetLanguageNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SetIsolationLevel(const AIsolationLevel : String) class "System.SystemSetIsolationLevelNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

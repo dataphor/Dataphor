@@ -275,11 +275,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>Indicates whether the identifier is to be resolved locally, globally, or both.</summary>
 		public NameBindingFlags BindingFlags { get { return FBindingFlags; } set { FBindingFlags = value; } }
 		
+		[Reference]
 		private Schema.NameResolutionPath FResolutionPath;
 		/// <summary>The resolution path used to resolve the identifier.</summary>
 		public Schema.NameResolutionPath ResolutionPath { get { return FResolutionPath; } }
 
 		/// <summary>The schema object which the identifier resolved to if the resolution was successful, null otherwise.</summary>		
+		[Reference]
 		public Schema.Object Object;
 		
 		private StringCollection FNames = new StringCollection();
@@ -353,6 +355,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public bool IsOperatorNameResolved { get { return FOperatorNameContext.IsAmbiguous || (FOperatorNameContext.Object != null); } }
 		
 		/// <summary>The operator resolved, if a successful resolution is possible, null otherwise.</summary>
+		[Reference]
 		public Schema.Operator Operator;
 		
 		private Schema.OperatorMatches FMatches = new Schema.OperatorMatches();
@@ -391,9 +394,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FCanConvert = (FSourceType is Schema.IGenericType) || (FTargetType is Schema.IGenericType) || FSourceType.Is(FTargetType);
 		}
 		
+		[Reference]
 		private Schema.IDataType FSourceType;
 		public Schema.IDataType SourceType { get { return FSourceType; } }
 		
+		[Reference]
 		private Schema.IDataType FTargetType;
 		public Schema.IDataType TargetType { get { return FTargetType; } }
 		
@@ -417,9 +422,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FTargetType = ATargetType;
 		}
 		
+		[Reference]
 		private Schema.ITableType FSourceType;
 		public new Schema.ITableType SourceType { get { return FSourceType; } }
 
+		[Reference]
 		private Schema.ITableType FTargetType;
 		public new Schema.ITableType TargetType { get { return FTargetType; } }
 		
@@ -457,9 +464,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FTargetType = ATargetType;
 		}
 		
+		[Reference]
 		private Schema.IRowType FSourceType;
 		public new Schema.IRowType SourceType { get { return FSourceType; } }
 
+		[Reference]
 		private Schema.IRowType FTargetType;
 		public new Schema.IRowType TargetType { get { return FTargetType; } }
 		
@@ -497,9 +506,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FTargetType = ATargetType;
 		}
 		
+		[Reference]
 		private Schema.ScalarType FSourceType;
 		public new Schema.ScalarType SourceType { get { return FSourceType; } }
 
+		[Reference]
 		private Schema.ScalarType FTargetType;
 		public new Schema.ScalarType TargetType { get { return FTargetType; } }
 		
@@ -2352,7 +2363,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				PlanNode LSourceNode = CompileTableSelectorExpression(APlan, (TableSelectorExpression)LStatement.SourceExpression);
 
-				PlanNode LBlockNode = (LSourceNode.Nodes.Count > 1 ? (PlanNode)new DelimitedBlockNode() : (PlanNode)new BlockNode());
+				PlanNode LBlockNode = (LSourceNode.NodeCount > 1 ? (PlanNode)new DelimitedBlockNode() : (PlanNode)new BlockNode());
 				foreach (PlanNode LRowNode in LSourceNode.Nodes)
 				{
 					InsertStatement LInsertStatement = new InsertStatement();
@@ -2733,12 +2744,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static bool GetEnforced(Plan APlan, MetaData AMetaData, bool ADefaultEnforced)
 		{
 			Tag LTag = MetaData.GetTag(AMetaData, "Storage.Enforced");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.Enforced", (!Convert.ToBoolean(LTag.Value)).ToString(), false, LTag.IsStatic);
-				LNewTag.Line = LTag.Line;
-				LNewTag.LinePos = LTag.LinePos;
 				AMetaData.Tags.Add(LNewTag);
 				if (!APlan.ServerProcess.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
@@ -2750,12 +2759,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static bool GetIsSparse(Plan APlan, MetaData AMetaData)
 		{
 			Tag LTag = MetaData.GetTag(AMetaData, "Storage.IsSparse");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.IsSparse", LTag.Value, false, LTag.IsStatic);
-				LNewTag.Line = LTag.Line;
-				LNewTag.LinePos = LTag.LinePos;
 				AMetaData.Tags.Add(LNewTag);
 				if (!APlan.ServerProcess.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
@@ -2767,12 +2774,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static void ProcessIsClusteredTag(Plan APlan, MetaData AMetaData)
 		{
 			Tag LTag = MetaData.GetTag(AMetaData, "Storage.IsClustered");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.IsClustered", LTag.Value, false, LTag.IsStatic);
-				LNewTag.Line = LTag.Line;
-				LNewTag.LinePos = LTag.LinePos;
 				AMetaData.Tags.Add(LNewTag);
 				if (!APlan.ServerProcess.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
@@ -3516,32 +3521,32 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 			// if the default is not remotable, make sure that the DAE.IsDefaultRemotable tag is false, if it exists
 			Tag LTag = LNewTableVarColumn.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				bool LRemotable = Boolean.Parse(LTag.Value);
 				LNewTableVarColumn.IsDefaultRemotable = LNewTableVarColumn.IsDefaultRemotable && LRemotable;
 				if (!(LNewTableVarColumn.IsDefaultRemotable ^ LRemotable))
-					LTag.Value = LNewTableVarColumn.IsDefaultRemotable.ToString();
+					LNewTableVarColumn.MetaData.Tags.Update("DAE.IsDefaultRemotable", LNewTableVarColumn.IsDefaultRemotable.ToString());
 			}
 			
 			// if the change is not remotable, make sure that the DAE.IsChangeRemotable tag is false, if it exists
 			LTag = LNewTableVarColumn.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				bool LRemotable = Boolean.Parse(LTag.Value);
 				LNewTableVarColumn.IsChangeRemotable = LNewTableVarColumn.IsChangeRemotable && LRemotable;
 				if (!(LNewTableVarColumn.IsChangeRemotable ^ LRemotable))
-					LTag.Value = LNewTableVarColumn.IsChangeRemotable.ToString();
+					LNewTableVarColumn.MetaData.Tags.Update("DAE.IsChangeRemotable", LNewTableVarColumn.IsChangeRemotable.ToString());
 			}
 			
 			// if the validate is not remotable, make sure that the DAE.IsValidateRemotable tag is false, if it exists
 			LTag = LNewTableVarColumn.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				bool LRemotable = Boolean.Parse(LTag.Value);
 				LNewTableVarColumn.IsValidateRemotable = LNewTableVarColumn.IsValidateRemotable && LRemotable;
 				if (!(LNewTableVarColumn.IsValidateRemotable ^ LRemotable))
-					LTag.Value = LNewTableVarColumn.IsValidateRemotable.ToString();
+					LNewTableVarColumn.MetaData.Tags.Update("DAE.IsValidateRemotable", LNewTableVarColumn.IsValidateRemotable.ToString());
 			}
 			
 			return LNewTableVarColumn;
@@ -3647,30 +3652,30 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 							LNode.Table.DetermineRemotable(APlan.ServerProcess);
 							LTag = LNode.Table.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-							if (LTag != null)
+							if (LTag != Tag.None)
 							{
 								bool LRemotable = Boolean.Parse(LTag.Value);
 								LNode.Table.IsDefaultRemotable = LNode.Table.IsDefaultRemotable && LRemotable;
 								if (!(LNode.Table.IsDefaultRemotable ^ LRemotable))
-									LTag.Value = LNode.Table.IsDefaultRemotable.ToString();
+									LNode.Table.MetaData.Tags.Update("DAE.IsDefaultRemotable", LNode.Table.IsDefaultRemotable.ToString());
 							}
 
 							LTag = LNode.Table.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-							if (LTag != null)
+							if (LTag != Tag.None)
 							{
 								bool LRemotable = Boolean.Parse(LTag.Value);
 								LNode.Table.IsChangeRemotable = LNode.Table.IsChangeRemotable && LRemotable;
 								if (!(LNode.Table.IsChangeRemotable ^ LRemotable))
-									LTag.Value = LNode.Table.IsChangeRemotable.ToString();
+									LNode.Table.MetaData.Tags.Update("DAE.IsChangeRemotable", LNode.Table.IsChangeRemotable.ToString());
 							}
 
 							LTag = LNode.Table.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-							if (LTag != null)
+							if (LTag != Tag.None)
 							{
 								bool LRemotable = Boolean.Parse(LTag.Value);
 								LNode.Table.IsValidateRemotable = LNode.Table.IsValidateRemotable && LRemotable;
 								if (!(LNode.Table.IsValidateRemotable ^ LRemotable))
-									LTag.Value = LNode.Table.IsValidateRemotable.ToString();
+									LNode.Table.MetaData.Tags.Update("DAE.IsValidateRemotable", LNode.Table.IsValidateRemotable.ToString());
 							}
 						}
 						else
@@ -9386,7 +9391,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							LNode.EventHandler.SessionObjectName = LNode.EventHandler.Name;
 						LNode.EventHandler.MergeMetaData(AStatement.MetaData);
 						Tag LTag = MetaData.GetTag(LNode.EventHandler.MetaData, "DAE.ATHandlerName");
-						if (LTag != null)
+						if (LTag != Tag.None)
 							LNode.EventHandler.ATHandlerName = LTag.Value;
 						APlan.PushCreationObject(LNode.EventHandler);
 						LCreationObjectPushed = true;
@@ -9404,7 +9409,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							LNode.EventHandler.SessionObjectName = LNode.EventHandler.Name;
 						LNode.EventHandler.MergeMetaData(AStatement.MetaData);
 						Tag LTag = MetaData.GetTag(LNode.EventHandler.MetaData, "DAE.ATHandlerName");
-						if (LTag != null)
+						if (LTag != Tag.None)
 							LNode.EventHandler.ATHandlerName = LTag.Value;
 						APlan.PushCreationObject(LNode.EventHandler);
 						LCreationObjectPushed = true;
@@ -9428,7 +9433,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					LNode.EventHandler = new Schema.TableVarColumnEventHandler(LObjectID, Schema.Object.GetGeneratedName(String.Format("{0}_{1}_{2}", LNode.EventSource.Name, ((Schema.TableVar)LNode.EventSource).Columns[LNode.EventSourceColumnIndex].Name, AEventType.ToString()), LObjectID));
 					LNode.EventHandler.MergeMetaData(AStatement.MetaData);
 					Tag LTag = MetaData.GetTag(LNode.EventHandler.MetaData, "DAE.ATHandlerName");
-					if (LTag != null)
+					if (LTag != Tag.None)
 						LNode.EventHandler.ATHandlerName = LTag.Value;
 					APlan.PushCreationObject(LNode.EventHandler);
 					LCreationObjectPushed = true;
@@ -9894,7 +9899,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				}
 			}
 
-			if (LNode.Nodes.Count == 1)
+			if (LNode.NodeCount == 1)
 				return LNode.Nodes[0];
 			else
 				return LNode;

@@ -99,35 +99,35 @@ namespace Alphora.Dataphor.DAE.Schema
 				Tag LTag;
 				
 				LTag = MetaData.Tags.GetTag("DefaultIsolationLevel");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
 					
 				LTag = MetaData.Tags.GetTag("DefaultLibraryName");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultLibraryName = LTag.Value;
 					
 				LTag = MetaData.Tags.GetTag("DefaultMaxCallDepth");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
 					
 				LTag = MetaData.Tags.GetTag("DefaultMaxStackDepth");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
 
 				LTag = MetaData.Tags.GetTag("DefaultUseDTC");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultUseDTC = Convert.ToBoolean(LTag.Value);
 
 				LTag = MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
 				
 				LTag = MetaData.Tags.GetTag("ShouldEmitIL");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().ShouldEmitIL = Convert.ToBoolean(LTag.Value);
 				
 				LTag = MetaData.Tags.GetTag("UsePlanCache");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					EnsureDefaultNativeSessionInfo().UsePlanCache = Convert.ToBoolean(LTag.Value);
 			}
 		}
@@ -216,6 +216,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		private string FUserID;
 		public string UserID { get { return FUserID; } set { FUserID = value; } }
 		
+		[Reference]
 		private ServerLink FServerLink;
 		public ServerLink ServerLink { get { return FServerLink; } set { FServerLink = value; } }
 		

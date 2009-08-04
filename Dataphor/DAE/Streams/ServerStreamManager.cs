@@ -139,6 +139,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class StreamEvents : TypedList
 	{
 		public StreamEvents() : base(typeof(StreamEvent)) {}
@@ -148,7 +149,11 @@ namespace Alphora.Dataphor.DAE.Streams
 			get { return (StreamEvent)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class StreamEvents : BaseList<StreamEvent>
+	{
+	#endif
 		public void Open(StreamID AStreamID)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)

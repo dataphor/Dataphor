@@ -64,6 +64,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 
+		[Reference]
 		internal ScalarType FScalarType;
 		public ScalarType ScalarType 
 		{ 
@@ -106,6 +107,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override bool IsATObject { get { return FTableVarColumn == null ? false : FTableVarColumn.IsATObject; } }
 
+		[Reference]
 		internal TableVarColumn FTableVarColumn;
 		public TableVarColumn TableVarColumn
 		{

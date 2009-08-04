@@ -249,7 +249,8 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			} 
 		}
 	}
-	
+
+	#if USETYPEDLIST
 	public class MemoryDeviceTransactions : TypedList
 	{
 		public MemoryDeviceTransactions() : base(typeof(MemoryDeviceTransaction)){}
@@ -259,7 +260,11 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			get { return (MemoryDeviceTransaction)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class MemoryDeviceTransactions : BaseList<MemoryDeviceTransaction>
+	{
+	#endif
 		public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
 			Add(new MemoryDeviceTransaction(AIsolationLevel));

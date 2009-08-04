@@ -181,35 +181,11 @@ namespace Alphora.Dataphor.DAE.Server
 					FHandlers.RemoveAt(LIndex);
 		}
 	}
-	
+
+	#if USETYPEDLIST	
 	public class ServerTransactions : DisposableTypedList
 	{
 		public ServerTransactions() : base(typeof(ServerTransaction), true, false){}
-		
-		public void UnprepareDeferredConstraintChecks()
-		{
-			if (FTableVars != null)
-			{
-				Exception LException = null;
-				while (FTableVars.Count > 0)
-					try
-					{
-						foreach (Schema.TableVar LTableVar in FTableVars.Keys)
-						{
-							RemoveDeferredConstraintChecks(LTableVar);
-							break;
-						}
-					}
-					catch (Exception E)
-					{
-						LException = E;
-					}
-					
-				FTableVars = null;
-				if (LException != null)
-					throw LException;
-			}
-		}
 		
 		public new ServerTransaction this[int AIndex]
 		{
@@ -217,6 +193,10 @@ namespace Alphora.Dataphor.DAE.Server
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class ServerTransactions : DisposableList<ServerTransaction>
+	{
+	#endif
 		public ServerTransaction BeginTransaction(ServerProcess AProcess, IsolationLevel AIsolationLevel)
 		{
 			return this[Add(new ServerTransaction(AProcess, AIsolationLevel))];
@@ -246,6 +226,31 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			foreach (ServerTableVar LTableVar in this[Count - 1].TableVars.Values)
 				LTableVar.Validate(AProcess, Count - 1);
+		}
+		
+		public void UnprepareDeferredConstraintChecks()
+		{
+			if (FTableVars != null)
+			{
+				Exception LException = null;
+				while (FTableVars.Count > 0)
+					try
+					{
+						foreach (Schema.TableVar LTableVar in FTableVars.Keys)
+						{
+							RemoveDeferredConstraintChecks(LTableVar);
+							break;
+						}
+					}
+					catch (Exception E)
+					{
+						LException = E;
+					}
+					
+				FTableVars = null;
+				if (LException != null)
+					throw LException;
+			}
 		}
 		
 		private ServerTableVars FTableVars = new ServerTableVars();

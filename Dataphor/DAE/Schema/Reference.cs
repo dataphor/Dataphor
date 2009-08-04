@@ -47,6 +47,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Reference"), DisplayName); } }
 
 		// SourceTable
+		[Reference]
 		private TableVar FSourceTable;
 		public TableVar SourceTable
 		{
@@ -55,6 +56,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// TargetTable
+		[Reference]
 		private TableVar FTargetTable;
 		public TableVar TargetTable
 		{
@@ -81,6 +83,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// ParentReference		
+		[Reference]
 		private Schema.Reference FParentReference;
 		/// <summary>For derived references, this is the reference from which this reference was derived.</summary>
 		public Schema.Reference ParentReference
@@ -138,6 +141,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public Expressions DeleteReferenceExpressions { get { return FDeleteReferenceExpressions; } } 
 		
         // The constraints used to enforce this reference (if necessary)
+		[Reference]
         private CatalogConstraint FCatalogConstraint;
         public CatalogConstraint CatalogConstraint
         {
@@ -145,6 +149,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FCatalogConstraint = value; }
         }
         
+		[Reference]
         private TransitionConstraint FSourceConstraint;
         public TransitionConstraint SourceConstraint
         {
@@ -152,6 +157,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSourceConstraint = value; }
 		}
         
+		[Reference]
         private TransitionConstraint FTargetConstraint;
         public TransitionConstraint TargetConstraint
         {
@@ -159,6 +165,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FTargetConstraint = value; }
         }
         
+		[Reference]
         private EventHandler FUpdateHandler;
         public EventHandler UpdateHandler
         {
@@ -166,6 +173,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FUpdateHandler = value; }
         }
         
+		[Reference]
         private EventHandler FDeleteHandler;
         public EventHandler DeleteHandler
         {

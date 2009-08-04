@@ -11,6 +11,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using Alphora.Dataphor;
 	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 	
 	public abstract class Operation : Disposable
 	{
@@ -28,7 +29,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
 	}
-	
+
+	#if USETYPEDLIST	
 	public class Operations : TypedList
 	{
 		public Operations() : base(typeof(Operation)){}
@@ -39,6 +41,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class Operations : BaseList<Operation> { }
+	#endif
 	
 	public class InsertOperation : Operation
 	{

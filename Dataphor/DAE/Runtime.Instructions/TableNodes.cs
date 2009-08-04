@@ -1185,7 +1185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsFunctional = true;
 			FIsDeterministic = true;
 			FIsRepeatable = true;
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
 				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
 				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
@@ -1214,7 +1214,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				LTable.Open();
 				// Insert each row from the arguments into this new table
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 				{
 					Row LRow = (Row)Nodes[LIndex].Execute(AProcess);
 					try
@@ -1243,7 +1243,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				TableSelectorExpression LExpression = new TableSelectorExpression();
 				LExpression.TypeSpecifier = DataType.EmitSpecifier(AMode);
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 					LExpression.Expressions.Add(Nodes[LIndex].EmitStatement(AMode));
 				LExpression.Modifiers = Modifiers;
 				foreach (Schema.Key LKey in TableVar.Keys)
@@ -1255,7 +1255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				PresentationSelectorExpression LExpression = new PresentationSelectorExpression();
 				LExpression.TypeSpecifier = DataType.EmitSpecifier(AMode);
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 					LExpression.Expressions.Add(Nodes[LIndex].EmitStatement(AMode));
 				LExpression.Modifiers = Modifiers;
 				foreach (Schema.Key LKey in TableVar.Keys)
@@ -1800,7 +1800,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				APlan.AddDevicePlan(LDevicePlan);
 				FDeviceSupported = true;
-				Execute = new ExecuteDelegate(TableDeviceExecute);
 				CheckDeviceRights(APlan);
 				if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
 				{

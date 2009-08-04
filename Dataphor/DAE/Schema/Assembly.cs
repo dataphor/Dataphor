@@ -37,9 +37,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		private AssemblyName FName;
 		public AssemblyName Name { get { return FName; } }
 		
+		[Reference]
 		private Assembly FAssembly;
 		public Assembly Assembly { get { return FAssembly; } }
 		
+		[Reference]
 		private LoadedLibrary FLibrary;
 		public LoadedLibrary Library { get { return FLibrary; } }
 		
@@ -81,6 +83,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FClassName = AClassName;
 		}
 		
+		[Reference]
 		private RegisteredAssembly FAssembly;
 		public RegisteredAssembly Assembly { get { return FAssembly; } }
 		

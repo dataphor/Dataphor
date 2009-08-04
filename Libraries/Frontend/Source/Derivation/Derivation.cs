@@ -106,15 +106,15 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 			{
 				string LTagName = String.Format("Frontend.{0}.{1}", APageType, ATagName);
 				Tag LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", APageType, ATagName));
-				if (LTag != null)
+				if (LTag != Tag.None)
 					return LTag.Value;
 					
 				LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", GetPageTypeCardinality(APageType), ATagName));
-				if (LTag != null)
+				if (LTag != Tag.None)
 					return LTag.Value;
 					
 				LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}", ATagName));
-				if (LTag != null)
+				if (LTag != Tag.None)
 					return LTag.Value;
 					
 				return ADefaultValue;
@@ -159,27 +159,27 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 					if (APageType != String.Empty)
 					{
 						Tag LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}.{2}", APageType, AReferenceType, ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}.{2}", GetPageTypeCardinality(APageType), AReferenceType, ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", AReferenceType, ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", APageType, ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", GetPageTypeCardinality(APageType), ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}", ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						return ADefaultValue;
@@ -187,11 +187,11 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 					else
 					{
 						Tag LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", AReferenceType, ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 						
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}", ATagName));
-						if (LTag != null)
+						if (LTag != Tag.None)
 							return LTag.Value;
 							
 						return ADefaultValue;
@@ -216,10 +216,10 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 				if (APageType != String.Empty)
 				{
 					Tag LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}.{2}", APageType, AReferenceType, ATagName));
-					if (LTag == null)
+					if (LTag == Tag.None)
 						LTag = AMetaData.Tags.GetTag(String.Format("Frontend.{0}.{1}", APageType, ATagName));
 						
-					if (LTag != null)
+					if (LTag != Tag.None)
 						return LTag.Value;
 					else
 						return ADefaultValue;

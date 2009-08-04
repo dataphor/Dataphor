@@ -193,6 +193,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// ResourceManagers
+		[Reference]
 		private Hashtable FResourceManagers;
 		private int FNextResourceManagerID;
 		public int GetNextResourceManagerID()
@@ -325,6 +326,11 @@ namespace Alphora.Dataphor.DAE.Server
 		// PlanCache
 		private PlanCache FPlanCache;
 		public PlanCache PlanCache { get { return FPlanCache; } }
+		
+		public int PlanCacheCount
+		{
+			get { return FPlanCache.Count; }
+		}
 		
 		// PlanCacheSize
 		public int PlanCacheSize
@@ -654,9 +660,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		public Exception WrapException(Exception AException)
-		{			
-            SRFLogger.WriteLine(TraceLevel.Verbose,"Wrapped Exception {0}",AException);
-            if (FLogErrors)
+		{
+			SRFLogger.WriteLine(TraceLevel.Verbose,"Wrapped Exception {0}",AException);
+			if (FLogErrors)
 				LogError(AException);
 				
 			return AException;

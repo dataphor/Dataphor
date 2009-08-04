@@ -22,6 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 	
     public abstract class ProjectNodeBase : UnaryTableNode
     {
@@ -42,11 +43,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ColumnNames
+		#if USETYPEDLIST
 		protected TypedList FColumnNames = new TypedList(typeof(string), false);
-		public TypedList ColumnNames
-		{
-			get { return FColumnNames; }
-		}
+		public TypedList ColumnNames { get { return FColumnNames; } }
+		#else
+		protected BaseList<string> FColumnNames = new BaseList<string>();
+		public BaseList<string> ColumnNames { get { return FColumnNames; } }
+		#endif
 		
 		protected abstract void DetermineColumns(Plan APlan);
 		

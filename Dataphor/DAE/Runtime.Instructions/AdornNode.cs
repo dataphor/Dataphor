@@ -136,7 +136,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
-				for (int LIndex = 0; LIndex < ANode.Nodes.Count; LIndex++)
+				for (int LIndex = 0; LIndex < ANode.NodeCount; LIndex++)
 					ANode.Nodes[LIndex] = ReplaceColumnReferences(APlan, ANode.Nodes[LIndex], AIdentifier, AColumnIndex);
 				return ANode;
 			}
@@ -243,15 +243,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					Tag LTag;
 					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-					if (LTag != null)
+					if (LTag != Tag.None)
 						LNewColumn.IsDefaultRemotable = LNewColumn.IsDefaultRemotable && Convert.ToBoolean(LTag.Value);
 						
 					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-					if (LTag != null)
+					if (LTag != Tag.None)
 						LNewColumn.IsChangeRemotable = LNewColumn.IsChangeRemotable && Convert.ToBoolean(LTag.Value);
 						
 					LTag = LExpression.MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-					if (LTag != null)
+					if (LTag != Tag.None)
 						LNewColumn.IsValidateRemotable = LNewColumn.IsValidateRemotable && Convert.ToBoolean(LTag.Value);
 				}
 
@@ -333,15 +333,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Tag LTag;
 				Schema.ResultTableVar LTableVar = (Schema.ResultTableVar)TableVar;
 				LTag = MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					LTableVar.InferredIsDefaultRemotable = LTableVar.InferredIsDefaultRemotable && Convert.ToBoolean(LTag.Value);
 					
 				LTag = MetaData.Tags.GetTag("DAE.IsChangeRemotable");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					LTableVar.InferredIsChangeRemotable = LTableVar.InferredIsChangeRemotable && Convert.ToBoolean(LTag.Value);
 					
 				LTag = MetaData.Tags.GetTag("DAE.IsValidateRemotable");
-				if (LTag != null)
+				if (LTag != Tag.None)
 					LTableVar.InferredIsValidateRemotable = LTableVar.InferredIsValidateRemotable && Convert.ToBoolean(LTag.Value);
 			}
 

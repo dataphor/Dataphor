@@ -2258,6 +2258,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region class DataSetBuffer
 
+		#if USETYPEDLIST
 		internal class DataSetBuffer : DisposableTypedList
 		{
 			public DataSetBuffer() : base(typeof(DataSetRow), true, false){}
@@ -2268,6 +2269,10 @@ namespace Alphora.Dataphor.DAE.Client
 				set { base[AIndex] = value; }
 			}
 
+		#else
+		internal class DataSetBuffer : DisposableList<DataSetRow>
+		{
+		#endif
 			public void Add(int ACount, DataSet ADataSet)
 			{
 				for (int LIndex = 0; LIndex < ACount; LIndex++)

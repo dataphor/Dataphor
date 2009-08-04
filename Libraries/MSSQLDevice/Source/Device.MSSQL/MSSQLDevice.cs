@@ -779,7 +779,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
             Tags LTags = base.Map(ATags);
             Tag LTag = LTags.GetTag("IntegratedSecurity");
-            if (LTag != null)
+            if (LTag != Tag.None)
             {
                 LTags.Remove(LTag);
                 LTags.AddOrUpdate("Integrated Security", "SSPI");
@@ -816,7 +816,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         {
             Tags LTags = base.Map(ATags);
             Tag LTag = LTags.GetTag("IntegratedSecurity");
-            if (LTag != null)
+            if (LTag != Tag.None)
             {
                 LTags.Remove(LTag.Name);
                 LTags.AddOrUpdate("Trusted_Connection", "Yes");

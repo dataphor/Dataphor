@@ -25,10 +25,17 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 		public LayoutNodes Children { get { return FChildren; } }
 	}
 	
+	#if USETYPEDLIST
 	public class LayoutNodes : TypedList
 	{
 		public LayoutNodes(LayoutNode AContainer) : base(typeof(LayoutNode))
 		{
+	#else
+	public class LayoutNodes : ValidatingBaseList<LayoutNode>
+	{
+		public LayoutNodes(LayoutNode AContainer) : base()
+		{
+	#endif
 			FContainer = AContainer;
 		}
 		
@@ -40,6 +47,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			set { base[AIndex] = value; }
 		}
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AItem, int AIndex)
 		{
 			base.Adding(AItem, AIndex);
@@ -54,6 +62,21 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			((LayoutNode)AItem).FParent = null;
 			base.Removing(AItem, AIndex);
 		}
+		#else
+		protected override void Adding(LayoutNode AValue, int AIndex)
+		{
+			//base.Adding(AValue, AIndex);
+			if (AValue.Parent != null)
+				AValue.Parent.Children.Remove(AValue);
+			AValue.FParent = FContainer;
+		}
+		
+		protected override void Removing(LayoutNode AValue, int AIndex)
+		{
+			AValue.FParent = null;
+			//base.Removing(AItem, AIndex);
+		}
+		#endif
 	}
 	
 	public class RowNode : LayoutNode {}

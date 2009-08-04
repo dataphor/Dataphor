@@ -64,6 +64,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public PlanNode PlanNode { get { return FPlanNode; } }
 	}
 
+	#if USETYPEDLIST
 	public class CatalogPlanParameters : TypedList
 	{
 		public CatalogPlanParameters() : base(typeof(CatalogPlanParameter)){}
@@ -73,6 +74,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			get { return (CatalogPlanParameter)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
+	#else
+	public class CatalogPlanParameters : BaseList<CatalogPlanParameter>
+	{
+	#endif
 	}
 	
 	public class CatalogDevicePlanNode : DevicePlanNode

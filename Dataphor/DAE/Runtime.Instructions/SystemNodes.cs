@@ -24,6 +24,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
@@ -2007,6 +2008,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 	
+	public class SystemGetTotalMemoryNode : NilaryInstructionNode
+	{
+		public override object NilaryInternalExecute(ServerProcess AProcess)
+		{
+			return GC.GetTotalMemory(true);
+		}
+	}
+	
+	public class SystemGetPlanCountNode : NilaryInstructionNode
+	{
+		public override object NilaryInternalExecute(ServerProcess AProcess)
+		{
+			return AProcess.ServerSession.Server.PlanCacheCount;
+		}
+	}
+	
 	// operator ServerName() : System.Name;
 	public class SystemServerNameNode : InstructionNode
 	{
@@ -2687,6 +2704,112 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
 			AProcess.Plan.Catalog.ConversionPathCache.Clear();
 			return null;
+		}
+	}
+	
+	// create operator GetInstanceSize(const AReference : String, const AMode : String) : Integer;
+	public class SystemGetInstanceSizeNode : BinaryInstructionNode
+	{
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		{
+			#if NILPROPOGATION
+			if ((AArgument1 == null) || (AArgument2 == null))
+				return null;
+			#endif
+				
+			return 
+				MemoryUtility.SizeOf
+				(
+					ReflectionUtility.ResolveReference
+					(
+						(string)AArgument1, 
+						new Token("#Server", AProcess.ServerSession.Server), 
+						new Token("#Catalog", AProcess.ServerSession.Server.Catalog), 
+						new Token("#Process", AProcess), 
+						new Token("#Session", AProcess.ServerSession)
+					), 
+					(TraversalMode)Enum.Parse(typeof(TraversalMode), (string)AArgument2, true)
+				);
+		}
+	}
+
+	// operator GetInstanceSizes(const AReference : String, const AMode : String) : table { FieldName : Name, FieldType : Name, FieldSize : Integer };
+	public class SystemGetInstanceSizesNode : TableNode
+	{
+		public override void DetermineDataType(Plan APlan)
+		{
+			DetermineModifiers(APlan);
+			FDataType = new Schema.TableType();
+			FTableVar = new Schema.ResultTableVar(this);
+			FTableVar.Owner = APlan.User;
+
+			DataType.Columns.Add(new Schema.Column("DeclaringType", APlan.Catalog.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("FieldName", APlan.Catalog.DataTypes.SystemName));			
+			DataType.Columns.Add(new Schema.Column("FieldType", APlan.Catalog.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("FieldSize", APlan.Catalog.DataTypes.SystemInteger));
+			foreach (Schema.Column LColumn in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+				
+			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["DeclaringType"], TableVar.Columns["FieldName"] }));
+
+			TableVar.DetermineRemotable(APlan.ServerProcess);
+			Order = TableVar.FindClusteringOrder(APlan);
+			
+			// Ensure the order exists in the orders list
+			if (!TableVar.Orders.Contains(Order))
+				TableVar.Orders.Add(Order);
+		}
+		
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			LocalTable LResult = new LocalTable(this, AProcess);
+			try
+			{
+				LResult.Open();
+
+				// Populate the result
+				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				try
+				{
+					LRow.ValuesOwned = false;
+
+					List<FieldSizeInfo> LFieldSizes = 
+						MemoryUtility.SizesOf
+						(
+							ReflectionUtility.ResolveReference
+							(
+								(string)Nodes[0].Execute(AProcess), 
+								new Token("#Server", AProcess.ServerSession.Server), 
+								new Token("#Catalog", AProcess.ServerSession.Server.Catalog), 
+								new Token("#Process", AProcess), 
+								new Token("#Session", AProcess.ServerSession)
+							), 
+							(TraversalMode)Enum.Parse(typeof(TraversalMode), (string)Nodes[1].Execute(AProcess), true)
+						);
+						
+					for (int LIndex = 0; LIndex < LFieldSizes.Count; LIndex++)
+					{
+						LRow[0] = LFieldSizes[LIndex].DeclaringType;
+						LRow[1] = LFieldSizes[LIndex].FieldName;
+						LRow[2] = LFieldSizes[LIndex].FieldType;
+						LRow[3] = LFieldSizes[LIndex].FieldSize;
+						LResult.Insert(LRow);
+					}
+				}
+				finally
+				{
+					LRow.Dispose();
+				}
+				
+				LResult.First();
+				
+				return LResult;
+			}
+			catch
+			{
+				LResult.Dispose();
+				throw;
+			}
 		}
 	}
 }

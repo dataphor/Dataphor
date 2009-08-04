@@ -101,7 +101,7 @@ namespace Alphora.Dataphor.DAE.Connection
 	}
 	
 	// Parameters are denoted by @<parameter name> in the Statement set on the command object, these will be replaced as necessary by each connection type
-	
+	#if USETYPEDLIST
 	public class SQLParameters : TypedList
 	{
 		public SQLParameters() : base(typeof(SQLParameter)){}
@@ -111,7 +111,11 @@ namespace Alphora.Dataphor.DAE.Connection
 			get { return (SQLParameter)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class SQLParameters : BaseList<SQLParameter>
+	{
+	#endif
 		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)

@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								PlanNode LCurrentNode = LSourceNode;
 								while (LCurrentNode != null)
 								{
-									if (LCurrentNode.Nodes.Count >= 1)
+									if (LCurrentNode.NodeCount >= 1)
 									{
 										if (LCurrentNode.Nodes[0] == FSourceNode)
 										{

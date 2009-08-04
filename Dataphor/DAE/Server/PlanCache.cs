@@ -67,6 +67,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private int FSize;
 		public int Size { get { return FSize; } }
 		
+		public int Count { get { return FPlans.Count; } }
+		
 		private FixedSizeCache FPlans; // FixedSizeCache ( <CachedPlanHeader>, <CachedPlans> )
 		
 		private void DisposeCachedPlan(ServerProcess AProcess, ServerPlan APlan)

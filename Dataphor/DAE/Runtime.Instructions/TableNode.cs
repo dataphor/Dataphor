@@ -207,10 +207,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public abstract class TableNode : InstructionNodeBase
 	{        
 		// constructor
-		public TableNode() : base()
-		{
-			Execute = new ExecuteDelegate(TableStandardExecute);
-		}
+		public TableNode() : base() { }
 		
 		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn AColumn)
 		{
@@ -648,9 +645,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			PrepareJoinApplicationTransaction(APlan);
 			base.DetermineDevice(APlan);
-			if (FDeviceSupported)
-				Execute = new ExecuteDelegate(TableDeviceExecute);
-			else
+			if (!FDeviceSupported)
 				DetermineCursorBehavior(APlan);
 			FSymbols = Compiler.SnapshotSymbols(APlan);
 			if ((FCursorCapabilities & CursorCapability.Updateable) != 0)
@@ -723,16 +718,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// if any child node is a tabletype and not a tablenode  
 				//	or is a table node and does not support modification, modification is not supported
-				foreach (PlanNode LNode in Nodes)
-					if 
-					(
-						((LNode.DataType is Schema.TableType) && !(LNode is TableNode)) || 
-						((LNode is TableNode) && !((TableNode)LNode).FModifySupported)
-					)
-					{
-						FModifySupported = false;
-						return;
-					}
+				if (NodeCount > 0)
+					foreach (PlanNode LNode in Nodes)
+						if 
+						(
+							((LNode.DataType is Schema.TableType) && !(LNode is TableNode)) || 
+							((LNode is TableNode) && !((TableNode)LNode).FModifySupported)
+						)
+						{
+							FModifySupported = false;
+							return;
+						}
 				
 				FModifySupported = false;
 				// TODO: Build modification binding cache
@@ -3141,135 +3137,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		public virtual void InferPopulateNode(Plan APlan) { }
-		
-		protected object TableStandardExecute(ServerProcess AProcess)
-		{
-			#if WRAPRUNTIMEEXCEPTIONS
-			try
-			{
-			#endif
-				AProcess.CheckAborted();
-				#if TRACKCALLDEPTH
-				AProcess.Context.IncCallDepth();
-				try
-				{
-				#endif
-					if ((FPopulateNode != null) && !AProcess.IsInsert)
-						ApplicationTransactionUtility.JoinExpression(AProcess, AProcess.ApplicationTransactionID, FPopulateNode, this);
 
-					return InternalExecute(AProcess);
-				#if TRACKCALLDEPTH
-				}
-				finally
-				{
-					AProcess.Context.DecCallDepth();
-				}
-				#endif
-			#if WRAPRUNTIMEEXCEPTIONS
-			}
-			catch (RuntimeException LRuntimeException)
-			{
-				if (!LRuntimeException.HasContext())
-					LRuntimeException.SetContext(this);
-				throw LRuntimeException;
-			}
-			catch (ControlError LControlError)
-			{
-				throw LControlError;
-			}
-			catch (NullReferenceException LNullReferenceException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.NilEncountered, LNullReferenceException, this);
-			}
-			catch (DataphorException LDataphorException)
-			{
-				if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
-					throw LDataphorException;
-				else
-					throw new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
-			}
-			catch (FormatException LFormatException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LFormatException.Message, LFormatException);
-			}
-			catch (ArgumentException LArgumentException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArgumentException.Message, LArgumentException);
-			}
-			catch (ArithmeticException LArithmeticException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArithmeticException.Message, LArithmeticException);
-			}
-			catch (Exception LException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
-			}
-			#endif
-		}
-		
-		protected object TableDeviceExecute(ServerProcess AProcess)
+		protected override void InternalBeforeExecute(ServerProcess AProcess)
 		{
-			#if WRAPRUNTIMEEXCEPTIONS
-			try
-			{
-			#endif
-				AProcess.CheckAborted();
-				#if TRACKCALLDEPTH
-				AProcess.Context.IncCallDepth();
-				try
-				{
-				#endif
-					if ((FPopulateNode != null) && !AProcess.IsInsert)
-						ApplicationTransactionUtility.JoinExpression(AProcess, AProcess.ApplicationTransactionID, FPopulateNode, this);
-
-					return AProcess.DeviceExecute(FDevice, this);
-				#if TRACKCALLDEPTH
-				}
-				finally
-				{
-					AProcess.Context.DecCallDepth();
-				}
-				#endif
-			#if WRAPRUNTIMEEXCEPTIONS
-			}
-			catch (RuntimeException LRuntimeException)
-			{
-				if (!LRuntimeException.HasContext())
-					LRuntimeException.SetContext(this);
-				throw LRuntimeException;
-			}
-			catch (ControlError LControlError)
-			{
-				throw LControlError;
-			}
-			catch (NullReferenceException LNullReferenceException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.NilEncountered, LNullReferenceException, this);
-			}
-			catch (DataphorException LDataphorException)
-			{
-				if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
-					throw LDataphorException;
-				else
-					throw new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
-			}
-			catch (FormatException LFormatException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LFormatException.Message, LFormatException);
-			}
-			catch (ArgumentException LArgumentException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArgumentException.Message, LArgumentException);
-			}
-			catch (ArithmeticException LArithmeticException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArithmeticException.Message, LArithmeticException);
-			}
-			catch (Exception LException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
-			}
-			#endif
+			if ((FPopulateNode != null) && !AProcess.IsInsert)
+				ApplicationTransactionUtility.JoinExpression(AProcess, AProcess.ApplicationTransactionID, FPopulateNode, this);
 		}
 		
 		public virtual void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) {}

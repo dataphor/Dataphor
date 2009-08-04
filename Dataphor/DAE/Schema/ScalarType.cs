@@ -40,6 +40,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override int ParentObjectID { get { return FRepresentation == null ? -1 : FRepresentation.ID; } }
 
+		[Reference]
 		internal Representation FRepresentation;
 		public Representation Representation
 		{
@@ -53,6 +54,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
+		[Reference]
 		private IDataType FDataType;
 		public IDataType DataType
 		{
@@ -77,7 +79,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadReadAccessorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ReadAccessorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FReadAccessorID = Int32.Parse(LTag.Value);
 		}
 		
@@ -99,6 +101,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // ReadAccessor
+		[Reference]
         private Operator FReadAccessor;
         public Operator ReadAccessor
         {
@@ -127,7 +130,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadWriteAccessorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.WriteAccessorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FWriteAccessorID = Int32.Parse(LTag.Value);
 		}
 		
@@ -149,6 +152,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // WriteAccessor
+		[Reference]
         private Operator FWriteAccessor;
         public Operator WriteAccessor
         {
@@ -224,6 +228,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FRepresentation = ARepresentation;
 		}
 		
+		[Reference]
 		private Representation FRepresentation;
 		public Representation Representation { get { return FRepresentation; } }
 		
@@ -274,6 +279,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
  		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 
+		[Reference]
 		internal ScalarType FScalarType;
 		public ScalarType ScalarType
 		{
@@ -304,7 +310,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadSelectorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FSelectorID = Int32.Parse(LTag.Value);
 		}
 
@@ -326,6 +332,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // Selector -- the selector operator for this representation
+		[Reference]
         private Operator FSelector;
         public Operator Selector
         {
@@ -576,6 +583,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FScalarType = AScalarType;
 		}
 		
+		[Reference]
 		private ScalarType FScalarType;
 		public ScalarType ScalarType { get { return FScalarType; } }
 	
@@ -585,6 +593,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (!(AItem is Representation))
 				throw new SchemaException(SchemaException.Codes.RepresentationContainer);
 			base.Validate(AItem);
+			FScalarType.ValidateChildObjectName(AItem.Name);
 		}
 		#endif
 		
@@ -625,6 +634,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FCompareNode = ACompareNode;
 		}
 
+		[Reference]
 		private IDataType FDataType;
 		public IDataType DataType { get { return FDataType; } }
 		
@@ -706,12 +716,15 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Conversion"), IsNarrowing ? Strings.Get("SchemaObjectDescription.Narrowing") : Strings.Get("SchemaObjectDescription.Widening"), FSourceScalarType.DisplayName, FTargetScalarType.DisplayName); } }
 		
+		[Reference]
 		private ScalarType FSourceScalarType;
 		public ScalarType SourceScalarType { get { return FSourceScalarType; } }
 		
+		[Reference]
 		private ScalarType FTargetScalarType;
 		public ScalarType TargetScalarType { get { return FTargetScalarType; } }
 		
+		[Reference]
 		private Operator FOperator;
 		public Operator Operator { get { return FOperator; } }
 		
@@ -783,12 +796,12 @@ namespace Alphora.Dataphor.DAE.Schema
 	{
 		public ScalarConversionPath() : base()
 		{
-			FRolloverCount = 4;
+			//FRolloverCount = 4;
 		}
 		
 		public ScalarConversionPath(ScalarConversionPath APath) : base()
 		{
-			FRolloverCount = 4;
+			//FRolloverCount = 4;
 			AddRange(APath);
 		}
 
@@ -841,6 +854,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class ScalarConversionPathList : TypedList
 	{
 		public ScalarConversionPathList() : base(typeof(ScalarConversionPath)) {}
@@ -851,6 +865,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class ScalarConversionPathList : ValidatingBaseList<ScalarConversionPath> { }
+	#endif
 	
 	public class ScalarConversionPaths : ScalarConversionPathList
 	{
@@ -892,9 +909,14 @@ namespace Alphora.Dataphor.DAE.Schema
 						FBestPath = LPath;
 		}
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AValue, int AIndex)
 		{
 			ScalarConversionPath LConversionPath = (ScalarConversionPath)AValue;
+		#else
+		protected override void Adding(ScalarConversionPath LConversionPath, int AIndex)
+		{
+		#endif
 			if (LConversionPath.NarrowingScore > BestNarrowingScore)
 			{
 				FBestNarrowingScore = LConversionPath.NarrowingScore;
@@ -907,7 +929,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FBestPaths = null;				
 			FBestPath = null;
 					
-			base.Adding(AValue, AIndex);
+			//base.Adding(AValue, AIndex);
 		}
 		
 		private ScalarConversionPathList FBestPaths;
@@ -960,7 +982,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				TargetType = ATargetType;
 			}
 			
+			[Reference]
 			public Schema.ScalarType SourceType;
+	
+			[Reference]
 			public Schema.ScalarType TargetType;
 			
 			public override bool Equals(object AObject)
@@ -1157,6 +1182,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override int ParentObjectID { get { return FScalarType == null ? -1 : FScalarType.ID; } }
 
+		[Reference]
 		internal ScalarType FScalarType;
 		public ScalarType ScalarType
 		{
@@ -1187,7 +1213,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadSelectorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SelectorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FSelectorID = Int32.Parse(LTag.Value);
 		}
 
@@ -1208,6 +1234,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				FSelector = AProcess.CatalogDeviceSession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
 		}
 
+		[Reference]
 		private Operator FSelector;
 		public Operator Selector
 		{
@@ -1229,7 +1256,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadComparerID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ComparerID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FComparerID = Int32.Parse(LTag.Value);
 		}
 
@@ -1250,6 +1277,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				FComparer = AProcess.CatalogDeviceSession.ResolveCatalogObject(FComparerID) as Schema.Operator;
 		}
 
+		[Reference]
 		private Operator FComparer;
 		public Operator Comparer
 		{
@@ -1320,6 +1348,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FScalarType = AScalarType;
 		}
 		
+		[Reference]
 		private ScalarType FScalarType;
 		public ScalarType ScalarType { get { return FScalarType; } }
 		
@@ -1379,14 +1408,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			FIsDisposable = true;
 			#if USETYPEINHERITANCE
 			FParentTypes = new ScalarTypes();
-			FParentTypes.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
+			//FParentTypes.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			#endif
 			FRepresentations = new Representations(this);
-			FRepresentations.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
+			//FRepresentations.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			FSpecials = new Specials(this);
-			FSpecials.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
+			//FSpecials.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			FConstraints = new ScalarTypeConstraints(this);
-			FConstraints.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
+			//FConstraints.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 		}
 
 		public override string[] GetRights()
@@ -1423,15 +1452,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		public bool IsCompound;
 		
 		public Schema.IRowType CompoundRowType;
-
-		protected void ChildObjectValidate(object ASender, Object AItem)
+		
+		public void ValidateChildObjectName(string AName)
 		{
-			if (FConstraints.IndexOfName(AItem.Name) >= 0)
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AItem.Name);
-			if ((FDefault != null) && (String.Compare(FDefault.Name, AItem.Name) == 0))
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AItem.Name);
-			if (FRepresentations.IndexOfName(AItem.Name) >= 0)
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AItem.Name);
+			if 
+			(
+				(FConstraints.IndexOfName(AName) >= 0) 
+					|| ((FDefault != null) && (String.Compare(FDefault.Name, AName) == 0)) 
+					|| (FRepresentations.IndexOfName(AName) >= 0)
+			)
+				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AName);
 		}
 		
 		public bool Equivalent(IDataType ADataType)
@@ -1511,7 +1541,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadIsDefaultConveyor()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsDefaultConveyor");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FIsDefaultConveyor = Boolean.Parse(LTag.Value);
 		}
 
@@ -1526,6 +1556,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.IsDefaultConveyor");
 		}
 		
+		[Reference]
 		private Type FNativeType;
 		public Type NativeType
 		{
@@ -1568,6 +1599,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				Explicit = AExplicit;
 			}
 			
+			[Reference]
 			public Representation Representation;
 			public bool Explicit;
 		}
@@ -1641,6 +1673,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 		
 		// LikeType
+		[Reference]
 		private ScalarType FLikeType;
 		public ScalarType LikeType 
 		{ 
@@ -1670,7 +1703,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadIsSpecialOperatorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.IsSpecialOperatorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FIsSpecialOperatorID = Int32.Parse(LTag.Value);
 		}
 
@@ -1692,6 +1725,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // IsSpecialOperator
+		[Reference]
         private Operator FIsSpecialOperator;
         public Operator IsSpecialOperator
         {
@@ -1713,7 +1747,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadEqualityOperatorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.EqualityOperatorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FEqualityOperatorID = Int32.Parse(LTag.Value);
 		}
 
@@ -1735,6 +1769,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // EqualityOperator
+		[Reference]
         private Operator FEqualityOperator;
         public Operator EqualityOperator
         {
@@ -1756,7 +1791,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadComparisonOperatorID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.ComparisonOperatorID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FComparisonOperatorID = Int32.Parse(LTag.Value);
 		}
 
@@ -1778,6 +1813,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         // ComparisonOperator
+		[Reference]
         private Operator FComparisonOperator;
         public Operator ComparisonOperator
         {
@@ -1803,7 +1839,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					try
 					{
 						if (value != null)
-							ChildObjectValidate(this, value);
+							ValidateChildObjectName(value.Name);
 						if (FOldDefault != null)
 							FOldDefault.FScalarType = null;
 						FDefault = value;
@@ -1829,7 +1865,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadSortID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.SortID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			FSortID = Int32.Parse(LTag.Value);
 		}
 
@@ -1844,6 +1880,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.SortID");
 		}
 		
+		[Reference]
 		private Sort FSort;
 		public Sort Sort
 		{
@@ -1865,7 +1902,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadUniqueSortID()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.UniqueSortID");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FUniqueSortID = Int32.Parse(LTag.Value);
 		}
 
@@ -1880,6 +1917,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.UniqueSortID");
 		}
 		
+		[Reference]
 		private Sort FUniqueSort;
 		public Sort UniqueSort
 		{

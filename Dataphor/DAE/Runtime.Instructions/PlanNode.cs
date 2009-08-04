@@ -65,7 +65,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public PlanNode() : base()
 		{
-			Execute = new ExecuteDelegate(StandardExecute);
+			//Execute = new ExecuteDelegate(StandardExecute);
  		}
 		
         // IsLiteral
@@ -130,9 +130,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// IsContextLiteral (see the sargability discussion in RestrictNode.cs for a description of this characteristic)
 		public virtual bool IsContextLiteral(int ALocation)
 		{
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-				if (!Nodes[LIndex].IsContextLiteral(ALocation))
-					return false;
+			if (FNodes != null)
+				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+					if (!Nodes[LIndex].IsContextLiteral(ALocation))
+						return false;
 			return true;
 		}
 		
@@ -145,6 +146,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
         
         // Device
+		[Reference]
         protected Schema.Device FDevice;
         public Schema.Device Device
         {
@@ -193,28 +195,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
             Schema.Device LCurrentChildDevice = null;
             FNoDevice = !ShouldSupport;
             
-            foreach (PlanNode LNode in Nodes)
-            {
-				FNoDevice = FNoDevice || LNode.NoDevice;
-				if (!FNoDevice)
+            if (FNodes != null)
+				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
 				{
-					LChildDevice = LNode.Device;
-					if (LChildDevice != null)
+					FNoDevice = FNoDevice || Nodes[LIndex].NoDevice;
+					if (!FNoDevice)
 					{
-						if (LCurrentChildDevice == null)
-							LCurrentChildDevice = LChildDevice;
-						else if (LCurrentChildDevice != LChildDevice)
+						LChildDevice = Nodes[LIndex].Device;
+						if (LChildDevice != null)
 						{
-							#if TRACEEVENTS
-							if ((DataType != null) && !IgnoreUnsupported && !APlan.InTypeOfContext)
-								APlan.ServerProcess.ServerSession.Server.RaiseTraceEvent(APlan.ServerProcess, TraceCodes.UnsupportedNode, String.Format(@"Node ""{0}"" not supported because arguments have disparate device sources.", this.GetType().Name));
-							#endif
-							FNoDevice = true;
-							break;
+							if (LCurrentChildDevice == null)
+								LCurrentChildDevice = LChildDevice;
+							else if (LCurrentChildDevice != LChildDevice)
+							{
+								#if TRACEEVENTS
+								if ((DataType != null) && !IgnoreUnsupported && !APlan.InTypeOfContext)
+									APlan.ServerProcess.ServerSession.Server.RaiseTraceEvent(APlan.ServerProcess, TraceCodes.UnsupportedNode, String.Format(@"Node ""{0}"" not supported because arguments have disparate device sources.", this.GetType().Name));
+								#endif
+								FNoDevice = true;
+								break;
+							}
 						}
 					}
 				}
-            }
 
             if (!FNoDevice)
             {
@@ -265,9 +268,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 				FDeviceSupported = false;
-				
-			if (FDeviceSupported)
-				Execute = new ExecuteDelegate(DeviceExecute);
 		}
 		
 		// IgnoreUnsupported -- only applies if DataType is not null
@@ -315,7 +315,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         // Nodes
-        public PlanNodes Nodes = new PlanNodes();
+        private PlanNodes FNodes;
+        public PlanNodes Nodes
+        {
+			get
+			{
+				if (FNodes == null)
+					FNodes = new PlanNodes();
+				return FNodes;
+			}
+		}
+		
+		public int NodeCount { get { return FNodes == null ? 0 : FNodes.Count; } }
 
 		// IL Generation        
         public void EmitIL(Plan APlan, bool AParentEmitted) 
@@ -324,9 +335,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (!AParentEmitted)
 					InternalEmitIL(APlan);
-				
-				foreach (PlanNode LNode in Nodes)
-					LNode.EmitIL(APlan, FShouldEmitIL);
+
+				if (FNodes != null)				
+					for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+						Nodes[LIndex].EmitIL(APlan, FShouldEmitIL);
 			}
         }
 
@@ -354,7 +366,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (DataType == null)
 				AGenerator.Emit(OpCodes.Ldnull);
 			AGenerator.Emit(OpCodes.Ret);
-			Execute = (ExecuteDelegate)AExecute.CreateDelegate(typeof(ExecuteDelegate), this);
+			ILExecute = (ExecuteDelegate)AExecute.CreateDelegate(typeof(ExecuteDelegate), this);
 		}
 		
 		public object TestExecute(ServerProcess AProcess)
@@ -497,6 +509,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// DataType
+		[Reference] // TODO: This should be a reference for scalar types, but owned for all other types
 		protected Schema.IDataType FDataType;
 		public virtual Schema.IDataType DataType
 		{
@@ -541,28 +554,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public virtual void InternalDetermineBinding(Plan APlan)
 		{
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-				Nodes[LIndex].DetermineBinding(APlan);
+			if (FNodes != null)
+				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+					Nodes[LIndex].DetermineBinding(APlan);
 		}
 		
 		/// <summary>Rechecks security for the plan using the given plan and associated security context.</summary>
 		public virtual void BindToProcess(Plan APlan)
 		{
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
-				Nodes[LIndex].BindToProcess(APlan);
+			if (FNodes != null)
+				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+					Nodes[LIndex].BindToProcess(APlan);
 		}
 		
-/*
-		protected virtual object ProtectedExecute(ServerProcess AProcess)
-		{
-			if (FDeviceSupported)
-				return AProcess.DeviceExecute(FDevice, this);
-			else
-				return InternalExecute(AProcess);
-		}
-*/
-		
-		protected object DeviceExecute(ServerProcess AProcess)
+        // ILExecute
+        protected ExecuteDelegate ILExecute;
+
+		// BeforeExecute        
+        protected virtual void InternalBeforeExecute(ServerProcess AProcess) { }
+        
+		public object Execute(ServerProcess AProcess)
 		{
 			#if WRAPRUNTIMEEXCEPTIONS
 			try
@@ -574,68 +585,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 				#endif
-					return AProcess.DeviceExecute(FDevice, this);
-				#if TRACKCALLDEPTH
-				}
-				finally
-				{
-					AProcess.Context.DecCallDepth();
-				}
-				#endif
-			#if WRAPRUNTIMEEXCEPTIONS
-			}
-			catch (RuntimeException LRuntimeException)
-			{
-				if (!LRuntimeException.HasContext())
-					LRuntimeException.SetContext(this);
-				throw LRuntimeException;
-			}
-			catch (ControlError LControlError)
-			{
-				throw LControlError;
-			}
-			catch (NullReferenceException LNullReferenceException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.NilEncountered, LNullReferenceException, this);
-			}
-			catch (DataphorException LDataphorException)
-			{
-				if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
-					throw LDataphorException;
-				else
-					throw new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
-			}
-			catch (FormatException LFormatException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LFormatException.Message, LFormatException);
-			}
-			catch (ArgumentException LArgumentException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArgumentException.Message, LArgumentException);
-			}
-			catch (ArithmeticException LArithmeticException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArithmeticException.Message, LArithmeticException);
-			}
-			catch (Exception LException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
-			}
-			#endif
-		}
-		
-		protected object StandardExecute(ServerProcess AProcess)
-		{
-			#if WRAPRUNTIMEEXCEPTIONS
-			try
-			{
-			#endif
-				AProcess.CheckAborted();
-				#if TRACKCALLDEPTH
-				AProcess.Context.IncCallDepth();
-				try
-				{
-				#endif
+					if (ILExecute != null)
+						return ILExecute(AProcess);
+					InternalBeforeExecute(AProcess);
+					if (FDeviceSupported)
+						return AProcess.DeviceExecute(FDevice, this);
 					return InternalExecute(AProcess);
 				#if TRACKCALLDEPTH
 				}
@@ -686,9 +640,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 		}
 		
-        // Execute
-        public ExecuteDelegate Execute;
-        
         public abstract object InternalExecute(ServerProcess AProcess);
         
 		#region ShowPlan
@@ -717,8 +668,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		protected virtual void WritePlanNodes(System.Xml.XmlWriter AWriter)
 		{
-			foreach (PlanNode LNode in Nodes)
-				LNode.WritePlan(AWriter);
+			if (FNodes != null)
+				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+					Nodes[LIndex].WritePlan(AWriter);
 		}
 
 		protected static void WritePlanTags(System.Xml.XmlWriter AWriter, MetaData AMetaData)
@@ -781,21 +733,36 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public PlanNodes() : base(){}
 
 		private int FCount;
-		private PlanNode[] FNodes = new PlanNode[CInitialCapacity];
+		private PlanNode[] FNodes;
 		
         public PlanNode this[int AIndex]
         {	
-			get { return FNodes[AIndex]; }
-			set { FNodes[AIndex] = value; }
+			get 
+			{ 
+				#if DEBUG
+				if (AIndex >= FCount)
+					throw new IndexOutOfRangeException();
+				#endif
+				return FNodes[AIndex];
+			}
+			set 
+			{ 
+				#if DEBUG
+				if (AIndex >= FCount)
+					throw new IndexOutOfRangeException();
+				#endif
+				FNodes[AIndex] = value;
+			}
         }
         
         private void EnsureCapacity(int ARequiredCapacity)
         {
-			if (FNodes.Length <= ARequiredCapacity)
+			if ((FNodes == null) || (FNodes.Length <= ARequiredCapacity))
 			{
-				PlanNode[] FNewNodes = new PlanNode[Math.Max(FNodes.Length, 1) * 2];
-				for (int LIndex = 0; LIndex < FNodes.Length; LIndex++)
-					FNewNodes[LIndex] = FNodes[LIndex];
+				PlanNode[] FNewNodes = new PlanNode[Math.Max(FNodes == null ? 0 : FNodes.Length, 1) * 2];
+				if (FNodes != null)
+					for (int LIndex = 0; LIndex < FNodes.Length; LIndex++)
+						FNewNodes[LIndex] = FNodes[LIndex];
 				FNodes = FNewNodes;
 			}
         }

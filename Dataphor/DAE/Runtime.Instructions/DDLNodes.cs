@@ -1318,7 +1318,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AValueNodes.Add(ANode);
 			}
 
-			for (int LIndex = 0; LIndex < ANode.Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < ANode.NodeCount; LIndex++)
 				ReplaceValueNodes(ANode.Nodes[LIndex], AValueNodes, AColumnName);
 		}
 		

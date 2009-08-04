@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsDeterministic = true;
 			FIsRepeatable = true;
 			FIsNilable = false;
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
 				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
 				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
@@ -43,7 +43,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			ListValue LList = new ListValue(AProcess, ListType);
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 				LList.Add(Nodes[LIndex].Execute(AProcess));
 			return LList;
 		}
@@ -52,8 +52,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			ListSelectorExpression LExpression = new ListSelectorExpression();
 			LExpression.TypeSpecifier = ListType.EmitSpecifier(AMode);
-			foreach (PlanNode LNode in Nodes)
-				LExpression.Expressions.Add(LNode.EmitStatement(AMode));
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+				LExpression.Expressions.Add(Nodes[LIndex].EmitStatement(AMode));
 			LExpression.Modifiers = Modifiers;
 			return LExpression;
 		}

@@ -255,17 +255,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			SetIsChangeRemotable();
         }
         
-		private void ConstraintsAdding(object ASender, Object AObject)
+		internal void ConstraintsAdding(object ASender, Object AObject)
 		{
 			FIsValidateRemotable = FIsValidateRemotable && AObject.IsRemotable;
 		}
 		
-		private void ConstraintsRemoving(object ASender, Object AObject)
+		internal void ConstraintsRemoving(object ASender, Object AObject)
 		{
 			SetIsValidateRemotable();
 		}
 		
-		private void EventHandlersAdding(object ASender, Object AObject)
+		internal void EventHandlersAdding(object ASender, Object AObject)
 		{
 			EventHandler LObject = (EventHandler)AObject;
 			if ((LObject.EventType & EventType.Default) != 0)
@@ -276,7 +276,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				FIsChangeRemotable = FIsChangeRemotable && LObject.IsRemotable;
 		}
 		
-		private void EventHandlersRemoving(object ASender, Object AObject)
+		internal void EventHandlersRemoving(object ASender, Object AObject)
 		{
 			EventHandler LObject = (EventHandler)AObject;
 			if ((LObject.EventType & EventType.Default) != 0)
@@ -296,6 +296,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override bool IsATObject { get { return FTableVar == null ? false : FTableVar.IsATObject; } }
 
 		// TableVar
+		[Reference]
 		internal TableVar FTableVar;
 		public TableVar TableVar 
 		{ 
@@ -310,6 +311,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Column
+		[Reference]
 		private Column FColumn;
 		public Column Column { get { return FColumn; } }
 
@@ -356,11 +358,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get 
 			{ 
 				if (FConstraints == null)
-				{
 					FConstraints = new TableVarColumnConstraints(this);			
-					FConstraints.OnAdding += new SchemaObjectListEventHandler(ConstraintsAdding);
-					FConstraints.OnRemoving += new SchemaObjectListEventHandler(ConstraintsRemoving);
-				}
 				return FConstraints; 
 			} 
 		}
@@ -382,11 +380,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get 
 			{ 
 				if (FEventHandlers == null)
-				{
 					FEventHandlers = new TableVarColumnEventHandlers(this);
-					FEventHandlers.OnAdding += new SchemaObjectListEventHandler(EventHandlersAdding);
-					FEventHandlers.OnRemoving += new SchemaObjectListEventHandler(EventHandlersRemoving);
-				}
 				return FEventHandlers; 
 			} 
 		}
@@ -770,8 +764,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			FTableVar = ATableVar;
 		}
 		
+		[Reference]
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
+
+		protected override void Validate(Object AObject)
+		{
+			base.Validate(AObject);
+			FTableVar.ValidateChildObjectName(AObject.Name);
+		}
 		
 		protected override void Adding(Object AItem, int AIndex)
 		{
@@ -786,7 +787,31 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-    public class KeyColumns : TableVarColumnsBase {}
+    public class KeyColumns : TableVarColumnsBase 
+    {
+		//public KeyColumns() : base() { }
+		public KeyColumns(Key AKey) : base()
+		{
+			FKey = AKey;
+		}
+		
+		private Key FKey;
+		public Key Key { get { return FKey; } }
+
+		protected override void Adding(Object AObject, int AIndex)
+		{
+			base.Adding(AObject, AIndex);
+			if (FKey != null)
+				FKey.UpdateKeyName();
+		}
+
+		protected override void Removing(Object AObject, int AIndex)
+		{
+			base.Removing(AObject, AIndex);
+			if (FKey != null)
+				FKey.UpdateKeyName();
+		}
+    }
     
 	public class OrderColumn : System.Object, ICloneable
     {
@@ -821,6 +846,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// Column
+		[Reference]
 		protected TableVarColumn FColumn;
 		public TableVarColumn Column
 		{
@@ -1152,6 +1178,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// TableVar
+		[Reference]
 		internal TableVar FTableVar;
 		public TableVar TableVar 
 		{ 
@@ -1223,7 +1250,6 @@ namespace Alphora.Dataphor.DAE.Schema
             if (LOrder != null)
 				return (Columns.Count == LOrder.Columns.Count) && Equivalent(LOrder);
 
-            System.Diagnostics.Debug.Assert(!(AObject is Key), "Order.Equals called with a Key as argument");
             return base.Equals(AObject);
         }
 
@@ -1304,6 +1330,7 @@ namespace Alphora.Dataphor.DAE.Schema
         }
     }
 
+	#if USETYPEDLIST
 	public class Orders : TypedList
     {
 		public Orders() : base(typeof(Order)) { }
@@ -1312,10 +1339,21 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			FTableVar = ATableVar;
 		}
+	#else
+	public class Orders : ValidatingBaseList<Order>
+	{
+	#endif
+		public Orders() : base() { }
+		public Orders(TableVar ATableVar) : base()
+		{
+			FTableVar = ATableVar;
+		}
 		
+		[Reference]
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AItem, int AIndex)
 		{
 			base.Adding(AItem, AIndex);
@@ -1333,6 +1371,19 @@ namespace Alphora.Dataphor.DAE.Schema
             get { return (Order)(base[AIndex]); }
             set { base[AIndex] = value; }
         }
+        #else
+        protected override void Adding(Order AValue, int AIndex)
+		{
+ 			 //base.Adding(AValue, AIndex);
+			 AValue.FTableVar = FTableVar;
+		}
+		
+		protected override void Removing(Order AValue, int AIndex)
+		{
+ 			 AValue.FTableVar = null;
+ 			 //base.Removing(AValue, AIndex);
+		}
+        #endif
         
         // ToString
         public override string ToString()
@@ -1408,32 +1459,12 @@ namespace Alphora.Dataphor.DAE.Schema
 
         private void InternalInitialize()
         {
-			FColumns = new KeyColumns();
-			FColumns.OnValidate += new SchemaObjectListEventHandler(ColumnValidate);
-			FColumns.OnAdding += new SchemaObjectListEventHandler(ColumnAdding);
-			FColumns.OnRemoving += new SchemaObjectListEventHandler(ColumnRemoving);
-        }
-        
-        private void ColumnValidate(object ASender, Object AItem)
-        {
-            DoChanging();
-        }
-        
-        private void ColumnAdding(object ASender, Object AItem)
-        {
-			DoChanged();
-			UpdateKeyName();
-        }
-        
-        private void ColumnRemoving(object ASender, Object AItem)
-        {
-            DoChanged();
-            UpdateKeyName();
+			FColumns = new KeyColumns(this);
         }
         
         private bool FNameCurrent = false;
 
-        private void UpdateKeyName()
+        internal void UpdateKeyName()
         {
 			FNameCurrent = false;
         }
@@ -1469,7 +1500,6 @@ namespace Alphora.Dataphor.DAE.Schema
         public override bool Equals(object AObject)
         {
 			Key LKey = AObject as Key;
-			System.Diagnostics.Debug.Assert(LKey != null, "Key.Equals called with non-key argument");
 			return (LKey != null) && FColumns.Equals(LKey.Columns) && (FIsSparse == LKey.IsSparse);
         }
         
@@ -1493,6 +1523,7 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
 		// TableVar
+		[Reference]
 		internal TableVar FTableVar;
 		public TableVar TableVar 
 		{ 
@@ -1567,20 +1598,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Name;
         }
         
-        public event System.EventHandler OnChanging;
-        protected virtual void DoChanging()
-        {
-            if (OnChanging != null)
-                OnChanging(this, EventArgs.Empty);
-        }
-        
-        public event System.EventHandler OnChanged;
-        protected virtual void DoChanged()
-        {
-            if (OnChanged != null)
-                OnChanged(this, EventArgs.Empty);
-        }
-        
         public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
 			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
@@ -1630,6 +1647,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
+    #if USETYPEDLIST
 	public class Keys : TypedList
     {        
 		public Keys() : base(typeof(Key)) { }
@@ -1638,10 +1656,21 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			FTableVar = ATableVar;
 		}
+	#else
+	public class Keys : ValidatingBaseList<Key>
+	{
+		public Keys() : base() { }
+		public Keys(TableVar ATableVar) : base()
+		{
+			FTableVar = ATableVar;
+		}
+	#endif
 		
+		[Reference]
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AItem, int AIndex)
 		{
 			base.Adding(AItem, AIndex);
@@ -1659,7 +1688,20 @@ namespace Alphora.Dataphor.DAE.Schema
             get { return (Key)(base[AIndex]); }
             set { base[AIndex] = value; }
         }
-        
+		#else
+        protected override void Adding(Key AValue, int AIndex)
+		{
+ 			 //base.Adding(AValue, AIndex);
+			 AValue.FTableVar = FTableVar;
+		}
+		
+		protected override void Removing(Key AValue, int AIndex)
+		{
+ 			 AValue.FTableVar = null;
+ 			 //base.Removing(AValue, AIndex);
+		}
+		#endif
+
         public bool IsKeyColumnName(string AColumnName)
         {
 			foreach (Schema.Key LKey in this)
@@ -1773,36 +1815,29 @@ namespace Alphora.Dataphor.DAE.Schema
 		private void InternalInitialize()
 		{
 			FColumns = new TableVarColumns(this);
-			FColumns.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
 			FKeys = new Keys(this);
 			FOrders = new Orders(this);
 			FConstraints = new TableVarConstraints(this);
-			FConstraints.OnValidate += new SchemaObjectListEventHandler(ChildObjectValidate);
-			FConstraints.OnRemoving += new SchemaObjectListEventHandler(ChildObjectRemoving);
 			FRowConstraints = new RowConstraints();
 		}
 		
-		protected virtual void ChildObjectValidate(object ASender, Object AItem)
+		public void ResetHasDeferredConstraintsComputed()
+		{
+			FHasDeferredConstraintsComputed = false;
+		}
+		
+		public void ValidateChildObjectName(string AName)
 		{
 			if 
 				(
-					(FColumns.IndexOfName(AItem.Name) >= 0) ||
-					(FConstraints.IndexOfName(AItem.Name) >= 0)
+					(FColumns.IndexOfName(AName) >= 0) ||
+					(FConstraints.IndexOfName(AName) >= 0)
 				)
 			{
-				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AItem.Name);
+				throw new SchemaException(SchemaException.Codes.DuplicateChildObjectName, AName);
 			}
-			
-			if (AItem is TableVarConstraint)
-				FHasDeferredConstraintsComputed = false;
 		}
-
-		private void ChildObjectRemoving(object ASender, Object AItem)
-		{
-			if (AItem is TableVarConstraint)
-				FHasDeferredConstraintsComputed = false;
-		}
-
+		
 		// Columns
 		private TableVarColumns FColumns;
 		public TableVarColumns Columns { get { return FColumns; } }
@@ -1963,14 +1998,17 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TableVarScope Scope;
 
 		// List of references in which this table variable is involved as a source
+		[Reference]
 		private References FSourceReferences = new References();
 		public References SourceReferences { get { return FSourceReferences; } }
 		
 		// List of references in which this table variable is involved as a target
+		[Reference]
 		private References FTargetReferences = new References();
 		public References TargetReferences { get { return FTargetReferences; } }
 
 		// List of references derived by type inference, not actually present in the catalog.
+		[Reference]
 		private References FDerivedReferences = new References();
 		public References DerivedReferences { get { return FDerivedReferences; } }
 		
@@ -2245,6 +2283,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TransitionConstraints DeleteConstraints { get { return FDeleteConstraints; } }
 
 		// List of database-wide constraints that reference this table		
+		[Reference]
 		private CatalogConstraints FCatalogConstraints = new CatalogConstraints(); 
 		public CatalogConstraints CatalogConstraints { get { return FCatalogConstraints; } }
 		
@@ -2587,6 +2626,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.BaseTableVar"), DisplayName); } }
 
 		// Device
+		[Reference]
 		private Device FDevice;
 		public Device Device
 		{

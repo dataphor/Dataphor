@@ -957,6 +957,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FCatalog = ACatalog;
 		}
 		
+		[Reference]
 		private Catalog FCatalog;
 		
 		public event CatalogLookupFailedEvent OnCatalogLookupFailed;
@@ -1029,6 +1030,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
+		[Reference]
 		private ScalarType FSystemScalar;
 		public ScalarType SystemScalar
 		{
@@ -1041,6 +1043,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemScalar = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemBoolean;
 		public ScalarType SystemBoolean
 		{
@@ -1053,6 +1056,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemBoolean = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemDecimal;
 		public ScalarType SystemDecimal
 		{
@@ -1065,6 +1069,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemDecimal = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemLong;
 		public ScalarType SystemLong
 		{
@@ -1077,6 +1082,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemLong = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemInteger;
 		public ScalarType SystemInteger
 		{
@@ -1089,6 +1095,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemInteger = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemShort;
 		public ScalarType SystemShort
 		{
@@ -1101,6 +1108,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemShort = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemByte;
 		public ScalarType SystemByte
 		{
@@ -1113,6 +1121,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemByte = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemString;
 		public ScalarType SystemString
 		{
@@ -1126,6 +1135,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		#if USEISTRING
+		[Reference]
 		private ScalarType FSystemIString;
 		public ScalarType SystemIString
 		{
@@ -1138,6 +1148,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
+		[Reference]
 		private ScalarType FSystemMoney;
 		public ScalarType SystemMoney
 		{
@@ -1150,6 +1161,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemMoney = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemGuid;
 		public ScalarType SystemGuid
 		{
@@ -1162,6 +1174,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemGuid = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemTimeSpan;
 		public ScalarType SystemTimeSpan
 		{
@@ -1174,6 +1187,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemTimeSpan = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemDateTime;
 		public ScalarType SystemDateTime
 		{
@@ -1186,6 +1200,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemDateTime = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemDate;
 		public ScalarType SystemDate
 		{
@@ -1198,6 +1213,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemDate = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemTime;
 		public ScalarType SystemTime
 		{
@@ -1210,6 +1226,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemTime = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemBinary;
 		public ScalarType SystemBinary
 		{
@@ -1222,6 +1239,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemBinary = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemGraphic;
 		public ScalarType SystemGraphic
 		{
@@ -1234,6 +1252,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemGraphic = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemError;
 		public ScalarType SystemError
 		{
@@ -1246,6 +1265,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FSystemError = value; }
 		}
 		
+		[Reference]
 		private ScalarType FSystemName;
 		public ScalarType SystemName
 		{

@@ -81,6 +81,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class StreamIDList : TypedList
 	{
 		public StreamIDList() : base(typeof(StreamID)){}
@@ -91,6 +92,9 @@ namespace Alphora.Dataphor.DAE.Streams
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class StreamIDList : BaseList<StreamID> { }
+	#endif
 	
 	public interface IStreamManager
 	{

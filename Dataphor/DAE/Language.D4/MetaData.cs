@@ -11,6 +11,8 @@
 // However, early indications are that the amount of memory saved is not significant,
 // even when dealing with large catalogs such as IBAS.
 
+#define USESTRUCTTAG
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,52 +22,493 @@ using Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.DAE.Language.D4
 {
+	#if USESTRUCTTAG
+	public struct Tag
+	{
+		public Tag(string AName) : this(AName, null, false, false) { }
+		public Tag(string AName, string AValue) : this(AName, AValue, false, false) { }
+		public Tag(string AName, string AValue, bool AIsInherited) : this(AName, AValue, AIsInherited, false) { }
+		public Tag(string AName, string AValue, bool AIsInherited, bool AIsStatic)
+		{
+			//if ((AName == null) || (AName == String.Empty))
+			//	throw new SchemaException(SchemaException.Codes.TagNameRequired);
+			FName = AName;
+			FValue = AValue;
+			FIsInherited = AIsInherited;
+			FIsStatic = AIsStatic;
+		}
+		
+		private string FName;
+		public string Name { get { return FName; } }
+		
+		private string FValue;
+		public string Value { get { return FValue == null ? String.Empty : FValue; } }
+		
+		private bool FIsInherited;
+		public bool IsInherited { get { return FIsInherited; } }
+
+		private bool FIsStatic;
+		public bool IsStatic { get { return FIsStatic; } }
+		
+		public override bool Equals(object AObject)
+		{
+			if (AObject is Tag)
+				return ((Tag)AObject).Name == FName;
+			return false;
+		}
+		
+		public override int GetHashCode()
+		{
+			return FName.GetHashCode();
+		}
+
+		/// <summary>Returns a copy of this tag.</summary>
+		public Tag Copy()
+		{
+			return InternalCopy(Name);
+		}
+		
+		/// <summary>Returns a copy of this tag with the name prefixed by ANameSpace.</summary>
+		public Tag Copy(string ANameSpace)
+		{
+			return InternalCopy(Schema.Object.Qualify(Name, ANameSpace));
+		}
+		
+		private Tag InternalCopy(string AName)
+		{
+			return new Tag(AName, FValue, FIsInherited, FIsStatic);
+		}
+		
+		/// <summary>Returns a copy of this tag with the IsInherited property set to true.</summary>		
+		public Tag Inherit()
+		{
+			if (FIsStatic)
+				Error.Fail(@"Static tag ""{0}"" cannot be inherited.", Name);
+			return InternalInherit(Name);
+		}
+
+		/// <summary>Returns a copy of this tag with the IsInherited property set to true, and with the tag name prefixed by ANameSpace.</summary>		
+		public Tag Inherit(string ANameSpace)
+		{
+			return InternalInherit(Schema.Object.Qualify(Name, ANameSpace));
+		}
+		
+		private Tag InternalInherit(string AName)
+		{
+			return new Tag(AName, FValue, true, FIsStatic);
+		}
+
+		public static Tag None = new Tag(null, null, false, false);
+		
+		public static bool operator ==(Tag ALeftTag, Tag ARightTag)
+		{
+			return ALeftTag.Name == ARightTag.Name;
+		}
+		
+		public static bool operator !=(Tag ALeftTag, Tag ARightTag)
+		{
+			return ALeftTag.Name != ARightTag.Name;
+		}
+	}
+
+	public class Tags : System.Object
+	{
+		/// <summary>
+		/// Internal list of tags, null if the list contains no tags.
+		/// </summary>
+		private Tag[] FTags;
+		
+		private int FCount;
+		
+		public int Count { get { return FCount; } }
+
+		private int IndexOfName(string AName)
+		{
+			if (FTags == null)
+				return -1;
+				
+			for (int LIndex = 0; LIndex < FCount; LIndex++)
+				if (FTags[LIndex].Name == AName)
+					return LIndex;
+					
+			return -1;
+		}
+		
+        private void EnsureCapacity(int ARequiredCapacity)
+        {
+			if ((FTags == null) || (FTags.Length <= ARequiredCapacity))
+			{
+				Tag[] FNewTags = new Tag[Math.Max(FTags == null ? 0 : FTags.Length, 1) * 2];
+				if (FTags != null)
+					for (int LIndex = 0; LIndex < FTags.Length; LIndex++)
+						FNewTags[LIndex] = FTags[LIndex];
+				FTags = FNewTags;
+			}
+        }
+        
+        private void InternalAdd(Tag ATag)
+        {
+			EnsureCapacity(FCount);
+			FTags[FCount] = ATag;
+			FCount++;
+        }
+        
+        private void RemoveAt(int AIndex)
+        {
+			FCount--;
+			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
+				FTags[LIndex] = FTags[LIndex + 1];
+			FTags[FCount] = Tag.None;
+        }
+        
+		public Tag this[int AIndex]
+		{
+			get
+			{
+				#if DEBUG
+				if (AIndex < 0 || AIndex >= Count)
+					throw new IndexOutOfRangeException();
+				#endif
+				return FTags[AIndex];
+			}
+		}
+		
+		/// <summary>Returns the Tag for the given name, raises an error if the Tag does not exist.</summary>		
+		public Tag this[string AName]
+		{
+			get
+			{
+				return GetTag(AName, true);
+			}
+		}
+		
+		/// <summary>Returns the Tag for the given name, if one exists, null otherwise.</summary>
+		public Tag GetTag(string AName)
+		{
+			return GetTag(AName, false);
+		}
+		
+		/// <summary>Returns the Tag for the given name. If the tag does not exist, an error is thrown if AShouldThrow is true, otherwise, null is returned.</summary>
+		public Tag GetTag(string AName, bool AShouldThrow)
+		{
+			int LIndex = IndexOfName(AName);
+			if (LIndex >= 0)
+				return FTags[LIndex];
+				
+			if (AShouldThrow)
+				throw new SchemaException(SchemaException.Codes.TagNotFound, AName);
+
+			return Tag.None;
+		}
+		
+		/// <summary>Returns the value of the specified tag, returning ADefaultValue if the tag does not exist.</summary>
+		public string GetTagValue(string AName, string ADefaultValue)
+		{
+			Tag LTag = GetTag(AName);
+			if (LTag != Tag.None)
+				return LTag.Value;
+			return ADefaultValue;
+		}
+		
+		/// <summary>Returns the value of the specific tag, returning the value of the default tag if the tag does not exist, and ADefaultValue if the default tag does not exist.</summary>
+		public string GetTagValue(string AName, string ADefaultName, string ADefaultValue)
+		{
+			Tag LTag = GetTag(AName);
+			if (LTag == Tag.None)
+				LTag = GetTag(ADefaultName);
+			if (LTag != Tag.None)
+				return LTag.Value;
+			return ADefaultValue;
+		}
+		
+		/// <summary>Adds the given tag, replacing a reference or inherited tag of the same name.</summary>
+		/// <remarks>If a tag already exists of the same name as the tag being added, the tag will be removed if it is a reference or inherited tag. Otherwise, an error will be raised.</remarks>
+		public void Add(Tag ATag)
+		{
+			int LIndex = IndexOfName(ATag.Name);
+			
+			if (LIndex >= 0)
+				if (FTags[LIndex].IsInherited)
+					RemoveAt(LIndex);
+				else
+					throw new SchemaException(SchemaException.Codes.DuplicateTagName, ATag.Name);
+			
+			InternalAdd(ATag);
+		}
+		
+		/// <summary>Inherits the given tag into this tag list.</summary>
+		/// <remarks>
+		/// If a tag with the same name as the given tag does not exist, the given tag is referenced. If the existing tag with the same name as the given tag
+		/// is a reference, the tag reference is replaced by a call to the Inherit method of the given tag. Otherwise, the value of the existing tag is set
+		/// based on the value of the given tag. Note that changing the value of the tag will cause the IsInherited property to be set to false.
+		/// </remarks>
+		public void Inherit(Tag ATag)
+		{
+			int LIndex = IndexOfName(ATag.Name);
+			if (LIndex < 0)
+				InternalAdd(ATag.Inherit());
+			else
+				FTags[LIndex] = ATag.Inherit();
+		}
+		
+		/// <summary>Joins the given tag to this tag list using copy semantics.</summary>
+		/// <remarks>
+		/// If a tag with the same name as the given tag does not exist, the given tag is copied by calling the Copy method of the given tag.
+		/// If the value of the given tag is different than the value of the existing tag, the existing tag is removed. Otherwise, the
+		/// existing tag remains and no action is taken.
+		/// </remarks>
+		public void Join(Tag ATag)
+		{
+			int LIndex = IndexOfName(ATag.Name);
+			if (LIndex < 0)
+				InternalAdd(ATag.Copy());
+			else
+			{
+				if (FTags[LIndex].Value != ATag.Value)
+					RemoveAt(LIndex);
+			}
+		}
+		
+		/// <summary>Joins the given tag to this list using reference semantics.</summary>
+		/// <remarks>
+		/// If a tag with the same name as the given tag does not exist, the given tag is referenced in this tag list.
+		/// If the value of the given tag is different than the value of the existing tag, the existing tag is removed.
+		/// Otherwise, the existing tag remains and no action is taken.
+		/// </remarks>
+		public void JoinInherit(Tag ATag)
+		{
+			int LIndex = IndexOfName(ATag.Name);
+			if (LIndex < 0)
+				InternalAdd(ATag.Inherit());
+			else
+			{
+				if (FTags[LIndex].Value != ATag.Value)
+					RemoveAt(LIndex);
+			}
+		}
+		
+		/// <summary>Updates the value and static setting of the given tag.</summary>
+		/// <remarks>
+		/// If a tag with the given name does not exist, an error is raised.
+		/// If a tag with the given name is being referenced, that tag reference is replaced with a new tag
+		/// with the given value and static setting. Otherwise, the tag is updated with the given value
+		/// and static setting, and the IsInherited property of the tag is set to false.
+		/// </remarks>
+		public void Update(string ATagName, string ATagValue, bool AIsStatic)
+		{
+			int LIndex = IndexOfName(ATagName);
+			if (LIndex >= 0)
+				FTags[LIndex] = new Tag(ATagName, ATagValue, false, AIsStatic);
+			else
+				throw new SchemaException(SchemaException.Codes.TagNotFound, ATagName);
+		}
+		
+		/// <summary>Updates the value of the given tag, and sets IsStatic to false.</summary>
+		/// <remarks>This overload is equivalent to calling Update(ATagName, ATagValue, false)</remarks>
+		public void Update(string ATagName, string ATagValue)
+		{
+			Update(ATagName, ATagValue, false);
+		}
+		
+		/// <summary>Updates the value of the tag with the same name as the given tag to the value and static setting of the given tag.</summary>
+		/// <remarks>This overload is equivalent to calling Update(ATag.Name, ATag.Value, ATag.IsStatic)</remarks>
+		public void Update(Tag ATag)
+		{
+			Update(ATag.Name, ATag.Value, ATag.IsStatic);
+		}
+		
+		/// <summary>Updates or adds a tag of the given name with the given value and static setting.</summary>
+		/// <remarks>
+		/// If a tag of the given name does not exist, a tag will be created and added.
+		/// If a tag with the given name is being referenced, that tag reference is replaced with a new tag
+		/// with the given value and static setting. Otherwise, the tag is updated with the given value
+		/// and static setting, and the IsInherited property of the tag is set to false.
+		/// </remarks>
+		public void AddOrUpdate(string ATagName, string ATagValue, bool AIsStatic)
+		{
+			int LIndex = IndexOfName(ATagName);
+			if (LIndex < 0)
+				InternalAdd(new Tag(ATagName, ATagValue, false, AIsStatic));
+			else
+				FTags[LIndex] = new Tag(ATagName, ATagValue, false, AIsStatic);
+		}
+		
+		/// <summary>Add or updates the given tag, and sets IsStatic to false.</summary>
+		/// <remarks>This overload is equivalent to calling AddOrUpdate(ATagName, ATagValue, false)</remarks>
+		public void AddOrUpdate(string ATagName, string ATagValue)
+		{
+			AddOrUpdate(ATagName, ATagValue, false);
+		}
+		
+		/// <summary>Adds or updates the tag with the same name as the given tag to the value and static setting of the given tag.</summary>
+		/// <remarks>This overload is equivalent to calling AddOrUpdate(ATag.Name, ATag.Value, ATag.IsStatic)</remarks>
+		public void AddOrUpdate(Tag ATag)
+		{
+			AddOrUpdate(ATag.Name, ATag.Value, ATag.IsStatic);
+		}
+		
+		/// <summary>Calls Add for each Tag in the given array.</summary>
+		public void AddRange(Tag[] ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
+				Add(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls Add for each Tag in the given list.</summary>
+		public void AddRange(Tags ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+				Add(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls Update for each Tag in the given array.</summary>
+		public void UpdateRange(Tag[] ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
+				Update(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls Update for each Tag in the given list.</summary>
+		public void UpdateRange(Tags ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+				Update(ATags[LIndex]);
+		}
+
+		/// <summary>Calls AddOrUpdate for each Tag in the given array.</summary>
+		public void AddOrUpdateRange(Tag[] ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
+				AddOrUpdate(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls AddOrUpdate for each Tag in the given list.</summary>
+		public void AddOrUpdateRange(Tags ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+				AddOrUpdate(ATags[LIndex]);
+		}
+		
+		/// <summary>Removes the tag of the given name if it exists. Otherwise, no action is taken.</summary>
+		public void SafeRemove(string ATagName)
+		{
+			int LIndex = IndexOfName(ATagName);
+			if (LIndex >= 0)
+				RemoveAt(LIndex);
+		}
+
+		/// <summary>Removes the tag of the given name and returns it, if it exists. Otherwise, null is returned.</summary>		
+		public Tag RemoveTag(string ATagName)
+		{
+			int LIndex = IndexOfName(ATagName);
+			if (LIndex >= 0)
+			{
+				Tag LTag = this[LIndex];
+				RemoveAt(LIndex);
+				return LTag;
+			}
+			return Tag.None;
+		}
+		
+		/// <summary>Removes the tag of the given name if it exists. Otherwise, an error is raised.</summary>
+		public void Remove(string ATagName)
+		{
+			int LIndex = IndexOfName(ATagName);
+			if (LIndex >= 0)
+				RemoveAt(LIndex);
+			else
+				throw new SchemaException(SchemaException.Codes.TagNotFound, ATagName);
+		}
+		
+		/// <summary>Removes the tag with the same name as the given tag if one exists. Otherwise no action is taken.</summary>
+		public void SafeRemove(Tag ATag)
+		{
+			SafeRemove(ATag.Name);
+		}
+		
+		/// <summary>Removes the tag with the same name as the given tag if one exists. Otherwise, an error is raised.</summary>
+		public void Remove(Tag ATag)
+		{
+			Remove(ATag.Name);
+		}
+		
+		/// <summary>Calls Remove for each tag in the given array.</summary>
+		public void RemoveRange(Tag[] ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
+				Remove(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls Remove for each tag in the given list.</summary>
+		public void RemoveRange(Tags ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+				Remove(ATags[LIndex]);
+		}
+
+		/// <summary>Calls SafeRemove for each tag in the given array.</summary>		
+		public void SafeRemoveRange(Tag[] ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Length; LIndex++)
+				SafeRemove(ATags[LIndex]);
+		}
+		
+		/// <summary>Calls SafeRemove for each tag in the given list.</summary>
+		public void SafeRemoveRange(Tags ATags)
+		{
+			for (int LIndex = 0; LIndex < ATags.Count; LIndex++)
+				SafeRemove(ATags[LIndex]);
+		}
+		
+		/// <summary>Returns true if this list contains a tag with the same name as the given tag, false otherwise.</summary>
+		public bool Contains(Tag ATag)
+		{
+			return Contains(ATag.Name);
+		}
+		
+		/// <summary>Returns true if this list contains a tag with the given name, false otherwise.
+		public bool Contains(string ATagName)
+		{
+			return IndexOfName(ATagName) >= 0;
+		}
+		
+		/// <summary>Copies tags from this tag list to the given tag list.</summary>
+		/// <remarks>
+		/// If the tag in this tag list is a reference, it is copied using the Inherit() method of the tag being referenced,
+		/// otheriwse it is copied using the Copy() method of the tag.
+		/// </remarks>
+		public void CopyTo(Tags ATags)
+		{
+			if (FTags != null)
+				for (int LIndex = 0; LIndex < FCount; LIndex++)
+					ATags.Add(((Tag)FTags[LIndex]).Copy());
+		}
+
+		/// <summary> Returns the set of static or non-static tags (not cloned). </summary>
+		public Tags GetSubset(bool AStatic)
+		{
+			Tag LTag;
+			Tags LTags = new Tags();
+			if (FTags != null)
+				for (int LIndex = 0; LIndex < FCount; LIndex++)
+				{
+					LTag = this[LIndex];
+					if (LTag.IsStatic == AStatic)
+						LTags.Add(LTag);
+				}
+			return LTags;
+		}
+	}
+	#else
     /// <remarks> Tag </remarks>
     public class Tag : System.Object
     {
-		// constructor
-		public Tag(string AName) : base()
-		{
-			if ((AName == null) || (AName == String.Empty))
-				throw new SchemaException(SchemaException.Codes.TagNameRequired);
-			#if USETAGNAMECACHE
-			FName = TagNames.GetTagName(AName);
-			#else
-			FName = AName;
-			#endif
-		}
-		
-		public Tag(string AName, string AValue) : base()
-		{
-			if ((AName == null) || (AName == String.Empty))
-				throw new SchemaException(SchemaException.Codes.TagNameRequired);
-			#if USETAGNAMECACHE
-			FName = TagNames.GetTagName(AName);
-			#else
-			FName = AName;
-			#endif
-			FValue = AValue == null ? String.Empty : AValue;
-		}
-		
-		public Tag(string AName, string AValue, bool AIsInherited) : base()
-		{
-			if ((AName == null) || (AName == String.Empty))
-				throw new SchemaException(SchemaException.Codes.TagNameRequired);
-			#if USETAGNAMECACHE
-			FName = TagNames.GetTagName(AName);
-			#else
-			FName = AName;
-			#endif
-			FValue = AValue;
-			FIsInherited = AIsInherited;
-		}
-
 		public Tag(string AName, string AValue, bool AIsInherited, bool AIsStatic) : base()
 		{
 			if ((AName == null) || (AName == String.Empty))
 				throw new SchemaException(SchemaException.Codes.TagNameRequired);
 			#if USETAGNAMECACHE
-			FName = TagNames.GetTagName(AName);
+			FID = TagNames.GetTagID(AName);
 			#else
 			FName = AName;
 			#endif
@@ -74,9 +517,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FIsStatic = AIsStatic;
 		}
 		
+		public Tag(string AName) : this(AName, String.Empty, false, false) { }
+		public Tag(string AName, string AValue) : this(AName, AValue, false, false) { }
+		public Tag(string AName, string AValue, bool AIsInherited) : this(AName, AValue, AIsInherited, false) { }
+
 		// Name
+		#if USETAGNAMECACHE
+		protected int FID;
+		public string Name { get { return TagNames.GetTagName(FID); } }
+		#else
 		protected string FName;
 		public string Name { get { return FName; } }
+		#endif
 		
 		// Value
 		protected string FValue = String.Empty;
@@ -125,9 +577,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
-		public int Line = -1;
-		public int LinePos = -1;
-		
 		public override bool Equals(object AObject)
 		{
 			Tag LTag = AObject as Tag;
@@ -137,24 +586,32 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (LTagReference != null)
 					LTag = LTagReference.Tag;
 			}
+			#if USETAGNAMECACHE
+			return (LTag != null) && (FID == LTag.FID);
+			#else
 			return (LTag != null) && (FName == LTag.Name);
+			#endif
 		}
 		
 		public override int GetHashCode()
 		{
+			#if USETAGNAMECACHE
+			return FID;
+			#else
 			return FName.GetHashCode();
+			#endif
 		}
 
 		/// <summary>Returns a copy of this tag.</summary>
 		public Tag Copy()
 		{
-			return InternalCopy(FName);
+			return InternalCopy(Name);
 		}
 		
 		/// <summary>Returns a copy of this tag with the name prefixed by ANameSpace.</summary>
 		public Tag Copy(string ANameSpace)
 		{
-			return InternalCopy(Schema.Object.Qualify(FName, ANameSpace));
+			return InternalCopy(Schema.Object.Qualify(Name, ANameSpace));
 		}
 		
 		protected virtual Tag InternalCopy(string AName)
@@ -166,20 +623,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Tag Inherit()
 		{
 			if (FIsStatic)
-				Error.Fail(@"Static tag ""{0}"" cannot be inherited.", FName);
-			return InternalInherit(FName);
+				Error.Fail(@"Static tag ""{0}"" cannot be inherited.", Name);
+			return InternalInherit(Name);
 		}
 
 		/// <summary>Returns a copy of this tag with the IsInherited property set to true, and with the tag name prefixed by ANameSpace.</summary>		
 		public Tag Inherit(string ANameSpace)
 		{
-			return InternalInherit(Schema.Object.Qualify(FName, ANameSpace));
+			return InternalInherit(Schema.Object.Qualify(Name, ANameSpace));
 		}
 		
 		protected virtual Tag InternalInherit(string AName)
 		{
 			return new Tag(AName, FValue, true, FIsStatic);
 		}
+		
+		public static Tag None = null;
     }
 
     public class TagReference : System.Object
@@ -920,6 +1379,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			#endif
 		}
 	}
+	#endif
 
     public sealed class TagNames : System.Object
     {
@@ -931,27 +1391,40 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		#if USETAGNAMECACHE
 		private static object FDictionarySyncHandle = new object();
 
-		private static Dictionary<string, string> FTagNameCache = new Dictionary<string, string>();
+		private static Dictionary<string, int> FTagNameCache = new Dictionary<string, int>();
+		private static Dictionary<int, string> FTagNameIndex = new Dictionary<int, string>();
 		
 		public static void ClearTagNameCache()
 		{
 			lock (FDictionarySyncHandle)
 			{
 				FTagNameCache.Clear();
+				FTagNameIndex.Clear();
 			}
 		}
-
-		public static string GetTagName(string AName)
+		
+		public static int GetTagID(string AName)
 		{
 			lock (FDictionarySyncHandle)
 			{
-				string LName;
-				if (FTagNameCache.TryGetValue(AName, out LName))
-					return LName;
+				int LID;
+				if (FTagNameCache.TryGetValue(AName, out LID))
+					return LID;
 					
-				FTagNameCache.Add(AName, AName);
-				return AName;
+				LID = FTagNameCache.Count;
+				FTagNameCache.Add(AName, LID);
+				FTagNameIndex.Add(LID, AName);
+				return LID;
 			}
+		}
+		
+		public static string GetTagName(int AID)
+		{
+			string LName;
+			if (FTagNameIndex.TryGetValue(AID, out LName))
+				return LName;
+				
+			throw new ArgumentException(String.Format("Tag name not found for tag ID: {0}.", AID));
 		}
 		#endif
     }
@@ -1074,13 +1547,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		/// <summary>Retrives the tag of the given name from the given metadata, if the tag exists. Otherwise, null is returned.</summary>
 		public static Tag GetTag(MetaData AMetaData, string ATagName)
 		{
-			return AMetaData == null ? null : AMetaData.Tags.GetTag(ATagName);
+			return AMetaData == null ? Tag.None : AMetaData.Tags.GetTag(ATagName);
 		}
 		
 		/// <summary>Removes the tag of the given name from the given metadata and returns it, if it exists. Otherwise, null is returned.</summary>
 		public static Tag RemoveTag(MetaData AMetaData, string ATagName)
 		{
-			return AMetaData == null ? null : AMetaData.Tags.RemoveTag(ATagName);
+			return AMetaData == null ? Tag.None : AMetaData.Tags.RemoveTag(ATagName);
 		}
 		
 		/// <summary>Retrieves the value of the given tag from the given metadata, defaulted to the value of the default tag, or the given default value, if neither tag exists.</summary>

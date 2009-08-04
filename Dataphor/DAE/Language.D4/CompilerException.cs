@@ -8,6 +8,7 @@ using System.Text;
 using System.Resources;
 
 using Alphora.Dataphor.DAE;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Language.D4
 {
@@ -833,6 +834,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class CompilerMessages : TypedList
 	{
 		public CompilerMessages() : base(typeof(Exception)) {}
@@ -842,7 +844,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return (Exception)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-
+	
+	#else
+	public class CompilerMessages : ValidatingBaseList<Exception>
+	{
+	#endif
 		// Indicates the stored error flags are out-of-date.
 		private bool FFlagsReset;
 				
@@ -876,7 +882,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			} 
 		}
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AValue, int AIndex)
+		#else
+		protected override void Adding(Exception AValue, int AIndex)
+		#endif
 		{
 			if (AValue is CompilerException)
 			{
@@ -893,13 +903,17 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FHasFatalErrors = true;
 				FHasErrors = true;
 			}
-			base.Adding(AValue, AIndex);
+			//base.Adding(AValue, AIndex);
 		}
 
+		#if USETYPEDLIST
 		protected override void Removing(object AValue, int AIndex)
+		#else
+		protected override void Removing(Exception AValue, int AIndex)
+		#endif
 		{
 			FFlagsReset = true;
-			base.Removing(AValue, AIndex);
+			//base.Removing(AValue, AIndex);
 		}
 		
 		private void GetFlags()

@@ -1366,8 +1366,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Equal);
 			FLexer.NextToken().CheckType(TokenType.String);
 			Tag LTag = new Tag(LName, FLexer[0].AsString, false, AIsStatic);
-			LTag.Line = LLine;
-			LTag.LinePos = LLinePos;
 			return LTag;
         }		
 
@@ -1420,8 +1418,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							int LLine = FLexer[0, false].Line;
 							int LLinePos = FLexer[0, false].LinePos;
 							Tag LTag = new Tag(QualifiedIdentifier(false), String.Empty, false, false);
-							LTag.Line = LLine;
-							LTag.LinePos = LLinePos;
 							AAlterMetaData.DropTags.Add(LTag); 
 						break;
 						default: throw new ParserException(ParserException.Codes.DDLDirectiveExpected);

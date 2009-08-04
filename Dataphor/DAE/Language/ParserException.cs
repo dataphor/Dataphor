@@ -8,6 +8,7 @@ using System.Text;
 using System.Resources;
 
 using Alphora.Dataphor.DAE;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Language
 {
@@ -125,6 +126,7 @@ namespace Alphora.Dataphor.DAE.Language
 		public ParserException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
 	}
 
+	#if USETYPEDLIST
 	public class ParserMessages : TypedList
 	{
 		public ParserMessages() : base(typeof(Exception)) {}
@@ -134,7 +136,11 @@ namespace Alphora.Dataphor.DAE.Language
 			get { return (Exception)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-
+	
+	#else
+	public class ParserMessages : BaseList<Exception>
+	{
+	#endif
 		/// <summary>Returns true if there are any errors.</summary>		
 		public bool HasErrors()
 		{

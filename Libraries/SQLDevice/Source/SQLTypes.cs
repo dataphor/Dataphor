@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public string GetTag(string ATagName, string ADefaultValue, D4.MetaData AMetaData)
 		{
 			D4.Tag LTag = GetTag(ATagName, AMetaData);
-			if (LTag != null)
+			if (LTag != D4.Tag.None)
 				return LTag.Value;
 			return ADefaultValue;
 		}
@@ -97,10 +97,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public D4.Tag GetTag(string ATagName, D4.MetaData AMetaData)
 		{
 			D4.Tag LTag = D4.MetaData.GetTag(AMetaData, ATagName);
-			if (LTag == null)
+			if (LTag == D4.Tag.None)
 			{	
 				LTag = D4.MetaData.GetTag(MetaData, ATagName);
-				if (LTag == null)
+				if (LTag == D4.Tag.None)
 					LTag = D4.MetaData.GetTag(ScalarType.MetaData, ATagName);
 			}
 			return LTag;
@@ -111,7 +111,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public string NativeDomainName(D4.MetaData AMetaData)
 		{
 			D4.Tag LNativeDomainName = GetTag("Storage.NativeDomainName", AMetaData);
-			if (LNativeDomainName != null)
+			if (LNativeDomainName != D4.Tag.None)
 				return LNativeDomainName.Value;
 			return InternalNativeDomainName(AMetaData);
 		}
@@ -129,10 +129,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public string DomainName(D4.MetaData AMetaData)
 		{
 			D4.Tag LDomainName = D4.MetaData.GetTag(AMetaData, "Storage.DomainName");
-			if (LDomainName != null)
+			if (LDomainName != D4.Tag.None)
 				return LDomainName.Value;
 			LDomainName = GetTag("Storage.Name");
-			if (LDomainName != null)
+			if (LDomainName != D4.Tag.None)
 				return LDomainName.Value;
 			return NativeDomainName(AMetaData);
 		}

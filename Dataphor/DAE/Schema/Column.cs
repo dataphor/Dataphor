@@ -34,6 +34,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		// DataType		
+		[Reference]
 		private IDataType FDataType;
 		public IDataType DataType 
 		{ 

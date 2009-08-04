@@ -37,6 +37,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FElementType = AElementType;
 		}
 		
+		[Reference]
 		private IDataType FElementType;
 		public IDataType ElementType
 		{

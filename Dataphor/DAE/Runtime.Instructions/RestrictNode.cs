@@ -333,7 +333,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if ((FConditions[LIndex].Count > 1) || (FConditions[LIndex][0].Instruction != Instructions.Equal) || !FConditions[LIndex][0].Argument.IsContextLiteral(0))
 					return false;
 
-			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns();
+			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns(null);
 			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
 				LKeyColumns.Add(FConditions[LIndex].Column);
 
@@ -346,13 +346,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected Schema.Order FindSeekOrder(Plan APlan)
 		{
-			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns();
+			Schema.KeyColumns LKeyColumns = new Schema.KeyColumns(null);
 			for (int LIndex = 0; LIndex < FConditions.Count; LIndex++)
 				LKeyColumns.Add(FConditions[LIndex].Column);
 
 			foreach (Schema.Key LKey in SourceTableVar.Keys)
 				if (!LKey.IsSparse && (LKey.Columns.Count == LKeyColumns.Count) && LKey.Columns.IsSupersetOf(LKeyColumns))
 					return new Schema.Order(LKey, APlan);
+
 			return null;
 		}
 		

@@ -31,6 +31,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public EventHandler(int AID, string AName) : base(AID, AName) {}
 		
 		// Operator
+		[Reference]
 		protected Operator FOperator;
 		public Operator Operator 
 		{
@@ -175,6 +176,7 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public ScalarTypeEventHandler(int AID, string AName) : base(AID, AName) {}
 		
+		[Reference]
 		internal ScalarType FScalarType;
 		public ScalarType ScalarType
 		{
@@ -232,6 +234,7 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public TableVarColumnEventHandler(int AID, string AName) : base(AID, AName) {}
 		
+		[Reference]
 		internal TableVarColumn FTableVarColumn;
 		public TableVarColumn TableVarColumn
 		{
@@ -290,6 +293,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TableVarEventHandler(string AName) : base(AName) {}
 		public TableVarEventHandler(int AID, string AName) : base(AID, AName) {}
 		
+		[Reference]
 		internal TableVar FTableVar;
 		public TableVar TableVar
 		{
@@ -465,6 +469,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FScalarType = AScalarType;
 		}
 		
+		[Reference]
 		private ScalarType FScalarType;
 		public ScalarType ScalarType { get { return FScalarType; } }
 		
@@ -497,6 +502,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FTableVarColumn = ATableVarColumn;
 		}
 		
+		[Reference]
 		private TableVarColumn FTableVarColumn;
 		public TableVarColumn TableVarColumn { get { return FTableVarColumn; } }
 		
@@ -513,10 +519,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.Adding(AItem, AIndex);
 			((TableVarColumnEventHandler)AItem).FTableVarColumn = FTableVarColumn;
+			FTableVarColumn.EventHandlersAdding(this, AItem);
 		}
 		
 		protected override void Removing(Object AItem, int AIndex)
 		{
+			FTableVarColumn.EventHandlersRemoving(this, AItem);
 			((TableVarColumnEventHandler)AItem).FTableVarColumn = null;
 			base.Removing(AItem, AIndex);
 		}
@@ -529,6 +537,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FTableVar = ATableVar;
 		}
 		
+		[Reference]
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
 		

@@ -237,10 +237,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ListValue LRequisites = (ListValue)AArguments[4];
 
 				for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-					LLibrary.Files.Add(LFiles[LIndex]);
+					LLibrary.Files.Add((Schema.FileReference)LFiles[LIndex]);
 
 				for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-					LLibrary.Libraries.Add(LRequisites[LIndex]);
+					LLibrary.Libraries.Add((Schema.LibraryReference)LRequisites[LIndex]);
 			}
 			
 			if (AArguments.Length >= 6)
@@ -401,7 +401,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ListValue LFiles = (ListValue)AArguments[1];
 			LLibrary.Files.Clear();
 			for (int LIndex = 0; LIndex < LFiles.Count(); LIndex++)
-				LLibrary.Files.Add(((Schema.FileReference)LFiles[LIndex]).Clone());
+				LLibrary.Files.Add((Schema.FileReference)((Schema.FileReference)LFiles[LIndex]).Clone());
 			return LLibrary;
 		}
 	}
@@ -436,7 +436,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ListValue LRequisites = (ListValue)AArguments[1];
 			LLibrary.Libraries.Clear();
 			for (int LIndex = 0; LIndex < LRequisites.Count(); LIndex++)
-				LLibrary.Libraries.Add(((Schema.LibraryReference)LRequisites[LIndex]).Clone());
+				LLibrary.Libraries.Add((Schema.LibraryReference)((Schema.LibraryReference)LRequisites[LIndex]).Clone());
 			return LLibrary;
 		}
 	}
@@ -1224,7 +1224,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LLibrary.MetaData.Tags.Add(ANewSetting);
 				}
 				else
-					LLibrary.MetaData.Tags[AOldSetting.Name].Value = ANewSetting.Value;
+					LLibrary.MetaData.Tags.Update(AOldSetting.Name, ANewSetting.Value);
 				try
 				{
 					AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
@@ -1246,7 +1246,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					else
 					{
-						LLibrary.MetaData.Tags[AOldSetting.Name].Value = AOldSetting.Value;
+						LLibrary.MetaData.Tags.Update(AOldSetting.Name, AOldSetting.Value);
 					}
 					throw;
 				}
@@ -1412,7 +1412,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Find the first unambiguous setting value for the given setting name in a breadth-first traversal of the library dependency graph
 		private string ResolveSetting(Plan APlan, string ASettingName)
 		{
-			Tag LTag = null;
+			Tag LTag = Tag.None;
 			foreach (Schema.LoadedLibraries LLevel in APlan.NameResolutionPath)
 			{
 				StringCollection LContainingLibraries = new StringCollection();
@@ -1442,7 +1442,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 
-			return LTag == null ? null : LTag.Value;
+			return LTag == Tag.None ? null : LTag.Value;
 		}
 
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)

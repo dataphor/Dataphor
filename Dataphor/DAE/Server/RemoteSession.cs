@@ -152,7 +152,8 @@ namespace Alphora.Dataphor.DAE.Server
 			throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
 		}
     }
-    
+
+	#if USETYPEDLIST    
 	public class RemoteSessions : DisposableTypedList
 	{
 		public RemoteSessions() : base()
@@ -166,7 +167,11 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return (RemoteSession)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class RemoteSessions : DisposableList<RemoteSession>
+	{
+	#endif
 		public int IndexOf(Schema.ServerLink ALink)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)

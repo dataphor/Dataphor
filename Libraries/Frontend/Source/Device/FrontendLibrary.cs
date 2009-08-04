@@ -161,6 +161,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FDocumentType = ADocumentType;
 		}
 		
+		[Reference]
 		private DocumentType FDocumentType;
 		public DocumentType DocumentType
 		{
@@ -310,6 +311,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			#endif
 		}
 		
+		[Reference]
 		private FrontendDevice FFrontendDevice;
 		public FrontendDevice FrontendDevice { get { return FFrontendDevice; } }
 

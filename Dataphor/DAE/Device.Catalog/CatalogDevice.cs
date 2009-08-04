@@ -312,7 +312,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		protected void TranslateBaseTableVarNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, BaseTableVarNode ABaseTableVarNode)
 		{
 			Tag LTag = MetaData.GetTag(ABaseTableVarNode.TableVar.MetaData, "Catalog.CacheLevel");
-			if (LTag != null)
+			if (LTag != Tag.None)
 			{
 				if ((LTag.Value == "StoreTable") || (LTag.Value == "StoreView"))
 				{

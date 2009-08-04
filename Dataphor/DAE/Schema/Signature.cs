@@ -24,19 +24,21 @@ using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
-    public class SignatureElement : System.Object
+    public struct SignatureElement
     {
-		public SignatureElement(IDataType ADataType) : base()
+		public SignatureElement(IDataType ADataType)
 		{
 			FDataType = ADataType;
+			FModifier = Modifier.In;
 		}
 		
-		public SignatureElement(IDataType ADataType, Modifier AModifier) : base()
+		public SignatureElement(IDataType ADataType, Modifier AModifier)
 		{
 			FDataType = ADataType;
 			FModifier = AModifier;
 		}
 		
+		[Reference]
 		private IDataType FDataType;
 		public IDataType DataType { get { return FDataType; } }
 		
@@ -45,14 +47,17 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override bool Equals(object AObject)
 		{
-			SignatureElement LObject = AObject as SignatureElement;
-			return
-				(LObject != null) &&
-				(
-					((FModifier == Modifier.Var) && (LObject.Modifier == Modifier.Var)) ||
-					((FModifier != Modifier.Var) && (LObject.Modifier != Modifier.Var))
-				) &&
-				FDataType.Equals(LObject.DataType);
+			if (AObject is SignatureElement)
+			{
+				SignatureElement LObject = (SignatureElement)AObject;
+				return
+					(
+						((FModifier == Modifier.Var) && (LObject.Modifier == Modifier.Var)) ||
+						((FModifier != Modifier.Var) && (LObject.Modifier != Modifier.Var))
+					) &&
+					FDataType.Equals(LObject.DataType);
+			}
+			return false;
 		}
 		
 		public override int GetHashCode()
@@ -89,7 +94,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
 
-	public class Signature : System.Object
+	public class Signature
     {
 		public Signature(SignatureElement[] ASignature)
 		{
@@ -126,13 +131,16 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override bool Equals(object AValue)
 		{
-			Signature LSignature = AValue as Signature;
-			if ((LSignature != null) && (LSignature.Count == Count))
+			if (AValue is Signature)
 			{
-				for (int LIndex = 0; LIndex < Count; LIndex++)
-					if (!(this[LIndex].Equals(LSignature[LIndex])))
-						return false;
-				return true;
+				Signature LSignature = (Signature)AValue;
+				if (LSignature.Count == Count)
+				{
+					for (int LIndex = 0; LIndex < Count; LIndex++)
+						if (!(this[LIndex].Equals(LSignature[LIndex])))
+							return false;
+					return true;
+				}
 			}
 			return false;
 		}

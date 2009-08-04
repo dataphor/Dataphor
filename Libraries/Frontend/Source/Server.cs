@@ -42,6 +42,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			FServer.Disposed += new EventHandler(ServerDisposed);
 		}
 		
+		[Reference]
 		private DAE.Server.Server FServer;
 		public DAE.Server.Server Server { get { return FServer; } }
 		
@@ -97,9 +98,11 @@ namespace Alphora.Dataphor.Frontend.Server
 			FSession.Disposed += new EventHandler(SessionDisposed);
 		}
 
+		[Reference]
 		private FrontendServer FFrontendServer;		
 		public FrontendServer FrontendServer { get { return FFrontendServer; } }
 		
+		[Reference]
 		private ServerSession FSession;
 		public ServerSession Session { get { return FSession; } }
 		

@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.Connection
 				LTag = ATags[LIndex];
 			#endif
 				Tag LLegendTag = FLegend.GetTag(LTag.Name);
-				if (LLegendTag != null)
+				if (LLegendTag != Tag.None)
 					LTags.AddOrUpdate(LLegendTag.Value, LTag.Value);
 				else
 					LTags.AddOrUpdate(LTag.Name, LTag.Value);

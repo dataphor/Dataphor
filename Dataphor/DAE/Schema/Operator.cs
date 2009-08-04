@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
@@ -47,6 +48,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public string Name { get { return FName; } }
 		
 		// Operator
+		[Reference]
 		private Operator FOperator;
 		public Operator Operator { get { return FOperator; } }
 
@@ -59,6 +61,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
         // DataType
+		[Reference]
         private IDataType FDataType;
         public IDataType DataType
         {
@@ -418,6 +421,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		#endif
 		
         // ReturnDataType
+		[Reference]
         private IDataType FReturnDataType;
 		public IDataType ReturnDataType
         {
@@ -616,15 +620,29 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			FOperator = AOperator;
 			FSignatures = new OperatorSignatures(this);
+			#if USEVIRTUAL
+			#if USETYPEDLIST
 			FParentSignatures = new TypedList(typeof(OperatorSignature), false);
+			#else
+			FParentSignatures = new BaseList<OperatorSignature>();
+			#endif
+			#endif
 		}
-		
+
+		#if USEVIRTUAL
+		#if USETYPEDLIST
 		private TypedList FParentSignatures;
 		public TypedList ParentSignatures { get { return FParentSignatures; } }
+		#else
+		private BaseList<OperatorSignature> FParentSiagntures;
+		public BaseList<OperatorSignature> ParentSignatures { get { return FParentSignatures; } }
+		#endif
+		#endif
 		
 		private OperatorSignatures FSignatures;
 		public OperatorSignatures Signatures { get { return FSignatures; } }
 		
+		[Reference]
 		private Operator FOperator;
 		public Operator Operator { get { return FOperator; } }
 		
@@ -938,6 +956,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			IsMatch = true;
 		}
 		
+		[Reference]
 		public OperatorSignature Signature;
 
 		/// <summary>Indicates whether this signature is an exact match with the call signature. (No casting or conversion required)</summary>
@@ -978,7 +997,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				return LNarrowingScore;
 			}
-		}
+		}				  
 		
 		/// <summary>Indicates the total path length for the conversions in this match.</summary>
 		public int PathLength
@@ -1003,7 +1022,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
     }
-    
+
+	#if USETYPEDLIST    
     public class OperatorMatchList : TypedList
     {
 		public OperatorMatchList() : base(typeof(OperatorMatch)) {}
@@ -1021,7 +1041,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (IndexOf(LMatch) >= 0)
 				throw new SchemaException(SchemaException.Codes.DuplicateOperatorMatch, LMatch.Signature.Operator.Name);
 		}
-
+	#else
+	public class OperatorMatchList : NonNullList<OperatorMatch>
+	{
+		protected override void Validate(OperatorMatch AValue)
+		{
+			base.Validate(AValue);
+			if (IndexOf(AValue) >= 0)
+				throw new SchemaException(SchemaException.Codes.DuplicateOperatorMatch, AValue.Signature.Operator.Name);
+		}
+	#endif
+	
 		public int IndexOf(Operator AOperator)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
@@ -1058,6 +1088,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Contains(ASignature.Operator);
 		}
 		
+		#if USETYPEDLIST
 		public int IndexOf(OperatorMatch AMatch)
 		{
 			return IndexOf(AMatch.Signature.Operator);
@@ -1067,6 +1098,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			return Contains(AMatch.Signature.Operator);
 		}
+		#else
+		public override int IndexOf(OperatorMatch AMatch)
+		{
+			return IndexOf(AMatch.Signature.Operator);
+		}
+		#endif
     }
     
     public class OperatorMatches : OperatorMatchList
@@ -1240,10 +1277,14 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 		}
 		
+		#if USETYPEDLIST
 		protected override void Adding(object AValue, int AIndex)
 		{
 			OperatorMatch LMatch = (OperatorMatch)AValue;
-			
+		#else
+		protected override void Adding(OperatorMatch LMatch, int AIndex)
+		{
+		#endif
 			if (LMatch.IsMatch)
 			{
 				if (LMatch.NarrowingScore > FBestNarrowingScore)
@@ -1261,7 +1302,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			FIsMatchComputed = false;
 
-			base.Adding(AValue, AIndex);
+			//base.Adding(AValue, AIndex);
 		}
 
 		private bool FIsClearing;
@@ -1283,7 +1324,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			FIsMatchComputed = false;
 		}
 		
+		#if USETYPEDLIST
 		protected override void Removing(object AValue, int AIndex)
+		#else
+		protected override void Removing(OperatorMatch AValue, int AIndex)
+		#endif
 		{
 			if (!FIsClearing)
 			{
@@ -1291,7 +1336,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				ComputeBestMatches();
 				FIsMatchComputed = false;
 			}
-			base.Removing(AValue, AIndex);
+			//base.Removing(AValue, AIndex);
 		}
     }
     

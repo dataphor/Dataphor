@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.SQL;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Language.RealSQL
 {
@@ -230,6 +231,7 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 			}
 		}
 		
+		#if USETYPEDLIST
 		protected class NamedExpressions : TypedList
 		{
 			public NamedExpressions() : base(typeof(NamedExpression)){}
@@ -240,6 +242,10 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 				set { base[AIndex] = value; } 
 			}
 			
+		#else
+		protected class NamedExpressions : BaseList<NamedExpression>
+		{
+		#endif
 			public NamedExpression this[string AName]
 			{
 				get

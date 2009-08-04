@@ -45,7 +45,8 @@
 // the same string reference for each tag of a given name.
 // However, early indications are that the amount of memory saved is not significant,
 // even when dealing with large catalogs such as IBAS.
-//#define USETHREADABORT in Alphora.Dataphor.DAE (currently disabled) determines whether or not to use Thread.Abort to terminate a running process
+//#define USETHREADABORT in Alphora.Dataphor.DAE (currently disabled) // Determines whether or not to use Thread.Abort to terminate a running process
+//#define USETYPEDLIST throughout (currently disabled) // Determines whether or not to use the TypedList descendent or the new BaseList<T> and related generics for basic list support
 #define USEUNIFIEDJOINKEYINFERENCE in Alphora.Dataphor.DAE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 #define USEUPDATEVALUEFLAGS in Alphora.Dataphor.DAE // ??
 #define WRAPRUNTIMEEXCEPTIONS in Alphora.Dataphor.DAE // Determines whether or not non-Dataphor descended runtime exceptions are wrapped with a Dataphor Exception

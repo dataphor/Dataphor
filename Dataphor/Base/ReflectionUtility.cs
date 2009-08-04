@@ -9,7 +9,21 @@ using System.ComponentModel;
 
 namespace Alphora.Dataphor
 {
-
+	/// <summary>
+	/// Defines a Token used by the ResolveReference method to provide the root instance of a given reference.
+	/// </summary>
+	public class Token
+	{
+		public Token(string AName, object AValue)
+		{
+			Name = AName;
+			Value = AValue;
+		}
+		
+		public string Name;
+		public object Value;
+	}
+	
 	public class ReflectionUtility 
 	{
 		/// <summary> Gets the Type of the property or field member. </summary>
@@ -41,12 +55,12 @@ namespace Alphora.Dataphor
 		/// <remarks> Sets the member using the converter for the member's type. </remarks>
 		public static void SetInstanceMember(object AInstance, string AMemberName, string AValue)
 		{
-			MemberInfo LMember = ReflectionUtility.FindSimpleMember(AInstance.GetType(), AMemberName);
+			MemberInfo LMember = FindSimpleMember(AInstance.GetType(), AMemberName);
 			SetMemberValue
 			(
 				LMember,
 				AInstance,
-				TypeDescriptor.GetConverter(ReflectionUtility.GetMemberType(LMember)).ConvertFromString(AValue)
+				TypeDescriptor.GetConverter(GetMemberType(LMember)).ConvertFromString(AValue)
 			);
 		}
 
@@ -82,7 +96,7 @@ namespace Alphora.Dataphor
 				throw new BaseException(BaseException.Codes.MemberNotFound, AName, AType.FullName);
 			return LResult;
 		}
-
+		
 		/// <summary> Gets a single attribute for a type based on the attribute class type. </summary>
 		/// <remarks> Returns null if not found.  Throws if more than one instance of the specified attribute appears. </remarks>
 		public static object GetAttribute(ICustomAttributeProvider AProvider, Type AAttributeType)
@@ -146,6 +160,85 @@ namespace Alphora.Dataphor
 				return ((FieldInfo)AMember).GetValue(AInstance);
 			else
 				return ((MethodInfo)AMember).Invoke(AInstance, new object[] {});
+		}
+
+		public static object ResolveToken(string AToken, params Token[] ATokens)
+		{
+			for (int LIndex = 0; LIndex < ATokens.Length; LIndex++)
+				if (ATokens[LIndex].Name == AToken)
+					return ATokens[LIndex].Value;
+					
+			throw new ArgumentException(String.Format("Could not resolve token {0}.", AToken));
+		}
+		
+		public static object ResolveReference(string AReference, params Token[] ATokens)
+		{
+			string[] LReferences = AReference.Split('.');
+			object LObject = null;
+			for (int LIndex = 0; LIndex < LReferences.Length; LIndex++)
+			{
+				if (LIndex == 0)
+					LObject = ResolveToken(LReferences[LIndex], ATokens);
+				else
+				{
+					int LBracketIndex = LReferences[LIndex].IndexOf('[');
+					if (LBracketIndex > 0)
+					{
+						if (LReferences[LIndex].IndexOf(']') != LReferences[LIndex].Length - 1)
+							throw new ArgumentException(String.Format("Indexer reference does not have a closing bracket: {0}", LReferences[LIndex]));
+						string LMemberName = LReferences[LIndex].Substring(0, LBracketIndex);
+						LObject = GetMemberValue(FindSimpleMember(LObject.GetType(), LMemberName), LObject);
+						
+						string LReferenceIndex = LReferences[LIndex].Substring(LBracketIndex + 1, LReferences[LIndex].Length - 1 - (LBracketIndex + 1));
+						string[] LMemberIndexes = LReferenceIndex.Split(',');
+
+						if (LObject.GetType().IsArray)
+						{
+							Array LArray = (Array)LObject;
+							int[] LMemberIndexValues = new int[LMemberIndexes.Length];
+							for (int LMemberIndex = 0; LMemberIndex < LMemberIndexes.Length; LMemberIndex++)
+								LMemberIndexValues[LMemberIndex] = Int32.Parse(LMemberIndexes[LMemberIndex]);
+								
+							LObject = LArray.GetValue(LMemberIndexValues);
+						}
+						else
+						{
+							DefaultMemberAttribute LDefaultMember = GetAttribute(LObject.GetType(), typeof(DefaultMemberAttribute)) as DefaultMemberAttribute;
+							if (LDefaultMember == null)
+								throw new ArgumentException(String.Format("Member {0} does not have a default property.", LMemberName));
+
+							Type[] LMemberIndexTypes = new Type[LMemberIndexes.Length];
+							object[] LMemberIndexValues = new object[LMemberIndexes.Length];
+							for (int LMemberIndex = 0; LMemberIndex < LMemberIndexes.Length; LMemberIndex++)
+							{
+								int LMemberIndexInt;
+								if (Int32.TryParse(LMemberIndexes[LMemberIndex], out LMemberIndexInt))
+								{
+									LMemberIndexTypes[LMemberIndex] = typeof(Int32);
+									LMemberIndexValues[LMemberIndex] = LMemberIndexInt;
+								}
+								else
+								{
+									LMemberIndexTypes[LMemberIndex] = typeof(String);
+									LMemberIndexValues[LMemberIndex] = LMemberIndexes[LMemberIndex];
+								}
+							}
+
+							PropertyInfo LInfo = LObject.GetType().GetProperty(LDefaultMember.MemberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy, null, null, LMemberIndexTypes, null);
+							if (LInfo == null)
+								throw new ArgumentException(String.Format("Could not resolve an indexer for member {0} with the reference list {1}.", LMemberName, LReferenceIndex));
+								
+							LObject = LInfo.GetValue(LObject, LMemberIndexValues);
+						}
+					}
+					else
+					{
+						LObject = GetMemberValue(FindSimpleMember(LObject.GetType(), LReferences[LIndex]), LObject);
+					}
+				}
+			}
+		
+			return LObject;
 		}
 	}
 }

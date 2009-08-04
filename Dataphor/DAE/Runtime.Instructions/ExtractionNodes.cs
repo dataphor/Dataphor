@@ -66,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsDeterministic = true;
 			FIsRepeatable = true;
 			FIsNilable = true;
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
 				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
 				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsDeterministic = true;
 			FIsRepeatable = true;
 			FIsNilable = true;
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
 				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
 				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;

@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AColumnName = LNode.Identifier;
 				return true;
 			}
-			else if (ANode.IsOrderPreserving && (ANode.Nodes.Count == 1))
+			else if (ANode.IsOrderPreserving && (ANode.NodeCount == 1))
 				return IsColumnReferencing(ANode.Nodes[0], ref AColumnName);
 			else
 				return false;

@@ -106,9 +106,12 @@
     <Compile Include="DataphorException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DisposableList.cs" />
     <Compile Include="ExceptionUtility.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MemoryUtility.cs" />
+    <Compile Include="NonNullList.cs" />
     <Compile Include="TemporaryStream.cs" />
     <Compile Include="IdentifierIndex.cs">
       <SubType>Code</SubType>
@@ -129,6 +132,7 @@
     <Compile Include="TimingUtility.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ValidatingBaseList.cs" />
     <Compile Include="WebUtility.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -62,14 +62,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{	
 			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
 			
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 				EmitExecute(APlan, AGenerator, LExecutePath, LIndex);
 		}
 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			foreach (PlanNode LNode in Nodes)	
-				LNode.Execute(AProcess);
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+				Nodes[LIndex].Execute(AProcess);
 			return null;
 		}
 
@@ -77,9 +77,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Block LBlock = new Block();
 			Statement LStatement;
-			foreach (PlanNode LNode in Nodes)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
-				LStatement = LNode.EmitStatement(AMode);
+				LStatement = Nodes[LIndex].EmitStatement(AMode);
 				if (!(LStatement is EmptyStatement))
 					LBlock.Statements.Add(LStatement);
 			}
@@ -101,8 +101,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			foreach (PlanNode LNode in Nodes)
-				LNode.Execute(AProcess);
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
+				Nodes[LIndex].Execute(AProcess);
 			return null;
 		}
 
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{	
 			int[] LExecutePath = PrepareExecutePath(APlan, AExecutePath);
 			
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 				EmitExecute(APlan, AGenerator, LExecutePath, LIndex);
 		}
 
@@ -118,9 +118,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DelimitedBlock LBlock = new DelimitedBlock();
 			Statement LStatement;
-			foreach (PlanNode LNode in Nodes)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
-				LStatement = LNode.EmitStatement(AMode);
+				LStatement = Nodes[LIndex].EmitStatement(AMode);
 				if (!(LStatement is EmptyStatement))
 					LBlock.Statements.Add(LStatement);
 			}
@@ -692,7 +692,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 /*
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
 		{
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 			{
 				int[] LExecutePath = new int[AExecutePath.Length + 1];
 				AExecutePath.CopyTo(LExecutePath, 0);
@@ -718,7 +718,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 				AProcess.Context.ErrorVar = Nodes[0].Execute(AProcess);
 			if (AProcess.Context.ErrorVar == null)
 				throw new RuntimeException(RuntimeException.Codes.NilEncountered, this);
@@ -728,7 +728,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override Statement EmitStatement(EmitMode AMode)
 		{
 			RaiseStatement LStatement = new RaiseStatement();
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 				LStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
 			return LStatement;
 		}
@@ -929,7 +929,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 				ErrorHandlerNode LNode;
 				object LErrorVar = AProcess.Context.ErrorVar;
-				for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
+				for (int LIndex = 1; LIndex < NodeCount; LIndex++)
 				{
 					LNode = GetErrorHandlerNode(Nodes[LIndex]);
 					if (AProcess.DataTypes.SystemError.Is(LNode.ErrorType)) // TODO: No RTTI on the error
@@ -1715,7 +1715,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 				APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
 			try
 			{
@@ -1723,7 +1723,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				if (Nodes.Count > 0)
+				if (NodeCount > 0)
 					APlan.Symbols.Pop();
 			}
 			APlan.Symbols.Push(new Symbol(FVariableName, FVariableType));
@@ -1755,7 +1755,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AGenerator.Emit(OpCodes.Ldloc, LLocal);
 			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Push", new Type[] { typeof(DataVar) }));
 			
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 			{
 				LocalBuilder LResult = AGenerator.DeclareLocal(typeof(DataVar));
 				EmitEvaluate(APlan, AGenerator, LExecutePath, 0);
@@ -1808,7 +1808,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.Context.Push(null);
 			int LStackDepth = AProcess.Context.Count;
 
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 			{
 				object LValue = Nodes[0].Execute(AProcess);
 				if (Nodes[0].DataType is Schema.ScalarType)
@@ -1830,7 +1830,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			VariableStatement LStatement = new VariableStatement();
 			LStatement.VariableName = new IdentifierExpression(VariableName);
 			LStatement.TypeSpecifier = VariableType.EmitSpecifier(AMode);
-			if (Nodes.Count > 0)
+			if (NodeCount > 0)
 				LStatement.Expression = (Expression)Nodes[0].EmitStatement(AMode);
 			return LStatement;
 		}

@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					LTag = AMetaData.Tags[LIndex];
 				#endif
-					if ((!LTag.IsStatic) && ((FEmitMode == EmitMode.ForRemote) || !(AMetaData.Tags.IsReference(LTag.Name) || LTag.IsInherited)))
+					if ((!LTag.IsStatic) && ((FEmitMode == EmitMode.ForRemote) || !(/*AMetaData.Tags.IsReference(LTag.Name) || */LTag.IsInherited)))
 						LTags.Add(LTag);
 				}
 				

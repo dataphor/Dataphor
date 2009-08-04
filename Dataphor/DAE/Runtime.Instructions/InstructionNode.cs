@@ -40,6 +40,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         
 		// Operator
 		// The operator this node is implementing
+		[Reference]
 		private Schema.Operator FOperator;
 		public Schema.Operator Operator
 		{
@@ -49,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override Statement EmitStatement(EmitMode AMode)
 		{		
-			if (FOperator.IsBuiltin && (Nodes.Count > 0) && (Nodes.Count <= 2))
+			if (FOperator.IsBuiltin && (NodeCount > 0) && (NodeCount <= 2))
 			{
 				Expression LExpression;
 				if (Nodes.Count == 1)
@@ -80,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				CallExpression LExpression = new CallExpression();
 				LExpression.Identifier = Schema.Object.EnsureRooted(FOperator.OperatorName);
-				for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 					if (FOperator.Operands[LIndex].Modifier == Modifier.Var)
 						LExpression.Expressions.Add(new ParameterExpression(Modifier.Var, (Expression)Nodes[LIndex].EmitStatement(AMode)));
 					else
@@ -193,7 +194,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				LocalBuilder LArguments = AGenerator.DeclareLocal(typeof(object[]));
 				
-				AGenerator.Emit(OpCodes.Ldc_I4, Nodes.Count);
+				AGenerator.Emit(OpCodes.Ldc_I4, NodeCount);
 				AGenerator.Emit(OpCodes.Newarr, typeof(object));
 				AGenerator.Emit(OpCodes.Stloc, LArguments);
 				
@@ -376,8 +377,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			object[] LArguments = new object[Nodes.Count];
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			object[] LArguments = new object[NodeCount];
+			for (int LIndex = 0; LIndex < LArguments.Length; LIndex++)
 				LArguments[LIndex] = Nodes[LIndex].Execute(AProcess);
 			try
 			{

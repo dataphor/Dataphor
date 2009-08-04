@@ -68,6 +68,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public Guid Bookmark { get { return FBookmark; } }
     }
 
+	#if USETYPEDLIST
     public class LocalRows : DisposableTypedList
     {
 		public LocalRows() : base(typeof(LocalRow), true, false){}
@@ -78,6 +79,10 @@ namespace Alphora.Dataphor.DAE.Server
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class LocalRows : DisposableList<LocalRow>
+	{
+	#endif
 		public BufferDirection BufferDirection;
     }
     

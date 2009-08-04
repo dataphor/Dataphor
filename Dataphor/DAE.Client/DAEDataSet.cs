@@ -1152,6 +1152,7 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class DataSetParams : TypedList
 	{
 		public DataSetParams() : base(typeof(DataSetParam)) {}
@@ -1175,6 +1176,25 @@ namespace Alphora.Dataphor.DAE.Client
 			((DataSetParam)AValue).OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
 			DataSetParamStructureChanged(null);
 		}
+	#else
+	public class DataSetParams : ValidatingBaseList<DataSetParam>
+	{
+		protected override void Adding(DataSetParam AValue, int AIndex)
+		{
+			//base.Adding(AValue, AIndex);
+			AValue.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			AValue.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			DataSetParamStructureChanged(null);
+		}
+		
+		protected override void Removing(DataSetParam AValue, int AIndex)
+		{
+			AValue.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			AValue.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+			DataSetParamStructureChanged(null);
+			//base.Removing(AValue, AIndex);
+		}
+	#endif
 		
 		private void DataSetParamChanged(object ASender)
 		{
@@ -1298,6 +1318,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 	}
 	
+	#if USETYPEDLIST
 	public class DataSetParamGroups : DisposableTypedList
 	{
 		public DataSetParamGroups() : base(typeof(DataSetParamGroup)) {}
@@ -1323,6 +1344,25 @@ namespace Alphora.Dataphor.DAE.Client
 			DataSetParamStructureChanged(null);
 			base.Removing(AValue, AIndex);
 		}
+	#else
+	public class DataSetParamGroups : DisposableList<DataSetParamGroup>
+	{
+		protected override void Adding(DataSetParamGroup AValue, int AIndex)
+		{
+			//base.Adding(AValue, AIndex);
+			AValue.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
+			AValue.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			DataSetParamStructureChanged(null);
+		}
+		
+		protected override void Removing(DataSetParamGroup AValue, int AIndex)
+		{
+			AValue.OnParamStructureChanged -= new ParamStructureChangedHandler(DataSetParamStructureChanged);
+			AValue.OnParamChanged -= new ParamChangedHandler(DataSetParamChanged);
+			DataSetParamStructureChanged(null);
+			//base.Removing(AValue, AIndex);
+		}
+	#endif
 		
 		private void DataSetParamChanged(object ASender)
 		{

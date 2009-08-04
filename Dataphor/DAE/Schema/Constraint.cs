@@ -168,6 +168,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		public override bool IsPersistent { get { return true; } }
 
+		[Reference]
 		internal ScalarType FScalarType;
 		public ScalarType ScalarType
 		{
@@ -252,6 +253,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.TableVarColumnConstraint"), DisplayName, FTableVarColumn.DisplayName, FTableVarColumn.TableVar.DisplayName); } }
 
+		[Reference]
 		internal TableVarColumn FTableVarColumn;
 		public TableVarColumn TableVarColumn
 		{
@@ -340,6 +342,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public TableVarConstraint(string AName) : base(AName) {}
 		public TableVarConstraint(int AID, string AName) : base(AID, AName) {}
 		
+		[Reference]
 		internal TableVar FTableVar;
 		public TableVar TableVar
 		{
@@ -790,6 +793,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FScalarType = AScalarType;
 		}
 		
+		[Reference]
 		private ScalarType FScalarType;
 		public ScalarType ScalarType { get { return FScalarType; } }
 		
@@ -799,6 +803,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (!(AItem is ScalarTypeConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "ScalarTypeConstraint");
 			base.Validate(AItem);
+			FScalarType.ValidateChildObjectName(AItem.Name);
 		}
 		#endif
 		
@@ -834,6 +839,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FTableVarColumn = ATableVarColumn;
 		}
 		
+		[Reference]
 		private TableVarColumn FTableVarColumn;
 		public TableVarColumn TableVarColumn { get { return FTableVarColumn; } }
 		
@@ -850,10 +856,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.Adding(AItem, AIndex);
 			((TableVarColumnConstraint)AItem).FTableVarColumn = FTableVarColumn;
+			FTableVarColumn.ConstraintsAdding(this, AItem);
 		}
 		
 		protected override void Removing(Object AItem, int AIndex)
 		{
+			FTableVarColumn.ConstraintsRemoving(this, AItem);
 			((TableVarColumnConstraint)AItem).FTableVarColumn = null;
 			base.Removing(AItem, AIndex);
 		}
@@ -878,6 +886,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			FTableVar = ATableVar;
 		}
 		
+		[Reference]
 		private TableVar FTableVar;
 		public TableVar TableVar { get { return FTableVar; } }
 		
@@ -887,6 +896,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (!(AItem is TableVarConstraint))
 				throw new SchemaException(SchemaException.Codes.InvalidContainer, "TableVarConstraint");
 			base.Validate(AItem);
+			FTableVar.ValidateChildObjectName(AItem.Name);
 		}
 		#endif
 		
@@ -894,12 +904,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.Adding(AItem, AIndex);
 			((TableVarConstraint)AItem).FTableVar = FTableVar;
+			FTableVar.ResetHasDeferredConstraintsComputed();
 		}
 		
 		protected override void Removing(Object AItem, int AIndex)
 		{
 			((TableVarConstraint)AItem).FTableVar = null;
 			base.Removing(AItem, AIndex);
+			FTableVar.ResetHasDeferredConstraintsComputed();
 		}
 		
 		public new TableVarConstraint this[int AIndex]

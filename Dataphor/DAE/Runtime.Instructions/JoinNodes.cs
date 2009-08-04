@@ -2996,7 +2996,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LExpression.RowExistsColumn.MetaData.Tags.Add(LTag.Copy());
 					#else
 					for (int LIndex = 0; LIndex < LColumn.MetaData.Tags.Count; LIndex++)
-						if (!LColumn.MetaData.Tags.IsReference(LIndex))
+						if (!LColumn.MetaData.Tags[LIndex].IsInherited) //!LColumn.MetaData.Tags.IsReference(LIndex))
 							LExpression.RowExistsColumn.MetaData.Tags.Add(LColumn.MetaData.Tags[LIndex].Copy());
 					#endif
 				}

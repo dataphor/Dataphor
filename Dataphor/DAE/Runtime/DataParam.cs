@@ -11,6 +11,7 @@ using Alphora.Dataphor;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
@@ -144,7 +145,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 				);
 		}
 	}
-    
+
+	#if USETYPEDLIST
     public class DataParams : TypedList
     {
 		public DataParams() : base()
@@ -157,7 +159,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 			get { return (DataParam)(base[AIndex]); }
 			set { base[AIndex] = value; }
 		}
-		
+	
+	#else
+	public class DataParams : BaseList<DataParam>
+	{
+	#endif	
 		public DataParam this[string AIndex]
 		{
 			get
@@ -201,7 +207,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 			if (Count == 0)
 				throw new RuntimeException(RuntimeException.Codes.ParamsEmpty);
 			else
+				#if USETYPEDLIST
 				return (DataParam)RemoveItemAt(0);
+				#else
+				return RemoveAt(0);
+				#endif
 		}
 		
 		public DataParam Peek()

@@ -76,7 +76,8 @@ namespace Alphora.Dataphor.DAE.Schema
 			return new LibraryReference(FName, FVersion);
 		}
 	}
-	
+
+	#if USETYPEDLIST
 	public class LibraryReferences : TypedList
 	{
 		public LibraryReferences() : base(typeof(LibraryReference)) {}
@@ -93,7 +94,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (Contains(((LibraryReference)AValue).Name))
 				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, ((LibraryReference)AValue).Name);
 		}
-		
+	#else
+	public class LibraryReferences : ValidatingBaseList<LibraryReference>
+	{
+		protected override void  Validate(LibraryReference AValue)
+		{
+ 			 //base.Validate(AValue);
+ 			 if (Contains(AValue.Name))
+ 				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AValue.Name);
+		}
+	#endif
+	
 		public LibraryReference this[string AName]
 		{
 			get { return this[IndexOf(AName)]; }
@@ -159,6 +170,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class FileReferences : TypedList
 	{
 		public FileReferences() : base(typeof(FileReference)) {}
@@ -175,6 +187,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (Contains(((FileReference)AValue).FileName))
 				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, ((FileReference)AValue).FileName);
 		}
+	#else
+	public class FileReferences : ValidatingBaseList<FileReference>
+	{
+		protected override void Validate(FileReference AValue)
+		{
+			//base.Validate(AValue);
+			if (Contains(AValue.FileName))
+				throw new SchemaException(SchemaException.Codes.DuplicateObjectName, AValue.FileName);
+		}
+	#endif
 		
 		public int IndexOf(string AFileName)
 		{
@@ -429,11 +451,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				while (FLexer[1].Type != TokenType.EOF)
 				{
 					FLexer.NextToken();
-					Tag LTag = new Tag(FLexer[0].AsString);
+					string LTagName = FLexer[0].AsString;
 					FLexer.NextToken().CheckSymbol(Keywords.Equal);
 					FLexer.NextToken();
-					LTag.Value = FLexer[0].AsString;
-					MetaData.Tags.Add(LTag);
+					MetaData.Tags.Add(new Tag(LTagName, FLexer[0].AsString));
 					if (FLexer.PeekTokenSymbol(1) == Keywords.StatementTerminator)
 						FLexer.NextToken();
 				}
@@ -581,9 +602,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			LLibrary.IsSuspect = FIsSuspect;
 			LLibrary.SuspectReason = FSuspectReason;
 			foreach (LibraryReference LLibraryReference in FLibraries)
-				LLibrary.Libraries.Add(LLibraryReference.Clone());
+				LLibrary.Libraries.Add((LibraryReference)LLibraryReference.Clone());
 			foreach (FileReference LFileReference in FFiles)
-				LLibrary.Files.Add(LFileReference.Clone());
+				LLibrary.Files.Add((FileReference)LFileReference.Clone());
 			return LLibrary;
 		}
 	}
@@ -679,9 +700,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		private List FAssemblies = new List();
 		public List Assemblies { get { return FAssemblies; } }
 
+		[Reference]
 		private LoadedLibraries FRequiredLibraries = new LoadedLibraries();
 		public LoadedLibraries RequiredLibraries { get { return FRequiredLibraries; } }
 		
+		[Reference]
 		private LoadedLibraries FRequiredByLibraries = new LoadedLibraries();		
 		public LoadedLibraries RequiredByLibraries { get { return FRequiredByLibraries; } }
 		

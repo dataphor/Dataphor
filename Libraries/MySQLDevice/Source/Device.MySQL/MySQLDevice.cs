@@ -282,7 +282,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 		{
 			D4.Tags LTags = base.Map(ATags);
             D4.Tag LTag = LTags.GetTag("IntegratedSecurity");
-            if (LTag != null)
+            if (LTag != D4.Tag.None)
             {
                 LTags.Remove(LTag);
                 LTags.AddOrUpdate("Integrated Security", "SSPI");

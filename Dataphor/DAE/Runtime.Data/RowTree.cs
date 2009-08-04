@@ -45,7 +45,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected abstract void DisposeValues();
 	}
-	
+
+	#if USETYPEDLIST
 	public class RowTreeList : DisposableTypedList
 	{
 		public RowTreeList() : base(typeof(RowTree), true, false){}
@@ -56,6 +57,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class RowTreeList : DisposableList<RowTree> { }
+	#endif
 	
 	public class RowTree : System.Object
 	{

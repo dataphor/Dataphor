@@ -47,6 +47,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		public SQLDomain Domain { get { return FDomain; } }
 	}
 	
+	#if USETYPEDLIST
 	public class SQLColumns : TypedList
 	{
 		public SQLColumns() : base(typeof(SQLColumn)){}
@@ -56,7 +57,11 @@ namespace Alphora.Dataphor.DAE.Connection
 			get { return (SQLColumn)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+	
+	#else
+	public class SQLColumns : BaseList<SQLColumn>
+	{
+	#endif
 		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
@@ -91,6 +96,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		public bool Ascending { get { return FAscending; } }
 	}
 	
+	#if USETYPEDLIST
 	public class SQLIndexColumns : TypedList
 	{
 		public SQLIndexColumns() : base(typeof(SQLIndexColumn)){}
@@ -100,7 +106,11 @@ namespace Alphora.Dataphor.DAE.Connection
 			get { return (SQLIndexColumn)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+	
+	#else
+	public class SQLIndexColumns : BaseList<SQLIndexColumn>
+	{
+	#endif
 		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
@@ -148,6 +158,7 @@ namespace Alphora.Dataphor.DAE.Connection
 		public SQLIndexColumns Columns { get { return FColumns; } }
 	}
 	
+	#if USETYPEDLIST
 	public class SQLIndexes : TypedList
 	{
 		public SQLIndexes() : base(typeof(SQLIndex)){}
@@ -158,6 +169,10 @@ namespace Alphora.Dataphor.DAE.Connection
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class SQLIndexes : BaseList<SQLIndex>
+	{
+	#endif
 		public int IndexOf(string AName)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)

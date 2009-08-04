@@ -559,6 +559,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		public Tags Properties { get { return FProperties; } }
 	}
 
+	#if USETYPEDLIST
 	public class ElaboratedGroups : TypedList
 	{
 		public ElaboratedGroups() : base(typeof(ElaboratedGroup)){}
@@ -568,7 +569,11 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			get { return (ElaboratedGroup)base[AIndex]; } 
 			set { base[AIndex] = value; } 
 		}
-		
+	
+	#else
+	public class ElaboratedGroups : BaseList<ElaboratedGroup>
+	{
+	#endif
 		public ElaboratedGroup this[string AName] { get { return this[IndexOf(AName)]; } }
 		
 		public int IndexOf(string AName)
@@ -1288,6 +1293,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class ElaboratedTableVarColumns : TypedList
 	{
 		public ElaboratedTableVarColumns() : base(typeof(ElaboratedTableVarColumn)){}
@@ -1298,6 +1304,10 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class ElaboratedTableVarColumns : BaseList<ElaboratedTableVarColumn>
+	{
+	#endif
 		public ElaboratedTableVarColumn this[string AColumnName] 
 		{ 
 			get 

@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
@@ -53,14 +54,17 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// Plan
+		[Reference]
 		private Plan FPlan;
 		public Plan Plan { get { return FPlan; } }
 
 		// Device
+		[Reference]
 		private Device FDevice;
 		public Device Device { get { return FDevice; } }
 
 		// PlanNode
+		[Reference]
         private PlanNode FPlanNode;
 		public PlanNode Node { get { return FPlanNode; } }
 		
@@ -92,6 +96,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public override string DisplayName { get { return String.Format("Device_{0}_Map_{1}", Device.Name, Name); } }
 
+		[Reference]
 		private Device FDevice;
 		public Device Device 
 		{ 
@@ -107,6 +112,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceOperator"), FOperator.OperatorName, FOperator.Signature.ToString(), Device.DisplayName); } }
 
 		// Operator		
+		[Reference]
 		private Schema.Operator FOperator;
 		public Schema.Operator Operator
 		{
@@ -201,6 +207,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.DeviceScalarType"), FScalarType.DisplayName, Device.DisplayName); } }
 
 		// ScalarType
+		[Reference]
 		private ScalarType FScalarType;
 		public ScalarType ScalarType
 		{
@@ -740,7 +747,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void LoadRegistered()
 		{
 			Tag LTag = MetaData.RemoveTag(MetaData, "DAE.Registered");
-			if (LTag != null)
+			if (LTag != Tag.None)
 				FRegistered = Boolean.Parse(LTag.Value);
 		}
 
@@ -1203,6 +1210,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class DeviceSettings : TypedList
 	{
 		public DeviceSettings() : base(typeof(DeviceSetting)) { }
@@ -1212,7 +1220,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return (DeviceSetting)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+	#else
+	public class DeviceSettings : BaseList<DeviceSetting>
+	{
+	#endif
 		public DeviceSettings GetSettingsForDevice(string ADeviceName)
 		{
 			DeviceSettings LResult = new DeviceSettings();
@@ -1288,6 +1299,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public IsolationLevel IsolationLevel { get { return FIsolationLevel; } }
 	}
 	
+	#if USETYPEDLIST
 	public class DeviceTransactions : TypedList
 	{
 		public DeviceTransactions() : base(typeof(DeviceTransaction)){}
@@ -1298,6 +1310,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class DeviceTransactions : BaseList<DeviceTransaction>
+	{
+	#endif
 		public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
 			Add(new DeviceTransaction(AIsolationLevel));
@@ -1308,13 +1324,21 @@ namespace Alphora.Dataphor.DAE.Schema
 			// If we successfully committed a nested transaction, append it's log to the current transaction so that a subsequent rollback will undo it's affects as well.
 			if ((ASuccess) && (Count > 1))
 			{
+				#if USETYPEDLIST
 				DeviceTransaction LTransaction = (DeviceTransaction)RemoveItemAt(Count - 1);
+				#else
+				DeviceTransaction LTransaction = RemoveAt(Count - 1);
+				#endif
 				CurrentTransaction().Operations.AddRange(LTransaction.Operations);
 				LTransaction.Operations.Clear();
 				LTransaction.Dispose();
 			}
 			else
+				#if USETYPEDLIST
 				((DeviceTransaction)RemoveItemAt(Count - 1)).Dispose();
+				#else
+				RemoveAt(Count - 1).Dispose();
+				#endif
 		}
 		
 		public DeviceTransaction CurrentTransaction()
@@ -1352,10 +1376,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
+		[Reference]
 		private Device FDevice;
 		public Device Device { get { return FDevice; } }
 		
 		// ServerProcess
+		[Reference]
 		private ServerProcess FServerProcess;
 		public ServerProcess ServerProcess { get { return FServerProcess; } } 
 
@@ -1659,7 +1685,8 @@ namespace Alphora.Dataphor.DAE.Schema
 				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (Row)ARow.Copy(), null));
         }
     }
-    
+
+	#if USETYPEDLIST    
 	public class DeviceSessions : DisposableTypedList
     {
 		public DeviceSessions() : base()
@@ -1679,7 +1706,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return (DeviceSession)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+	#else
+	public class DeviceSessions : DisposableList<DeviceSession>
+	{
+		public DeviceSessions() : base() { }
+		public DeviceSessions(bool AItemsOwned) : base(AItemsOwned) { }
+	#endif
+
 		public int IndexOf(Device ADevice)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
@@ -1697,6 +1730,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get { return this[IndexOf(ADevice)]; }
 		}
+		
+		private object FSyncRoot = new object();
+		public object SyncRoot { get { return FSyncRoot; } }
     }
 
 	public class DeviceUser : System.Object
@@ -1742,9 +1778,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			ConnectionParameters = AConnectionParameters;
 		}
 		
+		[Reference]
 		private User FUser;
 		public User User { get { return FUser; } set { FUser = value; } }
 		
+		[Reference]
 		private Device FDevice;
 		public Device Device { get { return FDevice; } set { FDevice = value; } }
 		
@@ -1825,6 +1863,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
 
+	#if USETYPEDLIST
 	public class TranslationMessages : TypedList
 	{
 		public TranslationMessages() : base(typeof(TranslationMessage)) {}
@@ -1835,6 +1874,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { base[AIndex] = value; }
 		}
 
+	#else
+	public class TranslationMessages : BaseList<TranslationMessage>
+	{
+	#endif
 		public override string ToString()
 		{
 			StringBuilder LBuilder = new StringBuilder();

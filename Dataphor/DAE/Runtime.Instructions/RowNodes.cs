@@ -23,6 +23,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using System.Collections.Generic;
 	
     public class RowNode : PlanNode
     {
@@ -50,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsDeterministic = true;
 			FIsRepeatable = true;
 			FIsNilable = false;
-			for (int LIndex = 0; LIndex < Nodes.Count; LIndex++)
+			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 			{
 				FIsLiteral = FIsLiteral && Nodes[LIndex].IsLiteral;
 				FIsFunctional = FIsFunctional && Nodes[LIndex].IsFunctional;
@@ -735,8 +736,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public abstract class RowProjectNodeBase : UnaryRowNode
 	{
 		// ColumnNames
+		#if USETYPEDLIST
 		protected TypedList FColumnNames = new TypedList(typeof(string), false);
 		public TypedList ColumnNames { get { return FColumnNames; } }
+		#else
+		protected BaseList<string> FColumnNames = new BaseList<string>();
+		public BaseList<string> ColumnNames { get { return FColumnNames; } }
+		#endif
 		
 		public override object InternalExecute(ServerProcess AProcess, object AArgument)
 		{

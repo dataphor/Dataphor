@@ -2828,7 +2828,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { FDeviceCursor = value; }
 		}
 	}
-	
+
+	#if USETYPEDLIST	
 	public class SQLConnectionPool : DisposableTypedList
 	{
 		public SQLConnectionPool() : base(typeof(SQLConnectionHeader)) {}
@@ -2838,7 +2839,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return (SQLConnectionHeader)base[AIndex]; }
 			set { base[AIndex] = value; }
 		}
-		
+
+	#else
+	public class SQLConnectionPool : DisposableList<SQLConnectionHeader>
+	{
+	#endif
 		/// <returns>Returns the first avaiable connection in the pool.  Will return null, if there are no available connections.</returns>
 		public SQLConnectionHeader AvailableConnectionHeader()
 		{
@@ -2872,6 +2877,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public SQLQueryContext RightQueryContext;
 	}
 	
+	#if USETYPEDLIST
 	public class SQLJoinContexts : TypedList
 	{
 		public SQLJoinContexts() : base(typeof(SQLJoinContext), /* AllowNulls */ true) {}
@@ -2882,6 +2888,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class SQLJoinContexts : BaseList<SQLJoinContext> { }
+	#endif
 	
 	[Flags]
 	public enum SQLReferenceFlags 
@@ -2991,6 +3000,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 	}
 	
+	#if USETYPEDLIST
 	public class SQLRangeVarColumns : TypedList
 	{
 		public SQLRangeVarColumns() : base(typeof(SQLRangeVarColumn)) {}
@@ -3001,6 +3011,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { base[AIndex] = value; }
 		}
 		
+	#else
+	public class SQLRangeVarColumns : BaseList<SQLRangeVarColumn>
+	{
+	#endif
 		public SQLRangeVarColumn this[string AColumnName] { get { return this[IndexOf(AColumnName)]; } }
 		
 		public int IndexOf(string AColumnName)
@@ -3042,6 +3056,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public SQLRangeVarColumns Columns { get { return FColumns; } }
 	}
 
+	#if USETYPEDLIST
 	public class SQLRangeVars : TypedList
 	{
 		public SQLRangeVars() : base(typeof(SQLRangeVar)) {}
@@ -3052,6 +3067,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class SQLRangeVars : BaseList<SQLRangeVar> { }
+	#endif
 	
 	public class SQLQueryContext : System.Object
 	{
@@ -3425,6 +3443,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public PlanNode PlanNode { get { return FPlanNode; } }
 	}
 
+	#if USETYPEDLIST
 	public class SQLPlanParameters : TypedList
 	{
 		public SQLPlanParameters() : base(typeof(SQLPlanParameter)){}
@@ -3435,6 +3454,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class SQLPlanParameters : BaseList<SQLPlanParameter> { }
+	#endif
 
 	public abstract class SQLDeviceSession : DeviceSession, IStreamProvider
 	{
@@ -4463,6 +4485,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public ColumnExpression ColumnExpression { get { return FColumnExpression; } }
 	}
 	
+	#if USETYPEDLIST
 	public class ColumnMaps : TypedList
 	{
 		public ColumnMaps() : base(typeof(ColumnMap)){}
@@ -4472,7 +4495,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			get { return (ColumnMap)base[AIndex]; } 
 			set { base[AIndex] = value; } 
 		}
-		
+
+	#else
+	public class ColumnMaps : BaseList<ColumnMap>
+	{
+	#endif	
 		// Returns the ColumnMap with the given ColumnIndex into DataType.Columns
 		public ColumnMap ColumnMapByIndex(int AIndex)
 		{
@@ -4498,6 +4525,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public bool IsDeferred;
 	}
 	
+	#if USETYPEDLIST
 	public class SQLTableColumns : TypedList
 	{
 		public SQLTableColumns() : base(typeof(SQLTableColumn)){}
@@ -4508,6 +4536,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			set { base[AIndex] = value; }
 		}
 	}
+	#else
+	public class SQLTableColumns : BaseList<SQLTableColumn> { }
+	#endif
 	
 	public class SQLTable : Table
 	{
