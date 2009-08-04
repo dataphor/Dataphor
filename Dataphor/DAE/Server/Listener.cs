@@ -27,9 +27,12 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>
 		/// Establishes a listener in the current process, using the listener configuration settings if available.
 		/// </summary>
-		/// <returns>True if a listener was established, false otherwise.</returns>
+		/// <returns>True if a listener is established in this app domain.</returns>
 		public static bool EstablishListener()
 		{
+			if (FChannel != null)
+				return true;
+			
 			IDictionary LSettings = (IDictionary)ConfigurationManager.GetSection("listener");
 			
 			// Set shouldListen=false to turn off the listener for a process
