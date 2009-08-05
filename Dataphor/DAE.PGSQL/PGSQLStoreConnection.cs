@@ -45,5 +45,12 @@ namespace Alphora.Dataphor.DAE.Store.PGSQL
             bool LTableExists = (bool) this.ExecuteScalar(LStatement);
             return LTableExists;           
         }
+
+		public override object NativeToLiteralValue(object AValue)
+		{
+			if (AValue is bool)
+				return ((bool)AValue ? "'true'" : "'false'");			
+			return base.NativeToLiteralValue(AValue);
+		}
     }
 }

@@ -456,7 +456,7 @@ namespace Alphora.Dataphor.DAE.Store
 			}
 		}
 
-		internal object NativeToLiteralValue(object AValue)
+		public virtual object NativeToLiteralValue(object AValue)
 		{
 			if (AValue is bool)
 				return ((bool)AValue ? 1 : 0).ToString();
