@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FErrorListView.Dock = DockStyle.Fill;
 			FDockContentErrorListView.HideOnClose = true;
 			FDockContentErrorListView.Controls.Add(FErrorListView);
-			FDockContentErrorListView.TabText = "Errors/Warnings";
+			FDockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
 			FDockContentErrorListView.Text = "Errors and Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 

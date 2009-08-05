@@ -144,7 +144,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// 
 			FMenuStrip.Items.AddRange(new[]
 										  {
-											  FScriptMenu
+											  FScriptMenu,
+											  FExportMenu
 										  });
 
 			//
@@ -161,7 +162,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 													   FPrepareMenuItem,
 													   FAnalyzeMenuItem,
 													   FInjectMenuItem,
-													   FExportMenu
+													   FExecuteLineMenuItem,
+													   FPrepareLineMenuItem,
+													   FAnalyzeLineMenuItem,
+													   FSelectBlockMenuItem,
+													   FPriorBlockMenuItem,
+													   FNextBlockMenuItem
 												   });
 			FScriptMenu.Text = "&Script";
 			FScriptMenu.MergeAction = MergeAction.Insert;
