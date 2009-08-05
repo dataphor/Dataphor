@@ -19,7 +19,7 @@ create operator iInclusiveGreater(const ALeftValue : SQLText, const ARightValue 
 create operator iLike(const AString : SQLText, const APattern : String) : Boolean class "System.StringLikeNode" static tags { DAE.IsBuiltin = "true" };
 create operator iIndexer(const AString : SQLText, const AIndex : Integer) : String class "System.StringIndexerNode" static tags { DAE.IsBuiltin = "true" };
 create operator Length(const AString : SQLText) : Integer class "System.StringLengthNode";
-create operator SubString(const AString : SQLText, const AStartIndex : Integer, const ALength : Integer) : String class "System.StringSubStringNode";
+create operator SubString(const AString : SQLText, const AStartIndex : Integer, const ALength : Integer) : String class "System.StringSubStringTernaryNode";
 create operator SubString(const AString : SQLText, const AStartIndex : Integer) : String class "System.StringSubStringNode";
 create operator Pos(const ASubString : String, const AString : SQLText) : Integer class "System.StringPosNode";
 create operator IndexOf(const AString : SQLText, const ASubString : String) : Integer class "System.StringIndexOfNode";
