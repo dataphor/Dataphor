@@ -115,6 +115,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FDockContentResultPanel.TabText = "Results";
 			FDockContentResultPanel.ShowHint = DockState.DockBottom;
 			FDockContentResultPanel.DockPanel = FDockPanel;
+			FDockContentResultPanel.Name = "DockContentResultPanel";
 		}
 
 

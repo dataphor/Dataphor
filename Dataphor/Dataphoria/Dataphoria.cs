@@ -88,9 +88,48 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockPanel.DockTopPortion = 240;
 			FDockPanel.DockBottomPortion = 240;
 
-
 			LoadSettings();
 		}
+
+		#if TRACEFOCUS
+
+		private static string WalkParentControls(Control AControl)
+		{
+			if (AControl == null)
+				return "";
+			else
+				return 
+					WalkParentControls(AControl.Parent)
+						+ "->"
+						+ (AControl.Parent != null ? "(" + AControl.Parent.Controls.IndexOf(AControl).ToString() + ")" : "")
+						+ (AControl.Name != null ? AControl.Name : "")
+						+ (AControl.Text != null ? "\"" + AControl.Name + "\"" : "")
+						+ "[" + AControl.GetType().Name + "]";
+		}
+
+		[System.Runtime.InteropServices.DllImport("user32.dll", CharSet=System.Runtime.InteropServices.CharSet.Auto, ExactSpelling=true)]
+		public static extern IntPtr GetFocus();
+ 
+		private bool ProcessQueryFocus(Form AForm, Keys AKey)
+		{
+			IntPtr LFocusPtr = GetFocus();
+			if (LFocusPtr != IntPtr.Zero)
+			{
+				Control LControl = Control.FromHandle(LFocusPtr);
+				if (LControl != null)
+					System.Diagnostics.Trace.WriteLine("Focus: " + WalkParentControls(LControl));
+			}
+			return true;
+		}
+
+		protected override bool ProcessDialogKey(Keys AKeyData)
+		{
+			if (AKeyData == (Keys.Control | Keys.Shift | Keys.Alt | Keys.F))
+				ProcessQueryFocus(this, AKeyData);
+			return base.ProcessDialogKey(AKeyData);
+		}
+		
+		#endif
 
 		protected override void OnClosing(CancelEventArgs AArgs)
 		{
@@ -469,8 +508,6 @@ namespace Alphora.Dataphor.Dataphoria
 			ADesigner.Disposed += DesignerDisposed;
 		}
 
-		
-
 		private void EditForm(IFormInterface AInterface)
 		{
 			CheckExclusiveDesigner(AInterface);
@@ -714,7 +751,6 @@ namespace Alphora.Dataphor.Dataphoria
 				LEditor.New();
 				LEditor.EditorText = AText;
 				LEditor.Service.SetModified(false);
-				((IDesigner)LEditor).Show();	// IDesigner.Show is distinct from Control.Show
 				return LEditor;
 			}
 			catch
@@ -876,8 +912,6 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region File Support
 
-		
-
 		private string GetOpenFilter()
 		{
 			StringBuilder LFilter = new StringBuilder();
@@ -1030,7 +1064,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void AttachForm(BaseForm AForm) 
 		{
-			AForm.Show(this.FDockPanel);	
+			AForm.Show(this.FDockPanel);
+			AForm.SelectNextControl(AForm, true, true, true, false);	
 		}
 
 		private void CloseChildren()

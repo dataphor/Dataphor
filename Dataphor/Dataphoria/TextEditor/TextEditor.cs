@@ -163,6 +163,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FDockContentTextEdit.Controls.Add(FTextEdit);
             FDockContentTextEdit.ShowHint = DockState.Document;
             FDockContentTextEdit.Show(FDockPanel);
+            FDockContentTextEdit.Name = "DockContentTextEdit";
         }
 
 
