@@ -82,6 +82,13 @@ namespace Alphora.Dataphor.Dataphoria
             FDockContentExplorer.Show(this.FDockPanel);
             FDockContentErrorListView.Show(this.FDockPanel);
 
+
+			FDockPanel.DockLeftPortion = 240;
+        	FDockPanel.DockRightPortion = 240;
+        	FDockPanel.DockTopPortion = 240;
+        	FDockPanel.DockBottomPortion = 240;
+
+
 			LoadSettings();
 		}
 
