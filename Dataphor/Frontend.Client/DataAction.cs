@@ -424,7 +424,7 @@ namespace Alphora.Dataphor.Frontend.Client
 									LParamNames[i], 
 									LColumn.DataType, 
 									LArgument.Modifier, 
-									LArgument.Source.IsEmpty ? null : (LField.HasValue() ? LField.Value : null)
+									LArgument.Source.IsEmpty ? null : (LField.HasValue() ? LField.AsNative : null)
 								)
 							);
 						}
