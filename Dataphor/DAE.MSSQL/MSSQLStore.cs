@@ -26,8 +26,13 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
 		{
 			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
 			LBuilder.ConnectionString = ConnectionString;
+
+			if (LBuilder.ContainsKey("MultipleActiveResultSets"))
+			{
+				FSupportsMARS = "True" == ((string)LBuilder["MultipleActiveResultSets"]);
+			}
+
 			
-            FSupportsMARS = LBuilder.ContainsKey("MultipleActiveResultSets") && (bool)LBuilder["MultipleActiveResultSets"];
             FSupportsUpdatableCursor = false;
             
             if (FShouldEnsureDatabase)

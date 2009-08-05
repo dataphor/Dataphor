@@ -42,7 +42,10 @@ namespace Alphora.Dataphor.DAE.Connection
 		{ 
 			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
 			LBuilder.ConnectionString = AConnectionString;
-			FSupportsMARS = LBuilder.ContainsKey("MultipleActiveResultSets") && (bool)LBuilder["MultipleActiveResultSets"];
+			if (LBuilder.ContainsKey("MultipleActiveResultSets"))
+			{
+				FSupportsMARS = "True" == ((string)LBuilder["MultipleActiveResultSets"]);
+			}
 		}
 
 		protected override IDbConnection CreateDbConnection(string AConnectionString)
