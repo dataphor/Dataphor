@@ -31,11 +31,11 @@ using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-    public partial class Dataphoria : Form, IDataphoria
-    {
-        public const string CConfigurationFileName = "Dataphoria{0}.config";
+	public partial class Dataphoria : Form, IDataphoria
+	{
+		public const string CConfigurationFileName = "Dataphoria{0}.config";
 
-        public Dataphoria()
+		public Dataphoria()
 		{
 			InitializeComponent();
 
@@ -43,50 +43,50 @@ namespace Alphora.Dataphor.Dataphoria
 
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
-            FExplorer = new DataTree();
-            FExplorer.AllowDrop = true;
-            FExplorer.BorderStyle = BorderStyle.None;
-            FExplorer.CausesValidation = false;
-            FExplorer.HideSelection = false;
-            FExplorer.ImageIndex = 0;
-            FExplorer.ImageList = FTreeImageList;
-            FExplorer.Name = "FExplorer";
-            FExplorer.SelectedImageIndex = 0;
-            FExplorer.ShowRootLines = false;            
-            FExplorer.TabIndex = 1;
-            FExplorer.HelpRequested += FExplorer_HelpRequested;
+			FExplorer = new DataTree();
+			FExplorer.AllowDrop = true;
+			FExplorer.BorderStyle = BorderStyle.None;
+			FExplorer.CausesValidation = false;
+			FExplorer.HideSelection = false;
+			FExplorer.ImageIndex = 0;
+			FExplorer.ImageList = FTreeImageList;
+			FExplorer.Name = "FExplorer";
+			FExplorer.SelectedImageIndex = 0;
+			FExplorer.ShowRootLines = false;			
+			FExplorer.TabIndex = 1;
+			FExplorer.HelpRequested += FExplorer_HelpRequested;
 			FExplorer.Dataphoria = this;
 			FExplorer.Select();
 			
 			FErrorListView = new ErrorListView();
-            FErrorListView.OnErrorsAdded += ErrorsAdded;
-            FErrorListView.OnWarningsAdded += WarningsAdded;
+			FErrorListView.OnErrorsAdded += ErrorsAdded;
+			FErrorListView.OnWarningsAdded += WarningsAdded;
 
 			FExplorer.Dock = DockStyle.Fill;
 			FDockContentExplorer = new DockContent();
-            FDockContentExplorer.Controls.Add(FExplorer);
-            FDockContentExplorer.HideOnClose = true;
-            FDockContentExplorer.TabText = "Dataphoria Explorer";
-            FDockContentExplorer.Text = "DataTree Explorer - Dataphoria";
-            FDockContentExplorer.ShowHint = DockState.DockLeft;
+			FDockContentExplorer.Controls.Add(FExplorer);
+			FDockContentExplorer.HideOnClose = true;
+			FDockContentExplorer.TabText = "Dataphor Explorer";
+			FDockContentExplorer.Text = "Dataphor Explorer - Dataphoria";
+			FDockContentExplorer.ShowHint = DockState.DockLeft;
 
-            FDockContentErrorListView = new DockContent();
+			FDockContentErrorListView = new DockContent();
 
-            FErrorListView.Dock = DockStyle.Fill;
+			FErrorListView.Dock = DockStyle.Fill;
 			FDockContentErrorListView.HideOnClose = true;
-            FDockContentErrorListView.Controls.Add(FErrorListView);
-            FDockContentErrorListView.TabText = "Dataphoria Error List";
-            FDockContentErrorListView.Text = "Error List - Dataphoria";
-            FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
+			FDockContentErrorListView.Controls.Add(FErrorListView);
+			FDockContentErrorListView.TabText = "Errors/Warnings";
+			FDockContentErrorListView.Text = "Errors and Warnings - Dataphoria";
+			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
-            FDockContentExplorer.Show(this.FDockPanel);
-            FDockContentErrorListView.Show(this.FDockPanel);
+			FDockContentExplorer.Show(this.FDockPanel);
+			FDockContentErrorListView.Show(this.FDockPanel);
 
 
 			FDockPanel.DockLeftPortion = 240;
-        	FDockPanel.DockRightPortion = 240;
-        	FDockPanel.DockTopPortion = 240;
-        	FDockPanel.DockBottomPortion = 240;
+			FDockPanel.DockRightPortion = 240;
+			FDockPanel.DockTopPortion = 240;
+			FDockPanel.DockBottomPortion = 240;
 
 
 			LoadSettings();
@@ -266,12 +266,12 @@ namespace Alphora.Dataphor.Dataphoria
 								FFrontendSession.OnDeserializationErrors += FrontendSessionDeserializationErrors;
 								FServerNode = new ServerNode(FDataSession.Server != null);
 								FServerNode.Text = FDataSession.Alias.ToString();
-                                FExplorer.AddBaseNode(FServerNode);
+								FExplorer.AddBaseNode(FServerNode);
 								try
 								{
 									FServerNode.Expand();
-								    FConnectToolStripMenuItem.Visible = false;
-								    FDisconnectToolStripMenuItem.Visible = true;									
+									FConnectToolStripMenuItem.Visible = false;
+									FDisconnectToolStripMenuItem.Visible = true;									
 									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
 									FDockContentExplorer.Show();
 									FExplorer.Focus();
@@ -279,7 +279,7 @@ namespace Alphora.Dataphor.Dataphoria
 								catch
 								{
 									FServerNode = null;
-                                    FExplorer.Nodes.Clear();
+									FExplorer.Nodes.Clear();
 									throw;
 								}
 							}
@@ -325,10 +325,10 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						Text = Strings.DataphoriaTitle;
 						FConnectToolStripMenuItem.Visible = true;
-                        FDisconnectToolStripMenuItem.Visible = false;						
-                        FDockContentExplorer.Hide();
+						FDisconnectToolStripMenuItem.Visible = false;						
+						FDockContentExplorer.Hide();
 
-                        FExplorer.Nodes.Clear();
+						FExplorer.Nodes.Clear();
 						FServerNode = null;
 					}
 					finally
@@ -392,14 +392,14 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private Bitmap LoadBitmap(string AResourceName)
 		{
-		    Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(AResourceName);
-		    if (LManifestResourceStream != null)
-		    {
-		        var LResult = new Bitmap(LManifestResourceStream);
-		        LResult.MakeTransparent();
-		        return LResult;
-		    }
-            throw new ArgumentException("Could not get manifest resource stream for: " + AResourceName, "AResourceName");
+			Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(AResourceName);
+			if (LManifestResourceStream != null)
+			{
+				var LResult = new Bitmap(LManifestResourceStream);
+				LResult.MakeTransparent();
+				return LResult;
+			}
+			throw new ArgumentException("Could not get manifest resource stream for: " + AResourceName, "AResourceName");
 		}
 
 		public Frontend.Client.Windows.Session GetLiveDesignableFrontendSession()
@@ -448,7 +448,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 			if (LExpression.Type == DocumentType.Document)
 			{
-                LForm.AddCustomAction
+				LForm.AddCustomAction
 				(
 					Strings.EditMenuText,  
 					LoadBitmap("Alphora.Dataphor.Dataphoria.Images.Edit.bmp"), 
@@ -599,7 +599,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			DesignerInfo LInfo = new DesignerInfo();
 			string LSelectDesigner = Strings.SelectDesigner;
-            IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
+			IWindowsFormInterface LForm = FrontendSession.LoadForm(null, String.Format(".Frontend.Derive('Designers adorn {{ ClassName tags {{ Frontend.Browse.Visible = ''false'' }} }} tags {{ Frontend.Caption = ''{0}'' }}')", LSelectDesigner));
 			try
 			{
 				if (LForm.ShowModal(FormMode.Query) != DialogResult.OK)
@@ -847,8 +847,8 @@ namespace Alphora.Dataphor.Dataphoria
 		public void SaveAll()
 		{
 			
-            
-            IDesigner LDesigner;
+			
+			IDesigner LDesigner;
 			foreach (Form LForm in this.MdiChildren)
 			{
 				LDesigner = LForm as IDesigner;
@@ -869,7 +869,7 @@ namespace Alphora.Dataphor.Dataphoria
 			object LResult = base.GetService(AServiceType);
 			if (LResult != null)
 				return LResult;
-		    return FServices[AServiceType];
+			return FServices[AServiceType];
 		}
 
 		#endregion
@@ -1028,11 +1028,9 @@ namespace Alphora.Dataphor.Dataphoria
 
 		#region Child Forms
 
-		//private TabbedMDIManager FTabbedMDIManager;
-
 		public void AttachForm(BaseForm AForm) 
 		{
-            AForm.Show(this.FDockPanel);            
+			AForm.Show(this.FDockPanel);	
 		}
 
 		private void CloseChildren()
@@ -1054,31 +1052,31 @@ namespace Alphora.Dataphor.Dataphoria
 		protected override void OnMdiChildActivate(EventArgs AArgs)
 		{
 			base.OnMdiChildActivate(AArgs);
-            MergeOrRevertMergeOfToolbars();
-		    MergeOrRevertMergeOfStatusBars();
+			MergeOrRevertMergeOfToolbars();
+			MergeOrRevertMergeOfStatusBars();
 		}
 
-        private void MergeOrRevertMergeOfStatusBars()
-        {
-            ToolStripManager.RevertMerge(this.FStatusStrip);
-            var LChildForm = ActiveMdiChild as IStatusBarClient;
-            if (LChildForm != null)
-            {
-                LChildForm.MergeStatusBarWith(this.FStatusStrip);
-            }
-        }
+		private void MergeOrRevertMergeOfStatusBars()
+		{
+			ToolStripManager.RevertMerge(this.FStatusStrip);
+			var LChildForm = ActiveMdiChild as IStatusBarClient;
+			if (LChildForm != null)
+			{
+				LChildForm.MergeStatusBarWith(this.FStatusStrip);
+			}
+		}
 
-        private void MergeOrRevertMergeOfToolbars()
-        {
-            ToolStripManager.RevertMerge(this.FToolStrip);            
-            var LChildForm = ActiveMdiChild as IChildFormWithToolBar;
-            if (LChildForm != null)
-            {
-                LChildForm.MergeToolbarWith(this.FToolStrip);
-            }
-        }
+		private void MergeOrRevertMergeOfToolbars()
+		{
+			ToolStripManager.RevertMerge(this.FToolStrip);			
+			var LChildForm = ActiveMdiChild as IChildFormWithToolBar;
+			if (LChildForm != null)
+			{
+				LChildForm.MergeToolbarWith(this.FToolStrip);
+			}
+		}
 
-        #endregion
+		#endregion
 
 		#region DAE & Frontend Server Helpers
 
@@ -1168,7 +1166,7 @@ namespace Alphora.Dataphor.Dataphoria
 				}
 				finally
 				{
-					FUtilityProcess.UnprepareExpression(LPlan);                
+					FUtilityProcess.UnprepareExpression(LPlan);				
 				}
 				return LResult;
 			}
@@ -1289,16 +1287,16 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Provides access to the warnings / errors list pane. </summary>
 		public ErrorListView Warnings
 		{
-            get
-            {
-                return FErrorListView; 
-            }
+			get
+			{
+				return FErrorListView; 
+			}
 		}
 
 		private void ShowWarnings()
 		{
 			FDockContentErrorListView.Show(FDockPanel);
-            FDockContentErrorListView.Activate();                                   
+			FDockContentErrorListView.Activate();								   
 		}
 
 		private void WarningsAdded(object ASender, EventArgs AArgs)
@@ -1309,12 +1307,12 @@ namespace Alphora.Dataphor.Dataphoria
 		private void ErrorsAdded(object ASender, EventArgs AArgs)
 		{
 			ShowWarnings();
-            FDockContentErrorListView.Show(FDockPanel);			
+			FDockContentErrorListView.Show(FDockPanel);			
 		}
 
 		private void ClearWarnings()
 		{
-            FErrorListView.ClearErrors();
+			FErrorListView.ClearErrors();
 		}
 
 		// IErrorSource
@@ -1335,14 +1333,14 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private EventHandler FOnFormDesignerLibrariesChanged;
 
-        public event EventHandler OnFormDesignerLibrariesChanged {
-            add {
-                this.FOnFormDesignerLibrariesChanged += value;
-            }
-            remove {
-                this.FOnFormDesignerLibrariesChanged -= value;
-            }
-        }
+		public event EventHandler OnFormDesignerLibrariesChanged {
+			add {
+				this.FOnFormDesignerLibrariesChanged += value;
+			}
+			remove {
+				this.FOnFormDesignerLibrariesChanged -= value;
+			}
+		}
 
 		private void BrowseDesignerLibraries()
 		{
@@ -1381,7 +1379,7 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 			catch (Exception LException)
 			{
-                Program.HandleException(new DataphoriaException(DataphoriaException.Codes.UnableToOpenHelp, LException, LFileName));
+				Program.HandleException(new DataphoriaException(DataphoriaException.Codes.UnableToOpenHelp, LException, LFileName));
 			}
 		}
 
@@ -1420,7 +1418,7 @@ namespace Alphora.Dataphor.Dataphoria
 		public void ShowDataphorExplorer()
 		{
 			FDockContentExplorer.Show(FDockPanel);
-            FDockContentExplorer.Activate();            
+			FDockContentExplorer.Activate();			
 		}
 
 		public void LaunchAlphoraWebsite()
@@ -1436,57 +1434,57 @@ namespace Alphora.Dataphor.Dataphoria
 		public void LaunchAlphoraGroups()
 		{
 			System.Diagnostics.Process.Start(@"http://news.alphora.com/");
-        }
+		}
 
-        private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
-        {            
-            /*try
-            {*/
-                if (ASender == FClearWarningsToolStripMenuItem)
-                            ClearWarnings();
-                else if (ASender == FConnectToolStripMenuItem)
-                        EnsureServerConnection();
-                else if (ASender == FDisconnectToolStripMenuItem)
-                        Disconnect();
-                else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
-                        NewDesigner();
-                else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)                        
-                        NewEditor(String.Empty, "d4");
-                else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
-                        OpenFile();
-                else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
-                        OpenFileWith();
-                else if (ASender == FSaveAllToolStripMenuItem)
-                        SaveAll();
-                else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
-                        LaunchForm();
-                else if (ASender == FExitToolStripMenuItem)
-                        Close();
-                else if (ASender == FDataphorExplorerToolStripMenuItem)
-                        ShowDataphorExplorer();
-                else if (ASender == FWarningsErrorsToolStripMenuItem)
-                        ShowWarnings();
-                else if (ASender == FDesignerLibrariesToolStripMenuItem)
-                        BrowseDesignerLibraries();
-                else if (ASender == FDataphorDocumentationToolStripMenuItem)
-                        Documentation();
-                else if (ASender == FAboutToolStripMenuItem)
-                        About();
-                else if (ASender == FAlphoraWebSiteToolStripMenuItem)
-                        LaunchAlphoraWebsite();
-                else if (ASender == FWebDocumentationToolStripMenuItem)
-                        LaunchWebDocumentation();
-                else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
-                        LaunchAlphoraGroups();
-                else if (ASender == FDocumentTypesToolStripMenuItem)
-                        BrowseDocumentTypes(); 
-                
-            /*}
-            catch (Exception LException)
-            {
-                Program.HandleException(LException);
-            }*/
-        }
+		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
+		{			
+			/*try
+			{*/
+				if (ASender == FClearWarningsToolStripMenuItem)
+							ClearWarnings();
+				else if (ASender == FConnectToolStripMenuItem)
+						EnsureServerConnection();
+				else if (ASender == FDisconnectToolStripMenuItem)
+						Disconnect();
+				else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
+						NewDesigner();
+				else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)						
+						NewEditor(String.Empty, "d4");
+				else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
+						OpenFile();
+				else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
+						OpenFileWith();
+				else if (ASender == FSaveAllToolStripMenuItem)
+						SaveAll();
+				else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
+						LaunchForm();
+				else if (ASender == FExitToolStripMenuItem)
+						Close();
+				else if (ASender == FDataphorExplorerToolStripMenuItem)
+						ShowDataphorExplorer();
+				else if (ASender == FWarningsErrorsToolStripMenuItem)
+						ShowWarnings();
+				else if (ASender == FDesignerLibrariesToolStripMenuItem)
+						BrowseDesignerLibraries();
+				else if (ASender == FDataphorDocumentationToolStripMenuItem)
+						Documentation();
+				else if (ASender == FAboutToolStripMenuItem)
+						About();
+				else if (ASender == FAlphoraWebSiteToolStripMenuItem)
+						LaunchAlphoraWebsite();
+				else if (ASender == FWebDocumentationToolStripMenuItem)
+						LaunchWebDocumentation();
+				else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
+						LaunchAlphoraGroups();
+				else if (ASender == FDocumentTypesToolStripMenuItem)
+						BrowseDocumentTypes(); 
+				
+			/*}
+			catch (Exception LException)
+			{
+				Program.HandleException(LException);
+			}*/
+		}
 
 		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
 		{
@@ -1518,7 +1516,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FErrorListView_HelpRequested(object ASender, HelpEventArgs AArgs)
 		{
 			string LKeyword = "Errors and Warnings";
-            DataphorException LException = FErrorListView.SelectedError as DataphorException;
+			DataphorException LException = FErrorListView.SelectedError as DataphorException;
 			if (LException != null)
 				LKeyword = LException.Code.ToString();
 
@@ -1531,5 +1529,5 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#endregion
-    }
+	}
 }
