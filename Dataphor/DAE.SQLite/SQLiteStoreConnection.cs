@@ -33,5 +33,20 @@ namespace Alphora.Dataphor.DAE.Store.SQLite
         {
             return Convert.ToInt32(this.ExecuteScalar(String.Format("select count(*) from SQLITE_MASTER where type = 'table' and name = '{0}'", ATableName))) != 0;
         }
+
+		protected override SQLStoreCursor InternalOpenCursor(string ATableName, System.Collections.Generic.List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		{
+
+			return
+				new SQLiteStoreCursor
+				(
+					this,
+					ATableName,
+					AColumns,
+					AIndex,
+					AIsUpdatable
+				);
+		}
+		
     }
 }

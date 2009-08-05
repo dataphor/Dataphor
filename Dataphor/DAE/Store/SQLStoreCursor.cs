@@ -749,17 +749,13 @@ namespace Alphora.Dataphor.DAE.Store
 			FIsOnRow = false;
 		}
 		
-		public object NativeToStoreValue(object AValue)
-		{
-			if (AValue is bool)
-				return (byte)((bool)AValue ? 1 : 0);
+		public virtual object NativeToStoreValue(object AValue)
+		{			
 			return AValue;
 		}
-		
-		public object StoreToNativeValue(object AValue)
-		{
-			if (AValue is byte)
-				return ((byte)AValue) == 1;
+
+		public virtual object StoreToNativeValue(object AValue)
+		{			
 			if (AValue is DBNull)
 				return null;
 			return AValue;

@@ -6,6 +6,7 @@
 
 #define USESQLCONNECTION
 
+using System;
 using System.Collections.Generic;
 using System.Data.SqlServerCe;
 
@@ -137,5 +138,19 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
             
             return true;
         }
+
+		public override object NativeToStoreValue(object AValue)
+		{
+			if (AValue is bool)
+				return (byte)((bool)AValue ? 1 : 0);
+			return base.NativeToStoreValue(AValue);
+		}
+
+		public override object StoreToNativeValue(object AValue)
+		{
+			if (AValue is byte)
+				return ((byte)AValue) == 1;			
+			return base.StoreToNativeValue(AValue);
+		}
     }
 }

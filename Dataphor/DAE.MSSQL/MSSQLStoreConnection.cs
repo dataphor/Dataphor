@@ -41,5 +41,20 @@ namespace Alphora.Dataphor.DAE.Store.MSSQL
         {
             return ((int)this.ExecuteScalar(String.Format("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '{0}'", ATableName)) != 0);
         }
+
+		protected override SQLStoreCursor InternalOpenCursor(string ATableName, List<string> AColumns, SQLIndex AIndex, bool AIsUpdatable)
+		{
+			return
+				new MSSQLStoreCursor
+				(
+					this,
+					ATableName,
+					AColumns,
+					AIndex,
+					AIsUpdatable
+				);
+		}
     }
+
+	
 }

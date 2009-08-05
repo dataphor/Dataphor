@@ -41,6 +41,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MSSQLStore.cs" />
     <Compile Include="MSSQLStoreConnection.cs" />
+    <Compile Include="MSSQLStoreCursor.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SystemStoreCatalog.sql" />
