@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Device.MSSQL\MSSQLInstructionNodes.cs" />
     <Compile Include="Device.MSSQL\MSSQLOperators.cs" />
+    <Compile Include="Device.MSSQL\MSSQLTypes.cs" />
     <Compile Include="Device.MSSQL\Register.cs">
       <SubType>Code</SubType>
     </Compile>
