@@ -107,6 +107,7 @@
     <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
       <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
       <Name>DAE.NativeCLI</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE\DAE.csproj">
       <Name>DAE</Name>

@@ -92,6 +92,7 @@
     <Reference Include="ICSharpCode.TextEditor, Version=2.1.0.2429, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\ICSharpCode.TextEditor.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -124,7 +125,7 @@
       <Name>BOP</Name>
       <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Name>DAE.Client.Controls</Name>
@@ -136,17 +137,18 @@
       <Name>DAE.Client</Name>
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
       <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
       <Name>DAE.NativeCLI</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\DAE\DAE.csproj">
       <Name>DAE</Name>
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Frontend.Client\Frontend.Client.csproj">
       <Name>Frontend.Client</Name>
@@ -157,6 +159,7 @@
     <ProjectReference Include="..\Logging\Logging.csproj">
       <Project>{47AC1A13-6F39-41CD-9F5F-7F5B1792CB84}</Project>
       <Name>Logging</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

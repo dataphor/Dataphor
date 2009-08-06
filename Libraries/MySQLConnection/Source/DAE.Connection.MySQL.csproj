@@ -102,14 +102,17 @@
     <ProjectReference Include="..\..\..\Dataphor\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
       <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Name>BOP</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>DAE</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
