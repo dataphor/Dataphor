@@ -93,6 +93,7 @@
     <Compile Include="Device.Oracle\OracleOperators.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Device.Oracle\OracleTypes.cs" />
     <Compile Include="Device.Oracle\Register.cs">
       <SubType>Code</SubType>
     </Compile>
