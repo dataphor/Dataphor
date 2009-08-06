@@ -248,7 +248,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						return null;
 					#else
 					int LColumnIndex = LRow.DataType.Columns.IndexOf(Identifier);
-					if (LRow.HasValue(LColumnIndex))
+					if (!LRow.IsNil && LRow.HasValue(LColumnIndex))
 						return LRow[LColumnIndex];
 					else
 						return null;

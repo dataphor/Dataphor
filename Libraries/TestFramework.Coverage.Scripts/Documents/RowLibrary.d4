@@ -121,3 +121,9 @@ end;
 TestFullRowRename(1);
 
 drop operator TestFullRowRename(Integer);
+
+//* Extraction from a nil row
+begin
+	var LRow := row { nil as row { Y : Integer } X, 5 Z };
+	var LColumn := LRow.X.Y;
+end;
