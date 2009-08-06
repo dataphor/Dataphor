@@ -44,32 +44,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
             Browse - unsupported
             CreateTable - direct translation
             AlterTable - direct translation
-            DropTable - direct translation
-			
-        Data type mapping ->
-		
-            DAE Type	|	TSQL Type														|	Translation Handler
-            ------------|---------------------------------------------------------------------------------------------
-            Boolean		|	bit																|	MSSQLBoolean
-            Byte		|   tinyint															|	MSSQLByte
-            SByte		|	smallint														|	SQLSByte
-            Short		|	smallint														|	SQLShort
-            UShort		|	integer															|	SQLUShort
-            Integer		|	integer															|	SQLInteger
-            UInteger	|	bigint															|	SQLUInteger
-            Long		|	bigint															|	SQLLong
-            ULong		|	decimal(20, 0)													|	SQLULong
-            Decimal		|	decimal(Storage.Precision, Storage.Scale)						|	SQLDecimal
-            TimeSpan	|	bigint															|	SQLTimeSpan
-            DateTime	|	datetime														|	MSSQLDateTime
-            Date		|	datetime														|	MSSQLDate
-            Time		|	datetime														|	MSSQLTime
-            Money		|	money															|	MSSQLMoney
-            Guid		|	uniqueidentifier												|	MSSQLGuid
-            String		|	varchar(Storage.Length)											|	SQLString
-            Binary		|	image															|	MSSQLBinary
-            SQLText		|	text															|	MSSQLText
-            MSSQLBinary |	binary(Storage.Length)											|	MSSQLMSSQLBinary
+            DropTable - direct translation			       
     */
 
     #region Device
