@@ -419,40 +419,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
     #endregion
 
-    #region Connection String Builder
-
-    public class OracleOLEDBConnectionStringBuilder : ConnectionStringBuilder
-    {
-        public OracleOLEDBConnectionStringBuilder()
-        {
-            FParameters.AddOrUpdate("Provider", "MSDAORA");
-            FLegend.AddOrUpdate("HostName", "Data source");
-            FLegend.AddOrUpdate("UserName", "user id");
-            FLegend.AddOrUpdate("Password", "password");
-        }
-    }
-
-    // for the Oracle.NET data provider
-    public class OracleConnectionStringBuilder : ConnectionStringBuilder
-    {
-        public OracleConnectionStringBuilder()
-        {
-            FLegend.AddOrUpdate("HostName", "Data Source");
-            FLegend.AddOrUpdate("UserName", "User Id");
-        }
-    }
-
-    public class OracleODBCConnectionStringBuilder : ConnectionStringBuilder
-    {
-        public OracleODBCConnectionStringBuilder()
-        {
-            FLegend.AddOrUpdate("HostName", "DSN");
-            FLegend.AddOrUpdate("UserName", "UID");
-            FLegend.AddOrUpdate("Password", "PWD");
-        }
-    }
-
-    #endregion
+    
 
     #region Types
 
