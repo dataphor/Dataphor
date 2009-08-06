@@ -13,7 +13,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 		{
 			FLegend.AddOrUpdate("HostName", "Server");
 			FLegend.AddOrUpdate("UserName", "User Id");
-			FLegend.AddOrUpdate("Password", "User Id");
+			FLegend.AddOrUpdate("Password", "Password");
 			FLegend.AddOrUpdate("Database", "Database");
 			FLegend.AddOrUpdate("SearchPath", "SearchPath");			
 		}
