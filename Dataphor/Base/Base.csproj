@@ -110,6 +110,7 @@
     <Compile Include="ExceptionUtility.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FixedSizeCache.cs" />
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
     <Compile Include="TemporaryStream.cs" />

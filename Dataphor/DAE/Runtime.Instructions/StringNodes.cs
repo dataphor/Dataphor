@@ -866,14 +866,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public abstract class StringLikeNodeBase : BinaryInstructionNode
 	{
 		protected const int CRegexCacheSize = 20;
-		protected static FixedSizeCache FRegexCache = new FixedSizeCache(CRegexCacheSize);
+		protected static FixedSizeCache<string, Regex> FRegexCache = new FixedSizeCache<string, Regex>(CRegexCacheSize);
 
 		public static Regex GetRegex(string APattern)
 		{
 			lock (FRegexCache)
 			{
-				Regex LRegex = FRegexCache[APattern] as Regex;
-				if (LRegex == null)
+				Regex LRegex;
+				if (!FRegexCache.TryGetValue(APattern, out LRegex))
 				{
 					LRegex = new Regex(APattern, RegexOptions.None);
 					FRegexCache.Add(APattern, LRegex);

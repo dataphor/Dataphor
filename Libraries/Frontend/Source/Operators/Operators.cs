@@ -260,8 +260,8 @@ namespace Alphora.Dataphor.Frontend.Server
 				lock (LSession.DerivationCache)
 				{
 					LSession.EnsureDerivationCacheConsistent();
-					DerivationCacheItem LItem = (DerivationCacheItem)LSession.DerivationCache[LSeed];
-					if (LItem == null)
+					DerivationCacheItem LItem;
+					if (!LSession.DerivationCache.TryGetValue(LSeed, out LItem))
 					{
 						LDocument = BuildInterface(AProcess, LSeed);
 						LSession.DerivationCache.Add(LSeed, new DerivationCacheItem(LDocument));

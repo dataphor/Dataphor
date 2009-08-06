@@ -397,7 +397,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			try
 			{
 				if (LImageCacheSize > 0)
-					Pipe.ImageCache = new ImageCache(LImageCacheSize);
+					Pipe.ImageCache = new FixedSizeCache<string, byte[]>(LImageCacheSize);
 			}
 			catch (Exception LException)
 			{

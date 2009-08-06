@@ -42,7 +42,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			// Prepare the structures
 			FIdentifiers = new IdentifierIndex();
 			FCRC32s = new Hashtable(ASize);
-			FCache = new FixedSizeCache(ASize);
+			FCache = new FixedSizeCache<string, string>(ASize);
 
 			LockDirectory();
 			try
@@ -191,11 +191,11 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		private IdentifierIndex FIdentifiers;
-		private FixedSizeCache FCache;
+		private FixedSizeCache<string, string> FCache;
 
 		private void ReferenceName(string AName)
 		{
-			Remove((string)FCache.Reference(AName, AName));
+			Remove(FCache.Reference(AName, null));
 		}
 
 		private void Remove(string AName)

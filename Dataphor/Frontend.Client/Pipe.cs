@@ -113,8 +113,8 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		#region Caches
 
-		private ImageCache FImageCache;
-		public ImageCache ImageCache
+		private FixedSizeCache<string, byte[]> FImageCache;
+		public FixedSizeCache<string, byte[]> ImageCache
 		{
 			get { return FImageCache; }
 			set { FImageCache = value; }
@@ -263,8 +263,8 @@ namespace Alphora.Dataphor.Frontend.Client
 				if (LIsImageRequest)
 					lock (ImageCache)
 					{
-						byte[] LData = ImageCache[ADocument];
-						if (LData != null)
+						byte[] LData;
+						if (ImageCache.TryGetValue(ADocument, out LData))
 							return new Scalar(AProcess, AProcess.DataTypes.SystemGraphic, LData);
 					}
 			}

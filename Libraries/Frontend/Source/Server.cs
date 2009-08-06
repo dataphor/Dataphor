@@ -12,6 +12,7 @@ using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.Frontend.Server.Derivation;
 
 namespace Alphora.Dataphor.Frontend.Server
 {
@@ -89,7 +90,7 @@ namespace Alphora.Dataphor.Frontend.Server
 	// manages derivation cache and other session specific settings
 	public class FrontendSession : System.Object
 	{
-		public const int CDefaultDerivationCacheSize = 150;
+		public const int CDefaultDerivationCacheSize = 50;
 		
 		public FrontendSession(FrontendServer AFrontendServer, ServerSession ASession)
 		{
@@ -123,9 +124,9 @@ namespace Alphora.Dataphor.Frontend.Server
 			get { return FUseDerivationCache; }
 			set { FUseDerivationCache = value; }
 		}
-		
-		private FixedSizeCache FDerivationCache = new FixedSizeCache(CDefaultDerivationCacheSize);
-		public FixedSizeCache DerivationCache { get { return FDerivationCache; } }
+
+		private FixedSizeCache<DerivationSeed, DerivationCacheItem> FDerivationCache = new FixedSizeCache<DerivationSeed, DerivationCacheItem>(CDefaultDerivationCacheSize);
+		public FixedSizeCache<DerivationSeed, DerivationCacheItem> DerivationCache { get { return FDerivationCache; } }
 		
 		private long FDerivationTimeStamp;
 		

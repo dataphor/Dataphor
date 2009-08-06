@@ -61,15 +61,15 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FSize = ACacheSize;
 			if (FSize > 1)
-				FPlans = new FixedSizeCache(FSize);
+				FPlans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(FSize);
 		}
 		
 		private int FSize;
 		public int Size { get { return FSize; } }
 		
 		public int Count { get { return FPlans.Count; } }
-		
-		private FixedSizeCache FPlans; // FixedSizeCache ( <CachedPlanHeader>, <CachedPlans> )
+
+		private FixedSizeCache<CachedPlanHeader, CachedPlans> FPlans;
 		
 		private void DisposeCachedPlan(ServerProcess AProcess, ServerPlan APlan)
 		{
@@ -110,8 +110,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (FPlans != null)
 				{
-					CachedPlans LPlans = FPlans[LHeader] as CachedPlans;
-					if (LPlans != null)
+					CachedPlans LPlans;
+					if (FPlans.TryGetValue(LHeader, out LPlans))
 					{
 						for (int LPlanIndex = LPlans.Count - 1; LPlanIndex >= 0; LPlanIndex--)
 						{
@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							else
 							{
-								LBumped = (CachedPlans)FPlans.Reference(LHeader, LPlans);
+								LBumped = FPlans.Reference(LHeader, LPlans);
 								break;
 							}
 						}
@@ -157,10 +157,10 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (FPlans != null)
 				{
-					CachedPlans LPlans = FPlans[LHeader] as CachedPlans;
-					if (LPlans == null)
+					CachedPlans LPlans;
+					if (!FPlans.TryGetValue(LHeader, out LPlans))
 						LPlans = new CachedPlans();
-					LBumped = (CachedPlans)FPlans.Reference(LHeader, LPlans);
+					LBumped = FPlans.Reference(LHeader, LPlans);
 				}
 			}
 			
@@ -181,8 +181,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (FPlans != null)
 				{
-					CachedPlans LPlans = FPlans[LHeader] as CachedPlans;
-					if (LPlans != null)
+					CachedPlans LPlans;
+					if (FPlans.TryGetValue(LHeader, out LPlans))
 					{
 						LPlans.Add(APlan);
 						return true;
@@ -199,8 +199,8 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (FPlans != null)
 				{
-					foreach (DictionaryEntry LEntry in FPlans)
-						DisposeCachedPlans(AProcess, LEntry.Value as CachedPlans);
+					foreach (CachedPlans LValue in (IEnumerable<CachedPlans>)FPlans)
+						DisposeCachedPlans(AProcess, LValue);
 					
 					FPlans.Clear();
 				}
@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				FSize = ASize;
 				if (FSize > 1)
-					FPlans = new FixedSizeCache(FSize);
+					FPlans = new FixedSizeCache<CachedPlanHeader, CachedPlans>(FSize);
 			}
 		}
 	}

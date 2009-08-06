@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			FSize = ACacheSize;
 			if (FSize > 0)
-				FCache = new FixedSizeCache(FSize);
+				FCache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(FSize);
 		}
 
 		private int FSize;
@@ -53,12 +53,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					FSize = ACacheSize;
 					FCache = null;
 					if (FSize > 0)
-						FCache = new FixedSizeCache(FSize);
+						FCache = new FixedSizeCache<string, Schema.CatalogObjectHeaders>(FSize);
 				}
 			}
 		}
 		
-		private FixedSizeCache FCache; // FixedSizeCache { string, Schema.CatalogObjectHeaders }
+		private FixedSizeCache<string, Schema.CatalogObjectHeaders> FCache; 
 		
 		public void Add(string AName, Schema.CatalogObjectHeaders AHeaders)
 		{
@@ -75,8 +75,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			{
 				if (FCache != null)
 				{
-					Schema.CatalogObjectHeaders LHeaders = FCache[AName] as Schema.CatalogObjectHeaders;
-					if (LHeaders != null)
+					Schema.CatalogObjectHeaders LHeaders;
+					if (FCache.TryGetValue(AName, out LHeaders))
 						FCache.Reference(AName, LHeaders);
 					return LHeaders;
 				}
