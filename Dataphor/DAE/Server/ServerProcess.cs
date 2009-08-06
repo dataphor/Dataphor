@@ -734,23 +734,28 @@ namespace Alphora.Dataphor.DAE.Server
 			while (FProcessContext.Count > 0)
 				FProcessContext.Pop();
 		}
-		
+
 		internal void PushProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PushFrame();
-			for (int LIndex = FProcessContext.Count - 1; LIndex >= 0; LIndex--)
+
+			// Note that this uses the current context count rather than the symbols count to 
+			// allow for the possibility that a window has been pushed on the current context
+			// For example, a dynamic evaluation.
+			for (int LIndex = Math.Min(FProcessContext.Count, FContext.Count) - 1; LIndex >= 0; LIndex--)
 				APlan.Symbols.Push(FProcessContext[LIndex]);
 
 			if (FContext.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = true;
 		}
-		
+				
 		internal void PopProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PopFrame();
 			if (FContext.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = false;
 		}
+		
 		#endif
 		
 		private void Compile(ServerPlan AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression)
