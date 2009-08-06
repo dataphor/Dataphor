@@ -536,11 +536,7 @@ if not exists (select * from sysdatabases where name = '{0}')
                             );
         }
 
-        public override void DetermineCursorBehavior(Plan APlan, TableNode ATableNode)
-        {
-            base.DetermineCursorBehavior(APlan, ATableNode);
-            // TODO: This will actually only be static if the ADOConnection is used because the DotNet providers do not support a method for obtaining a static cursor.
-        }
+       
 
         // ServerName		
 
@@ -569,86 +565,20 @@ if not exists (select * from sysdatabases where name = '{0}')
 
         protected override SQLConnection InternalCreateConnection()
         {
-            // ConnectionClass:
-            //  ODBCConnection
-            //  OLEDBConnection (default)
-            //  ADOConnection 
-            //  PostgreSQLConnection
-            // ConnectionStringBuilderClass
-            // PostgreSQLOLEDBConnectionStringBuilder (default) (use with ADOConnection and OLEDBConnection)
-            // PostgreSQLADODotNetConnectionStringBuilder (use with PostgreSQLConnection)
-            // PostgreSQLODBCConnectionStringBuilder (use with ODBCConnection)
 
-            /*
-				Connectivity Implementations with PostgreSQL:
-					ADOConnection ->
-						When we use ADO, it is fully functional, but thread locks when we attempt to use it concurrently.
-						If we switch providers to MSDASQL, it doesn't work either because the Command and Recordset objects
-						are not being released.  The connection complains that too many recordsets are open, even though no
-						recordsets are open.  Marshal.ReleaseComObject doesn't help either.  I suspect that the thread locking
-						problem we are seeing when we use ADO is related to this same issue.
-						
-					PostgreSQLConnection ->
-						When we use the native managed provider (SqlClient), performance drops by a factor of 2.
-						There are also issues with binary, varbinary, and image data types.
-						
-					OLEDBConnection ->
-						The OLEDB managed provider seems to resolve the thread locking issues, but it has yet to be probed for
-						full functionality.  As of right now, this if the only supported connectivity implementation for the 
-						PostgreSQLDevice.  This may change.
-						
-					There are also several mono providers which we can try if we run out of options in the Microsoft space.
-					
-				BTR 12/20/2004 ->
-					Changed the default to use the native managed provider on the assumption that this is faster because less
-					layers are involved. This assumption did not hold up under transaction processing tests prior to service pack 1,
-					but we are hoping that service pack 1 has improved performance of this provider. We still need to run tp tests
-					with the provider.
-					
-				BTR 12/20/2004 ->
-					Later that same day...
-					When using the SqlClient on Jeff's machine (not sure whether it was sp1 or not, need to check) we were getting
-					non-deterministic behavior (The connection would close unexpectedly after an open and cause Dataphor to consider
-					the connection a transaction failure). This behavior does not occur with the OleDbConnection so we switched back
-					to it. More later...
-					
-				BTR 12/21/2004 ->
-					SqlClient using .NET 1.1 with sp1 is confirmed, the behavior is unpredictable, same codebase with the OleDbConnection
-					works fine, so we are switching to that provider until further notice.
-			*/
 
             var LClassDefinition =
                 new ClassDefinition
                 (
                     Device.ConnectionClass == String.Empty
-                        ?
-#if USEADOCONNECTION
-						"ADOConnection.ADOConnection" 
-#else
-#if USEOLEDBCONNECTION
-						"Connection.OLEDBConnection"
-#else
- "Connection.PostgreSQLConnection"
-#endif
-#endif
- : Device.ConnectionClass
-                );
+                        ?"Connection.PostgreSQLConnection": Device.ConnectionClass);
 
             var LBuilderClass =
                 new ClassDefinition
                 (
                     Device.ConnectionStringBuilderClass == String.Empty
                         ?
-#if USEADOCONNECTION
-						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder"
-#else
-#if USEOLEDBCONNECTION
-						"PostgreSQLDevice.PostgreSQLOLEDBConnectionStringBuilder"
-#else
- "PostgreSQLDevice.PostgreSQLADODotNetConnectionStringBuilder"
-#endif
-#endif
- : Device.ConnectionStringBuilderClass
+ "PostgreSQLDevice.PostgreSQLADODotNetConnectionStringBuilder": Device.ConnectionStringBuilderClass
                     );
 
             var LConnectionStringBuilder =
