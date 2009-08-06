@@ -260,15 +260,19 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FNodesTree.TabIndex = 0;
             FNodesTree.AfterSelect += FNodesTree_AfterSelect;
             FNodesTree.Dock = DockStyle.Fill;
-            
+
+			FDockContentNodesTree = new DockContent();
+			FDockContentNodesTree.HideOnClose = true;
+			FDockContentNodesTree.Controls.Add(FNodesTree);
+			FDockContentNodesTree.TabText = "Nodes Tree";
+			FDockContentNodesTree.Text = "Nodes Tree - Dataphoria";
+			FDockContentNodesTree.ShowHint = DockState.Document;
+			FDockContentNodesTree.Show(FDockPanel);
             
             // 
             // FPalettePanel
             // 
             FPalettePanel = new ToolBox.ToolBox();
-            //FPalettePanel.Controls.Add(FPaletteGroupBar);
-            //FPalettePanel.Controls.Add(FPointerGroupView);
-            //this.FDockingManager.SetEnableDocking(this.FPalettePanel, true);
             FPalettePanel.NodesTree = this.FNodesTree;
             FPalettePanel.Location = new Point(1, 21);
             FPalettePanel.Name = "FPalettePanel";
@@ -280,8 +284,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentPalettePanel = new DockContent();
             FDockContentPalettePanel.HideOnClose = true;
             FDockContentPalettePanel.Controls.Add(FPalettePanel);
-            FDockContentPalettePanel.TabText = "Forms Palette";
-            FDockContentPalettePanel.Text = "Palette";
+            FDockContentPalettePanel.TabText = "Node Palette";
+            FDockContentPalettePanel.Text = "Node Palette - Dataphoria";
             FDockContentPalettePanel.ShowHint = DockState.DockLeft;
             FDockContentPalettePanel.Show(FDockPanel);
 
@@ -290,7 +294,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             // 
             FFormPanel = new FormPanel();
             FFormPanel.BackColor = SystemColors.ControlDark;
-            //this.FDockingManager.SetEnableDocking(this.FFormPanel, true);
             FFormPanel.Location = new Point(1, 21);
             FFormPanel.Name = "FFormPanel";
             FFormPanel.Size = new Size(685, 283);
@@ -300,36 +303,24 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentFormPanel = new DockContent();
             FDockContentFormPanel.HideOnClose = true;
             FDockContentFormPanel.Controls.Add(FFormPanel);
-            FDockContentFormPanel.ShowHint = DockState.Document;
+            FDockContentFormPanel.TabText = "Form - Dataphoria";
+            FDockContentFormPanel.Text = "Form";
+            FDockContentFormPanel.ShowHint = DockState.DockBottom;
             FDockContentFormPanel.Show(FDockPanel);
 
-           
-
-
-            FDockContentNodesTree = new DockContent();
-            FDockContentNodesTree.HideOnClose = true;
-            FDockContentNodesTree.Controls.Add(FNodesTree);
-            FDockContentNodesTree.TabText = "Forms Nodes Tree";
-            FDockContentNodesTree.Text = "Nodes Tree";
-            FDockContentNodesTree.ShowHint = DockState.DockRight;
-            FDockContentNodesTree.Show(FDockPanel);
-
-
-            FPropertyGrid = new PropertyGrid();
-            // 
-            // FPropertyGrid
-            // 
+			// 
+			// FPropertyGrid
+			// 
+			FPropertyGrid = new PropertyGrid();
             FPropertyGrid.BackColor = SystemColors.Control;
             FPropertyGrid.CausesValidation = false;
             FPropertyGrid.CommandsVisibleIfAvailable = true;
             FPropertyGrid.Cursor = Cursors.HSplit;
-            //this.FDockingManager.SetEnableDocking(this.FPropertyGrid, true);
             FPropertyGrid.LargeButtons = false;
             FPropertyGrid.LineColor = SystemColors.ScrollBar;
             FPropertyGrid.Location = new Point(1, 21);
             FPropertyGrid.Name = "FPropertyGrid";
             FPropertyGrid.PropertySort = PropertySort.Alphabetical;
-            FPropertyGrid.Size = new Size(229, 187);
             FPropertyGrid.TabIndex = 2;
             FPropertyGrid.Text = "Properties of the Currently Selected Node";
             FPropertyGrid.ToolbarVisible = false;
@@ -341,8 +332,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             FDockContentPropertyGrid = new DockContent();
             FDockContentPropertyGrid.HideOnClose = true;
             FDockContentPropertyGrid.Controls.Add(FPropertyGrid);
-            FDockContentPropertyGrid.TabText = "Forms Properties Grid";
-            FDockContentPropertyGrid.Text = "Properties Grid";
+            FDockContentPropertyGrid.TabText = "Properties";
+            FDockContentPropertyGrid.Text = "Properties - Dataphoria";
             FDockContentPropertyGrid.ShowHint = DockState.DockRight;
             FDockContentPropertyGrid.Show(FDockPanel);
         }
