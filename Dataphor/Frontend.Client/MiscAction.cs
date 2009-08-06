@@ -270,17 +270,59 @@ namespace Alphora.Dataphor.Frontend.Client
 					foreach (CompilerError LError in FResults.Errors)
 						LErrors.AppendFormat
 						(
-							"\r\n{0} {1} at line ({2}) column ({3}): {4}",
+							"{0} {1} at line ({2}) column ({3}): {4}\r\n",
 							(LError.IsWarning ? "Warning" : "Error"),
 							LError.ErrorNumber,
 							LError.Line,
 							LError.Column,
 							LError.ErrorText
 						);
+					LErrors.AppendFormat("Script:\r\n{0}\r\n----------End Script----------\r\n", EmbedErrorAnnotatedSourceScript(FSourceCode, FResults));
 					throw new ClientException(ClientException.Codes.ScriptCompilerError, LErrors.ToString());
 				}
 
 			return FResults.CompiledAssembly;
+		}
+
+		/// <summary> Emits the given source code with the given set of error messages annotated within. </summary>
+		private static string EmbedErrorAnnotatedSourceScript(string ASourceCode, CompilerResults AResults)
+		{
+			var LResult = new StringBuilder(ASourceCode.Length);
+			var LPos = 0;
+			var LLine = 1;																	 
+			while (true)
+			{
+				var LMatch = ASourceCode.IndexOf("\n", LPos);
+				if (LMatch >= 0)
+				{
+					var LSourceLine = ASourceCode.Substring(LPos, LMatch - LPos + 1);
+					LResult.Append(LSourceLine);
+					foreach (CompilerError LError in AResults.Errors)
+						if (LError.Line == LLine)
+						{
+							LResult.Append(GenerateSpaces(LSourceLine, LError.Column - 1));
+							LResult.AppendFormat("^{0}\r\n", LError.ErrorNumber);
+						}
+					LPos = LMatch + 1;
+					LLine++;
+				}
+				else
+					break;
+			}
+			return LResult.ToString();
+		}
+
+		/// <summary> Generate a given number of leading whitespace characters, using a given string as preference for those characters. </summary>
+		/// <remarks> This ensures that the resulting string has tabs where the source line had them. </remarks>
+		private static string GenerateSpaces(string ASource, int ACount)
+		{
+			var LSpaces = new StringBuilder(ACount);
+			for (int i = 0; i < ACount; i++)
+				if (ASource.Length > i && ASource[i] == '\t')
+					LSpaces.Append('\t');
+				else
+					LSpaces.Append(' ');
+			return LSpaces.ToString();
 		}
 		
 		private ScriptBase CreateScript(Assembly AAssembly)
