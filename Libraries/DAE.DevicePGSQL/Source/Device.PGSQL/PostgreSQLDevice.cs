@@ -57,7 +57,6 @@ if not exists (select * from pg_database where datname = '{0}')
 
        
 
-        public bool IsAccess { set; get; }
 
         /// <value>Indicates whether the device should auto-determine the version of the target system.</value>
         public bool ShouldDetermineVersion
@@ -149,7 +148,7 @@ if not exists (select * from pg_database where datname = '{0}')
 #else
                 RunScript(AProcess,
                           String.Format(new StreamReader(LStream).ReadToEnd(), Name, "false",
-                                        false.ToString().ToLower(), IsAccess.ToString().ToLower()));
+                                        false.ToString().ToLower(), false.ToString().ToLower()));
 #endif
             }
         }
@@ -409,9 +408,7 @@ if not exists (select * from pg_database where datname = '{0}')
                         String.Format
                             (
                             (
-                                !IsAccess
-                                    ?
-                                        @"
+                                @"
 									select 
 											su.name as TableSchema,
 											so.name as TableName, 
@@ -434,15 +431,6 @@ if not exists (select * from pg_database where datname = '{0}')
 											{0}
 											{1}
 										order by so.name, sc.colid
-								"
-                                    :
-                                        @"
-									select
-											Name as TableSchema,
-											Name as TableName,
-											uhh column name
-
-								
 								"
                             ),
                             ATableVar == null
