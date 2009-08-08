@@ -24,8 +24,8 @@ namespace Alphora.Dataphor.Device.PGSQL
         public const string CPostgreSQLBinaryScalarType = "PostgreSQLDevice.PostgreSQLBinary";
 
         public static string CEnsureDatabase =
-            @"
-if not exists (select * from sysdatabases where name = '{0}')
+			@"
+if not exists (select * from pg_database where datname = '{0}')
 	create database {0}
 			";
 
@@ -157,7 +157,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         protected void EnsureDatabase(ServerProcess AProcess)
         {
             string LDatabaseName = DatabaseName;
-            DatabaseName = "master";
+            DatabaseName = "public";
             try
             {
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
@@ -179,7 +179,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         protected void DetermineVersion(ServerProcess AProcess)
         {
             string LDatabaseName = DatabaseName;
-            DatabaseName = "master";
+			DatabaseName = "public";
             try
             {
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
