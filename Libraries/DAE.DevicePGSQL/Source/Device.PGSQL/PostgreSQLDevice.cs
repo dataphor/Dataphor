@@ -157,7 +157,7 @@ if not exists (select * from pg_database where datname = '{0}')
         protected void EnsureDatabase(ServerProcess AProcess)
         {
             string LDatabaseName = DatabaseName;
-            DatabaseName = "public";
+            DatabaseName = "postgres";
             try
             {
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
@@ -179,7 +179,7 @@ if not exists (select * from pg_database where datname = '{0}')
         protected void DetermineVersion(ServerProcess AProcess)
         {
             string LDatabaseName = DatabaseName;
-			DatabaseName = "public";
+			DatabaseName = "postgres";
             try
             {
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
