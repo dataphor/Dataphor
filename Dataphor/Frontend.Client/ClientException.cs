@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			/// <summary>Error code 201137: "Cannot connect to server.  No server alias specified."</summary>
 			NoServerAliasSpecified = 201137,
 
-			/// <summary>Error code 201139: "FormMode ({0}) not support when there is no MainSource for the form."</summary>
+			/// <summary>Error code 201139: "FormMode ({0}) not supported when there is no MainSource for the form."</summary>
 			MainSourceNotSpecified = 201139,
 
 			/// <summary>Error code 201140: "The node types table does not contain required entries.  This usually occurs when 'Frontend' is not included in the library or application requisites."</summary>
