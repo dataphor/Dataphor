@@ -185,16 +185,11 @@ if not exists (select * from pg_database where datname = '{0}')
                 var LDeviceSession = (SQLDeviceSession)Connect(AProcess, AProcess.ServerSession.SessionInfo);
                 try
                 {
-                    SQLCursor LCursor = LDeviceSession.Connection.Open("exec xp_msver");
+					SQLCursor LCursor = LDeviceSession.Connection.Open("SELECT version()");
                     try
                     {
                         string LVersion = String.Empty;
-                        while (LCursor.Next())
-                            if (Convert.ToString(LCursor[1]) == "ProductVersion")
-                            {
-                                LVersion = Convert.ToString(LCursor[3]);
-                                break;
-                            }
+						LVersion  = ((string) LCursor[0]).Split(' ')[1];                    	                        
 
                         if (LVersion.Length > 0)
                             FMajorVersion = Convert.ToInt32(LVersion.Substring(0, LVersion.IndexOf('.')));
