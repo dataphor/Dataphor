@@ -417,7 +417,7 @@ if not exists (select * from pg_database where datname = '{0}')
 								and pg_class.relnamespace = pg_namespace.oid
 								and pg_class.relkind = 'r'
 								{0} {1}
-								order by c.owner, c.table_name, c.column_id
+								order by pg_namespace.nspname, pg_class.relname, pg_attribute.attnum
 						"
 						:
 							DeviceTablesExpression,
@@ -430,42 +430,35 @@ if not exists (select * from pg_database where datname = '{0}')
 
         protected override string GetDeviceIndexesExpression(TableVar ATableVar)
         {
-            return
-                DeviceIndexesExpression != String.Empty
-                    ?
-                        base.GetDeviceIndexesExpression(ATableVar)
-                    :
-                        String.Format
-                            (
-                            @"
+			return
+				String.Format
+					(
+					DeviceIndexesExpression == String.Empty
+						?
+							@"
 							select 
-									su.name as TableSchema,
-									so.name as TableName, 
-									si.name as IndexName, 
-									sc.name as ColumnName, 
-									sik.keyno as OrdinalPosition,
-									INDEXPROPERTY(so.id, si.name, 'IsUnique') as IsUnique,
-									{0} /* if ServerVersion >= 8.0, otherwise 0 as IsDescending */
-								from sysobjects as so
-									join sysusers as su on so.uid = su.uid
-									join sysindexes as si on si.id = so.id
-									left join sysobjects as sno on sno.name = si.name
-									left join sysconstraints as sn on sn.constid = sno.id
-									join sysindexkeys as sik on sik.id = so.id and sik.indid = si.indid
-									join syscolumns as sc on sc.id = so.id and sc.colid = sik.colid
-								where (so.xtype = 'U' or so.xtype = 'V')
-									and OBJECTPROPERTY(so.id, 'isMSShipped') = 0
-									and INDEXPROPERTY(so.id, si.name, 'IsStatistics') = 0
-									{1} /* if ServerVersion >= 8.0, otherwise empty string */
-									{2}
-								order by so.name, si.indid, sik.keyno
-						",
-                            "INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') as IsDescending",
-                            "and INDEXKEY_PROPERTY(so.id, si.indid, sik.keyno, 'IsDescending') is not null",
-                            ATableVar == null
-                                ? String.Empty
-                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar))
-                            );
+								pg_statio_all_indexes.schemaname as TableSchema,
+								pg_statio_all_indexes.relname as TableName,
+								pg_statio_all_indexes.indexrelname IndexName,
+								pg_attribute.attname as ColumnName,
+								pg_attribute.attnum as OrdinalPosition,
+								pg_index.indisunique as IsUnique,
+								case when indoption[0]=3  then TRUE else FALSE end as IsDescending
+
+								from pg_attribute,pg_statio_all_indexes,pg_index
+								where pg_attribute.attrelid = pg_statio_all_indexes.relid
+								and pg_index.indexrelid=pg_statio_all_indexes.indexrelid
+									{0}
+									{1}
+								order by pg_statio_all_indexes.schemaname, pg_statio_all_indexes.relname, pg_statio_all_indexes.indexrelname, pg_attribute.attname
+						"
+						:
+							DeviceIndexesExpression,
+					Schema == String.Empty ? String.Empty : String.Format("and pg_statio_all_indexes.schemaname = '{0}'", Schema),
+					ATableVar == null
+						? String.Empty
+						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+					);
         }
 
         protected override string GetDeviceForeignKeysExpression(TableVar ATableVar)
