@@ -32,7 +32,7 @@ if not exists (select * from pg_database where datname = '{0}')
         protected string FApplicationName = "Dataphor Server";
         protected string FDatabaseName = String.Empty;
 
-        private int FMajorVersion = 8; // default to SQL Server 2000 (pending detection)
+        private int FMajorVersion = 8; // default to Postgresql 8 (pending detection)
         protected string FServerName = String.Empty;
         protected bool FShouldDetermineVersion = true;
         protected bool FShouldEnsureDatabase = true;
@@ -53,10 +53,7 @@ if not exists (select * from pg_database where datname = '{0}')
         {
             get { return FMajorVersion; }
             set { FMajorVersion = value; }
-        }
-
-       
-
+        }       
 
         /// <value>Indicates whether the device should auto-determine the version of the target system.</value>
         public bool ShouldDetermineVersion
@@ -80,8 +77,7 @@ if not exists (select * from pg_database where datname = '{0}')
             set { FShouldReconcileRowGUIDCol = value; }
         }
 
-        /// <value>Indicates whether the device should create the DAE support operators if they do not already exist.</value>
-        /// <remarks>The value of this property is only valid if IsPostgreSQL70 is false.</remarks>
+        /// <value>Indicates whether the device should create the DAE support operators if they do not already exist.</value>       
         public bool ShouldEnsureOperators
         {
             get { return FShouldEnsureOperators; }
@@ -91,19 +87,19 @@ if not exists (select * from pg_database where datname = '{0}')
         public string ServerName
         {
             get { return FServerName; }
-            set { FServerName = value == null ? String.Empty : value; }
+            set { FServerName = value ?? String.Empty; }
         }
 
         public string DatabaseName
         {
             get { return FDatabaseName; }
-            set { FDatabaseName = value == null ? String.Empty : value; }
+            set { FDatabaseName = value ?? String.Empty; }
         }
 
         public string ApplicationName
         {
             get { return FApplicationName; }
-            set { FApplicationName = value == null ? "Dataphor Server" : value; }
+            set { FApplicationName = value ?? "Dataphor Server"; }
         }
 
         public bool UseIntegratedSecurity
@@ -299,8 +295,7 @@ if not exists (select * from pg_database where datname = '{0}')
         {
             switch (ADomainName.ToLower())
             {
-                case "bit":
-                case "tinyint":
+                case "boolean":                
                 case "smallint":
                 case "int":
                 case "integer":
@@ -336,10 +331,8 @@ if not exists (select * from pg_database where datname = '{0}')
         {
             switch (ADomainName.ToLower())
             {
-                case "bit":
-                    return AProcess.DataTypes.SystemBoolean;
-                case "tinyint":
-                    return AProcess.DataTypes.SystemByte;
+                case "boolean":
+                    return AProcess.DataTypes.SystemBoolean;                
                 case "smallint":
                     return AProcess.DataTypes.SystemShort;
                 case "int":
@@ -400,46 +393,38 @@ if not exists (select * from pg_database where datname = '{0}')
 
         protected override string GetDeviceTablesExpression(TableVar ATableVar)
         {
-            return
-                DeviceTablesExpression != String.Empty
-                    ?
-                        base.GetDeviceTablesExpression(ATableVar)
-                    :
-                        String.Format
-                            (
-                            (
-                                @"
-									select 
-											su.name as TableSchema,
-											so.name as TableName, 
-											sc.name as ColumnName, 
-											sc.colorder as OrdinalPosition,								
-											so.name as TableTitle, 
-											sc.name as ColumnTitle, 
-											snt.name as NativeDomainName, 
-											st.name as DomainName,
-											convert(integer, sc.length) as Length,
-											sc.isnullable as IsNullable,
-											case when snt.name in ('text', 'ntext', 'image') then 1 else 0 end as IsDeferred
-										from sysobjects as so
-											join sysusers as su on so.uid = su.uid
-											join syscolumns as sc on sc.id = so.id 
-											join systypes as st on st.xusertype = sc.xusertype
-											join systypes as snt on st.xtype = snt.xusertype
-										where (so.xtype = 'U' or so.xtype = 'V')
-											and OBJECTPROPERTY(so.id, 'IsMSShipped') = 0
-											{0}
-											{1}
-										order by so.name, sc.colid
-								"
-                            ),
-                            ATableVar == null
-                                ? String.Empty
-                                : String.Format("and so.name = '{0}'", ToSQLIdentifier(ATableVar)),
-                            FShouldReconcileRowGUIDCol
-                                ? String.Empty
-                                : "and COLUMNPROPERTY(so.id, sc.name, 'IsRowGUIDCol') = 0"
-                            );
+			return
+				String.Format
+					(
+					DeviceTablesExpression == String.Empty
+						?
+							@"
+							select 
+								pg_namespace.nspname as TableSchema,
+								pg_class.relname as TableName,
+								pg_attribute.attname as ColumnName,
+								pg_attribute.attnum as OrdinalPosition,
+								pg_class.relname as TableTitle,
+								pg_attribute.attname as ColumnTitle,
+								pg_type.typname as NativeDomainName,
+								pg_type.typname as DomainName,
+								pg_attribute.atttypmod-4 as Length, -- Only for varchar
+								not pg_attribute.attnotnull as IsNullable,
+								case when pg_attribute.attname in ('text', 'bytea') then TRUE else FALSE end as IsDeferred
+								from pg_attribute,pg_class,pg_type,pg_namespace
+								where pg_attribute.attrelid = pg_class.oid
+								and pg_attribute.atttypid = pg_type.oid
+								and pg_class.relnamespace = pg_namespace.oid
+								where 1 = 1 {0} {1}
+								order by c.owner, c.table_name, c.column_id
+						"
+						:
+							DeviceTablesExpression,
+					Schema == String.Empty ? String.Empty : String.Format("and pg_namespace.nspname = '{0}'", Schema),
+					ATableVar == null
+						? String.Empty
+						: String.Format("and pg_class.relname = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+					);
         }
 
         protected override string GetDeviceIndexesExpression(TableVar ATableVar)
