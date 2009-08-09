@@ -415,7 +415,8 @@ if not exists (select * from pg_database where datname = '{0}')
 								where pg_attribute.attrelid = pg_class.oid
 								and pg_attribute.atttypid = pg_type.oid
 								and pg_class.relnamespace = pg_namespace.oid
-								where 1 = 1 {0} {1}
+								and pg_class.relkind = 'r'
+								{0} {1}
 								order by c.owner, c.table_name, c.column_id
 						"
 						:
