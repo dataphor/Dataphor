@@ -399,32 +399,28 @@ if not exists (select * from pg_database where datname = '{0}')
 					DeviceTablesExpression == String.Empty
 						?
 							@"
-							select 
-								pg_namespace.nspname as TableSchema,
-								pg_class.relname as TableName,
-								pg_attribute.attname as ColumnName,
-								pg_attribute.attnum as OrdinalPosition,
-								pg_class.relname as TableTitle,
-								pg_attribute.attname as ColumnTitle,
-								pg_type.typname as NativeDomainName,
-								pg_type.typname as DomainName,
-								pg_attribute.atttypmod-4 as Length, -- Only for varchar
-								not pg_attribute.attnotnull as IsNullable,
-								case when pg_attribute.attname in ('text', 'bytea') then TRUE else FALSE end as IsDeferred
-								from pg_attribute,pg_class,pg_type,pg_namespace
-								where pg_attribute.attrelid = pg_class.oid
-								and pg_attribute.atttypid = pg_type.oid
-								and pg_class.relnamespace = pg_namespace.oid
-								and pg_class.relkind = 'r'
+								select 
+								table_schema as TableSchema,
+								table_name as TableName,
+								column_name as ColumnName,
+								ordinal_position as OrdinalPosition,
+								table_name as TableTitle,
+								column_name as ColumnTitle,
+								data_type as NativeDomainName,
+								data_type as DomainName,
+								character_maximum_length as Length,
+								case when is_nullable = 'NO' then 0 else 1 end as IsNullable,
+								case when data_type in ('text', 'bytea') then 1 else 0 end as IsDeferred
+								from information_schema.columns 
 								{0} {1}
-								order by pg_namespace.nspname, pg_class.relname, pg_attribute.attnum
+								order by table_schema, table_name, ordinal_position
 						"
 						:
 							DeviceTablesExpression,
-					Schema == String.Empty ? String.Empty : String.Format("and pg_namespace.nspname = '{0}'", Schema),
+					Schema == String.Empty ? String.Empty : String.Format("and table_schema = '{0}'", Schema),
 					ATableVar == null
 						? String.Empty
-						: String.Format("and pg_class.relname = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+						: String.Format("and table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
 					);
         }
 
