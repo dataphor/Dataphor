@@ -420,7 +420,7 @@ if not exists (select * from pg_database where datname = '{0}')
 					Schema == String.Empty ? String.Empty : String.Format("and table_schema = '{0}'", Schema),
 					ATableVar == null
 						? String.Empty
-						: String.Format("and table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+						: String.Format("and table_name = '{0}'", ToSQLIdentifier(ATableVar).ToLower())
 					);
         }
 
@@ -453,7 +453,7 @@ if not exists (select * from pg_database where datname = '{0}')
 					Schema == String.Empty ? String.Empty : String.Format("and pg_statio_all_indexes.schemaname = '{0}'", Schema),
 					ATableVar == null
 						? String.Empty
-						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+						: String.Format("and pg_statio_all_indexes.relname = '{0}'", ToSQLIdentifier(ATableVar).ToLower())
 					);
         }
 
@@ -491,7 +491,7 @@ if not exists (select * from pg_database where datname = '{0}')
 					Schema == String.Empty ? String.Empty : String.Format("and tc.table_schema = '{0}'", Schema),
 					ATableVar == null
 						? String.Empty
-						: String.Format("and tc.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+						: String.Format("and tc.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToLower())
 					);
         }
 
