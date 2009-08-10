@@ -459,39 +459,40 @@ if not exists (select * from pg_database where datname = '{0}')
 
         protected override string GetDeviceForeignKeysExpression(TableVar ATableVar)
         {
-            return
-                DeviceForeignKeysExpression != String.Empty
-                    ?
-                        base.GetDeviceForeignKeysExpression(ATableVar)
-                    :
-                        String.Format
-                            (
-                            @"
-							select 
-									su.name as ConstraintSchema,
-									so.name as ConstraintName,
-									ssu.name as SourceTableSchema,
-									sso.name as SourceTableName,
-									ssc.name as SourceColumnName,
-									tsu.name as TargetTableSchema,
-									tso.name as TargetTableName,
-									tsc.name as TargetColumnName,
-									keyno OrdinalPosition
-								from sysforeignkeys as sfk
-									join sysobjects as so on sfk.constid = so.id
-									join sysusers as su on su.uid = so.uid
-									join sysobjects as sso on sfk.fkeyid = sso.id
-									join sysusers as ssu on ssu.uid = sso.uid
-									join syscolumns as ssc on ssc.colid = sfk.fkey and ssc.id = sfk.fkeyid
-									join sysobjects as tso on sfk.rkeyid = tso.id
-									join sysusers as tsu on tsu.uid = tso.uid
-									join syscolumns as tsc on tsc.colid = sfk.rkey and tsc.id = sfk.rkeyid
-								where 1 = 1
+			return
+				String.Format
+					(
+					DeviceForeignKeysExpression == String.Empty
+						?
+							@"
+							SELECT
+							tc.table_schema as ConstraintSchema,
+							tc.constraint_name as ConstraintName, 
+							tc.table_name as SourceTableName, 
+							kcu.column_name as SourceColumnName, 
+							ccu.table_schema as TargetTableSchema,
+							ccu.table_name as TargetTableName,
+							ccu.column_name as TargetColumnName,
+							c.ordinal_position as OrdinalPosition
+							FROM 
+								information_schema.table_constraints AS tc 
+								JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name
+								JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = tc.constraint_name
+								JOIN information_schema.columns as c ON 
+								c.table_schema = ccu.table_schema and ccu.table_name = c.table_name
+								and c.column_name = ccu.column_name
+							WHERE constraint_type = 'FOREIGN KEY' 
 									{0}
-								order by ConstraintSchema, ConstraintName, OrdinalPosition
-						",
-                            ATableVar == null ? String.Empty : "and so.name = '" + ToSQLIdentifier(ATableVar) + "'"
-                            );
+									{1}
+								order by tc.table_schema, tc.constraint_name, c.ordinal_position
+						"
+						:
+							DeviceForeignKeysExpression,
+					Schema == String.Empty ? String.Empty : String.Format("and tc.table_schema = '{0}'", Schema),
+					ATableVar == null
+						? String.Empty
+						: String.Format("and tc.table_name = '{0}'", ToSQLIdentifier(ATableVar).ToUpper())
+					);
         }
 
        
