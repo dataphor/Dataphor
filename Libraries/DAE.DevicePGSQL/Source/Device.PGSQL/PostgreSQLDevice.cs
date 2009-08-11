@@ -70,12 +70,7 @@ if not exists (select * from pg_database where datname = '{0}')
             set { FShouldEnsureDatabase = value; }
         }
 
-        /// <value>Indicates whether the device should reconcile columns that are marked as ROWGUIDCOL in SQLServer.</value>
-        public bool ShouldReconcileRowGUIDCol
-        {
-            get { return FShouldReconcileRowGUIDCol; }
-            set { FShouldReconcileRowGUIDCol = value; }
-        }
+       
 
         /// <value>Indicates whether the device should create the DAE support operators if they do not already exist.</value>       
         public bool ShouldEnsureOperators
@@ -524,26 +519,21 @@ if not exists (select * from pg_database where datname = '{0}')
 
         protected override SQLConnection InternalCreateConnection()
         {
+        	string LConnectionClassName = Device.ConnectionClass == String.Empty
+        	            	?"Connection.PostgreSQLConnection": Device.ConnectionClass;
+        	
+			var LClassDefinition = new ClassDefinition(LConnectionClassName);
 
-
-            var LClassDefinition =
-                new ClassDefinition
-                (
-                    Device.ConnectionClass == String.Empty
-                        ?"Connection.PostgreSQLConnection": Device.ConnectionClass);
-
-            var LBuilderClass =
-                new ClassDefinition
-                (
-                    Device.ConnectionStringBuilderClass == String.Empty
-                        ?
- "PostgreSQLDevice.PostgreSQLADODotNetConnectionStringBuilder": Device.ConnectionStringBuilderClass
-                    );
+        	string LConnectionStringBuilderClassName = Device.ConnectionStringBuilderClass == String.Empty
+        	               	?
+								"PostgreSQLDevice.PostgreSQLConnectionStringBuilder" : Device.ConnectionStringBuilderClass;
+        	
+			var LBuilderClassDefinition =new ClassDefinition(LConnectionStringBuilderClassName);
 
             var LConnectionStringBuilder =
                 (ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
                 (
-                    LBuilderClass,
+                    LBuilderClassDefinition,
                     new object[] { }
                 );
 
