@@ -1,0 +1,6 @@
+<library xmlns:bop="www.alphora.com/schemas/bop" version="1.0.0.0" defaultdevicename="" 
+assembliesasstring="" librariesasstring="" name="PGSQLConnection" issystem="False" 
+isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
+    <files.filereference filename="Alphora.Dataphor.DAE.Connection.PGSQL.dll" isassembly="True" />
+    <libraries.libraryreference name="Connection" version="*" />
+</library>
