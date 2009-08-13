@@ -1,5 +1,6 @@
 //#define TRACEEVENTS // Enable this to turn on tracing
 #define ALLOWPROCESSCONTEXT
+#define PROCESSSTREAMSOWNED // Determines whether or not the process will deallocate all streams allocated by the process.
 
 /*
 	Alphora Dataphor
@@ -5797,6 +5798,9 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcessInfo = AProcessInfo;
 			FDeviceSessions = new Schema.DeviceSessions(false);
 			FStreamManager = (IStreamManager)this;
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams = new Dictionary<StreamID, bool>();
+			#endif
 			FContext = new Context(FServerSession.SessionInfo.DefaultMaxStackDepth, FServerSession.SessionInfo.DefaultMaxCallDepth);
 			FProcessPlan = new ServerStatementPlan(this);
 			PushExecutingPlan(FProcessPlan);
@@ -5975,6 +5979,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
+				#if PROCESSSTREAMSOWNED
+				ReleaseStreams();
+				#endif
+
 				FSQLParser = null;
 				FSQLCompiler = null;
 				FStreamManager = null;
@@ -6207,18 +6215,60 @@ namespace Alphora.Dataphor.DAE.Server
 		private IStreamManager FStreamManager;
 		public IStreamManager StreamManager { get { return FStreamManager; } }
 		
+		#if PROCESSSTREAMSOWNED
+		private Dictionary<StreamID, bool> FOwnedStreams;
+		
+		private void ReleaseStreams()
+		{
+			if (FOwnedStreams != null)
+			{
+				foreach (StreamID LStreamID in FOwnedStreams.Keys)
+					try
+					{
+						ServerSession.Server.StreamManager.Deallocate(LStreamID);
+					}
+					catch
+					{
+						// Just keep going, get rid of as many as possible.
+					}
+
+				FOwnedStreams = null;
+			}
+		}
+		#endif
+		
 		StreamID IStreamManager.Allocate()
 		{
-			return ServerSession.Server.StreamManager.Allocate();
+			StreamID LStreamID = ServerSession.Server.StreamManager.Allocate();
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, false);
+			#endif
+			return LStreamID;
 		}
 		
 		StreamID IStreamManager.Reference(StreamID AStreamID)
 		{
-			return ServerSession.Server.StreamManager.Reference(AStreamID);
+			StreamID LStreamID = ServerSession.Server.StreamManager.Reference(AStreamID);
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, true);
+			#endif
+			return LStreamID;
+		}
+		
+		public StreamID Register(IStreamProvider AStreamProvider)
+		{
+			StreamID LStreamID = ServerSession.Server.StreamManager.Register(AStreamProvider);
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, false);
+			#endif
+			return LStreamID;
 		}
 		
 		void IStreamManager.Deallocate(StreamID AStreamID)
 		{
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Remove(AStreamID);
+			#endif
 			ServerSession.Server.StreamManager.Deallocate(AStreamID);
 		}
 		
