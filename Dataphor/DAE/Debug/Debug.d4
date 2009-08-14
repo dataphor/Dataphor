@@ -19,7 +19,7 @@ create operator Debug.GetSessions() : table { Session_ID : Integer }
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
 //* Operator: GetProcesses
-create operator Debug.GetProcesses() : table { Process_ID : Integer }
+create operator Debug.GetProcesses() : table { Process_ID : Integer, DidBreak : Boolean }
 	class "System.DebugGetProcessesNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 

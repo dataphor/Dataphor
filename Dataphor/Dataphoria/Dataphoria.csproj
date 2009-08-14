@@ -245,6 +245,7 @@
     <Compile Include="DataphoriaException.Designer.cs">
       <DependentUpon>DataphoriaException.cs</DependentUpon>
     </Compile>
+    <Compile Include="Debug\Debugger.cs" />
     <Compile Include="Designers\DesignBuffer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -403,6 +404,12 @@
     <Compile Include="UnsafeNativeMethods.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ViewCallStack.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewCallStack.Designer.cs">
+      <DependentUpon>ViewCallStack.cs</DependentUpon>
+    </Compile>
     <Compile Include="Visual\DesignerBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -498,6 +505,9 @@
     <EmbeddedResource Include="TextEditor\TextEditor.resx">
       <DependentUpon>TextEditor.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewCallStack.resx">
+      <DependentUpon>ViewCallStack.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="TextEditor\Modes\CS-Mode.xshd">

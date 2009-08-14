@@ -93,5 +93,8 @@ namespace Alphora.Dataphor.Dataphoria
         void UnregisterDesigner(DesignBuffer ABuffer);
 
         void CheckNotRegistered(DesignBuffer ABuffer);
+
+		object Invoke(Delegate method);
+		object Invoke(Delegate method, params object[] args);        
     }
 }

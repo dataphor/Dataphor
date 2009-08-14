@@ -318,6 +318,23 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
+		public void DisownAll()
+		{
+			lock (this)
+			{
+				FDisowning = true;
+				try
+				{
+					while (FCount > 0)
+						InternalRemoveAt(FCount - 1);
+				}
+				finally
+				{
+					FDisowning = false;
+				}
+			}
+		}
+
 		protected virtual void ObjectDispose(object ASender, EventArgs AArgs)
 		{
 			Disown((ServerChildObject)ASender);

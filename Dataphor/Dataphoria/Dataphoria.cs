@@ -28,6 +28,7 @@ using Alphora.Dataphor.Frontend.Client.Windows;
 using WeifenLuo.WinFormsUI.Docking;
 using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 using Alphora.Dataphor.DAE.Server;
+using System.Threading;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -392,6 +393,8 @@ namespace Alphora.Dataphor.Dataphoria
 						FServerNode = null;
 						
 						OnDisconnected(EventArgs.Empty);
+						
+						StopDebugger();
 					}
 					finally
 					{
@@ -1546,6 +1549,22 @@ namespace Alphora.Dataphor.Dataphoria
 				StopDebugger();
 			else if (ASender == FViewSessionsMenuItem || ASender == FViewSessionsButton)
 				ViewSessions();
+			else if (ASender == FDebugPauseMenuItem || ASender == FDebugPauseButton)
+				PauseDebugger();
+			else if (ASender == FDebugRunMenuItem || ASender == FDebugRunButton)
+				RunDebugger();
+		}
+
+		private void RunDebugger()
+		{
+			if (Debugger != null)
+				Debugger.Run();
+		}
+
+		private void PauseDebugger()
+		{
+			if (Debugger != null)
+				Debugger.Pause();
 		}
 
 		private void ViewSessions()
@@ -1553,14 +1572,24 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentSessionView.Show(FDockPanel);
 		}
 
-		private void StartDebugger()
+		private Debugger FDebugger;
+		public Debugger Debugger { get { return FDebugger; } }
+		
+		private void EnsureDebugger()
 		{
-			ExecuteScript(@".System.Debug.Start();");
+			if (FDebugger == null)
+			{
+				FDebugger = new Debugger(this);
+			}
 		}
-
+		
 		private void StopDebugger()
 		{
-			ExecuteScript(@".System.Debug.Stop();");
+			if (FDebugger != null)
+			{
+				FDebugger.Dispose();
+				FDebugger = null;
+			}
 		}
 
 		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)

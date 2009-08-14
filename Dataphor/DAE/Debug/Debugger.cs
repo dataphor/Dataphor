@@ -53,6 +53,13 @@ namespace Alphora.Dataphor.DAE.Debug
 				FProcesses = null;
 			}
 			
+			if (FBrokenProcesses != null)
+			{
+				FBrokenProcesses.DisownAll();
+				FBrokenProcesses.Dispose();
+				FBrokenProcesses = null;
+			}
+			
 			if (FWaitSignal != null)
 			{
 				FWaitSignal.Close();
@@ -101,7 +108,6 @@ namespace Alphora.Dataphor.DAE.Debug
 		private ManualResetEvent FPauseSignal;
 		private object FSyncHandle = new object();
 		private int FPausedCount;
-		
 		private bool FIsPaused;
 		public bool IsPaused { get { return FIsPaused; } }
 		
@@ -120,6 +126,9 @@ namespace Alphora.Dataphor.DAE.Debug
 		
 		private ServerProcesses FProcesses;
 		public ServerProcesses Processes { get { return FProcesses; } }
+
+		private ServerProcesses FBrokenProcesses = new ServerProcesses();
+		public ServerProcesses BrokenProcesses { get { return FBrokenProcesses; } }
 
 		/// <summary>
 		/// Stops the debugger
@@ -149,6 +158,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			lock (FSyncHandle)
 			{
 				FProcesses.Disown(AProcess);
+				FBrokenProcesses.SafeDisown(AProcess);
 				AProcess.SetDebugger(null);
 			}
 		}
@@ -250,6 +260,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			lock (FSyncHandle)
 			{
 				FIsPaused = false;
+				FBrokenProcesses.DisownAll();
 				FPauseSignal.Set();
 			}
 		}
@@ -380,7 +391,10 @@ namespace Alphora.Dataphor.DAE.Debug
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
 			if (ShouldBreak(AProcess, ANode, AException))
+			{
+				FBrokenProcesses.Add(AProcess);
 				FPauseSignal.Reset();
+			}
 
 			Interlocked.Increment(ref FPausedCount);
 			WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);

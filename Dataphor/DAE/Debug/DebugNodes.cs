@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
-	// operator Debug.GetProcesses() : table { Process_ID : Integer }
+	// operator Debug.GetProcesses() : table { Process_ID : Integer, DidBreak : Boolean }
 	public class DebugGetProcessesNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -152,6 +152,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar.Owner = APlan.User;
 
 			DataType.Columns.Add(new Schema.Column("Process_ID", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.Catalog.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -179,11 +180,15 @@ namespace Alphora.Dataphor.DAE.Debug
 					LRow.ValuesOwned = false;
 
 					if (AProcess.ServerSession.Debugger != null)
-						foreach (ServerProcess LProcess in AProcess.ServerSession.CheckedDebugger.Processes)
+					{
+						var LDebugger = AProcess.ServerSession.CheckedDebugger;
+						foreach (ServerProcess LProcess in LDebugger.Processes)
 						{
 							LRow[0] = LProcess.ProcessID;
+							LRow[1] = LDebugger.BrokenProcesses.Contains(LProcess);
 							LResult.Insert(LRow);
 						}
+					}
 				}
 				finally
 				{
