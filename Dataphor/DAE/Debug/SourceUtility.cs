@@ -18,16 +18,16 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public static string CopySection(string AScript, LineInfo ALineInfo)
 		{
-			int LPos = -1;
+			int LPos = 0;
 			for (int LIndex = 1; LIndex < ALineInfo.Line; LIndex++)
-				while (AScript[++LPos] != '\n');
+				while (AScript[LPos++] != '\n');
 				
 			for (int LIndex = 1; LIndex < ALineInfo.LinePos; LIndex++)
 				LPos++;
 				
 			int LEndPos = LPos;
 			for (int LIndex = ALineInfo.Line; LIndex < ALineInfo.EndLine; LIndex++)
-				while (AScript[++LEndPos] != '\n');
+				while (AScript[LEndPos++] != '\n');
 				
 			for (int LIndex = 1; LIndex < ALineInfo.EndLinePos; LIndex++)
 				LEndPos++;

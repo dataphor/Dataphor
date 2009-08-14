@@ -529,13 +529,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			
 			IMetaData LResult;
-//			if ((AMode == EmitMode.ForStorage) && (FDeclarationText != null))
-//			{
-//				SourceStatement LStatement = new SourceStatement();
-//				LStatement.Source = FDeclarationText + FBodyText;
-//				LResult = LStatement;
-//			}
-//			else
+			if ((AMode == EmitMode.ForCopy) && (FDeclarationText != null))
+			{
+				SourceStatement LStatement = new SourceStatement();
+				LStatement.Source = FDeclarationText + FBodyText;
+				LResult = LStatement;
+			}
+			else
 			{
 				CreateOperatorStatement LStatement = new CreateOperatorStatement();
 				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
@@ -658,13 +658,13 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 			IMetaData LResult;
 			
-//			if ((AMode == EmitMode.ForStorage) && (DeclarationText != null))
-//			{
-//				SourceStatement LStatement = new SourceStatement();
-//				LStatement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
-//				LResult = LStatement;
-//			}
-//			else
+			if ((AMode == EmitMode.ForCopy) && (DeclarationText != null))
+			{
+				SourceStatement LStatement = new SourceStatement();
+				LStatement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
+				LResult = LStatement;
+			}
+			else
 			{
 				CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
 				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);

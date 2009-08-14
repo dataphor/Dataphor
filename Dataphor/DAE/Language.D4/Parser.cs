@@ -4762,11 +4762,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (LStatement.IsAbstract)
 						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
 					#endif
-					ALine = FLexer[0].Line;
-					ALinePos = FLexer[0].LinePos;
 					LStatement.Block.ClassDefinition = ClassDefinition();
-					LStatement.Block.Line = ALine;
-					LStatement.Block.LinePos = ALinePos;
+					LStatement.Block.Line = LStatement.Block.ClassDefinition.Line;
+					LStatement.Block.LinePos = LStatement.Block.ClassDefinition.LinePos;
 					LStatement.Block.SetEndPosition(FLexer);
 					LHasBody = true;
 				break;
@@ -4776,9 +4774,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (LStatement.IsAbstract)
 						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
 					#endif
+					FLexer.NextToken();
 					ALine = FLexer[0].Line;
 					ALinePos = FLexer[0].LinePos;
-					FLexer.NextToken();
 					LStatement.Block.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
 					LStatement.Block.Line = ALine;
@@ -5236,8 +5234,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken().CheckSymbol(Keywords.Initialization);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				{
-					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.ClassDefinition = ClassDefinition();
+					LStatement.Initialization.Line = LStatement.Initialization.ClassDefinition.Line;
+					LStatement.Initialization.LinePos = LStatement.Initialization.ClassDefinition.LinePos;
 					LStatement.Initialization.SetEndPosition(FLexer);
 				}
 				else
@@ -5252,8 +5251,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken().CheckSymbol(Keywords.Aggregation);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				{
-					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.ClassDefinition = ClassDefinition();
+					LStatement.Aggregation.Line = LStatement.Aggregation.ClassDefinition.Line;
+					LStatement.Aggregation.LinePos = LStatement.Aggregation.ClassDefinition.LinePos;
 					LStatement.Aggregation.SetEndPosition(FLexer);
 				}
 				else
@@ -5268,8 +5268,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken().CheckSymbol(Keywords.Finalization);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				{
-					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.ClassDefinition = ClassDefinition();
+					LStatement.Finalization.Line = LStatement.Finalization.ClassDefinition.Line;
+					LStatement.Finalization.LinePos = LStatement.Finalization.ClassDefinition.LinePos;
 					LStatement.Finalization.SetEndPosition(FLexer);
 				}
 				else

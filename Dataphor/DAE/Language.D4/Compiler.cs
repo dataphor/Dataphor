@@ -5648,8 +5648,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 				// Copy the text of the operator from the source context
 				// Note that the text does not include the metadata for the operator, just the operator header and body.
-				LNode.CreateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
-				LNode.CreateOperator.BodyText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Block.LineInfo);
+				if (AStatement.Block.ClassDefinition == null)
+				{
+					LNode.CreateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
+					LNode.CreateOperator.BodyText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Block.LineInfo);
+				}
 				
 				// Pull the debug locator from the DAE.Locator metadata tag, if present
 				DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
@@ -5979,11 +5982,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 				// Copy the text of the operator from the source context
 				// Note that the text does not include the metadata for the operator, just the operator header and body.
-				Schema.AggregateOperator LAggregateOperator = (Schema.AggregateOperator)LNode.CreateOperator;
-				LAggregateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
-				LAggregateOperator.InitializationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Initialization.LineInfo);
-				LAggregateOperator.AggregationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Aggregation.LineInfo);
-				LAggregateOperator.FinalizationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Finalization.LineInfo);
+				if ((AStatement.Initialization.ClassDefinition == null) || (AStatement.Aggregation.ClassDefinition == null) || (AStatement.Finalization.ClassDefinition == null))
+				{
+					Schema.AggregateOperator LAggregateOperator = (Schema.AggregateOperator)LNode.CreateOperator;
+					LAggregateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
+					LAggregateOperator.InitializationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Initialization.LineInfo);
+					LAggregateOperator.AggregationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Aggregation.LineInfo);
+					LAggregateOperator.FinalizationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Finalization.LineInfo);
+				}
 				
 				// Pull the debug locator from the DAE.Locator metadata tag, if present
 				DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
