@@ -1,0 +1,66 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+begin
+	var LCount := 0;
+	var LCounter := 10000000;
+	for var LIndex := 1 to LCounter do
+		LCount := LCount + 1;
+end;
+
+// Raw Execution Time
+// 10000 - 0.02s
+// 100000 - 0.14s
+// 1000000 - 1.25s
+// 10000000 - 12.50s
+
+// ExecutionTime - Not checking abort flag
+// 10000 - 0.02s
+// 100000 - 0.13s
+// 1000000 - 1.25s
+// 10000000 - 12.25s
+
+// ExecutionTime - Not tracking call depth
+// 10000 - 0.01s
+// 100000 - 0.12s
+// 1000000 - 1.00s
+// 10000000 - 10.00s
+
+// ExecutionTime - Not wrapping runtime exceptions
+// 10000 - 0.02s
+// 100000 - 0.13s
+// 1000000 - 1.3s
+// 10000000 - 12.5s
+
+// ExecutionTime - Not using execution delegate
+// 10000 - 0.013s
+// 100000 - 0.13s
+// 1000000 - 1.3s
+// 10000000 - 12.9s
+
+// ExecutionTime - Not using Protected Execute
+// 10000 - 0.015s
+// 100000 - 0.12s
+// 1000000 - 1.15s
+// 10000000 - 11.75s
+
+// ExecutionTime - No Protected Execute, No Call Depth Tracking
+// 10000 - 0.015s
+// 100000 - 0.11s
+// 1000000 - 0.99s
+// 10000000 - 9.75s
+
+// ExecutionTime - Added PushWindow in base execution
+// 10000 - 0.03s
+// 100000 - 0.43s
+// 1000000 - 3.4s
+// 10000000 - 34s
+
+// Still an order of magnitude slower than .NET for raw execution speed
+// Pure .NET
+// 1000000 - 0.04s
+// 10000000 - 0.4s
+// 100000000 - 4.0s
+

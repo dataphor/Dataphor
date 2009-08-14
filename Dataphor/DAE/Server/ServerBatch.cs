@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				FScript.CheckParsed();
-				return (IServerExpressionPlan)FScript.Process.CompileExpression(FBatch, null, AParams);
+				return (IServerExpressionPlan)FScript.Process.CompileExpression(FBatch, null, AParams, FScript.SourceContext);
 			}
 			catch (Exception E)
 			{
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				FScript.CheckParsed();
-				return (IServerStatementPlan)FScript.Process.CompileStatement(FBatch, null, AParams);
+				return (IServerStatementPlan)FScript.Process.CompileStatement(FBatch, null, AParams, FScript.SourceContext);
 			}
 			catch (Exception E)
 			{

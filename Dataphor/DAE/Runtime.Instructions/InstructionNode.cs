@@ -36,7 +36,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public abstract class InstructionNodeBase : PlanNode
 	{
         // constructor
-        public InstructionNodeBase() : base() {}
+        public InstructionNodeBase() : base() 
+        {
+			// InstructionNodes are by default not breakable (because for 99% of instructions this would be the
+			// equivalent of breaking into the multiplication instruction in the processor, for example.
+			//IsBreakable = true;
+        }
         
 		// Operator
 		// The operator this node is implementing
@@ -271,8 +276,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 			#endif
-
-				return NilaryInternalExecute(AProcess);
+				
+				if (IsBreakable)
+				{
+				    AProcess.Context.PushWindow(0, this);
+				    try
+				    {
+				        return NilaryInternalExecute(AProcess);
+				    }
+				    finally
+				    {
+				        AProcess.Context.PopWindow();
+				    }
+				}
+				else
+				{
+					return NilaryInternalExecute(AProcess);
+				}
 
 			#if USECLEANUPNODES
 			}
@@ -295,7 +315,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object LArgument = Nodes[0].Execute(AProcess);
 			try
 			{
-				return InternalExecute(AProcess, LArgument);
+				if (IsBreakable)
+				{
+				    AProcess.Context.PushWindow(0, this);
+				    try
+				    {
+				        return InternalExecute(AProcess, LArgument);
+				    }
+				    finally
+				    {
+				        AProcess.Context.PopWindow();
+				    }
+				}
+				else
+				{
+					return InternalExecute(AProcess, LArgument);
+				}
 			}
 			finally
 			{
@@ -321,7 +356,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object LArgument2 = Nodes[1].Execute(AProcess);
 			try
 			{
-				return InternalExecute(AProcess, LArgument1, LArgument2);
+				if (IsBreakable)
+				{
+				    AProcess.Context.PushWindow(0, this);
+				    try
+				    {
+				        return InternalExecute(AProcess, LArgument1, LArgument2);
+				    }
+				    finally
+				    {
+				        AProcess.Context.PopWindow();
+				    }
+				}
+				else
+				{
+					return InternalExecute(AProcess, LArgument1, LArgument2);
+				}
 			}
 			finally
 			{
@@ -351,7 +401,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object LArgument3 = Nodes[2].Execute(AProcess);
 			try
 			{
-				return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+				if (IsBreakable)
+				{
+				    AProcess.Context.PushWindow(0, this);
+				    try
+				    {
+				        return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+				    }
+				    finally
+				    {
+				        AProcess.Context.PopWindow();
+				    }
+				}
+				else
+				{
+					return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+				}
 			}
 			finally
 			{
@@ -382,7 +447,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LArguments[LIndex] = Nodes[LIndex].Execute(AProcess);
 			try
 			{
-				return InternalExecute(AProcess, LArguments);
+				if (IsBreakable)
+				{
+				    AProcess.Context.PushWindow(0, this);
+				    try
+				    {
+				        return InternalExecute(AProcess, LArguments);
+				    }
+				    finally
+				    {
+				        AProcess.Context.PopWindow();
+				    }
+				}
+				else
+				{
+					return InternalExecute(AProcess, LArguments);
+				}
 			}
 			finally
 			{

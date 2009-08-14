@@ -7,6 +7,7 @@
 //#define TRACEEVENTS // Enable this to turn on tracing
 #define ALLOWPROCESSCONTEXT
 #define LOADFROMLIBRARIES
+#define PROCESSSTREAMSOWNED // Determines whether or not the process will deallocate all streams allocated by the process.
 
 using System;
 using System.IO;
@@ -25,6 +26,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -52,9 +54,15 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcessInfo = AProcessInfo;
 			FDeviceSessions = new Schema.DeviceSessions(false);
 			FStreamManager = (IStreamManager)this;
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams = new Dictionary<StreamID, bool>();
+			#endif
 			FContext = new Context(FServerSession.SessionInfo.DefaultMaxStackDepth, FServerSession.SessionInfo.DefaultMaxCallDepth);
 			FProcessPlan = new ServerStatementPlan(this);
 			PushExecutingPlan(FProcessPlan);
+			
+			if (FProcessInfo.DebuggerID > 0)
+				FServerSession.Server.GetDebugger(FProcessInfo.DebuggerID).Attach(this);
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
 			if (FServerSession.Server.FProcessCounter != null)
@@ -96,6 +104,9 @@ namespace Alphora.Dataphor.DAE.Server
 												{
 													try
 													{
+														if (FDebugger != null)
+															FDebugger.Detach(this);
+															
 														if (FApplicationTransactionID != Guid.Empty)
 															LeaveApplicationTransaction();
 													}
@@ -243,6 +254,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
+				#if PROCESSSTREAMSOWNED
+				ReleaseStreams();
+				#endif
+
 				FSQLParser = null;
 				FSQLCompiler = null;
 				FStreamManager = null;
@@ -467,23 +482,65 @@ namespace Alphora.Dataphor.DAE.Server
 			// TODO: Release locks taken for a given process (presumably keep a hash table of locks acquired on this process, which means every request for a lock must go through the process)
 			//FServerSession.Server.LockManager.Unlock(FProcessID);
 		}
-
+		
 		// IStreamManager
 		private IStreamManager FStreamManager;
 		public IStreamManager StreamManager { get { return FStreamManager; } }
 		
+		#if PROCESSSTREAMSOWNED
+		private Dictionary<StreamID, bool> FOwnedStreams;
+		
+		private void ReleaseStreams()
+		{
+			if (FOwnedStreams != null)
+			{
+				foreach (StreamID LStreamID in FOwnedStreams.Keys)
+					try
+					{
+						ServerSession.Server.StreamManager.Deallocate(LStreamID);
+					}
+					catch
+					{
+						// Just keep going, get rid of as many as possible.
+					}
+
+				FOwnedStreams = null;
+			}
+		}
+		#endif
+		
 		StreamID IStreamManager.Allocate()
 		{
-			return ServerSession.Server.StreamManager.Allocate();
+			StreamID LStreamID = ServerSession.Server.StreamManager.Allocate();
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, false);
+			#endif
+			return LStreamID;
 		}
 		
 		StreamID IStreamManager.Reference(StreamID AStreamID)
 		{
-			return ServerSession.Server.StreamManager.Reference(AStreamID);
+			StreamID LStreamID = ServerSession.Server.StreamManager.Reference(AStreamID);
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, true);
+			#endif
+			return LStreamID;
+		}
+		
+		public StreamID Register(IStreamProvider AStreamProvider)
+		{
+			StreamID LStreamID = ServerSession.Server.StreamManager.Register(AStreamProvider);
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Add(LStreamID, false);
+			#endif
+			return LStreamID;
 		}
 		
 		void IStreamManager.Deallocate(StreamID AStreamID)
 		{
+			#if PROCESSSTREAMSOWNED
+			FOwnedStreams.Remove(AStreamID);
+			#endif
 			ServerSession.Server.StreamManager.Deallocate(AStreamID);
 		}
 		
@@ -738,7 +795,7 @@ namespace Alphora.Dataphor.DAE.Server
 		internal void PushProcessContext(Plan APlan)
 		{
 			APlan.Symbols.PushFrame();
-
+			
 			// Note that this uses the current context count rather than the symbols count to 
 			// allow for the possibility that a window has been pushed on the current context
 			// For example, a dynamic evaluation.
@@ -758,7 +815,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		#endif
 		
-		private void Compile(ServerPlan AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression)
+		private void Compile(ServerPlan AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
 		{
 			PushExecutingPlan(AServerPlan);
 			try
@@ -783,7 +840,8 @@ namespace Alphora.Dataphor.DAE.Server
 					AServerPlan.Plan.PushCreationObject(LTableVar);
 					try
 					{
-						AServerPlan.Code = Compiler.Compile(AServerPlan.Plan, AStatement, AParams, AIsExpression);
+						AServerPlan.Code = Compiler.Compile(AServerPlan.Plan, AStatement, AParams, AIsExpression, ASourceContext);
+						AServerPlan.SetSourceContext(ASourceContext);
 
 						#if ALLOWPROCESSCONTEXT
 						// Include dependencies for any process context that may be being referenced by the plan
@@ -824,14 +882,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
         
-		internal ServerPlan CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams)
+		internal ServerPlan CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams, SourceContext ASourceContext)
 		{
 			ServerPlan LPlan = new ServerStatementPlan(this);
 			try
 			{
 				if (AMessages != null)
 					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AStatement, AParams, false);
+				Compile(LPlan, AStatement, AParams, false, ASourceContext);
 				FPlans.Add(LPlan);
 				return LPlan;
 			}
@@ -874,8 +932,13 @@ namespace Alphora.Dataphor.DAE.Server
 			return LContextName.ToString().GetHashCode();
 		}
 		
-		// PrepareStatement        
 		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
+		{
+			return PrepareStatement(AStatement, AParams, null);
+		}
+		
+		// PrepareStatement        
+		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams, DebugLocator ALocator)
 		{
 			BeginCall();
 			try
@@ -886,12 +949,15 @@ namespace Alphora.Dataphor.DAE.Server
 				RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
 				#endif
 				if (LPlan != null)
+				{
 					FPlans.Add(LPlan);
+					((ServerPlan)LPlan).SetSourceContext(new SourceContext(AStatement, ALocator));
+				}
 				else
 				{
 					ParserMessages LMessages = new ParserMessages();
 					Statement LStatement = ParseStatement(AStatement, LMessages);
-					LPlan = (IServerStatementPlan)CompileStatement(LStatement, LMessages, AParams);
+					LPlan = (IServerStatementPlan)CompileStatement(LStatement, LMessages, AParams, new SourceContext(AStatement, ALocator));
 					if (!LPlan.Messages.HasErrors)
 						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlan)LPlan);
 				}
@@ -1024,14 +1090,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		internal ServerPlan CompileExpression(Statement AExpression, ParserMessages AMessages, DataParams AParams)
+		internal ServerPlan CompileExpression(Statement AExpression, ParserMessages AMessages, DataParams AParams, SourceContext ASourceContext)
 		{
 			ServerPlan LPlan = new ServerExpressionPlan(this);
 			try
 			{
 				if (AMessages != null)
 					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AExpression, AParams, true);
+				Compile(LPlan, AExpression, AParams, true, ASourceContext);
 				FPlans.Add(LPlan);
 				return LPlan;
 			}
@@ -1042,8 +1108,13 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		// PrepareExpression
 		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
+		{
+			return PrepareExpression(AExpression, AParams, null);
+		}
+		
+		// PrepareExpression
+		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams, DebugLocator ALocator)
 		{
 			BeginCall();
 			try
@@ -1051,14 +1122,17 @@ namespace Alphora.Dataphor.DAE.Server
 				int LContextHashCode = GetContextHashCode(AParams);
 				IServerExpressionPlan LPlan = ServerSession.GetCachedPlan(this, AExpression, LContextHashCode) as IServerExpressionPlan;
 				if (LPlan != null)
+				{
 					FPlans.Add(LPlan);
+					((ServerPlan)LPlan).SetSourceContext(new SourceContext(AExpression, ALocator));
+				}
 				else
 				{
 					#if TRACEEVENTS
 					RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
 					#endif
 					ParserMessages LMessages = new ParserMessages();
-					LPlan = (IServerExpressionPlan)CompileExpression(ParseExpression(AExpression), LMessages, AParams);
+					LPlan = (IServerExpressionPlan)CompileExpression(ParseExpression(AExpression), LMessages, AParams, new SourceContext(AExpression, ALocator));
 					if (!LPlan.Messages.HasErrors)
 						ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlan)LPlan);
 					#if TRACEEVENTS
@@ -1125,14 +1199,20 @@ namespace Alphora.Dataphor.DAE.Server
 				UnprepareExpression(LPlan);
 			}
 		}
+		
+		
+		public IServerScript PrepareScript(string AScript)
+		{
+			return PrepareScript(AScript, null);
+		}
         
 		// PrepareScript
-		public IServerScript PrepareScript(string AScript)
+		public IServerScript PrepareScript(string AScript, DebugLocator ALocator)
 		{
 			BeginCall();
 			try
 			{
-				ServerScript LScript = new ServerScript(this, AScript);
+				ServerScript LScript = new ServerScript(this, AScript, ALocator);
 				try
 				{
 					FScripts.Add(LScript);
@@ -2021,6 +2101,8 @@ namespace Alphora.Dataphor.DAE.Server
 				}
                 throw;
             }
+
+			Yield(null);
 		}
 		
 		internal void EndCall()
@@ -2059,6 +2141,8 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Exit(FSyncHandle);
 				}
 			}
+			
+			Yield(null);
 		}
 		
 		internal int BeginTransactionalCall()
@@ -2138,7 +2222,53 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			return FServerSession.WrapException(AException);
 		}
+		
+		// Debugging
+		
+		private Debugger FDebugger;
+		public Debugger Debugger { get { return FDebugger; } }
+		
+		internal void SetDebugger(Debugger ADebugger)
+		{
+			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, FProcessID);
+			FDebugger = ADebugger;
+		}
+		
+		public void Yield(PlanNode APlanNode)
+		{
+			if (FDebugger != null)
+				FDebugger.Yield(this, APlanNode, null);
+		}
+		
+		public void Yield(PlanNode APlanNode, Exception AException)
+		{
+			if (FDebugger != null)
+				FDebugger.Yield(this, APlanNode, AException);
+		}
+		
+		private SourceContexts FSourceContexts = new SourceContexts();
 
+		public void PushSourceContext(SourceContext AContext)
+		{
+			FSourceContexts.Push(AContext);
+		}
+		
+		public void PopSourceContext(SourceContext AContext)
+		{
+			FSourceContexts.Pop();
+		}
+		
+		public SourceContext CurrentSourceContext
+		{
+			get
+			{
+				if (FSourceContexts.Count > 0)
+					return FSourceContexts.Peek();
+				return null;
+			}
+		}
+		
 		// ActiveCursor
 		protected ServerCursor FActiveCursor;
 		public ServerCursor ActiveCursor { get { return FActiveCursor; } }

@@ -56,6 +56,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LSessionInfo.DefaultMaxCallDepth = ANativeSessionInfo.DefaultMaxCallDepth;
 			LSessionInfo.UsePlanCache = ANativeSessionInfo.UsePlanCache;
 			LSessionInfo.ShouldEmitIL = ANativeSessionInfo.ShouldEmitIL;
+			LSessionInfo.DebuggerID = ANativeSessionInfo.DebuggerID;
 			return LSessionInfo;
 		}
 

@@ -101,6 +101,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						}
 					}
 
+					LBlock.SetEndPosition(FLexer);
 					return LBlock;
 				}
 				finally
@@ -293,6 +294,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					FLexer.NextToken();
 					Block LBlock = new Block();
 					LBlock.SetPosition(FLexer);
+					LBlock.SetEndPosition(FLexer);
 					return LBlock;
 				}
 				else
@@ -350,6 +352,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 					LBlock.Statements.Add(TerminatedStatement());
 			}
+			LBlock.SetEndPosition(FLexer);
 			return LBlock.Statements.Count == 1 ? LBlock.Statements[0] : LBlock;			
 		}
 
@@ -443,6 +446,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.StatementTerminator: 
 					LStatement = new Block(); 
 					LStatement.SetPosition(FLexer);
+					LStatement.SetEndPosition(FLexer);
 					break;
 				case Keywords.Begin:
 					FLexer.NextToken();
@@ -450,6 +454,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LStatement.SetPosition(FLexer);
 					((DelimitedBlock)LStatement).Statements.Add(Block());
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.SetEndPosition(FLexer);
 					break;
                 default: 
 					Expression LExpression = Expression();
@@ -460,6 +465,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						LStatement = new ExpressionStatement(LExpression);
 						LStatement.Line = LExpression.Line;
 						LStatement.LinePos = LExpression.LinePos;
+						LStatement.EndLine = LExpression.EndLine;
+						LStatement.EndLinePos = LExpression.EndLinePos;
 					}
 		            break;
             }
@@ -477,6 +484,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			SelectStatement LSelectStatement = new SelectStatement();
 			LSelectStatement.SetPosition(FLexer);
 			LSelectStatement.CursorDefinition = CursorDefinition();
+			LSelectStatement.SetEndPosition(FLexer);
             return LSelectStatement;
         }
         
@@ -661,6 +669,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			Expression LExpression = ExpressionTerm();
 			LanguageModifiers(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}			
         
@@ -729,6 +738,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LExpression = LBinaryExpression;
 				}
 			}
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -753,6 +763,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 LBinaryExpression.RightExpression = BitwiseBinaryExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -796,6 +807,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LBinaryExpression.RightExpression = ComparisonExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -843,6 +855,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LBinaryExpression.RightExpression = AdditiveExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
        
@@ -880,6 +893,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LBinaryExpression.RightExpression = MultiplicativeExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -921,6 +935,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LBinaryExpression.RightExpression = ExponentExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
 
@@ -945,6 +960,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 LBinaryExpression.RightExpression = ExponentExpression();
                 LExpression = LBinaryExpression;
             }
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -981,18 +997,22 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					case Keywords.Subtraction: 
 						LExpression = new UnaryExpression(Instructions.Negate, UnaryExpression());
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case Keywords.BitwiseNot: 
 						LExpression = new UnaryExpression(Instructions.BitwiseNot, UnaryExpression());
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case Keywords.Not: 
 						LExpression = new UnaryExpression(Instructions.Not, UnaryExpression());
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case Keywords.Exists: 
 						LExpression = new UnaryExpression(Instructions.Exists, UnaryExpression());
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 				}
 			}
@@ -1034,6 +1054,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 			
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -1068,6 +1089,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				return LQualifierExpression;
 			}
 
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -1119,6 +1141,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 
 			FLexer.NextToken().CheckSymbol(Keywords.EndIndexer);
+			LIndexerExpression.SetEndPosition(FLexer);
 			return LIndexerExpression;
 		}
         
@@ -1154,39 +1177,48 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					case TokenType.Nil:
 						LExpression = new ValueExpression(null, TokenType.Nil);
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Boolean: 
 						LExpression = new ValueExpression(FLexer[0].AsBoolean, TokenType.Boolean); 
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Integer: 
 						LExpression = new ValueExpression(FLexer[0].AsInteger, TokenType.Integer); 
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Hex:
 						LExpression = new ValueExpression(FLexer[0].AsHex, TokenType.Hex);
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Decimal: 
 						LExpression = new ValueExpression(FLexer[0].AsDecimal, TokenType.Decimal); 
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Float:
 						LExpression = new ValueExpression(Convert.ToDecimal(FLexer[0].AsFloat), TokenType.Decimal);
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.Money: 
 						LExpression = new ValueExpression(FLexer[0].AsMoney, TokenType.Money);
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					case TokenType.String: 
 						LExpression = new ValueExpression(FLexer[0].AsString, TokenType.String); 
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					#if USEISTRING
 					case LexerToken.IString: 
 						LExpression = new ValueExpression(FLexer.TokenIString(), LexerToken.IString);
 						LExpression.SetPosition(FLexer);
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					#endif
 					default: throw new ParserException(ParserException.Codes.UnknownTokenType, Enum.GetName(typeof(TokenType), FLexer[0].Type));
@@ -1222,6 +1254,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						if (FLexer.PeekTokenSymbol(1) == Keywords.Qualifier)
 							FLexer.NextToken();
 						((ExplodeColumnExpression)LExpression).ColumnName = QualifiedIdentifier();
+						LExpression.SetEndPosition(FLexer);
 						return LExpression;
 					}
                         
@@ -1248,6 +1281,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						}
 						LExpression.Line = LLine;
 						LExpression.LinePos = LLinePos;
+						LExpression.SetEndPosition(FLexer);
 						
 						return LExpression;
                     }
@@ -1283,6 +1317,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 				FLexer.NextToken();
+			LCallExpression.SetEndPosition(FLexer);
 			return LCallExpression;
 		}
 		
@@ -1469,7 +1504,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 			LExpression.Line = AExpression.Line;
 			LExpression.LinePos = AExpression.LinePos;
-				
+			LExpression.EndLine = AExpression.EndLine;
+			LExpression.EndLinePos = AExpression.EndLinePos;
 			return LExpression;
         }
         
@@ -1533,6 +1569,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				return LColumnExtractorExpression;
             }
             
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
 
@@ -1551,6 +1588,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             LExpression.TrueExpression = ExpressionTerm();
             FLexer.NextToken().CheckSymbol(Keywords.Else);
             LExpression.FalseExpression = ExpressionTerm();
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -1588,6 +1626,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             }
             while (!LDone);
             FLexer.NextToken().CheckSymbol(Keywords.End);
+			LCaseExpression.SetEndPosition(FLexer);
             return LCaseExpression;
         }
         
@@ -1599,6 +1638,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.WhenExpression = Expression();
             FLexer.NextToken().CheckSymbol(Keywords.Then);
             LExpression.ThenExpression = Expression();
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -1608,6 +1648,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             FLexer.NextToken().CheckSymbol(Keywords.Else);
 			LExpression.SetPosition(FLexer);
 			LExpression.Expression = Expression();
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
         
@@ -1783,6 +1824,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (!LDone);
 			}
 
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -1828,6 +1870,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LPos = OptionallyNamedColumnList(LExpression.Expressions);
 			LExpression.Line = LPos.Y;
 			LExpression.LinePos = LPos.X;
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -1844,6 +1887,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.BeginGroup);
 			LExpression.CursorDefinition = CursorDefinition();
 			FLexer.NextToken().CheckSymbol(Keywords.EndGroup);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -1884,6 +1928,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				break;
 			}
 
+			LCursorDefinition.SetEndPosition(FLexer);
 			return LCursorDefinition;
 		}
 		
@@ -1965,6 +2010,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.From);
 			LExpression.SetPosition(FLexer);
 			LExpression.Expression = Expression();
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -1989,6 +2035,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			
 			LExpression.Columns.Add(new ColumnExpression(AColumnName));
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 
@@ -2005,6 +2052,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.Expression = AExpression;
             LExpression.Condition = ExpressionTerm();
             LanguageModifiers(LExpression);
+			LExpression.SetEndPosition(FLexer);
             return LExpression;
         }
 
@@ -2021,6 +2069,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LProjectExpression.Expression = AExpression;
 			ColumnList(LProjectExpression.Columns);
 			LanguageModifiers(LProjectExpression);
+			LProjectExpression.SetEndPosition(FLexer);
             return LProjectExpression;
         }
         
@@ -2029,6 +2078,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			ColumnExpression LExpression = new ColumnExpression();
 			LExpression.ColumnName = QualifiedIdentifier();
 			LExpression.SetPosition(FLexer);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
 
@@ -2069,6 +2119,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.LinePos = LExpression.Expression.LinePos;
 			LExpression.ColumnAlias = UnrootedIdentifier();
 			MetaData(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -2088,6 +2139,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				default: LExpression.ColumnAlias = UnrootedIdentifier(); break;
 			}
 			MetaData(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -2147,6 +2199,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.SetPosition(FLexer);
 			LExpression.ColumnAlias = UnrootedIdentifier();
 			MetaData(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 
@@ -2184,6 +2237,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LRemoveExpression.Expression = AExpression;
 			ColumnList(LRemoveExpression.Columns);
 			LanguageModifiers(LRemoveExpression);
+			LRemoveExpression.SetEndPosition(FLexer);
 			return LRemoveExpression;
 		}
 
@@ -2200,6 +2254,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.Expression = AExpression;
 			NonEmptyNamedColumnList(LExpression.Expressions);
 			LanguageModifiers(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -2219,6 +2274,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.Expression = AExpression;
 			OptionallyNamedColumnList(LExpression.Expressions);
 			LanguageModifiers(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 
@@ -2254,6 +2310,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.Line = LLine;
 			LExpression.LinePos = LLinePos;
 			LanguageModifiers(LExpression);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 
@@ -2278,6 +2335,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             FLexer.NextToken().CheckSymbol(Keywords.Add);
             AggregateColumnList(LAggregateExpression.ComputeColumns);
             LanguageModifiers(LAggregateExpression);
+			LAggregateExpression.SetEndPosition(FLexer);
             return LAggregateExpression;
         }
         
@@ -2353,6 +2411,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LanguageModifiers(LAggregateColumnExpression);
             LAggregateColumnExpression.ColumnAlias = UnrootedIdentifier();
             MetaData(LAggregateColumnExpression);
+			LAggregateColumnExpression.SetEndPosition(FLexer);
             return LAggregateColumnExpression;
         }
 
@@ -2383,6 +2442,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				MetaData(LOrderExpression.SequenceColumn);
 			}
 			LanguageModifiers(LOrderExpression);
+			LOrderExpression.SetEndPosition(FLexer);
             return LOrderExpression;
         }
 
@@ -2402,6 +2462,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             FLexer.NextToken().CheckSymbol(Keywords.By);
             OrderColumnDefinitionList(LBrowseExpression.Columns);
             LanguageModifiers(LBrowseExpression);
+			LBrowseExpression.SetEndPosition(FLexer);
             return LBrowseExpression;
         }
 
@@ -2424,6 +2485,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				OrderColumnDefinitionList(LQuotaExpression.Columns);
 			}
 			LanguageModifiers(LQuotaExpression);
+			LQuotaExpression.SetEndPosition(FLexer);
             return LQuotaExpression;
         }
 
@@ -2483,6 +2545,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 }
             }
             LanguageModifiers(LExplodeExpression);
+			LExplodeExpression.SetEndPosition(FLexer);
             return LExplodeExpression;
         }
 
@@ -2498,6 +2561,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             LOnExpression.SetPosition(FLexer);
             LOnExpression.Expression = AExpression;
             LOnExpression.ServerName = QualifiedIdentifier();
+			LOnExpression.SetEndPosition(FLexer);
             return LOnExpression;
         }
 
@@ -2508,6 +2572,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.SetPosition(FLexer);
 			LExpression.Expression = AExpression;
 			LExpression.TypeSpecifier = TypeSpecifier();
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -2518,6 +2583,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.SetPosition(FLexer);
 			LExpression.Expression = AExpression;
 			LExpression.TypeSpecifier = TypeSpecifier();
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -2601,6 +2667,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			MetaData(LAdornExpression);
 			AlterMetaData(LAdornExpression, false);
 			LanguageModifiers(LAdornExpression);
+			LAdornExpression.SetEndPosition(FLexer);
 			return LAdornExpression;
 		}
 		
@@ -2653,6 +2720,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			MetaData(LExpression);
 			AlterMetaData(LExpression, false);
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -2684,6 +2752,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			} while (!LDone);
 
 			LanguageModifiers(LExpression);			
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -2694,6 +2763,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LExpression.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.Assign);
 			LExpression.Expression = ExpressionTerm();
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 
@@ -2762,6 +2832,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LUnionExpression.LeftExpression = AExpression;
             LUnionExpression.RightExpression = ExpressionTerm();
             LanguageModifiers(LUnionExpression);
+			LUnionExpression.SetEndPosition(FLexer);
             return LUnionExpression;
         }
         
@@ -2773,6 +2844,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LIntersectExpression.LeftExpression = AExpression;
             LIntersectExpression.RightExpression = ExpressionTerm();
             LanguageModifiers(LIntersectExpression);
+			LIntersectExpression.SetEndPosition(FLexer);
             return LIntersectExpression;
         }
 
@@ -2784,6 +2856,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDifferenceExpression.LeftExpression = AExpression;
             LDifferenceExpression.RightExpression = ExpressionTerm();
             LanguageModifiers(LDifferenceExpression);
+			LDifferenceExpression.SetEndPosition(FLexer);
             return LDifferenceExpression;
         }
 
@@ -2795,6 +2868,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             LProductExpression.LeftExpression = AExpression;
             LProductExpression.RightExpression = ExpressionTerm();
             LanguageModifiers(LProductExpression);
+			LProductExpression.SetEndPosition(FLexer);
             return LProductExpression;
         }
 
@@ -2806,6 +2880,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDivideExpression.LeftExpression = AExpression;
             LDivideExpression.RightExpression = ExpressionTerm();
             LanguageModifiers(LDivideExpression);
+			LDivideExpression.SetEndPosition(FLexer);
             return LDivideExpression;
         }
 
@@ -2823,6 +2898,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LJoinExpression.LeftExpression = AExpression;
 			ConditionedExpressionTerm(LJoinExpression);
 			LanguageModifiers(LJoinExpression);
+			LJoinExpression.SetEndPosition(FLexer);
 			return LJoinExpression;
 		}
 		
@@ -2839,6 +2915,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LHavingExpression.LeftExpression = AExpression;
 			ConditionedExpressionTerm(LHavingExpression);
 			LanguageModifiers(LHavingExpression);
+			LHavingExpression.SetEndPosition(FLexer);
 			return LHavingExpression;
 		}
 		
@@ -2855,6 +2932,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LWithoutExpression.LeftExpression = AExpression;
 			ConditionedExpressionTerm(LWithoutExpression);
 			LanguageModifiers(LWithoutExpression);
+			LWithoutExpression.SetEndPosition(FLexer);
 			return LWithoutExpression;
 		}
 
@@ -2897,6 +2975,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
                 MetaData(LOuterJoinExpression.RowExistsColumn);
             }
             LanguageModifiers(LOuterJoinExpression);
+			LOuterJoinExpression.SetEndPosition(FLexer);
             return LOuterJoinExpression;
         }
 
@@ -2929,6 +3008,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             LStatement.SourceExpression = Expression();
             FLexer.NextToken().CheckSymbol(Keywords.Into);
             LStatement.Target = Expression();
+			LStatement.SetEndPosition(FLexer);
             return LStatement;
         }
 
@@ -2953,6 +3033,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken();
 				LStatement.Condition = ExpressionTerm();
             }
+			LStatement.SetEndPosition(FLexer);
             return LStatement;
         }
         
@@ -2992,6 +3073,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Assign);
 			LExpression.SetPosition(FLexer);
 			LExpression.Expression = ExpressionTerm();
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
         }
         
@@ -3007,6 +3089,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.SetPosition(FLexer);
 			LanguageModifiers(LStatement);
             LStatement.Target = Expression();
+			LStatement.SetEndPosition(FLexer);
             return LStatement;
         }
  
@@ -3040,12 +3123,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					FLexer.NextToken();
 					LStatement.Expression = Expression();
 				}
+				LStatement.SetEndPosition(FLexer);
 				LBlock.Statements.Add(LStatement);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.ListSeparator)
 					FLexer.NextToken();
 				else
 				  break;
 			}
+			LBlock.SetEndPosition(FLexer);
 			if (LBlock.Statements.Count == 1)
 				return LBlock.Statements[0];
 			else
@@ -3064,6 +3149,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Assign);
 			LStatement.SetPosition(FLexer);
 			LStatement.Expression = Expression();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3077,6 +3163,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			Statement LStatement = new ExitStatement();
 			FLexer.NextToken();
 			LStatement.SetPosition(FLexer);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3100,6 +3187,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken();
 				LStatement.FalseStatement = Statement();
 			}
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3116,6 +3204,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.Condition = Expression();
 			FLexer.NextToken().CheckSymbol(Keywords.Do);
 			LStatement.Statement = Statement();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3132,6 +3221,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.Statement = DelimitedBlock(new string[] { Keywords.While });
 			FLexer.NextToken();
 			LStatement.Condition = Expression();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3171,6 +3261,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					FLexer.NextToken();
 					LVariableStatement.TypeSpecifier = TypeSpecifier();
 				}
+				LVariableStatement.SetEndPosition(FLexer);
 				LBlock.Statements.Add(LVariableStatement);
 			}
 
@@ -3181,6 +3272,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LAssignmentStatement.Expression = Expression();
 			if ((LVariableStatement != null) && (LVariableStatement.TypeSpecifier == null))
 				LVariableStatement.TypeSpecifier = new TypeOfTypeSpecifier(LAssignmentStatement.Expression);
+			LAssignmentStatement.SetEndPosition(FLexer);
 			LBlock.Statements.Add(LAssignmentStatement);
 			
 			bool LIsPositive;
@@ -3210,6 +3302,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LIterationStatement = LIterationBlock;
 			LWhileStatement.Statement = LIterationStatement;
 			LBlock.Statements.Add(LWhileStatement);
+			LBlock.SetEndPosition(FLexer);
 			return LBlock;
 		}
 		
@@ -3262,6 +3355,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			ForEachStatement LStatement = new ForEachStatement();
 			FLexer.NextToken();
+			LStatement.SetPosition(FLexer);
 			switch (FLexer.PeekTokenSymbol(1))
 			{
 				case Keywords.Row : FLexer.NextToken(); break;
@@ -3278,6 +3372,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.Expression = CursorDefinition();
 			FLexer.NextToken().CheckSymbol(Keywords.Do);
 			LStatement.Statement = Statement();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3297,6 +3392,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDoWhileStatement.Statement = DelimitedBlock(new string[] { Keywords.Until });
 			FLexer.NextToken();
 			LDoWhileStatement.Condition = new UnaryExpression(Instructions.Not, Expression());
+			LDoWhileStatement.SetEndPosition(FLexer);
 			return LDoWhileStatement;
 		}
 		
@@ -3310,6 +3406,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			BreakStatement LStatement = new BreakStatement();
 			FLexer.NextToken();
 			LStatement.SetPosition(FLexer);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3323,6 +3420,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			ContinueStatement LStatement = new ContinueStatement();
 			FLexer.NextToken();
 			LStatement.SetPosition(FLexer);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -3364,6 +3462,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
             }
             while (!LDone);
             FLexer.NextToken().CheckSymbol(Keywords.End);
+			LCaseStatement.SetEndPosition(FLexer);
             return LCaseStatement;
         }
         
@@ -3375,6 +3474,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.WhenExpression = Expression();
             FLexer.NextToken().CheckSymbol(Keywords.Then);
             LStatement.ThenStatement = TerminatedStatement();
+			LStatement.SetEndPosition(FLexer);
             return LStatement;
         }
 		
@@ -3421,6 +3521,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LFinallyStatement.TryStatement = LTryStatement;
 					LFinallyStatement.FinallyStatement = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LFinallyStatement.SetEndPosition(FLexer);
 					return LFinallyStatement;
 
 				case Keywords.Except:
@@ -3468,6 +3569,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						FLexer.NextToken();
 					}
 
+					LExceptStatement.SetEndPosition(FLexer);
 					return LExceptStatement;
 					
 				case Keywords.Commit:
@@ -3489,6 +3591,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LErrorBlock.Statements.Add(new RaiseStatement());
 					LCommitStatement.ErrorHandlers.Add(new GenericErrorHandler(LErrorBlock));
 					LBlock.Statements.Add(LCommitStatement);
+					LBlock.SetEndPosition(FLexer);
 					return LBlock;
 					
 				default: throw new ParserException(ParserException.Codes.TryStatementExpected);
@@ -3507,6 +3610,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.SetPosition(FLexer);
 			if (FLexer.PeekTokenSymbol(1) != Keywords.StatementTerminator)
 				LStatement.Expression = Expression();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 
@@ -3533,6 +3637,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				break;
 			}
 
+			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
 		
@@ -3556,32 +3661,34 @@ namespace Alphora.Dataphor.DAE.Language.D4
         protected Statement CreateStatement()
         {
 			FLexer.NextToken();
+			int LLine = FLexer[0, false].Line;
+			int LLinePos = FLexer[0, false].LinePos;
 			switch (FLexer.NextToken().AsSymbol)
 			{
-				case Keywords.Table: return CreateTableStatement(false);
-				case Keywords.View: return CreateViewStatement(false);
-				case Keywords.Constraint: return CreateConstraintStatement(false);
-				case Keywords.Reference: return CreateReferenceStatement(false);
-				case Keywords.Operator: return CreateOperatorStatement(false);
-				case Keywords.Aggregate: return CreateAggregateOperatorStatement(false);
+				case Keywords.Table: return CreateTableStatement(LLine, LLinePos, false);
+				case Keywords.View: return CreateViewStatement(LLine, LLinePos, false);
+				case Keywords.Constraint: return CreateConstraintStatement(LLine, LLinePos, false);
+				case Keywords.Reference: return CreateReferenceStatement(LLine, LLinePos, false);
+				case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, false);
+				case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, false);
 				case Keywords.Session:
 					switch (FLexer.NextToken().AsSymbol)
 					{
-						case Keywords.Table: return CreateTableStatement(true);
-						case Keywords.View: return CreateViewStatement(true);
-						case Keywords.Constraint: return CreateConstraintStatement(true);
-						case Keywords.Reference: return CreateReferenceStatement(true);
-						case Keywords.Operator: return CreateOperatorStatement(true);
-						case Keywords.Aggregate: return CreateAggregateOperatorStatement(true);
+						case Keywords.Table: return CreateTableStatement(LLine, LLinePos, true);
+						case Keywords.View: return CreateViewStatement(LLine, LLinePos, true);
+						case Keywords.Constraint: return CreateConstraintStatement(LLine, LLinePos, true);
+						case Keywords.Reference: return CreateReferenceStatement(LLine, LLinePos, true);
+						case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, true);
+						case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, true);
 						default : throw new ParserException(ParserException.Codes.UnknownCreateDirective, FLexer[0].AsSymbol);
 					}
-				case Keywords.Type: return CreateScalarTypeStatement();
-				case Keywords.Server: return CreateServerStatement();
-				case Keywords.Device: return CreateDeviceStatement();
-				case Keywords.Sort: return CreateSortStatement();
-				case Keywords.Conversion: return CreateConversionStatement();
-				case Keywords.Role: return CreateRoleStatement();
-				case Keywords.Right: return CreateRightStatement();
+				case Keywords.Type: return CreateScalarTypeStatement(LLine, LLinePos);
+				case Keywords.Server: return CreateServerStatement(LLine, LLinePos);
+				case Keywords.Device: return CreateDeviceStatement(LLine, LLinePos);
+				case Keywords.Sort: return CreateSortStatement(LLine, LLinePos);
+				case Keywords.Conversion: return CreateConversionStatement(LLine, LLinePos);
+				case Keywords.Role: return CreateRoleStatement(LLine, LLinePos);
+				case Keywords.Right: return CreateRightStatement(LLine, LLinePos);
 				default: throw new ParserException(ParserException.Codes.UnknownCreateDirective, FLexer[0].AsSymbol);
 			}
         }
@@ -3603,10 +3710,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<device name> ::=
 				<qualified identifier>
         */
-        protected CreateTableStatement CreateTableStatement(bool AIsSession)
+        protected CreateTableStatement CreateTableStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateTableStatement LStatement = new CreateTableStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.IsSession = AIsSession;
 			LStatement.TableVarName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.In)
@@ -3622,6 +3730,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else
 				CreateTableDefinitionList(LStatement);
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
@@ -3748,6 +3857,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -3763,6 +3873,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			KeyColumnList(LDefinition.Columns);
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -3810,6 +3921,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			ReferenceColumnList(LDefinition.Columns);
 			LDefinition.ReferencesDefinition = ReferencesDefinition();
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -3902,6 +4014,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			ReferenceColumnList(LDefinition.Columns);
 			UpdateReferenceAction(LDefinition);
 			DeleteReferenceAction(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -3940,14 +4053,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<constraint name> ::=
 				<qualified identifier>
 		*/        
-        protected CreateConstraintStatement CreateConstraintStatement(bool AIsSession)
+        protected CreateConstraintStatement CreateConstraintStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateConstraintStatement LStatement = new CreateConstraintStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.IsSession = AIsSession;
 			LStatement.ConstraintName = QualifiedIdentifier();
 			LStatement.Expression = Expression();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -3962,16 +4077,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
             <view name> ::=
 				<qualified identifier>
 		*/        
-        protected CreateViewStatement CreateViewStatement(bool AIsSession)
+        protected CreateViewStatement CreateViewStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateViewStatement LStatement = new CreateViewStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.IsSession = AIsSession;
 			LStatement.TableVarName = QualifiedIdentifier();
 			LStatement.Expression = Expression();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.BeginList)
 				CreateViewDefinitionList(LStatement);
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -4025,6 +4142,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			OrderColumnDefinitionList(LDefinition.Columns);
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4097,6 +4215,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken();
 				ClassAttributeDefinitionList(LDefinition.Attributes);
 			}
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4138,6 +4257,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Equal);
 			FLexer.NextToken();
 			LDefinition.AttributeValue = FLexer[0].AsString;
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
 
@@ -4201,6 +4321,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (!LDone);
 			}
 			
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4230,10 +4351,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					[<class definition>]
 					<metadata>
 		*/		
-        protected CreateScalarTypeStatement CreateScalarTypeStatement()
+        protected CreateScalarTypeStatement CreateScalarTypeStatement(int ALine, int ALinePos)
         {
 			CreateScalarTypeStatement LStatement = new CreateScalarTypeStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ScalarTypeName = QualifiedIdentifier();
 			
 			#if ALLOWSUBTYPES
@@ -4286,6 +4408,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				LStatement.ClassDefinition = ClassDefinition();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -4294,6 +4417,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			ScalarTypeNameDefinition LDefinition = new ScalarTypeNameDefinition();
 			LDefinition.ScalarTypeName = QualifiedIdentifier();
 			LDefinition.SetPosition(FLexer);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
 
@@ -4369,6 +4493,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -4420,6 +4545,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 	    
@@ -4435,6 +4561,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			LDefinition.Expression = Expression();
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4446,6 +4573,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.ConstraintName = UnrootedIdentifier();
 			LDefinition.Expression = Expression();
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
 
@@ -4483,6 +4611,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					}
 				}
 				MetaData(LDefinition);
+				LDefinition.SetEndPosition(FLexer);
 				return LDefinition;
 			}
 			else
@@ -4493,6 +4622,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LDefinition.ConstraintName = UnrootedIdentifier();
 				LDefinition.Expression = Expression();
 				MetaData(LDefinition);
+				LDefinition.SetEndPosition(FLexer);
 				return LDefinition;
 			}
         }
@@ -4513,6 +4643,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.Name = UnrootedIdentifier();
 			LDefinition.Value = Expression();
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4526,6 +4657,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Sort);
 			LDefinition.SetPosition(FLexer);
 			LDefinition.Expression = Expression();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -4537,16 +4669,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					<references definition>
 					<metadata>
 		*/        
-        protected CreateReferenceStatement CreateReferenceStatement(bool AIsSession)
+        protected CreateReferenceStatement CreateReferenceStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateReferenceStatement LStatement = new CreateReferenceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.IsSession = AIsSession;
 			LStatement.ReferenceName = QualifiedIdentifier();
 			LStatement.TableVarName = QualifiedIdentifier();
 			ReferenceColumnList(LStatement.Columns);
 			LStatement.ReferencesDefinition = ReferencesDefinition();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -4563,10 +4697,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<operator name> ::=
 				<qualified identifier>
         */
-        protected CreateOperatorStatement CreateOperatorStatement(bool AIsSession)
+        protected CreateOperatorStatement CreateOperatorStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateOperatorStatement LStatement = new CreateOperatorStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.OperatorName = QualifiedIdentifier();
 			LStatement.IsSession = AIsSession;
 			FormalParameterList(LStatement.FormalParameters);
@@ -4627,7 +4762,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (LStatement.IsAbstract)
 						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
 					#endif
+					ALine = FLexer[0].Line;
+					ALinePos = FLexer[0].LinePos;
 					LStatement.Block.ClassDefinition = ClassDefinition();
+					LStatement.Block.Line = ALine;
+					LStatement.Block.LinePos = ALinePos;
+					LStatement.Block.SetEndPosition(FLexer);
 					LHasBody = true;
 				break;
 				
@@ -4636,9 +4776,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (LStatement.IsAbstract)
 						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
 					#endif
+					ALine = FLexer[0].Line;
+					ALinePos = FLexer[0].LinePos;
 					FLexer.NextToken();
 					LStatement.Block.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Block.Line = ALine;
+					LStatement.Block.LinePos = ALinePos;
+					LStatement.Block.SetEndPosition(FLexer);
 					LHasBody = true;
 				break;
 			}
@@ -4652,6 +4797,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				throw new ParserException(ParserException.Codes.InvalidOperatorDefinition);
 
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -4701,6 +4847,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LFormalParameter.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.TypeSpecifier);
 			LFormalParameter.TypeSpecifier = TypeSpecifier();
+			LFormalParameter.SetEndPosition(FLexer);
 			return LFormalParameter;
 		}
 
@@ -4738,6 +4885,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LSpecifier.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.TypeSpecifier);
 			LSpecifier.TypeSpecifier = TypeSpecifier();
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
 
@@ -4787,6 +4935,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         {
 			GenericTypeSpecifier LSpecifier = new GenericTypeSpecifier();
 			LSpecifier.SetPosition(FLexer);
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
 
@@ -4806,6 +4955,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else
 				LSpecifier.ScalarTypeName = QualifiedIdentifier();
 			LSpecifier.SetPosition(FLexer);
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
 
@@ -4832,6 +4982,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 					LSpecifier.IsGeneric = true;
 			}
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
 
@@ -4854,6 +5005,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 					LSpecifier.IsGeneric = true;	
 			}
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
         
@@ -4893,6 +5045,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 					LSpecifier.IsGeneric = true;
 			}
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
         
@@ -4919,6 +5072,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 					LSpecifier.IsGeneric = true;
 			}
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
         }
         
@@ -4954,6 +5108,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.BeginGroup);
 			LTypeSpecifier.Expression = Expression();
 			FLexer.NextToken().CheckSymbol(Keywords.EndGroup);
+			LTypeSpecifier.SetEndPosition(FLexer);
 			return LTypeSpecifier;
         }
         
@@ -4986,6 +5141,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LTypeSpecifier.Line = LTypeSpecifier.TypeSpecifier.Line;
 				LTypeSpecifier.LinePos = LTypeSpecifier.TypeSpecifier.LinePos;
 			}
+			LTypeSpecifier.SetEndPosition(FLexer);
 			return LTypeSpecifier;
         }
         
@@ -5022,10 +5178,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					finalization (<class definition> | <block>)
 					<metadata>
         */
-        protected CreateAggregateOperatorStatement CreateAggregateOperatorStatement(bool AIsSession)
+        protected CreateAggregateOperatorStatement CreateAggregateOperatorStatement(int ALine, int ALinePos, bool AIsSession)
         {
 			CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.IsSession = AIsSession;
 			FLexer.NextToken().CheckSymbol(Keywords.Operator);
 			LStatement.OperatorName = QualifiedIdentifier();
@@ -5078,32 +5235,50 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			#endif
 				FLexer.NextToken().CheckSymbol(Keywords.Initialization);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+				{
+					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.ClassDefinition = ClassDefinition();
+					LStatement.Initialization.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Initialization.SetEndPosition(FLexer);
 				}
 					
 				FLexer.NextToken().CheckSymbol(Keywords.Aggregation);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+				{
+					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.ClassDefinition = ClassDefinition();
+					LStatement.Aggregation.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Aggregation.SetEndPosition(FLexer);
 				}
 					
 				FLexer.NextToken().CheckSymbol(Keywords.Finalization);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+				{
+					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.ClassDefinition = ClassDefinition();
+					LStatement.Finalization.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Finalization.SetEndPosition(FLexer);
 				}
 			#if USETYPEINHERITANCE
 			}
@@ -5113,6 +5288,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			#endif
 				
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 		
@@ -5124,12 +5300,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<server link name> ::=
 				<qualified identifier>
 		*/        
-        protected CreateServerStatement CreateServerStatement()
+        protected CreateServerStatement CreateServerStatement(int ALine, int ALinePos)
         {
 			CreateServerStatement LStatement = new CreateServerStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ServerName = QualifiedIdentifier();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 		
@@ -5158,10 +5336,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		This is the BNF line that was removed (was right after <device name>):
 					["{"<device map item commalist>"}"]
 */
-        protected CreateDeviceStatement CreateDeviceStatement()
+        protected CreateDeviceStatement CreateDeviceStatement(int ALine, int ALinePos)
         {
 			CreateDeviceStatement LStatement = new CreateDeviceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.DeviceName = QualifiedIdentifier();
 /*
 			if (FLexer.PeekTokenSymbol() == Keywords.BeginList)
@@ -5190,6 +5369,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LStatement.ReconciliationSettings = ReconciliationSettings();
 			LStatement.ClassDefinition = ClassDefinition();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5206,6 +5386,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				LDeviceScalarTypeMap.ClassDefinition = ClassDefinition();
 			MetaData(LDeviceScalarTypeMap);
+			LDeviceScalarTypeMap.SetEndPosition(FLexer);
 			return LDeviceScalarTypeMap;
         }
         
@@ -5222,6 +5403,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				LDeviceOperatorMap.ClassDefinition = ClassDefinition();
 			MetaData(LDeviceOperatorMap);
+			LDeviceOperatorMap.SetEndPosition(FLexer);
 			return LDeviceOperatorMap;
         }
         
@@ -5236,6 +5418,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LOperatorSpecifier.SetPosition(FLexer);
 			LOperatorSpecifier.OperatorName = QualifiedIdentifier();
 			FormalParameterSpecifiers(LOperatorSpecifier.FormalParameterSpecifiers);
+			LOperatorSpecifier.SetEndPosition(FLexer);
 			return LOperatorSpecifier;
 		}
 		
@@ -5298,6 +5481,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}        
 
@@ -5313,6 +5497,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			IndexColumnDefinitionList(LDefinition.Columns);
 			MetaData(LDefinition);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -5355,6 +5540,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.Asc: FLexer.NextToken(); break;
 			}
 			
+			LColumn.SetEndPosition(FLexer);
 			return LColumn;
         }
         
@@ -5432,14 +5618,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<create sort statement> ::=
 				create sort <scalar type name> using <expression> <metadata>
 		*/        
-        protected CreateSortStatement CreateSortStatement()
+        protected CreateSortStatement CreateSortStatement(int ALine, int ALinePos)
         {
 			CreateSortStatement LStatement = new CreateSortStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ScalarTypeName = QualifiedIdentifier();
 			FLexer.NextToken().CheckSymbol(Keywords.Using);
 			LStatement.Expression = Expression();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5448,10 +5636,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<create conversion statement> ::=
 				create conversion <scalar type name> to <scalar type name> using <operator name> [widening | narrowing] <metadata>
         */
-        protected CreateConversionStatement CreateConversionStatement()
+        protected CreateConversionStatement CreateConversionStatement(int ALine, int ALinePos)
         {
 			CreateConversionStatement LStatement = new CreateConversionStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.SourceScalarTypeName = TypeSpecifier();
 			FLexer.NextToken().CheckSymbol(Keywords.To);
 			LStatement.TargetScalarTypeName = TypeSpecifier();
@@ -5472,6 +5661,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				break;
 			}
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5480,12 +5670,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<create role statement> ::=
 				create role <role name> <metadata>
         */
-        protected CreateRoleStatement CreateRoleStatement()
+        protected CreateRoleStatement CreateRoleStatement(int ALine, int ALinePos)
         {
 			CreateRoleStatement LStatement = new CreateRoleStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.RoleName = QualifiedIdentifier();
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5494,11 +5686,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<create right statement> ::=
 				create right <right name>
 		*/
-		protected CreateRightStatement CreateRightStatement()
+		protected CreateRightStatement CreateRightStatement(int ALine, int ALinePos)
 		{
 			CreateRightStatement LStatement = new CreateRightStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.RightName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
         
@@ -5520,19 +5714,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
         protected Statement AlterStatement()
         {
 			FLexer.NextToken();
+			int LLine = FLexer[0, false].Line;
+			int LLinePos = FLexer[0, false].LinePos;
 			switch (FLexer.NextToken().AsSymbol)
 			{
-				case Keywords.Table: return AlterTableStatement();
-				case Keywords.View: return AlterViewStatement();
-				case Keywords.Constraint: return AlterConstraintStatement();
-				case Keywords.Reference: return AlterReferenceStatement();
-				case Keywords.Type: return AlterScalarTypeStatement();
-				case Keywords.Operator: return AlterOperatorStatement();
-				case Keywords.Aggregate: return AlterAggregateOperatorStatement();
-				case Keywords.Server: return AlterServerStatement();
-				case Keywords.Device: return AlterDeviceStatement();
-				case Keywords.Sort: return AlterSortStatement();
-				case Keywords.Role: return AlterRoleStatement();
+				case Keywords.Table: return AlterTableStatement(LLine, LLinePos);
+				case Keywords.View: return AlterViewStatement(LLine, LLinePos);
+				case Keywords.Constraint: return AlterConstraintStatement(LLine, LLinePos);
+				case Keywords.Reference: return AlterReferenceStatement(LLine, LLinePos);
+				case Keywords.Type: return AlterScalarTypeStatement(LLine, LLinePos);
+				case Keywords.Operator: return AlterOperatorStatement(LLine, LLinePos);
+				case Keywords.Aggregate: return AlterAggregateOperatorStatement(LLine, LLinePos);
+				case Keywords.Server: return AlterServerStatement(LLine, LLinePos);
+				case Keywords.Device: return AlterDeviceStatement(LLine, LLinePos);
+				case Keywords.Sort: return AlterSortStatement(LLine, LLinePos);
+				case Keywords.Role: return AlterRoleStatement(LLine, LLinePos);
 				default: throw new ParserException(ParserException.Codes.UnknownAlterDirective, FLexer[0].AsSymbol);
 			}
         }
@@ -5544,10 +5740,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					["{"<alter table definition item commalist>"}"]
 					<alter metadata>
         */
-        protected Statement AlterTableStatement()
+        protected Statement AlterTableStatement(int ALine, int ALinePos)
         {
 			AlterTableStatement LStatement = new AlterTableStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.TableVarName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.BeginList)
 			{
@@ -5565,6 +5762,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (!LDone);
 			}
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
@@ -5652,10 +5850,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					["{"<alter view definition item commalist>"}"]
 					<alter metadata>
 		*/
-		protected Statement AlterViewStatement()
+		protected Statement AlterViewStatement(int ALine, int ALinePos)
 		{
 			AlterViewStatement LStatement = new AlterViewStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.TableVarName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.BeginList)
 			{
@@ -5673,6 +5872,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (!LDone);
 			}
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -5857,6 +6057,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -5865,6 +6066,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropColumnDefinition LDefinition = new DropColumnDefinition();
 			LDefinition.SetPosition(FLexer);
 			LDefinition.ColumnName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -5873,14 +6075,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter constraint statement> ::=
 				alter constraint <constraint name> [<expression>] <alter metadata>
         */
-        protected Statement AlterConstraintStatement()
+        protected Statement AlterConstraintStatement(int ALine, int ALinePos)
         {
 			AlterConstraintStatement LStatement = new AlterConstraintStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ConstraintName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) != Keywords.Alter)
 				LStatement.Expression = Expression();
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5899,6 +6103,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) != Keywords.Alter)
 				LDefinition.Expression = Expression();
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
 		}
 		
@@ -5929,6 +6134,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			AlterTransitionConstraintDefinitionItem(LDefinition);
 			AlterTransitionConstraintDefinitionItem(LDefinition);
 			AlterMetaData(LDefinition, (FLexer[0].Type == TokenType.Symbol) && (FLexer[0].AsSymbol == Keywords.Alter));
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -5993,6 +6199,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LDefinition.IsTransition = true;
 			}
 			LDefinition.ConstraintName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6014,6 +6221,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			KeyColumnList(LDefinition.Columns);
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6022,6 +6230,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropKeyDefinition LDefinition = new DropKeyDefinition();
 			LDefinition.SetPosition(FLexer);
 			KeyColumnList(LDefinition.Columns);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6030,12 +6239,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter reference statement> ::=
 				alter reference <reference name> <alter metadata>
         */
-        protected Statement AlterReferenceStatement()
+        protected Statement AlterReferenceStatement(int ALine, int ALinePos)
         {
 			AlterReferenceStatement LStatement = new AlterReferenceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ReferenceName = QualifiedIdentifier();
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
@@ -6052,6 +6263,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			LDefinition.ReferenceName = QualifiedIdentifier();
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6060,6 +6272,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropReferenceDefinition LDefinition = new DropReferenceDefinition();
 			LDefinition.SetPosition(FLexer);
 			LDefinition.ReferenceName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
 
@@ -6076,6 +6289,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			OrderColumnDefinitionList(LDefinition.Columns);
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6084,6 +6298,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropOrderDefinition LDefinition = new DropOrderDefinition();
 			LDefinition.SetPosition(FLexer);
 			OrderColumnDefinitionList(LDefinition.Columns);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6095,10 +6310,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					<alter class definition>
 					<alter metadata>
         */
-        protected Statement AlterScalarTypeStatement()
+        protected Statement AlterScalarTypeStatement(int ALine, int ALinePos)
         {
 			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ScalarTypeName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.BeginList)
 			{
@@ -6131,6 +6347,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 				
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -6262,6 +6479,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 				
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6289,6 +6507,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropRepresentationDefinition LDefinition = new DropRepresentationDefinition();
 			LDefinition.SetPosition(FLexer);
 			LDefinition.RepresentationName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6335,6 +6554,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6343,6 +6563,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropPropertyDefinition LDefinition = new DropPropertyDefinition();
 			LDefinition.SetPosition(FLexer);
 			LDefinition.PropertyName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
 
@@ -6361,6 +6582,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) != Keywords.Alter)
 				LDefinition.Value = Expression();
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6369,6 +6591,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			DropSpecialDefinition LDefinition = new DropSpecialDefinition();
 			LDefinition.SetPosition(FLexer);
 			LDefinition.Name = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6386,6 +6609,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) != Keywords.Alter)
 				LDefinition.Expression = Expression();
 			AlterMetaData(LDefinition, false);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6393,6 +6617,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         {
 			DropDefaultDefinition LDefinition = new DropDefaultDefinition();
 			LDefinition.SetPosition(FLexer);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6403,10 +6628,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					[(<alter class definition> | <block>)]
 					<alter metadata>
 		*/        
-        protected Statement AlterOperatorStatement()
+        protected Statement AlterOperatorStatement(int ALine, int ALinePos)
         {
 			AlterOperatorStatement LStatement = new AlterOperatorStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.OperatorSpecifier = OperatorSpecifier();
 			
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Alter)
@@ -6414,7 +6640,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FLexer.NextToken();
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
 				{
+					LStatement.Block.SetPosition(FLexer);
 					LStatement.Block.AlterClassDefinition = AlterClassDefinition();
+					LStatement.Block.SetEndPosition(FLexer);
 					AlterMetaData(LStatement, false);
 				}
 				else
@@ -6423,11 +6651,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else
 			{
 				FLexer.NextToken().CheckSymbol(Keywords.Begin);
+				LStatement.Block.SetPosition(FLexer);
 				LStatement.Block.Block = Block();
 				FLexer.NextToken().CheckSymbol(Keywords.End);
+				LStatement.Block.SetEndPosition(FLexer);
 				AlterMetaData(LStatement, false);
 			}
 
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
@@ -6440,10 +6671,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					[finalization (<alter class definition> | <block>)]
 					<alter metadata>
 		*/        
-        protected Statement AlterAggregateOperatorStatement()
+        protected Statement AlterAggregateOperatorStatement(int ALine, int ALinePos)
         {
 			AlterAggregateOperatorStatement LStatement = new AlterAggregateOperatorStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			FLexer.NextToken().CheckSymbol(Keywords.Operator);
 			LStatement.OperatorSpecifier = OperatorSpecifier();
 			
@@ -6451,12 +6683,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				FLexer.NextToken();
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Alter)
+				{
+					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.AlterClassDefinition = AlterClassDefinition();
+					LStatement.Initialization.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Initialization.SetEndPosition(FLexer);
 				}
 			}
 			
@@ -6464,12 +6702,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				FLexer.NextToken();
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Alter)
+				{
+					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.AlterClassDefinition = AlterClassDefinition();
+					LStatement.Aggregation.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Aggregation.SetEndPosition(FLexer);
 				}
 			}
 			
@@ -6477,16 +6721,23 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				FLexer.NextToken();
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Alter)
+				{
+					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.AlterClassDefinition = AlterClassDefinition();
+					LStatement.Finalization.SetEndPosition(FLexer);
+				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
+					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
+					LStatement.Finalization.SetEndPosition(FLexer);
 				}
 			}
 			
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
@@ -6495,12 +6746,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter server link statement> ::=
 				alter server <server link name> <alter metadata>
 		*/        
-        protected Statement AlterServerStatement()
+        protected Statement AlterServerStatement(int ALine, int ALinePos)
         {
 			AlterServerStatement LStatement = new AlterServerStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ServerName = QualifiedIdentifier();
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -6516,10 +6769,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter reconciliation settings> ::=
 				[alter reconciliation "{"<reconciliation settings item commalist>"}"]
 		*/
-        protected Statement AlterDeviceStatement()
+        protected Statement AlterDeviceStatement(int ALine, int ALinePos)
         {
 			AlterDeviceStatement LStatement = new AlterDeviceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.DeviceName = QualifiedIdentifier();
 			
 			if (FLexer.PeekTokenSymbol(1) == Keywords.BeginList)
@@ -6571,6 +6825,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 			}
 				
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -6652,6 +6907,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 				AlterMetaData(LAlterDeviceScalarTypeMap, true);
+			LAlterDeviceScalarTypeMap.SetEndPosition(FLexer);
 			return LAlterDeviceScalarTypeMap;
         }
         
@@ -6669,6 +6925,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 				AlterMetaData(LAlterDeviceOperatorMap, true);
+			LAlterDeviceOperatorMap.SetEndPosition(FLexer);
 			return LAlterDeviceOperatorMap;
         }
         
@@ -6719,6 +6976,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Alter)
 				AlterMetaData(LDefinition, true);
 
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6761,6 +7019,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.Index);
 			IndexColumnDefinitionList(LDefinition.Columns);
 			AlterMetaData(LDefinition, true);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6770,6 +7029,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.Index);
 			IndexColumnDefinitionList(LDefinition.Columns);
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6790,6 +7050,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDropDeviceScalarTypeMap.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.Type);
 			LDropDeviceScalarTypeMap.ScalarTypeName = QualifiedIdentifier();
+			LDropDeviceScalarTypeMap.SetEndPosition(FLexer);
 			return LDropDeviceScalarTypeMap;
         }
         
@@ -6799,6 +7060,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDropDeviceOperatorMap.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.Operator);
 			LDropDeviceOperatorMap.OperatorSpecifier = OperatorSpecifier();
+			LDropDeviceOperatorMap.SetEndPosition(FLexer);
 			return LDropDeviceOperatorMap;
         }
         
@@ -6808,6 +7070,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LDefinition.SetPosition(FLexer);
 			FLexer.NextToken().CheckSymbol(Keywords.Store);
 			LDefinition.StoreName = QualifiedIdentifier();
+			LDefinition.SetEndPosition(FLexer);
 			return LDefinition;
         }
         
@@ -6816,10 +7079,11 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter sort statement> ::=
 				alter sort <scalar type name> [using <expression>] <alter metadata>
         */
-        protected AlterSortStatement AlterSortStatement()
+        protected AlterSortStatement AlterSortStatement(int ALine, int ALinePos)
         {
 			AlterSortStatement LStatement = new AlterSortStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ScalarTypeName = QualifiedIdentifier();
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Using)
 			{
@@ -6827,6 +7091,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LStatement.Expression = Expression();
 			}
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -6835,12 +7100,14 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<alter role statement> ::=
 				alter role <role name> <alter metadata>
 		*/
-		protected AlterRoleStatement AlterRoleStatement()
+		protected AlterRoleStatement AlterRoleStatement(int ALine, int ALinePos)
 		{
 			AlterRoleStatement LStatement = new AlterRoleStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.RoleName = QualifiedIdentifier();
 			AlterMetaData(LStatement, false);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -6864,123 +7131,149 @@ namespace Alphora.Dataphor.DAE.Language.D4
         protected Statement DropStatement()
         {
 			FLexer.NextToken();
+			int LLine = FLexer[0, false].Line;
+			int LLinePos = FLexer[0, false].LinePos;
 			switch (FLexer.NextToken().AsSymbol)
 			{
-				case Keywords.Table: return DropTableStatement();
-				case Keywords.View: return DropViewStatement();
-				case Keywords.Constraint: return DropConstraintStatement();
-				case Keywords.Reference: return DropReferenceStatement();
-				case Keywords.Type: return DropScalarTypeStatement();
-				case Keywords.Operator: return DropOperatorStatement();
+				case Keywords.Table: return DropTableStatement(LLine, LLinePos);
+				case Keywords.View: return DropViewStatement(LLine, LLinePos);
+				case Keywords.Constraint: return DropConstraintStatement(LLine, LLinePos);
+				case Keywords.Reference: return DropReferenceStatement(LLine, LLinePos);
+				case Keywords.Type: return DropScalarTypeStatement(LLine, LLinePos);
+				case Keywords.Operator: return DropOperatorStatement(LLine, LLinePos);
 				case Keywords.Aggregate:
 					FLexer.NextToken().CheckSymbol(Keywords.Operator);
-					return DropOperatorStatement();
-				case Keywords.Server: return DropServerStatement();
-				case Keywords.Device: return DropDeviceStatement();
-				case Keywords.Sort: return DropSortStatement();
-				case Keywords.Conversion: return DropConversionStatement();
-				case Keywords.Role: return DropRoleStatement();
-				case Keywords.Right: return DropRightStatement();
+					return DropOperatorStatement(LLine, LLinePos);
+				case Keywords.Server: return DropServerStatement(LLine, LLinePos);
+				case Keywords.Device: return DropDeviceStatement(LLine, LLinePos);
+				case Keywords.Sort: return DropSortStatement(LLine, LLinePos);
+				case Keywords.Conversion: return DropConversionStatement(LLine, LLinePos);
+				case Keywords.Role: return DropRoleStatement(LLine, LLinePos);
+				case Keywords.Right: return DropRightStatement(LLine, LLinePos);
 				default: throw new ParserException(ParserException.Codes.UnknownDropDirective, FLexer[0].AsSymbol);
 			}
         }
         
-        protected DropTableStatement DropTableStatement()
+        protected DropTableStatement DropTableStatement(int ALine, int ALinePos)
         {
 			DropTableStatement LStatement = new DropTableStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropViewStatement DropViewStatement()
+        protected DropViewStatement DropViewStatement(int ALine, int ALinePos)
         {
 			DropViewStatement LStatement = new DropViewStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropConstraintStatement DropConstraintStatement()
+        protected DropConstraintStatement DropConstraintStatement(int ALine, int ALinePos)
         {
 			DropConstraintStatement LStatement = new DropConstraintStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ConstraintName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropReferenceStatement DropReferenceStatement()
+        protected DropReferenceStatement DropReferenceStatement(int ALine, int ALinePos)
         {
 			DropReferenceStatement LStatement = new DropReferenceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ReferenceName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropScalarTypeStatement DropScalarTypeStatement()
+        protected DropScalarTypeStatement DropScalarTypeStatement(int ALine, int ALinePos)
         {
 			DropScalarTypeStatement LStatement = new DropScalarTypeStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
-        protected DropOperatorStatement DropOperatorStatement()
+        protected DropOperatorStatement DropOperatorStatement(int ALine, int ALinePos)
         {
 			DropOperatorStatement LStatement = new DropOperatorStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
 			FormalParameterSpecifiers(LStatement.FormalParameterSpecifiers);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropServerStatement DropServerStatement()
+        protected DropServerStatement DropServerStatement(int ALine, int ALinePos)
         {
 			DropServerStatement LStatement = new DropServerStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropDeviceStatement DropDeviceStatement()
+        protected DropDeviceStatement DropDeviceStatement(int ALine, int ALinePos)
         {
 			DropDeviceStatement LStatement = new DropDeviceStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ObjectName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 
-        protected DropSortStatement DropSortStatement()
+        protected DropSortStatement DropSortStatement(int ALine, int ALinePos)
         {
 			DropSortStatement LStatement = new DropSortStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.ScalarTypeName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
-        protected DropConversionStatement DropConversionStatement()
+        protected DropConversionStatement DropConversionStatement(int ALine, int ALinePos)
         {
 			DropConversionStatement LStatement = new DropConversionStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.SourceScalarTypeName = TypeSpecifier();
 			FLexer.NextToken().CheckSymbol(Keywords.To);
 			LStatement.TargetScalarTypeName = TypeSpecifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
-		protected DropRoleStatement DropRoleStatement()
+		protected DropRoleStatement DropRoleStatement(int ALine, int ALinePos)
 		{
 			DropRoleStatement LStatement = new DropRoleStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.RoleName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
-		protected DropRightStatement DropRightStatement()
+		protected DropRightStatement DropRightStatement(int ALine, int ALinePos)
 		{
 			DropRightStatement LStatement = new DropRightStatement();
-			LStatement.SetPosition(FLexer);
+			LStatement.Line = ALine;
+			LStatement.LinePos = ALinePos;
 			LStatement.RightName = QualifiedIdentifier();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 
@@ -7022,6 +7315,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				} while (!LDone);
 			}
 			MetaData(LStatement);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -7042,6 +7336,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LColumnSpecifier.SetPosition(FLexer);
 				LColumnSpecifier.TableVarName = QualifiedIdentifier();
 				LColumnSpecifier.ColumnName = LIdentifier;
+				LColumnSpecifier.SetEndPosition(FLexer);
 				return LColumnSpecifier;
 			}
 			else
@@ -7049,6 +7344,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				ObjectEventSourceSpecifier LSpecifier = new ObjectEventSourceSpecifier();
 				LSpecifier.SetPosition(FLexer);
 				LSpecifier.ObjectName = LIdentifier;
+				LSpecifier.SetEndPosition(FLexer);
 				return LSpecifier;
 			}
 		}
@@ -7085,6 +7381,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 			else
 				EventSpecifier(LEventSpecifier);
+			LEventSpecifier.SetEndPosition(FLexer);
 			return LEventSpecifier;
 		}
 		
@@ -7131,6 +7428,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FLexer.NextToken().CheckSymbol(Keywords.From);
 			LStatement.EventSourceSpecifier = EventSourceSpecifier();
 			LStatement.EventSpecifier = EventSpecifierClause();
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -7165,6 +7463,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					default: throw new ParserException(ParserException.Codes.ListTerminatorExpected);
 				}
 			} while (!LDone);
+			LStatement.SetEndPosition(FLexer);
 			return LStatement;
 		}
 		
@@ -7236,6 +7535,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				FormalParameterSpecifiers(LSpecifier.FormalParameterSpecifiers);
 			}
 			
+			LSpecifier.SetEndPosition(FLexer);
 			return LSpecifier;
 		}
 		
@@ -7313,6 +7613,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			CatalogObjectSpecifier(LGrantStatement);
 			FLexer.NextToken().CheckSymbol(Keywords.To);
 			SecuritySpecifier(LGrantStatement);
+			LGrantStatement.SetEndPosition(FLexer);
 			return LGrantStatement;
 		}
 		
@@ -7330,6 +7631,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			CatalogObjectSpecifier(LRevokeStatement);
 			FLexer.NextToken().CheckSymbol(Keywords.From);
 			SecuritySpecifier(LRevokeStatement);
+			LRevokeStatement.SetEndPosition(FLexer);
 			return LRevokeStatement;
 		}
 		
@@ -7347,6 +7649,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			CatalogObjectSpecifier(LRevertStatement);
 			FLexer.NextToken().CheckSymbol(Keywords.For);
 			SecuritySpecifier(LRevertStatement);
+			LRevertStatement.SetEndPosition(FLexer);
 			return LRevertStatement;
 		}
     }

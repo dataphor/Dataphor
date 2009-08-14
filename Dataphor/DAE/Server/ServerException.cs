@@ -275,6 +275,24 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106191: "Only objects of type "{0}" may be added to this container."</summary>
 			TypedObjectContainer = 106191,
+			
+			/// <summary>Error code 106192: "The debugger must be paused in order to perform this operation."</summary>
+			DebuggerRunning = 106192,
+			
+			/// <summary>Error code 106193: "There is no debugger associated with session ({0})."</summary>
+			DebuggerNotStarted = 106193,
+			
+			/// <summary>Error code 106194: "There is already a debugger started for session ({0})."</summary>
+			DebuggerAlreadyStarted = 106194,
+			
+			/// <summary>Error code 106195: "There is already a debugger attached to process ({0})."</summary>
+			DebuggerAlreadyAttached = 106195,
+			
+			/// <summary>Error code 106196: "There is already a debugger attached to session ({0})."</summary>
+			DebuggerAlreadyAttachedToSession = 106196,
+			
+			/// <summary>Error code 106197: "The debugger cannot be attached to the debugger session ({0})."</summary>
+			CannotAttachToDebuggerSession = 106197,
 		}
 		
 		// Resource manager for this exception class

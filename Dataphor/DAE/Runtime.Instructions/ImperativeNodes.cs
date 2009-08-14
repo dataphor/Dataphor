@@ -56,6 +56,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public BlockNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -97,6 +98,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public DelimitedBlockNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
@@ -133,6 +135,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public FrameNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		public override void InternalDetermineBinding(Plan APlan)
@@ -194,6 +197,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public ExpressionStatementNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		public ExpressionStatementNode(PlanNode ANode) : base()
@@ -240,6 +244,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public ExitNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -264,6 +269,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public WhileNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 /*
@@ -348,6 +354,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public DoWhileNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 /*
@@ -430,6 +437,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//	Nodes[1] - Iteration Statement
 	public class ForEachNode : PlanNode
 	{
+		public ForEachNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		private ForEachStatement FStatement;
 		public ForEachStatement Statement
 		{
@@ -632,6 +644,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public BreakNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -663,6 +676,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public ContinueNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -687,6 +701,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public RaiseNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 /*
@@ -739,6 +754,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public TryFinallyNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 		public override void EmitIL(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -782,10 +798,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class ErrorHandlerNode : PlanNode
 	{
-		//public ErrorHandlerNode() : base()
-		//{
-		//    ShouldEmitIL = true;
-		//}
+		public ErrorHandlerNode() : base()
+		{
+		    ShouldEmitIL = true;
+			IsBreakable = true;
+		}
 		
 		protected bool FIsGeneric;
 		public bool IsGeneric
@@ -907,6 +924,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class TryExceptNode : PlanNode
 	{
+		public TryExceptNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		public static ErrorHandlerNode GetErrorHandlerNode(PlanNode ANode)
 		{
 			ErrorHandlerNode LResult = ANode as ErrorHandlerNode;
@@ -958,6 +980,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public IfNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 /*
@@ -1032,6 +1055,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class CaseNode : PlanNode
 	{
+		public CaseNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			foreach (CaseItemNode LNode in Nodes)
@@ -1084,6 +1112,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Nodes[1] -> case item then statement
 	public class SelectedCaseNode : PlanNode
 	{
+		public SelectedCaseNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		public override void DetermineBinding(Plan APlan)
 		{
 			Nodes[0].DetermineBinding(APlan);
@@ -1182,6 +1215,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class CaseItemNode : PlanNode
 	{
+		public CaseItemNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			return null;
@@ -1360,6 +1398,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public CallNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		private PlanNode FAllocateResultNode;
@@ -1611,83 +1650,80 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
 				AProcess.Context.Push(AArguments[LIndex]);
 				
-			AProcess.Context.PushWindow(Operator.Operands.Count);
+			AProcess.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
 			try
 			{
-				AProcess.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
+				bool LSaveIsInsert = AProcess.IsInsert;
+				AProcess.IsInsert = false;
 				try
 				{
-					bool LSaveIsInsert = AProcess.IsInsert;
-					AProcess.IsInsert = false;
+					ApplicationTransaction LTransaction = null;
+					if ((AProcess.ApplicationTransactionID != Guid.Empty) && !Operator.ShouldTranslate)
+						LTransaction = AProcess.GetApplicationTransaction();
 					try
 					{
-						ApplicationTransaction LTransaction = null;
-						if ((AProcess.ApplicationTransactionID != Guid.Empty) && !Operator.ShouldTranslate)
-							LTransaction = AProcess.GetApplicationTransaction();
+						if (LTransaction != null)
+							LTransaction.PushGlobalContext();
 						try
 						{
-							if (LTransaction != null)
-								LTransaction.PushGlobalContext();
+							// Prepare the result
+							if (FAllocateResultNode != null)
+								FAllocateResultNode.Execute(AProcess);
+
+							// Record the stack depth
+							int LStackDepth = AProcess.Context.Count;
+
 							try
 							{
-								// Prepare the result
-								if (FAllocateResultNode != null)
-									FAllocateResultNode.Execute(AProcess);
-
-								// Record the stack depth
-								int LStackDepth = AProcess.Context.Count;
-
-								try
-								{
-									Operator.Block.BlockNode.Execute(AProcess);
-								}
-								catch (ExitError){}
-								
-								// Pass any var arguments back out to the instruction
-								for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-									if (Operator.Operands[LIndex].Modifier == Modifier.Var)
-										AArguments[LIndex] = AProcess.Context[AProcess.Context.Count - LStackDepth + (Operator.Operands.Count + (FAllocateResultNode != null ? 1 : 0) - 1 - LIndex)];
-								
-								// Return the result
-								if (FAllocateResultNode != null)
-									return AProcess.Context[AProcess.Context.Count - LStackDepth];
-
-								return null;
+								Operator.Block.BlockNode.Execute(AProcess);
 							}
-							finally
-							{
-								if (LTransaction != null)
-									LTransaction.PopGlobalContext();
-							}
+							catch (ExitError){}
+							
+							// Pass any var arguments back out to the instruction
+							for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
+								if (Operator.Operands[LIndex].Modifier == Modifier.Var)
+									AArguments[LIndex] = AProcess.Context[AProcess.Context.Count - LStackDepth + (Operator.Operands.Count + (FAllocateResultNode != null ? 1 : 0) - 1 - LIndex)];
+							
+							// Return the result
+							if (FAllocateResultNode != null)
+								return AProcess.Context[AProcess.Context.Count - LStackDepth];
+
+							return null;
 						}
 						finally
 						{
 							if (LTransaction != null)
-								Monitor.Exit(LTransaction);
+								LTransaction.PopGlobalContext();
 						}
 					}
 					finally
 					{
-						AProcess.IsInsert = LSaveIsInsert;
+						if (LTransaction != null)
+							Monitor.Exit(LTransaction);
 					}
 				}
 				finally
 				{
-					AProcess.Plan.PopSecurityContext();
+					AProcess.IsInsert = LSaveIsInsert;
 				}
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Plan.PopSecurityContext();
 			}
 		}
 	}
 	
 	public class VariableNode : PlanNode
 	{
-		public VariableNode() : base(){}
+		public VariableNode() : base()
+		{
+			IsBreakable = true;
+		}
+
 		public VariableNode(string AVariableName, Schema.IDataType AVariableType) : base()
 		{
+			IsBreakable = true;
 			FVariableName = AVariableName;
 			FVariableType = AVariableType;
 		}
@@ -1942,6 +1978,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public AssignmentNode() : base()
 		{
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 		
 		public AssignmentNode(PlanNode ATargetNode, PlanNode AValueNode) : base()

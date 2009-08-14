@@ -23,6 +23,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -274,6 +275,58 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
+		// DeclarationText
+		private string FDeclarationText;
+		public string DeclarationText
+		{
+			get { return FDeclarationText; }
+			set { FDeclarationText = value; }
+		}
+		
+		// BodyText
+		private string FBodyText;
+		public string BodyText
+		{
+			get { return FBodyText; }
+			set { FBodyText = value; }
+		}
+		
+		// Locator
+		private DebugLocator FLocator;
+		public DebugLocator Locator
+		{
+			get { return FLocator; }
+			set { FLocator = value; }
+		}
+
+		/// <summary>
+		/// Parses the DebugLocator from the DAE.Locator tag, if present.
+		/// </summary>
+		public static DebugLocator GetLocator(MetaData AMetaData)
+		{
+			Tag LTag = MetaData.RemoveTag(AMetaData, "DAE.Locator");
+			if (LTag != Tag.None)
+				return DebugLocator.Parse(LTag.Value);
+				
+			return null;
+		}
+
+		public void SaveLocator()
+		{
+			if (FLocator != null)
+			{
+				if (MetaData == null)
+					MetaData = new MetaData();
+				MetaData.Tags.AddOrUpdate("DAE.Locator", FLocator.ToString(), true);
+			}
+		}
+		
+		public void RemoveLocator()
+		{
+			if (MetaData != null)
+				MetaData.Tags.RemoveTag("DAE.Locator");
+		}
+
 		// ATOperatorName
 		private string FSourceOperatorName;
 		public string SourceOperatorName
@@ -466,43 +519,57 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				SaveObjectID();
 				SaveGeneratorID();
+				SaveLocator();
 			}
 			else
 			{
 				RemoveObjectID();
 				RemoveGeneratorID();
+				RemoveLocator();
+			}
+			
+			IMetaData LResult;
+//			if ((AMode == EmitMode.ForStorage) && (FDeclarationText != null))
+//			{
+//				SourceStatement LStatement = new SourceStatement();
+//				LStatement.Source = FDeclarationText + FBodyText;
+//				LResult = LStatement;
+//			}
+//			else
+			{
+				CreateOperatorStatement LStatement = new CreateOperatorStatement();
+				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand LOperand in Operands)
+				{
+					FormalParameter LFormalParameter = new FormalParameter();
+					LFormalParameter.Identifier = LOperand.Name;
+					LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
+					LFormalParameter.Modifier = LOperand.Modifier;
+					LStatement.FormalParameters.Add(LFormalParameter);
+				}
+				if (ReturnDataType != null)
+					LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
+				#if USEVIRTUAL
+				LStatement.IsVirtual = IsVirtual;
+				LStatement.IsAbstract = IsAbstract;
+				LStatement.IsOverride = IsOverride;
+				LStatement.IsReintroduced = IsReintroduced;
+				#endif
+				if ((AMode == EmitMode.ForRemote) && (Block.BlockNode != null) && !IsRemotable)
+					LStatement.Block.Block = new Block();
+				else
+					Block.EmitStatement(AMode, LStatement.Block);
+				LResult = LStatement;
 			}
 
-			CreateOperatorStatement LStatement = new CreateOperatorStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-			foreach (Operand LOperand in Operands)
-			{
-				FormalParameter LFormalParameter = new FormalParameter();
-				LFormalParameter.Identifier = LOperand.Name;
-				LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-				LFormalParameter.Modifier = LOperand.Modifier;
-				LStatement.FormalParameters.Add(LFormalParameter);
-			}
-			if (ReturnDataType != null)
-				LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
-			#if USEVIRTUAL
-			LStatement.IsVirtual = IsVirtual;
-			LStatement.IsAbstract = IsAbstract;
-			LStatement.IsOverride = IsOverride;
-			LStatement.IsReintroduced = IsReintroduced;
-			#endif
-			if ((AMode == EmitMode.ForRemote) && (Block.BlockNode != null) && !IsRemotable)
-				LStatement.Block.Block = new Block();
-			else
-				Block.EmitStatement(AMode, LStatement.Block);
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
+			LResult.MetaData = MetaData == null ? null : MetaData.Copy();
 			if (SessionObjectName != null)
 			{
-				if (LStatement.MetaData == null)
-					LStatement.MetaData = new MetaData();
-				LStatement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				if (LResult.MetaData == null)
+					LResult.MetaData = new MetaData();
+				LResult.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
 			}
-			return LStatement;
+			return (Statement)LResult;
 		}
 		
 		public override Statement EmitDropStatement(EmitMode AMode)
@@ -546,6 +613,28 @@ namespace Alphora.Dataphor.DAE.Schema
         private OperatorBlock FFinalization = new OperatorBlock();
         public OperatorBlock Finalization { get { return FFinalization; } }
         
+		// InitializationText
+		private string FInitializationText;
+		public string InitializationText
+		{
+			get { return FInitializationText; }
+			set { FInitializationText = value; }
+		}
+		
+		public string AggregationText
+		{
+			get { return BodyText; }
+			set { BodyText = value; }
+		}
+		
+		// FinalizationText
+		private string FFinalizationText;
+		public string FinalizationText
+		{
+			get { return FFinalizationText; }
+			set { FFinalizationText = value; }
+		}
+		
         // IsOrderDependent
         private bool FIsOrderDependent;
         public bool IsOrderDependent
@@ -557,47 +646,66 @@ namespace Alphora.Dataphor.DAE.Schema
 		public override Statement EmitStatement(EmitMode AMode)
 		{
 			if (AMode == EmitMode.ForStorage)
+			{
 				SaveObjectID();
+				SaveLocator();
+			}
 			else
+			{
 				RemoveObjectID();
+				RemoveLocator();
+			}
+				
+			IMetaData LResult;
+			
+//			if ((AMode == EmitMode.ForStorage) && (DeclarationText != null))
+//			{
+//				SourceStatement LStatement = new SourceStatement();
+//				LStatement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;
+//				LResult = LStatement;
+//			}
+//			else
+			{
+				CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
+				LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
+				foreach (Operand LOperand in Operands)
+				{
+					FormalParameter LFormalParameter = new FormalParameter();
+					LFormalParameter.Identifier = LOperand.Name;
+					LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
+					LFormalParameter.Modifier = LOperand.Modifier;
+					LStatement.FormalParameters.Add(LFormalParameter);
+				}
+				LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
+				#if USEVIRTUAL
+				LStatement.IsVirtual = IsVirtual;
+				LStatement.IsAbstract = IsAbstract;
+				LStatement.IsOverride = IsOverride;
+				LStatement.IsReintroduced = IsReintroduced;
+				#endif
+				if ((AMode == EmitMode.ForRemote) && !IsRemotable)
+				{
+					LStatement.Initialization.Block = new Block();
+					LStatement.Aggregation.Block = new Block();
+					LStatement.Finalization.Block = new Block();
+				}
+				else
+				{
+					Initialization.EmitStatement(AMode, LStatement.Initialization);
+					Aggregation.EmitStatement(AMode, LStatement.Aggregation);
+					Finalization.EmitStatement(AMode, LStatement.Finalization);
+				}
+				LResult = LStatement;
+			}
 
-			CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
-			LStatement.OperatorName = Schema.Object.EnsureRooted(OperatorName);
-			foreach (Operand LOperand in Operands)
-			{
-				FormalParameter LFormalParameter = new FormalParameter();
-				LFormalParameter.Identifier = LOperand.Name;
-				LFormalParameter.TypeSpecifier = LOperand.DataType.EmitSpecifier(AMode);
-				LFormalParameter.Modifier = LOperand.Modifier;
-				LStatement.FormalParameters.Add(LFormalParameter);
-			}
-			LStatement.ReturnType = ReturnDataType.EmitSpecifier(AMode);
-			#if USEVIRTUAL
-			LStatement.IsVirtual = IsVirtual;
-			LStatement.IsAbstract = IsAbstract;
-			LStatement.IsOverride = IsOverride;
-			LStatement.IsReintroduced = IsReintroduced;
-			#endif
-			if ((AMode == EmitMode.ForRemote) && !IsRemotable)
-			{
-				LStatement.Initialization.Block = new Block();
-				LStatement.Aggregation.Block = new Block();
-				LStatement.Finalization.Block = new Block();
-			}
-			else
-			{
-				Initialization.EmitStatement(AMode, LStatement.Initialization);
-				Aggregation.EmitStatement(AMode, LStatement.Aggregation);
-				Finalization.EmitStatement(AMode, LStatement.Finalization);
-			}
-			LStatement.MetaData = MetaData == null ? null : MetaData.Copy();
+			LResult.MetaData = MetaData == null ? null : MetaData.Copy();
 			if (SessionObjectName != null)
 			{
-				if (LStatement.MetaData == null)
-					LStatement.MetaData = new MetaData();
-				LStatement.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
+				if (LResult.MetaData == null)
+					LResult.MetaData = new MetaData();
+				LResult.MetaData.Tags.AddOrUpdate("DAE.GlobalObjectName", OperatorName, true);
 			}
-			return LStatement;
+			return (Statement)LResult;
 		}
 
 		public override Statement EmitHeader()

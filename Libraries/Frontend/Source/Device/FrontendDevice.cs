@@ -1114,7 +1114,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		public StreamID RegisterBinary(ServerProcess AProcess, Stream AData)
 		{
 			FrontendDeviceSession LDeviceSession = (FrontendDeviceSession)AProcess.DeviceConnect(this);
-			StreamID LStreamID = AProcess.ServerSession.Server.StreamManager.Register(LDeviceSession);
+			StreamID LStreamID = AProcess.Register(LDeviceSession);
 			LDeviceSession.Create(LStreamID, AData);
 			return LStreamID;
 		}

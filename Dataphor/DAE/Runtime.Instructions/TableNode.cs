@@ -207,7 +207,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public abstract class TableNode : InstructionNodeBase
 	{        
 		// constructor
-		public TableNode() : base() { }
+		public TableNode() : base() 
+		{
+			IsBreakable = false; // TODO: Debug table nodes? 
+		}
 		
 		protected Schema.TableVarColumn CopyTableVarColumn(Schema.TableVarColumn AColumn)
 		{

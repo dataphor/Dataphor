@@ -21,6 +21,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -201,12 +202,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
+		public IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
 		{
 			try
 			{
 				CleanupPlans(ACleanupInfo);
-				ServerStatementPlan LStatementPlan = (ServerStatementPlan)FServerProcess.PrepareStatement(AStatement, RemoteParamsToDataParams(AParams));
+				ServerStatementPlan LStatementPlan = (ServerStatementPlan)FServerProcess.PrepareStatement(AStatement, RemoteParamsToDataParams(AParams), ALocator);
 				RemoteServerStatementPlan LRemotePlan = new RemoteServerStatementPlan(this, LStatementPlan);
 				APlanDescriptor = GetPlanDescriptor(LRemotePlan);
 				return LRemotePlan;
@@ -258,12 +259,12 @@ namespace Alphora.Dataphor.DAE.Server
 			return LDescriptor;
 		}
 		
-		public IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
+		public IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo)
 		{
 			try
 			{
 				CleanupPlans(ACleanupInfo);
-				RemoteServerExpressionPlan LRemotePlan = new RemoteServerExpressionPlan(this, (ServerExpressionPlan)FServerProcess.PrepareExpression(AExpression, RemoteParamsToDataParams(AParams)));
+				RemoteServerExpressionPlan LRemotePlan = new RemoteServerExpressionPlan(this, (ServerExpressionPlan)FServerProcess.PrepareExpression(AExpression, RemoteParamsToDataParams(AParams), ALocator));
 				APlanDescriptor = GetPlanDescriptor(LRemotePlan, AParams);
 				return LRemotePlan;
 			}
@@ -290,7 +291,7 @@ namespace Alphora.Dataphor.DAE.Server
 		)
 		{
 			ProcessCallInfo(ACallInfo);
-			APlan = PrepareExpression(AExpression, AParams.Params, out APlanDescriptor, ACleanupInfo);
+			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
 				TimeSpan LExecuteTime;
@@ -318,7 +319,7 @@ namespace Alphora.Dataphor.DAE.Server
 		)
 		{
 			ProcessCallInfo(ACallInfo);
-			APlan = PrepareExpression(AExpression, AParams.Params, out APlanDescriptor, ACleanupInfo);
+			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
 				TimeSpan LExecuteTime;
@@ -349,7 +350,7 @@ namespace Alphora.Dataphor.DAE.Server
 		)
 		{
 			ProcessCallInfo(ACallInfo);
-			APlan = PrepareExpression(AExpression, AParams.Params, out APlanDescriptor, ACleanupInfo);
+			APlan = PrepareExpression(AExpression, AParams.Params, null, out APlanDescriptor, ACleanupInfo);
 			try
 			{
 				TimeSpan LExecuteTime;
@@ -381,9 +382,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// PrepareScript
-		public IRemoteServerScript PrepareScript(string AScript)
+		public IRemoteServerScript PrepareScript(string AScript, DebugLocator ALocator)
 		{
-			ServerScript LScript = (ServerScript)FServerProcess.PrepareScript(AScript);
+			ServerScript LScript = (ServerScript)FServerProcess.PrepareScript(AScript, ALocator);
 			return new RemoteServerScript(this, LScript);
 		}
 		

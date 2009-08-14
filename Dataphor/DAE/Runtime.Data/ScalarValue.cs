@@ -897,7 +897,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// <summary>A scalar value which is currently contained inside a native row or list.</summary>	
 	public abstract class InternedScalar : Scalar
 	{
-		public InternedScalar(IServerProcess AProcess, Schema.IScalarType ADataType) : base(AProcess, ADataType)
+		public InternedScalar(IServerProcess AProcess, Schema.IScalarType ADataType) : base(AProcess, ADataType, null)
 		{
 			ValuesOwned = false;
 		}

@@ -1,0 +1,113 @@
+/*
+	Dataphor debugging support
+*/
+
+//* Operator: GetDebuggers
+create operator Debug.GetDebuggers() 
+	: table { Session_ID : Integer, BreakOnException : Boolean, IsPaused : Boolean }
+	class "System.DebugGetDebuggersNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: SetBreakOnException
+create operator Debug.SetBreakOnException(ABreakOnException : Boolean)
+	class "System.DebugSetBreakOnExceptionNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: GetProcesses
+create operator Debug.GetProcesses() : table { Process_ID : Integer }
+	class "System.DebugGetProcessesNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: AttachProcess
+create operator Debug.AttachProcess(AProcessID : Integer) 
+	class "System.DebugAttachProcessNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: DetachProcess
+create operator Debug.DetachProcess(AProcessID : Integer) 
+	class "System.DebugDetachProcessNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: AttachSession
+create operator Debug.AttachSession(ASessionID : Integer) 
+	class "System.DebugAttachSessionNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: DetachSession
+create operator Debug.DetachSession(ASessionID : Integer) 
+	class "System.DebugDetachSessionNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: GetCallStack
+create operator Debug.GetCallStack(AProcessID : Integer) 
+	: table { Index : Integer, Description : String }
+	class "System.DebugGetCallStackNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: GetContext
+//create operator Debug.GetContext(AProcessID : Integer, AStackIndex : Integer) 
+//	: table { Name : Name, Value : String }
+//	class "System.DebugGetContextNode"
+//	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+	
+//* Operator: GetStepIntoOperators
+//create operator Debug.GetStepIntoOperators(AProcessID : Integer) 
+//	: table { Index : Integer, OperatorName : Name }
+//	class "System.DebugGetStepIntoOperatorsNode"
+//	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: GetBreakpoints
+create operator Debug.GetBreakpoints() 
+	: table { Locator : String, Line : Integer, LinePos : Integer }
+	class "System.DebugGetBreakpointsNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: ToggleBreakpoint
+create operator Debug.ToggleBreakpoint(ALocator : String, ALine : Integer, ALinePos : Integer) : Boolean
+	class "System.DebugToggleBreakpointNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: Start
+create operator Debug.Start() 
+	class "System.DebugStartNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: Stop
+create operator Debug.Stop() 
+	class "System.DebugStopNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: WaitForBreak
+create operator Debug.WaitForBreak() 
+	class "System.DebugWaitForBreakNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: Pause
+create operator Debug.Pause() 
+	class "System.DebugPauseNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: Run
+create operator Debug.Run() 
+	class "System.DebugRunNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: RunTo
+//create operator Debug.RunTo(AProcessID : Integer, ALocator : string, ALine : Integer, ALinePos : Integer) 
+//	class "System.DebugRunToNode"
+//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: StepOver
+//create operator Debug.StepOver(AProcessID : Integer) 
+//	class "System.DebugStepOverNode"
+//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: StepInto
+//create operator Debug.StepInto(AProcessID : Integer) 
+//	class "System.DebugStepIntoNode"
+//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+
+//* Operator: StepIntoSpecific
+//create operator Debug.StepIntoSpecific(AProcessID : Integer, AOperatorName : Name) 
+//	class "System.DebugStepIntoSpecificNode"
+//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };

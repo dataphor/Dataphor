@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE
 {
@@ -130,7 +131,7 @@ namespace Alphora.Dataphor.DAE
         /// <summary> Prepares the given statement for remote execution. </summary>
         /// <param name='AStatement'> A single valid Dataphor statement to prepare. </param>
         /// <returns> An <see cref="IServerStatementPlan"/> instance for the prepared statement. </returns>
-        IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
+        IRemoteServerStatementPlan PrepareStatement(string AStatement, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
         
         /// <summary> Unprepares a statement plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareStatement. </param>
@@ -141,7 +142,7 @@ namespace Alphora.Dataphor.DAE
         /// <summary> Prepares the given expression for remote selection. </summary>
         /// <param name='AExpression'> A single valid Dataphor expression to prepare. </param>
         /// <returns> An <see cref="IServerExpressionPlan"/> instance for the prepared expression. </returns>
-        IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
+        IRemoteServerExpressionPlan PrepareExpression(string AExpression, RemoteParam[] AParams, DebugLocator ALocator, out PlanDescriptor APlanDescriptor, ProcessCleanupInfo ACleanupInfo);
         
         /// <summary> Unprepares an expression plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareExpression. </param>
@@ -189,7 +190,7 @@ namespace Alphora.Dataphor.DAE
 		void CloseCursor(IRemoteServerCursor ACursor, ProcessCallInfo ACallInfo);
 
 		/// <summary> Prepares a given script for remote execution. </summary>
-        IRemoteServerScript PrepareScript(string AScript);
+        IRemoteServerScript PrepareScript(string AScript, DebugLocator ALocator);
         
 		/// <summary> Unprepares a given script. </summary>
         void UnprepareScript(IRemoteServerScript AScript);

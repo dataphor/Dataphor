@@ -597,41 +597,43 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void StopProcess(int AProcessID)
+		public ServerProcess FindProcess(int AProcessID)
 		{
 			foreach (ServerSession LSession in Sessions)
 			{
-				ServerProcess LProcessToStop = null;
 				lock (LSession.Processes)
+				{
 					foreach (ServerProcess LProcess in LSession.Processes)
 						if (LProcess.ProcessID == AProcessID)
-						{
-							LProcessToStop = LProcess;
-							break;
-						}
-				
-				if (LProcessToStop != null)
-				{
-					TerminateProcess(LProcessToStop);
-					return;
+							return LProcess;
 				}
 			}
+			
+			return null;
+		}
+		
+		public ServerProcess GetProcess(int AProcessID)
+		{
+			ServerProcess LProcess = FindProcess(AProcessID);
+			if (LProcess != null)
+				return LProcess;
 
 			throw new ServerException(ServerException.Codes.ProcessNotFound, AProcessID);
+		}
+		
+		public void StopProcess(int AProcessID)
+		{
+			TerminateProcess(GetProcess(AProcessID));
+		}
+		
+		public ServerSession GetSession(int ASessionID)
+		{
+			return FSessions.GetSession(ASessionID);
 		}
 
 		public void CloseSession(int ASessionID)
 		{
-			foreach (ServerSession LSession in Sessions)
-			{
-				if (LSession.SessionID == ASessionID)
-				{
-					LSession.Dispose();
-					return;
-				}
-			}
-
-			throw new ServerException(ServerException.Codes.SessionNotFound, ASessionID);
+			GetSession(ASessionID).Dispose();
 		}
 		
 		public void DropSessionObject(Schema.CatalogObject AObject)
@@ -1061,16 +1063,23 @@ namespace Alphora.Dataphor.DAE.Server
 					DateTime LEndTime = DateTime.Now.AddTicks(ProcessTerminationTimeout.Ticks / 2);
 					while (true)
 					{
+						Debug.Debugger LDebugger = null;
 						Monitor.Enter(AProcess.ExecutionSyncHandle);
 						try
 						{
 							if ((AProcess.ExecutingThread == null) || !AProcess.ExecutingThread.IsAlive)
 								return;
+								
+							if (AProcess.Debugger != null)
+								LDebugger = AProcess.Debugger;
 						}
 						finally
 						{
 							Monitor.Exit(AProcess.ExecutionSyncHandle);
 						}
+						
+						if ((LDebugger != null) && LDebugger.IsPaused)
+							LDebugger.CheckForAbort();
 
 						System.Threading.Thread.SpinWait(100);
 						if (DateTime.Now > LEndTime)
@@ -1277,6 +1286,40 @@ namespace Alphora.Dataphor.DAE.Server
 						LogError(E);
 					}
 				}
+			}
+		}
+		
+		/// <summary>
+		/// Returns a list of currently running debuggers in the DAE.
+		/// </summary>
+		public List<Debug.Debugger> GetDebuggers()
+		{
+			BeginCall();
+			try
+			{
+				List<Debug.Debugger> LResult = new List<Debug.Debugger>();
+				foreach (ServerSession LSession in FSessions)
+					if (LSession.Debugger != null)
+						LResult.Add(LSession.Debugger);
+						
+				return LResult;
+			}
+			finally
+			{
+				EndCall();
+			}
+		}
+		
+		public Debug.Debugger GetDebugger(int ADebuggerID)
+		{
+			BeginCall();
+			try
+			{
+				return FSessions.GetSession(ADebuggerID).CheckedDebugger;
+			}
+			finally
+			{
+				EndCall();
 			}
 		}
 		
@@ -2487,6 +2530,12 @@ namespace Alphora.Dataphor.DAE.Server
 							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 						}
 						LogMessage("System catalog registered.");
+						LogMessage("Registering debug operators...");
+						using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
+						{
+							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
+						}
+						LogMessage("Debug operators registered.");
 					}
 				}
 			}

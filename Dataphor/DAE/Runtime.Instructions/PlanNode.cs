@@ -65,7 +65,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public PlanNode() : base()
 		{
-			//Execute = new ExecuteDelegate(StandardExecute);
  		}
 		
         // IsLiteral
@@ -300,18 +299,76 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FShouldEmitIL = value; }
 		}
 		
-		private int FLine = -1;
-		public int Line
+		private bool FIsBreakable = false;
+		public bool IsBreakable
 		{
-			get { return FLine; }
-			set { FLine = value; }
+			get { return FIsBreakable; }
+			set { FIsBreakable = value; }
 		}
 		
-		private int FLinePos = -1;
+		private LineInfo FLineInfo;
+		public LineInfo LineInfo
+		{
+			get { return FLineInfo; }
+			set { FLineInfo = value; }
+		}
+		
+		public void SetLineInfo(LineInfo ALineInfo)
+		{
+			if (ALineInfo != null)
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				
+				FLineInfo.Line = ALineInfo.Line;
+				FLineInfo.LinePos = ALineInfo.LinePos;
+				FLineInfo.EndLine = ALineInfo.EndLine;
+				FLineInfo.EndLinePos = ALineInfo.EndLinePos;
+			}
+		}
+
+		public int Line 
+		{ 
+			get { return FLineInfo == null ? -1 : FLineInfo.Line; } 
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.Line = value;
+			}
+		}
+		
 		public int LinePos
 		{
-			get { return FLinePos; }
-			set { FLinePos = value; }
+			get { return FLineInfo == null ? -1 : FLineInfo.LinePos; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.LinePos = value;
+			}
+		}
+		
+		public int EndLine
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.EndLine; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.EndLine = value;
+			}
+		}
+		
+		public int EndLinePos
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.EndLinePos; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.EndLinePos = value;
+			}
 		}
 		
         // Nodes
@@ -580,6 +637,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 			#endif
 				AProcess.CheckAborted();
+				if (IsBreakable)
+					AProcess.Yield(this);
 				#if TRACKCALLDEPTH
 				AProcess.Context.IncCallDepth();
 				try
@@ -600,42 +659,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#endif
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
-			catch (RuntimeException LRuntimeException)
-			{
-				if (!LRuntimeException.HasContext())
-					LRuntimeException.SetContext(this);
-				throw LRuntimeException;
-			}
-			catch (ControlError LControlError)
-			{
-				throw LControlError;
-			}
-			catch (NullReferenceException LNullReferenceException)
-			{
-				throw new RuntimeException(RuntimeException.Codes.NilEncountered, LNullReferenceException, this);
-			}
-			catch (DataphorException LDataphorException)
-			{
-				if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
-					throw LDataphorException;
-				else
-					throw new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
-			}
-			catch (FormatException LFormatException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LFormatException.Message, LFormatException);
-			}
-			catch (ArgumentException LArgumentException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArgumentException.Message, LArgumentException);
-			}
-			catch (ArithmeticException LArithmeticException)
-			{
-				throw new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LArithmeticException.Message, LArithmeticException);
-			}
 			catch (Exception LException)
 			{
-				throw new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
+				Exception LToThrow = null;
+				
+				RuntimeException LRuntimeException = LException as RuntimeException;
+				if (LRuntimeException != null)
+				{
+					if (!LRuntimeException.HasContext())
+						LRuntimeException.SetContext(this);
+					LToThrow = LRuntimeException;
+				}
+				
+				if ((LToThrow == null) && (LException is ControlError))
+					throw LException;
+
+				if ((LToThrow == null) && (LException is NullReferenceException))
+					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, this);
+					
+				if (LToThrow == null)
+				{
+					DataphorException LDataphorException = LException as DataphorException;
+					if (LDataphorException != null)
+					{
+						if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
+							LToThrow = LDataphorException;
+						else
+							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
+					}
+				}
+				
+				if ((LToThrow == null) && ((LException is FormatException) || (LException is ArgumentException) || (LException is ArithmeticException)))
+					LToThrow = new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LException.Message, LException);
+					
+				if (LToThrow == null)
+					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
+					
+				if (IsBreakable)
+					AProcess.Yield(this, LToThrow);
+					
+				throw LToThrow;
 			}
 			#endif
 		}

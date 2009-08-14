@@ -1822,8 +1822,8 @@ namespace Alphora.Dataphor.DAE.Schema
 				FContext = AContext.SafeEmitStatementAsString();
 			else
 			{
-				FLine = AContext.Line;
-				FLinePos = AContext.LinePos;
+			    FLine = AContext.Line;
+			    FLinePos = AContext.LinePos;
 			}
 		}
 		

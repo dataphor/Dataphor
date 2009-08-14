@@ -8,15 +8,19 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	public class StackWindow : System.Object
 	{
-		public StackWindow(int ABase) : base()
+		public StackWindow(int ABase, PlanNode AOriginator) : base()
 		{
 			Base = ABase;
+			Originator = AOriginator;
 		}
 		
+		public PlanNode Originator;
 		public int Base;
 		public int FrameBase { get { return FFrames.CurrentFrame.Base; } }
 		public int FrameRowBase { get { return FFrames.RowBase; } }
@@ -87,6 +91,23 @@ namespace Alphora.Dataphor.DAE.Runtime
 				}
 				return LFrameRowBase;					
 			}
+        }
+        
+        /// <summary>
+        /// Returns the current call stack.
+        /// </summary>
+		/// <remarks>
+		/// This method is not thread safe, synchronization is the responsibility of the caller.
+		/// This method returns the actual stack windows. The method is expected to be used read
+		/// only, but a copy is not taken for performance reasons. Modifications to these structures
+		/// will corrupt the stack of the running process.
+		/// </remarks>
+        public List<StackWindow> GetCallStack()
+        {
+			List<StackWindow> LResult = new List<StackWindow>();
+			for (int LIndex = 0; LIndex < FCount; LIndex++)
+				LResult.Add(FStackWindows[LIndex]);
+			return LResult;
         }
 	}
 }

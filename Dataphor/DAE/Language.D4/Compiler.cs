@@ -19,6 +19,7 @@ using System.Collections.Specialized;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Runtime;
@@ -589,8 +590,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return Compile(APlan, AStatement, null, AIsCursor);
 		}
 
-		// Main compile method which all overloads eventually call		
 		public static PlanNode Compile(Plan APlan, Statement AStatement, DataParams AParams, bool AIsCursor)
+		{
+			return Compile(APlan, AStatement, AParams, AIsCursor, null);
+		}
+
+		// Main compile method which all overloads eventually call		
+		public static PlanNode Compile(Plan APlan, Statement AStatement, DataParams AParams, bool AIsCursor, SourceContext ASourceContext)
 		{
 			// Prepare plan timers
 			long LStartTicks = TimingUtility.CurrentTicks;
@@ -601,32 +607,40 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					APlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
 			
 			PlanNode LNode = null;
+			APlan.PushSourceContext(ASourceContext);
 			try
 			{
-				if (AIsCursor)
-					LNode = CompileCursor(APlan, AStatement is Expression ? (Expression)AStatement : ((SelectStatement)AStatement).CursorDefinition);
-				else
+				try
 				{
-					#if ALLOWPROCESSCONTEXT
-					APlan.Symbols.PushFrame();
-					try
+					if (AIsCursor)
+						LNode = CompileCursor(APlan, AStatement is Expression ? (Expression)AStatement : ((SelectStatement)AStatement).CursorDefinition);
+					else
 					{
-						LNode = CompileStatement(APlan, AStatement);
-						APlan.ServerProcess.ReportProcessContext(APlan.Symbols);
+						#if ALLOWPROCESSCONTEXT
+						APlan.Symbols.PushFrame();
+						try
+						{
+							LNode = CompileStatement(APlan, AStatement);
+							APlan.ServerProcess.ReportProcessContext(APlan.Symbols);
+						}
+						finally
+						{
+							APlan.Symbols.PopFrame();
+						}
+						#else
+						LNode = CompileFrameNode(APlan, AStatement);
+						#endif
 					}
-					finally
-					{
-						APlan.Symbols.PopFrame();
-					}
-					#else
-					LNode = CompileFrameNode(APlan, AStatement);
-					#endif
+				}
+				catch (Exception LException)
+				{
+					if (!(LException is CompilerException) || (((CompilerException)LException).Code != (int)CompilerException.Codes.NonFatalErrors))
+						APlan.Messages.Add(LException);
 				}
 			}
-			catch (Exception LException)
+			finally
 			{
-				if (!(LException is CompilerException) || (((CompilerException)LException).Code != (int)CompilerException.Codes.NonFatalErrors))
-					APlan.Messages.Add(LException);
+				APlan.PopSourceContext();
 			}
 			
 			APlan.Statistics.CompileTime = new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
@@ -907,6 +921,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static PlanNode CompileBlock(Plan APlan, Statement AStatement)
 		{																	
 			BlockNode LNode = new BlockNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			foreach (Statement LStatement in ((Block)AStatement).Statements)
 				LNode.Nodes.Add(CompileStatement(APlan, LStatement));
 			LNode.DetermineCharacteristics(APlan);
@@ -916,10 +931,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static PlanNode CompileDelimitedBlock(Plan APlan, Statement AStatement)
 		{
 			FrameNode LFrameNode = new FrameNode();
+			LFrameNode.SetLineInfo(AStatement.LineInfo);
 			APlan.Symbols.PushFrame();
 			try
 			{
 				DelimitedBlockNode LNode = new DelimitedBlockNode();
+				LNode.SetLineInfo(AStatement.LineInfo);
 				foreach (Statement LStatement in ((DelimitedBlock)AStatement).Statements)
 					LNode.Nodes.Add(CompileStatement(APlan, LStatement));
 				LNode.DetermineCharacteristics(APlan);
@@ -935,6 +952,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected static PlanNode CompileExpressionStatement(Plan APlan, Statement AStatement)
 		{
 			ExpressionStatementNode LNode = new ExpressionStatementNode(CompileExpression(APlan, ((ExpressionStatement)AStatement).Expression, true));
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			#if ALLOWSTATEMENTSASEXPRESSIONS
 			if ((LNode.Nodes[0].DataType != null) && !LNode.Nodes[0].DataType.Equals(APlan.Catalog.DataTypes.SystemScalar) && LNode.Nodes[0].IsFunctional && !APlan.ServerProcess.SuppressWarnings)
@@ -953,7 +971,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			PlanNode LFalseNode = null;
 			if (LStatement.FalseStatement != null)
 				LFalseNode = CompileFrameNode(APlan, LStatement.FalseStatement);
-			return EmitIfNode(APlan, LIfNode, LTrueNode, LFalseNode);
+			PlanNode LNode = EmitIfNode(APlan, LIfNode, LTrueNode, LFalseNode);
+			LNode.SetLineInfo(AStatement.LineInfo);
+			return LNode;
 		}
 		
 		protected static PlanNode EmitIfNode(Plan APlan, PlanNode ACondition, PlanNode ATrueStatement, PlanNode AFalseStatement)
@@ -1008,6 +1028,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (LStatement.Expression != null)
 			{
 				SelectedCaseNode LNode = new SelectedCaseNode();
+				LNode.SetLineInfo(AStatement.LineInfo);
 				
 				PlanNode LSelectorNode = CompileExpression(APlan, LStatement.Expression);
 				PlanNode LEqualNode = null;
@@ -1019,6 +1040,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					foreach (CaseItemStatement LCaseItemStatement in LStatement.CaseItems)
 					{
 						CaseItemNode LCaseItemNode = new CaseItemNode();
+						LCaseItemNode.SetLineInfo(LCaseItemStatement.LineInfo);
 						PlanNode LWhenNode = CompileTypedExpression(APlan, LCaseItemStatement.WhenExpression, LSelectorNode.DataType);
 						LCaseItemNode.Nodes.Add(LWhenNode);
 						APlan.Symbols.Push(new Symbol(LWhenNode.DataType));
@@ -1048,6 +1070,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (LStatement.ElseStatement != null)
 				{	
 					CaseItemNode LCaseItemNode = new CaseItemNode();
+					LCaseItemNode.SetLineInfo(LStatement.ElseStatement.LineInfo);
 					LCaseItemNode.Nodes.Add(CompileStatement(APlan, LStatement.ElseStatement));
 					LCaseItemNode.DetermineCharacteristics(APlan);
 					LNode.Nodes.Add(LCaseItemNode);
@@ -1059,10 +1082,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			else
 			{
 				CaseNode LNode = new CaseNode();
+				LNode.SetLineInfo(AStatement.LineInfo);
 				
 				foreach (CaseItemStatement LCaseItemStatement in LStatement.CaseItems)
 				{
 					CaseItemNode LCaseItemNode = new CaseItemNode();
+					LCaseItemNode.SetLineInfo(LCaseItemStatement.LineInfo);
 					LCaseItemNode.Nodes.Add(CompileBooleanExpression(APlan, LCaseItemStatement.WhenExpression));
 					LCaseItemNode.Nodes.Add(CompileStatement(APlan, LCaseItemStatement.ThenStatement));
 					LCaseItemNode.DetermineCharacteristics(APlan);
@@ -1072,6 +1097,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (LStatement.ElseStatement != null)
 				{
 					CaseItemNode LCaseItemNode = new CaseItemNode();
+					LCaseItemNode.SetLineInfo(LStatement.ElseStatement.LineInfo);
 					LCaseItemNode.Nodes.Add(CompileStatement(APlan, LStatement.ElseStatement));
 					LCaseItemNode.DetermineCharacteristics(APlan);
 					LNode.Nodes.Add(LCaseItemNode);
@@ -1086,6 +1112,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			WhileStatement LStatement = (WhileStatement)AStatement;
 			WhileNode LNode = new WhileNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			PlanNode LConditionNode = CompileBooleanExpression(APlan, LStatement.Condition);
 			LNode.Nodes.Add(LConditionNode);
 			APlan.EnterLoop();
@@ -1104,6 +1131,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected static PlanNode CompileForEachStatement(Plan APlan, Statement AStatement)
 		{
 			ForEachNode LNode = new ForEachNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.Statement = (ForEachStatement)AStatement;
 			PlanNode LExpression = CompileCursorDefinition(APlan, LNode.Statement.Expression);
 			APlan.EnterLoop();
@@ -1191,6 +1219,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			DoWhileStatement LStatement = (DoWhileStatement)AStatement;
 			DoWhileNode LNode = new DoWhileNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			PlanNode LConditionNode = CompileBooleanExpression(APlan, LStatement.Condition);
 			APlan.EnterLoop();
 			try
@@ -1209,6 +1238,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		protected static PlanNode CompileExitStatement(Plan APlan, Statement AStatement)
 		{
 			ExitNode LNode = new ExitNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			return LNode;
 		}
@@ -1218,6 +1248,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (!APlan.InLoop)
 				throw new CompilerException(CompilerException.Codes.NoLoop, AStatement);
 			BreakNode LNode = new BreakNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			return LNode;
 		}
@@ -1227,6 +1258,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			if (!APlan.InLoop)
 				throw new CompilerException(CompilerException.Codes.NoLoop, AStatement);
 			ContinueNode LNode = new ContinueNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			return LNode;
 		}
@@ -1235,6 +1267,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			RaiseStatement LStatement = (RaiseStatement)AStatement;
 			RaiseNode LNode = new RaiseNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			if (LStatement.Expression != null)
 			{
 				PlanNode LPlanNode = CompileExpression(APlan, LStatement.Expression);
@@ -1255,6 +1288,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			TryFinallyStatement LStatement = (TryFinallyStatement)AStatement;
 			TryFinallyNode LNode = new TryFinallyNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.Nodes.Add(CompileFrameNode(APlan, LStatement.TryStatement));
 			LNode.Nodes.Add(CompileFrameNode(APlan, LStatement.FinallyStatement));
 			LNode.DetermineCharacteristics(APlan);
@@ -1265,6 +1299,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			TryExceptStatement LStatement = (TryExceptStatement)AStatement;
 			TryExceptNode LNode = new TryExceptNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.Nodes.Add(CompileFrameNode(APlan, LStatement.TryStatement));
 
 			APlan.EnterErrorContext();
@@ -1273,6 +1308,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				foreach (GenericErrorHandler LHandler in LStatement.ErrorHandlers)
 				{
 					ErrorHandlerNode LErrorNode = new ErrorHandlerNode();
+					LErrorNode.SetLineInfo(LHandler.LineInfo);
 					if (LHandler is SpecificErrorHandler)
 						LErrorNode.ErrorType = (Schema.IScalarType)CompileTypeSpecifier(APlan, new ScalarTypeSpecifier(((SpecificErrorHandler)LHandler).ErrorTypeName));
 					else
@@ -2166,7 +2202,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				
 			//Schema.BaseTableVar LTempTableVar;
 			FrameNode LFrameNode = new FrameNode();
+			LFrameNode.SetLineInfo(AStatement.LineInfo);
 			BlockNode LBlockNode = new BlockNode();
+			LBlockNode.SetLineInfo(AStatement.LineInfo);
 			LFrameNode.Nodes.Add(LBlockNode);
 			APlan.Symbols.PushFrame();
 			try
@@ -2237,6 +2275,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LTargetNode = LTargetNode.Nodes[0];
 
 			DelimitedBlockNode LBlockNode = new DelimitedBlockNode();
+			LBlockNode.SetLineInfo(AStatement.LineInfo);
 			VariableNode LVariableNode = new VariableNode(Schema.Object.GetUniqueName(), ASourceNode.DataType);
 			LVariableNode.Nodes.Add(ASourceNode);
 			LVariableNode.DetermineCharacteristics(APlan);
@@ -3431,6 +3470,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public static PlanNode CompileFrameNode(Plan APlan, Statement AStatement)
 		{
 			FrameNode LNode = new FrameNode();
+			LNode.SetLineInfo(AStatement.LineInfo);
 			APlan.Symbols.PushFrame();
 			try
 			{
@@ -5590,6 +5630,60 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
+		public static void ProcessSourceContext(Plan APlan, CreateOperatorStatement AStatement, CreateOperatorNode LNode)
+		{
+			// SourceContext is the script that is currently being compiled
+			// The Locator in the source context represents an offset into the script identified by the locator, not
+			// the actual script contained in the SourceContext. Line numbers in AOperatorLineInfo will be relative 
+			// to the actual script in SourceContext, not the locator.
+			
+			if (APlan.SourceContext != null)
+			{
+				// Determine the line offsets for the operator declaration
+				LineInfo LLineInfo = new LineInfo();
+				LLineInfo.Line = AStatement.Line;
+				LLineInfo.LinePos = AStatement.LinePos;
+				LLineInfo.EndLine = AStatement.Block.Line;
+				LLineInfo.EndLinePos = AStatement.Block.LinePos;
+
+				// Copy the text of the operator from the source context
+				// Note that the text does not include the metadata for the operator, just the operator header and body.
+				LNode.CreateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
+				LNode.CreateOperator.BodyText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Block.LineInfo);
+				
+				// Pull the debug locator from the DAE.Locator metadata tag, if present
+				DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
+				if (LLocator != null)
+					LNode.CreateOperator.Locator = LLocator;
+				else
+				{
+					// Set the debug locator to the combination of the source context debug locator and the operator line info
+					if (APlan.SourceContext.Locator != null)
+					{
+						LNode.CreateOperator.Locator = 
+							new DebugLocator
+							(
+								APlan.SourceContext.Locator.Locator, 
+								APlan.SourceContext.Locator.Line + LLineInfo.Line, 
+								LLineInfo.LinePos
+							);
+					}
+					else
+					{
+						// If there is no locator, this is either dynamic or ad-hoc execution, and the locator should be a negative offset
+						// so the operator text can be returned as the debug context.
+						LNode.CreateOperator.Locator =
+							new DebugLocator
+							(
+								DebugLocator.OperatorLocator(LNode.CreateOperator.DisplayName),
+								-(LLineInfo.Line - 1),
+								LLineInfo.LinePos
+							);
+					}
+				}
+			}
+		}
+		
 		public static PlanNode CompileCreateOperatorStatement(Plan APlan, Statement AStatement)
 		{
 			if (APlan.IsOperatorCreationContext)
@@ -5682,6 +5776,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					}
 					#endif
 						
+					ProcessSourceContext(APlan, LStatement, LNode);
+
 					APlan.PlanCatalog.Add(LNode.CreateOperator);
 					try
 					{
@@ -5787,7 +5883,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 														foreach (Schema.Object LObject in LDependencies)
 															LPlan.Plan.AttachDependency(LObject);
 
-														PlanNode LBlockNode = BindOperatorBlock(LPlan.Plan, AOperator, CompileOperatorBlock(LPlan.Plan, AOperator, AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
+														PlanNode LBlockNode = BindOperatorBlock(LPlan.Plan, AOperator, CompileOperatorBlock(LPlan.Plan, AOperator, new Parser().ParseStatement(AOperator.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
 														LPlan.Plan.CheckCompiled();
 														AOperator.Block.BlockNode = LBlockNode;
 														AOperator.DetermineRemotable(APlan.ServerProcess);
@@ -5865,6 +5961,63 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
+		public static void ProcessSourceContext(Plan APlan, CreateAggregateOperatorStatement AStatement, CreateOperatorNode LNode)
+		{
+			// SourceContext is the script that is currently being compiled
+			// The Locator in the source context represents an offset into the script identified by the locator, not
+			// the actual script contained in the SourceContext. Line numbers in AOperatorLineInfo will be relative 
+			// to the actual script in SourceContext, not the locator.
+			
+			if (APlan.SourceContext != null)
+			{
+				// Determine the line offsets for the operator declaration
+				LineInfo LLineInfo = new LineInfo();
+				LLineInfo.Line = AStatement.Line;
+				LLineInfo.LinePos = AStatement.LinePos;
+				LLineInfo.EndLine = AStatement.Initialization.Line;
+				LLineInfo.EndLinePos = AStatement.Initialization.LinePos;
+
+				// Copy the text of the operator from the source context
+				// Note that the text does not include the metadata for the operator, just the operator header and body.
+				Schema.AggregateOperator LAggregateOperator = (Schema.AggregateOperator)LNode.CreateOperator;
+				LAggregateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
+				LAggregateOperator.InitializationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Initialization.LineInfo);
+				LAggregateOperator.AggregationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Aggregation.LineInfo);
+				LAggregateOperator.FinalizationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Finalization.LineInfo);
+				
+				// Pull the debug locator from the DAE.Locator metadata tag, if present
+				DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
+				if (LLocator != null)
+					LNode.CreateOperator.Locator = LLocator;
+				else
+				{
+					// Set the debug locator to the combination of the source context debug locator and the operator line info
+					if (APlan.SourceContext.Locator != null)
+					{
+						LNode.CreateOperator.Locator = 
+							new DebugLocator
+							(
+								APlan.SourceContext.Locator.Locator, 
+								APlan.SourceContext.Locator.Line + LLineInfo.Line, 
+								LLineInfo.LinePos
+							);
+					}
+					else
+					{
+						// If there is no locator, this is either dynamic or ad-hoc execution, and the locator should be a negative offset
+						// so the operator text can be returned as the debug context.
+						LNode.CreateOperator.Locator =
+							new DebugLocator
+							(
+								DebugLocator.OperatorLocator(LNode.CreateOperator.DisplayName),
+								-(LLineInfo.Line - 1),
+								LLineInfo.LinePos
+							);
+					}
+				}
+			}
+		}
+		
 		public static PlanNode CompileCreateAggregateOperatorStatement(Plan APlan, Statement AStatement)
 		{
 			if (APlan.IsOperatorCreationContext)
@@ -5913,6 +6066,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LOperator.Owner = APlan.User;
 					LOperator.Library = APlan.CurrentLibrary;
 						
+					ProcessSourceContext(APlan, LStatement, LNode);
+
 					APlan.PlanCatalog.Add(LOperator);
 					try
 					{
@@ -6130,7 +6285,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 													if (AOperator.Initialization.ClassDefinition == null)
 													{
 														int LSymbolCount = LPlan.Plan.Symbols.Count;
-														LInitializationNode = CompileStatement(LPlan.Plan, AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
+														LInitializationNode = CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
 														LInitializationDisplacement = LPlan.Plan.Symbols.Count - LSymbolCount;
 													}
 					
@@ -6142,7 +6297,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 															foreach (Schema.Operand LOperand in AOperator.Operands)
 																LPlan.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 
-															LAggregationNode = CompileDeallocateFrameVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
+															LAggregationNode = CompileDeallocateFrameVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
 														}
 														finally
 														{
@@ -6151,7 +6306,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 													}
 
 													if (AOperator.Finalization.ClassDefinition == null)
-														LFinalizationNode = CompileDeallocateVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
+														LFinalizationNode = CompileDeallocateVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.FinalizationText, null)), LResultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
 												}
 												finally
 												{
@@ -10859,9 +11014,12 @@ indicative of other problems, a reference will never be attached as an explicit 
 			{
 				LNode = new CallNode();
 			}
-
+			
 			if (LNode is InstructionNodeBase)
 				((InstructionNodeBase)LNode).Operator = AOperator;
+				
+			if (LNode.IsBreakable && (AStatement != null))
+				LNode.SetLineInfo(AStatement.LineInfo);
 
 			LNode.DataType = AOperator.ReturnDataType;
 			for (int LIndex = 0; LIndex < AArguments.Length; LIndex++)

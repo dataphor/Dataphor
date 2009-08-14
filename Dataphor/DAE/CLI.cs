@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE
 {
@@ -413,6 +414,7 @@ namespace Alphora.Dataphor.DAE
         /// input string contains more than a single statement, it will be ignored.
         /// </remarks>
         IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams);
+        IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams, DebugLocator ALocator);
         
         /// <summary> Unprepares a statement plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareStatement. </param>
@@ -439,6 +441,7 @@ namespace Alphora.Dataphor.DAE
         /// <param name='AExpression'> A single valid expression to prepare. </param>
         /// <returns> An <see cref="IServerExpressionPlan"/> instance for the prepared expression. </returns>
         IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams);
+        IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams, DebugLocator ALocator);
         
         /// <summary> Unprepares an expression plan. </summary>
         /// <param name="APlan"> A reference to a plan object returned from a call to PrepareExpression. </param>
@@ -479,6 +482,7 @@ namespace Alphora.Dataphor.DAE
 		/// be compiled and executed in isolation, in the order given in the script.
 		/// </remarks>
         IServerScript PrepareScript(string AScript);
+        IServerScript PrepareScript(string AScript, DebugLocator ALocator);
         
         /// <summary>Executes the given script as a whole.</summary>
         /// <param name="AScript">The script to be execute.</param>

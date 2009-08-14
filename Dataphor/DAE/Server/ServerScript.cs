@@ -10,16 +10,18 @@ using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
 	public class ServerScript : ServerChildObject, IServerScript
 	{
-		internal ServerScript(ServerProcess AProcess, string AScript) : base()
+		internal ServerScript(ServerProcess AProcess, string AScript, DebugLocator ALocator) : base()
 		{
 			FProcess = AProcess;
 			FBatches = new ServerBatches();
 			FMessages = new ParserMessages();
+			FSourceContext = new SourceContext(AScript, ALocator);
 			FScript = FProcess.ParseScript(AScript, FMessages);
 			if ((FScript is Block) && (((Block)FScript).Statements.Count > 0))
 			{
@@ -72,6 +74,9 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		private Statement FScript;
+		
+		private SourceContext FSourceContext;
+		public SourceContext SourceContext { get { return FSourceContext; } }
 		
 		// Process        
 		private ServerProcess FProcess;

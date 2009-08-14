@@ -4824,7 +4824,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						else
 						{
 							// set up a deferred read stream using the device session as the provider
-							StreamID LStreamID = Process.ServerSession.Server.StreamManager.Register(FDeviceSession);
+							StreamID LStreamID = Process.Register(FDeviceSession);
 							string LStatement;
 							SQLParameters LParameters;
 							GetDeferredStatement(InternalGetKey(), LColumnIndex, out LStatement, out LParameters);

@@ -35,3 +35,13 @@ end;
 drop operator TestOutputParams(String, var String);
 drop operator TestInputParams(String);
 
+//*
+// Ensure that process local context does not get pushed in a dynamic evaluation
+var ARecordID := 54;
+select 
+ System.Evaluate
+ (
+  'ARecordID', 
+  row { ARecordID ARecordID }
+ ) as Integer;
+ 

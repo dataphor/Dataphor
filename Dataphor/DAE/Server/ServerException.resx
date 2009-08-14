@@ -377,4 +377,25 @@
   <data name="106190" xml:space="preserve">
     <value>Unable to connect to listener on "{0}".</value>
   </data>
+  <data name="106191" xml:space="preserve">
+    <value>Only objects of type "{0}" may be added to this container.</value>
+  </data>
+  <data name="106192" xml:space="preserve">
+    <value>The debugger must be paused in order to perform this operation.</value>
+  </data>
+  <data name="106193" xml:space="preserve">
+    <value>There is no debugger associated with session ({0}).</value>
+  </data>
+  <data name="106194" xml:space="preserve">
+    <value>There is already a debugger started for session ({0}).</value>
+  </data>
+  <data name="106195" xml:space="preserve">
+    <value>There is already a debugger attached to process ({0}).</value>
+  </data>
+  <data name="106196" xml:space="preserve">
+    <value>There is already a debugger attached to session ({0}).</value>
+  </data>
+  <data name="106197" xml:space="preserve">
+    <value>The debugger cannot be attached to the debugger session ({0}).</value>
+  </data>
 </root>

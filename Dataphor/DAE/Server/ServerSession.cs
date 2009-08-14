@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -55,10 +56,18 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							try
 							{
-								if (FApplicationTransactions != null)
+								try
 								{
-									EndApplicationTransactions();
-									FApplicationTransactions = null;
+									if (FDebugger != null)
+										FDebugger.Stop();
+								}
+								finally
+								{
+									if (FApplicationTransactions != null)
+									{
+										EndApplicationTransactions();
+										FApplicationTransactions = null;
+									}
 								}
 							}
 							finally
@@ -307,6 +316,53 @@ namespace Alphora.Dataphor.DAE.Server
 				return FCursorManager; 
 			}
 		}
+		
+		// Debug
+		private Debugger FDebugger;
+		public Debugger Debugger { get { return FDebugger; } }
+		
+		public Debugger CheckedDebugger
+		{
+			get
+			{
+				if (FDebugger == null)
+					throw new ServerException(ServerException.Codes.DebuggerNotStarted, FSessionID);
+				return FDebugger;
+			}
+		}
+		
+		public void StartDebugger()
+		{
+			new Debugger(this);
+		}
+		
+		public void StopDebugger()
+		{
+			CheckedDebugger.Stop();
+		}
+		
+		/// <summary>
+		/// Sets the debugger that is started on this session.
+		/// </summary>
+		internal void SetDebugger(Debugger ADebugger)
+		{
+			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyStarted, FSessionID);
+			FSessionInfo.DebuggerID = 0; // Clear the debugger ID, just in case
+			FDebugger = ADebugger;
+		}
+		
+		/// <summary>
+		/// Sets the ID of the debugger to which this session is attached.
+		/// </summary>
+		internal void SetDebuggerID(int ADebuggerID)
+		{
+			if ((FDebugger != null) && (FSessionID == ADebuggerID))
+				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, FSessionID);
+			if ((FSessionInfo.DebuggerID != 0) && (ADebuggerID != 0) && (FSessionInfo.DebuggerID != ADebuggerID))
+				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttachedToSession, FSessionID);
+			FSessionInfo.DebuggerID = ADebuggerID;
+		}
 
 		// Execution
 		internal Exception WrapException(Exception AException)
@@ -338,6 +394,10 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
+		/// <summary>
+		/// Initiates a termination request for a process.
+		/// </summary>
+		/// <param name="AProcessID">The ID of the process to be stopped.</param>
 		public void StopProcess(int AProcessID)
 		{
 			ServerProcess LProcessToStop = null;

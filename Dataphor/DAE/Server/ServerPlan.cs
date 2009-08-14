@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -96,6 +97,35 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return FCode; }
 			set { FCode = value; }
+		}
+		
+		// Source
+		protected string FSource;
+		/// <summary>
+		/// Contains the source text for the plan. Only present if no debug locator is provided.
+		/// </summary>
+		public string Source { get { return FSource; } }
+		
+		// Locator
+		protected DebugLocator FLocator;
+		/// <summary>
+		/// Provides a reference for identifying the source text for the plan. May be null for dynamic or ad-hoc execution.
+		/// </summary>
+		public DebugLocator Locator { get { return FLocator; } }
+		
+		/// <summary>
+		/// Sets the source context for the plan.
+		/// </summary>
+		public void SetSourceContext(SourceContext ASourceContext)
+		{
+			// Clear existing context
+			FSource = null;
+			FLocator = null;
+			
+			if (ASourceContext.Locator != null)
+				FLocator = ASourceContext.Locator;
+			else
+				FSource = ASourceContext.Script;
 		}
 		
 		// Process        

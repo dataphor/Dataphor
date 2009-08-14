@@ -18,6 +18,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -356,13 +357,18 @@ namespace Alphora.Dataphor.DAE.Server
 			return LInfo;
 		}
 		
+		public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
+		{
+			return PrepareStatement(AStatement, AParams, null);
+		}
+		
         /// <summary> Prepares the given statement for execution. </summary>
         /// <param name='AStatement'> A single valid Dataphor statement to prepare. </param>
         /// <returns> An <see cref="IServerStatementPlan"/> instance for the prepared statement. </returns>
-        public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams)
+        public IServerStatementPlan PrepareStatement(string AStatement, DataParams AParams, DebugLocator ALocator)
         {
 			PlanDescriptor LPlanDescriptor;
-			IRemoteServerStatementPlan LPlan = FProcess.PrepareStatement(AStatement, DataParamsToRemoteParams(AParams), out LPlanDescriptor, GetProcessCleanupInfo());
+			IRemoteServerStatementPlan LPlan = FProcess.PrepareStatement(AStatement, DataParamsToRemoteParams(AParams), ALocator, out LPlanDescriptor, GetProcessCleanupInfo());
 			return new LocalStatementPlan(this, LPlan, LPlanDescriptor);
 		}
         
@@ -390,17 +396,22 @@ namespace Alphora.Dataphor.DAE.Server
 			RemoteParamDataToDataParams(AParams, LParamData);
 		}
 		
+		public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
+		{
+			return PrepareExpression(AExpression, AParams, null);
+		}
+		
         /// <summary> Prepares the given expression for selection. </summary>
         /// <param name='AExpression'> A single valid Dataphor expression to prepare. </param>
         /// <returns> An <see cref="IServerExpressionPlan"/> instance for the prepared expression. </returns>
-        public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams)
+        public IServerExpressionPlan PrepareExpression(string AExpression, DataParams AParams, DebugLocator ALocator)
         {
 			#if LOGCACHEEVENTS
 			FSession.FServer.FInternalServer.LogMessage(String.Format("Thread {0} preparing expression '{1}'.", Thread.CurrentThread.GetHashCode(), AExpression));
 			#endif
 			
 			PlanDescriptor LPlanDescriptor;
-			IRemoteServerExpressionPlan LPlan = FProcess.PrepareExpression(AExpression, DataParamsToRemoteParams(AParams), out LPlanDescriptor, GetProcessCleanupInfo());
+			IRemoteServerExpressionPlan LPlan = FProcess.PrepareExpression(AExpression, DataParamsToRemoteParams(AParams), ALocator, out LPlanDescriptor, GetProcessCleanupInfo());
 			return new LocalExpressionPlan(this, LPlan, LPlanDescriptor, AParams);
 		}
 		
@@ -495,7 +506,12 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public IServerScript PrepareScript(string AScript)
 		{
-			return new LocalScript(this, FProcess.PrepareScript(AScript));
+			return PrepareScript(AScript, null);
+		}
+		
+		public IServerScript PrepareScript(string AScript, DebugLocator ALocator)
+		{
+			return new LocalScript(this, FProcess.PrepareScript(AScript, ALocator));
 		}
 		
 		public void UnprepareScript(IServerScript AScript)

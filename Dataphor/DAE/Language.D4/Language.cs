@@ -2777,6 +2777,24 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 	}
 	
+	public class SourceStatement : Statement, IMetaData
+	{
+		private string FSource;
+		public string Source
+		{
+			get { return FSource; }
+			set { FSource = value; }
+		}
+		
+        // MetaData
+        protected MetaData FMetaData;
+        public MetaData MetaData
+        {
+			get { return FMetaData; }
+			set { FMetaData = value; }
+        }
+	}
+	
 	public abstract class CreateOperatorStatementBase : D4Statement, IMetaData
 	{
 		// OperatorName

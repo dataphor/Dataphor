@@ -163,6 +163,14 @@
     <Compile Include="DAEException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Debug\Breakpoint.cs" />
+    <Compile Include="Debug\CallStackEntry.cs" />
+    <Compile Include="Debug\DebugContext.cs" />
+    <Compile Include="Debug\Debugger.cs" />
+    <Compile Include="Debug\DebugLocator.cs" />
+    <Compile Include="Debug\DebugNodes.cs" />
+    <Compile Include="Debug\SourceContext.cs" />
+    <Compile Include="Debug\SourceUtility.cs" />
     <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -802,6 +810,7 @@
     <Content Include="Language.SQL\BNFDifferences.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
+    <EmbeddedResource Include="Debug\Debug.d4" />
     <None Include="Schema\SQLDeviceMappings.d4" />
     <None Include="Storage\AllocationManager.cs">
       <SubType>Code</SubType>

@@ -1,0 +1,66 @@
+/*
+	Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Debug Unit Tests
+*/
+
+// Start a debugger
+Debug.Start();
+
+if not exists (GetDebuggers() where Session_ID = SessionID()) then
+	raise Error("Start debugger failed"); 
+	
+Debug.SetBreakOnException(true);
+
+if not((GetDebuggers() where Session_ID = SessionID())[].BreakOnException) then
+	raise Error("SetBreakOnException failed");
+	
+begin
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		if not exists (GetProcesses() where Process_ID = LProcessID) then
+			raise Error("Debug.AttachProcess failed");
+
+		Debug.DetachProcess(LProcessID);
+		if exists (GetProcesses() where Process_ID = LProcessID) then
+			raise Error("Debug.DetachProcess failed");
+	finally
+		StopProcess(LProcessID);
+	end;
+end;
+
+begin
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+	finally
+		StopProcess(LProcessID);
+	end;
+	if exists (GetProcesses() where Process_ID = LProcessID) then
+		raise Error("Disposed process did not detach");
+end;
+
+Debug.AttachSession(SessionID());
+
+begin
+	var LProcessID := StartProcess();
+	try
+		if not exists (GetProcesses() where Process_ID = LProcessID) then
+			raise Error("New process on attached session did not attach");
+	finally
+		StopProcess(LProcessID);
+	end;
+end;
+
+Debug.DetachSession(SessionID());
+
+// Stop the debugger
+Debug.Stop();
+
+if exists (GetDebuggers() where Session_ID = SessionID()) then
+	raise Error("Stop debugger failed");

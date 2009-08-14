@@ -33,7 +33,15 @@ namespace Alphora.Dataphor.DAE.Language
 				|	|- DelimitedBlock
 				|- IfStatement
     */
-
+    
+    public class LineInfo
+    {
+		public int Line = -1;
+		public int LinePos = -1;
+		public int EndLine = -1;
+		public int EndLinePos = -1;
+    }
+    
 	[Serializable]
 	public abstract class Statement : Object 
 	{
@@ -44,13 +52,64 @@ namespace Alphora.Dataphor.DAE.Language
 		}
 		
 		// The line and position of the starting token for this element in the syntax tree
-		public int Line = -1;
-		public int LinePos = -1;
+		private LineInfo FLineInfo;
+		public LineInfo LineInfo { get { return FLineInfo; } }
+
+		public int Line
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.Line; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.Line = value;
+			}
+		}
+		
+		public int LinePos
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.LinePos; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.LinePos = value;
+			}
+		}
+		
+		public int EndLine
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.EndLine; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.EndLine = value;
+			}
+		}
+		
+		public int EndLinePos
+		{
+			get { return FLineInfo == null ? -1 : FLineInfo.EndLinePos; }
+			set
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				FLineInfo.EndLinePos = value;
+			}
+		}
 		
 		public void SetPosition(Lexer ALexer)
 		{
 			Line = ALexer[0, false].Line;
 			LinePos = ALexer[0, false].LinePos;
+		}
+		
+		public void SetEndPosition(Lexer ALexer)
+		{
+			EndLine = ALexer[0, false].Line;
+			LexerToken LToken = ALexer[0, false];
+			EndLinePos = LToken.LinePos + (LToken.Token == null ? 0 : LToken.Token.Length);
 		}
 
 		private LanguageModifiers FModifiers;

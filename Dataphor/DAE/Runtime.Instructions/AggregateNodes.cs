@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.PushWindow(0);
+			AProcess.Context.PushWindow(0, this);
 			try
 			{
 				Table LTable = null;

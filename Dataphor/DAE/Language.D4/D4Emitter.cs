@@ -1658,6 +1658,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				EmitTryExceptStatement((TryExceptStatement)AStatement);
 			else if (AStatement is EmptyStatement)
 				EmitEmptyStatement((EmptyStatement)AStatement);
+			else if (AStatement is SourceStatement)
+				EmitSourceStatement((SourceStatement)AStatement);
 			else
 				throw new LanguageException(LanguageException.Codes.UnknownStatementClass, AStatement.GetType().Name);
 		}
@@ -1889,6 +1891,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		protected virtual void EmitEmptyStatement(Statement AStatement)
 		{
+		}
+		
+		protected virtual void EmitSourceStatement(SourceStatement AStatement)
+		{
+			Append(AStatement.Source);
+			EmitMetaData(AStatement.MetaData);
 		}
 		
 		protected virtual void EmitD4Statement(Statement AStatement)

@@ -168,5 +168,6 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		[Test] public void ExecuteSpecifyClause() { ExecuteScript("Coverage.Scripts", "SpecifyClause"); }
 		[Test, Ignore("Build this coverage")] public void ExecuteTableIndexer() { ExecuteScript("Coverage.Scripts", "TableIndexer"); }
 		[Test] public void ExecuteServerLinks() { ExecuteScript("Coverage.Scripts", "ServerLink"); }
+		[Test] public void ExecuteDebugLibrary() { ExecuteScript("Coverage.Scripts", "DebugLibrary"); }
 	}
 }

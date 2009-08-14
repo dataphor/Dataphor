@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -456,6 +457,35 @@ namespace Alphora.Dataphor.DAE.Server
 		public string GetDefaultDeviceName(string ALibraryName, bool AShouldThrow)
 		{
 			return GetDefaultDeviceName(Catalog.Libraries[ALibraryName], AShouldThrow);
+		}
+
+		private SourceContexts FSourceContexts;
+				
+		public SourceContext SourceContext 
+		{ 
+			get 
+			{ 
+				if (FSourceContexts == null)
+					return null;
+					
+				if (FSourceContexts.Count == 0)
+					return null;
+					
+				return FSourceContexts.Peek();
+			}
+		}
+		
+		public void PushSourceContext(SourceContext ASourceContext)
+		{
+			if (FSourceContexts == null)
+				FSourceContexts = new SourceContexts();
+				
+			FSourceContexts.Push(ASourceContext);
+		}
+		
+		public void PopSourceContext()
+		{
+			FSourceContexts.Pop();
 		}
 		
 		protected string GetDefaultDeviceName(Schema.Library ALibrary, bool AShouldThrow)

@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	public class Stack<T> : Object
@@ -19,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			MaxStackDepth = AMaxStackDepth;
 			MaxCallDepth = AMaxCallDepth;
-			FWindows.Push(new StackWindow(0));
+			FWindows.Push(new StackWindow(0, null));
 		}
 		
 		protected int FCount;
@@ -139,9 +141,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
 		} // same code as peek and poke, duplicated for performance
 		
+		public void PushWindow(int ACount, PlanNode AOriginator)
+		{
+			FWindows.Push(new StackWindow(FCount - ACount, AOriginator));
+		}
+		
 		public void PushWindow(int ACount)
 		{
-			FWindows.Push(new StackWindow(FCount - ACount));
+			PushWindow(ACount, null);
 		}
 		
 		public void PopWindow()
@@ -168,6 +175,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 			for (int LIndex = LBase; LIndex < FCount; LIndex++)
 				FStack[LIndex] = default(T);
 			FCount = LBase;
+		}
+		
+		public StackWindow CurrentStackWindow
+		{
+			get
+			{
+				return FWindows.CurrentStackWindow;
+			}
+		}
+		
+		public List<StackWindow> GetCallStack()
+		{
+			return FWindows.GetCallStack();
 		}
 	}
 }

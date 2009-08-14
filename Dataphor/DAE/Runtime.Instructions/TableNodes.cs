@@ -372,6 +372,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
     public abstract class DMLNode : PlanNode
     {
+		public DMLNode() : base()
+		{
+			IsBreakable = true;
+		}
+		
 		private bool FUnchecked = false;
 		public bool Unchecked { get { return FUnchecked; } }
 		
