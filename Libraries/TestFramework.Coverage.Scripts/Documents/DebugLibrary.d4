@@ -45,8 +45,11 @@ begin
 		raise Error("Disposed process did not detach");
 end;
 
-Debug.AttachSession(SessionID());
+// This should be a negative test, you cannot attach to your own session.
+//Debug.AttachSession(SessionID());
 
+/*
+// This needs to be run on a separate session.
 begin
 	var LProcessID := StartProcess();
 	try
@@ -58,6 +61,7 @@ begin
 end;
 
 Debug.DetachSession(SessionID());
+*/
 
 // Stop the debugger
 Debug.Stop();

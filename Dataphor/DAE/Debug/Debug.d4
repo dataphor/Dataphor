@@ -12,6 +12,11 @@ create operator Debug.GetDebuggers()
 create operator Debug.SetBreakOnException(ABreakOnException : Boolean)
 	class "System.DebugSetBreakOnExceptionNode"
 	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+	
+//* Operator: GetSessions
+create operator Debug.GetSessions() : table { Session_ID : Integer }
+	class "System.DebugGetSessionsNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
 //* Operator: GetProcesses
 create operator Debug.GetProcesses() : table { Process_ID : Integer }

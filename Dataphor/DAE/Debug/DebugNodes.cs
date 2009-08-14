@@ -80,6 +80,66 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
+	// operator Debug.GetSessions() : table { Session_ID : Integer }
+	public class DebugGetSessionsNode : TableNode
+	{
+		public override void DetermineDataType(Plan APlan)
+		{
+			DetermineModifiers(APlan);
+			FDataType = new Schema.TableType();
+			FTableVar = new Schema.ResultTableVar(this);
+			FTableVar.Owner = APlan.User;
+
+			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.Catalog.DataTypes.SystemInteger));
+			foreach (Schema.Column LColumn in DataType.Columns)
+				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
+
+			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
+
+			TableVar.DetermineRemotable(APlan.ServerProcess);
+			Order = TableVar.FindClusteringOrder(APlan);
+
+			// Ensure the order exists in the orders list
+			if (!TableVar.Orders.Contains(Order))
+				TableVar.Orders.Add(Order);
+		}
+
+		public override object InternalExecute(ServerProcess AProcess)
+		{
+			LocalTable LResult = new LocalTable(this, AProcess);
+			try
+			{
+				LResult.Open();
+
+				// Populate the result
+				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				try
+				{
+					LRow.ValuesOwned = false;
+
+					foreach (ServerSession LSession in AProcess.ServerSession.CheckedDebugger.Sessions)
+					{
+						LRow[0] = LSession.SessionID;
+						LResult.Insert(LRow);
+					}
+				}
+				finally
+				{
+					LRow.Dispose();
+				}
+
+				LResult.First();
+
+				return LResult;
+			}
+			catch
+			{
+				LResult.Dispose();
+				throw;
+			}
+		}
+	}
+
 	// operator Debug.GetProcesses() : table { Process_ID : Integer }
 	public class DebugGetProcessesNode : TableNode
 	{
