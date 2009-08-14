@@ -6,7 +6,7 @@ using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Client.Provider;
 using NUnit.Framework;
 
-namespace Alphora.Dataphor.DAE.Diagnostics.Client.Provider
+namespace Alphora.Dataphor.DAE.ClientTests.Provider
 {
     [TestFixture]
     public class ConnectionTest

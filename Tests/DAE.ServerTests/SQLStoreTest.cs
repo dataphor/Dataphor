@@ -17,7 +17,7 @@ using Alphora.Dataphor.DAE.Store.SQLCE;
 
 using NUnit.Framework;
 
-namespace Alphora.Dataphor.DAE.Diagnostics
+namespace Alphora.Dataphor.DAE.ServerTests
 {
     [TestFixture]
     public class SQLStoreTest

@@ -11,7 +11,7 @@ using System.Text;
 using NUnit.Framework;
 using Alphora.Dataphor.DAE.Server;
 
-namespace Alphora.Dataphor.DAE.Diagnostics
+namespace Alphora.Dataphor.DAE.ServerTests
 {
 	[TestFixture]
 	public class CoverageTest

@@ -15,7 +15,7 @@ using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Language.D4;
 using System.IO;
 
-namespace Alphora.Dataphor.DAE.Diagnostics
+namespace Alphora.Dataphor.DAE.ServerTests
 {
 	public enum CatalogStoreType { SQLCE, SQLite, MSSQL };
 	

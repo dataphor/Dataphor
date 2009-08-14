@@ -51,7 +51,7 @@ select
 		right join (MSSQLTiming group by { Operation } add { Count() MSSQLCount, Sum(Duration) MSSQLSumDuration, Avg(Duration) MSSQLAvgDuration })
 */
 
-namespace Alphora.Dataphor.DAE.Diagnostics
+namespace Alphora.Dataphor.DAE.ServerTests
 {
 	[TestFixture]
 	public class CatalogStoreTest
