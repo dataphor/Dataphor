@@ -52,7 +52,10 @@
     <Compile Include="CoverageTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLStoreTest.cs" />
-    <Compile Include="TestUtility.cs" />
+    <Compile Include="Utilities\SQLCEServerConfigurationManager.cs" />
+    <Compile Include="Utilities\MSSQLServerConfigurationManager.cs" />
+    <Compile Include="Utilities\ServerConfigurationManager.cs" />
+    <Compile Include="Utilities\SQLiteServerConfigurationManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Dataphor\Base\Base.csproj">

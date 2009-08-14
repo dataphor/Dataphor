@@ -7,7 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Alphora.Dataphor.DAE.ServerTests.Utilities;
 using NUnit.Framework;
 using Alphora.Dataphor.DAE.Server;
 
@@ -16,6 +16,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 	[TestFixture]
 	public class CoverageTest
 	{
+		private ServerConfigurationManager FServerConfigurationManager;
 		private ServerConfiguration FConfiguration;
 		private IServer FServer;
 		private IServerSession FSession;
@@ -24,9 +25,11 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
-			FConfiguration = ServerTestUtility.Instance.GetTestConfiguration();
-			ServerTestUtility.Instance.ResetInstance(FConfiguration);
-			FServer = ServerTestUtility.Instance.GetServer(FConfiguration);
+
+			FServerConfigurationManager = new SQLCEServerConfigurationManager();
+			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
+			FServerConfigurationManager.ResetInstance();
+			FServer = FServerConfigurationManager.GetServer();
 			FServer.Start();
 			
 			IServerSession LSession = FServer.Connect(new SessionInfo("Admin", ""));
@@ -53,7 +56,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		public void TearDownFixture()
 		{
 			FServer.Stop();
-			ServerTestUtility.Instance.ResetInstance(FConfiguration);
+			FServerConfigurationManager.ResetInstance();
 		}
 		
 		[SetUp]

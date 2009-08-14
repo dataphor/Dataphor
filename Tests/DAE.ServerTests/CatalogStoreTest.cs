@@ -11,7 +11,7 @@ using System.Text;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-
+using Alphora.Dataphor.DAE.ServerTests.Utilities;
 using NUnit.Framework;
 
 using Alphora.Dataphor.DAE.Server;
@@ -56,16 +56,16 @@ namespace Alphora.Dataphor.DAE.ServerTests
 	[TestFixture]
 	public class CatalogStoreTest
 	{
-		private void CatalogRegressionTest(CatalogStoreType ACatalogStoreType)
+		private void CatalogRegressionTest(ServerConfigurationManager AServerConfigurationManager)
 		{
 			// Create a test configuration
-			ServerConfiguration LTestConfiguration = ServerTestUtility.Instance.GetTestConfiguration("TestInstance", ACatalogStoreType);
+			ServerConfiguration LTestConfiguration = AServerConfigurationManager.GetTestConfiguration("TestInstance");
 
 			// Reset the instance
-			ServerTestUtility.Instance.ResetInstance(LTestConfiguration, ACatalogStoreType);
+			AServerConfigurationManager.ResetInstance();
 				
 			// Start a server based on the StoreRegression instance
-			Server.Server LServer = ServerTestUtility.Instance.GetServer(LTestConfiguration);
+			Server.Server LServer = AServerConfigurationManager.GetServer();
 			LServer.Start();
 			
 			// Stop the server
@@ -78,15 +78,15 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			LServer.Stop();
 			
 			// Reset the instance
-			ServerTestUtility.Instance.ResetInstance(LTestConfiguration, ACatalogStoreType);
+			AServerConfigurationManager.ResetInstance();
 		}
 		
 		[Test]
 		public void CatalogRegressionTest()
 		{
-			CatalogRegressionTest(CatalogStoreType.SQLCE);
-			CatalogRegressionTest(CatalogStoreType.SQLite);
-			CatalogRegressionTest(CatalogStoreType.MSSQL);
+			CatalogRegressionTest(new SQLCEServerConfigurationManager());
+			CatalogRegressionTest(new SQLiteServerConfigurationManager());
+			CatalogRegressionTest(new MSSQLServerConfigurationManager());
 		}
 	}
 }
