@@ -117,11 +117,12 @@ namespace Alphora.Dataphor.DAE.Debug
 				{
 					LRow.ValuesOwned = false;
 
-					foreach (ServerSession LSession in AProcess.ServerSession.CheckedDebugger.Sessions)
-					{
-						LRow[0] = LSession.SessionID;
-						LResult.Insert(LRow);
-					}
+					if (AProcess.ServerSession.Debugger != null)
+						foreach (ServerSession LSession in AProcess.ServerSession.CheckedDebugger.Sessions)	// Still use CheckedDebugger for concurrency
+						{
+							LRow[0] = LSession.SessionID;
+							LResult.Insert(LRow);
+						}
 				}
 				finally
 				{
@@ -177,11 +178,12 @@ namespace Alphora.Dataphor.DAE.Debug
 				{
 					LRow.ValuesOwned = false;
 
-					foreach (ServerProcess LProcess in AProcess.ServerSession.CheckedDebugger.Processes)
-					{
-						LRow[0] = LProcess.ProcessID;
-						LResult.Insert(LRow);
-					}
+					if (AProcess.ServerSession.Debugger != null)
+						foreach (ServerProcess LProcess in AProcess.ServerSession.CheckedDebugger.Processes)
+						{
+							LRow[0] = LProcess.ProcessID;
+							LResult.Insert(LRow);
+						}
 				}
 				finally
 				{

@@ -80,6 +80,16 @@ namespace Alphora.Dataphor.Dataphoria
 			this.LConfigureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDesignerLibrariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDocumentTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FStopDebuggerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+			this.FViewSessionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FViewProcessesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FDebugProcessesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
+			this.FDebugPauseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FDebugRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FBreakOnExceptionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.LHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDataphorDocumentationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
@@ -94,6 +104,14 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FOpenFileToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.FOpenFileWithToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.FLaunchFormToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.FStopDebuggerButton = new System.Windows.Forms.ToolStripButton();
+			this.FViewSessionsButton = new System.Windows.Forms.ToolStripButton();
+			this.FViewProcessesButton = new System.Windows.Forms.ToolStripButton();
+			this.FViewDebugProcessesButton = new System.Windows.Forms.ToolStripButton();
+			this.FDebugPauseButton = new System.Windows.Forms.ToolStripButton();
+			this.FDebugRunButton = new System.Windows.Forms.ToolStripButton();
+			this.FBreakOnExceptionButton = new System.Windows.Forms.ToolStripButton();
 			this.FDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
 			this.FMainMenuStrip.SuspendLayout();
 			this.FToolStrip.SuspendLayout();
@@ -149,6 +167,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FFileToolStripMenuItem,
             this.FViewToolStripMenuItem,
             this.LConfigureToolStripMenuItem,
+            this.debugToolStripMenuItem,
             this.LHelpToolStripMenuItem});
 			this.FMainMenuStrip.Location = new System.Drawing.Point(0, 0);
 			this.FMainMenuStrip.Name = "FMainMenuStrip";
@@ -334,6 +353,82 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FDocumentTypesToolStripMenuItem.Text = "Document Types";
 			this.FDocumentTypesToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
+			// debugToolStripMenuItem
+			// 
+			this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FStopDebuggerMenuItem,
+            this.toolStripMenuItem7,
+            this.FViewSessionsMenuItem,
+            this.FViewProcessesMenuItem,
+            this.FDebugProcessesMenuItem,
+            this.toolStripMenuItem8,
+            this.FDebugPauseMenuItem,
+            this.FDebugRunMenuItem,
+            this.FBreakOnExceptionMenuItem});
+			this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
+			this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+			this.debugToolStripMenuItem.Text = "Debug";
+			// 
+			// FStopDebuggerMenuItem
+			// 
+			this.FStopDebuggerMenuItem.Name = "FStopDebuggerMenuItem";
+			this.FStopDebuggerMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FStopDebuggerMenuItem.Text = "Stop Debugger";
+			this.FStopDebuggerMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// toolStripMenuItem7
+			// 
+			this.toolStripMenuItem7.Name = "toolStripMenuItem7";
+			this.toolStripMenuItem7.Size = new System.Drawing.Size(173, 6);
+			// 
+			// FViewSessionsMenuItem
+			// 
+			this.FViewSessionsMenuItem.Name = "FViewSessionsMenuItem";
+			this.FViewSessionsMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FViewSessionsMenuItem.Text = "View Sessions";
+			this.FViewSessionsMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// FViewProcessesMenuItem
+			// 
+			this.FViewProcessesMenuItem.Name = "FViewProcessesMenuItem";
+			this.FViewProcessesMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FViewProcessesMenuItem.Text = "View Processes";
+			this.FViewProcessesMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// FDebugProcessesMenuItem
+			// 
+			this.FDebugProcessesMenuItem.Name = "FDebugProcessesMenuItem";
+			this.FDebugProcessesMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FDebugProcessesMenuItem.Text = "Debug Processes";
+			this.FDebugProcessesMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// toolStripMenuItem8
+			// 
+			this.toolStripMenuItem8.Name = "toolStripMenuItem8";
+			this.toolStripMenuItem8.Size = new System.Drawing.Size(173, 6);
+			// 
+			// FDebugPauseMenuItem
+			// 
+			this.FDebugPauseMenuItem.Name = "FDebugPauseMenuItem";
+			this.FDebugPauseMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FDebugPauseMenuItem.Text = "Pause";
+			this.FDebugPauseMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// FDebugRunMenuItem
+			// 
+			this.FDebugRunMenuItem.Name = "FDebugRunMenuItem";
+			this.FDebugRunMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FDebugRunMenuItem.Text = "Run";
+			this.FDebugRunMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// FBreakOnExceptionMenuItem
+			// 
+			this.FBreakOnExceptionMenuItem.CheckOnClick = true;
+			this.FBreakOnExceptionMenuItem.Name = "FBreakOnExceptionMenuItem";
+			this.FBreakOnExceptionMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.FBreakOnExceptionMenuItem.Text = "Break On Exception";
+			this.FBreakOnExceptionMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
 			// LHelpToolStripMenuItem
 			// 
 			this.LHelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -401,7 +496,15 @@ namespace Alphora.Dataphor.Dataphoria
             this.FNewScriptToolStripButton,
             this.FOpenFileToolStripButton,
             this.FOpenFileWithToolStripButton,
-            this.FLaunchFormToolStripButton});
+            this.FLaunchFormToolStripButton,
+            this.toolStripSeparator1,
+            this.FStopDebuggerButton,
+            this.FViewSessionsButton,
+            this.FViewProcessesButton,
+            this.FViewDebugProcessesButton,
+            this.FDebugPauseButton,
+            this.FDebugRunButton,
+            this.FBreakOnExceptionButton});
 			this.FToolStrip.Location = new System.Drawing.Point(0, 24);
 			this.FToolStrip.Name = "FToolStrip";
 			this.FToolStrip.Size = new System.Drawing.Size(664, 25);
@@ -456,6 +559,75 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FLaunchFormToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.FLaunchFormToolStripButton.Text = "Launch form";
 			this.FLaunchFormToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+			// 
+			// FStopDebuggerButton
+			// 
+			this.FStopDebuggerButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FStopDebuggerButton.Image = ((System.Drawing.Image)(resources.GetObject("FStopDebuggerButton.Image")));
+			this.FStopDebuggerButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FStopDebuggerButton.Name = "FStopDebuggerButton";
+			this.FStopDebuggerButton.Size = new System.Drawing.Size(23, 22);
+			this.FStopDebuggerButton.Text = "Stop Debugger";
+			// 
+			// FViewSessionsButton
+			// 
+			this.FViewSessionsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewSessionsButton.Image = ((System.Drawing.Image)(resources.GetObject("FViewSessionsButton.Image")));
+			this.FViewSessionsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FViewSessionsButton.Name = "FViewSessionsButton";
+			this.FViewSessionsButton.Size = new System.Drawing.Size(23, 22);
+			this.FViewSessionsButton.Text = "View Sessions";
+			// 
+			// FViewProcessesButton
+			// 
+			this.FViewProcessesButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewProcessesButton.Image = ((System.Drawing.Image)(resources.GetObject("FViewProcessesButton.Image")));
+			this.FViewProcessesButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FViewProcessesButton.Name = "FViewProcessesButton";
+			this.FViewProcessesButton.Size = new System.Drawing.Size(23, 22);
+			this.FViewProcessesButton.Text = "View Processes";
+			// 
+			// FViewDebugProcessesButton
+			// 
+			this.FViewDebugProcessesButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewDebugProcessesButton.Image = ((System.Drawing.Image)(resources.GetObject("FViewDebugProcessesButton.Image")));
+			this.FViewDebugProcessesButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FViewDebugProcessesButton.Name = "FViewDebugProcessesButton";
+			this.FViewDebugProcessesButton.Size = new System.Drawing.Size(23, 22);
+			this.FViewDebugProcessesButton.Text = "View Debug Processes";
+			// 
+			// FDebugPauseButton
+			// 
+			this.FDebugPauseButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugPauseButton.Image = ((System.Drawing.Image)(resources.GetObject("FDebugPauseButton.Image")));
+			this.FDebugPauseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FDebugPauseButton.Name = "FDebugPauseButton";
+			this.FDebugPauseButton.Size = new System.Drawing.Size(23, 22);
+			this.FDebugPauseButton.Text = "Debug Pause";
+			// 
+			// FDebugRunButton
+			// 
+			this.FDebugRunButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugRunButton.Image = ((System.Drawing.Image)(resources.GetObject("FDebugRunButton.Image")));
+			this.FDebugRunButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FDebugRunButton.Name = "FDebugRunButton";
+			this.FDebugRunButton.Size = new System.Drawing.Size(23, 22);
+			this.FDebugRunButton.Text = "Debug Run";
+			// 
+			// FBreakOnExceptionButton
+			// 
+			this.FBreakOnExceptionButton.CheckOnClick = true;
+			this.FBreakOnExceptionButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FBreakOnExceptionButton.Image = ((System.Drawing.Image)(resources.GetObject("FBreakOnExceptionButton.Image")));
+			this.FBreakOnExceptionButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FBreakOnExceptionButton.Name = "FBreakOnExceptionButton";
+			this.FBreakOnExceptionButton.Size = new System.Drawing.Size(23, 22);
+			this.FBreakOnExceptionButton.Text = "Break On Exception";
 			// 
 			// FDockPanel
 			// 
@@ -530,5 +702,23 @@ namespace Alphora.Dataphor.Dataphoria
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.ToolStripButton FStopDebuggerButton;
+		private System.Windows.Forms.ToolStripButton FViewSessionsButton;
+		private System.Windows.Forms.ToolStripButton FViewProcessesButton;
+		private System.Windows.Forms.ToolStripButton FViewDebugProcessesButton;
+		private System.Windows.Forms.ToolStripButton FDebugPauseButton;
+		private System.Windows.Forms.ToolStripButton FDebugRunButton;
+		private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FStopDebuggerMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
+		private System.Windows.Forms.ToolStripMenuItem FViewSessionsMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FViewProcessesMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FDebugProcessesMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FDebugPauseMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FDebugRunMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FBreakOnExceptionMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
+		private System.Windows.Forms.ToolStripButton FBreakOnExceptionButton;
     }
 }

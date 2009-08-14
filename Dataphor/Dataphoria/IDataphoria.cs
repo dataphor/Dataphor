@@ -13,11 +13,15 @@ namespace Alphora.Dataphor.Dataphoria
 {
     public interface IDataphoria : IErrorSource, IServiceProvider, IDisposable
     {
+		event EventHandler Connected;
+		event EventHandler Disconnected;
+		
         Session FrontendSession { get; }
         IServerProcess UtilityProcess { get; }
         DataSession DataSession { get; }
         ErrorListView Warnings { get; }
         Settings Settings { get; }
+        
         FileDesignBuffer PromptForFileBuffer(IDesigner ADesigner, string AFileName);
 
         DocumentDesignBuffer PromptForDocumentBuffer(IDesigner ADesigner, string ALibraryName, string ADocumentName);

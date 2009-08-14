@@ -57,12 +57,8 @@ namespace Alphora.Dataphor.Dataphoria
 			FExplorer.HelpRequested += FExplorer_HelpRequested;
 			FExplorer.Dataphoria = this;
 			FExplorer.Select();
-			
-			FErrorListView = new ErrorListView();
-			FErrorListView.OnErrorsAdded += ErrorsAdded;
-			FErrorListView.OnWarningsAdded += WarningsAdded;
-
 			FExplorer.Dock = DockStyle.Fill;
+
 			FDockContentExplorer = new DockContent();
 			FDockContentExplorer.Controls.Add(FExplorer);
 			FDockContentExplorer.HideOnClose = true;
@@ -70,18 +66,32 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentExplorer.Text = "Dataphor Explorer - Dataphoria";
 			FDockContentExplorer.ShowHint = DockState.DockLeft;
 
-			FDockContentErrorListView = new DockContent();
-
+			FErrorListView = new ErrorListView();
+			FErrorListView.OnErrorsAdded += ErrorsAdded;
+			FErrorListView.OnWarningsAdded += WarningsAdded;
 			FErrorListView.Dock = DockStyle.Fill;
+
+			FDockContentErrorListView = new DockContent();
 			FDockContentErrorListView.HideOnClose = true;
 			FDockContentErrorListView.Controls.Add(FErrorListView);
 			FDockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
 			FDockContentErrorListView.Text = "Errors and Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
+			FSessionView = new SessionView();
+			FSessionView.Dataphoria = this;
+			FSessionView.Name = "FSessionView";
+			FSessionView.Dock = DockStyle.Fill;
+
+			FDockContentSessionView = new DockContent();
+			FDockContentSessionView.HideOnClose = true;
+			FDockContentSessionView.Controls.Add(FSessionView);
+			FDockContentSessionView.TabText = "Sessions";
+			FDockContentSessionView.Text = "Sessions - Dataphoria";
+			FDockContentSessionView.ShowHint = DockState.DockBottomAutoHide;
+			
 			FDockContentExplorer.Show(this.FDockPanel);
 			FDockContentErrorListView.Show(this.FDockPanel);
-
 
 			FDockPanel.DockLeftPortion = 240;
 			FDockPanel.DockRightPortion = 240;
@@ -140,9 +150,11 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private DataTree FExplorer;
 		private ErrorListView FErrorListView;
+		private SessionView FSessionView;
 
 		private DockContent FDockContentExplorer;
 		private DockContent FDockContentErrorListView;
+		private DockContent FDockContentSessionView;
 
 		#region Settings
 
@@ -308,11 +320,12 @@ namespace Alphora.Dataphor.Dataphoria
 								FExplorer.AddBaseNode(FServerNode);
 								try
 								{
+									OnConnected(EventArgs.Empty);
 									FServerNode.Expand();
 									FConnectToolStripMenuItem.Visible = false;
 									FDisconnectToolStripMenuItem.Visible = true;									
 									Text = Strings.DataphoriaTitle + " - " + FDataSession.Alias;
-									FDockContentExplorer.Show();
+									FDockContentExplorer.Show(FDockPanel);
 									FExplorer.Focus();
 								}
 								catch
@@ -349,6 +362,14 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
+		public event EventHandler Connected;
+
+		private void OnConnected(EventArgs AArgs)
+		{
+			if (Connected != null)
+				Connected(this, AArgs);
+		}
+
 		private void Dataphoria_Shown(object ASender, EventArgs AArgs)
 		{
 			EnsureServerConnection();
@@ -369,6 +390,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 						FExplorer.Nodes.Clear();
 						FServerNode = null;
+						
+						OnDisconnected(EventArgs.Empty);
 					}
 					finally
 					{
@@ -402,6 +425,14 @@ namespace Alphora.Dataphor.Dataphoria
 					}
 				}
 			}
+		}
+
+		public event EventHandler Disconnected;
+		
+		private void OnDisconnected(EventArgs AArgs)
+		{
+			if (Disconnected != null)
+				Disconnected(this, AArgs);
 		}
 
 		public void Disconnect()
@@ -1473,52 +1504,63 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
 		{			
-			/*try
-			{*/
-				if (ASender == FClearWarningsToolStripMenuItem)
-							ClearWarnings();
-				else if (ASender == FConnectToolStripMenuItem)
-						EnsureServerConnection();
-				else if (ASender == FDisconnectToolStripMenuItem)
-						Disconnect();
-				else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
-						NewDesigner();
-				else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)						
-						NewEditor(String.Empty, "d4");
-				else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
-						OpenFile();
-				else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
-						OpenFileWith();
-				else if (ASender == FSaveAllToolStripMenuItem)
-						SaveAll();
-				else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
-						LaunchForm();
-				else if (ASender == FExitToolStripMenuItem)
-						Close();
-				else if (ASender == FDataphorExplorerToolStripMenuItem)
-						ShowDataphorExplorer();
-				else if (ASender == FWarningsErrorsToolStripMenuItem)
-						ShowWarnings();
-				else if (ASender == FDesignerLibrariesToolStripMenuItem)
-						BrowseDesignerLibraries();
-				else if (ASender == FDataphorDocumentationToolStripMenuItem)
-						Documentation();
-				else if (ASender == FAboutToolStripMenuItem)
-						About();
-				else if (ASender == FAlphoraWebSiteToolStripMenuItem)
-						LaunchAlphoraWebsite();
-				else if (ASender == FWebDocumentationToolStripMenuItem)
-						LaunchWebDocumentation();
-				else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
-						LaunchAlphoraGroups();
-				else if (ASender == FDocumentTypesToolStripMenuItem)
-						BrowseDocumentTypes(); 
-				
-			/*}
-			catch (Exception LException)
-			{
-				Program.HandleException(LException);
-			}*/
+			if (ASender == FClearWarningsToolStripMenuItem)
+				ClearWarnings();
+			else if (ASender == FConnectToolStripMenuItem)
+				EnsureServerConnection();
+			else if (ASender == FDisconnectToolStripMenuItem)
+				Disconnect();
+			else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
+				NewDesigner();
+			else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)						
+				NewEditor(String.Empty, "d4");
+			else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
+				OpenFile();
+			else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
+				OpenFileWith();
+			else if (ASender == FSaveAllToolStripMenuItem)
+				SaveAll();
+			else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
+				LaunchForm();
+			else if (ASender == FExitToolStripMenuItem)
+				Close();
+			else if (ASender == FDataphorExplorerToolStripMenuItem)
+				ShowDataphorExplorer();
+			else if (ASender == FWarningsErrorsToolStripMenuItem)
+				ShowWarnings();
+			else if (ASender == FDesignerLibrariesToolStripMenuItem)
+				BrowseDesignerLibraries();
+			else if (ASender == FDataphorDocumentationToolStripMenuItem)
+				Documentation();
+			else if (ASender == FAboutToolStripMenuItem)
+				About();
+			else if (ASender == FAlphoraWebSiteToolStripMenuItem)
+				LaunchAlphoraWebsite();
+			else if (ASender == FWebDocumentationToolStripMenuItem)
+				LaunchWebDocumentation();
+			else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
+				LaunchAlphoraGroups();
+			else if (ASender == FDocumentTypesToolStripMenuItem)
+				BrowseDocumentTypes(); 
+			else if (ASender == FStopDebuggerMenuItem || ASender == FStopDebuggerButton)
+				StopDebugger();
+			else if (ASender == FViewSessionsMenuItem || ASender == FViewSessionsButton)
+				ViewSessions();
+		}
+
+		private void ViewSessions()
+		{
+			FDockContentSessionView.Show(FDockPanel);
+		}
+
+		private void StartDebugger()
+		{
+			ExecuteScript(@".System.Debug.Start();");
+		}
+
+		private void StopDebugger()
+		{
+			ExecuteScript(@".System.Debug.Stop();");
 		}
 
 		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
