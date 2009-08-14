@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		public Debugger(ServerSession ASession)
 		{
 			SetSession(ASession);
-			FBreakSignal = new AutoResetEvent(false);
+			FWaitSignal = new AutoResetEvent(false);
 			FPauseSignal = new ManualResetEvent(true);
 			FProcesses = new ServerProcesses();
 			FSessions = new ServerSessions();
@@ -53,10 +53,10 @@ namespace Alphora.Dataphor.DAE.Debug
 				FProcesses = null;
 			}
 			
-			if (FBreakSignal != null)
+			if (FWaitSignal != null)
 			{
-				FBreakSignal.Close();
-				FBreakSignal = null;
+				FWaitSignal.Close();
+				FWaitSignal = null;
 			}
 			
 			if (FPauseSignal != null)
@@ -97,7 +97,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			SetSession(null);
 		}
 		
-		private AutoResetEvent FBreakSignal;
+		private AutoResetEvent FWaitSignal;
 		private ManualResetEvent FPauseSignal;
 		private object FSyncHandle = new object();
 		private int FPausedCount;
@@ -215,7 +215,7 @@ namespace Alphora.Dataphor.DAE.Debug
 						return;
 				}
 				
-				FBreakSignal.WaitOne();
+				FWaitSignal.WaitOne();
 			}
 		}
 		
@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			}
 			
 			if (LShouldBreak)
-				FBreakSignal.Set();
+				FWaitSignal.Set();
 		}
 		
 		private void InternalRun()
@@ -383,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Debug
 				FPauseSignal.Reset();
 
 			Interlocked.Increment(ref FPausedCount);
-			WaitHandle.SignalAndWait(FBreakSignal, FPauseSignal);
+			WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
 			Interlocked.Decrement(ref FPausedCount);
 		}
 	}
