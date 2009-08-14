@@ -765,8 +765,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						FRow.DataTypes[AIndex] = DataValue.NativeTypeToScalarType(Process.GetServerProcess(), value.GetType());
 					else
 						FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;
-					#endif
+					FRow.Values[AIndex] = DataValue.CopyNative(Process, FRow.DataTypes[AIndex], value);
+					#else
 					FRow.Values[AIndex] = DataValue.CopyNative(Process, DataType.Columns[AIndex].DataType, value);
+					#endif
 				}
 				else
 				{

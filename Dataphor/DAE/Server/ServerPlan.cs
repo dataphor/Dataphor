@@ -223,6 +223,9 @@ namespace Alphora.Dataphor.DAE.Server
 				DataValue LDataValue = LResult as DataValue;
 				if (LDataValue != null)
 					return LDataValue;
+
+				if ((this.DataType == Process.DataTypes.SystemGeneric) || (this.DataType == Process.DataTypes.SystemScalar))
+					return DataValue.FromNative(FProcess, DataValue.NativeTypeToScalarType(Process.GetServerProcess(), LResult.GetType()), LResult);
 					
 				return DataValue.FromNative(FProcess, this.DataType, LResult);
 			}
