@@ -2237,12 +2237,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void Yield(PlanNode APlanNode)
 		{
+			CheckAborted();
 			if (FDebugger != null)
 				FDebugger.Yield(this, APlanNode, null);
 		}
 		
 		public void Yield(PlanNode APlanNode, Exception AException)
 		{
+			CheckAborted();
 			if (FDebugger != null)
 				FDebugger.Yield(this, APlanNode, AException);
 		}

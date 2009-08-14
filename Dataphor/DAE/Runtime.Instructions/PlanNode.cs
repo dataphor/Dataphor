@@ -636,9 +636,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			try
 			{
 			#endif
-				AProcess.CheckAborted();
 				if (IsBreakable)
 					AProcess.Yield(this);
+				else
+					AProcess.CheckAborted();
 				#if TRACKCALLDEPTH
 				AProcess.Context.IncCallDepth();
 				try

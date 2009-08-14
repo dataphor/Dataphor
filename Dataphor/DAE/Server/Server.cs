@@ -1134,14 +1134,8 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void TerminateProcess(ServerProcess AProcess)
 		{
-			try
-			{
-				TerminateProcessThread(AProcess);
-			}
-			finally
-			{
-				((IServerSession)AProcess.ServerSession).StopProcess(AProcess);
-			}
+			TerminateProcessThread(AProcess);
+			((IServerSession)AProcess.ServerSession).StopProcess(AProcess);
 		}
 		
 		// Sessions

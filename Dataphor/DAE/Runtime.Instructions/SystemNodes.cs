@@ -1442,23 +1442,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void ExecuteResults(IAsyncResult AResult)
 		{
-			IServerScript LScript = (IServerScript)AResult.AsyncState;
-			IServerProcess LProcess = LScript.Process;
 			try
 			{
-				try
+				IServerScript LScript = (IServerScript)AResult.AsyncState;
+				IServerProcess LProcess = LScript.Process;
+				if (LProcess != null)
 				{
-					((ServerProcess)LProcess).Context.PopWindow();
-				}
-				finally
-				{
-					LProcess.UnprepareScript(LScript);
+					try
+					{
+						try
+						{
+							((ServerProcess)LProcess).Context.PopWindow();
+						}
+						finally
+						{
+							LProcess.UnprepareScript(LScript);
+						}
+					}
+					finally
+					{
+						if (((ServerScript)LScript).ShouldCleanupProcess)
+							LProcess.Session.StopProcess(LProcess);
+					}
 				}
 			}
-			finally
+			catch
 			{
-				if (((ServerScript)LScript).ShouldCleanupProcess)
-					LProcess.Session.StopProcess(LProcess);
+				// do nothing, we are on a worker thread and an unhandled exception will bring down the application.
+				// Cause that's what you'd want to do if you got an unhandled exception on a thread. Crash.
 			}
 		}
 		

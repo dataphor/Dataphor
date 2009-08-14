@@ -45,11 +45,22 @@ begin
 		raise Error("Disposed process did not detach");
 end;
 
-// This should be a negative test, you cannot attach to your own session.
-//Debug.AttachSession(SessionID());
+// Cannot attach to debugger session.
+begin
+	var LExceptionHit := false;
+	try
+		Debug.AttachSession(SessionID());
+	except
+		LExceptionHit := true;
+	end;
+	if not(LExceptionHit) then
+		raise Error("Attaching to debugger session did not fail.");
+end;
 
 /*
-// This needs to be run on a separate session.
+// This needs to be run on a separate session...
+// Probably needs to be managed by an NUnit test directly.
+Debug.AttachSession(SessionID());
 begin
 	var LProcessID := StartProcess();
 	try
@@ -62,6 +73,20 @@ end;
 
 Debug.DetachSession(SessionID());
 */
+
+// Stop a process that is broken in debug
+begin
+	var LProcessID := StartProcess();
+	try
+		Debug.AttachProcess(LProcessID);
+		ExecuteAsync(LProcessID, 'raise Error("Debug Error");');
+	finally
+		StopProcess(LProcessID);
+	end;
+	
+	if exists (Processes where ID = LProcessID) then	
+		raise Error('Could not stop broken process.');
+end;
 
 // Stop the debugger
 Debug.Stop();

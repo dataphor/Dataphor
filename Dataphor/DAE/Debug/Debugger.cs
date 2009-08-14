@@ -278,7 +278,12 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public void CheckForAbort()
 		{
-			FPauseSignal.Set();
+			CheckPaused();
+			lock (FSyncHandle)
+			{
+				FPauseSignal.Set();
+				FPauseSignal.Reset();
+			}
 		}
 		
 /*
@@ -392,8 +397,11 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			if (ShouldBreak(AProcess, ANode, AException))
 			{
-				FBrokenProcesses.Add(AProcess);
-				FPauseSignal.Reset();
+				lock (FSyncHandle)
+				{
+					FBrokenProcesses.Add(AProcess);
+					InternalPause();
+				}
 			}
 
 			Interlocked.Increment(ref FPausedCount);
