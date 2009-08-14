@@ -59,13 +59,13 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		private void CatalogRegressionTest(CatalogStoreType ACatalogStoreType)
 		{
 			// Create a test configuration
-			ServerConfiguration LTestConfiguration = ServerTestUtility.GetTestConfiguration("TestInstance", ACatalogStoreType);
+			ServerConfiguration LTestConfiguration = ServerTestUtility.Instance.GetTestConfiguration("TestInstance", ACatalogStoreType);
 
 			// Reset the instance
-			ServerTestUtility.ResetInstance(LTestConfiguration, ACatalogStoreType);
+			ServerTestUtility.Instance.ResetInstance(LTestConfiguration, ACatalogStoreType);
 				
 			// Start a server based on the StoreRegression instance
-			Server.Server LServer = ServerTestUtility.GetServer(LTestConfiguration);
+			Server.Server LServer = ServerTestUtility.Instance.GetServer(LTestConfiguration);
 			LServer.Start();
 			
 			// Stop the server
@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			LServer.Stop();
 			
 			// Reset the instance
-			ServerTestUtility.ResetInstance(LTestConfiguration, ACatalogStoreType);
+			ServerTestUtility.Instance.ResetInstance(LTestConfiguration, ACatalogStoreType);
 		}
 		
 		[Test]

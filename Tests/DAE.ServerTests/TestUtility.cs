@@ -21,17 +21,31 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	
 	public class ServerTestUtility
 	{
-		public static ServerConfiguration GetTestConfiguration()
+		private static ServerTestUtility FInstance;
+
+		public static ServerTestUtility Instance
+		{
+			get
+			{
+				if (FInstance == null) 
+					FInstance = new ServerTestUtility();
+				return FInstance;
+			}
+		}
+
+
+
+		public ServerConfiguration GetTestConfiguration()
 		{
 			return GetTestConfiguration("TestInstance");
 		}
 		
-		public static ServerConfiguration GetTestConfiguration(string AInstanceName)
+		public ServerConfiguration GetTestConfiguration(string AInstanceName)
 		{
 			return GetTestConfiguration(AInstanceName, CatalogStoreType.SQLCE);
 		}
 		
-		public static ServerConfiguration GetTestConfiguration(string AInstanceName, CatalogStoreType ACatalogStoreType)
+		public ServerConfiguration GetTestConfiguration(string AInstanceName, CatalogStoreType ACatalogStoreType)
 		{
 			ServerConfiguration LTestConfiguration = new ServerConfiguration();
 			LTestConfiguration.Name = AInstanceName;
@@ -53,12 +67,12 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			return LTestConfiguration;
 		}
 		
-		public static void ResetInstance(ServerConfiguration ATestConfiguration)
+		public void ResetInstance(ServerConfiguration ATestConfiguration)
 		{
 			ResetInstance(ATestConfiguration, CatalogStoreType.SQLCE);
 		}
 		
-		public static void ResetInstance(ServerConfiguration ATestConfiguration, CatalogStoreType ACatalogStoreType)
+		public void ResetInstance(ServerConfiguration ATestConfiguration, CatalogStoreType ACatalogStoreType)
 		{
 			// Delete the instance directory
 			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.Server.CDefaultInstanceDirectory), ATestConfiguration.Name);
@@ -70,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 				ResetMSSQLCatalog(ATestConfiguration);
 		}
 
-		public static void ResetMSSQLCatalog(ServerConfiguration ATestConfiguration)
+		public void ResetMSSQLCatalog(ServerConfiguration ATestConfiguration)
 		{
 			DbConnectionStringBuilder LBuilder = new DbConnectionStringBuilder();
 			LBuilder.ConnectionString = ATestConfiguration.CatalogStoreConnectionString;
@@ -101,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			}
 		}
 		
-		public static Server.Server GetServer(ServerConfiguration AServerConfiguration)
+		public Server.Server GetServer(ServerConfiguration AServerConfiguration)
 		{
 			Server.Server LServer = new Server.Server();
 			AServerConfiguration.ApplyTo(LServer);

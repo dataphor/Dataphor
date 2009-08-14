@@ -24,9 +24,9 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
-			FConfiguration = ServerTestUtility.GetTestConfiguration();
-			ServerTestUtility.ResetInstance(FConfiguration);
-			FServer = ServerTestUtility.GetServer(FConfiguration);
+			FConfiguration = ServerTestUtility.Instance.GetTestConfiguration();
+			ServerTestUtility.Instance.ResetInstance(FConfiguration);
+			FServer = ServerTestUtility.Instance.GetServer(FConfiguration);
 			FServer.Start();
 			
 			IServerSession LSession = FServer.Connect(new SessionInfo("Admin", ""));
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		public void TearDownFixture()
 		{
 			FServer.Stop();
-			ServerTestUtility.ResetInstance(FConfiguration);
+			ServerTestUtility.Instance.ResetInstance(FConfiguration);
 		}
 		
 		[SetUp]
