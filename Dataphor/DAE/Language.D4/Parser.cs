@@ -5232,55 +5232,41 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 			#endif
 				FLexer.NextToken().CheckSymbol(Keywords.Initialization);
+				LStatement.Initialization.SetPosition(FLexer);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-				{
 					LStatement.Initialization.ClassDefinition = ClassDefinition();
-					LStatement.Initialization.Line = LStatement.Initialization.ClassDefinition.Line;
-					LStatement.Initialization.LinePos = LStatement.Initialization.ClassDefinition.LinePos;
-					LStatement.Initialization.SetEndPosition(FLexer);
-				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Initialization.SetPosition(FLexer);
 					LStatement.Initialization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
-					LStatement.Initialization.SetEndPosition(FLexer);
 				}
+				LStatement.Initialization.SetEndPosition(FLexer);
 					
 				FLexer.NextToken().CheckSymbol(Keywords.Aggregation);
+				LStatement.Aggregation.SetPosition(FLexer);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-				{
 					LStatement.Aggregation.ClassDefinition = ClassDefinition();
-					LStatement.Aggregation.Line = LStatement.Aggregation.ClassDefinition.Line;
-					LStatement.Aggregation.LinePos = LStatement.Aggregation.ClassDefinition.LinePos;
-					LStatement.Aggregation.SetEndPosition(FLexer);
-				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Aggregation.SetPosition(FLexer);
 					LStatement.Aggregation.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
-					LStatement.Aggregation.SetEndPosition(FLexer);
 				}
+				LStatement.Aggregation.SetEndPosition(FLexer);
 					
 				FLexer.NextToken().CheckSymbol(Keywords.Finalization);
+				LStatement.Finalization.SetPosition(FLexer);
 				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-				{
 					LStatement.Finalization.ClassDefinition = ClassDefinition();
-					LStatement.Finalization.Line = LStatement.Finalization.ClassDefinition.Line;
-					LStatement.Finalization.LinePos = LStatement.Finalization.ClassDefinition.LinePos;
-					LStatement.Finalization.SetEndPosition(FLexer);
-				}
 				else
 				{
 					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Finalization.SetPosition(FLexer);
 					LStatement.Finalization.Block = Block();
 					FLexer.NextToken().CheckSymbol(Keywords.End);
-					LStatement.Finalization.SetEndPosition(FLexer);
 				}
+				LStatement.Finalization.SetEndPosition(FLexer);
+
 			#if USETYPEINHERITANCE
 			}
 			else

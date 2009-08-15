@@ -5986,8 +5986,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					Schema.AggregateOperator LAggregateOperator = (Schema.AggregateOperator)LNode.CreateOperator;
 					LAggregateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
-					LAggregateOperator.InitializationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Initialization.LineInfo);
-					LAggregateOperator.AggregationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Aggregation.LineInfo);
+					LAggregateOperator.InitializationText = SourceUtility.CopySection(APlan.SourceContext.Script, new LineInfo(AStatement.Initialization.Line, AStatement.Initialization.LinePos, AStatement.Aggregation.Line, AStatement.Aggregation.LinePos));
+					LAggregateOperator.AggregationText = SourceUtility.CopySection(APlan.SourceContext.Script, new LineInfo(AStatement.Aggregation.Line, AStatement.Aggregation.LinePos, AStatement.Finalization.Line, AStatement.Finalization.LinePos));
 					LAggregateOperator.FinalizationText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Finalization.LineInfo);
 				}
 				

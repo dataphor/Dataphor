@@ -529,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			
 			IMetaData LResult;
-			if ((AMode == EmitMode.ForCopy) && (FDeclarationText != null))
+			if ((AMode != EmitMode.ForRemote) && (FDeclarationText != null))
 			{
 				SourceStatement LStatement = new SourceStatement();
 				LStatement.Source = FDeclarationText + FBodyText;
@@ -658,7 +658,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 			IMetaData LResult;
 			
-			if ((AMode == EmitMode.ForCopy) && (DeclarationText != null))
+			if ((AMode != EmitMode.ForRemote) && (DeclarationText != null))
 			{
 				SourceStatement LStatement = new SourceStatement();
 				LStatement.Source = DeclarationText + InitializationText + AggregationText + FinalizationText;

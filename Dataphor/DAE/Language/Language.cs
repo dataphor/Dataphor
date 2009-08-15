@@ -36,6 +36,15 @@ namespace Alphora.Dataphor.DAE.Language
     
     public class LineInfo
     {
+		public LineInfo() { }
+		public LineInfo(int ALine, int ALinePos, int AEndLine, int AEndLinePos)
+		{
+			Line = ALine;
+			LinePos = ALinePos;
+			EndLine = AEndLine;
+			EndLinePos = AEndLinePos;
+		}
+		
 		public int Line = -1;
 		public int LinePos = -1;
 		public int EndLine = -1;

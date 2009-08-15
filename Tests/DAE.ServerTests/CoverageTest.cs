@@ -173,5 +173,6 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[Test] public void ExecuteServerLinks() { ExecuteScript("Coverage.Scripts", "ServerLink"); }
 		[Test] public void ExecuteDebugLibrary() { ExecuteScript("Coverage.Scripts", "DebugLibrary"); }
 		[Test] public void ExecutePlanCache() { ExecuteScript("Coverage.Scripts", "PlanCache"); }
+		[Test] public void ExecuteOperatorText() { ExecuteScript("Coverage.Scripts", "OperatorText"); }
 	}
 }

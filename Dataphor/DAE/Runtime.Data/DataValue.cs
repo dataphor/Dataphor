@@ -432,6 +432,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (AValue is StreamID)
 					return new Scalar(AProcess, LScalarType, (StreamID)AValue);
+				if (LScalarType.IsGeneric)
+					return new Scalar(AProcess, NativeTypeToScalarType(AProcess.GetServerProcess(), AValue.GetType()), AValue);
 				return new Scalar(AProcess, LScalarType, AValue);
 			}
 				
