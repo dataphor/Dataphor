@@ -24,6 +24,7 @@ create operator TestNavigable(const AExpression : String, const AExpectedExpress
 create operator TestBackwardsNavigable(const AExpression : String, const AExpectedExpression : String) class "Alphora.Dataphor.DAE.Diagnostics.TestBackwardsNavigableNode,Alphora.Dataphor.DAE.Diagnostics";
 create operator TestSearchable(const AExpression : String, const AExpectedExpression : String) class "Alphora.Dataphor.DAE.Diagnostics.TestSearchableNode,Alphora.Dataphor.DAE.Diagnostics";
 create operator TestParserEmitter(const AScript : String) class "Alphora.Dataphor.DAE.Diagnostics.TestParserEmitterNode,Alphora.Dataphor.DAE.Diagnostics";
+create operator TestIsPlanCached() : Boolean class "Alphora.Dataphor.DAE.Diagnostics.TestIsPlanCachedNode,Alphora.Dataphor.DAE.Diagnostics";
 //create operator CanonicalForm(const AScript : String) : String class "Alphora.Dataphor.DAE.Diagnostics.CanonicalFormNode,Alphora.Dataphor.DAE.Diagnostics";
 
 create operator RunNavigableTest(const AExpression : String) : String

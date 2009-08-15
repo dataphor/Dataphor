@@ -2251,5 +2251,13 @@ drop table Testing;
 			return null;
 		}
 	}
+
+	public class TestIsPlanCachedNode : NilaryInstructionNode
+	{
+		public override object NilaryInternalExecute(ServerProcess AProcess)
+		{
+			return AProcess.ExecutingPlan.Header != null;
+		}
+	}
 }
 

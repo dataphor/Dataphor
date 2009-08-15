@@ -444,7 +444,7 @@ namespace Alphora.Dataphor.DAE.Server
 					Process.ServerSession.SessionInfo.UsePlanCache = false;
 					try
 					{
-						// Push a loading context to prevent the DDL from begin logged.
+						// Push a loading context to prevent the DDL from being logged.
 						Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 						try
 						{
@@ -480,7 +480,10 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Exit(LTransaction);
 			}
 			
-			FCheckTable = Process.Plan.Catalog[((Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName]).GlobalName] as Schema.TableVar;
+			Schema.SessionObject LSessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName];
+			LSessionObject.IsGenerated = true;
+			FCheckTable = Process.Plan.Catalog[LSessionObject.GlobalName] as Schema.TableVar;
+			FCheckTable.IsGenerated = true;
 			FCheckTableKey = FCheckTable.Keys.MinimumKey(true);
 			FCheckRowType = new Schema.RowType(FCheckTable.DataType.Columns);
 		}

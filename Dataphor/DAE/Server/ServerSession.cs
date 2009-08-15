@@ -158,20 +158,20 @@ namespace Alphora.Dataphor.DAE.Server
 		// Plan Cache		
 		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
 				Server.PlanCache.Add(AProcess, AStatement, AContextHashCode, APlan);
 		}
 		
 		public ServerPlan GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
 				return Server.PlanCache.Get(AProcess, AStatement, AContextHashCode);
 			return null;
 		}
 		
 		public bool ReleaseCachedPlan(ServerProcess AProcess, ServerPlan APlan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasNonGeneratedSessionObjects())
 				return Server.PlanCache.Release(AProcess, APlan);
 			return false;
 		}
@@ -303,6 +303,27 @@ namespace Alphora.Dataphor.DAE.Server
 		public bool HasSessionObjects()
 		{
 			return ((FSessionObjects == null ? 0 : FSessionObjects.Count) + (FSessionOperators == null ? 0 : FSessionOperators.Count)) > 0;
+		}
+		
+		public bool HasNonGeneratedSessionObjects()
+		{
+			if ((FSessionObjects == null) && (FSessionOperators == null))
+				return false;
+				
+			// ASSERTION: The only way a session object could be marked generated is if it is
+			// the check table created to track deferred constraint checks.
+			if (FSessionObjects != null)
+				for (int LIndex = 0; LIndex < FSessionObjects.Count; LIndex++)
+					if (!FSessionObjects[LIndex].IsGenerated)
+						return true;
+					
+			// NOTE: The server does not currently create session operators to support any internal operations
+			// If that ever changes, this needs to be changed to look for those generated operators.
+			// For now, this is a shortcut for performance.
+			if ((FSessionOperators != null) && (FSessionOperators.Count) > 0)
+				return true;
+			
+			return false;
 		}
 		
 		// CursorManager
