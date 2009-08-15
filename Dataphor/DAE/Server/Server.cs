@@ -4152,7 +4152,10 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Exit(LTransaction);
 			}
 			
-			FCheckTable = Process.Plan.Catalog[((Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName]).GlobalName] as Schema.TableVar;
+			Schema.SessionObject LSessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName];
+			LSessionObject.IsGenerated = true;
+			FCheckTable = Process.Plan.Catalog[LSessionObject.GlobalName] as Schema.TableVar;
+			FCheckTable.IsGenerated = true;
 			FCheckTableKey = FCheckTable.Keys.MinimumKey(true);
 			FCheckRowType = new Schema.RowType(FCheckTable.DataType.Columns);
 		}
@@ -5420,20 +5423,20 @@ namespace Alphora.Dataphor.DAE.Server
 		// Plan Cache		
 		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlanBase APlan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasNonGeneratedSessionObjects())
 				Server.PlanCache.Add(AProcess, AStatement, AContextHashCode, APlan);
 		}
 		
 		public ServerPlanBase GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && !HasNonGeneratedSessionObjects())
 				return Server.PlanCache.Get(AProcess, AStatement, AContextHashCode);
 			return null;
 		}
 		
 		public bool ReleaseCachedPlan(ServerProcess AProcess, ServerPlanBase APlan)
 		{
-			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasSessionObjects())
+			if (FSessionInfo.UsePlanCache && (Server.PlanCache != null) && (APlan.Header != null) && (!APlan.Header.IsInvalidPlan) && !HasNonGeneratedSessionObjects())
 				return Server.PlanCache.Release(AProcess, APlan);
 			return false;
 		}
@@ -5565,6 +5568,27 @@ namespace Alphora.Dataphor.DAE.Server
 		public bool HasSessionObjects()
 		{
 			return ((FSessionObjects == null ? 0 : FSessionObjects.Count) + (FSessionOperators == null ? 0 : FSessionOperators.Count)) > 0;
+		}
+		
+		public bool HasNonGeneratedSessionObjects()
+		{
+			if ((FSessionObjects == null) && (FSessionOperators == null))
+				return false;
+				
+			// ASSERTION: The only way a session object could be marked generated is if it is
+			// the check table created to track deferred constraint checks.
+			if (FSessionObjects != null)
+				for (int LIndex = 0; LIndex < FSessionObjects.Count; LIndex++)
+					if (!FSessionObjects[LIndex].IsGenerated)
+						return true;
+					
+			// NOTE: The server does not currently create session operators to support any internal operations
+			// If that ever changes, this needs to be changed to look for those generated operators.
+			// For now, this is a shortcut for performance.
+			if ((FSessionOperators != null) && (FSessionOperators.Count) > 0)
+				return true;
+			
+			return false;
 		}
 		
 		#if OnExpression
