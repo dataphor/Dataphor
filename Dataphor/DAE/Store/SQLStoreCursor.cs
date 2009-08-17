@@ -111,6 +111,7 @@ namespace Alphora.Dataphor.DAE.Store
 		private object[] FStartValues;
 		private object[] FEndValues;
 		private bool FIsOnRow;
+		private bool FIsOnSimulatedCrack;
 		
 		private void DisposeReader()
 		{
@@ -290,10 +291,10 @@ namespace Alphora.Dataphor.DAE.Store
 			FEndValues = AEndValues;
 			
 			if (FStartValues != null)
-				InternalSeek(AStartValues);
+				FIsOnSimulatedCrack = InternalSeek(AStartValues);
 			else
-				InternalFirst();
-				
+				FIsOnSimulatedCrack = InternalFirst();
+			
 			FIsOnRow = false;
 		}
 		
@@ -593,7 +594,13 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 
-				FIsOnRow = InternalNext();
+				if (FIsOnSimulatedCrack)
+				{
+					FIsOnSimulatedCrack = false;
+					FIsOnRow = true;
+				}
+				else
+					FIsOnRow = InternalNext();
 
 			#if SQLSTORETIMING
 			}
@@ -609,7 +616,7 @@ namespace Alphora.Dataphor.DAE.Store
 			return FIsOnRow;
 		}
 		
-		protected virtual void InternalLast()
+		protected virtual bool InternalLast()
 		{
 			FEditingRow = null;			
 			DisposeReader();
@@ -623,6 +630,7 @@ namespace Alphora.Dataphor.DAE.Store
 				FBufferForward = false;
 				FBufferIndex = FBuffer.Count;
 			}
+			return false;
 		}
 		
 		public void Last()
@@ -634,14 +642,14 @@ namespace Alphora.Dataphor.DAE.Store
 			#endif
 
 			if (FEndValues != null)
-				InternalSeek(FEndValues);
+				FIsOnSimulatedCrack = InternalSeek(FEndValues);
 			else
-				InternalLast();
+				FIsOnSimulatedCrack = InternalLast();
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("Last", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
 			#endif
-
+			
 			FIsOnRow = false;
 		}
 		
@@ -707,7 +715,13 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 			#endif
 
-				FIsOnRow = InternalPrior();
+				if (FIsOnSimulatedCrack)
+				{	
+					FIsOnSimulatedCrack = false;
+					FIsOnRow = true;
+				}
+				else
+					FIsOnRow = InternalPrior();
 				
 			#if SQLSTORETIMING
 			}
@@ -723,7 +737,7 @@ namespace Alphora.Dataphor.DAE.Store
 			return FIsOnRow;
 		}
 
-		protected virtual void InternalFirst()
+		protected virtual bool InternalFirst()
 		{
 			#if SQLSTORETIMING
 			long LStartTicks = TimingUtility.CurrentTicks;
@@ -733,6 +747,7 @@ namespace Alphora.Dataphor.DAE.Store
 			DisposeReader();
 			EnsureReader(null, true, true);
 			ClearBuffer();
+			return false;
 
 			#if SQLSTORETIMING
 			Connection.Store.Counters.Add(new SQLStoreCounter("First", FTableName, "", false, false, false, TimingUtility.TimeSpanFromTicks(LStartTicks)));
@@ -742,10 +757,12 @@ namespace Alphora.Dataphor.DAE.Store
 		public void First()
 		{
 			FCurrentRow = null;
+
 			if (FStartValues != null)
-				InternalSeek(FStartValues);
+				FIsOnSimulatedCrack = InternalSeek(FStartValues);
 			else
-				InternalFirst();
+				FIsOnSimulatedCrack = InternalFirst();
+			
 			FIsOnRow = false;
 		}
 		
@@ -896,13 +913,14 @@ namespace Alphora.Dataphor.DAE.Store
 		public bool FindKey(object[] AKey)
 		{
 			FCurrentRow = null;
+			FIsOnSimulatedCrack = false;
 			
 			if ((FStartValues != null) && ((CompareKeys(FStartValues, AKey) < 0) || (CompareKeys(FEndValues, AKey) > 0)))
 				return false;
 				
 			if (InternalSeek(AKey))
 			{
-				FIsOnRow = InternalNext();
+				FIsOnRow = true;
 				return FIsOnRow;
 			}
 			
@@ -913,24 +931,28 @@ namespace Alphora.Dataphor.DAE.Store
 		public void FindNearest(object[] AKey)
 		{
 			FCurrentRow = null;
+			FIsOnSimulatedCrack = false;
 
 			if (FStartValues != null)
 			{
 				if (CompareKeys(FStartValues, AKey) < 0)
 				{
-					InternalSeek(FStartValues);
-					FIsOnRow = InternalNext();
+					FIsOnRow = InternalSeek(FStartValues);
+					if (!FIsOnRow)
+						FIsOnRow = InternalNext();
 				}
 				else if (CompareKeys(FEndValues, AKey) > 0)
 				{
-					InternalSeek(FEndValues);
-					FIsOnRow = InternalPrior();
+					FIsOnRow = InternalSeek(FEndValues);
+					if (!FIsOnRow)
+						FIsOnRow = InternalPrior();
 				}
 			}
 			else
 			{
-				InternalSeek(AKey);
-				FIsOnRow = InternalNext();
+				FIsOnRow = InternalSeek(AKey);
+				if (!FIsOnRow)
+					FIsOnRow = InternalNext();
 			}
 		}
 	}

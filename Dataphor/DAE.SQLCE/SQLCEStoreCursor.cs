@@ -80,9 +80,9 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
             return FResultSet.Read();
         }
 
-        protected override void InternalLast()
+        protected override bool InternalLast()
         {
-            FResultSet.ReadLast();
+            return FResultSet.ReadLast();
         }
 
         protected override bool InternalPrior()
@@ -90,9 +90,9 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			return FResultSet.ReadPrevious();
         }
 
-        protected override void InternalFirst()
+        protected override bool InternalFirst()
         {
-            FResultSet.ReadFirst();
+            return FResultSet.ReadFirst();
         }
 
         protected override bool InternalSeek(object[] AKey)
@@ -101,7 +101,12 @@ namespace Alphora.Dataphor.DAE.Store.SQLCE
 			object[] LKey = new object[AKey.Length];
 			for (int LIndex = 0; LIndex < LKey.Length; LIndex++)
 				LKey[LIndex] = NativeToStoreValue(AKey[LIndex]);
-			return FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
+			FResultSet.Seek(DbSeekOptions.FirstEqual, LKey);
+			// Despite the fact that the documentation says that the
+			// result value of the Seek operation indicates whether or
+			// not the cursor is positioned on a row, this does not
+			// seem to be the case. (As of 3.5 sp1)
+			return false;
         }
 		
         protected override object InternalGetValue(int AIndex)
