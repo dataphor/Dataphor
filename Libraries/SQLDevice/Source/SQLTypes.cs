@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if (LString != null)
 				return String.Format("cast('{0}' as {1})", LString.Replace("'", "''"), DomainName());
 
-			return LValue.ToString();
+			return String.Format("cast('{0}' as {1})", LValue.ToString(), DomainName());
 		}
 		
 		public virtual object ParameterToScalar(IServerProcess AProcess, object AValue)
@@ -616,7 +616,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("cast('{0}' as {1})", ((TimeSpan)AValue).Ticks.ToString(NumberFormatInfo.InvariantInfo), DomainName());
+			return String.Format("cast({0} as {1})", ((TimeSpan)AValue).Ticks.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
