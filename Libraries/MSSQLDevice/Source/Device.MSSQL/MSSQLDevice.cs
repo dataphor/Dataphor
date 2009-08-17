@@ -805,7 +805,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsBoolean ? "1" : "0";
+			return String.Format("cast({0} as {1})", AValue.AsBoolean ? "1" : "0", DomainName());
 		}
 		
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -925,7 +925,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if (LValue < MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -990,7 +990,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if (LValue < MSSQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1056,7 +1056,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if (LValue < MSSQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1101,7 +1101,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsGuid.ToString());
+			return String.Format("cast('{0}' as {1})", AValue.AsGuid.ToString(), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1189,7 +1189,7 @@ if not exists (select * from sysdatabases where name = '{0}')
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsString);
+			return String.Format("cast('{0}' as {1})", AValue.AsString, DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)

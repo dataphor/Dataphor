@@ -29,9 +29,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			
 			string LString = LValue as string;
 			if (LString != null)
-				return String.Format("'{0}'", LString.Replace("'", "''"));
+				return String.Format("cast('{0}' as {1})", LString.Replace("'", "''"), DomainName());
 
-			return LValue.ToString();
+			return String.Format("cast('{0}' as {1})", LValue.ToString(), DomainName());
 		}
 		
 		public virtual Scalar ParameterToScalar(IServerProcess AProcess, object AValue)
@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsBoolean ? "1" : "0";
+			return String.Format("cast({0} as {1})", AValue.AsBoolean ? "1" : "0", DomainName());
 		}
 		
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -237,7 +237,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsByte.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsByte.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -306,7 +306,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsInt16.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsInt16.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -448,7 +448,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsInt64.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsInt64.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -517,7 +517,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public byte GetPrecision(D4.MetaData AMetaData)
@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -617,7 +617,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsTimeSpan.Ticks.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsTimeSpan.Ticks.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -653,7 +653,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -699,7 +699,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 			
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -747,7 +747,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo);
+			return String.Format("cast({0} as {1})", AValue.AsDecimal.ToString(NumberFormatInfo.InvariantInfo), DomainName());
 		}
 		
 		public override SQLType GetSQLType(D4.MetaData AMetaData)
@@ -875,7 +875,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsString);
+			return String.Format("cast('{0}' as {1})", AValue.AsString, DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -914,7 +914,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsString);
+			return String.Format("cast('{0}' as {1})", AValue.AsString, DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)

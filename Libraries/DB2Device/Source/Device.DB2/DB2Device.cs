@@ -1092,7 +1092,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1164,7 +1164,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1210,7 +1210,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1287,7 +1287,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
@@ -1340,7 +1340,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			if ((AValue == null) || AValue.IsNil)
 				return String.Format("cast(null as {0})", DomainName());
 				
-			return String.Format("'{0}'", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", AValue.AsDateTime.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
