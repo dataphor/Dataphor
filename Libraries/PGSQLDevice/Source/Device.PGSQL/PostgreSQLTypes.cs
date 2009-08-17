@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 
-			return (bool)AValue ? "1" : "0";
+			return String.Format("cast({0} as {1})", (bool)AValue ? "1" : "0", DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (LValue < MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (LValue < PostgreSQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
@@ -290,7 +290,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (LValue < PostgreSQLDateTime.MinValue)
 				throw new SQLException(SQLException.Codes.ValueOutOfRange, ScalarType.Name, LValue.ToString());
 
-			return String.Format("'{0}'", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
+			return String.Format("cast('{0}' as {1})", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
@@ -335,7 +335,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 
-			return String.Format("'{0}'", (Guid)AValue);
+			return String.Format("cast('{0}' as {1})", (Guid)AValue, DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
@@ -426,7 +426,7 @@ namespace Alphora.Dataphor.Device.PGSQL
 			if (AValue == null)
 				return String.Format("cast(null as {0})", DomainName());
 
-			return String.Format("'{0}'", Convert.ToBase64String((byte[])AValue));
+			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
 		}
 
 		public override object ToScalar(IServerProcess AProcess, object AValue)
