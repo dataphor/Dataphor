@@ -28,9 +28,8 @@ namespace Alphora.Dataphor.DAE.Client
 		// Do not localize
 		public const string CParamNamespace = "AMaster";
 
-		protected override void InternalInitialize()
+		public DAEDataSet()
 		{
-			base.InternalInitialize();
 			FParamGroups = new DataSetParamGroups();
 			FParamGroups.OnParamChanged += new ParamChangedHandler(DataSetParamChanged);
 			FParamGroups.OnParamStructureChanged += new ParamStructureChangedHandler(DataSetParamStructureChanged);

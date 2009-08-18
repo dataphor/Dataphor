@@ -25,9 +25,8 @@ namespace Alphora.Dataphor.DAE.Client
 	/// <summary> A DAEDataSet descendent that implements behavior common to an ordered result set. </summary>
 	public abstract class TableDataSet : DAEDataSet
 	{
-		protected override void InternalInitialize()
+		public TableDataSet()
 		{
-			base.InternalInitialize();
 			FMasterLink = new MasterDataLink(this);
 			FMasterLink.OnDataChanged += new DataLinkHandler(MasterDataChanged);
 			FMasterLink.OnRowChanged += new DataLinkFieldHandler(MasterRowChanged);

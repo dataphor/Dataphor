@@ -44,13 +44,18 @@ namespace Alphora.Dataphor.DAE.Client
 		protected static readonly int JoinAsInsertMask = BitVector32.CreateMask(UseApplicationTransactionsMask);
 		protected static readonly int IsJoinedMask = BitVector32.CreateMask(JoinAsInsertMask);
 		
-		protected override void InternalInitialize()
+		public DataView()
 		{
-			base.InternalInitialize();
 			InternalUseBrowse = true;
 			InternalWriteWhereClause = true;
 			UseApplicationTransactions = true;
 			FShouldEnlist = EnlistMode.Default;
+		}
+
+		public DataView(IContainer AContainer) : this()
+		{
+			if (AContainer != null)
+				AContainer.Add(this);
 		}
 
 		protected override void InternalDispose(bool ADisposing)

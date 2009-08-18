@@ -29,7 +29,7 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.FSessionDataView = new Alphora.Dataphor.DAE.Client.DataView();
+			this.FSessionDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.dbGrid1 = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
 			this.FSessionSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
 			this.panel1 = new System.Windows.Forms.Panel();

@@ -19,6 +19,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Client.Design;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -42,27 +43,20 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public DataSet() : base()
 		{
-			InternalInitialize();
-		}
-
-		public DataSet(IContainer AContainer)
-		{
-			InternalInitialize();
-			if (AContainer != null)
-				AContainer.Add(this);
-		}
-
-		protected virtual void InternalInitialize()
-		{
 			FBuffer = new DataSetBuffer();
-			FSources = new ArrayList();
 			BufferClear();
 			FFields = new Schema.Objects(10);
 			FDataFields = new DataFields(this);
 			RefreshAfterPost = true;
 			InternalIsWriteOnly = false;
 		}
-		
+
+		public DataSet(IContainer AContainer) : this()
+		{
+			if (AContainer != null)
+				AContainer.Add(this);
+		}
+
 		protected virtual void InternalDispose(bool ADisposing)
 		{
 			Close();
@@ -90,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Client
 					if (FSources != null)
 					{
 						while(FSources.Count != 0)
-							((DataSource)FSources[0]).DataSet = null;
+							FSources[FSources.Count - 1].DataSet = null;
 						FSources = null;
 					}
 
@@ -696,7 +690,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		#region DataLinks & Sources
 
-		private ArrayList FSources;
+		private List<DataSource> FSources = new List<DataSource>();
 
 		internal void AddSource(DataSource ADataSource)
 		{
@@ -727,13 +721,10 @@ namespace Alphora.Dataphor.DAE.Client
 		///	</returns>
 		protected DataLink[] EnumerateLinks()
 		{
-			ArrayList LTempList = new ArrayList();
+			List<DataLink> LTempList = new List<DataLink>();
 			foreach (DataSource LSource in FSources)
-				foreach (DataLink LLink in LSource.FLinks)
-					LTempList.Add(LLink);
-			DataLink[] LResult = new DataLink[LTempList.Count];
-			LTempList.CopyTo(LResult);
-			return LResult;
+				LSource.EnumerateLinks(LTempList);
+			return LTempList.ToArray();
 		}
 								
 		#endregion
@@ -3300,29 +3291,28 @@ namespace Alphora.Dataphor.DAE.Client
     {
 		public DataSource() : base()
 		{
-			InternalInitialize();
 		}
 
-		public DataSource(IContainer AContainer)
+		public DataSource(IContainer AContainer) : this()
 		{
-			InternalInitialize();
 			if (AContainer != null)
 				AContainer.Add(this);
-		}
-
-		private void InternalInitialize()
-		{
-			FLinks = new ArrayList();
 		}
 
 		protected override void Dispose(bool ADisposing)
 		{
 			DataSet = null;
 			base.Dispose(ADisposing);
-			FLinks = null;
+			if (FLinks != null)
+			{
+				while (FLinks.Count > 0)
+					FLinks[FLinks.Count - 1].Source = null;
+				FLinks = null;
+			}
 		}
+
+		internal List<DataLink> FLinks = new List<DataLink>();
 		
-		internal ArrayList FLinks;
 		internal void AddLink(DataLink ALink)
 		{
 			FLinks.Add(ALink);
@@ -3339,6 +3329,12 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			if ((FDataSet != null) && (FDataSet.Active))
 				FDataSet.BufferUpdateCount(false);
+		}
+		
+		public void EnumerateLinks(List<DataLink> ALinks)
+		{
+			foreach (DataLink LLink in FLinks)
+				ALinks.Add(LLink);
 		}
 		
 		private DataSet FDataSet;
