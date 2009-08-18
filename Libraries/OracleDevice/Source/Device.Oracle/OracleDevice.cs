@@ -18,10 +18,6 @@ using Alphora.Dataphor.DAE.Streams;
 
 namespace Alphora.Dataphor.DAE.Device.Oracle
 {
-    
-
-   
-
     public class OracleDevice : SQLDevice
     {
         private readonly string[] FOracleReservedWords =
@@ -36,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                 "number_base", "naturaln", "new", "nextval", "open", "others", "out", "package", "partition",
                 "pls_integer", "positive", "positiven", "pragma", "private", "procedure", "raise", "range",
                 "real", "record", "ref", "release", "remr", "return", "reverse", "rollback", "rownum",
-                "rowtype", "run", "savepoint", "schema", "seperate", "space", "sql", "sqlcode", "sqlerrm",
+				"rowtype", "run", "savepoint", "schema", "seperate", "space", "sql", "sqlcode", "sqlerrm",
                 "statement", "stddev", "subtype", "sum", "tabauth", "tables", "task", "terminate", "true",
                 "type", "use", "variance", "views", "when", "while", "work", "write", "xor"
             };
@@ -238,6 +234,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 									case when c.nullable = 'N' then 0 else 1 end as IsNullable,
 									case when c.data_type in ('BLOB', 'CLOB') then 1 else 0 end as IsDeferred
 								from all_tab_columns c
+									join all_tables t on c.owner = t.owner and c.table_name = t.table_name
 								where 1 = 1 {0} {1}
 								order by c.owner, c.table_name, c.column_id
 						"
@@ -390,8 +387,4 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                 ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] {LConnectionString});
         }
     }
-
-    
-
-     
 }
