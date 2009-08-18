@@ -240,6 +240,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 									case when c.nullable = 'N' then 0 else 1 end as IsNullable,
 									case when c.data_type in ('BLOB', 'CLOB') then 1 else 0 end as IsDeferred
 								from all_tab_columns c
+									join all_tables t on c.owner = t.owner and c.table_name = t.table_name
 								where 1 = 1 {0} {1}
 								order by c.owner, c.table_name, c.column_id
 						" :
