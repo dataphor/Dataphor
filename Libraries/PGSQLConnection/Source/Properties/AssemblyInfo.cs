@@ -34,7 +34,6 @@ using System.Runtime.InteropServices;
 // mediante el asterisco ('*'), como se muestra a continuación:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("2.2.*")]
-[assembly: AssemblyFileVersion("2.2.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 
