@@ -127,18 +127,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			set { FShouldEmitIL = value; }
 		}
 
-		private int FDebuggerID;
-		/// <summary>
-		/// The ID of the debugger to use to debug processes on this session, if any.
-		/// </summary>
-		[System.ComponentModel.DefaultValue(0)]
-		[System.ComponentModel.Description("The ID of the debugger to use to debug processes on this session, if any.")]
-		public int DebuggerID
-		{
-			get { return FDebuggerID; }
-			set { FDebuggerID = value; }
-		}
-		
 		#region ISerializable Members
 
 		[SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
@@ -155,7 +143,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			info.AddValue("DefaultMaxCallDepth", DefaultMaxCallDepth);
 			info.AddValue("UsePlanCache", UsePlanCache);
 			info.AddValue("ShouldEmitIL", ShouldEmitIL);
-			info.AddValue("DebuggerID", DebuggerID);
 		}
 		
 		protected NativeSessionInfo(SerializationInfo info, StreamingContext context)
@@ -171,7 +158,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 			DefaultMaxCallDepth = info.GetInt32("DefaultMaxCallDepth");
 			UsePlanCache = info.GetBoolean("UsePlanCache");
 			ShouldEmitIL = info.GetBoolean("ShouldEmitIL");
-			DebuggerID = info.GetInt32("DebuggerID");
 		}
 
 		#endregion
@@ -192,7 +178,6 @@ namespace Alphora.Dataphor.DAE.NativeCLI
 					DefaultMaxCallDepth = this.DefaultMaxCallDepth,
 					UsePlanCache = this.UsePlanCache,
 					ShouldEmitIL = this.ShouldEmitIL,
-					DebuggerID = this.DebuggerID
 				};
 		}
 	}

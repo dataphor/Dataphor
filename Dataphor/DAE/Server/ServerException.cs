@@ -293,6 +293,9 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106197: "The debugger cannot be attached to the debugger session ({0})."</summary>
 			CannotAttachToDebuggerSession = 106197,
+			
+			/// <summary>Error code 106198: "Could not determine the current location for process ({0})."</summary>
+			CouldNotDetermineProcessLocation = 106198,
 		}
 		
 		// Resource manager for this exception class

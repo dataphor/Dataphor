@@ -255,18 +255,6 @@ namespace Alphora.Dataphor.DAE
 			set { FShouldEmitIL = value; }
 		}
 		
-		private int FDebuggerID;
-		/// <summary>
-		/// The ID of the debugger to use to debug processes on this session, if any.
-		/// </summary>
-		[System.ComponentModel.DefaultValue(0)]
-		[System.ComponentModel.Description("The ID of the debugger to use to debug processes on this session, if any.")]
-		public int DebuggerID
-		{
-			get { return FDebuggerID; }
-			set { FDebuggerID = value; }
-		}
-		
 		public virtual object Clone()
 		{	
 			SessionInfo LSessionInfo = new SessionInfo(FUserID, FPassword);
@@ -284,7 +272,6 @@ namespace Alphora.Dataphor.DAE
 			LSessionInfo.DefaultMaxCallDepth = FDefaultMaxCallDepth;
 			LSessionInfo.UsePlanCache = FUsePlanCache;
 			LSessionInfo.ShouldEmitIL = FShouldEmitIL;
-			LSessionInfo.DebuggerID = FDebuggerID;
 			//LSessionInfo.PlanCacheSize = FPlanCacheSize;
 			return LSessionInfo;
 		}
@@ -310,7 +297,6 @@ namespace Alphora.Dataphor.DAE
 			info.AddValue("DefaultMaxCallDepth", DefaultMaxCallDepth);
 			info.AddValue("UsePlanCache", UsePlanCache);
 			info.AddValue("ShouldEmitIL", ShouldEmitIL);
-			info.AddValue("DebuggerID", DebuggerID);
 		}
 		
 		protected SessionInfo(SerializationInfo info, StreamingContext context)
@@ -331,7 +317,6 @@ namespace Alphora.Dataphor.DAE
 			DefaultMaxCallDepth = info.GetInt32("DefaultMaxCallDepth");
 			UsePlanCache = info.GetBoolean("UsePlanCache");
 			ShouldEmitIL = info.GetBoolean("ShouldEmitIL");
-			DebuggerID = info.GetInt32("DebuggerID");
 		}
 
 		#endregion
@@ -349,7 +334,6 @@ namespace Alphora.Dataphor.DAE
 			FDefaultIsolationLevel = ASessionInfo.DefaultIsolationLevel;
 			FFetchCount = ASessionInfo.FetchCount;
 			FFetchAtOpen = ASessionInfo.FetchAtOpen;
-			FDebuggerID = ASessionInfo.DebuggerID;
 		}
 		
 		// UseImplicitTransactions
@@ -418,18 +402,6 @@ namespace Alphora.Dataphor.DAE
 			set { FSuppressWarnings = value; }
 		}
 		
-		private int FDebuggerID;
-		/// <summary>
-		/// The ID of the debugger to use to debug this process, if any.
-		/// </summary>
-		[System.ComponentModel.DefaultValue(0)]
-		[System.ComponentModel.Description("The ID of the debugger to use to debug this process, if any.")]
-		public int DebuggerID
-		{
-			get { return FDebuggerID; }
-			set { FDebuggerID = value; }
-		}
-		
 		public virtual object Clone()
 		{
 			ProcessInfo LProcessInfo = new ProcessInfo();
@@ -439,7 +411,6 @@ namespace Alphora.Dataphor.DAE
 			LProcessInfo.FetchCount = FFetchCount;
 			LProcessInfo.FetchAtOpen = FFetchAtOpen;
 			LProcessInfo.SuppressWarnings = FSuppressWarnings;
-			LProcessInfo.DebuggerID = FDebuggerID;
 			return LProcessInfo;
 		}
     }

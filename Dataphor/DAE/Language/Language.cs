@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Language
 		// The line and position of the starting token for this element in the syntax tree
 		private LineInfo FLineInfo;
 		public LineInfo LineInfo { get { return FLineInfo; } }
-
+		
 		public int Line
 		{
 			get { return FLineInfo == null ? -1 : FLineInfo.Line; }
@@ -119,6 +119,17 @@ namespace Alphora.Dataphor.DAE.Language
 			EndLine = ALexer[0, false].Line;
 			LexerToken LToken = ALexer[0, false];
 			EndLinePos = LToken.LinePos + (LToken.Token == null ? 0 : LToken.Token.Length);
+		}
+		
+		public void SetLineInfo(LineInfo ALineInfo)
+		{
+			if (ALineInfo != null)
+			{
+				Line = ALineInfo.Line;
+				LinePos = ALineInfo.LinePos;
+				EndLine = ALineInfo.EndLine;
+				EndLinePos = ALineInfo.EndLinePos;
+			}
 		}
 
 		private LanguageModifiers FModifiers;

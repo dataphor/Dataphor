@@ -1,4 +1,10 @@
 /*
+	Alphora Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
 	Dataphor debugging support
 */
 
@@ -19,7 +25,7 @@ create operator Debug.GetSessions() : table { Session_ID : Integer }
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
 //* Operator: GetProcesses
-create operator Debug.GetProcesses() : table { Process_ID : Integer, DidBreak : Boolean }
+create operator Debug.GetProcesses() : table { Process_ID : Integer, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean }
 	class "System.DebugGetProcessesNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
@@ -49,11 +55,17 @@ create operator Debug.GetCallStack(AProcessID : Integer)
 	class "System.DebugGetCallStackNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
-//* Operator: GetContext
-//create operator Debug.GetContext(AProcessID : Integer, AStackIndex : Integer) 
-//	: table { Name : Name, Value : String }
-//	class "System.DebugGetContextNode"
-//	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+//* Operator: GetStack
+create operator Debug.GetStack(AProcessID : Integer, AWindowIndex : Integer) 
+	: table { Index : Integer, Name : Name, Type : String, Value : String }
+	class "System.DebugGetStackNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+
+//* Operator: GetContext	
+create operator Debug.GetContext(AProcessID : Integer)
+	: row { Locator : String, Line : Integer, LinePos : Integer, Script : String }
+	class "System.DebugGetContextNode"
+	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	
 //* Operator: GetStepIntoOperators
 //create operator Debug.GetStepIntoOperators(AProcessID : Integer) 
@@ -82,9 +94,9 @@ create operator Debug.Stop()
 	class "System.DebugStopNode"
 	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
-//* Operator: WaitForBreak
-create operator Debug.WaitForBreak() 
-	class "System.DebugWaitForBreakNode"
+//* Operator: WaitForPause()
+create operator Debug.WaitForPause() 
+	class "System.DebugWaitForPauseNode"
 	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
 //* Operator: Pause

@@ -8,8 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor.DAE.Runtime.Data;
-
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	public class Context : Stack<object>

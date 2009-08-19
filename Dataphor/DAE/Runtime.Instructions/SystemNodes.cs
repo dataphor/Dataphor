@@ -1139,15 +1139,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// create operator Execute(const AProcessID : Integer, const AScript : String, const AInParams : row, var AOutParams : row)
 	public class SystemExecuteNode : InstructionNode
 	{
-		public static void ExecuteScript(ServerProcess AProcess, string AScript)
+		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AScript)
 		{
-			ExecuteScript(AProcess, AScript, null, null);
+			ExecuteScript(AProcess, ANode, AScript, null, null);
 		}
 		
-		public static void ExecuteScript(ServerProcess AProcess, string AScript, Row AInParams, Row AOutParams)
+		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AScript, Row AInParams, Row AOutParams)
 		{
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProcess, AInParams, AOutParams);
-			AProcess.Context.PushWindow(0);
+			AProcess.Context.PushWindow(0, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1174,6 +1174,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ExecuteScript
 				(
 					AProcess.ServerSession.Processes.GetProcess((int)AArguments[0]),
+					this,
 					(string)AArguments[1],
 					AArguments.Length >= 3 ? (Row)AArguments[2] : null,
 					AArguments.Length >= 4 ? (Row)AArguments[3] : null
@@ -1182,6 +1183,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ExecuteScript
 				(
 					AProcess,
+					this,
 					(string)AArguments[0],
 					AArguments.Length >= 2 ? (Row)AArguments[1] : null,
 					AArguments.Length >= 3 ? (Row)AArguments[2] : null
@@ -1226,11 +1228,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AOutParams[LIndex] = AParams[AParams.IndexOf(AOutParams.DataType.Columns[LIndex].Name)].Value;
 		}
 		
-		private object Evaluate(ServerProcess AProcess, string AExpression, Row AInParams, Row AOutParams)
+		private object Evaluate(ServerProcess AProcess, PlanNode ANode, string AExpression, Row AInParams, Row AOutParams)
 		{
 			DataParams LParams = ParamsFromRows(AProcess, AInParams, AOutParams);
 
-			AProcess.Context.PushWindow(0);
+			AProcess.Context.PushWindow(0, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1265,6 +1267,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Evaluate
 					(
 						AProcess.ServerSession.Processes.GetProcess((int)AArguments[0]),
+						this,
 						(string)AArguments[1],
 						AArguments.Length >= 3 ? (Row)AArguments[2] : null,
 						AArguments.Length >= 4 ? (Row)AArguments[3] : null
@@ -1274,6 +1277,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Evaluate
 					(
 						AProcess, 
+						this,
 						(string)AArguments[0], 
 						AArguments.Length >= 2 ? (Row)AArguments[1] : null, 
 						AArguments.Length >= 3 ? (Row)AArguments[2] : null
@@ -1392,12 +1396,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator ExecuteAs(AScript : System.String, AUserID : System.UserID, APassword : System.String; const AInParams : row; var AOutParams : row);</remarks>
 	public class SystemExecuteAsNode : InstructionNode
 	{
-		public static void ExecuteScript(ServerProcess AProcess, string AString, SessionInfo ASessionInfo)
+		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AString, SessionInfo ASessionInfo)
 		{
-			ExecuteScript(AProcess, AString, ASessionInfo, null, null);
+			ExecuteScript(AProcess, ANode, AString, ASessionInfo, null, null);
 		}
 		
-		public static void ExecuteScript(ServerProcess AProcess, string AScript, SessionInfo ASessionInfo, Row AInParams, Row AOutParams)
+		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AScript, SessionInfo ASessionInfo, Row AInParams, Row AOutParams)
 		{
 			IServerSession LSession = ((IServer)AProcess.ServerSession.Server).Connect(ASessionInfo);
 			try
@@ -1405,7 +1409,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				IServerProcess LProcess = LSession.StartProcess(new ProcessInfo(LSession.SessionInfo));
 				try
 				{
-					SystemExecuteNode.ExecuteScript((ServerProcess)LProcess, AScript, AInParams, AOutParams);
+					SystemExecuteNode.ExecuteScript((ServerProcess)LProcess, ANode, AScript, AInParams, AOutParams);
 				}
 				finally
 				{
@@ -1423,6 +1427,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ExecuteScript
 			(
 				AProcess, 
+				this,
 				(string)AArguments[0], 
 				new SessionInfo((string)AArguments[1], (string)AArguments[2], AProcess.Plan.CurrentLibrary.Name),
 				AArguments.Length >= 4 ? (Row)AArguments[3] : null,
@@ -1651,7 +1656,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			string LString = (string)AArguments[0];
-			AProcess.Context.PushWindow(0);
+			AProcess.Context.PushWindow(0, this);
 			try
 			{
 				IServerExpressionPlan LPlan = ((IServerProcess)AProcess).PrepareExpression(LString, null);
@@ -2609,7 +2614,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			long LStartTicks = TimingUtility.CurrentTicks;
-			SystemExecuteNode.ExecuteScript(AProcess, (string)AArguments[0]);
+			SystemExecuteNode.ExecuteScript(AProcess, this, (string)AArguments[0]);
 			return new TimeSpan((long)((((double)(TimingUtility.CurrentTicks - LStartTicks)) / TimingUtility.TicksPerSecond) * TimeSpan.TicksPerSecond));
 		}
 	}

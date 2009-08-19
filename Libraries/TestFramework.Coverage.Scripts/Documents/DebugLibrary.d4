@@ -60,7 +60,7 @@ end;
 /*
 // This needs to be run on a separate session...
 // Probably needs to be managed by an NUnit test directly.
-Debug.AttachSession(SessionID());
+Debug.AttachSession(3);
 begin
 	var LProcessID := StartProcess();
 	try

@@ -369,9 +369,12 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyStarted, FSessionID);
-			FSessionInfo.DebuggerID = 0; // Clear the debugger ID, just in case
+			FDebuggerID = 0; // Clear the debugger ID, just in case
 			FDebugger = ADebugger;
 		}
+		
+		private int FDebuggerID;
+		public int DebuggerID { get { return FDebuggerID; } }
 		
 		/// <summary>
 		/// Sets the ID of the debugger to which this session is attached.
@@ -380,9 +383,9 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if ((FDebugger != null) && (FSessionID == ADebuggerID))
 				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, FSessionID);
-			if ((FSessionInfo.DebuggerID != 0) && (ADebuggerID != 0) && (FSessionInfo.DebuggerID != ADebuggerID))
+			if ((FDebuggerID != 0) && (ADebuggerID != 0))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttachedToSession, FSessionID);
-			FSessionInfo.DebuggerID = ADebuggerID;
+			FDebuggerID = ADebuggerID;
 		}
 
 		// Execution

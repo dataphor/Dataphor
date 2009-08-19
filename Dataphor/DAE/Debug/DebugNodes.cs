@@ -1,8 +1,15 @@
-﻿using System;
+﻿/*
+	Alphora Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 using System.Collections.Generic;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Debug
 {
@@ -118,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					LRow.ValuesOwned = false;
 
 					if (AProcess.ServerSession.Debugger != null)
-						foreach (ServerSession LSession in AProcess.ServerSession.CheckedDebugger.Sessions)	// Still use CheckedDebugger for concurrency
+						foreach (DebugSessionInfo LSession in AProcess.ServerSession.CheckedDebugger.GetSessions())
 						{
 							LRow[0] = LSession.SessionID;
 							LResult.Insert(LRow);
@@ -141,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
-	// operator Debug.GetProcesses() : table { Process_ID : Integer, DidBreak : Boolean }
+	// operator Debug.GetProcesses() : table { Process_ID : Integer, IsPaused : Boolean, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean }
 	public class DebugGetProcessesNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -152,6 +159,10 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar.Owner = APlan.User;
 
 			DataType.Columns.Add(new Schema.Column("Process_ID", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.Catalog.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Locator", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", APlan.Catalog.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.Catalog.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
@@ -178,17 +189,29 @@ namespace Alphora.Dataphor.DAE.Debug
 				try
 				{
 					LRow.ValuesOwned = false;
-
+					
 					if (AProcess.ServerSession.Debugger != null)
-					{
-						var LDebugger = AProcess.ServerSession.CheckedDebugger;
-						foreach (ServerProcess LProcess in LDebugger.Processes)
+						foreach (DebugProcessInfo LProcess in AProcess.ServerSession.CheckedDebugger.GetProcesses())
 						{
 							LRow[0] = LProcess.ProcessID;
-							LRow[1] = LDebugger.BrokenProcesses.Contains(LProcess);
+							LRow[1] = LProcess.IsPaused;
+							if (LProcess.Location != null)
+							{
+								LRow[2] = LProcess.Location.Locator;
+								LRow[3] = LProcess.Location.Line;
+								LRow[4] = LProcess.Location.LinePos;
+								LRow[5] = LProcess.DidBreak;
+							}
+							else
+							{
+								LRow[2] = null;
+								LRow[3] = null;
+								LRow[4] = null;
+								LRow[5] = null;
+							}
+
 							LResult.Insert(LRow);
 						}
-					}
 				}
 				finally
 				{
@@ -316,9 +339,8 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
-/*
-	// operator GetContext(AProcessID : Integer, AStackIndex : Integer) : table { Name : Name, Value : String }
-	public class DebugGetContextNode : TableNode
+	// operator GetStack(AProcessID : Integer, AWindowIndex : Integer) : table { Index : Integer, Name : Name, Type : String, Value : String }
+	public class DebugGetStackNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
 		{
@@ -327,7 +349,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
+			DataType.Columns.Add(new Schema.Column("Index", APlan.Catalog.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Type", APlan.Catalog.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Value", APlan.Catalog.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
@@ -345,7 +369,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			int LProcessID = (int)Nodes[0].Execute(AProcess);
-			int LStackIndex = (int)Nodes[1].Execute(AProcess);
+			int LWindowIndex = (int)Nodes[1].Execute(AProcess);
 
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
@@ -358,15 +382,13 @@ namespace Alphora.Dataphor.DAE.Debug
 				{
 					LRow.ValuesOwned = false;
 
-					var LDebugger = AProcess.ServerSession.CheckedDebugger;
-					if (LDebugger != null)
+					foreach (StackEntry LEntry in AProcess.ServerSession.CheckedDebugger.GetStack(LProcessID, LWindowIndex))
 					{
-						foreach (ContextEntry LEntry in LDebugger.GetContext(LProcessID, LStackIndex))
-						{
-							LRow[0] = LEntry.Name;
-							LRow[1] = LEntry.Value;
-							LResult.Insert(LRow);
-						}
+						LRow[0] = LEntry.Index;
+						LRow[1] = LEntry.Name;
+						LRow[2] = LEntry.Type;
+						LRow[3] = LEntry.Value;
+						LResult.Insert(LRow);
 					}
 				}
 				finally
@@ -385,7 +407,23 @@ namespace Alphora.Dataphor.DAE.Debug
 			}
 		}
 	}
+	
+	//* Operator: GetContext(AProcessID : Integer) : row { Locator : String, Line : Integer, LinePos : Integer, Script : String }
+	public class DebugGetContextNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		{
+			DebugContext LContext = AProcess.ServerSession.CheckedDebugger.GetContext((int)AArgument1);
+			Row LRow = new Row(AProcess, (Schema.RowType)DataType);
+			LRow[0] = LContext.Locator;
+			LRow[1] = LContext.Line;
+			LRow[2] = LContext.LinePos;
+			LRow[3] = LContext.Script;
+			return LRow;
+		}
+	}
 		
+/*
 	//* Operator: GetStepIntoOperators
 	// operator GetStepIntoOperators(AProcessID : Integer) : table { Index : Integer, OperatorName : Name }
 	public class DebugGetStepIntoOperatorsNode : TableNode
@@ -553,12 +591,12 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
-	// operator Debug.WaitForBreak()
-	public class DebugWaitForBreakNode : NilaryInstructionNode
+	// operator Debug.WaitForPause()
+	public class DebugWaitForPauseNode : NilaryInstructionNode
 	{
 		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
-			AProcess.ServerSession.CheckedDebugger.WaitForBreak();
+			AProcess.ServerSession.CheckedDebugger.WaitForPause(AProcess);
 			return null;
 		}
 	}

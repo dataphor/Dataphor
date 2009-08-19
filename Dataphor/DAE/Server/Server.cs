@@ -1079,7 +1079,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						
 						if ((LDebugger != null) && LDebugger.IsPaused)
-							LDebugger.CheckForAbort();
+							LDebugger.Detach(AProcess);
 
 						System.Threading.Thread.SpinWait(100);
 						if (DateTime.Now > LEndTime)

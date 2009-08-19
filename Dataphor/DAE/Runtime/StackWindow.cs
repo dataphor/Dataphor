@@ -105,9 +105,13 @@ namespace Alphora.Dataphor.DAE.Runtime
         public List<StackWindow> GetCallStack()
         {
 			List<StackWindow> LResult = new List<StackWindow>();
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
+			for (int LIndex = FCount - 1; LIndex >= 0; LIndex--)
 				LResult.Add(FStackWindows[LIndex]);
 			return LResult;
         }
+        
+        public int Count { get { return FStackWindows.Length; } }
+        
+        public StackWindow this[int AIndex] { get { return FStackWindows[FCount - AIndex - 1]; } }
 	}
 }

@@ -298,7 +298,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			get { return FLocator; }
 			set { FLocator = value; }
 		}
-
+		
 		/// <summary>
 		/// Parses the DebugLocator from the DAE.Locator tag, if present.
 		/// </summary>

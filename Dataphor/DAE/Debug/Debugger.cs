@@ -33,10 +33,6 @@ namespace Alphora.Dataphor.DAE.Debug
 
 		public void Dispose()
 		{
-			// Run to restart any paused processes.
-			if (FPauseSignal != null)
-				Run();
-				
 			if (FSessions != null)
 			{
 				while (FSessions.Count > 0)
@@ -107,9 +103,21 @@ namespace Alphora.Dataphor.DAE.Debug
 		private AutoResetEvent FWaitSignal;
 		private ManualResetEvent FPauseSignal;
 		private object FSyncHandle = new object();
+
+		private bool FIsPauseRequested;
+		public bool IsPauseRequested { get { return FIsPauseRequested; } }
+		
 		private int FPausedCount;
-		private bool FIsPaused;
-		public bool IsPaused { get { return FIsPaused; } }
+		public bool IsPaused 
+		{ 
+			get 
+			{ 
+				lock (FSyncHandle) 
+				{ 
+					return FIsPauseRequested && (GetRunningCount() == FPausedCount); 
+				} 
+			} 
+		}
 		
 		private bool FBreakOnException;
 		public bool BreakOnException
@@ -122,13 +130,13 @@ namespace Alphora.Dataphor.DAE.Debug
 		public Breakpoints Breakpoints { get { return FBreakpoints; } }
 		
 		private ServerSessions FSessions;
-		public ServerSessions Sessions { get { return FSessions; } }
+		//public ServerSessions Sessions { get { return FSessions; } }
 		
 		private ServerProcesses FProcesses;
-		public ServerProcesses Processes { get { return FProcesses; } }
+		//public ServerProcesses Processes { get { return FProcesses; } }
 
 		private ServerProcesses FBrokenProcesses = new ServerProcesses();
-		public ServerProcesses BrokenProcesses { get { return FBrokenProcesses; } }
+		//public ServerProcesses BrokenProcesses { get { return FBrokenProcesses; } }
 
 		/// <summary>
 		/// Stops the debugger
@@ -161,6 +169,8 @@ namespace Alphora.Dataphor.DAE.Debug
 				FBrokenProcesses.SafeDisown(AProcess);
 				AProcess.SetDebugger(null);
 			}
+			
+			Pulse();
 		}
 		
 		/// <summary>
@@ -211,21 +221,19 @@ namespace Alphora.Dataphor.DAE.Debug
 					LRunningCount++;
 			return LRunningCount;
 		}
-
+		
 		/// <summary>
-		/// Waits for a debugged thread to break
+		/// Waits for the debugger to pause
 		/// </summary>
-		public void WaitForBreak()
+		public void WaitForPause(ServerProcess AProcess)
 		{
 			while (true)
 			{
-				lock (FSyncHandle)
-				{
-					if (GetRunningCount() == FPausedCount)
-						return;
-				}
+				if (IsPaused)
+					return;
 				
-				FWaitSignal.WaitOne();
+				FWaitSignal.WaitOne(500);
+				AProcess.CheckAborted();
 			}
 		}
 		
@@ -233,7 +241,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			lock (FSyncHandle)
 			{
-				FIsPaused = true;
+				FIsPauseRequested = true;
 				FPauseSignal.Reset();
 			}
 		}
@@ -244,22 +252,14 @@ namespace Alphora.Dataphor.DAE.Debug
 		public void Pause()
 		{
 			InternalPause();
-
-			bool LShouldBreak;
-			lock (FSyncHandle)
-			{
-				LShouldBreak = GetRunningCount() == FPausedCount;
-			}
-			
-			if (LShouldBreak)
-				FWaitSignal.Set();
+			FWaitSignal.Set();
 		}
 		
 		private void InternalRun()
 		{
 			lock (FSyncHandle)
 			{
-				FIsPaused = false;
+				FIsPauseRequested = false;
 				FBrokenProcesses.DisownAll();
 				FPauseSignal.Set();
 			}
@@ -276,13 +276,15 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Pulses the debugger to allow paused processes to check for abort due to a terminate request coming from the server.
 		/// </summary>
-		public void CheckForAbort()
+		public void Pulse()
 		{
-			CheckPaused();
 			lock (FSyncHandle)
 			{
-				FPauseSignal.Set();
-				FPauseSignal.Reset();
+				if (FIsPauseRequested)
+				{
+					FPauseSignal.Set();
+					FPauseSignal.Reset();
+				}
 			}
 		}
 		
@@ -307,18 +309,7 @@ namespace Alphora.Dataphor.DAE.Debug
 				
 			if (FBreakpoints.Count > 0)
 			{
-				// Use call stack or executing plan source to build a locator
-				DebugLocator LCurrentLocator = null;
-				InstructionNodeBase LOriginator = AProcess.Context.CurrentStackWindow.Originator as InstructionNodeBase;
-				if ((LOriginator != null) && (LOriginator.Operator != null))
-					LCurrentLocator = new DebugLocator(LOriginator.Operator.Locator, ANode.Line, ANode.LinePos);
-				else
-				{
-					if (AProcess.ExecutingPlan.Locator != null)
-						LCurrentLocator = new DebugLocator(AProcess.ExecutingPlan.Locator, ANode.Line, ANode.LinePos);
-					else
-						LCurrentLocator = new DebugLocator(DebugLocator.CDynamicLocator, ANode.Line, ANode.LinePos);
-				}
+				DebugLocator LCurrentLocation = AProcess.GetCurrentLocation();
 				
 				// Determine whether or not a breakpoint has been hit
 				for (int LIndex = 0; LIndex < FBreakpoints.Count; LIndex++)
@@ -326,9 +317,9 @@ namespace Alphora.Dataphor.DAE.Debug
 					Breakpoint LBreakpoint = FBreakpoints[LIndex];
 					if 
 					(
-						(LBreakpoint.Locator == LCurrentLocator.Locator) 
-							&& (LBreakpoint.Line == LCurrentLocator.Line) 
-							&& ((LBreakpoint.LinePos == -1) || (LBreakpoint.LinePos == LCurrentLocator.LinePos))
+						(LBreakpoint.Locator == LCurrentLocation.Locator) 
+							&& (LBreakpoint.Line == LCurrentLocation.Line) 
+							&& ((LBreakpoint.LinePos == -1) || (LBreakpoint.LinePos == LCurrentLocation.LinePos))
 					)
 						return true;
 				}
@@ -343,6 +334,47 @@ namespace Alphora.Dataphor.DAE.Debug
 				throw new ServerException(ServerException.Codes.DebuggerRunning);
 		}
 		
+		/// <summary>
+		/// Returns the list of currently debugged sessions.
+		/// </summary>
+		public List<DebugSessionInfo> GetSessions()
+		{
+			List<DebugSessionInfo> LSessions = new List<DebugSessionInfo>();
+			lock (FSyncHandle)
+			{
+				foreach (ServerSession LSession in FSessions)
+					LSessions.Add(new DebugSessionInfo { SessionID = LSession.SessionID });
+			}
+			return LSessions;
+		}
+		
+		/// <summary>
+		/// Returns the list of current debugged processes, with the running status and current location of each.
+		/// </summary>
+		public List<DebugProcessInfo> GetProcesses()
+		{
+			List<DebugProcessInfo> LProcesses = new List<DebugProcessInfo>();
+			lock (FSyncHandle)
+			{
+				bool LIsPaused = IsPaused;
+				foreach (ServerProcess LProcess in FProcesses)
+					LProcesses.Add
+					(
+						new DebugProcessInfo
+						{
+							ProcessID = LProcess.ProcessID,
+							IsPaused = LProcess.IsRunning && LIsPaused,
+							Location = (LProcess.IsRunning && LIsPaused) ? LProcess.SafeGetCurrentLocation() : null,
+							DidBreak = FBrokenProcesses.Contains(LProcess)
+						}
+					);
+			}
+			return LProcesses;
+		}
+		
+		/// <summary>
+		/// Returns the current call stack of a process.
+		/// </summary>
 		public CallStack GetCallStack(int AProcessID)
 		{
 			CheckPaused();
@@ -358,11 +390,49 @@ namespace Alphora.Dataphor.DAE.Debug
 				{
 					InstructionNodeBase LOriginator = LStackWindows[LIndex].Originator as InstructionNodeBase;
 					if ((LOriginator != null) && (LOriginator.Operator != null))
-						LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName));
+						LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, null));
 					else
-						LCallStack.Add(new CallStackEntry(LIndex, "<Plan>"));
+						LCallStack.Add(new CallStackEntry(LIndex, "<Plan>", null));
 				}
 				return LCallStack;
+			}
+		}
+		
+		public DebugContext GetContext(int AProcessID)
+		{
+			CheckPaused();
+			
+			lock (FSyncHandle)
+			{
+				return FProcesses.GetProcess(AProcessID).SafeGetCurrentContext();
+			}
+		}
+		
+		/// <summary>
+		/// Returns the current stack of a process within a specific window.
+		/// </summary>
+		public List<StackEntry> GetStack(int AProcessID, int AWindowIndex)
+		{
+			CheckPaused();
+			
+			lock (FSyncHandle)
+			{
+				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
+				object[] LStackWindow = LProcess.Context.GetStack(AWindowIndex);
+				List<StackEntry> LStack = new List<StackEntry>();
+				for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
+					LStack.Add
+					(
+						new StackEntry
+						{ 
+							Index = LIndex, 
+							Name = String.Format("Location{0}", LIndex), 
+							Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName, 
+							Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString() 
+						}
+					);
+
+				return LStack;
 			}
 		}
 		
@@ -392,7 +462,6 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Yields the current process to the debugger if a breakpoint or break condition is satisfied.
 		/// </summary>
-		/// <param name="AContext"></param>
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
 			if (ShouldBreak(AProcess, ANode, AException))
@@ -404,9 +473,12 @@ namespace Alphora.Dataphor.DAE.Debug
 				}
 			}
 
-			Interlocked.Increment(ref FPausedCount);
-			WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
-			Interlocked.Decrement(ref FPausedCount);
+			while (FIsPauseRequested && FProcesses.Contains(AProcess))
+			{
+				Interlocked.Increment(ref FPausedCount);
+				WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
+				Interlocked.Decrement(ref FPausedCount);
+			}
 		}
 	}
 }

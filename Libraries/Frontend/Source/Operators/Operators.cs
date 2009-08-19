@@ -315,6 +315,7 @@ namespace Alphora.Dataphor.Frontend.Server
 				SystemExecuteNode.ExecuteScript
 				(
 					AProcess, 
+					this,
 					LDevice.LoadDocument
 					(
 						AProcess, 

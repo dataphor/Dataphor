@@ -169,8 +169,11 @@
     <Compile Include="Debug\Debugger.cs" />
     <Compile Include="Debug\DebugLocator.cs" />
     <Compile Include="Debug\DebugNodes.cs" />
+    <Compile Include="Debug\DebugProcessInfo.cs" />
+    <Compile Include="Debug\DebugSessionInfo.cs" />
     <Compile Include="Debug\SourceContext.cs" />
     <Compile Include="Debug\SourceUtility.cs" />
+    <Compile Include="Debug\StackEntry.cs" />
     <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -398,4 +398,7 @@
   <data name="106197" xml:space="preserve">
     <value>The debugger cannot be attached to the debugger session ({0}).</value>
   </data>
+  <data name="106198" xml:space="preserve">
+    <value>Could not determine the current location for process ({0}).</value>
+  </data>
 </root>

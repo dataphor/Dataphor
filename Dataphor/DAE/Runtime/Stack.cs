@@ -189,5 +189,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			return FWindows.GetCallStack();
 		}
+		
+		public object[] GetStack(int AWindowIndex)
+		{
+			int LBase = FWindows[AWindowIndex].Base;
+			int LCeiling = AWindowIndex >= FWindows.Count ? FCount : FWindows[AWindowIndex + 1].Base;
+			
+			object[] LResult = new object[LCeiling - LBase];
+			for (int LIndex = LBase; LIndex < LCeiling; LIndex++)
+				LResult[LResult.Length - 1 - LIndex] = FStack[LIndex];
+			return LResult;
+		}
 	}
 }

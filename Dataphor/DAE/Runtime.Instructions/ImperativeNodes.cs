@@ -1408,7 +1408,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineDataType(APlan);
 
 			if (FDataType != null)
+			{
 				FAllocateResultNode = new VariableNode(Keywords.Result, FDataType);
+				FAllocateResultNode.IsBreakable = false;
+			}
 		}
 		
 		public override void InternalDetermineBinding(Plan APlan)

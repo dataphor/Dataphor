@@ -106,6 +106,14 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			return String.Format("{0}:{1}", COperatorLocator, AOperatorSpecifier);
 		}
+		
+		/// <summary>
+		/// Returns true if the locator is an OPERATOR locator
+		/// </summary>
+		public static bool IsOperatorLocator(string ALocator)
+		{
+			return ALocator.StartsWith(COperatorLocator + ":");
+		}
 
 		/// <summary>
 		/// Dynamic debug locator used as the locator for all dynamic execution.

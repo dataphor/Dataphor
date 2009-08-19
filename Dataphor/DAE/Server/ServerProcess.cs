@@ -61,8 +61,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcessPlan = new ServerStatementPlan(this);
 			PushExecutingPlan(FProcessPlan);
 			
-			if (FProcessInfo.DebuggerID > 0)
-				FServerSession.Server.GetDebugger(FProcessInfo.DebuggerID).Attach(this);
+			if (FServerSession.DebuggerID > 0)
+				FServerSession.Server.GetDebugger(FServerSession.DebuggerID).Attach(this);
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
 			if (FServerSession.Server.FProcessCounter != null)
@@ -2101,8 +2101,6 @@ namespace Alphora.Dataphor.DAE.Server
 				}
                 throw;
             }
-
-			Yield(null);
 		}
 		
 		internal void EndCall()
@@ -2141,8 +2139,6 @@ namespace Alphora.Dataphor.DAE.Server
 					Monitor.Exit(FSyncHandle);
 				}
 			}
-			
-			Yield(null);
 		}
 		
 		internal int BeginTransactionalCall()
@@ -2230,23 +2226,99 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		internal void SetDebugger(Debugger ADebugger)
 		{
-			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
+			if ((FDebugger != null) && (ADebugger != null))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, FProcessID);
 			FDebugger = ADebugger;
+		}
+		
+		private PlanNode FCurrentLocation;
+		
+		public DebugLocator GetCurrentLocation()
+		{
+			try
+			{
+				// Use call stack or executing plan source to build a locator
+				InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
+				if ((LOriginator != null) && (LOriginator.Operator != null))
+					return new DebugLocator(LOriginator.Operator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+
+				if (ExecutingPlan.Locator != null)
+					return new DebugLocator(ExecutingPlan.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+
+				return new DebugLocator(DebugLocator.CDynamicLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+			}
+			catch (Exception E)
+			{
+				throw new ServerException(ServerException.Codes.CouldNotDetermineProcessLocation, E, FProcessID);
+			}
+		}
+		
+		public DebugLocator SafeGetCurrentLocation()
+		{
+			try
+			{
+				return GetCurrentLocation();
+			}
+			catch (Exception E)
+			{
+				return new DebugLocator(E.Message, -1, -1);
+			}
+		}
+		
+		public DebugContext GetCurrentContext()
+		{
+			try
+			{
+				InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
+				if ((LOriginator != null) && (LOriginator.Operator != null))
+				{
+					if (DebugLocator.IsOperatorLocator(LOriginator.Operator.Locator.Locator))
+						return new DebugContext(new D4TextEmitter().Emit(LOriginator.Operator.EmitStatement(EmitMode.ForCopy)), LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+
+					return new DebugContext(null, LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				}
+
+				if (ExecutingPlan.Locator != null)
+					return new DebugContext(null, ExecutingPlan.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+
+				return new DebugContext(ExecutingPlan.Source, DebugLocator.CDynamicLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+			}
+			catch (Exception E)
+			{
+				throw new ServerException(ServerException.Codes.CouldNotDetermineProcessLocation, E, FProcessID);
+			}
+		}
+		
+		public DebugContext SafeGetCurrentContext()
+		{
+			try
+			{
+				return GetCurrentContext();
+			}
+			catch (Exception E)
+			{
+				return new DebugContext("<Error retrieving debug context>", E.Message, -1, -1);
+			}
 		}
 		
 		public void Yield(PlanNode APlanNode)
 		{
 			CheckAborted();
 			if (FDebugger != null)
+			{
+				FCurrentLocation = APlanNode;
 				FDebugger.Yield(this, APlanNode, null);
+			}
 		}
 		
 		public void Yield(PlanNode APlanNode, Exception AException)
 		{
 			CheckAborted();
 			if (FDebugger != null)
+			{
+				FCurrentLocation = APlanNode;
 				FDebugger.Yield(this, APlanNode, AException);
+			}
 		}
 		
 		private SourceContexts FSourceContexts = new SourceContexts();

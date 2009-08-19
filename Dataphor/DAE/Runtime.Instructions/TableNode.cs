@@ -738,6 +738,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				#if USEMODIFICATIONBINDING
 				// Use an update to determine whether any modification would be supported against this expression
 				UpdateNode LUpdateNode = new UpdateNode();
+				LNode.IsBreakable = false;
 				LUpdateNode.Nodes.Add(this);
 				FModifySupported = FDevice.Supports(APlan, LUpdateNode);
 				#endif
@@ -955,11 +956,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									Schema.RowType LOldKey = new Schema.RowType(TableVar.FindClusteringKey().Columns, Keywords.Old);
 									Schema.RowType LKey = new Schema.RowType(TableVar.FindClusteringKey().Columns);
 									FInsertNode = new InsertNode();
+									FInsertNode.IsBreakable = false;
 									FUpdateNode = new UpdateNode();
+									FUpdateNode.IsBreakable = false;
 									FUpdateNode.Nodes.Add(Compiler.EmitUpdateConditionNode(APlan, this, Compiler.CompileExpression(APlan, Compiler.BuildKeyEqualExpression(APlan, LOldKey.Columns, LKey.Columns))));
 									FUpdateNode.TargetNode = FUpdateNode.Nodes[0].Nodes[0];
 									FUpdateNode.ConditionNode = FUpdateNode.Nodes[0].Nodes[1];
 									FDeleteNode = new DeleteNode();
+									FDeleteNode.IsBreakable = false;
 									FDeleteNode.Nodes.Add(Compiler.EmitRestrictNode(APlan, this, Compiler.CompileExpression(APlan, Compiler.BuildKeyEqualExpression(APlan, LOldKey.Columns, LKey.Columns))));
 								}
 								finally
