@@ -49,9 +49,9 @@
       <Project>{7887C79A-4A65-4F31-95C0-67C3558ADB6B}</Project>
       <Name>DAE.Connection.PGSQL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\PGSQLDevice\Source\DAE.DevicePGSQL.csproj">
+    <ProjectReference Include="..\..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj">
       <Project>{40E33930-93EC-4371-97E1-D709B022132C}</Project>
-      <Name>DAE.DevicePGSQL</Name>
+      <Name>DAEDevicePGSQL</Name>
     </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>

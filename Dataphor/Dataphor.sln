@@ -105,7 +105,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.ServerTests", "..\Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.ClientTests", "..\Tests\DAE.ClientTests\DAE.ClientTests.csproj", "{A0EC803A-8DF9-45A2-B793-C4E76E892419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.DevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAE.DevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAEDevicePGSQL", "..\Libraries\PGSQLDevice\Source\DAEDevicePGSQL.csproj", "{40E33930-93EC-4371-97E1-D709B022132C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAE.Connection.PGSQL", "..\Libraries\PGSQLConnection\Source\DAE.Connection.PGSQL.csproj", "{7887C79A-4A65-4F31-95C0-67C3558ADB6B}"
 EndProject
