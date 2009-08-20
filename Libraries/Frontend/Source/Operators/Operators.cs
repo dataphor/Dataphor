@@ -321,7 +321,8 @@ namespace Alphora.Dataphor.Frontend.Server
 						AProcess, 
 						LLibraryName,
 						LDocumentName
-					)
+					),
+					new DAE.Debug.DebugLocator("doc:" + LLibraryName + ":" + LDocumentName, 1, 1)
 				);
 			}
 			finally

@@ -1460,6 +1460,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	public class SystemRegisterLibraryNode : InstructionNode
 	{
 		public const string CRegisterFileName = @"Documents\Register.d4";
+		public const string CRegisterDocumentLocator = @"doc:{0}:Register";
 
 		public static void EnsureLibraryRegistered(ServerProcess AProcess, Schema.LibraryReference ALibraryReference, bool AWithReconciliation)
 		{
@@ -1610,7 +1611,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										{
 											using (StreamReader LReader = new StreamReader(LRegisterFileName))
 											{
-												AProcess.ServerSession.Server.RunScript(AProcess, LReader.ReadToEnd(), ALibraryName);
+												AProcess.ServerSession.Server.RunScript
+												(
+													AProcess, 
+													LReader.ReadToEnd(), 
+													ALibraryName, 
+													new DAE.Debug.DebugLocator(String.Format(CRegisterDocumentLocator, ALibraryName), 1, 1)
+												);
 											}
 										}
 										catch (Exception LException)
@@ -1717,7 +1724,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryIsRequired, LLoadedLibrary.Name);
 							
 						// Drop all the objects in the library
-						AProcess.ServerSession.Server.RunScript(AProcess, AProcess.ServerSession.Server.ScriptDropLibrary(AProcess, ALibraryName), LLoadedLibrary.Name);
+						AProcess.ServerSession.Server.RunScript
+						(
+							AProcess, 
+							AProcess.ServerSession.Server.ScriptDropLibrary(AProcess, ALibraryName), 
+							LLoadedLibrary.Name,
+							null
+						);
 						
 						// Any session with current library set to the unregistered library will be set to General
 						AProcess.ServerSession.Server.LibraryUnloaded(LLoadedLibrary.Name);

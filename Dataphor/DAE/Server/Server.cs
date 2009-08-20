@@ -1972,26 +1972,26 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void RunScript(string AScript)
 		{
-			RunScript(FSystemProcess, AScript, String.Empty);
+			RunScript(FSystemProcess, AScript, String.Empty, null);
 		}
 		
 		/// <summary> Runs the given script as the specified library. </summary>
 		/// <remarks> LibraryName may be the empty string. </remarks>
 		public void RunScript(string AScript, string ALibraryName)
 		{
-			RunScript(FSystemProcess, AScript, ALibraryName);
+			RunScript(FSystemProcess, AScript, ALibraryName, null);
 		}
 		
 		public void RunScript(ServerProcess AProcess, string AScript)
 		{
-			RunScript(AProcess, AScript, String.Empty);
+			RunScript(AProcess, AScript, String.Empty, null);
 		}
 		
-		public void RunScript(ServerProcess AProcess, string AScript, string ALibraryName)
+		public void RunScript(ServerProcess AProcess, string AScript, string ALibraryName, DAE.Debug.DebugLocator ALocator)
 		{
 			if (ALibraryName != String.Empty)
 				AProcess.ServerSession.CurrentLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
-			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(AScript);
+			IServerScript LScript = ((IServerProcess)AProcess).PrepareScript(AScript, ALocator);
 			try
 			{
 				LScript.Execute(null);
@@ -2036,7 +2036,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.Object.SetNextObjectID(FSystemProcess.CatalogDeviceSession.GetMaxObjectID() + 1);
 				
 				// Insert a row into TableDee...
-				RunScript(FSystemProcess, "insert table { row { } } into TableDee;", String.Empty);
+				RunScript(FSystemProcess, "insert table { row { } } into TableDee;");
 				
 				// Ensure all loaded libraries are loaded
 				FSystemProcess.CatalogDeviceSession.ResolveLoadedLibraries();
