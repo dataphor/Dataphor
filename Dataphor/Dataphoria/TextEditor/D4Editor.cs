@@ -26,6 +26,7 @@ using DataSet=System.Data.DataSet;
 using Image=System.Drawing.Image;
 using SD = ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -694,9 +695,23 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					DataSession.ServerSession, 
 					GetTextToExecute(),
 					ExecutorProgress,
-					ExecutorFinished
+					ExecutorFinished,
+					GetLocator()
 				);
 			FExecutor.Start();
+		}
+
+		private DebugLocator GetLocator()
+		{
+			int LLine = 1;
+			int LColumn = 1;
+			if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+			{
+				var LSelectionStart = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
+				LLine = LSelectionStart.Line;
+				LColumn = LSelectionStart.Column;
+			}
+			return new DebugLocator(Service.GetLocator(), LLine, LColumn);
 		}
 
 		public bool SelectLine()

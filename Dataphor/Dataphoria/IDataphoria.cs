@@ -22,6 +22,8 @@ namespace Alphora.Dataphor.Dataphoria
         ErrorListView Warnings { get; }
         Settings Settings { get; }
         
+        Debugger Debugger { get; }
+        
         FileDesignBuffer PromptForFileBuffer(IDesigner ADesigner, string AFileName);
 
         DocumentDesignBuffer PromptForDocumentBuffer(IDesigner ADesigner, string ALibraryName, string ADocumentName);

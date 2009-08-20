@@ -15,6 +15,7 @@ using System.Text;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -30,12 +31,12 @@ namespace Alphora.Dataphor.DAE.Client
 
 	public static class ScriptExecutionUtility
 	{
-		public static void ExecuteScript(IServerSession ASession, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress)
+		public static void ExecuteScript(IServerSession ASession, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress, DebugLocator ALocator)
 		{
 			IServerProcess LProcess = ASession.StartProcess(new ProcessInfo(ASession.SessionInfo));
 			try
 			{
-				ExecuteScript(LProcess, AScript, AOptions, out AErrors, out ATimeElapsed, AReportScriptProgress);
+				ExecuteScript(LProcess, AScript, AOptions, out AErrors, out ATimeElapsed, AReportScriptProgress, ALocator);
 			}
 			finally
 			{
@@ -43,7 +44,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public static void ExecuteScript(IServerProcess AProcess, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress)
+		public static void ExecuteScript(IServerProcess AProcess, string AScript, ScriptExecuteOption AOptions, out ErrorList AErrors, out TimeSpan ATimeElapsed, ReportScriptProgressHandler AReportScriptProgress, DebugLocator ALocator)
 		{
 			StringBuilder LResult = new StringBuilder();
 			AErrors = new ErrorList();
@@ -53,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Client
 			DateTime LStartTime = DateTime.Now;
 			try
 			{
-				IServerScript LScript = AProcess.PrepareScript(AScript);
+				IServerScript LScript = AProcess.PrepareScript(AScript, ALocator);
 				try
 				{
 					if (ConvertParserErrors(LScript.Messages, AErrors))

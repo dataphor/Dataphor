@@ -119,5 +119,19 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// Dynamic debug locator used as the locator for all dynamic execution.
 		/// </summary>
 		//public static DebugLocator Dynamic = new DebugLocator("DYNAMIC", 1, 1);
+
+		public override bool Equals(object AOther)
+		{
+			DebugLocator LOther = AOther as DebugLocator;
+			if (LOther != null && LOther.FLocator == this.FLocator && LOther.FLine == this.FLine && LOther.FLinePos == this.FLinePos)
+				return true;
+			else
+				return base.Equals(AOther);
+		}
+
+		public override int GetHashCode()
+		{
+			return (FLocator == null ? 0 : FLocator.GetHashCode()) ^ FLine.GetHashCode() ^ FLinePos.GetHashCode();
+		}
 	}
 }

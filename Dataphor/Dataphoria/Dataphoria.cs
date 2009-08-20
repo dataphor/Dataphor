@@ -100,6 +100,8 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockPanel.DockBottomPortion = 240;
 
 			LoadSettings();
+			
+			CreateDebugger();
 		}
 
 		#if TRACEFOCUS
@@ -393,8 +395,6 @@ namespace Alphora.Dataphor.Dataphoria
 						FServerNode = null;
 						
 						OnDisconnected(EventArgs.Empty);
-						
-						StopDebugger();
 					}
 					finally
 					{
@@ -1546,50 +1546,18 @@ namespace Alphora.Dataphor.Dataphoria
 			else if (ASender == FDocumentTypesToolStripMenuItem)
 				BrowseDocumentTypes(); 
 			else if (ASender == FStopDebuggerMenuItem || ASender == FStopDebuggerButton)
-				StopDebugger();
+				Debugger.Stop();
 			else if (ASender == FViewSessionsMenuItem || ASender == FViewSessionsButton)
 				ViewSessions();
 			else if (ASender == FDebugPauseMenuItem || ASender == FDebugPauseButton)
-				PauseDebugger();
-			else if (ASender == FDebugRunMenuItem || ASender == FDebugRunButton)
-				RunDebugger();
-		}
-
-		private void RunDebugger()
-		{
-			if (Debugger != null)
-				Debugger.Run();
-		}
-
-		private void PauseDebugger()
-		{
-			if (Debugger != null)
 				Debugger.Pause();
+			else if (ASender == FDebugRunMenuItem || ASender == FDebugRunButton)
+				Debugger.Run();
 		}
 
 		private void ViewSessions()
 		{
 			FDockContentSessionView.Show(FDockPanel);
-		}
-
-		private Debugger FDebugger;
-		public Debugger Debugger { get { return FDebugger; } }
-		
-		private void EnsureDebugger()
-		{
-			if (FDebugger == null)
-			{
-				FDebugger = new Debugger(this);
-			}
-		}
-		
-		private void StopDebugger()
-		{
-			if (FDebugger != null)
-			{
-				FDebugger.Dispose();
-				FDebugger = null;
-			}
 		}
 
 		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
@@ -1598,7 +1566,20 @@ namespace Alphora.Dataphor.Dataphoria
 		}
 
 		#endregion
-		
+
+		#region Debugger
+
+		private Debugger FDebugger;
+		public Debugger Debugger { get { return FDebugger; } }
+
+		private void CreateDebugger()
+		{
+			if (FDebugger == null)
+				FDebugger = new Debugger(this);
+		}
+
+		#endregion
+				
 		#region Help
 
 		public const string CDefaultHelpFileName = @"..\Documentation\Dataphor.chm";

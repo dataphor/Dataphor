@@ -12,6 +12,7 @@ using System.Text;
 using System.Reflection;
 
 using Alphora.Dataphor.Dataphoria;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
@@ -42,6 +43,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public abstract void LoadData(Stream AData);
 
+		public abstract string GetLocator();
 	}
 
 	public class FileDesignBuffer : DesignBuffer
@@ -130,6 +132,11 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 				AData.Position = 0;
 				StreamUtility.CopyStream(LStream, AData);
 			}
+		}
+
+		public override string GetLocator()
+		{
+			return "file:" + FFileName;
 		}
 	}
 
@@ -229,42 +236,26 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			if (ABinary)
 				throw new NotSupportedException("InternalSaveData called with ABinary true");
 
-			DAE.Schema.ScalarType LType;
-			if (ABinary)
-				LType = Dataphoria.FrontendSession.Pipe.Process.DataTypes.SystemBinary;
-			else
-				LType = Dataphoria.FrontendSession.Pipe.Process.DataTypes.SystemString;
-			Frontend.Client.Pipe LPipe = Dataphoria.FrontendSession.Pipe;
-			object LData = AData;
-/*
- * I don't believe this ever worked (creating a Scalar with a Stream directly)
-			using 
-			(
-				DAE.Runtime.Data.Scalar LData = 
-					(
-						ABinary ? 
-						new DAE.Runtime.Data.Scalar(LPipe.Process, LType, (Stream)AData) :
-						new DAE.Runtime.Data.Scalar(LPipe.Process, LType, AData)
-					)
-			)
+			DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
+			LParams.Add(new DAE.Runtime.DataParam("LibraryName", Dataphoria.UtilityProcess.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(LibraryName)));
+			LParams.Add(new DAE.Runtime.DataParam("DocumentName", Dataphoria.UtilityProcess.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(DocumentName)));
+			LParams.Add(new DAE.Runtime.DataParam("DocumentType", Dataphoria.UtilityProcess.DataTypes.SystemString, DAE.Language.Modifier.Const, DocumentType));
+			LParams.Add(new DAE.Runtime.DataParam("Data", Dataphoria.UtilityProcess.DataTypes.SystemString, DAE.Language.Modifier.Const, AData));
+
+			DAE.IServerStatementPlan LPlan = Dataphoria.UtilityProcess.PrepareStatement(".Frontend.CreateAndSave(LibraryName, DocumentName, DocumentType, Data)", LParams);
+			try
 			{
-*/
-				DAE.Runtime.DataParams LParams = new DAE.Runtime.DataParams();
-				LParams.Add(new DAE.Runtime.DataParam("LibraryName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(LibraryName)));
-				LParams.Add(new DAE.Runtime.DataParam("DocumentName", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DAE.Schema.Object.EnsureRooted(DocumentName)));
-				LParams.Add(new DAE.Runtime.DataParam("DocumentType", LPipe.Process.DataTypes.SystemString, DAE.Language.Modifier.Const, DocumentType));
-				LParams.Add(new DAE.Runtime.DataParam("Data", LType, DAE.Language.Modifier.Const, LData));
-				
-				DAE.IServerStatementPlan LPlan = LPipe.Process.PrepareStatement(".Frontend.CreateAndSave(LibraryName, DocumentName, DocumentType, Data)", LParams);
-				try
-				{
-					LPlan.Execute(LParams);
-				}
-				finally
-				{
-					LPipe.Process.UnprepareStatement(LPlan);
-				}
-//			}
+				LPlan.Execute(LParams);
+			}
+			finally
+			{
+				Dataphoria.UtilityProcess.UnprepareStatement(LPlan);
+			}
+		}
+
+		public override string GetLocator()
+		{
+			return "doc:" + FLibraryName + ":" + FDocumentName;
 		}
 	}
 
@@ -274,6 +265,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		{
 			FInstance = AInstance;
 			FDescriptor = ADescriptor;
+			FID = Guid.NewGuid();
 		}
 
 		// Instance
@@ -290,6 +282,14 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public PropertyDescriptor Descriptor
 		{
 			get { return FDescriptor; }
+		}
+		
+		// ID
+		
+		private Guid FID;
+		public Guid ID
+		{
+			get { return FID; }
 		}
 
 		// DesignBuffer
@@ -334,6 +334,11 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public override void LoadData(Stream AData)
 		{
 			Error.Fail("LoadData(Stream) is not supported for PropertyDesignBuffer");
+		}
+
+		public override string GetLocator()
+		{
+			return null;
 		}
 	}
 }

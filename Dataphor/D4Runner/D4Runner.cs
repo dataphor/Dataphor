@@ -16,6 +16,7 @@ using Alphora.Dataphor.DAE.Client;
 
 using CommandLine;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace D4Runner
 {
@@ -106,7 +107,8 @@ namespace D4Runner
 						delegate(PlanStatistics AStatistics, string AResults)
 						{
 							Console.WriteLine(AResults);
-						}
+						},
+						File == null ? null : new DebugLocator("file:" + Path.GetFullPath(File), 1, 1)
 					);
 					foreach(Exception LException in LErrors)
 						Console.WriteLine(LException.Message);

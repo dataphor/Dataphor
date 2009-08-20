@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
@@ -36,6 +37,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		event RequestHandler AfterSaveAsDocument;
 		void SaveAsDocument();
 		void SaveAsFile();
+		string GetLocator();
 	}
 
 	public class DesignService : IDesignService
@@ -301,6 +303,14 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			{
 				LForm.HostNode.Dispose();
 			}
+		}
+
+		public string GetLocator()
+		{
+			if (FBuffer == null)
+				return null;
+			else
+				return FBuffer.GetLocator();
 		}
 	}
 

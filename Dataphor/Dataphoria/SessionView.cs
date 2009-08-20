@@ -13,10 +13,8 @@ namespace Alphora.Dataphor.Dataphoria
 		public SessionView()
 		{
 			InitializeComponent();
-			
-			
 		}
-		
+
 		private IDataphoria FDataphoria;
 		public IDataphoria Dataphoria
 		{
@@ -61,13 +59,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void FAttachButton_Click(object sender, EventArgs e)
 		{
-			FDataphoria.ExecuteScript
-			(
-				@"
-					Debug.Start(); 
-					Debug.AttachSession(" + FSessionDataView["ID"].AsString + @");
-				"
-			);
+			if (FDataphoria.Debugger != null)
+				FDataphoria.Debugger.AttachSession(FSessionDataView["ID"].AsInt32);
 		}
 
 		private void FRefreshButton_Click(object sender, EventArgs e)
