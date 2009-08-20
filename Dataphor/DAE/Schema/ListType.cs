@@ -13,14 +13,9 @@ using System.Security.Cryptography;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Device.Catalog;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -157,9 +152,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LSpecifier;
 		}
 
-        public void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
-			ElementType.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			ElementType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
         }
    }
 }

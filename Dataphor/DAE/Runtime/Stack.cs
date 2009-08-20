@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
@@ -21,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			MaxStackDepth = AMaxStackDepth;
 			MaxCallDepth = AMaxCallDepth;
-			FWindows.Push(new StackWindow(0, null));
+			FWindows.Push(new StackWindow(0, null, null));
 		}
 		
 		protected int FCount;
@@ -141,14 +142,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
 		} // same code as peek and poke, duplicated for performance
 		
-		public void PushWindow(int ACount, PlanNode AOriginator)
+		public void PushWindow(int ACount, ServerPlan APlan, PlanNode AOriginator)
 		{
-			FWindows.Push(new StackWindow(FCount - ACount, AOriginator));
+			FWindows.Push(new StackWindow(FCount - ACount, APlan, AOriginator));
 		}
 		
 		public void PushWindow(int ACount)
 		{
-			PushWindow(ACount, null);
+			PushWindow(ACount, null, null);
 		}
 		
 		public void PopWindow()

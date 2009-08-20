@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LTableVar.InferredIsDefaultRemotable = !PropagateDefault || SourceTableVar.IsDefaultRemotable;
 			LTableVar.InferredIsChangeRemotable = !PropagateChange || SourceTableVar.IsChangeRemotable;
 			LTableVar.InferredIsValidateRemotable = !PropagateValidate || SourceTableVar.IsValidateRemotable;
-			LTableVar.DetermineRemotable(APlan.ServerProcess);
+			LTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			
 			LTableVar.ShouldChange = PropagateChange && (LTableVar.ShouldChange || SourceTableVar.ShouldChange);
 			LTableVar.ShouldDefault = PropagateDefault && (LTableVar.ShouldDefault || SourceTableVar.ShouldDefault);

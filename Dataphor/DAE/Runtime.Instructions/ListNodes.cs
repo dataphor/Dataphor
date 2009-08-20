@@ -582,7 +582,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar.EnsureTableVarColumns();
 			FTableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { FTableVar.Columns[LSequenceColumn.Name] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list

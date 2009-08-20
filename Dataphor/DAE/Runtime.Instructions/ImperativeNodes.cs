@@ -1768,7 +1768,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.Push(new Symbol(FVariableName, FVariableType));
 			Schema.ScalarType LScalarType = FVariableType as Schema.ScalarType;
 			if (LScalarType != null)
-				FHasDefault = ((LScalarType.Default != null) || (LScalarType.HasHandlers(APlan.ServerProcess, EventType.Default)));
+				FHasDefault = ((LScalarType.Default != null) || (LScalarType.HasHandlers(EventType.Default)));
 		}
 
 /*

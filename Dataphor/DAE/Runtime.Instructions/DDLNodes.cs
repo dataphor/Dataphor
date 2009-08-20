@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.BindNode(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LDependentNames, String.Empty, false, true, false, true))).Execute(AProcess);
+				Compiler.BindNode(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true))).Execute(AProcess);
 			}
 		}
 		
@@ -51,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 					LObjectNames[LIndex] = LHeaders[LIndex].Name;
 					
-				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LObjectNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNames, String.Empty, false, true, false, true)).Execute(AProcess);
 			}
 		}
 		
@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (LHeaders[LIndex].IsATObject || LHeaders[LIndex].IsSessionObject || LHeaders[LIndex].IsGenerated)
 				{
-					if (LHeaders[LIndex].ResolveObject(AProcess) is Schema.DeviceObject)
+					if (LHeaders[LIndex].ResolveObject(AProcess.CatalogDeviceSession) is Schema.DeviceObject)
 						LDeviceMaps.Add(LHeaders[LIndex].Name);
 					else
 						LDependents.Add(LHeaders[LIndex].Name);
@@ -75,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDeviceMapNames = new string[LDeviceMaps.Count];
 				LDeviceMaps.CopyTo(LDeviceMapNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LDeviceMapNames, String.Empty, false, true, true, true));
+				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDeviceMapNames, String.Empty, false, true, true, true));
 				LNode.Execute(AProcess);
 			}
 						
@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LDependentNames, String.Empty, false, true, true, true));
+				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, true, true));
 				LNode.Execute(AProcess);
 			}
 		}
@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LDependentNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true)).Execute(AProcess);
 			}
 		}
 		
@@ -1545,7 +1545,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 					AProcess.CatalogDeviceSession.CreateTableVarColumn(ATable, LTableVarColumn);
 				}
-				ATable.DetermineRemotable(AProcess);
+				ATable.DetermineRemotable(AProcess.CatalogDeviceSession);
 			}
 			finally
 			{
@@ -1893,12 +1893,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						Schema.Operator LNewSelector = Compiler.CompileSpecialSelector(AProcess.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
 						if (LNewSpecial.HasDependencies())
 							LNewSelector.AddDependencies(LNewSpecial.Dependencies);
-						LNewSelector.DetermineRemotable(AProcess);
+						LNewSelector.DetermineRemotable(AProcess.CatalogDeviceSession);
 
 						Schema.Operator LNewComparer = Compiler.CompileSpecialComparer(AProcess.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
 						if (LNewSpecial.HasDependencies())
 							LNewComparer.AddDependencies(LNewSpecial.Dependencies);
-						LNewComparer.DetermineRemotable(AProcess);
+						LNewComparer.DetermineRemotable(AProcess.CatalogDeviceSession);
 
 						new DropOperatorNode(LSpecial.Selector).Execute(AProcess);
 						new CreateOperatorNode(LNewSelector).Execute(AProcess);
@@ -2377,7 +2377,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.Plan.PopCreationObject();
 				}
 
-				LAggregateOperator.DetermineRemotable(AProcess);
+				LAggregateOperator.DetermineRemotable(AProcess.CatalogDeviceSession);
 			}
 
 			AProcess.CatalogDeviceSession.AlterMetaData(LAggregateOperator, FAlterAggregateOperatorStatement.AlterMetaData);
@@ -2500,8 +2500,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			AProcess.CatalogDeviceSession.AlterMetaData(FReference, FAlterReferenceStatement.AlterMetaData);
 
-			FReference.SourceTable.SetShouldReinferReferences(AProcess);
-			FReference.TargetTable.SetShouldReinferReferences(AProcess);
+			FReference.SourceTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
+			FReference.TargetTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
 
 			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
 			AProcess.Plan.Catalog.UpdateDerivationTimeStamp();

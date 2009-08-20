@@ -379,7 +379,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -501,7 +501,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list

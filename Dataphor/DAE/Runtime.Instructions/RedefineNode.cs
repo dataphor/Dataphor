@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									if (LNewColumn.HasDependencies())
 										for (int LDependencyIndex = 0; LIndex < LNewColumn.Dependencies.Count; LIndex++)
 										{
-											LObject = LNewColumn.Dependencies.ResolveObject(APlan.ServerProcess, LDependencyIndex);
+											LObject = LNewColumn.Dependencies.ResolveObject(APlan.CatalogDeviceSession, LDependencyIndex);
 											APlan.AttachDependency(LObject);
 											LNewColumn.IsNilable = LPlanNode.IsNilable;
 											LNewColumn.IsChangeRemotable = LNewColumn.IsChangeRemotable && LObject.IsRemotable;

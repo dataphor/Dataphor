@@ -955,9 +955,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			#if ALLOWSTATEMENTSASEXPRESSIONS
-			if ((LNode.Nodes[0].DataType != null) && !LNode.Nodes[0].DataType.Equals(APlan.Catalog.DataTypes.SystemScalar) && LNode.Nodes[0].IsFunctional && !APlan.ServerProcess.SuppressWarnings)
+			if ((LNode.Nodes[0].DataType != null) && !LNode.Nodes[0].DataType.Equals(APlan.Catalog.DataTypes.SystemScalar) && LNode.Nodes[0].IsFunctional && !APlan.SuppressWarnings)
 			#else
-			if ((LNode.Nodes[0].DataType != null) && LNode.Nodes[0].IsFunctional && !APlan.ServerProcess.SuppressWarnings)
+			if ((LNode.Nodes[0].DataType != null) && LNode.Nodes[0].IsFunctional && !APlan.SuppressWarnings)
 			#endif
 				APlan.Messages.Add(new CompilerException(CompilerException.Codes.ExpressionStatement, CompilerErrorLevel.Warning, AStatement));
 			return LNode;
@@ -1850,7 +1850,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		public static PlanNode EmitPropertyReadNode(Plan APlan, PlanNode APlanNode, Schema.ScalarType AScalarType, Schema.Property AProperty)
 		{
-			AProperty.ResolveReadAccessor(APlan.ServerProcess);
+			AProperty.ResolveReadAccessor(APlan.CatalogDeviceSession);
 			PlanNode LNode = BuildCallNode(APlan, null, AProperty.ReadAccessor, new PlanNode[]{APlanNode});
 			LNode.DetermineDataType(APlan);
 			LNode.DetermineCharacteristics(APlan);
@@ -2305,7 +2305,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
 		public static PlanNode EmitPropertyWriteNode(Plan APlan, Statement AStatement, Schema.Property AProperty, PlanNode ASourceNode, PlanNode ATargetNode)
 		{
-			AProperty.ResolveWriteAccessor(APlan.ServerProcess);
+			AProperty.ResolveWriteAccessor(APlan.CatalogDeviceSession);
 			PlanNode LNode = BuildCallNode(APlan, AStatement, AProperty.WriteAccessor, new PlanNode[]{ATargetNode, ASourceNode});
 			LNode.Nodes.Clear();
 			if (!ASourceNode.DataType.Is(AProperty.DataType))
@@ -2810,7 +2810,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.Enforced", (!Convert.ToBoolean(LTag.Value)).ToString(), false, LTag.IsStatic);
 				AMetaData.Tags.Add(LNewTag);
-				if (!APlan.ServerProcess.SuppressWarnings)
+				if (!APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
 			}
 				
@@ -2825,7 +2825,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.IsSparse", LTag.Value, false, LTag.IsStatic);
 				AMetaData.Tags.Add(LNewTag);
-				if (!APlan.ServerProcess.SuppressWarnings)
+				if (!APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
 			}
 			
@@ -2840,7 +2840,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				AMetaData.Tags.Remove(LTag);
 				Tag LNewTag = new Tag("DAE.IsClustered", LTag.Value, false, LTag.IsStatic);
 				AMetaData.Tags.Add(LNewTag);
-				if (!APlan.ServerProcess.SuppressWarnings)
+				if (!APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedTag, CompilerErrorLevel.Warning, LTag.Name, LNewTag.Name));
 			}
 		}
@@ -3059,7 +3059,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							}
 						}
 						
-						LNewConstraint.DetermineRemotable(APlan.ServerProcess);
+						LNewConstraint.DetermineRemotable(APlan.CatalogDeviceSession);
 							
 						if (!LNewConstraint.IsRemotable)
 							LNewConstraint.ConstraintType = Schema.ConstraintType.Database;
@@ -3223,7 +3223,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						}
 					}
 					
-					LNewConstraint.DetermineRemotable(APlan.ServerProcess);
+					LNewConstraint.DetermineRemotable(APlan.CatalogDeviceSession);
 						
 					if (LNewConstraint.IsRemotable)
 						LNewConstraint.ConstraintType = Schema.ConstraintType.Row;
@@ -3455,7 +3455,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					ADefault.Node = CompileTypedExpression(APlan, ADefaultDefinition.Expression, ADataType);
 					ADefault.Node = OptimizeNode(APlan, ADefault.Node);
 					ADefault.Node = BindNode(APlan, ADefault.Node);
-					ADefault.DetermineRemotable(APlan.ServerProcess);
+					ADefault.DetermineRemotable(APlan.CatalogDeviceSession);
 				}
 				finally
 				{
@@ -3716,7 +3716,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							if (LNode.Table.Keys.Count == 0)
 								throw new CompilerException(CompilerException.Codes.KeyRequired, AStatement);
 
-							LNode.Table.DetermineRemotable(APlan.ServerProcess);
+							LNode.Table.DetermineRemotable(APlan.CatalogDeviceSession);
 							LTag = LNode.Table.MetaData.Tags.GetTag("DAE.IsDefaultRemotable");
 							if (LTag != Tag.None)
 							{
@@ -3796,7 +3796,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							foreach (Schema.TableVarColumn LColumn in LNode.Table.Columns)
 								if (LColumn.DataType is Schema.ScalarType)
 									APlan.AttachDependency((Schema.ScalarType)LColumn.DataType);
-							LNode.Table.DetermineRemotable(APlan.ServerProcess);
+							LNode.Table.DetermineRemotable(APlan.CatalogDeviceSession);
 						}
 								
 						return LBlockNode;
@@ -3911,7 +3911,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						else
 							LNode.View.MergeMetaData(((TableNode)LPlanNode).TableVar.MetaData);
 						LNode.View.MergeMetaData(LStatement.MetaData);
-						LNode.View.DetermineRemotable(APlan.ServerProcess);
+						LNode.View.DetermineRemotable(APlan.CatalogDeviceSession);
 						return LBlockNode;
 					}
 					catch
@@ -4041,7 +4041,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					throw;
 				}
 				
-				AView.SetShouldReinferReferences(APlan.ServerProcess);
+				AView.SetShouldReinferReferences(APlan.CatalogDeviceSession);
 			}
 		}
 		
@@ -4085,7 +4085,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						LStatement = ASelector.Block;
 						
 					LOperator.Block.BlockNode = BindOperatorBlock(APlan, LOperator, CompileOperatorBlock(APlan, LOperator, LStatement));
-					LOperator.DetermineRemotable(APlan.ServerProcess);
+					LOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!(LOperator.IsFunctional && LOperator.IsDeterministic && LOperator.IsRemotable))
 						throw new CompilerException(CompilerException.Codes.InvalidSelector, ASelector, ARepresentation.Name, AScalarType.Name);
 				}
@@ -4130,7 +4130,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						LStatement = AReadAccessor.Block;
 						
 					LOperator.Block.BlockNode = BindOperatorBlock(APlan, LOperator, CompileOperatorBlock(APlan, LOperator, LStatement));
-					LOperator.DetermineRemotable(APlan.ServerProcess);
+					LOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!(LOperator.IsFunctional && LOperator.IsDeterministic && LOperator.IsRemotable))
 						throw new CompilerException(CompilerException.Codes.InvalidReadAccessor, AReadAccessor, AProperty.Name, ARepresentation.Name, AScalarType.Name);
 				}
@@ -4177,7 +4177,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						LStatement = AWriteAccessor.Block;
 						
 					LOperator.Block.BlockNode = BindOperatorBlock(APlan, LOperator, CompileOperatorBlock(APlan, LOperator, LStatement));
-					LOperator.DetermineRemotable(APlan.ServerProcess);
+					LOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!(LOperator.IsDeterministic && LOperator.IsRemotable))
 						throw new CompilerException(CompilerException.Codes.InvalidWriteAccessor, AWriteAccessor, AProperty.Name, ARepresentation.Name, AScalarType.Name);
 				}
@@ -4232,7 +4232,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (APlan.ServerProcess.InLoadingContext())
 				{
 					AProperty.LoadReadAccessorID();
-					AProperty.LoadDependencies(APlan.ServerProcess);
+					AProperty.LoadDependencies(APlan.CatalogDeviceSession);
 				}
 				else
 				{
@@ -4337,7 +4337,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					if (APlan.ServerProcess.InLoadingContext())
 					{
 						LRepresentation.LoadSelectorID();
-						LRepresentation.LoadDependencies(APlan.ServerProcess);
+						LRepresentation.LoadDependencies(APlan.CatalogDeviceSession);
 					}
 					else
 					{
@@ -4508,7 +4508,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							if (LNewSpecial.Comparer.HasDependencies())
 								LOperator.AddDependencies(LNewSpecial.Comparer.Dependencies);
 									
-						LOperator.DetermineRemotable(APlan.ServerProcess);
+						LOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 
 						return LOperator;
 					}
@@ -4802,7 +4802,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					AConstraint.Node = OptimizeNode(APlan, AConstraint.Node);
 					AConstraint.Node = BindNode(APlan, AConstraint.Node);
 						
-					AConstraint.DetermineRemotable(APlan.ServerProcess);
+					AConstraint.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!AConstraint.IsRemotable)
 						throw new CompilerException(CompilerException.Codes.NonRemotableConstraintExpression, AConstraintDefinition.Expression);
 						
@@ -4822,7 +4822,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						}
 					}
 					
-					AConstraint.DetermineRemotable(APlan.ServerProcess);
+					AConstraint.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!AConstraint.IsRemotable)
 						throw new CompilerException(CompilerException.Codes.NonRemotableCustomConstraintMessage, AConstraintDefinition);
 						
@@ -4863,7 +4863,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LSpecial.Selector = CompileSpecialSelector(APlan, AScalarType, LSpecial, ASpecialDefinition.Name, LSpecial.ValueNode);
 					if (LSpecial.HasDependencies())
 						LSpecial.Selector.AddDependencies(LSpecial.Dependencies);
-					LSpecial.Selector.DetermineRemotable(APlan.ServerProcess);
+					LSpecial.Selector.DetermineRemotable(APlan.CatalogDeviceSession);
 					APlan.PlanCatalog.Add(LSpecial.Selector);
 					APlan.AttachDependencies(LSpecial.Selector.Dependencies);
 					APlan.Catalog.OperatorResolutionCache.Clear(LSpecial.Selector.OperatorName);
@@ -4871,7 +4871,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				else
 				{
 					LSpecial.LoadSelectorID();
-					LSpecial.LoadDependencies(APlan.ServerProcess);
+					LSpecial.LoadDependencies(APlan.CatalogDeviceSession);
 				}
 				
 				if (!APlan.ServerProcess.InLoadingContext())
@@ -4879,7 +4879,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					LSpecial.Comparer = CompileSpecialComparer(APlan, AScalarType, LSpecial, ASpecialDefinition.Name, LSpecial.ValueNode);
 					if (LSpecial.HasDependencies())
 						LSpecial.Comparer.AddDependencies(LSpecial.Dependencies);
-					LSpecial.Comparer.DetermineRemotable(APlan.ServerProcess);
+					LSpecial.Comparer.DetermineRemotable(APlan.CatalogDeviceSession);
 					APlan.PlanCatalog.Add(LSpecial.Comparer);
 					APlan.AttachDependencies(LSpecial.Comparer.Dependencies);
 					APlan.Catalog.OperatorResolutionCache.Clear(LSpecial.Comparer.OperatorName);
@@ -4890,7 +4890,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				}
 
 				LSpecial.RemoveDependency(AScalarType);
-				LSpecial.DetermineRemotable(APlan.ServerProcess);
+				LSpecial.DetermineRemotable(APlan.CatalogDeviceSession);
 				
 				return LSpecial;
 			}
@@ -5144,7 +5144,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							else
 							{
 								// Load the set of dependencies to ensure they are reported correctly in the cache
-								LNode.ScalarType.LoadDependencies(APlan.ServerProcess);
+								LNode.ScalarType.LoadDependencies(APlan.CatalogDeviceSession);
 							}
 						}
 						else 
@@ -5356,7 +5356,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			{
 				APlan.PlanCatalog.SafeRemove(LSort);
 			}
-			LSort.DetermineRemotable(APlan.ServerProcess);
+			LSort.DetermineRemotable(APlan.CatalogDeviceSession);
 			return LSort;
 		}
 		
@@ -5411,7 +5411,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					APlan.PlanCatalog.SafeRemove(LSort);
 				}
-				LSort.DetermineRemotable(APlan.ServerProcess);
+				LSort.DetermineRemotable(APlan.CatalogDeviceSession);
 				return LSort;
 			}
 			catch (Exception LException)
@@ -5838,7 +5838,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						else
 						{
 							LNode.CreateOperator.Block.BlockNode = BindOperatorBlock(APlan, LNode.CreateOperator, CompileOperatorBlock(APlan, LNode.CreateOperator, LStatement.Block.Block));
-							LNode.CreateOperator.DetermineRemotable(APlan.ServerProcess);
+							LNode.CreateOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 						}
 						
 						LNode.CreateOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(LNode.CreateOperator.MetaData, "DAE.IsRemotable", LNode.CreateOperator.IsRemotable.ToString()));
@@ -5918,16 +5918,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 														// Report dependencies for the signature and return types
 														Schema.Catalog LDependencies = new Schema.Catalog();
 														foreach (Schema.Operand LOperand in AOperator.Operands)
-															LOperand.DataType.IncludeDependencies(APlan.ServerProcess, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+															LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
 														if (AOperator.ReturnDataType != null)
-															AOperator.ReturnDataType.IncludeDependencies(APlan.ServerProcess, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+															AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
 														foreach (Schema.Object LObject in LDependencies)
 															LPlan.Plan.AttachDependency(LObject);
 
 														PlanNode LBlockNode = BindOperatorBlock(LPlan.Plan, AOperator, CompileOperatorBlock(LPlan.Plan, AOperator, new Parser().ParseStatement(AOperator.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
 														LPlan.Plan.CheckCompiled();
 														AOperator.Block.BlockNode = LBlockNode;
-														AOperator.DetermineRemotable(APlan.ServerProcess);
+														AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 
 														AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
 														AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
@@ -6233,7 +6233,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							APlan.Symbols.PopWindow();
 						}
 						
-						LOperator.DetermineRemotable(APlan.ServerProcess);
+						LOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 						LOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(LOperator.MetaData, "DAE.IsRemotable", LOperator.IsRemotable.ToString()));
 						LOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(LOperator.MetaData, "DAE.IsLiteral", LOperator.IsLiteral.ToString()));
 						LOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(LOperator.MetaData, "DAE.IsFunctional", LOperator.IsFunctional.ToString()));
@@ -6309,9 +6309,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 												// Report dependencies for the signature and return types
 												Schema.Catalog LDependencies = new Schema.Catalog();
 												foreach (Schema.Operand LOperand in AOperator.Operands)
-													LOperand.DataType.IncludeDependencies(APlan.ServerProcess, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+													LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
 												if (AOperator.ReturnDataType != null)
-													AOperator.ReturnDataType.IncludeDependencies(APlan.ServerProcess, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+													AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
 												foreach (Schema.Object LObject in LDependencies)
 													LPlan.Plan.AttachDependency(LObject);
 
@@ -6402,7 +6402,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 												if (LFinalizationNode != null)
 													AOperator.Finalization.BlockNode = LFinalizationNode;
 
-												AOperator.DetermineRemotable(APlan.ServerProcess);
+												AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 												AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
 												AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
 												AOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsFunctional", AOperator.IsFunctional.ToString()));
@@ -6532,7 +6532,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 							}
 						}
 						
-						LNode.Constraint.DetermineRemotable(APlan.ServerProcess);
+						LNode.Constraint.DetermineRemotable(APlan.CatalogDeviceSession);
 						
 						// Verify the violation message and report dependencies for it.
 						//LNode.Constraint.GetViolationMessage(APlan.ServerProcess, AStatement);
@@ -9549,12 +9549,12 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (ANode.EventSourceColumnIndex >= 0)
 				{
 					Schema.TableVarColumn LColumn = LTableVar.Columns[ANode.EventSourceColumnIndex];
-					if (LColumn.HasHandlers(APlan.ServerProcess) && (LColumn.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
+					if (LColumn.HasHandlers() && (LColumn.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
 						throw new CompilerException(CompilerException.Codes.OperatorAlreadyAttachedToColumnEvent, AStatement, ANode.EventHandler.Operator.OperatorName, ANode.EventHandler.EventType.ToString(), LColumn.Name, LTableVar.Name);
 				}
 				else
 				{
-					if (LTableVar.HasHandlers(APlan.ServerProcess) && (LTableVar.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
+					if (LTableVar.HasHandlers() && (LTableVar.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
 						throw new CompilerException(CompilerException.Codes.OperatorAlreadyAttachedToObjectEvent, AStatement, ANode.EventHandler.Operator.OperatorName, ANode.EventHandler.EventType.ToString(), LTableVar.Name);
 				}
 			}
@@ -9563,7 +9563,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.ScalarType LScalarType = ANode.EventSource as Schema.ScalarType;
 				if (LScalarType != null)
 				{
-					if (LScalarType.HasHandlers(APlan.ServerProcess) && (LScalarType.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
+					if (LScalarType.HasHandlers() && (LScalarType.EventHandlers.IndexOf(ANode.EventHandler.Operator, ANode.EventHandler.EventType) >= 0))
 						throw new CompilerException(CompilerException.Codes.OperatorAlreadyAttachedToObjectEvent, AStatement, ANode.EventHandler.Operator.OperatorName, ANode.EventHandler.EventType.ToString(), LScalarType.Name);
 				}
 			}
@@ -9676,7 +9676,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 				LNode.EventHandler.EventType = AEventType;	
 				LNode.EventHandler.Operator = LContext.Operator;
-				LNode.EventHandler.DetermineRemotable(APlan.ServerProcess);
+				LNode.EventHandler.DetermineRemotable(APlan.CatalogDeviceSession);
 				
 				// Check to see if the handler is already attached
 				CheckValidEventHandler(APlan, AStatement, LNode);
@@ -9758,7 +9758,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LTableVar != null)
 				{
 					int LHandlerIndex = -1;
-					if (LTableVar.HasHandlers(APlan.ServerProcess))
+					if (LTableVar.HasHandlers())
 						LHandlerIndex = LTableVar.EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 					if (LHandlerIndex < 0)
 						throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToObjectEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), LNode.EventSource.Name);
@@ -9767,7 +9767,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				else if (LScalarType != null)
 				{
 					int LHandlerIndex = -1;
-					if (LScalarType.HasHandlers(APlan.ServerProcess))
+					if (LScalarType.HasHandlers())
 						LHandlerIndex = LScalarType.EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 					if (LHandlerIndex < 0)
 						throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToObjectEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), LNode.EventSource.Name);
@@ -9787,7 +9787,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					throw new CompilerException(CompilerException.Codes.ColumnNameExpected, AStatement.EventSourceSpecifier);
 
 				int LHandlerIndex = -1;
-				if (LTableVar.Columns[LNode.EventSourceColumnIndex].HasHandlers(APlan.ServerProcess))
+				if (LTableVar.Columns[LNode.EventSourceColumnIndex].HasHandlers())
 					LHandlerIndex = LTableVar.Columns[LNode.EventSourceColumnIndex].EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 				if (LHandlerIndex < 0)
 					throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToColumnEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), ((Schema.TableVar)LNode.EventSource).Columns[LNode.EventSourceColumnIndex].Name, LNode.EventSource.Name);
@@ -9845,7 +9845,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				if (LTableVar != null)
 				{
 					int LHandlerIndex = -1;
-					if (LTableVar.HasHandlers(APlan.ServerProcess))
+					if (LTableVar.HasHandlers())
 						LHandlerIndex = LTableVar.EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 					if (LHandlerIndex < 0)
 						throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToObjectEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), LNode.EventSource.Name);
@@ -9854,7 +9854,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				else if (LScalarType != null)
 				{
 					int LHandlerIndex = -1;
-					if (LScalarType.HasHandlers(APlan.ServerProcess))
+					if (LScalarType.HasHandlers())
 						LHandlerIndex = LScalarType.EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 					if (LHandlerIndex < 0)
 						throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToObjectEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), LNode.EventSource.Name);
@@ -9874,7 +9874,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					throw new CompilerException(CompilerException.Codes.ColumnNameExpected, AStatement.EventSourceSpecifier);
 
 				int LHandlerIndex = -1;
-				if (LTableVar.Columns[LNode.EventSourceColumnIndex].HasHandlers(APlan.ServerProcess))
+				if (LTableVar.Columns[LNode.EventSourceColumnIndex].HasHandlers())
 					LHandlerIndex = LTableVar.Columns[LNode.EventSourceColumnIndex].EventHandlers.IndexOf(AStatement.OperatorName, AEventType);
 				if (LHandlerIndex < 0)
 					throw new CompilerException(CompilerException.Codes.OperatorNotAttachedToColumnEvent, AStatement.EventSpecifier, AStatement.OperatorName, AEventType.ToString(), ((Schema.TableVar)LNode.EventSource).Columns[LNode.EventSourceColumnIndex].Name, LNode.EventSource.Name);
@@ -10680,7 +10680,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				else
 				{
 					foreach (Schema.Conversion LConversion in LContext.BestPath)
-						if (LConversion.IsNarrowing && !APlan.ServerProcess.SuppressWarnings && !APlan.InTypeOfContext)
+						if (LConversion.IsNarrowing && !APlan.SuppressWarnings && !APlan.InTypeOfContext)
 							APlan.Messages.Add(new CompilerException(CompilerException.Codes.NarrowingConversion, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LConversion.SourceScalarType.Name, LConversion.TargetScalarType.Name));
 				}
 				#endif
@@ -11142,7 +11142,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			ResolveOperator(APlan, AContext);
 			if (AContext.Operator != null)
 			{
-				if (Convert.ToBoolean(MetaData.GetTag(AContext.Operator.MetaData, "DAE.IsDeprecated", "False")) && !APlan.ServerProcess.SuppressWarnings)
+				if (Convert.ToBoolean(MetaData.GetTag(AContext.Operator.MetaData, "DAE.IsDeprecated", "False")) && !APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.DeprecatedOperator, CompilerErrorLevel.Warning, AContext.Operator.DisplayName));
 					
 				if (AContext.IsExact)
@@ -11536,7 +11536,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						}
 					}
 					
-					if (!LResolvedKeyUnique && !APlan.ServerProcess.SuppressWarnings && !APlan.InTypeOfContext)
+					if (!LResolvedKeyUnique && !APlan.SuppressWarnings && !APlan.InTypeOfContext)
 						APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression, CompilerErrorLevel.Warning, AExpression));
 				}
 				else
@@ -11671,15 +11671,15 @@ indicative of other problems, a reference will never be attached as an explicit 
 					LTableNode = (TableNode)EmitRestrictNode(APlan, EmitRenameNode(APlan, LTableNode, "X"), LCondition);
 
 				ExtractRowNode LNode;
-				bool LSaveSuppressWarnings = APlan.ServerProcess.SuppressWarnings;
-				APlan.ServerProcess.SuppressWarnings = true;
+				bool LSaveSuppressWarnings = APlan.SuppressWarnings;
+				APlan.SuppressWarnings = true;
 				try
 				{				
 					LNode = (ExtractRowNode)EmitRowExtractorNode(APlan, AExpression, LTableNode);
 				}
 				finally
 				{
-					APlan.ServerProcess.SuppressWarnings = LSaveSuppressWarnings;
+					APlan.SuppressWarnings = LSaveSuppressWarnings;
 				}
 
 				LNode.IndexerExpression = AExpression;
@@ -11995,7 +11995,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				}
 			}
 
-			LNode.TableVar.DetermineRemotable(APlan.ServerProcess);
+			LNode.TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			CompileTableVarKeys(APlan, LNode.TableVar, AExpression.Keys);
 			Schema.Key LClusteringKey = LNode.TableVar.FindClusteringKey();
 
@@ -12046,7 +12046,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		// This operator cannot be overloaded.
 		public static PlanNode CompileRowExtractorExpression(Plan APlan, RowExtractorExpression AExpression)
 		{
-			if (!APlan.ServerProcess.SuppressWarnings)
+			if (!APlan.SuppressWarnings)
 				APlan.Messages.Add(new CompilerException(CompilerException.Codes.RowExtractorDeprecated, CompilerErrorLevel.Warning, AExpression));
 			return EmitRowExtractorNode(APlan, AExpression, AExpression.Expression);
 		}
@@ -12101,7 +12101,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		// This operator cannot be overloaded.
 		public static PlanNode CompileColumnExtractorExpression(Plan APlan, ColumnExtractorExpression AExpression)
 		{
-			if (!APlan.ServerProcess.SuppressWarnings)
+			if (!APlan.SuppressWarnings)
 				APlan.Messages.Add(new CompilerException(CompilerException.Codes.ColumnExtractorDeprecated, CompilerErrorLevel.Warning, AExpression));
 			return EmitColumnExtractorNode(APlan, AExpression, CompileExpression(APlan, AExpression.Expression));
 		}
@@ -13391,10 +13391,10 @@ indicative of other problems, a reference will never be attached as an explicit 
 			
 			if ((AExpression.LevelColumn != null) || (AExpression.SequenceColumn != null))
 			{
-				if (!AExpression.HasOrderByClause && !APlan.ServerProcess.SuppressWarnings)
+				if (!AExpression.HasOrderByClause && !APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidExplodeExpression, CompilerErrorLevel.Warning, AExpression));
 				
-				if (AExpression.HasOrderByClause && !IsOrderUnique(APlan, ((TableNode)LSourceNode).TableVar, ((TableNode)LRootNode).Order) && !APlan.ServerProcess.SuppressWarnings)
+				if (AExpression.HasOrderByClause && !IsOrderUnique(APlan, ((TableNode)LSourceNode).TableVar, ((TableNode)LRootNode).Order) && !APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidExplodeExpressionOrder, CompilerErrorLevel.Warning, AExpression));
 			}	
 

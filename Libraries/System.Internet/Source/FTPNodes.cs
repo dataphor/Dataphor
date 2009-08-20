@@ -128,7 +128,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Name"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list

@@ -14,14 +14,11 @@ using System.Security.Cryptography;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Device.Catalog;
+using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -82,7 +79,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FIsComputed = value; }
 		}
 		
-		public void DetermineShouldCallProposables(ServerProcess AProcess, bool AReset)
+		public void DetermineShouldCallProposables(bool AReset)
 		{
 			if (AReset)
 			{
@@ -91,25 +88,25 @@ namespace Alphora.Dataphor.DAE.Schema
 				FShouldValidate = false;
 			}
 
-			if (HasHandlers(AProcess, EventType.Change))
+			if (HasHandlers(EventType.Change))
 				FShouldChange = true;
 				
-			if (HasHandlers(AProcess, EventType.Default) || (FDefault != null))
+			if (HasHandlers(EventType.Default) || (FDefault != null))
 				FShouldDefault = true;
 				
-			if (HasHandlers(AProcess, EventType.Validate) || HasConstraints())
+			if (HasHandlers(EventType.Validate) || HasConstraints())
 				FShouldValidate = true;
 				
 			Schema.ScalarType LScalarType = DataType as Schema.ScalarType;
 			if (LScalarType != null) 
 			{
-				if (LScalarType.HasHandlers(AProcess, EventType.Change))
+				if (LScalarType.HasHandlers(EventType.Change))
 					FShouldChange = true;
 					
-				if (LScalarType.HasHandlers(AProcess, EventType.Default) || (LScalarType.Default != null))
+				if (LScalarType.HasHandlers(EventType.Default) || (LScalarType.Default != null))
 					FShouldDefault = true;
 					
-				if (LScalarType.HasHandlers(AProcess, EventType.Validate) || (LScalarType.Constraints.Count > 0))
+				if (LScalarType.HasHandlers(EventType.Validate) || (LScalarType.Constraints.Count > 0))
 					FShouldValidate = true;
 			}
 		}
@@ -363,12 +360,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			} 
 		}
 		
-		public bool HasHandlers(ServerProcess AProcess)
+		public bool HasHandlers()
 		{
 			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(ServerProcess AProcess, EventType AEventType)
+		public bool HasHandlers(EventType AEventType)
 		{
 			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
 		}
@@ -500,26 +497,26 @@ namespace Alphora.Dataphor.DAE.Schema
 			LColumn.ShouldValidate = ShouldValidate;
         }
         
-		public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
-			DataType.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			DataType.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 
 			if ((FDefault != null) && ((AMode != EmitMode.ForRemote) || FDefault.IsRemotable))
-				FDefault.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+				FDefault.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		
 			if (FConstraints != null)
 				foreach (Constraint LConstraint in Constraints)
 					if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-						LConstraint.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		}
 		
-		public override void IncludeHandlers(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
 			if (FEventHandlers != null)
 				foreach (EventHandler LHandler in FEventHandlers)
 					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -1316,16 +1313,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LOrder;
 		}
         
-        public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			
 			OrderColumn LColumn;
 			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
 			{
 				LColumn = Columns[LIndex];
 				if (LColumn.Sort != null)
-					LColumn.Sort.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					LColumn.Sort.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			}
         }
     }
@@ -1598,17 +1595,18 @@ namespace Alphora.Dataphor.DAE.Schema
 			return Name;
         }
         
-        public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			
 			TableVarColumn LColumn;
 			for (int LIndex = 0; LIndex < Columns.Count; LIndex++)
 			{
 				LColumn = Columns[LIndex];
-				Schema.Sort LSort = Compiler.GetUniqueSort(AProcess.Plan, LColumn.DataType);
+				// TODO: Fix this boundary-cross
+				Schema.Sort LSort = Compiler.GetUniqueSort(ASession.ServerProcess.Plan, LColumn.DataType);
 				if (LSort != null)
-					LSort.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					LSort.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			}
         }
 
@@ -2012,12 +2010,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		private References FDerivedReferences = new References();
 		public References DerivedReferences { get { return FDerivedReferences; } }
 		
-		public bool HasHandlers(ServerProcess AProcess)
+		public bool HasHandlers()
 		{
 			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(ServerProcess AProcess, EventType AEventType)
+		public bool HasHandlers(EventType AEventType)
 		{
 			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
 		}
@@ -2127,7 +2125,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					);
         }
         
-        public virtual void DetermineShouldCallProposables(ServerProcess AProcess, bool AReset)
+        public virtual void DetermineShouldCallProposables(bool AReset)
         {
 			if (AReset)
 			{
@@ -2138,7 +2136,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			foreach (TableVarColumn LColumn in Columns)
 			{
-				LColumn.DetermineShouldCallProposables(AProcess, AReset);
+				LColumn.DetermineShouldCallProposables(AReset);
 				FShouldChange = FShouldChange || LColumn.ShouldChange;
 				FShouldDefault = FShouldDefault || LColumn.ShouldDefault;
 				FShouldValidate = FShouldValidate || LColumn.ShouldValidate;
@@ -2147,7 +2145,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (FRowConstraints.Count > 0)
 				FShouldValidate = true;
 			
-			if (HasHandlers(AProcess) && (FEventHandlers != null))
+			if (HasHandlers())
 			{
 				foreach (EventHandler LHandler in FEventHandlers)
 				{
@@ -2163,7 +2161,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
         }
         
-		public override void DetermineRemotable(ServerProcess AProcess)
+		public override void DetermineRemotable(CatalogDeviceSession ASession)
 		{
 			IsDefaultRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsDefaultRemotable", "true"));
 			IsValidateRemotable = Convert.ToBoolean(MetaData.GetTag(MetaData, "DAE.IsValidateRemotable", "true"));
@@ -2405,88 +2403,88 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
 			if ((SourceTableName != null) && (AMode == EmitMode.ForRemote))
-				ASourceCatalog[ASourceCatalog.IndexOfName(SourceTableName)].IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+				ASourceCatalog[ASourceCatalog.IndexOfName(SourceTableName)].IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			else
 			{
 				if (!ATargetCatalog.Contains(Name))
 				{
 					ATargetCatalog.Add(this);		// this needs to be added before tracing dependencies to avoid recursion
 
-					base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 
 					foreach (TableVarColumn LColumn in Columns)
-						LColumn.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LColumn.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 						
 					foreach (Key LKey in Keys)
-						LKey.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LKey.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 						
 					foreach (Order LOrder in Orders)
-						LOrder.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LOrder.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 						
 					foreach (Constraint LConstraint in Constraints)
 						if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-							LConstraint.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);	
+							LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);	
 				}
 			}
 		}
 		
-		public override void IncludeHandlers(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
 			foreach (TableVarColumn LColumn in Columns)
 			{
 				if (LColumn.DataType is Schema.ScalarType)
-					((Schema.ScalarType)LColumn.DataType).IncludeHandlers(AProcess, ASourceCatalog, ATargetCatalog, AMode);
-				LColumn.IncludeHandlers(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					((Schema.ScalarType)LColumn.DataType).IncludeHandlers(ASession, ASourceCatalog, ATargetCatalog, AMode);
+				LColumn.IncludeHandlers(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			}
 
 			if (FEventHandlers != null)
 				foreach (EventHandler LHandler in FEventHandlers)
 					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		}
 		
-		public void IncludeLookupAndDetailReferences(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeLookupAndDetailReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
 		{
 			foreach (Reference LReference in SourceReferences)
 				if ((LReference.ParentReference == null) && !LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
 				{
-					LReference.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.TargetTable.IncludeReferences(AProcess, ASourceCatalog, ATargetCatalog);
+					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
+					LReference.TargetTable.IncludeReferences(ASession, ASourceCatalog, ATargetCatalog);
 				}
 
 			foreach (Reference LReference in TargetReferences)
 				if ((LReference.ParentReference == null) && !LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
-					LReference.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
+					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
 		}
 		
-		public void IncludeParentReferences(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeParentReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
 		{
-			IncludeLookupAndDetailReferences(AProcess, ASourceCatalog, ATargetCatalog);
+			IncludeLookupAndDetailReferences(ASession, ASourceCatalog, ATargetCatalog);
 			foreach (Reference LReference in SourceReferences)
 				if ((LReference.ParentReference == null) && LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
 				{
-					LReference.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.TargetTable.IncludeParentReferences(AProcess, ASourceCatalog, ATargetCatalog);
+					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
+					LReference.TargetTable.IncludeParentReferences(ASession, ASourceCatalog, ATargetCatalog);
 				}
 		}
 		
-		public void IncludeExtensionReferences(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeExtensionReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
 		{
 			foreach (Reference LReference in TargetReferences)
 				if ((LReference.ParentReference == null) && LReference.SourceKey.IsUnique && !ATargetCatalog.Contains(LReference.Name))
 				{
-					LReference.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
-					LReference.SourceTable.IncludeLookupAndDetailReferences(AProcess, ASourceCatalog, ATargetCatalog);
+					LReference.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, EmitMode.ForRemote);
+					LReference.SourceTable.IncludeLookupAndDetailReferences(ASession, ASourceCatalog, ATargetCatalog);
 				}
 		}
 		
-		public void IncludeReferences(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog)
+		public void IncludeReferences(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog)
 		{
-			IncludeParentReferences(AProcess, ASourceCatalog, ATargetCatalog);
-			IncludeExtensionReferences(AProcess, ASourceCatalog, ATargetCatalog);
+			IncludeParentReferences(ASession, ASourceCatalog, ATargetCatalog);
+			IncludeExtensionReferences(ASession, ASourceCatalog, ATargetCatalog);
 		}
 
 		protected void EmitTableVarStatement(EmitMode AMode, CreateTableVarStatement AStatement)
@@ -2581,12 +2579,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			return base.GetObjectFromHeader(AHeader);
 		}
 
-		public void SetShouldReinferReferences(ServerProcess AProcess)
+		public void SetShouldReinferReferences(CatalogDeviceSession ASession)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, false);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				if (LHeaders[LIndex].ObjectType == "DerivedTableVar")
-					AProcess.CatalogDeviceSession.MarkViewForRecompile(LHeaders[LIndex].ID);
+					ASession.MarkViewForRecompile(LHeaders[LIndex].ID);
 		}
 	}
     
@@ -2634,10 +2632,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FDevice = value; }
 		}
 		
-		public override void DetermineRemotable(ServerProcess AProcess)
+		public override void DetermineRemotable(CatalogDeviceSession ASession)
 		{
-			base.DetermineRemotable(AProcess);
-			DetermineShouldCallProposables(AProcess, true);
+			base.DetermineRemotable(ASession);
+			DetermineShouldCallProposables(true);
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -2705,9 +2703,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FInferredIsChangeRemotable = value; }
 		}
 		
-		public override void DetermineRemotable(ServerProcess AProcess)
+		public override void DetermineRemotable(CatalogDeviceSession ASession)
 		{
-			base.DetermineRemotable(AProcess);
+			base.DetermineRemotable(ASession);
 			
 			IsDefaultRemotable = IsDefaultRemotable && InferredIsDefaultRemotable;
 			IsValidateRemotable = IsValidateRemotable && InferredIsValidateRemotable;
@@ -2734,10 +2732,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FShouldReinferReferences = value; }
 		}
 		
-		public override void DetermineRemotable(ServerProcess AProcess)
+		public override void DetermineRemotable(CatalogDeviceSession ASession)
 		{
-			base.DetermineRemotable(AProcess);
-			DetermineShouldCallProposables(AProcess, false);
+			base.DetermineRemotable(ASession);
+			DetermineShouldCallProposables(false);
 		}
 		
 		/*

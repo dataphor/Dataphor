@@ -31,7 +31,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Process_ID"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -288,7 +288,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -512,7 +512,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list

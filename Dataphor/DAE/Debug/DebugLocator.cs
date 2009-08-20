@@ -75,8 +75,8 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// If the string is not a valid encoding of a debug locator, an ArgumentException is thrown.</remarks>
 		public static DebugLocator Parse(string AValue)
 		{
-			int LIndexOfAt = AValue.IndexOf("@");
-			int LIndexOfColon = AValue.IndexOf(":");
+			int LIndexOfAt = AValue.LastIndexOf("@");
+			int LIndexOfColon = AValue.LastIndexOf(":");
 			if ((LIndexOfAt < 0) || (LIndexOfColon < 0))
 				throw new ArgumentException("Invalid locator string");
 				
@@ -90,14 +90,19 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 		
 		/// <summary>
-		/// Dynamic locator string used to indicate that a locator is a reference to dynamic or ad-hoc execution
+		/// Plan locator string used to indicate that a locator is a reference to dynamic or ad-hoc execution
 		/// </summary>
-		public const string CDynamicLocator = "DYNAMIC";
+		public const string CPlanLocator = "plan";
 		
 		/// <summary>
 		/// Operator locator string used to indicate that a locator is a reference to an operator created by a dynamic or ad-hoc execution
 		/// </summary>
-		public const string COperatorLocator = "OPERATOR";
+		public const string COperatorLocator = "operator";
+		
+		public static string PlanLocator(Guid APlanID)
+		{
+			return String.Format("{0}:{1}", CPlanLocator, APlanID.ToString());
+		}
 		
 		/// <summary>
 		/// Constructs an operator locator string based on an operator specifier.
@@ -107,8 +112,13 @@ namespace Alphora.Dataphor.DAE.Debug
 			return String.Format("{0}:{1}", COperatorLocator, AOperatorSpecifier);
 		}
 		
+		public static bool IsPlanLocator(string ALocator)
+		{
+			return ALocator.StartsWith(CPlanLocator + ":");
+		}
+		
 		/// <summary>
-		/// Returns true if the locator is an OPERATOR locator
+		/// Returns true if the locator is an operator locator
 		/// </summary>
 		public static bool IsOperatorLocator(string ALocator)
 		{

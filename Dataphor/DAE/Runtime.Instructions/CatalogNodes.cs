@@ -394,7 +394,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(
 					AProcess.Plan.Catalog.EmitStatement
 					(
-						AProcess, 
+						AProcess.CatalogDeviceSession, 
 						EmitMode.ForCopy, 
 						new string[] { LObject.Name }, 
 						String.Empty, 
@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					LPlan.CheckCompiled();
-					return LEmitter.Emit(LPlan.Catalog.EmitStatement(AProcess, EmitMode.ForCopy, new string[] { LPlan.TableVar.Name } ));
+					return LEmitter.Emit(LPlan.Catalog.EmitStatement(AProcess.CatalogDeviceSession, EmitMode.ForCopy, new string[] { LPlan.TableVar.Name } ));
 				}
 				finally
 				{
@@ -579,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return AProcess.ServerSession.Server.ScriptLibrary(AProcess, (string)AArguments[0]);
+			return AProcess.ServerSession.Server.ScriptLibrary(AProcess.CatalogDeviceSession, (string)AArguments[0]);
 		}
     }
     
@@ -588,7 +588,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return AProcess.ServerSession.Server.ScriptCatalog(AProcess);
+			return AProcess.ServerSession.Server.ScriptCatalog(AProcess.CatalogDeviceSession);
 		}
 	}
 	
@@ -621,7 +621,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			bool LIncludeDependents = AArguments.Length > 1 ? (bool)AArguments[1] : true;
 			bool LIncludeObject = AArguments.Length > 2 ? (bool)AArguments[2] : true;
 		
-			return LEmitter.Emit(AProcess.Plan.Catalog.EmitDropStatement(AProcess, new string[] { LObject.Name }, String.Empty, true, true, LIncludeDependents, LIncludeObject));
+			return LEmitter.Emit(AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, new string[] { LObject.Name }, String.Empty, true, true, LIncludeDependents, LIncludeObject));
 		}
     }
     
@@ -630,7 +630,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return AProcess.ServerSession.Server.ScriptDropLibrary(AProcess, (string)AArguments[0]);
+			return AProcess.ServerSession.Server.ScriptDropLibrary(AProcess.CatalogDeviceSession, (string)AArguments[0]);
 		}
     }
     
@@ -639,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return AProcess.ServerSession.Server.ScriptDropCatalog(AProcess);
+			return AProcess.ServerSession.Server.ScriptDropCatalog(AProcess.CatalogDeviceSession);
 		}
     }
 
@@ -758,7 +758,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -840,7 +840,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -869,7 +869,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
 				{
 					ASequence += 1;
-					PopulateRequiredObject(AProcess, ATable, ARow, AObject.Dependencies.ResolveObject(AProcess, LIndex), ARecursive, ref ASequence, ALevel);
+					PopulateRequiredObject(AProcess, ATable, ARow, AObject.Dependencies.ResolveObject(AProcess.CatalogDeviceSession, LIndex), ARecursive, ref ASequence, ALevel);
 				}
 		}
 
@@ -943,7 +943,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], false));
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -1036,7 +1036,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Level"], true));
 			LOrder.Columns.Add(new Schema.OrderColumn(TableVar.Columns["Sequence"], true));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -1139,7 +1139,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list

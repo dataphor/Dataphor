@@ -527,17 +527,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			Schema.CatalogObject LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], false) as Schema.CatalogObject;
-			if ((LObject == null) && !AProcess.ServerSession.Server.LoadingFullCatalog) // This check is for backwards compatibility with d4c files. A d4c file persists an object's owner as a SetObjectOwner call with the old style mangled name of the operator.
+			if (LObject == null) 
 				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectExpected, LObject.Name);
-			if (LObject != null)
-			{
-				Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
-				if (AProcess.Plan.User.ID != LUser.ID)
-					AProcess.Plan.CheckAuthorized(LUser.ID);
-				if (!LObject.IsOwner(AProcess.Plan.User))
-					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.Plan.User.ID);
-				ChangeObjectOwner(AProcess, LObject, LUser);
-			}
+
+			Schema.User LUser = AProcess.CatalogDeviceSession.ResolveUser((string)AArguments[1]);
+			if (AProcess.Plan.User.ID != LUser.ID)
+				AProcess.Plan.CheckAuthorized(LUser.ID);
+			if (!LObject.IsOwner(AProcess.Plan.User))
+				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.Plan.User.ID);
+			ChangeObjectOwner(AProcess, LObject, LUser);
+
 			return null;
 		}
     }

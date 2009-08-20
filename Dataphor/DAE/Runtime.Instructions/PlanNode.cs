@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						if (!FDevice.IgnoreUnsupported && (DataType != null) && !IgnoreUnsupported && !APlan.InTypeOfContext)
 						{
-							if ((LDevicePlan != null) && !APlan.ServerProcess.SuppressWarnings)
+							if ((LDevicePlan != null) && !APlan.SuppressWarnings)
 								APlan.Messages.Add(new CompilerException(CompilerException.Codes.UnsupportedPlan, CompilerErrorLevel.Warning, FDevice.Name, SafeEmitStatementAsString(), LDevicePlan.TranslationMessages.ToString()));
 							#if TRACEEVENTS
 							APlan.ServerProcess.ServerSession.Server.RaiseTraceEvent(APlan.ServerProcess, TraceCodes.UnsupportedNode, String.Format(@"Node ""{0}"" not supported by device ""{1}"".", this.GetType().Name, FDevice.Name));

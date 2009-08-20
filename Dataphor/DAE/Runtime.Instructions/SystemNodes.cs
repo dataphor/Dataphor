@@ -931,7 +931,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -1147,7 +1147,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AScript, Row AInParams, Row AOutParams, DebugLocator ALocator)
 		{
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProcess, AInParams, AOutParams);
-			AProcess.Context.PushWindow(0, ANode);
+			AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1234,7 +1234,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DataParams LParams = ParamsFromRows(AProcess, AInParams, AOutParams);
 
-			AProcess.Context.PushWindow(0, ANode);
+			AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1658,7 +1658,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			string LString = (string)AArguments[0];
-			AProcess.Context.PushWindow(0, this);
+			AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
 			try
 			{
 				IServerExpressionPlan LPlan = ((IServerProcess)AProcess).PrepareExpression(LString, null);
@@ -2342,7 +2342,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Sequence"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list
@@ -2771,7 +2771,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["DeclaringType"], TableVar.Columns["FieldName"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list

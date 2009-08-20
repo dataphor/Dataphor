@@ -125,7 +125,10 @@ namespace Alphora.Dataphor.DAE.Server
 			if (ASourceContext.Locator != null)
 				FLocator = ASourceContext.Locator;
 			else
+			{
+				FLocator = new DebugLocator(DebugLocator.PlanLocator(this.ID), 1, 1);
 				FSource = ASourceContext.Script;
+			}
 		}
 		
 		// Process        

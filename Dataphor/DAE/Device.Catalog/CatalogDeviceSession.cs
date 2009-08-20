@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			public override void Undo(CatalogDeviceSession ASession)
 			{
 				FObject.AddDependencies(FOriginalDependencies);
-				FObject.DetermineRemotable(ASession.ServerProcess);
+				FObject.DetermineRemotable(ASession);
 			}
 		}
 		
@@ -2190,7 +2190,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public string ScriptCatalogObject(Schema.CatalogObject AObject)
 		{
-			return FEmitter.Emit(Catalog.EmitStatement(ServerProcess, EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
+			return FEmitter.Emit(Catalog.EmitStatement(this, EmitMode.ForStorage, new string[] { AObject.Name }, String.Empty, true, true, false, true));
 		}
 		
 		private void InternalInsertPersistentObject(Schema.Object AObject)
@@ -2558,7 +2558,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				
 				// Once all the objects have loaded, fixup pointers to generated objects
 				for (int LIndex = 0; LIndex < LScalarTypes.Count; LIndex++)
-					((Schema.ScalarType)LScalarTypes[LIndex]).ResolveGeneratedDependents(ServerProcess);
+					((Schema.ScalarType)LScalarTypes[LIndex]).ResolveGeneratedDependents(this);
 				
 				if (LResult != null)
 					return LResult;
@@ -2965,7 +2965,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ServerProcess.Plan.PushSecurityContext(new SecurityContext(ServerProcess.ServerSession.Server.SystemUser));
 				try
 				{
-					Block LBlock = (Block)ServerProcess.Plan.Catalog.EmitDropStatement(ServerProcess, LObjects, String.Empty, true, true, true, true);
+					Block LBlock = (Block)ServerProcess.Plan.Catalog.EmitDropStatement(this, LObjects, String.Empty, true, true, true, true);
 					foreach (Statement LStatement in LBlock.Statements)
 						Compiler.Bind(ServerProcess.Plan, Compiler.Compile(ServerProcess.Plan, LStatement)).Execute(ServerProcess);
 				}
@@ -4565,7 +4565,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
 				FInstructions.Add(new AddDependenciesInstruction(AOldOperator));
 			#endif
-			AOldOperator.DetermineRemotable(ServerProcess);
+			AOldOperator.DetermineRemotable(this);
 			
 			AlterOperatorBlockNode(AOldOperator.Block, ANewOperator.Block.BlockNode);
 		}
@@ -4730,8 +4730,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AReference.SourceTable.SourceReferences.AddInCreationOrder(AReference);
 			AReference.TargetTable.TargetReferences.AddInCreationOrder(AReference);
 			
-			AReference.SourceTable.SetShouldReinferReferences(ServerProcess);
-			AReference.TargetTable.SetShouldReinferReferences(ServerProcess);
+			AReference.SourceTable.SetShouldReinferReferences(this);
+			AReference.TargetTable.SetShouldReinferReferences(this);
 		}
 		
 		private void DetachReference(Schema.Reference AReference)
@@ -4779,8 +4779,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AReference.SourceTable.SourceReferences.SafeRemove(AReference);
 			AReference.TargetTable.TargetReferences.SafeRemove(AReference);
 			
-			AReference.SourceTable.SetShouldReinferReferences(ServerProcess);	
-			AReference.TargetTable.SetShouldReinferReferences(ServerProcess);	
+			AReference.SourceTable.SetShouldReinferReferences(this);	
+			AReference.TargetTable.SetShouldReinferReferences(this);	
 		}
 		
 		public void CreateReference(Schema.Reference AReference)
@@ -4947,7 +4947,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.Add(AEventHandler, ABeforeOperatorNames);
 				else
 					LTableVar.EventHandlers.Add(AEventHandler, ABeforeOperatorNames);
-				LTableVar.DetermineRemotable(ServerProcess);
+				LTableVar.DetermineRemotable(this);
 			}
 			else
 				((Schema.ScalarType)AEventSource).EventHandlers.Add(AEventHandler);
@@ -4962,7 +4962,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
 				else
 					LTableVar.EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
-				LTableVar.DetermineRemotable(ServerProcess);
+				LTableVar.DetermineRemotable(this);
 			}
 			else
 				((Schema.ScalarType)AEventSource).EventHandlers.MoveBefore(AEventHandler, ABeforeOperatorNames);
@@ -4977,7 +4977,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LTableVar.Columns[AEventSourceColumnIndex].EventHandlers.SafeRemove(AEventHandler);
 				else
 					LTableVar.EventHandlers.SafeRemove(AEventHandler);
-				LTableVar.DetermineRemotable(ServerProcess);
+				LTableVar.DetermineRemotable(this);
 			}
 			else
 				((Schema.ScalarType)AEventSource).EventHandlers.SafeRemove(AEventHandler);

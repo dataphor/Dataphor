@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									if (LNewColumn.HasDependencies())
 										for (int LIndex = 0; LIndex < LNewColumn.Dependencies.Count; LIndex++)
 										{
-											Schema.Object LObject = LNewColumn.Dependencies.ResolveObject(APlan.ServerProcess, LIndex);
+											Schema.Object LObject = LNewColumn.Dependencies.ResolveObject(APlan.CatalogDeviceSession, LIndex);
 											LIsChangeRemotable = LIsChangeRemotable && LObject.IsRemotable;
 											APlan.AttachDependency(LObject);
 										}

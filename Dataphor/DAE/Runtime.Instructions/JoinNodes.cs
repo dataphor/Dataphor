@@ -558,7 +558,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				FExpression = GenerateJoinExpression();
 
-				if ((FExpression == null) && !APlan.ServerProcess.SuppressWarnings)
+				if ((FExpression == null) && !APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectSemiTableExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
 			}
 			else
@@ -1757,7 +1757,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (FIsTimes && (FExpression != null))
 					throw new CompilerException(CompilerException.Codes.TableExpressionsNotProductCompatible, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString());
 
-				if (!FIsTimes && (FExpression == null) && !APlan.ServerProcess.SuppressWarnings)
+				if (!FIsTimes && (FExpression == null) && !APlan.SuppressWarnings)
 					APlan.Messages.Add(new CompilerException(CompilerException.Codes.PossiblyIncorrectProductExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement(), LeftTableType.ToString(), RightTableType.ToString()));
 			}
 			else
@@ -2871,7 +2871,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LTableVar.InferredIsChangeRemotable = (!PropagateChangeLeft || LeftTableVar.IsChangeRemotable) && (!PropagateChangeRight || RightTableVar.IsChangeRemotable);
 			LTableVar.InferredIsValidateRemotable = (!PropagateValidateLeft || LeftTableVar.IsValidateRemotable) && (!PropagateValidateRight || RightTableVar.IsValidateRemotable);
 
-			FTableVar.DetermineRemotable(APlan.ServerProcess);
+			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			FTableVar.ShouldValidate = FTableVar.ShouldValidate || LeftTableVar.ShouldValidate || RightTableVar.ShouldValidate || (EnforcePredicate && !FIsNatural);
 			FTableVar.ShouldDefault = FTableVar.ShouldDefault || LeftTableVar.ShouldDefault || RightTableVar.ShouldDefault;
 			FTableVar.ShouldChange = FTableVar.ShouldChange || LeftTableVar.ShouldChange || RightTableVar.ShouldChange || HasRowExistsColumn();

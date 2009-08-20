@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
 using System.Runtime.Serialization;
+using System.Threading;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
@@ -20,15 +21,16 @@ using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
-using System.Threading;
 											   
 namespace Alphora.Dataphor.DAE.Schema
 {
 	// Delegate classes for Table, Row and Column Trigger and Validation events
+	#if USEVALIDATIONEVENTS
     public delegate void RowValidateHandler(object ASender, IServerSession ASession, Row ARow, string AColumnName);
     public delegate void RowChangeHandler(object ASender, IServerSession ASession, Row ARow, string AColumnName, out bool AChanged);
     public delegate void RowInsertHandler(object ASender, IServerSession ASession, Row ARow);
@@ -36,6 +38,7 @@ namespace Alphora.Dataphor.DAE.Schema
     public delegate void RowDeleteHandler(object ASender, IServerSession ASession, Row ARow);
     public delegate void ColumnValidateHandler(object ASender, IServerSession ASession, object AValue);
     public delegate void ColumnChangeHandler(object ASender, IServerSession ASession, ref object AValue, out bool AChanged);
+    #endif
     
     /// <summary>Maintains a set of objects by ID, with the ability to resolve a reference if necessary, caching that reference.</summary>
     /// <remarks>This class is used to track dependencies for catalog objects while they are in the cache.</remarks>
@@ -89,15 +92,16 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		/// <summary>Retrieves the object reference for the object at the given index in this list.</summary>
 		/// <remarks>
-		/// If the object reference is already available in the list, it is used. Otherwise, the given ServerProcess is used to
-		/// resolve the object reference by ID.
+		/// If the object reference is already available in the list, it is used. 
+		/// Otherwise, the given catalog device session is used to resolve the object 
+		/// reference by ID.
 		/// </remarks>
-		public Schema.Object ResolveObject(ServerProcess AProcess, int AIndex)
+		public Schema.Object ResolveObject(CatalogDeviceSession ASession, int AIndex)
 		{
 			Schema.Object LObject = FObjects[AIndex];
 			if (LObject == null)
 			{
-				LObject = AProcess.CatalogDeviceSession.ResolveObject(FIDs[AIndex]);
+				LObject = ASession.ResolveObject(FIDs[AIndex]);
 				FObjects[AIndex] = LObject;
 			}
 			
@@ -289,10 +293,10 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public Schema.Object ResolveGenerator(ServerProcess AProcess)
+		public Schema.Object ResolveGenerator(CatalogDeviceSession ASession)
 		{
 			if ((FGenerator == null) && (FGeneratorID >= 0))
-				FGenerator = AProcess.CatalogDeviceSession.ResolveObject(FGeneratorID);
+				FGenerator = ASession.ResolveObject(FGeneratorID);
 			return FGenerator;
 		}
 		
@@ -399,9 +403,9 @@ namespace Alphora.Dataphor.DAE.Schema
 				FDependencies.Remove(AObject.ID);
 		}
 		
-		public void LoadDependencies(ServerProcess AProcess)
+		public void LoadDependencies(CatalogDeviceSession ASession)
 		{
-			Schema.DependentObjectHeaders LDependencies = AProcess.CatalogDeviceSession.SelectObjectDependencies(ID, false);
+			Schema.DependentObjectHeaders LDependencies = ASession.SelectObjectDependencies(ID, false);
 			for (int LIndex = 0; LIndex < LDependencies.Count; LIndex++)
 				Dependencies.Ensure(LDependencies[LIndex].ID);
 		}
@@ -495,31 +499,31 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FIsRemotable = value; }
 		}
 		
-		public virtual void DetermineRemotable(ServerProcess AProcess)
+		public virtual void DetermineRemotable(CatalogDeviceSession ASession)
 		{
 			if (FDependencies != null)
 				for (int LIndex = 0; LIndex < FDependencies.Count; LIndex++)
-					if (!FDependencies.ResolveObject(AProcess, LIndex).IsRemotable)
+					if (!FDependencies.ResolveObject(ASession, LIndex).IsRemotable)
 					{
 						FIsRemotable = false;
 						break;
 					}
 		}
         
-        public virtual void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public virtual void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
 			if (FDependencies != null)
 				for (int LIndex = 0; LIndex < FDependencies.Count; LIndex++)
-					FDependencies.ResolveObject(AProcess, LIndex).IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					FDependencies.ResolveObject(ASession, LIndex).IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
         }
         
-        public virtual void IncludeHandlers(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public virtual void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
         }
         
-        public bool HasDependentConstraints(ServerProcess AProcess)
+        public bool HasDependentConstraints(CatalogDeviceSession ASession)
         {
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(ID, true);
+			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, true);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				switch (LHeaders[LIndex].ObjectType)
 				{
@@ -534,9 +538,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			return false;
         }
         
-        public bool HasDependents(ServerProcess AProcess)
+        public bool HasDependents(CatalogDeviceSession ASession)
         {
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(ID, false);
 			return (LHeaders.Count > 0);
         }
         
@@ -891,10 +895,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		[Reference]
 		private Schema.Object FObject;
-		public Schema.Object ResolveObject(ServerProcess AProcess)
+		public Schema.Object ResolveObject(CatalogDeviceSession ASession)
 		{
 			if (FObject == null)
-				FObject = AProcess.CatalogDeviceSession.ResolveObject(FID);
+				FObject = ASession.ResolveObject(FID);
 
 			return FObject;
 		}

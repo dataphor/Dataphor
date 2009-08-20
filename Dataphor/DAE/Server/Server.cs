@@ -800,7 +800,6 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!FFirstRun)
 				LoadServerState(); // Load server state from the persistent store
 
-			FCatalogLoaded = true;
 			EnsureGeneralLibraryLoaded();
 		}
 
@@ -1950,24 +1949,24 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		/// <summary> Emits the creation script for the catalog and returns it as a string. </summary>
-		public string ScriptCatalog(ServerProcess AProcess)
+		public string ScriptCatalog(CatalogDeviceSession ASession)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(AProcess, EmitMode.ForCopy, false));
+			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, false));
 		}
 		
-		public string ScriptLibrary(ServerProcess AProcess, string ALibraryName)
+		public string ScriptLibrary(CatalogDeviceSession ASession, string ALibraryName)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(AProcess, EmitMode.ForCopy, ALibraryName, false));
+			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, ALibraryName, false));
 		}
 		
-		public string ScriptDropCatalog(ServerProcess AProcess)
+		public string ScriptDropCatalog(CatalogDeviceSession ASession)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(AProcess));
+			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession));
 		}
 		
-		public string ScriptDropLibrary(ServerProcess AProcess, string ALibraryName)
+		public string ScriptDropLibrary(CatalogDeviceSession ASession, string ALibraryName)
 		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(AProcess, new string[] {}, ALibraryName, false, false, true, true));
+			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession, new string[] {}, ALibraryName, false, false, true, true));
 		}
 		
 		public void RunScript(string AScript)
@@ -2002,26 +2001,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		// Indicates that the server is in the process of loading catalog
-		private bool FLoadingCatalog = false;
-		public bool LoadingCatalog 
-		{ 
-			get { return FLoadingCatalog; } 
-			set { FLoadingCatalog = value; } 
-		}
-		
-		// Indicates that the server has successfully loaded the catalog.
-		private bool FCatalogLoaded = false;
-		public bool CatalogLoaded { get { return FCatalogLoaded; } }
-		
-		// Indicates that the server is in the process of loading the full catalog
-		private bool FLoadingFullCatalog = false;
-		public bool LoadingFullCatalog
-		{
-			get { return FLoadingFullCatalog; }
-			set { FLoadingFullCatalog = value; }
-		}
-		
 		public void LoadServerState()
 		{
 			if (!IsRepository)
@@ -2054,44 +2033,6 @@ namespace Alphora.Dataphor.DAE.Server
 			EnsureGeneralLibraryLoaded();
 		}
 
-		public void LoadLibrary(string ALibraryName)
-		{
-			bool LSaveLoadingCatalog = FLoadingCatalog;
-			try
-			{
-				if (!FLoadingCatalog)
-					FLoadingCatalog = true;
-					
-				Schema.LoadedLibrary LSaveCurrentLibrary = FSystemSession.CurrentLibrary;
-				try
-				{
-					SystemLoadLibraryNode.LoadLibrary(FSystemProcess, ALibraryName);
-				}
-				finally
-				{
-					FSystemSession.CurrentLibrary = LSaveCurrentLibrary;
-				}
-			}
-			finally
-			{
-				FLoadingCatalog = LSaveLoadingCatalog;
-			}
-		}
-		
-		public void UnloadLibrary(ServerProcess AProcess, string ALibraryName)
-		{
-			bool LSaveLoadingCatalog = FLoadingCatalog;
-			FLoadingCatalog = true;
-			try
-			{
-				SystemUnregisterLibraryNode.UnregisterLibrary(AProcess, ALibraryName, false);
-			}
-			finally
-			{
-				FLoadingCatalog = LSaveLoadingCatalog;
-			}	   
-		}
-		
 		private string FStartupScriptUri = String.Empty;
 		/// <summary> A URI reference to a startup script. </summary>
 		/// <remarks> Cannot be set once the server is running. </remarks>

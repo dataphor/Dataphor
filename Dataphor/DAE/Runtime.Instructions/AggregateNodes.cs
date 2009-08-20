@@ -51,7 +51,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DetermineModifiers(APlan);
 			
 			// if the operator being invoked is order dependent, verify that the source is requested ordered by a unique order
-			if (Operator.IsOrderDependent && !APlan.ServerProcess.SuppressWarnings)
+			if (Operator.IsOrderDependent && !APlan.SuppressWarnings)
 			{
 				OrderNode LOrderNode = SourceNode as OrderNode;
 				if (LOrderNode == null)
@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.PushWindow(0, this);
+			AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
 			try
 			{
 				Table LTable = null;

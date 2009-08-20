@@ -121,3 +121,16 @@ if T2 <> table { row { 2 ID } } then
 
 SafeDrop('T1');
 SafeDrop('T2');
+
+//*
+SafeDrop('T1');
+create table T1 { ID1 : Integer, ID2 : Integer nil, key { ID1, ID2 } };
+insert row { 1 ID1, nil ID2 } into T1;
+update T1 set { ID2 := 2 };
+if T1 <> table { row { 1 ID1, 2 ID2 } } then
+	raise Error("Partial key update failed");
+SafeDrop('T1');
+
+
+
+

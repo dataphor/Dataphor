@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.DAE.Server
 							LTargetIndex++;
 						}
 						
-					Block LStatement = LAllButCatalogObject.Length > 0 ? (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess, EmitMode.ForRemote, LAllButCatalogObject) : new Block();
+					Block LStatement = LAllButCatalogObject.Length > 0 ? (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, LAllButCatalogObject) : new Block();
 					
 					#if ALLOWPROCESSCONTEXT
 					// Add variable declaration statements for any process context that may be being referenced by the plan
@@ -260,14 +260,14 @@ namespace Alphora.Dataphor.DAE.Server
 							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].Name, ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
 					#endif
 					
-					Block LCatalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess, EmitMode.ForRemote, new string[]{ ACatalogObjectName });
+					Block LCatalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, new string[]{ ACatalogObjectName });
 					LStatement.Statements.AddRange(LCatalogObjectStatement.Statements);
 					string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(LStatement);
 					return LCatalogString;
 				}
 				else
 				{
-					string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess, EmitMode.ForRemote, LRequiredObjects));
+					string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, LRequiredObjects));
 					return LCatalogString;
 				}
 			}

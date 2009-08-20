@@ -10,8 +10,8 @@ using System.Threading;
 using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Debug
 {
@@ -386,12 +386,15 @@ namespace Alphora.Dataphor.DAE.Debug
 				List<StackWindow> LStackWindows = LProcess.Context.GetCallStack();
 				
 				CallStack LCallStack = new CallStack();
+				
+				LCallStack.Add(new CallStackEntry(0, "<Plan>", LProcess.GetCurrentLocation()));
+				
 				for (int LIndex = 0; LIndex < LStackWindows.Count; LIndex++)
 				{
 					InstructionNodeBase LOriginator = LStackWindows[LIndex].Originator as InstructionNodeBase;
 					if ((LOriginator != null) && (LOriginator.Operator != null))
-						LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, null));
-					else
+						LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, new DebugLocator(LOriginator.Operator.Locator.Locator, LOriginator.Line, LOriginator.LinePos)));
+					else 
 						LCallStack.Add(new CallStackEntry(LIndex, "<Plan>", null));
 				}
 				return LCallStack;

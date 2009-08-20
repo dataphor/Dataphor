@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ACacheTimeStamp = FServerProcess.ServerSession.Server.CacheTimeStamp;
 
 			Schema.Catalog LCatalog = new Schema.Catalog();
-			LCatalog.IncludeDependencies(FServerProcess, FServerProcess.Plan.Catalog, FServerProcess.Plan.Catalog[AName], EmitMode.ForRemote);
+			LCatalog.IncludeDependencies(FServerProcess.CatalogDeviceSession, FServerProcess.Plan.Catalog, FServerProcess.Plan.Catalog[AName], EmitMode.ForRemote);
 			
 			#if LOGCACHEEVENTS
 			FServerProcess.ServerSession.Server.LogMessage(String.Format("Getting catalog for data type '{0}'.", AName));
@@ -639,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Server
 			string[] LRequiredObjects = FSession.Server.CatalogCaches.GetRequiredObjects(FSession, LCatalog, ACacheTimeStamp, out AClientCacheTimeStamp);
 			if (LRequiredObjects.Length > 0)
 			{
-				string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(LCatalog.EmitStatement(FServerProcess, EmitMode.ForRemote, LRequiredObjects));
+				string LCatalogString = new D4TextEmitter(EmitMode.ForRemote).Emit(LCatalog.EmitStatement(FServerProcess.CatalogDeviceSession, EmitMode.ForRemote, LRequiredObjects));
 				return LCatalogString;
 			}
 			return String.Empty;

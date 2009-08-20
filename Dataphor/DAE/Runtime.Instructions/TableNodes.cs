@@ -1197,7 +1197,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FIsDeterministic = FIsDeterministic && Nodes[LIndex].IsDeterministic;
 				FIsRepeatable = FIsRepeatable && Nodes[LIndex].IsRepeatable;
 			} 
-			FTableVar.DetermineRemotable(APlan.ServerProcess);
+			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			FTableVar.Owner = APlan.User;
 			if (Order == null)
 				Order = new Schema.Order(FTableVar.FindClusteringKey(), APlan);
@@ -1446,7 +1446,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FIsFunctional = true;
 			FIsDeterministic = true;
 			FIsRepeatable = true;
-			FTableVar.DetermineRemotable(APlan.ServerProcess);
+			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 
 			bool LIsNilable = (PropagateInsert == PropagateAction.False || !PropagateUpdate);
 			
@@ -2071,7 +2071,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FCursorType = SourceNode.CursorType;
 			FRequestedCursorType = APlan.CursorContext.CursorType;
 			FCursorCapabilities = SourceNode.CursorCapabilities;
-			if (TableVar.HasHandlers(APlan.ServerProcess))
+			if (TableVar.HasHandlers())
 				FCursorCapabilities |= CursorCapability.Updateable;
 			FCursorIsolation = SourceNode.CursorIsolation;
 			if (SourceNode.Order != null)

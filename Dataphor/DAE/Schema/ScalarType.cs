@@ -14,14 +14,16 @@ using System.Security.Cryptography;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Device.Catalog;
+
+// TODO: Need to refactor these run-time dependencies
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -94,10 +96,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ReadAccessorID");
 		}
 
-		public void ResolveReadAccessor(ServerProcess AProcess)
+		public void ResolveReadAccessor(CatalogDeviceSession ASession)
 		{
 			if ((FReadAccessor == null) && (FReadAccessorID > -1))
-				FReadAccessor = AProcess.CatalogDeviceSession.ResolveCatalogObject(FReadAccessorID) as Schema.Operator;
+				FReadAccessor = ASession.ResolveCatalogObject(FReadAccessorID) as Schema.Operator;
 		}
 
         // ReadAccessor
@@ -145,10 +147,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.WriteAccessorID");
 		}
 
-		public void ResolveWriteAccessor(ServerProcess AProcess)
+		public void ResolveWriteAccessor(CatalogDeviceSession ASession)
 		{
 			if ((FWriteAccessor == null) && (FWriteAccessorID > -1))
-				FWriteAccessor = AProcess.CatalogDeviceSession.ResolveCatalogObject(FWriteAccessorID) as Schema.Operator;
+				FWriteAccessor = ASession.ResolveCatalogObject(FWriteAccessorID) as Schema.Operator;
 		}
 
         // WriteAccessor
@@ -190,12 +192,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LProperty;
 		}
 
-		public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			
-			ReadAccessor.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
-			WriteAccessor.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			ReadAccessor.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			WriteAccessor.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		}
 
 		public bool HasExternalDependencies(Schema.ScalarType LSystemType)
@@ -325,10 +327,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.SelectorID");
 		}
 
-		public void ResolveSelector(ServerProcess AProcess)
+		public void ResolveSelector(CatalogDeviceSession ASession)
 		{
 			if ((FSelector == null) && (FSelectorID > -1))
-				FSelector = AProcess.CatalogDeviceSession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
+				FSelector = ASession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
 		}
 
         // Selector -- the selector operator for this representation
@@ -391,14 +393,14 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LStatement;
 		}
 
-        public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			
-			Selector.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			Selector.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 				
 			foreach (Property LProperty in Properties)
-				LProperty.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+				LProperty.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
         }
         
 		public override Object GetObjectFromHeader(ObjectHeader AHeader)
@@ -767,12 +769,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LStatement;
 		}
 		
-		public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
 			if (!ATargetCatalog.Contains(Name))
 			{
 				ATargetCatalog.Add(this);
-				base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+				base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			}
 		}
     }
@@ -1228,10 +1230,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.SelectorID");
 		}
 
-		public void ResolveSelector(ServerProcess AProcess)
+		public void ResolveSelector(CatalogDeviceSession ASession)
 		{
 			if ((FSelector == null) && (FSelectorID > -1))
-				FSelector = AProcess.CatalogDeviceSession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
+				FSelector = ASession.ResolveCatalogObject(FSelectorID) as Schema.Operator;
 		}
 
 		[Reference]
@@ -1271,10 +1273,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ComparerID");
 		}
 
-		public void ResolveComparer(ServerProcess AProcess)
+		public void ResolveComparer(CatalogDeviceSession ASession)
 		{
 			if ((FComparer == null) && (FComparerID > -1))
-				FComparer = AProcess.CatalogDeviceSession.ResolveCatalogObject(FComparerID) as Schema.Operator;
+				FComparer = ASession.ResolveCatalogObject(FComparerID) as Schema.Operator;
 		}
 
 		[Reference]
@@ -1331,12 +1333,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LAlterStatement;
 		}
 
-		public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+		public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
 		{
-			base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			
-			Selector.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
-			Comparer.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+			Selector.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
+			Comparer.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 		}
     }
 
@@ -1718,10 +1720,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.IsSpecialOperatorID");
 		}
 		
-		public void ResolveIsSpecialOperator(ServerProcess AProcess)
+		public void ResolveIsSpecialOperator(CatalogDeviceSession ASession)
 		{
 			if ((FIsSpecialOperator == null) && (FIsSpecialOperatorID > -1))
-				FIsSpecialOperator = AProcess.CatalogDeviceSession.ResolveCatalogObject(FIsSpecialOperatorID) as Schema.Operator;
+				FIsSpecialOperator = ASession.ResolveCatalogObject(FIsSpecialOperatorID) as Schema.Operator;
 		}
 
         // IsSpecialOperator
@@ -1762,10 +1764,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.EqualityOperatorID");
 		}
 		
-		public void ResolveEqualityOperator(ServerProcess AProcess)
+		public void ResolveEqualityOperator(CatalogDeviceSession ASession)
 		{
 			if ((FEqualityOperator == null) && (FEqualityOperatorID > -1))
-				FEqualityOperator = AProcess.CatalogDeviceSession.ResolveCatalogObject(FEqualityOperatorID) as Schema.Operator;
+				FEqualityOperator = ASession.ResolveCatalogObject(FEqualityOperatorID) as Schema.Operator;
 		}
 
         // EqualityOperator
@@ -1806,10 +1808,10 @@ namespace Alphora.Dataphor.DAE.Schema
 				MetaData.Tags.RemoveTag("DAE.ComparisonOperatorID");
 		}
 		
-		public void ResolveComparisonOperator(ServerProcess AProcess)
+		public void ResolveComparisonOperator(CatalogDeviceSession ASession)
 		{
 			if ((FComparisonOperator == null) && (FComparisonOperatorID > -1))
-				FComparisonOperator = AProcess.CatalogDeviceSession.ResolveCatalogObject(FComparisonOperatorID) as Schema.Operator;
+				FComparisonOperator = ASession.ResolveCatalogObject(FComparisonOperatorID) as Schema.Operator;
 		}
 
         // ComparisonOperator
@@ -1970,12 +1972,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
 		// HasHandlers
-		public bool HasHandlers(ServerProcess AProcess)
+		public bool HasHandlers()
 		{
 			return (FEventHandlers != null) && (FEventHandlers.Count > 0);
 		}
 		
-		public bool HasHandlers(ServerProcess AProcess, EventType AEventType)
+		public bool HasHandlers(EventType AEventType)
 		{
 			return (FEventHandlers != null) && FEventHandlers.HasHandlers(AEventType);
 		}
@@ -2002,6 +2004,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Conversions FImplicitConversions = new Conversions();
 		public Conversions ImplicitConversions { get { return FImplicitConversions; } }
 		
+		// TODO: Fix this boundary crossing
 		public object ValidateValue(ServerProcess AProcess, object AValue)
 		{
 			return ValidateValue(AProcess, AValue, null);
@@ -2079,39 +2082,39 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         #endif
 
-        public override void IncludeDependencies(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeDependencies(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
 			if (!ATargetCatalog.Contains(Name))
 			{
-				base.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+				base.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 				
 				ATargetCatalog.Add(this);
 			
 				if ((Default != null) && ((AMode != EmitMode.ForRemote) || Default.IsRemotable))
-					Default.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					Default.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 					
 				foreach (Constraint LConstraint in Constraints)
 					if ((AMode != EmitMode.ForRemote) || LConstraint.IsRemotable)
-						LConstraint.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LConstraint.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 						
 				foreach (Representation LRepresentation in Representations)
-					LRepresentation.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					LRepresentation.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 					
 				if (FIsSpecialOperator != null)
-					FIsSpecialOperator.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					FIsSpecialOperator.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 
 				foreach (Special LSpecial in Specials)
-					LSpecial.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+					LSpecial.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 					
 			}
         }
 
-        public override void IncludeHandlers(ServerProcess AProcess, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
+        public override void IncludeHandlers(CatalogDeviceSession ASession, Catalog ASourceCatalog, Catalog ATargetCatalog, EmitMode AMode)
         {
 			if (FEventHandlers != null)
 				foreach (EventHandler LHandler in FEventHandlers)
 					if ((AMode != EmitMode.ForRemote) || LHandler.IsRemotable)
-						LHandler.IncludeDependencies(AProcess, ASourceCatalog, ATargetCatalog, AMode);
+						LHandler.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
         }
         
         public override Statement EmitStatement(EmitMode AMode)
@@ -2205,28 +2208,28 @@ namespace Alphora.Dataphor.DAE.Schema
 			return base.GetObjectFromHeader(AHeader);
 		}
 
-		public void ResolveGeneratedDependents(ServerProcess AProcess)
+		public void ResolveGeneratedDependents(CatalogDeviceSession ASession)
 		{
 			if (FRepresentations.Count > 0)
 			{
-				ResolveEqualityOperator(AProcess);
-				ResolveComparisonOperator(AProcess);
-				ResolveIsSpecialOperator(AProcess);
+				ResolveEqualityOperator(ASession);
+				ResolveComparisonOperator(ASession);
+				ResolveIsSpecialOperator(ASession);
 				
 				foreach (Schema.Representation LRepresentation in FRepresentations)
 				{
-					LRepresentation.ResolveSelector(AProcess);
+					LRepresentation.ResolveSelector(ASession);
 					foreach (Schema.Property LProperty in LRepresentation.Properties)
 					{
-						LProperty.ResolveReadAccessor(AProcess);
-						LProperty.ResolveWriteAccessor(AProcess);
+						LProperty.ResolveReadAccessor(ASession);
+						LProperty.ResolveWriteAccessor(ASession);
 					}
 				}
 				
 				foreach (Schema.Special LSpecial in FSpecials)
 				{
-					LSpecial.ResolveSelector(AProcess);
-					LSpecial.ResolveComparer(AProcess);
+					LSpecial.ResolveSelector(ASession);
+					LSpecial.ResolveComparer(ASession);
 				}
 			}
 		}

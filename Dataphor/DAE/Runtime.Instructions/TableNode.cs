@@ -682,7 +682,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual void DetermineRemotable(Plan APlan)
 		{
-			FTableVar.DetermineRemotable(APlan.ServerProcess);
+			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 		}
 		
 		public override void DetermineCharacteristics(Plan APlan)
@@ -1512,7 +1512,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			PreparedDefault(AProcess, null, ARow, AValueFlags, String.Empty, false);
 			bool LPerform = true;
-			if (TableVar.HasHandlers(AProcess, EventType.BeforeInsert))
+			if (TableVar.HasHandlers(EventType.BeforeInsert))
 			{
 				PushRow(AProcess, ARow);
 				try
@@ -1578,7 +1578,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected internal void AfterInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.AfterInsert))
+			if (TableVar.HasHandlers(EventType.AfterInsert))
 			{
 				PushRow(AProcess, ARow);
 				try
@@ -1636,7 +1636,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DoBeforeUpdate(AOldRow, ANewRow, AProcess);
 			#endif
 			bool LPerform = true;
-			if (TableVar.HasHandlers(AProcess, EventType.BeforeUpdate))
+			if (TableVar.HasHandlers(EventType.BeforeUpdate))
 			{
 				PushRow(AProcess, AOldRow);
 				try
@@ -1718,7 +1718,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected internal void AfterUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.AfterUpdate))
+			if (TableVar.HasHandlers(EventType.AfterUpdate))
 			{
 				PushRow(AProcess, AOldRow);
 				try
@@ -1771,7 +1771,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			DoBeforeDelete(ARow, AProcess);
 			#endif
 			bool LPerform = true;
-			if (TableVar.HasHandlers(AProcess, EventType.BeforeDelete))
+			if (TableVar.HasHandlers(EventType.BeforeDelete))
 			{
 				PushRow(AProcess, ARow);
 				try
@@ -1821,7 +1821,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected internal void AfterDelete(ServerProcess AProcess, Row ARow)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.AfterDelete))
+			if (TableVar.HasHandlers(EventType.AfterDelete))
 			{
 				PushRow(AProcess, ARow);
 				try
@@ -2110,7 +2110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.Context.Push(null);
 					try
 					{
-						if (ATableVar.Columns[LIndex].HasHandlers(AProcess))
+						if (ATableVar.Columns[LIndex].HasHandlers())
 							foreach (Schema.EventHandler LHandler in ATableVar.Columns[LIndex].EventHandlers)
 								if ((LHandler.EventType & EventType.Default) != 0)
 								{
@@ -2145,7 +2145,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						AProcess.Context.Push(null);
 						try
 						{
-							if (LScalarType.HasHandlers(AProcess))
+							if (LScalarType.HasHandlers())
 								foreach (Schema.EventHandler LHandler in LScalarType.EventHandlers)
 									if ((LHandler.EventType & EventType.Default) != 0)
 									{
@@ -2193,7 +2193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static bool ExecuteScalarTypeChangeHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType)
 		{
 			bool LChanged = false;
-			if (AScalarType.HasHandlers(AProcess))
+			if (AScalarType.HasHandlers())
 				LChanged = ExecuteChangeHandlers(AProcess, AScalarType.EventHandlers);
 			#if USETYPEINHERITANCE
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
@@ -2219,7 +2219,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							ANewRow.BeginModifiedContext();
 						try
 						{
-							if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].HasHandlers(AProcess))
+							if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].HasHandlers())
 								if (ExecuteChangeHandlers(AProcess, ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].EventHandlers))
 									LChanged = true;
 								
@@ -2301,7 +2301,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								ANewRow.BeginModifiedContext();
 							try
 							{
-								if (LColumn.HasHandlers(AProcess))
+								if (LColumn.HasHandlers())
 									LColumnChanged = ExecuteChangeHandlers(AProcess, LColumn.EventHandlers);
 
 								if (LColumnChanged)
@@ -2392,7 +2392,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static bool ExecuteScalarTypeValidateHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Operator AFromOperator)
 		{
 			bool LChanged = false;
-			if (AScalarType.HasHandlers(AProcess))
+			if (AScalarType.HasHandlers())
 				LChanged = ExecuteValidateHandlers(AProcess, AScalarType.EventHandlers, AFromOperator);
 			#if USETYPEINHERITANCE
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
@@ -2418,7 +2418,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							bool LChanged = false;
 							Schema.TableVarColumn LColumn = ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)];
-							if (LColumn.HasHandlers(AProcess))
+							if (LColumn.HasHandlers())
 								LChanged = ExecuteValidateHandlers(AProcess, LColumn.EventHandlers);
 							int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(AColumnName);
 							AProcess.Context.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
@@ -2485,7 +2485,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							{
  								if (ANewRow.HasValue(LRowIndex) || ((AValueFlags == null) || AValueFlags[LRowIndex]))
 								{
-									if (LColumn.HasHandlers(AProcess))
+									if (LColumn.HasHandlers())
 									{
 										if (AValueFlags != null)
 											ANewRow.BeginModifiedContext();
@@ -2782,7 +2782,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// ExecuteValidateHandlers prepares the stack and executes each handler associated with the validate event
 		protected virtual bool ExecuteValidateHandlers(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.Validate))
+			if (TableVar.HasHandlers(EventType.Validate))
 			{
 				PushRow(AProcess, AOldRow);
 				try
@@ -2839,7 +2839,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// ExecuteDefaultHandlers prepares the stack and executes each handler associated with the default event
 		protected virtual bool ExecuteDefaultHandlers(ServerProcess AProcess, Row ARow, BitArray AValueFlags, string AColumnName)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.Default))
+			if (TableVar.HasHandlers(EventType.Default))
 			{
 				PushRow(AProcess, ARow);
 				try
@@ -2888,7 +2888,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected virtual bool ExecuteChangeHandlers(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
-			if (TableVar.HasHandlers(AProcess, EventType.Change))
+			if (TableVar.HasHandlers(EventType.Change))
 			{
 				PushRow(AProcess, AOldRow);
 				try

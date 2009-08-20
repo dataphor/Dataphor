@@ -16,6 +16,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.DAE.Device.Catalog;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -243,16 +244,16 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		/// <summary>Indicates whether time stamps should be affected by alter and drop table variable and operator statements.</summary>
-		public bool ShouldAffectTimeStamp { get { return ServerProcess.ShouldAffectTimeStamp; } }
+		public bool ShouldAffectTimeStamp { get { return FServerProcess.ShouldAffectTimeStamp; } }
 		
 		public void EnterTimeStampSafeContext()
 		{
-			ServerProcess.EnterTimeStampSafeContext();
+			FServerProcess.EnterTimeStampSafeContext();
 		}
 		
 		public void ExitTimeStampSafeContext()
 		{
-			ServerProcess.ExitTimeStampSafeContext();
+			FServerProcess.ExitTimeStampSafeContext();
 		}
 		
 		protected int FTypeOfCount;
@@ -432,27 +433,35 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Catalog		
-		public Schema.Catalog Catalog { get { return ServerProcess.ServerSession.Server.Catalog; } }
+		public Schema.Catalog Catalog { get { return FServerProcess.ServerSession.Server.Catalog; } }
+		
+		public bool SuppressWarnings
+		{
+			get { return FServerProcess.SuppressWarnings; }
+			set { FServerProcess.SuppressWarnings = value; }
+		}
+		
+		public CatalogDeviceSession CatalogDeviceSession { get { return FServerProcess.CatalogDeviceSession; } }
 		
 		public Schema.User User { get { return SecurityContext.User; } }
 		
-		public Schema.LoadedLibrary CurrentLibrary { get { return ServerProcess.ServerSession.CurrentLibrary; } }
+		public Schema.LoadedLibrary CurrentLibrary { get { return FServerProcess.ServerSession.CurrentLibrary; } }
 		
-		public Schema.NameResolutionPath NameResolutionPath { get { return ServerProcess.ServerSession.CurrentLibrary.GetNameResolutionPath(ServerProcess.ServerSession.Server.SystemLibrary); } }
+		public Schema.NameResolutionPath NameResolutionPath { get { return FServerProcess.ServerSession.CurrentLibrary.GetNameResolutionPath(FServerProcess.ServerSession.Server.SystemLibrary); } }
 		
-		public IStreamManager StreamManager { get { return (IStreamManager)ServerProcess; } }
+		public IStreamManager StreamManager { get { return (IStreamManager)FServerProcess; } }
 
-		public Schema.Device TempDevice { get { return ServerProcess.ServerSession.Server.TempDevice; } }
+		public Schema.Device TempDevice { get { return FServerProcess.ServerSession.Server.TempDevice; } }
 		
 		#if USEHEAPDEVICE
-		public Schema.Device HeapDevice { get { return ServerProcess.ServerSession.Server.HeapDevice; } }
+		public Schema.Device HeapDevice { get { return FServerProcess.ServerSession.Server.HeapDevice; } }
 		#endif
 		
-		public CursorManager CursorManager { get { return ServerProcess.ServerSession.CursorManager; } }
+		public CursorManager CursorManager { get { return FServerProcess.ServerSession.CursorManager; } }
 
 		public string DefaultTagNameSpace { get { return String.Empty; } }
 		
-		public string DefaultDeviceName { get { return GetDefaultDeviceName(ServerProcess.ServerSession.CurrentLibrary.Name, false); } }
+		public string DefaultDeviceName { get { return GetDefaultDeviceName(FServerProcess.ServerSession.CurrentLibrary.Name, false); } }
 		
 		public string GetDefaultDeviceName(string ALibraryName, bool AShouldThrow)
 		{
@@ -539,7 +548,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public bool HasRight(string ARight)
 		{
-			return InATCreationContext || ServerProcess.CatalogDeviceSession.UserHasRight(SecurityContext.User.ID, ARight);
+			return InATCreationContext || CatalogDeviceSession.UserHasRight(SecurityContext.User.ID, ARight);
 		}
 
 		/// <summary>Raises an error if the current user is not authorized to administer the given user.</summary>		
@@ -614,7 +623,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public void AttachDependencies(Schema.ObjectList ADependencies)
 		{
 			for (int LIndex = 0; LIndex < ADependencies.Count; LIndex++)
-				AttachDependency(ADependencies.ResolveObject(ServerProcess, LIndex));
+				AttachDependency(ADependencies.ResolveObject(CatalogDeviceSession, LIndex));
 		}
 		
 		public void AttachDependency(Schema.Object AObject)
@@ -626,7 +635,7 @@ namespace Alphora.Dataphor.DAE.Server
 				// If this is a generated object, attach the dependency to the generator, rather than the object directly.
 				// Unless it is a device object, in which case the dependency should be attached to the generated object.
 				if (AObject.IsGenerated && !(AObject is Schema.DeviceObject) && (AObject.GeneratorID >= 0))
-					AObject = AObject.ResolveGenerator(ServerProcess);
+					AObject = AObject.ResolveGenerator(CatalogDeviceSession);
 					
 				if (AObject is Schema.Property)
 					AObject = ((Schema.Property)AObject).Representation;
@@ -634,7 +643,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.Object LObject = (Schema.Object)FCreationObjects[FCreationObjects.Count - 1];
 				if ((LObject != AObject) && (!(AObject is Schema.Reference) || (LObject is Schema.TableVar)) && (!LObject.HasDependencies() || !LObject.Dependencies.Contains(AObject.ID)))
 				{
-					if (!ServerProcess.ServerSession.Server.IsRepository)
+					if (!FServerProcess.ServerSession.Server.IsRepository)
 					{
 						if 
 						(

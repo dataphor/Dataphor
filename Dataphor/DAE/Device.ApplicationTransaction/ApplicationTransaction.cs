@@ -815,7 +815,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			if (AObject.HasDependencies())
 				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
 				{
-					LObject = AObject.Dependencies.ResolveObject(AProcess, LIndex);
+					LObject = AObject.Dependencies.ResolveObject(AProcess.CatalogDeviceSession, LIndex);
 					if (LObject.IsATObject)
 					{
 						Schema.TableVar LTableVar = LObject as Schema.TableVar;
@@ -845,13 +845,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (LColumn.Default != null)
 					AddDependencies(AProcess, LColumn.Default);
 
-				if (LColumn.HasHandlers(AProcess))
+				if (LColumn.HasHandlers())
 					foreach (Schema.EventHandler LHandler in LColumn.EventHandlers)
 						if (LHandler.Operator.IsATObject)
 							EnsureATOperatorMapped(AProcess, LHandler.Operator);
 			}
 
-			if (ATableMap.TableVar.HasHandlers(AProcess))			
+			if (ATableMap.TableVar.HasHandlers())			
 				foreach (Schema.EventHandler LHandler in ATableMap.TableVar.EventHandlers)
 					if (LHandler.Operator.IsATObject)
 						EnsureATOperatorMapped(AProcess, LHandler.Operator);
@@ -1109,7 +1109,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 				}
 				
-				if (ASourceTableVar.HasHandlers(AProcess))
+				if (ASourceTableVar.HasHandlers())
 					foreach (Schema.EventHandler LHandler in ASourceTableVar.EventHandlers)
 						if (!LHandler.IsGenerated && LHandler.ShouldTranslate)
 						{
@@ -1126,7 +1126,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						}
 					
 				foreach (Schema.TableVarColumn LColumn in ASourceTableVar.Columns)
-					if (LColumn.HasHandlers(AProcess))
+					if (LColumn.HasHandlers())
 						foreach (Schema.EventHandler LHandler in LColumn.EventHandlers)
 							if (!LHandler.IsGenerated && LHandler.ShouldTranslate)
 							{
@@ -1255,7 +1255,24 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 							AProcess.Plan.EnterTimeStampSafeContext();
 							try
 							{
-								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LObjectNameArray, String.Empty, true, false, true, true))).Execute(AProcess);
+								Compiler.Bind
+								(
+									AProcess.Plan, 
+									Compiler.Compile
+									(
+										AProcess.Plan, 
+										AProcess.Plan.Catalog.EmitDropStatement
+										(
+											AProcess.CatalogDeviceSession, 
+											LObjectNameArray, 
+											String.Empty, 
+											true, 
+											false, 
+											true, 
+											true
+										)
+									)
+								).Execute(AProcess);
 							}
 							finally
 							{
@@ -1363,7 +1380,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 							AProcess.Plan.EnterTimeStampSafeContext();
 							try
 							{
-								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess, LObjectNameArray, String.Empty))).Execute(AProcess);
+								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.Plan.CatalogDeviceSession, LObjectNameArray, String.Empty))).Execute(AProcess);
 							}
 							finally
 							{

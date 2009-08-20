@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < LObjectNames.Count; LIndex++)
 					LObjectNameArray[LIndex] = LObjectNames[LIndex];
 					
-				Block LBlock = (Block)FServer.Catalog.EmitDropStatement(FServer.FSystemProcess, LObjectNameArray, String.Empty);
+				Block LBlock = (Block)FServer.Catalog.EmitDropStatement(FServer.FSystemProcess.CatalogDeviceSession, LObjectNameArray, String.Empty);
 				
 				FServer.FSystemProcess.BeginCall();
 				try

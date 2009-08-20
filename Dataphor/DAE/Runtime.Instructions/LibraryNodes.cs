@@ -1727,7 +1727,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						AProcess.ServerSession.Server.RunScript
 						(
 							AProcess, 
-							AProcess.ServerSession.Server.ScriptDropLibrary(AProcess, ALibraryName), 
+							AProcess.ServerSession.Server.ScriptDropLibrary(AProcess.CatalogDeviceSession, ALibraryName), 
 							LLoadedLibrary.Name,
 							null
 						);
@@ -1779,110 +1779,96 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (AProcess.Plan.Catalog.Libraries)
 			{
+				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				VersionNumber LCurrentVersion = AProcess.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
+				
+				if (AProcess.Plan.Catalog.LoadedLibraries.Contains(LLibrary.Name))
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
+
+				bool LIsLoaded = false;				
+				bool LAreAssembliesRegistered = false;	
+				Schema.LoadedLibrary LLoadedLibrary = null;
 				try
 				{
-					Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
-					VersionNumber LCurrentVersion = AProcess.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
-					
-					if (AProcess.Plan.Catalog.LoadedLibraries.Contains(LLibrary.Name))
-						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
+					LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
+					LLoadedLibrary.Owner = AProcess.CatalogDeviceSession.ResolveUser(AProcess.CatalogDeviceSession.GetLibraryOwner(ALibraryName));
+						
+					//	Ensure that each required library is loaded
+					foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
+					{
+						Schema.Library LRequiredLibrary = AProcess.Plan.Catalog.Libraries[LReference.Name];
+						if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
+							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
 
-					bool LIsLoaded = false;				
-					bool LAreAssembliesRegistered = false;	
-					Schema.LoadedLibrary LLoadedLibrary = null;
+						if (!AProcess.Plan.Catalog.LoadedLibraries.Contains(LReference.Name))
+						{
+							if (!LRequiredLibrary.IsSuspect)
+								LoadLibrary(AProcess, LReference.Name, AIsKnown);
+							else
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, ALibraryName, LReference.Name);
+						}
+						
+						LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
+						AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
+						LLoadedLibrary.ClearNameResolutionPath();
+					}
+					
+					AProcess.ServerSession.Server.DoLibraryLoading(LLibrary.Name);
 					try
 					{
-						LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
-						LLoadedLibrary.Owner = AProcess.CatalogDeviceSession.ResolveUser(AProcess.CatalogDeviceSession.GetLibraryOwner(ALibraryName));
-							
-						//	Ensure that each required library is loaded
-						foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
-						{
-							Schema.Library LRequiredLibrary = AProcess.Plan.Catalog.Libraries[LReference.Name];
-							if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
-
-							if (!AProcess.Plan.Catalog.LoadedLibraries.Contains(LReference.Name))
-							{
-								if (!LRequiredLibrary.IsSuspect)
-									LoadLibrary(AProcess, LReference.Name, AIsKnown);
-								else
-									throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, ALibraryName, LReference.Name);
-							}
-							
-							LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-							AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
-							LLoadedLibrary.ClearNameResolutionPath();
-						}
+						// RegisterAssemblies
+						SystemRegisterLibraryNode.RegisterLibraryFiles(AProcess, LLibrary, LLoadedLibrary);
 						
-						AProcess.ServerSession.Server.DoLibraryLoading(LLibrary.Name);
+						LAreAssembliesRegistered = true;
+
+						AProcess.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
+						LLoadedLibrary.AttachLibrary();
 						try
 						{
-							// RegisterAssemblies
-							SystemRegisterLibraryNode.RegisterLibraryFiles(AProcess, LLibrary, LLoadedLibrary);
-							
-							LAreAssembliesRegistered = true;
-
-							AProcess.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
-							LLoadedLibrary.AttachLibrary();
-							try
-							{
-								AProcess.CatalogDeviceSession.SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
-							}
-							catch (Exception LRegisterException)
-							{
-								LLoadedLibrary.DetachLibrary();
-								throw LRegisterException;
-							}
-
-							LIsLoaded = true; // If we reach this point, a subsequent exception must unload the library
-							if (LLibrary.IsSuspect)
-							{
-								LLibrary.IsSuspect = false;
-								LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
-							}					
+							AProcess.CatalogDeviceSession.SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
 						}
-						finally
+						catch (Exception LRegisterException)
 						{
-							AProcess.ServerSession.Server.DoLibraryLoaded(LLibrary.Name);
+							LLoadedLibrary.DetachLibrary();
+							throw LRegisterException;
 						}
-					}
-					catch (Exception LException)
-					{
-						AProcess.ServerSession.Server.LogError(LException);
-						LLibrary.IsSuspect = true;
-						LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
-						LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
-						
-						if (LIsLoaded)
-							SystemUnregisterLibraryNode.UnregisterLibrary(AProcess, ALibraryName, false);
-						else if (LAreAssembliesRegistered)
-							SystemRegisterLibraryNode.UnregisterLibraryAssemblies(AProcess, LLoadedLibrary);
-							
-						throw;
-					}
 
-					AProcess.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
-					
-					AProcess.Plan.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
+						LIsLoaded = true; // If we reach this point, a subsequent exception must unload the library
+						if (LLibrary.IsSuspect)
+						{
+							LLibrary.IsSuspect = false;
+							LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+						}					
+					}
+					finally
+					{
+						AProcess.ServerSession.Server.DoLibraryLoaded(LLibrary.Name);
+					}
 				}
-				catch
+				catch (Exception LException)
 				{
-					if (!AProcess.ServerSession.Server.LoadingFullCatalog) // Ignore exceptions occurring during full system loading
-						throw;
+					AProcess.ServerSession.Server.LogError(LException);
+					LLibrary.IsSuspect = true;
+					LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
+					LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+					
+					if (LIsLoaded)
+						SystemUnregisterLibraryNode.UnregisterLibrary(AProcess, ALibraryName, false);
+					else if (LAreAssembliesRegistered)
+						SystemRegisterLibraryNode.UnregisterLibraryAssemblies(AProcess, LLoadedLibrary);
+						
+					throw;
 				}
+
+				AProcess.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
+				
+				AProcess.Plan.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
 			}
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			// Backwards compatibility for the persistent catalog upgrade
-			// If the server is loading full catalog, and we are calling LoadLibrary for the Security library, register the library instead.
-			if (AProcess.ServerSession.Server.LoadingFullCatalog && ((string)AArguments[0] == "Security"))
-				SystemRegisterLibraryNode.RegisterLibrary(AProcess, "Security", false);
-			else
-				AProcess.ServerSession.Server.LoadLibrary((string)AArguments[0]);
-			return null;
+			throw new ServerException(ServerException.Codes.ServerError, "LoadLibrary is obsolete. Use RegisterLibrary instead.");
 		}
 	}
 	
@@ -2166,8 +2152,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			AProcess.ServerSession.Server.UnloadLibrary(AProcess, (string)AArguments[0]);
-			return null;
+			throw new ServerException(ServerException.Codes.ServerError, "UnloadLibrary is obsolete. Use UnregisterLibrary instead.");
 		}
 	}
 	
@@ -2175,7 +2160,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return null;
+			throw new ServerException(ServerException.Codes.ServerError, "SaveLibraryCatalog is obsolete. Use ScriptCatalog instead.");
 		}
 	}
 	
@@ -2254,7 +2239,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Version"]}));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 			
 			// Ensure the order exists in the orders list

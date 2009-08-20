@@ -847,7 +847,7 @@ namespace Alphora.Dataphor.DAE.Server
 						// Include dependencies for any process context that may be being referenced by the plan
 						// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
 						for (int LIndex = FProcessContext.Count - 1; LIndex >= 0; LIndex--)
-							AServerPlan.Plan.PlanCatalog.IncludeDependencies(this, AServerPlan.Plan.Catalog, FProcessContext[LIndex].DataType, EmitMode.ForRemote);
+							AServerPlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, AServerPlan.Plan.Catalog, FProcessContext[LIndex].DataType, EmitMode.ForRemote);
 						#endif
 
 						if (!AServerPlan.Plan.Messages.HasErrors && AIsExpression)
@@ -1054,7 +1054,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (ATableVar.HasDependencies())
 					for (int LIndex = 0; LIndex < ATableVar.Dependencies.Count; LIndex++)
 					{
-						Schema.Object LObject = ATableVar.Dependencies.ResolveObject(APlan.ServerProcess, LIndex);
+						Schema.Object LObject = ATableVar.Dependencies.ResolveObject(CatalogDeviceSession, LIndex);
 						if ((LObject != null) && LObject.IsATObject && ((LObject is Schema.TableVar) || (LObject is Schema.Operator)))
 							LATObjects.Add(LObject);
 					}
@@ -1076,16 +1076,16 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 				}
 				
-				APlan.Plan.PlanCatalog.IncludeDependencies(this, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
+				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
 				APlan.Plan.PlanCatalog.Remove(ATableVar);
 				APlan.Plan.PlanCatalog.Add(ATableVar);
 				return ATableVar.DataType;
 			}
 			else
 			{
-				APlan.Plan.PlanCatalog.IncludeDependencies(this, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
+				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
 				APlan.Plan.PlanCatalog.SafeRemove(ATableVar);
-				APlan.Plan.PlanCatalog.IncludeDependencies(this, APlan.Plan.Catalog, APlan.Code.DataType, EmitMode.ForRemote);
+				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, APlan.Code.DataType, EmitMode.ForRemote);
 				return APlan.Code.DataType;
 			}
 		}
@@ -2245,7 +2245,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (ExecutingPlan.Locator != null)
 					return new DebugLocator(ExecutingPlan.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
 
-				return new DebugLocator(DebugLocator.CDynamicLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				return new DebugLocator(DebugLocator.CPlanLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
 			}
 			catch (Exception E)
 			{
@@ -2281,7 +2281,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (ExecutingPlan.Locator != null)
 					return new DebugContext(null, ExecutingPlan.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
 
-				return new DebugContext(ExecutingPlan.Source, DebugLocator.CDynamicLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				return new DebugContext(ExecutingPlan.Source, DebugLocator.CPlanLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
 			}
 			catch (Exception E)
 			{
@@ -2431,7 +2431,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary>Returns true if the Server-level loading flag is set, or this process is in a loading context</summary>
 		public bool IsLoading()
 		{
-			return ServerSession.Server.LoadingCatalog || InLoadingContext();
+			return InLoadingContext();
 		}
 		
 		/// <summary>Returns true if this process is in a loading context.</summary>

@@ -19,6 +19,7 @@ using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
@@ -249,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			if (AObject.HasDependencies())
 				for (int LIndex = 0; LIndex < AObject.Dependencies.Count; LIndex++)
-					EmitObject(AContext, AObject.Dependencies.ResolveObject(AContext.Process, LIndex));
+					EmitObject(AContext, AObject.Dependencies.ResolveObject(AContext.Session, LIndex));
         }
         
         private void EmitTableVarChildDependencies(EmissionContext AContext, TableVar ATableVar)
@@ -299,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						if (LRepresentation.Selector.HasDependencies())
 							for (int LIndex = 0; LIndex < LRepresentation.Selector.Dependencies.Count; LIndex++)
 								if (LRepresentation.Selector.Dependencies.IDs[LIndex] != AObject.ID)
-									EmitObject(AContext, LRepresentation.Selector.Dependencies.ResolveObject(AContext.Process, LIndex));
+									EmitObject(AContext, LRepresentation.Selector.Dependencies.ResolveObject(AContext.Session, LIndex));
 						
 						foreach (Property LProperty in LRepresentation.Properties)
 						{
@@ -307,11 +308,11 @@ namespace Alphora.Dataphor.DAE.Schema
 							if (LProperty.ReadAccessor.HasDependencies())
 								for (int LIndex = 0; LIndex < LProperty.ReadAccessor.Dependencies.Count; LIndex++)
 									if (LProperty.ReadAccessor.Dependencies.IDs[LIndex] != AObject.ID)
-										EmitObject(AContext, LProperty.ReadAccessor.Dependencies.ResolveObject(AContext.Process, LIndex));
+										EmitObject(AContext, LProperty.ReadAccessor.Dependencies.ResolveObject(AContext.Session, LIndex));
 							if (LProperty.WriteAccessor.HasDependencies())
 								for (int LIndex = 0; LIndex < LProperty.WriteAccessor.Dependencies.Count; LIndex++)
 									if (LProperty.WriteAccessor.Dependencies.IDs[LIndex] != AObject.ID)
-										EmitObject(AContext, LProperty.WriteAccessor.Dependencies.ResolveObject(AContext.Process, LIndex));
+										EmitObject(AContext, LProperty.WriteAccessor.Dependencies.ResolveObject(AContext.Session, LIndex));
 						}
 					}
 				}
@@ -489,13 +490,13 @@ namespace Alphora.Dataphor.DAE.Schema
 				EmitLibrary(AContext, LLibrary);
         }
         
-        private void GatherDependents(ServerProcess AProcess, Schema.Object AObject, ObjectList ADependents)
+        private void GatherDependents(CatalogDeviceSession ASession, Schema.Object AObject, ObjectList ADependents)
         {
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, true);
+			List<Schema.DependentObjectHeader> LHeaders = ASession.SelectObjectDependents(AObject.ID, true);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				if (!ADependents.Contains(LHeaders[LIndex].ID))
 				{
-					Schema.Object LObject = AProcess.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID);
+					Schema.Object LObject = ASession.ResolveObject(LHeaders[LIndex].ID);
 					ADependents.Add(LObject.ID, LObject);
 				}
         }
@@ -512,7 +513,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// </remarks>
         public Statement EmitStatement
         (
-			ServerProcess AProcess,
+			CatalogDeviceSession ASession,
 			EmitMode AMode, 
 			string[] ARequestedObjectNames, 
 			string ALibraryName, 
@@ -533,11 +534,11 @@ namespace Alphora.Dataphor.DAE.Schema
 					if ((AIncludeObject) && !LRequestedObjects.Contains(LObject.ID))
 						LRequestedObjects.Add(LObject.ID, LObject);
 					if (AIncludeDependents)
-						GatherDependents(AProcess, LObject, LRequestedObjects);
+						GatherDependents(ASession, LObject, LRequestedObjects);
 				}
 			}
 			
-			EmissionContext LContext = new EmissionContext(AProcess, this, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
+			EmissionContext LContext = new EmissionContext(ASession, this, AMode, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
 			if (LRequestedObjects.Count == 0)
 			{
 				if (ALibraryName == String.Empty)
@@ -547,33 +548,33 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (LRequestedObjects.Count > 0)
 			{
 				for (int LIndex = 0; LIndex < LRequestedObjects.Count; LIndex++)
-					EmitObject(LContext, LRequestedObjects.ResolveObject(AProcess, LIndex));
+					EmitObject(LContext, LRequestedObjects.ResolveObject(ASession, LIndex));
 			}
 			else
 			{
-				foreach (CatalogObjectHeader LHeader in AProcess.CatalogDeviceSession.SelectLibraryCatalogObjects(ALibraryName))
-					EmitObject(LContext, AProcess.CatalogDeviceSession.ResolveCatalogObject(LHeader.ID));
+				foreach (CatalogObjectHeader LHeader in ASession.SelectLibraryCatalogObjects(ALibraryName))
+					EmitObject(LContext, ASession.ResolveCatalogObject(LHeader.ID));
 			}
 
 			return LContext.Block;
         }
         
 		/// <summary>Emits a statement to reconstruct the entire catalog.</summary>
-        public Statement EmitStatement(ServerProcess AProcess, EmitMode AMode, bool AIncludeSystem)
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, bool AIncludeSystem)
         {
-			return EmitStatement(AProcess, AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
+			return EmitStatement(ASession, AMode, new string[0], String.Empty, AIncludeSystem, false, false, true);
         }
 
 		/// <summary>Emits a statement to reconstruct the catalog for the given library.</summary>        
-        public Statement EmitStatement(ServerProcess AProcess, EmitMode AMode, string ALibraryName, bool AIncludeSystem)
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string ALibraryName, bool AIncludeSystem)
         {
-			return EmitStatement(AProcess, AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
+			return EmitStatement(ASession, AMode, new string[0], ALibraryName, AIncludeSystem, false, false, true);
         }
 
 		/// <summary>Emits a statement to reconstruct the specified list of catalog objects.</summary>        
-        public Statement EmitStatement(ServerProcess AProcess, EmitMode AMode, string[] ARequestedObjectNames)
+        public Statement EmitStatement(CatalogDeviceSession ASession, EmitMode AMode, string[] ARequestedObjectNames)
         {
-			return EmitStatement(AProcess, AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
+			return EmitStatement(ASession, AMode, ARequestedObjectNames, String.Empty, true, false, false, true);
         }
         
         protected void ReportDroppedObject(EmissionContext AContext, Schema.Object AObject)
@@ -649,9 +650,9 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			else if (AObject is DeviceScalarType)
 			{
-				Schema.CatalogObjectHeaders LHeaders = AContext.Process.CatalogDeviceSession.SelectGeneratedObjects(AObject.ID);
+				Schema.CatalogObjectHeaders LHeaders = AContext.Session.SelectGeneratedObjects(AObject.ID);
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
-					ReportDroppedObject(AContext, AContext.Process.CatalogDeviceSession.ResolveCatalogObject(LHeaders[LIndex].ID));
+					ReportDroppedObject(AContext, AContext.Session.ResolveCatalogObject(LHeaders[LIndex].ID));
 			}
         }
         
@@ -743,7 +744,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
         public Statement EmitDropStatement
         (
-			ServerProcess AProcess,
+			CatalogDeviceSession ASession,
 			string[] ARequestedObjectNames, 
 			string ALibraryName, 
 			bool AIncludeSystem, 
@@ -760,18 +761,19 @@ namespace Alphora.Dataphor.DAE.Schema
 					LRequestedObjects.Add(this[LObjectIndex].ID, this[LObjectIndex]);
 				else
 				{
-					Schema.CatalogObject LObject = AProcess.CatalogDeviceSession.ResolveName(LObjectName, AProcess.Plan.NameResolutionPath, new StringCollection());
+					// TODO: Refactor NameResolutionPath access here
+					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.Plan.NameResolutionPath, new StringCollection());
 					if (LObject != null)
 						LRequestedObjects.Add(LObject.ID, LObject);
 				}
 			}
 			
-			EmissionContext LContext = new EmissionContext(AProcess, this, EmitMode.ForCopy, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
+			EmissionContext LContext = new EmissionContext(ASession, this, EmitMode.ForCopy, LRequestedObjects, ALibraryName, AIncludeSystem, AIncludeGenerated, AIncludeDependents, AIncludeObject);
 			
 			ObjectList LDropList = ((ARequestedObjectNames.Length > 0) && (LRequestedObjects.Count == 0)) ? new ObjectList() : BuildDropList(LContext);
 			
 			for (int LIndex = 0; LIndex < LDropList.Count; LIndex++)
-				EmitDropObject(LContext, LDropList.ResolveObject(AProcess, LIndex));
+				EmitDropObject(LContext, LDropList.ResolveObject(ASession, LIndex));
 			
 			if (ARequestedObjectNames.Length == 0)
 			{
@@ -792,13 +794,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			if (LContext.RequestedObjects.Count == 0) 
 			{
-				foreach (CatalogObjectHeader LHeader in LContext.Process.CatalogDeviceSession.SelectLibraryCatalogObjects(LContext.LibraryName))
-					BuildObjectDropList(LContext, LDropList, LContext.Process.CatalogDeviceSession.ResolveCatalogObject(LHeader.ID));
+				foreach (CatalogObjectHeader LHeader in LContext.Session.SelectLibraryCatalogObjects(LContext.LibraryName))
+					BuildObjectDropList(LContext, LDropList, LContext.Session.ResolveCatalogObject(LHeader.ID));
 			}
 			else
 			{
 				for (int LIndex = 0; LIndex < LContext.RequestedObjects.Count; LIndex++)
-					BuildObjectDropList(LContext, LDropList, LContext.RequestedObjects.ResolveObject(LContext.Process, LIndex));
+					BuildObjectDropList(LContext, LDropList, LContext.RequestedObjects.ResolveObject(LContext.Session, LIndex));
 			}
 
 			return LDropList;
@@ -822,10 +824,10 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		private void BuildDependentDropList(EmissionContext AContext, ObjectList ADropList, Schema.Object AObject)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AContext.Process.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AContext.Session.SelectObjectDependents(AObject.ID, false);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
-				Schema.Object LObject = AContext.Process.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID);
+				Schema.Object LObject = AContext.Session.ResolveObject(LHeaders[LIndex].ID);
 				if ((LObject is Schema.Representation) && LObject.IsGenerated)
 					BuildObjectDropList(AContext, ADropList, ((Schema.Representation)LObject).ScalarType);
 				else if (LObject is Schema.Property)
@@ -837,7 +839,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				else if ((LHeaders[LIndex].GeneratorObjectID >= 0) && !AContext.IncludeGenerated)
 				{
-					Schema.Object LGeneratorObject = AContext.Process.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].GeneratorObjectID);
+					Schema.Object LGeneratorObject = AContext.Session.ResolveObject(LHeaders[LIndex].GeneratorObjectID);
 					if ((LGeneratorObject is Schema.Representation) && LGeneratorObject.IsGenerated)
 						BuildObjectDropList(AContext, ADropList, ((Schema.Representation)LGeneratorObject).ScalarType);
 					else if (LGeneratorObject is Schema.Property)
@@ -920,31 +922,31 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
         
-        public Statement EmitDropStatement(ServerProcess AProcess, string[] ARequestedObjectNames, string ALibraryName)
+        public Statement EmitDropStatement(CatalogDeviceSession ASession, string[] ARequestedObjectNames, string ALibraryName)
         {
-			return EmitDropStatement(AProcess, ARequestedObjectNames, ALibraryName, false, false, true, true);
+			return EmitDropStatement(ASession, ARequestedObjectNames, ALibraryName, false, false, true, true);
         }
         
-        public Statement EmitDropStatement(ServerProcess AProcess, string ALibraryName)
+        public Statement EmitDropStatement(CatalogDeviceSession ASession, string ALibraryName)
         {
-			return EmitDropStatement(AProcess, new string[]{}, ALibraryName, false, false, true, true);
+			return EmitDropStatement(ASession, new string[]{}, ALibraryName, false, false, true, true);
         }
         
-        public Statement EmitDropStatement(ServerProcess AProcess)
+        public Statement EmitDropStatement(CatalogDeviceSession ASession)
         {
-			return EmitDropStatement(AProcess, new string[]{}, String.Empty, false, false, true, true);
+			return EmitDropStatement(ASession, new string[]{}, String.Empty, false, false, true, true);
         }
         
-        public void IncludeDependencies(ServerProcess AProcess, Schema.Catalog ASourceCatalog, Schema.Object AObject, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.Object AObject, EmitMode AMode)
         {
-			AObject.IncludeDependencies(AProcess, ASourceCatalog, this, AMode);
+			AObject.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
 			foreach (Object LObject in this)
-				LObject.IncludeHandlers(AProcess, ASourceCatalog, this, AMode);
+				LObject.IncludeHandlers(ASession, ASourceCatalog, this, AMode);
         }
         
-        public void IncludeDependencies(ServerProcess AProcess, Schema.Catalog ASourceCatalog, Schema.IDataType ADataType, EmitMode AMode)
+        public void IncludeDependencies(CatalogDeviceSession ASession, Schema.Catalog ASourceCatalog, Schema.IDataType ADataType, EmitMode AMode)
         {
-			ADataType.IncludeDependencies(AProcess, ASourceCatalog, this, AMode);
+			ADataType.IncludeDependencies(ASession, ASourceCatalog, this, AMode);
         }
 	}
     
@@ -1350,7 +1352,7 @@ namespace Alphora.Dataphor.DAE.Schema
     {
 		public EmissionContext
 		(
-			ServerProcess AProcess,
+			CatalogDeviceSession ASession,
 			Catalog ACatalog,
 			EmitMode AMode, 
 			ObjectList ARequestedObjects, 
@@ -1361,7 +1363,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			bool AIncludeObject
 		) : base()
 		{
-			Process = AProcess;
+			Session = ASession;
 			Catalog = ACatalog;
 			Mode = AMode;
 			RequestedObjects = ARequestedObjects;
@@ -1372,7 +1374,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			IncludeObject = AIncludeObject;
 		}
 
-		public ServerProcess Process;		
+		public CatalogDeviceSession Session;		
 		public Catalog Catalog;
 		public EmitMode Mode;
 		public ObjectList RequestedObjects;

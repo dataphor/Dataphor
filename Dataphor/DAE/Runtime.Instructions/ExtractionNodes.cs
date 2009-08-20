@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					break;
 				}
 			
-			if (!LHasEmptyKey && !APlan.ServerProcess.SuppressWarnings && !APlan.InTypeOfContext)
+			if (!LHasEmptyKey && !APlan.SuppressWarnings && !APlan.InTypeOfContext)
 				APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression, CompilerErrorLevel.Warning, APlan.CurrentStatement()));
 			FDataType = LSourceNode.TableVar.DataType.RowType;
 		}

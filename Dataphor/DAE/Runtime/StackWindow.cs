@@ -9,17 +9,20 @@ using System.Collections.Generic;
 using System.Text;
 
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Server;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	public class StackWindow : System.Object
 	{
-		public StackWindow(int ABase, PlanNode AOriginator) : base()
+		public StackWindow(int ABase, ServerPlan APlan, PlanNode AOriginator) : base()
 		{
 			Base = ABase;
+			Plan = APlan;
 			Originator = AOriginator;
 		}
 		
+		public ServerPlan Plan;
 		public PlanNode Originator;
 		public int Base;
 		public int FrameBase { get { return FFrames.CurrentFrame.Base; } }
