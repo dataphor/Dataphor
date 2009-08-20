@@ -225,6 +225,7 @@
     <Compile Include="Language.D4\Parser.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Language.D4\Plan.cs" />
     <Compile Include="Language.RealSQL\RealSQLCompiler.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -608,7 +609,6 @@
     <Compile Include="Server\NativeServerCLI.cs" />
     <Compile Include="Server\NativeServer.cs" />
     <Compile Include="Server\NativeSession.cs" />
-    <Compile Include="Server\Plan.cs" />
     <Compile Include="Server\PlanCache.cs" />
     <Compile Include="Server\RemoteServer.cs" />
     <Compile Include="Server\RemoteServerBatch.cs" />
