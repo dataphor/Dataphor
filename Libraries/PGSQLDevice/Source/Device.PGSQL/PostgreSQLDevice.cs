@@ -8,6 +8,7 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Language.PGSQL;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
