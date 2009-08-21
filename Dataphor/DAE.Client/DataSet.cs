@@ -654,13 +654,13 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected virtual bool InternalColumnChanging(DataField AField, Row AOldRow, Row ANewRow)
 		{
-			RowChanging(AField);
+			DoRowChanging(AField);
 			return true;
 		}
 		
 		protected virtual bool InternalColumnChanged(DataField AField, Row AOldRow, Row ANewRow)
 		{
-			RowChanged(AField);
+			DoRowChanged(AField);
 			return true;
 		}
 		
@@ -1041,7 +1041,7 @@ namespace Alphora.Dataphor.DAE.Client
 			finally
 			{
 				InternalBOF = true;
-				DataChanged();
+				DoDataChanged();
 			}
 		}
 
@@ -1059,7 +1059,7 @@ namespace Alphora.Dataphor.DAE.Client
 			finally
 			{
 				InternalEOF = true;
-				DataChanged();
+				DoDataChanged();
 			}
 		}
 		
@@ -1138,7 +1138,7 @@ namespace Alphora.Dataphor.DAE.Client
 					{
 						if (LOffsetDelta != 0)
 							UpdateFirstOffsets(LOffsetDelta);
-						DataChanged();
+						DoDataChanged();
 					}
 				}
 			}
@@ -1391,7 +1391,7 @@ namespace Alphora.Dataphor.DAE.Client
 				SetState(DataSetState.Insert);
 				InitializeRow(FActiveOffset);
 				InternalIsModified = false;
-				DataChanged();
+				DoDataChanged();
 				DoAfterInsert();
 			}
 			catch
@@ -1593,7 +1593,7 @@ namespace Alphora.Dataphor.DAE.Client
 				{
 					if ((FBuffer[FActiveOffset].RowFlag & RowFlag.Inserted) != 0)
 						FBuffer[FActiveOffset].RowFlag &= ~(RowFlag.Inserted | RowFlag.Data);
-					DataChanged();
+					DoDataChanged();
 				}
 				ClearOriginalRow();
 				DoAfterPost();
@@ -1627,7 +1627,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			CheckState(DataSetState.Edit, DataSetState.Insert);
 			InitializeRow(FActiveOffset);
-			RowChanged(null);
+			DoRowChanged(null);
 		}
 
 		#endregion
@@ -1784,7 +1784,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			try
 			{
-				DataChanged();
+				DoDataChanged();
 			}
 			catch
 			{
@@ -1792,9 +1792,14 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 		
+		public event EventHandler DataChanged;
+		
 		/// <summary> Occurs the active row or any other part of the buffer changes. </summary>
-		protected virtual void DataChanged()
+		protected virtual void DoDataChanged()
 		{
+			if (DataChanged != null)
+				DataChanged(this, EventArgs.Empty);
+				
 			Exception LFirstException = null;
 			foreach (DataLink LLink in EnumerateLinks())
 			{
@@ -1832,19 +1837,27 @@ namespace Alphora.Dataphor.DAE.Client
 			foreach (DataLink LLink in EnumerateLinks())
 				LLink.PrepareToCancel();
 		}
-		
+
+		public event FieldChangeEventHandler RowChanging;
+
 		/// <summary> Occurs only when the fields in the active record are changing. </summary>
 		/// <param name="AField"> Valid reference to a field if one field is changing. Null otherwise. </param>
-		protected virtual void RowChanging(DataField AField)
+		protected virtual void DoRowChanging(DataField AField)
 		{
+			if (RowChanging != null)
+				RowChanging(this, AField);
 			foreach (DataLink LLink in EnumerateLinks())
 				LLink.RowChanging(AField);
 		}
 
+		public event FieldChangeEventHandler RowChanged;
+		
 		/// <summary> Occurs only when the fields in the active record has changed. </summary>
 		/// <param name="AField"> Valid reference to a field if one field has changed. Null otherwise. </param>
-		protected virtual void RowChanged(DataField AField)
+		protected virtual void DoRowChanged(DataField AField)
 		{
+			if (RowChanged != null)
+				RowChanged(this, AField);
 			foreach (DataLink LLink in EnumerateLinks())
 				LLink.RowChanged(AField);
 		}
@@ -2318,6 +2331,8 @@ namespace Alphora.Dataphor.DAE.Client
 		EOF = 4, 
 		Inserted = 8
 	};
+	
+	public delegate void FieldChangeEventHandler(object ASender, DataField AField);
 	
     public class DataFields : ICollection
     {

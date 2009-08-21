@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentErrorListView.HideOnClose = true;
 			FDockContentErrorListView.Controls.Add(FErrorListView);
 			FDockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
-			FDockContentErrorListView.Text = "Errors and Warnings - Dataphoria";
+			FDockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
 			FSessionView = new SessionView();
@@ -1134,8 +1134,6 @@ namespace Alphora.Dataphor.Dataphoria
 				LForm.Dispose();
 		}
 
-		private IStatusBarClient FCurrentStatusBarClient;
-		
 		protected override void OnMdiChildActivate(EventArgs AArgs)
 		{
 			base.OnMdiChildActivate(AArgs);
@@ -1523,61 +1521,93 @@ namespace Alphora.Dataphor.Dataphoria
 			System.Diagnostics.Process.Start(@"http://news.alphora.com/");
 		}
 
-		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
-		{			
-			if (ASender == FClearWarningsToolStripMenuItem)
-				ClearWarnings();
-			else if (ASender == FConnectToolStripMenuItem)
-				EnsureServerConnection();
-			else if (ASender == FDisconnectToolStripMenuItem)
-				Disconnect();
-			else if (ASender == FNewToolStripMenuItem || ASender == FNewToolStripButton)
-				NewDesigner();
-			else if (ASender == FNewScriptToolStripMenuItem || ASender == FNewScriptToolStripButton)						
-				NewEditor(String.Empty, "d4");
-			else if (ASender == FOpenFileToolStripMenuItem || ASender == FOpenFileToolStripButton)
-				OpenFile();
-			else if (ASender == FOpenFileWithToolStripMenuItem || ASender == FOpenFileWithToolStripMenuItem)
-				OpenFileWith();
-			else if (ASender == FSaveAllToolStripMenuItem)
-				SaveAll();
-			else if (ASender == FLaunchFormToolStripMenuItem || ASender == FLaunchFormToolStripButton)
-				LaunchForm();
-			else if (ASender == FExitToolStripMenuItem)
-				Close();
-			else if (ASender == FDataphorExplorerToolStripMenuItem)
-				ShowDataphorExplorer();
-			else if (ASender == FWarningsErrorsToolStripMenuItem)
-				ShowWarnings();
-			else if (ASender == FDesignerLibrariesToolStripMenuItem)
-				BrowseDesignerLibraries();
-			else if (ASender == FDataphorDocumentationToolStripMenuItem)
-				Documentation();
-			else if (ASender == FAboutToolStripMenuItem)
-				About();
-			else if (ASender == FAlphoraWebSiteToolStripMenuItem)
-				LaunchAlphoraWebsite();
-			else if (ASender == FWebDocumentationToolStripMenuItem)
-				LaunchWebDocumentation();
-			else if (ASender == FAlphoraDiscussionGroupsToolStripMenuItem)
-				LaunchAlphoraGroups();
-			else if (ASender == FDocumentTypesToolStripMenuItem)
-				BrowseDocumentTypes(); 
-			else if (ASender == FStopDebuggerMenuItem || ASender == FDebugStopButton)
-				Debugger.Stop();
-			else if (ASender == FViewSessionsMenuItem || ASender == FViewSessionsButton)
-				ViewSessions();
-			else if (ASender == FDebugPauseMenuItem || ASender == FDebugPauseButton)
-				Debugger.Pause();
-			else if (ASender == FDebugRunMenuItem || ASender == FDebugRunButton)
-				Debugger.Run();
-			else if (ASender == FViewCallStackMenuItem || ASender == FViewCallStackButton)
-				FDockContentCallStackView.Show(FDockPanel);
-		}
-
-		private void ViewSessions()
+		private void FToolStrip_ItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
 		{
-			FDockContentSessionView.Show(FDockPanel);
+			switch (AArgs.ClickedItem.Name)
+			{
+				case "FClearWarningsToolStripMenuItem" :
+					ClearWarnings();
+					break;
+				case "FConnectToolStripMenuItem" :
+					EnsureServerConnection();
+					break;
+				case "FDisconnectToolStripMenuItem" :
+					Disconnect();
+					break;
+				case "FNewToolStripMenuItem" :
+				case "FNewToolStripButton" :
+					NewDesigner();
+					break;
+				case "FNewScriptToolStripMenuItem" :
+				case "FNewScriptToolStripButton" :
+					NewEditor(String.Empty, "d4");
+					break;
+				case "FOpenFileToolStripMenuItem" :
+				case "FOpenFileToolStripButton" :
+					OpenFile();
+					break;
+				case "FOpenFileWithToolStripMenuItem" :
+				case "FOpenFileWithToolStripButton" :
+					OpenFileWith();
+					break;
+				case "FSaveAllToolStripMenuItem" :
+					SaveAll();
+					break;
+				case "FLaunchFormToolStripMenuItem" :
+				case "FLaunchFormToolStripButton" :
+					LaunchForm();
+					break;
+				case "FExitToolStripMenuItem" :
+					Close();
+					break;
+				case "FDataphorExplorerToolStripMenuItem" :
+					ShowDataphorExplorer();
+					break;
+				case "FWarningsErrorsToolStripMenuItem" :
+					ShowWarnings();
+					break;
+				case "FDesignerLibrariesToolStripMenuItem" :
+					BrowseDesignerLibraries();
+					break;
+				case "FDataphorDocumentationToolStripMenuItem" :
+					Documentation();
+					break;
+				case "FAboutToolStripMenuItem" :
+					About();
+					break;
+				case "FAlphoraWebSiteToolStripMenuItem" :
+					LaunchAlphoraWebsite();
+					break;
+				case "FWebDocumentationToolStripMenuItem" :
+					LaunchWebDocumentation();
+					break;
+				case "FAlphoraDiscussionGroupsToolStripMenuItem" :
+					LaunchAlphoraGroups();
+					break;
+				case "FDocumentTypesToolStripMenuItem" :
+					BrowseDocumentTypes(); 
+					break;
+				case "FStopDebuggerMenuItem" :
+				case "FDebugStopButton" :
+					Debugger.Stop();
+					break;
+				case "FViewSessionsMenuItem" :
+				case "FViewSessionsButton" :
+					ViewSessions();
+					break;
+				case "FDebugPauseMenuItem" :
+				case "FDebugPauseButton" :
+					Debugger.Pause();
+					break;
+				case "FDebugRunMenuItem" :
+				case "FDebugRunButton" :
+					Debugger.Run();
+					break;
+				case "FViewCallStackMenuItem" :
+				case "FViewCallStackButton" :
+					FDockContentCallStackView.Show(FDockPanel);
+					break;
+			}
 		}
 
 		private void ClearWarningsClicked(object ASender, System.EventArgs AArgs)
@@ -1596,6 +1626,11 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FDebugger == null)
 				FDebugger = new Debugger(this);
+		}
+
+		private void ViewSessions()
+		{
+			FDockContentSessionView.Show(FDockPanel);
 		}
 
 		#endregion

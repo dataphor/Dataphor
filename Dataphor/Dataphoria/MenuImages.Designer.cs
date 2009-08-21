@@ -102,6 +102,13 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap DebugAttach {
+            get {
+                object obj = ResourceManager.GetObject("DebugAttach", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap DebugBreakException {
             get {
                 object obj = ResourceManager.GetObject("DebugBreakException", resourceCulture);
@@ -119,6 +126,13 @@ namespace Alphora.Dataphor.Dataphoria {
         internal static System.Drawing.Bitmap DebugDebugProcesses {
             get {
                 object obj = ResourceManager.GetObject("DebugDebugProcesses", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugDetach {
+            get {
+                object obj = ResourceManager.GetObject("DebugDetach", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -273,6 +287,13 @@ namespace Alphora.Dataphor.Dataphoria {
         internal static System.Drawing.Bitmap Redo {
             get {
                 object obj = ResourceManager.GetObject("Redo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Refresh {
+            get {
+                object obj = ResourceManager.GetObject("Refresh", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

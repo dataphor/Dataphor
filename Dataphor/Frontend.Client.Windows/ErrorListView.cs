@@ -22,6 +22,8 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private System.Windows.Forms.ImageList imageList;
 		private System.Windows.Forms.Splitter detailSplitter;
 		private System.Windows.Forms.TextBox FErrorDetailBox;
+		private ContextMenuStrip FContextMenu;
+		private ToolStripMenuItem FClearErrorsMenuItem;
 		private System.ComponentModel.IContainer components;
 
 		public ErrorListView()
@@ -49,7 +51,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ErrorListView));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ErrorListView));
 			this.descriptionColumnHeader = new System.Windows.Forms.ColumnHeader();
 			this.FErrorListView = new System.Windows.Forms.ListView();
 			this.iconColumnHeader = new System.Windows.Forms.ColumnHeader();
@@ -57,6 +59,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.imageList = new System.Windows.Forms.ImageList(this.components);
 			this.detailSplitter = new System.Windows.Forms.Splitter();
 			this.FErrorDetailBox = new System.Windows.Forms.TextBox();
+			this.FContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.FClearErrorsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FContextMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// descriptionColumnHeader
@@ -68,9 +73,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			this.FErrorListView.AllowColumnReorder = true;
 			this.FErrorListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							 this.iconColumnHeader,
-																							 this.descriptionColumnHeader,
-																							 this.classColumnHeader});
+            this.iconColumnHeader,
+            this.descriptionColumnHeader,
+            this.classColumnHeader});
+			this.FErrorListView.ContextMenuStrip = this.FContextMenu;
 			this.FErrorListView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.FErrorListView.FullRowSelect = true;
 			this.FErrorListView.GridLines = true;
@@ -80,9 +86,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FErrorListView.Size = new System.Drawing.Size(512, 165);
 			this.FErrorListView.SmallImageList = this.imageList;
 			this.FErrorListView.TabIndex = 0;
+			this.FErrorListView.UseCompatibleStateImageBehavior = false;
 			this.FErrorListView.View = System.Windows.Forms.View.Details;
-			this.FErrorListView.DoubleClick += new System.EventHandler(this.FErrorListView_DoubleClick);
 			this.FErrorListView.SelectedIndexChanged += new System.EventHandler(this.FErrorListView_SelectedIndexChanged);
+			this.FErrorListView.DoubleClick += new System.EventHandler(this.FErrorListView_DoubleClick);
 			// 
 			// iconColumnHeader
 			// 
@@ -96,9 +103,10 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			// 
 			// imageList
 			// 
-			this.imageList.ImageSize = new System.Drawing.Size(16, 16);
 			this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
 			this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+			this.imageList.Images.SetKeyName(0, "");
+			this.imageList.Images.SetKeyName(1, "");
 			// 
 			// detailSplitter
 			// 
@@ -120,8 +128,21 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.FErrorDetailBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
 			this.FErrorDetailBox.Size = new System.Drawing.Size(512, 88);
 			this.FErrorDetailBox.TabIndex = 1;
-			this.FErrorDetailBox.Text = "";
 			this.FErrorDetailBox.WordWrap = false;
+			// 
+			// FContextMenu
+			// 
+			this.FContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FClearErrorsMenuItem});
+			this.FContextMenu.Name = "contextMenuStrip1";
+			this.FContextMenu.Size = new System.Drawing.Size(190, 26);
+			this.FContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.FContextMenu_ItemClicked);
+			// 
+			// FClearErrorsMenuItem
+			// 
+			this.FClearErrorsMenuItem.Name = "FClearErrorsMenuItem";
+			this.FClearErrorsMenuItem.Size = new System.Drawing.Size(189, 22);
+			this.FClearErrorsMenuItem.Text = "Clear Errors/Warnings";
 			// 
 			// ErrorListView
 			// 
@@ -130,7 +151,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			this.Controls.Add(this.FErrorDetailBox);
 			this.Name = "ErrorListView";
 			this.Size = new System.Drawing.Size(512, 256);
+			this.FContextMenu.ResumeLayout(false);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 		#endregion
@@ -311,6 +334,12 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 			public Exception Exception;
 			public IErrorSource Source;
+		}
+
+		private void FContextMenu_ItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
+		{
+			if (AArgs.ClickedItem.Name == "FClearErrorsMenuItem")
+				ClearErrors();
 		}
 	}
 

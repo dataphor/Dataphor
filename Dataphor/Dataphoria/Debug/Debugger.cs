@@ -75,6 +75,9 @@ namespace Alphora.Dataphor.Dataphoria
 			NotifyPropertyChanged("SelectedCallStackIndex");
 			NotifyPropertyChanged("CurrentLocation");
 
+			if (!AIsPaused)
+				InternalUnpause();
+			
 			ResetSelectedProcess();
 		}
 
@@ -226,7 +229,7 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					var LRow = LProcesses.Select();
 					LCandidateID = (int)LRow["Process_ID"];
-					if ((bool)LRow["DidBreak"])
+					if (LRow.HasValue("DidBreak") && (bool)LRow["DidBreak"])
 						break;
 				}
 				SelectedProcessID = LCandidateID;
@@ -275,8 +278,9 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				DebugLocator LLocation = null;
 				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
-				if (LWindow != null)
-					LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
+				// TODO: Uncomment this once GetCallStack returns location information
+				//if (LWindow != null)
+				//    LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
 				InternalSetCurrentLocation(LLocation);
 			}
 			else
@@ -305,6 +309,12 @@ namespace Alphora.Dataphor.Dataphoria
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachSession({0});", ASessionID));
 		}
 
+		public void DetachSession(int ASessionID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachSession({0});", ASessionID));
+		}
+		
 		private void InternalUnpause()
 		{
 			InternalSetIsPaused(false);
@@ -318,9 +328,8 @@ namespace Alphora.Dataphor.Dataphoria
 				var LProcess = FDataphoria.DataSession.ServerSession.StartProcess(new ProcessInfo(FDataphoria.DataSession.ServerSession.SessionInfo));
 				try
 				{
-					var LDebugBreakDelegate = new ThreadStart(delegate { DebuggerPaused(); });
 					LProcess.Execute(".System.Debug.WaitForPause();", null);
-					FDataphoria.Invoke(LDebugBreakDelegate);
+					FDataphoria.Invoke(new ThreadStart(delegate { DebuggerPaused(); }));
 				}
 				finally
 				{
@@ -336,8 +345,11 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Invoked when the debugger pauses or breaks. </summary>
 		private void DebuggerPaused()
 		{
-			InternalSetIsPaused(true);
-			ResetSelectedProcess();
+			if (IsStarted)
+			{
+				InternalSetIsPaused(true);
+				ResetSelectedProcess();
+			}
 		}
 	}
 }
