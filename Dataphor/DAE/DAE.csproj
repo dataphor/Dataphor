@@ -145,6 +145,11 @@
     <Compile Include="CLI.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Compiler\Compiler.cs" />
+    <Compile Include="Compiler\CompilerException.cs" />
+    <Compile Include="Compiler\Plan.cs" />
+    <Compile Include="Compiler\PlanStructures.cs" />
+    <Compile Include="Compiler\Symbols.cs" />
     <Compile Include="Connection\ConnectionException.cs" />
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
@@ -201,12 +206,6 @@
     <Compile Include="Device\DeviceException.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Language.D4\Compiler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.D4\CompilerException.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Language.D4\D4Emitter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -225,9 +224,6 @@
     <Compile Include="Language.D4\Parser.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Language.D4\Plan.cs" />
-    <Compile Include="Language.D4\PlanStructures.cs" />
-    <Compile Include="Language.D4\Symbols.cs" />
     <Compile Include="Language.RealSQL\RealSQLCompiler.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -739,6 +735,9 @@
     <Compile Include="Utility.cs">
       <SubType>Code</SubType>
     </Compile>
+    <EmbeddedResource Include="Compiler\CompilerException.resx">
+      <DependentUpon>CompilerException.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Connection\ConnectionException.resx">
       <DependentUpon>ConnectionException.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -753,9 +752,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Device\DeviceException.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Language.D4\CompilerException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Language\LanguageException.resx">
@@ -805,6 +801,7 @@
     <EmbeddedResource Include="Strings.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <Content Include="Compiler\QuickReference.txt" />
     <Content Include="Language.D4\BNF.txt" />
     <Content Include="Language.RealSQL\BNF.txt" />
     <Content Include="Language.SQL\BNF.txt" />
