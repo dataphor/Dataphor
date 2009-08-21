@@ -736,10 +736,8 @@
       <SubType>Code</SubType>
     </Compile>
     <EmbeddedResource Include="Compiling\CompilerException.resx">
-      <DependentUpon>CompilerException.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Connection\ConnectionException.resx">
-      <DependentUpon>ConnectionException.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Device.ApplicationTransaction\ApplicationTransactionException.resx">

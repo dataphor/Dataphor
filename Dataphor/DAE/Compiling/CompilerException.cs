@@ -598,7 +598,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		
 		// Resource manager for this exception class
-		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Language.D4.CompilerException", typeof(CompilerException).Assembly);
+		private static ResourceManager FResourceManager = new ResourceManager("Alphora.Dataphor.DAE.Compiling.CompilerException", typeof(CompilerException).Assembly);
 
 		// Constructors
 		public CompilerException(Codes AErrorCode) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null) {}
