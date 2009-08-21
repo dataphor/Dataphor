@@ -492,9 +492,6 @@
     <Compile Include="Runtime.Instructions\UnionNode.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Runtime\Context.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Runtime\DataParam.cs" />
     <Compile Include="Runtime\DataVar.cs">
       <SubType>Code</SubType>
@@ -508,6 +505,7 @@
     <Compile Include="Runtime\Semaphore.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Runtime\Stack.cs" />
     <Compile Include="Schema\Assembly.cs">
       <SubType>Code</SubType>
     </Compile>
