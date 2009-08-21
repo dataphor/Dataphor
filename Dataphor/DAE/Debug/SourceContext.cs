@@ -1,6 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿/*
+	Dataphor
+	© Copyright 2000-2009 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+using System;
 
 namespace Alphora.Dataphor.DAE.Debug
 {
@@ -33,5 +37,5 @@ namespace Alphora.Dataphor.DAE.Debug
 		public DebugLocator Locator { get { return FLocator; } }
 	}
 	
-	public class SourceContexts : Stack<SourceContext> { }
+	public class SourceContexts : System.Collections.Generic.Stack<SourceContext> { }
 }

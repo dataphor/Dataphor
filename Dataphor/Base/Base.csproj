@@ -111,8 +111,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FixedSizeCache.cs" />
+    <Compile Include="Frame.cs" />
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
+    <Compile Include="Stack.cs" />
+    <Compile Include="StackWindow.cs" />
     <Compile Include="TemporaryStream.cs" />
     <Compile Include="IdentifierIndex.cs">
       <SubType>Code</SubType>

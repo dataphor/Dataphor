@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Alphora.Dataphor.DAE.Runtime
+namespace Alphora.Dataphor
 {
 	public class Frame
 	{

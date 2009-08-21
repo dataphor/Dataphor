@@ -1,0 +1,21 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Operator Text
+	
+	Verifies that operators can be emitted and re-parsed correctly.
+*/
+
+foreach var LRow in Operators { Name } do
+	try	
+		TestOperatorText(LRow.Name);
+	except
+		on E : Error do
+			raise Error("Could not re-parse emitted text for operator " + LRow.Name, E);
+	end;
+
+//select Script('System.Concat0000003407')

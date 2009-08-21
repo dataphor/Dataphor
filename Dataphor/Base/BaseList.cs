@@ -1128,7 +1128,7 @@ namespace Alphora.Dataphor
 		public HashtableList(IEqualityComparer AComparer) : base(AComparer) {}
 		public HashtableList(int ACapacity, float ALoadFactor) : base(ACapacity, ALoadFactor) {}
 		public HashtableList(IDictionary ADictionary, IEqualityComparer AComparer) : base (ADictionary, AComparer) {}
-		public HashtableList(IHashCodeProvider AHashCodeProvider, IComparer AComparer) : base(AHashCodeProvider, AComparer) {}
+		//public HashtableList(IHashCodeProvider AHashCodeProvider, IComparer AComparer) : base(AHashCodeProvider, AComparer) {}
 
 		public abstract int Add(object AValue);
 		

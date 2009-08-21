@@ -8,45 +8,46 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Server;
-
-namespace Alphora.Dataphor.DAE.Runtime
+namespace Alphora.Dataphor
 {
 	public class Stack<T> : Object
 	{
 		public const int CInitialCapacity = 0;
+		public const int CDefaultMaxStackDepth = 32767;
 		
-		public Stack() : this(Server.Server.CDefaultMaxStackDepth, Server.Server.CDefaultMaxCallDepth) { }
+		public Stack() : this(CDefaultMaxStackDepth, StackWindowList.CDefaultMaxCallDepth) { }
 		public Stack(int AMaxStackDepth, int AMaxCallDepth) : base()
 		{
-			MaxStackDepth = AMaxStackDepth;
-			MaxCallDepth = AMaxCallDepth;
-			FWindows.Push(new StackWindow(0, null, null));
+			FMaxStackDepth = AMaxStackDepth;
+			FWindows = new StackWindowList(AMaxCallDepth);
+			FWindows.Push(new StackWindow(0)); // ?
 		}
 		
 		protected int FCount;
 		public int Count { get { return (AllowExtraWindowAccess ? FCount : (FCount - Base)); } }
 		public int FrameCount { get { return FCount - FWindows.CurrentStackWindow.FrameBase; } }
 		
-		public int MaxStackDepth;
-		public int MaxCallDepth;
-		
-		private int FCallDepth;
-		public void IncCallDepth()
+		private int FMaxStackDepth;
+		public int MaxStackDepth
 		{
-			if (FCallDepth >= MaxCallDepth)
-				throw new RuntimeException(RuntimeException.Codes.CallOverflow, MaxCallDepth);
-			FCallDepth++;
-		}
-		
-		public void DecCallDepth()
-		{
-			FCallDepth--;
-		}
+			get { return FMaxStackDepth; }
+			set
+			{
+				if (value < FCount)
+					throw new BaseException(BaseException.Codes.StackDepthExceedsNewSetting, FCount, value);
 
+				FMaxStackDepth = value;
+			}
+		}
+		
+		public int MaxCallDepth
+		{
+			get { return FWindows.MaxCallDepth; }
+			set { FWindows.MaxCallDepth = value; }
+		}
+		
 		protected T[] FStack = new T[CInitialCapacity];
-		protected StackWindowList FWindows = new StackWindowList();
+		protected StackWindowList FWindows;
 		protected int Base { get { return FWindows.CurrentStackWindow.Base; } }
 
         private void EnsureCapacity(int ARequiredCapacity)
@@ -63,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public void Push(T AItem)
 		{
 			if (FCount >= MaxStackDepth)
-				throw new RuntimeException(RuntimeException.Codes.StackOverflow, MaxStackDepth);
+				throw new BaseException(BaseException.Codes.StackOverflow, MaxStackDepth);
 			EnsureCapacity(FCount);
 			FStack[FCount] = AItem;
 			FCount++;
@@ -73,7 +74,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			#if DEBUG
 			if (FCount <= Base)
-				throw new RuntimeException(RuntimeException.Codes.StackEmpty);
+				throw new BaseException(BaseException.Codes.StackEmpty);
 			#endif
 
 			FCount--;
@@ -97,7 +98,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#if DEBUG 
 			int LIndex = FCount - 1 - AOffset;
 			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AOffset.ToString());
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
 			return FStack[LIndex];
 			#else
 			return FStack[FCount - 1 - AOffset]; // same code as the indexer, duplicated for performance
@@ -109,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#if DEBUG 
 			int LIndex = FCount - 1 - AOffset;
 			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AOffset.ToString());
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
 			FStack[LIndex] = AItem;
 			#else
 			FStack[FCount - 1 - AOffset] = AItem; // same code as the indexer, duplicated for performance
@@ -123,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				#if DEBUG 
 				int LIndex = FCount - 1 - AIndex;
 				if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-					throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AIndex.ToString());
+					throw new BaseException(BaseException.Codes.InvalidStackIndex, AIndex.ToString());
 				return FStack[LIndex];
 				#else
 				return FStack[FCount - 1 - AIndex]; 
@@ -134,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				#if DEBUG 
 				int LIndex = FCount - 1 - AIndex;
 				if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-					throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AIndex.ToString());
+					throw new BaseException(BaseException.Codes.InvalidStackIndex, AIndex.ToString());
 				FStack[LIndex] = value;
 				#else
 				FStack[FCount - 1 - AIndex] = value; 
@@ -142,14 +143,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
 		} // same code as peek and poke, duplicated for performance
 		
-		public void PushWindow(int ACount, ServerPlan APlan, PlanNode AOriginator)
-		{
-			FWindows.Push(new StackWindow(FCount - ACount, APlan, AOriginator));
-		}
-		
 		public void PushWindow(int ACount)
 		{
-			PushWindow(ACount, null, null);
+			FWindows.Push(new StackWindow(FCount - ACount));
 		}
 		
 		public void PopWindow()

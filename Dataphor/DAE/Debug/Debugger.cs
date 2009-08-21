@@ -391,10 +391,10 @@ namespace Alphora.Dataphor.DAE.Debug
 				
 				for (int LIndex = 0; LIndex < LStackWindows.Count; LIndex++)
 				{
-					InstructionNodeBase LOriginator = LStackWindows[LIndex].Originator as InstructionNodeBase;
-					if ((LOriginator != null) && (LOriginator.Operator != null))
-						LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, new DebugLocator(LOriginator.Operator.Locator.Locator, LOriginator.Line, LOriginator.LinePos)));
-					else 
+					//InstructionNodeBase LOriginator = LStackWindows[LIndex].Originator as InstructionNodeBase;
+					//if ((LOriginator != null) && (LOriginator.Operator != null))
+					//	LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, new DebugLocator(LOriginator.Operator.Locator.Locator, LOriginator.Line, LOriginator.LinePos)));
+					//else 
 						LCallStack.Add(new CallStackEntry(LIndex, "<Plan>", null));
 				}
 				return LCallStack;

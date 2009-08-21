@@ -1,110 +1,210 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:element name="root" msdata:IsDataSet="true">
-			<xsd:complexType>
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="data">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" />
-							<xsd:attribute name="type" type="xsd:string" />
-							<xsd:attribute name="mimetype" type="xsd:string" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="resheader">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
-						</xsd:complexType>
-					</xsd:element>
-				</xsd:choice>
-			</xsd:complexType>
-		</xsd:element>
-	</xsd:schema>
-	<resheader name="ResMimeType">
-		<value>text/microsoft-resx</value>
-	</resheader>
-	<resheader name="Version">
-		<value>1.0.0.0</value>
-	</resheader>
-	<resheader name="Reader">
-		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<resheader name="Writer">
-		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=1.0.3102.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<data name="100100">
-		<value>Unable to set property ({0}).</value>
-	</data>
-	<data name="100101">
-		<value>Member ({0}) not found for class ({1}).  Overloaded and indexed properties are not supported.</value>
-	</data>
-	<data name="100102">
-		<value>Multiple attributes found.  Expecting single attribute ({0}).</value>
-	</data>
-	<data name="100103">
-		<value>A constructor matching the default constructor signature ({0}) is not found.</value>
-	</data>
-	<data name="100104">
-		<value>This list does not allow null items.</value>
-	</data>
-	<data name="100105">
-		<value>Cannot add an item of type ({0}), collection only allows items of type ({1}).</value>
-	</data>
-	<data name="100106">
-		<value>Child cover is read only.</value>
-	</data>
-	<data name="100107">
-		<value>List index ({0}) out of bounds.</value>
-	</data>
-	<data name="100108">
-		<value>Method is not supported.</value>
-	</data>
-	<data name="100109">
-		<value>Child ({0}) not found.</value>
-	</data>
-	<data name="100110">
-		<value>Child component must derive from ComponentBase.</value>
-	</data>
-	<data name="100111">
-		<value>Parent component may not contain itself.</value>
-	</data>
-	<data name="100112">
-		<value>Child component already referenced by this parent.</value>
-	</data>
-	<data name="100113">
-		<value>Object ({0}) is not a container.</value>
-	</data>
-	<data name="100114">
-		<value>Component ({0}) not found.</value>
-	</data>
-	<data name="100115">
-		<value>Duplicate value inserted ({0}).</value>
-	</data>
-	<data name="100116">
-		<value>List index out of bounds ({0}).  Valid range is (0-{1}).</value>
-	</data>
-	<data name="100117">
-		<value>Cannot perform this operation on a sorted list.</value>
-	</data>
-	<data name="100118">
-		<value>List cover is read only.</value>
-	</data>
-	<data name="100119">
-		<value>Objects cannot be inserted into a hash table, use the Add method instead.</value>
-	</data>
-	<data name="100120">
-		<value>Object at index ({0}) not found.</value>
-	</data>
-	<data name="100121">
-		<value>Size must be at least two (2).</value>
-	</data>
-	<data name="100122"><value>Finalizer invoked.</value></data>
-	<data name="100123"><value>Only 'Exception' based instances can be added to the errors list.  Attempted to add a ({0}).</value></data>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="100100" xml:space="preserve">
+    <value>Unable to set property ({0}).</value>
+  </data>
+  <data name="100101" xml:space="preserve">
+    <value>Member ({0}) not found for class ({1}).  Overloaded and indexed properties are not supported.</value>
+  </data>
+  <data name="100102" xml:space="preserve">
+    <value>Multiple attributes found.  Expecting single attribute ({0}).</value>
+  </data>
+  <data name="100103" xml:space="preserve">
+    <value>A constructor matching the default constructor signature ({0}) is not found.</value>
+  </data>
+  <data name="100104" xml:space="preserve">
+    <value>This list does not allow null items.</value>
+  </data>
+  <data name="100105" xml:space="preserve">
+    <value>Cannot add an item of type ({0}), collection only allows items of type ({1}).</value>
+  </data>
+  <data name="100106" xml:space="preserve">
+    <value>Child cover is read only.</value>
+  </data>
+  <data name="100107" xml:space="preserve">
+    <value>List index ({0}) out of bounds.</value>
+  </data>
+  <data name="100108" xml:space="preserve">
+    <value>Method is not supported.</value>
+  </data>
+  <data name="100109" xml:space="preserve">
+    <value>Child ({0}) not found.</value>
+  </data>
+  <data name="100110" xml:space="preserve">
+    <value>Child component must derive from ComponentBase.</value>
+  </data>
+  <data name="100111" xml:space="preserve">
+    <value>Parent component may not contain itself.</value>
+  </data>
+  <data name="100112" xml:space="preserve">
+    <value>Child component already referenced by this parent.</value>
+  </data>
+  <data name="100113" xml:space="preserve">
+    <value>Object ({0}) is not a container.</value>
+  </data>
+  <data name="100114" xml:space="preserve">
+    <value>Component ({0}) not found.</value>
+  </data>
+  <data name="100115" xml:space="preserve">
+    <value>Duplicate value inserted ({0}).</value>
+  </data>
+  <data name="100116" xml:space="preserve">
+    <value>List index out of bounds ({0}).  Valid range is (0-{1}).</value>
+  </data>
+  <data name="100117" xml:space="preserve">
+    <value>Cannot perform this operation on a sorted list.</value>
+  </data>
+  <data name="100118" xml:space="preserve">
+    <value>List cover is read only.</value>
+  </data>
+  <data name="100119" xml:space="preserve">
+    <value>Objects cannot be inserted into a hash table, use the Add method instead.</value>
+  </data>
+  <data name="100120" xml:space="preserve">
+    <value>Object at index ({0}) not found.</value>
+  </data>
+  <data name="100121" xml:space="preserve">
+    <value>Size must be at least two (2).</value>
+  </data>
+  <data name="100122" xml:space="preserve">
+    <value>Finalizer invoked.</value>
+  </data>
+  <data name="100123" xml:space="preserve">
+    <value>Only 'Exception' based instances can be added to the errors list.  Attempted to add a ({0}).</value>
+  </data>
+  <data name="100124" xml:space="preserve">
+    <value>Stack empty.</value>
+  </data>
+  <data name="100125" xml:space="preserve">
+    <value>Maximum stack depth ({0}) has been exceeded.</value>
+  </data>
+  <data name="100126" xml:space="preserve">
+    <value>Stack index out of range ({0}).</value>
+  </data>
+  <data name="100127" xml:space="preserve">
+    <value>Stack depth ({0}) already exceeds new setting ({1}).</value>
+  </data>
+  <data name="100128" xml:space="preserve">
+    <value>Call depth ({0}) alread exceeds new setting ({1}).</value>
+  </data>
+  <data name="100129" xml:space="preserve">
+    <value>Maximum call stack depth ({0}) has been exceeded.</value>
+  </data>
 </root>

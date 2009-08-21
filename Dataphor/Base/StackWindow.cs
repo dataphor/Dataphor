@@ -8,22 +8,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Server;
-
-namespace Alphora.Dataphor.DAE.Runtime
+namespace Alphora.Dataphor
 {
 	public class StackWindow : System.Object
 	{
-		public StackWindow(int ABase, ServerPlan APlan, PlanNode AOriginator) : base()
+		public StackWindow(int ABase) : base()
 		{
 			Base = ABase;
-			Plan = APlan;
-			Originator = AOriginator;
 		}
 		
-		public ServerPlan Plan;
-		public PlanNode Originator;
 		public int Base;
 		public int FrameBase { get { return FFrames.CurrentFrame.Base; } }
 		public int FrameRowBase { get { return FFrames.RowBase; } }
@@ -49,8 +42,31 @@ namespace Alphora.Dataphor.DAE.Runtime
 	public class StackWindowList
 	{
 		public const int CInitialCapacity = 0;
-		private int FCount;
+		public const int CDefaultMaxCallDepth = 1024;
+		
+		public StackWindowList() : this(CDefaultMaxCallDepth) { }
+		public StackWindowList(int AMaxCallDepth) : base()
+		{
+			FMaxCallDepth = AMaxCallDepth;
+		}
+		
 		private StackWindow[] FStackWindows = new StackWindow[CInitialCapacity];
+		
+		private int FCount;
+		public int Count { get { return FCount; } }
+
+		private int FMaxCallDepth;
+		public int MaxCallDepth
+		{
+			get { return FMaxCallDepth; }
+			set
+			{
+				if (FCount > value)
+					throw new BaseException(BaseException.Codes.CallDepthExceedsNewSetting, FCount, value);
+					
+				FMaxCallDepth = value;
+			}
+		}
 
         private void EnsureCapacity(int ARequiredCapacity)
         {
@@ -65,6 +81,9 @@ namespace Alphora.Dataphor.DAE.Runtime
         
         public void Push(StackWindow AStackWindow)
         {
+			if (FCount >= FMaxCallDepth)
+				throw new BaseException(BaseException.Codes.CallStackOverflow, FMaxCallDepth);
+				
 			EnsureCapacity(FCount);
 			FStackWindows[FCount] = AStackWindow;
 			FCount++;
@@ -112,8 +131,6 @@ namespace Alphora.Dataphor.DAE.Runtime
 				LResult.Add(FStackWindows[LIndex]);
 			return LResult;
         }
-        
-        public int Count { get { return FStackWindows.Length; } }
         
         public StackWindow this[int AIndex] { get { return FStackWindows[FCount - AIndex - 1]; } }
 	}

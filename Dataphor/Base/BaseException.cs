@@ -85,6 +85,25 @@ namespace Alphora.Dataphor
 
 			/// <summary>Error code 100123: "Only 'Exception' based instances can be added to the errors list.  Attempted to add a ({0})."</summary>
 			ExceptionsOnly = 100123,
+
+			/// <summary>Error code 100124: "Stack empty."</summary>
+			StackEmpty = 100124,
+
+			/// <summary>Error code 100125: "Maximum stack depth ({0}) has been exceeded."</summary>
+			StackOverflow = 100125,
+			
+			/// <summary>Error code 100126: "Stack index out of range ({0})."</summary>
+			InvalidStackIndex = 100126,
+			
+			/// <summary>Error code 100127: "Stack depth ({0}) already exceeds new setting ({1})."</summary>
+			StackDepthExceedsNewSetting = 100127,
+			
+			/// <summary>Error code 100128: "Call depth ({0}) alread exceeds new setting ({1})."</summary>
+			CallDepthExceedsNewSetting = 100128,
+			
+			/// <summary>Error code 100129: "Maximum call stack depth ({0}) has been exceeded."</summary>
+			CallStackOverflow = 100129,
+
 		};
 
 		// Resource manager for this exception class

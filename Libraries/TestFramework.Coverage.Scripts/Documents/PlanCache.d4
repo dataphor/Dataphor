@@ -1,0 +1,49 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+
+/*
+	Plan Cache Unit Tests
+*/
+
+// Verify the PlanCacheSize can be set
+update ServerSettings set { PlanCacheSize := 100 };
+
+if ServerSettings[].PlanCacheSize <> 100 then
+	raise Error("Setting PlanCacheSize failed");
+	
+// Verify the plan cache is used
+if not(Evaluate("TestIsPlanCached()") as Boolean) then
+	raise Error("Plan Cache is not being used as expected");
+	
+// Verify setting PlanCacheSize to 0 disables the plan cache
+update ServerSettings set { PlanCacheSize := 0 };
+if (Evaluate("TestIsPlanCached()") as Boolean) then
+	raise Error("Plan Cache is being used but should not be");
+	
+update ServerSettings set { PlanCacheSize := 1000 };
+if not(Evaluate("TestIsPlanCached()") as Boolean) then
+	raise Error("Plan Cache is not being used as expected");
+
+// Verify setting UsePlanCache to false disables the plan cache
+update Sessions set { UsePlanCache := false } where ID = SessionID();
+if (Evaluate("TestIsPlanCached()") as Boolean) then
+	raise Error("Plan Cache is being used but should not be");
+	
+update Sessions set { UsePlanCache := true } where ID = SessionID();
+if not(Evaluate("TestIsPlanCached()") as Boolean) then
+	raise Error("Plan Cache is not being used as expected");
+
+// Verify the plan cache is still used when invoked within a transaction that involves deferred constraint checks
+SafeDrop('TestA');
+SafeDrop('TestB');
+create table TestA { ID : Integer, key { ID } };
+create table TestB { A_ID : Integer, key { A_ID }, reference TestB_TestA { A_ID } references TestA { ID } };
+try
+	insert row { 1 ID } into TestA;
+	insert row { 1 A_ID } into TestB;
+	if not(Evaluate("TestIsPlanCached()") as Boolean) then
+		raise Error("Plan Cache is not being used as expected");
+commit;

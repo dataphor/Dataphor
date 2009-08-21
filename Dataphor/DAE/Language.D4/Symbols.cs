@@ -94,7 +94,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 			#if DEBUG 
 			int LIndex = FCount - 1 - AOffset;
 			if ((LIndex >= FCount) || (!AllowExtraWindowAccess && (LIndex < Base)))
-				throw new RuntimeException(RuntimeException.Codes.InvalidStackIndex, AOffset.ToString());
+				throw new BaseException(BaseException.Codes.InvalidStackIndex, AOffset.ToString());
 			FStack[LIndex].FIsModified = true;
 			#else
 			FStack[FCount - 1 - AOffset].FIsModified = true;

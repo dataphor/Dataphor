@@ -2238,9 +2238,9 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				// Use call stack or executing plan source to build a locator
-				InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
-				if ((LOriginator != null) && (LOriginator.Operator != null))
-					return new DebugLocator(LOriginator.Operator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				//InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
+				//if ((LOriginator != null) && (LOriginator.Operator != null))
+				//	return new DebugLocator(LOriginator.Operator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
 
 				if (ExecutingPlan.Locator != null)
 					return new DebugLocator(ExecutingPlan.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
@@ -2269,14 +2269,14 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			try
 			{
-				InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
-				if ((LOriginator != null) && (LOriginator.Operator != null))
-				{
-					if (DebugLocator.IsOperatorLocator(LOriginator.Operator.Locator.Locator))
-						return new DebugContext(new D4TextEmitter().Emit(LOriginator.Operator.EmitStatement(EmitMode.ForCopy)), LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-
-					return new DebugContext(null, LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-				}
+				//InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
+				//if ((LOriginator != null) && (LOriginator.Operator != null))
+				//{
+				//	if (DebugLocator.IsOperatorLocator(LOriginator.Operator.Locator.Locator))
+				//		return new DebugContext(new D4TextEmitter().Emit(LOriginator.Operator.EmitStatement(EmitMode.ForCopy)), LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				//
+				//	return new DebugContext(null, LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
+				//}
 
 				if (ExecutingPlan.Locator != null)
 					return new DebugContext(null, ExecutingPlan.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);

@@ -136,8 +136,8 @@ namespace Alphora.Dataphor.DAE.Server
 		public const int CATDeviceManagerID = 9; // application transaction device resource manager id
 		public const int CBaseResourceManagerID = 100; // base resource manager id
 		public const int CDefaultMaxConcurrentProcesses = 200;
-		public const int CDefaultMaxStackDepth = 32767;
-		public const int CDefaultMaxCallDepth = 1024;
+		public const int CDefaultMaxStackDepth = 32767; // Also specified in the base stack
+		public const int CDefaultMaxCallDepth = 1024; // Also specified in the base window stack
 		public const int CDefaultProcessWaitTimeout = 30;
 		public const int CDefaultProcessTerminationTimeout = 30;
 		public const int CDefaultPlanCacheSize = 1000;

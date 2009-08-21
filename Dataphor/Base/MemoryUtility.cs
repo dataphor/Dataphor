@@ -63,7 +63,7 @@ namespace Alphora.Dataphor
 			{
 				#region IEqualityComparer<object> Members
 				
-				public bool Equals(object x, object y)
+				public new bool Equals(object x, object y)
 				{
 					return Object.ReferenceEquals(x, y);
 				}

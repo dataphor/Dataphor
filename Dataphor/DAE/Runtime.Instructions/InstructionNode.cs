@@ -279,7 +279,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
+				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return NilaryInternalExecute(AProcess);
@@ -317,7 +317,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
+				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument);
@@ -358,7 +358,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
+				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument1, LArgument2);
@@ -403,7 +403,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
+				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
@@ -449,7 +449,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0, AProcess.ExecutingPlan, this);
+				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArguments);

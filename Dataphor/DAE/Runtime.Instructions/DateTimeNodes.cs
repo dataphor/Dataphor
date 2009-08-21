@@ -5,16 +5,17 @@
 */
 #define NILPROPOGATION
 
+using System;
+
+using Alphora.Dataphor.DAE.Server;	
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Streams;
+using Schema = Alphora.Dataphor.DAE.Schema;
+
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	
-	using Alphora.Dataphor.DAE.Server;	
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Streams;
-	using Schema = Alphora.Dataphor.DAE.Schema;
-	
 	// TODO: Nil handling in aggregate operators
 
 	// TimeSpan Selectors
