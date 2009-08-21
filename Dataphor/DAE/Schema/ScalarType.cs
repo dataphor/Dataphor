@@ -18,7 +18,8 @@ using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Device.Catalog;
 
-// TODO: Need to refactor these run-time dependencies
+// TODO: Need to refactor these dependencies
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;

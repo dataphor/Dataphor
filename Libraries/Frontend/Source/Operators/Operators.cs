@@ -11,6 +11,7 @@ using System.Collections;
 
 using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;

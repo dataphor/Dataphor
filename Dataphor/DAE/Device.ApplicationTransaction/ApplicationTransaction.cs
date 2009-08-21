@@ -3,26 +3,27 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+
+using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Device.Memory;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 {
-	using System;
-	using System.IO;
-	using System.Threading;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Collections.Specialized;
-
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Schema;
-	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Device.Memory;
-	
 	public sealed class ApplicationTransactionUtility : System.Object
 	{
 		public static string NameFromID(Guid AID)
@@ -1940,7 +1941,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	{
 		protected internal ApplicationTransactionDeviceSession
 		(
-			Device ADevice, 
+			Schema.Device ADevice, 
 			ServerProcess AServerProcess, 
 			DeviceSessionInfo ADeviceSessionInfo
 		) : base(ADevice, AServerProcess, ADeviceSessionInfo) {}

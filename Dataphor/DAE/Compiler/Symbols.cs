@@ -9,7 +9,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace Alphora.Dataphor.DAE.Runtime
+namespace Alphora.Dataphor.DAE.Compiling
 {
 	/// <summary>
 	/// Defines the structure for a compile-time symbol

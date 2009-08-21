@@ -13,6 +13,7 @@ using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.Frontend;
 using Alphora.Dataphor.Frontend.Server.Structuring;
 using Alphora.Dataphor.Frontend.Server.Elaboration;

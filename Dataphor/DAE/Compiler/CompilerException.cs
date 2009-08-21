@@ -6,11 +6,11 @@
 using System;
 using System.Text;
 using System.Resources;
-
-using Alphora.Dataphor.DAE;
 using System.Collections.Generic;
 
-namespace Alphora.Dataphor.DAE.Language.D4
+using Alphora.Dataphor.DAE.Language;
+
+namespace Alphora.Dataphor.DAE.Compiling
 {
 	public enum CompilerErrorLevel 
 	{ 

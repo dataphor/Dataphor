@@ -3,27 +3,28 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+using System.Text;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Resources;
+
 namespace Alphora.Dataphor.DAE.Device.SQL
 {
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Collections;
-	using System.Collections.Specialized;
-	using System.Resources;
-
-	using Alphora.Dataphor;
 	using Alphora.Dataphor.BOP;
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.SQL;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Schema;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.SQL;
-	using Alphora.Dataphor.DAE.Connection;
-	using D4 = Alphora.Dataphor.DAE.Language.D4;
 	
 	/*
 		Meta Data tags controlling SQL translation and reconciliation ->
@@ -396,7 +397,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			// verify that the types of all columns have type maps
 			foreach (Schema.Column LColumn in ATableVar.DataType.Columns)
 				if (!(LColumn.DataType is Schema.ScalarType) || (ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType) == null))
-					if (D4.Compiler.CouldGenerateDeviceScalarTypeMap(APlan, this, (Schema.ScalarType)LColumn.DataType))
+					if (Compiler.CouldGenerateDeviceScalarTypeMap(APlan, this, (Schema.ScalarType)LColumn.DataType))
 					{
 						D4.AlterDeviceStatement LStatement = new D4.AlterDeviceStatement();
 						LStatement.DeviceName = Name;
@@ -404,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
 						// so I cannot justify making this change in this version. Perhaps at some point, but not now...
 						LStatement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(LColumn.DataType.Name));
-						D4.Compiler.BindNode(APlan, D4.Compiler.CompileAlterDeviceStatement(APlan, LStatement)).Execute(APlan.ServerProcess);
+						Compiler.BindNode(APlan, Compiler.CompileAlterDeviceStatement(APlan, LStatement)).Execute(APlan.ServerProcess);
 						ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType); // Reresolve to attach a dependency to the generated map
 					}
 					else
@@ -1452,14 +1453,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				
 			foreach (D4.KeyDefinition LKeyDefinition in ANode.AlterTableStatement.CreateKeys)
 			{
-				Schema.Key LKey = D4.Compiler.CompileKeyDefinition(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
+				Schema.Key LKey = Compiler.CompileKeyDefinition(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
 					LBatch.Statements.Add(TranslateCreateIndex(ANode.TableVar, LKey));
 			}
 				
 			foreach (D4.OrderDefinition LOrderDefinition in ANode.AlterTableVarStatement.CreateOrders)
 			{
-				Schema.Order LOrder = D4.Compiler.CompileOrderDefinition(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition, false);
+				Schema.Order LOrder = Compiler.CompileOrderDefinition(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition, false);
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
 					LBatch.Statements.Add(TranslateCreateIndex(ANode.TableVar, LOrder));
 			}
@@ -1537,8 +1538,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				return true;
 				
 			Schema.Signature LSignature = new Schema.Signature(new SignatureElement[]{new SignatureElement(ADataType), new SignatureElement(ADataType)});
-			D4.OperatorBindingContext LContext = new D4.OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
-			D4.Compiler.ResolveOperator(APlan, LContext);
+			OperatorBindingContext LContext = new OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
+			Compiler.ResolveOperator(APlan, LContext);
 			if (LContext.Operator != null)
 			{
 				Schema.DeviceOperator LDeviceOperator = ResolveDeviceOperator(APlan, LContext.Operator);
@@ -1554,8 +1555,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public bool SupportsComparison(Plan APlan, Schema.IDataType ADataType)
 		{
 			Schema.Signature LSignature = new Schema.Signature(new SignatureElement[]{new SignatureElement(ADataType), new SignatureElement(ADataType)});
-			D4.OperatorBindingContext LContext = new D4.OperatorBindingContext(null, "iCompare", APlan.NameResolutionPath, LSignature, true);
-			D4.Compiler.ResolveOperator(APlan, LContext);
+			OperatorBindingContext LContext = new OperatorBindingContext(null, "iCompare", APlan.NameResolutionPath, LSignature, true);
+			Compiler.ResolveOperator(APlan, LContext);
 			if (LContext.Operator != null)
 			{
 				Schema.DeviceOperator LDeviceOperator = ResolveDeviceOperator(APlan, LContext.Operator);
@@ -1622,8 +1623,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 										LPlan.Plan.Symbols.Push(LDevicePlan.Plan.Symbols.Peek(LIndex));
 									try
 									{
-										PlanNode LNode = D4.Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
-										LNode = D4.Compiler.OptimizeNode(LPlan.Plan, LNode);
+										PlanNode LNode = Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
+										LNode = Compiler.OptimizeNode(LPlan.Plan, LNode);
 										LNode.InternalDetermineBinding(LPlan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
 										APlanNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
 										return FromScalar(LDevicePlan, LNode);
@@ -1981,7 +1982,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						CheckSupported(AProcess.Plan, ATableVar);
 						if (!AProcess.ServerSession.Server.IsRepository)
-							D4.Compiler.CompileTableVarKeyConstraints(AProcess.Plan, ATableVar);
+							Compiler.CompileTableVarKeyConstraints(AProcess.Plan, ATableVar);
 					}
 					finally
 					{
@@ -2005,7 +2006,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			else if (AMaster == D4.ReconcileMaster.Device)
 			{
-				D4.Compiler.CompileCreateReferenceStatement(AProcess.Plan, AReference.EmitStatement(D4.EmitMode.ForCopy)).Execute(AProcess);
+				Compiler.CompileCreateReferenceStatement(AProcess.Plan, AReference.EmitStatement(D4.EmitMode.ForCopy)).Execute(AProcess);
 			}
 		}
 		
@@ -2166,7 +2167,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							AProcess.PushExecutingPlan(LPlan);
 							try
 							{
-								PlanNode LNode = D4.Compiler.Compile(LPlan.Plan, LStatement);
+								PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
 								LPlan.CheckCompiled();
 								AProcess.DeviceExecute(this, LNode);
 							}
@@ -2203,7 +2204,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							AProcess.PushExecutingPlan(LPlan);
 							try
 							{
-								PlanNode LNode = D4.Compiler.Compile(LPlan.Plan, LStatement);
+								PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
 								LPlan.CheckCompiled();
 								LNode.Execute(AProcess);
 							}
@@ -2462,7 +2463,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							{
 								LColumn.MetaData.Tags.Add(new D4.Tag("Frontend.Width", Math.Min(Math.Max(3, LLength), 40).ToString()));
 								if (LLength >= 0) // A (n)varchar(max) column in Microsoft SQL Server will reconcile with length -1
-									LColumn.Constraints.Add(D4.Compiler.CompileTableVarColumnConstraint(AProcess.Plan, LTableVar, LColumn, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(LLength)), null)));
+									LColumn.Constraints.Add(Compiler.CompileTableVarColumnConstraint(AProcess.Plan, LTableVar, LColumn, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(LLength)), null)));
 							}
 							
 							if (LColumnTitle == LNativeColumnName)
@@ -3176,7 +3177,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			SQLRangeVarColumn LColumn = FindRangeVarColumn(AIdentifier);
 			if (LColumn == null)
-				throw new D4.CompilerException(D4.CompilerException.Codes.UnknownIdentifier, AIdentifier);
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, AIdentifier);
 			return LColumn;
 		}
 		
@@ -3373,7 +3374,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			SQLRangeVarColumn LColumn = FindRangeVarColumn(AIdentifier, ACurrentContextOnly);
 			if (LColumn == null)
-				throw new D4.CompilerException(D4.CompilerException.Codes.UnknownIdentifier, AIdentifier);
+				throw new CompilerException(CompilerException.Codes.UnknownIdentifier, AIdentifier);
 			return LColumn;
 		}
 		
@@ -3940,7 +3941,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 												LRow[LIndex] = Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LRow.DataType.Columns[LIndex].DataType).ToScalar(ServerProcess, LCursor[LIndex]);
 												
 										if (LCursor.Next())
-											throw new D4.CompilerException(D4.CompilerException.Codes.InvalidRowExtractorExpression);
+											throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
 
 										return LRow;
 									}
@@ -4893,9 +4894,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public static SQLDevice ResolveSQLDevice(ServerProcess AProcess, string ADeviceName)
 		{
-			Device LDevice = D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, ADeviceName, true) as Schema.Device;
+			Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, ADeviceName, true) as Schema.Device;
 			if (LDevice == null)
-				throw new D4.CompilerException(D4.CompilerException.Codes.DeviceIdentifierExpected);
+				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 
 			SQLDevice LSQLDevice = LDevice as SQLDevice;
 			if (LSQLDevice == null)
@@ -4946,9 +4947,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					ParserMessages LParserMessages = new ParserMessages();
 					Statement LStatement = new D4.Parser().ParseStatement(LStatementString, LParserMessages);
 					LPlan.Messages.AddRange(LParserMessages);
-					PlanNode LNode = D4.Compiler.Compile(LPlan.Plan, LStatement);
+					PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
 					if (LPlan.Messages.HasErrors)
-						throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(D4.CompilerErrorLevel.NonFatal));
+						throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(CompilerErrorLevel.NonFatal));
 
 					if (LNode is FrameNode)
 						LNode = LNode.Nodes[0];
@@ -5028,15 +5029,15 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 						if (!AInRowType.Columns[LInIndex].DataType.Is(LValueType))
 						{
-							D4.ConversionContext LContext = D4.Compiler.FindConversionPath(APlan, AInRowType.Columns[LInIndex].DataType, LValueType);
-							D4.Compiler.CheckConversionContext(APlan, LContext);
-							LSourceNode = D4.Compiler.ConvertNode(APlan, LSourceNode, LContext);
+							ConversionContext LContext = Compiler.FindConversionPath(APlan, AInRowType.Columns[LInIndex].DataType, LValueType);
+							Compiler.CheckConversionContext(APlan, LContext);
+							LSourceNode = Compiler.ConvertNode(APlan, LSourceNode, LContext);
 						}
 						
-						LSourceNode = D4.Compiler.Upcast(APlan, LSourceNode, LValueType);
+						LSourceNode = Compiler.Upcast(APlan, LSourceNode, LValueType);
 						AConversionNodes[LInIndex] = LSourceNode;
 							
-						//LValue = (Scalar)D4.Compiler.Upcast(AProcess.Plan, LSourceNode, LValueType).Execute(AProcess).Value;
+						//LValue = (Scalar)Compiler.Upcast(AProcess.Plan, LSourceNode, LValueType).Execute(AProcess).Value;
 					}
 				}
 				
@@ -5165,7 +5166,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				Row LInValues = null;
 				Row LOutValues = null;
 				
-				if (Operator.Operands[0].DataType.Is(D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name") as IDataType))
+				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name") as IDataType))
 				{
 					LDeviceName = (string)AArguments[0];
 					LStatement = (string)AArguments[1];
@@ -5372,14 +5373,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						// An error here should be ignored, just get as much schema information as possible from the actual cursor...
 						// Not as efficient, but the warning lets them know that.
-						APlan.Messages.Add(new D4.CompilerException(D4.CompilerException.Codes.CompilerMessage, D4.CompilerErrorLevel.Warning, LException, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
+						APlan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, LException, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
 						LMessageReported = true;
 					}
 					
 					if ((LSchema == null) || (LSchema.Columns.Count == 0))
 					{
 						if (!LMessageReported)
-							APlan.Messages.Add(new D4.CompilerException(D4.CompilerException.Codes.CompilerMessage, D4.CompilerErrorLevel.Warning, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
+							APlan.Messages.Add(new CompilerException(CompilerException.Codes.CompilerMessage, CompilerErrorLevel.Warning, "Compile-time schema retrieval failed, attempting run-time schema retrieval."));
 
 						if (LCursor != null)
 						{
@@ -5431,7 +5432,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 					else
 					{
-						FTableVar.Keys.Add(D4.Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
+						FTableVar.Keys.Add(Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
 					}
 				}
 				finally
@@ -5441,9 +5442,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			else
 			{
-				FDataType = D4.Compiler.CompileTypeSpecifier(APlan, new D4.Parser().ParseTypeSpecifier(LTableType)) as Schema.TableType;
+				FDataType = Compiler.CompileTypeSpecifier(APlan, new D4.Parser().ParseTypeSpecifier(LTableType)) as Schema.TableType;
 				if (FDataType == null)
-					throw new D4.CompilerException(D4.CompilerException.Codes.TableTypeExpected);
+					throw new CompilerException(CompilerException.Codes.TableTypeExpected);
 				FTableVar = new Schema.ResultTableVar(this);
 				FTableVar.Owner = APlan.User;
 				FSQLColumns = new SQLTableColumns();
@@ -5458,7 +5459,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						FSQLColumns.Add(new SQLTableColumn(LTableVarColumn, (Schema.DeviceScalarType)FSQLDevice.ResolveDeviceScalarType(APlan, (Schema.ScalarType)LTableVarColumn.Column.DataType)));
 				}
 					
-				FTableVar.Keys.Add(D4.Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
+				FTableVar.Keys.Add(Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
 			}
 			
 			FTableVar.EnsureKey(APlan);
@@ -5494,7 +5495,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				Row LInValues = null;
 				Row LOutValues = null;
 				
-				if (Nodes[0].DataType.Is(D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name", true) as IDataType))
+				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name", true) as IDataType))
 				{
 					if ((Nodes.Count >= 3) && (Nodes[2].DataType is Schema.IRowType))
 						LInValues = (Row)Nodes[2].Execute(AProcess);
@@ -5756,7 +5757,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if (LTableName == String.Empty)
 				LBatch = LSQLDevice.DeviceReconciliationScript(AProcess, LOptions);
 			else
-				LBatch = LSQLDevice.DeviceReconciliationScript(AProcess, D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, LTableName, true) as Schema.TableVar, LOptions);
+				LBatch = LSQLDevice.DeviceReconciliationScript(AProcess, Compiler.ResolveCatalogIdentifier(AProcess.Plan, LTableName, true) as Schema.TableVar, LOptions);
 				
 			return LSQLDevice.Emitter.Emit(LBatch);
 		}

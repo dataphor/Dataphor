@@ -12,10 +12,10 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Text;	   
 
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Client.Design;
 using Schema = Alphora.Dataphor.DAE.Schema;
@@ -646,7 +646,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		#region class DAECursor
 		
-		protected delegate void CursorErrorsOccurredHandler(DAECursor ACursor, DAE.Language.D4.CompilerMessages AMessages);
+		protected delegate void CursorErrorsOccurredHandler(DAECursor ACursor, CompilerMessages AMessages);
 
 		protected class DAECursor : Disposable
 		{

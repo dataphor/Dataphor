@@ -3,17 +3,19 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+using System;
+using System.IO;
+using System.Text;
+using System.Collections;
+
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Runtime;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	using System.IO;
-	using System.Collections;
-	
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Streams;
-	using System.Text;
-	
 	public class DataTypeList : System.Object
 	{
 		public DataTypeList() : base() {}
@@ -466,7 +468,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							
 							case 4 : // native specialized value
 								LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-								LDataType = Language.D4.Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Language.D4.Parser().ParseTypeSpecifier(LDataTypeName));
+								LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
 								AOffset += LStringConveyor.GetSize(LDataTypeName);
 								LScalarType = LDataType as Schema.ScalarType;
 								if ((LScalarType != null) && !LScalarType.IsCompound)
@@ -506,7 +508,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							
 							case 5 : // non-native specialized value
 								LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-								LDataType = Language.D4.Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Language.D4.Parser().ParseTypeSpecifier(LDataTypeName));
+								LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
 								AOffset += LStringConveyor.GetSize(LDataTypeName);
 								LScalarType = LDataType as Schema.ScalarType;
 								if (LScalarType != null)

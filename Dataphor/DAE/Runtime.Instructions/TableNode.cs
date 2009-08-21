@@ -8,26 +8,25 @@
 #define WRAPRUNTIMEEXCEPTIONS // Determines whether or not runtime exceptions are wrapped
 //#define TRACKCALLDEPTH // Determines whether or not call depth tracking is enabled
 
+using System;
+using System.IO;
+using System.Collections;
+using System.Text;
+using System.Threading;
+using System.Reflection;
+
+using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Schema = Alphora.Dataphor.DAE.Schema;
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	using System.IO;
-	using System.Collections;
-	using System.Text;
-	using System.Threading;
-	using System.Reflection;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-	using Schema = Alphora.Dataphor.DAE.Schema;
-	
 	/*
 		Modification Execution ->
 			Before

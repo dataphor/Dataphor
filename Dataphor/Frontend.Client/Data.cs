@@ -13,6 +13,7 @@ using System.Collections.Specialized;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
@@ -1171,7 +1172,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		// Error Handling
-		private void ErrorsOccurred(DataSet ADataSet, DAE.Language.D4.CompilerMessages AMessages)
+		private void ErrorsOccurred(DataSet ADataSet, CompilerMessages AMessages)
 		{
 			ErrorList AErrors = new ErrorList();
 			AErrors.AddRange(AMessages);

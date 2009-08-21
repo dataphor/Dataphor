@@ -3,19 +3,21 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.Threading;
+
+using Alphora.Dataphor.DAE.Language;
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Server;	
+using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Schema = Alphora.Dataphor.DAE.Schema;
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	using System.Threading;
-
-	using Alphora.Dataphor.DAE.Server;	
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-	using Schema = Alphora.Dataphor.DAE.Schema;
-
     /*
 		Cursor Level Table Operators ->
 			Cursor(table): Cursor

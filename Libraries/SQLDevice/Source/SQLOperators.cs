@@ -8,10 +8,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	using System;
 	using System.Collections;
 	
-	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.SQL;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Device;
 	using Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.DAE.Runtime;

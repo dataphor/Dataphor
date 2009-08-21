@@ -17,6 +17,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.SQL;
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
@@ -353,7 +354,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 				#if USEISTRING
 				case "clob": return (ScalarType)(IsCaseSensitive ? AProcess.Plan.Catalog[CSQLTextScalarType] : AProcess.Plan.Catalog[CSQLITextScalarType]);
 				#else
-				case "clob": return (ScalarType)D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
 				#endif
 				case "blob": return AProcess.DataTypes.SystemBinary;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);

@@ -12,19 +12,20 @@
 using System;
 using System.Globalization;
 using System.IO;
+
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Language.SQL;
 using Alphora.Dataphor.DAE.Language.TSQL;
-
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
-using ColumnExpression=Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
-using DropIndexStatement=Alphora.Dataphor.DAE.Language.TSQL.DropIndexStatement;
-using SelectStatement=Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
+using ColumnExpression = Alphora.Dataphor.DAE.Language.SQL.ColumnExpression;
+using DropIndexStatement = Alphora.Dataphor.DAE.Language.TSQL.DropIndexStatement;
+using SelectStatement = Alphora.Dataphor.DAE.Language.SQL.SelectStatement;
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {

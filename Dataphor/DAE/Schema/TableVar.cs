@@ -12,10 +12,9 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime.Instructions;

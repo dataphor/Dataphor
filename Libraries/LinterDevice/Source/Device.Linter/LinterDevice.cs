@@ -14,8 +14,9 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 	using Alphora.Dataphor.DAE.Device.SQL;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.SQL;
-	using Alphora.Dataphor.DAE.Connection;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Connection;
 	
 	/*
 		Data Type Mapping ->
@@ -137,7 +138,7 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 				#if USEISTRING
 				case "clob": return (ScalarType)(IsCaseSensitive ? AProcess.Plan.Catalog[CSQLTextScalarType] : AProcess.Plan.Catalog[CSQLITextScalarType]);
 				#else
-				case "clob": return (ScalarType)D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+				case "clob": return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
 				#endif
 				case "blob": return AProcess.DataTypes.SystemBinary;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);

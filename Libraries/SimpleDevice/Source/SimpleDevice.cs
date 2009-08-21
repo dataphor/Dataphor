@@ -8,13 +8,12 @@ using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;

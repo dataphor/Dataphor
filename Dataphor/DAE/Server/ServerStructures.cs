@@ -47,42 +47,6 @@ namespace Alphora.Dataphor.DAE.Server
 		Repository 
 	}
 
-	public class CursorContext : System.Object
-	{
-		public CursorContext() : base() {}
-		public CursorContext(CursorType ACursorType, CursorCapability ACapabilities, CursorIsolation AIsolation) : base()
-		{
-			FCursorType = ACursorType;
-			FCursorCapabilities = ACapabilities;
-			FCursorIsolation = AIsolation;
-		}
-		// CursorType
-		private CursorType FCursorType;
-		public CursorType CursorType
-		{
-			get { return FCursorType; }
-			set { FCursorType = value; }
-		}
-		
-		// CursorCapabilities
-		private CursorCapability FCursorCapabilities;
-		public CursorCapability CursorCapabilities
-		{
-			get { return FCursorCapabilities; }
-			set { FCursorCapabilities = value; }
-		}
-		
-		// CursorIsolation
-		private CursorIsolation FCursorIsolation;
-		public CursorIsolation CursorIsolation
-		{
-			get { return FCursorIsolation; }
-			set { FCursorIsolation = value; }
-		}
-	}
-	
-	public class CursorContexts : List<CursorContext> { }
-
 	public class LoadingContext : System.Object
 	{
 		public LoadingContext(Schema.User AUser, string ALibraryName) : base()

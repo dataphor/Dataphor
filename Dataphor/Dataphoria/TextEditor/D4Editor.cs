@@ -27,6 +27,7 @@ using Image=System.Drawing.Image;
 using SD = ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor;
 using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.DAE.Compiling;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {

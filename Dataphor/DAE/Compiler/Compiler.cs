@@ -17,21 +17,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Debug;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Schema = Alphora.Dataphor.DAE.Schema;
-using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
-
-namespace Alphora.Dataphor.DAE.Language.D4
+namespace Alphora.Dataphor.DAE.Compiling
 {
+	using Alphora.Dataphor.DAE.Debug;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+	using Schema = Alphora.Dataphor.DAE.Schema;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+
 	// TODO: Scan isolation levels...
     // TODO: table nesting operators
 	// TODO: Expression Transformation Optimization Engine
@@ -2868,16 +2868,16 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				return true;
 				
 			Schema.Signature LSignature = new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(ADataType), new Schema.SignatureElement(ADataType)});
-			D4.OperatorBindingContext LContext = new D4.OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
-			D4.Compiler.ResolveOperator(APlan, LContext);
+			OperatorBindingContext LContext = new OperatorBindingContext(null, "iEqual", APlan.NameResolutionPath, LSignature, true);
+			Compiler.ResolveOperator(APlan, LContext);
 			return LContext.Operator != null;
 		}
 		
 		public static bool SupportsComparison(Plan APlan, Schema.IDataType ADataType)
 		{
 			Schema.Signature LSignature = new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(ADataType), new Schema.SignatureElement(ADataType)});
-			D4.OperatorBindingContext LContext = new D4.OperatorBindingContext(null, "iCompare", APlan.NameResolutionPath, LSignature, true);
-			D4.Compiler.ResolveOperator(APlan, LContext);
+			OperatorBindingContext LContext = new OperatorBindingContext(null, "iCompare", APlan.NameResolutionPath, LSignature, true);
+			Compiler.ResolveOperator(APlan, LContext);
 			return LContext.Operator != null;
 		}
 		

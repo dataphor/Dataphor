@@ -9,13 +9,13 @@ using System.Text;
 using System.Diagnostics;
 using Security = System.Security;
 
-using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Streams;
 

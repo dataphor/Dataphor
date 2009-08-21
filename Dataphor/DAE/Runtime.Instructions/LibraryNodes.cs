@@ -6,28 +6,28 @@
 #define NILPROPOGATION
 #define LOADFROMLIBRARIES
 
+using System; 
+using System.IO;
+using System.Text;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
+//using System.Windows.Forms; // TODO: Why is this here?
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System; 
-	using System.IO;
-	using System.Text;
-	using System.Collections;
-	using System.Collections.Specialized;
-	using System.Reflection;
-	using System.Runtime.Remoting.Messaging;
-	using System.Windows.Forms;
-
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	
+
 	// operator FileReference(const AName : Name, const AIsAssembly : Boolean) : FileReference
 	public class FileReferenceNode : InstructionNode
 	{

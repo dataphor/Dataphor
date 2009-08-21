@@ -9,13 +9,14 @@ using System.IO;
 using System.Collections;
 using System.Runtime.Remoting.Lifetime;
 
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE
 {

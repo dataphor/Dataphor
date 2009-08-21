@@ -20,13 +20,14 @@ using System.Collections.Specialized;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
 using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.DAE.Server
 {

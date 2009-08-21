@@ -16,6 +16,7 @@ using System.Text;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.DAE.Compiling;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -199,14 +200,14 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 
 		/// <returns> True if no errors.  Continue processing... </returns>
-		public static bool ConvertCompilerErrors(DAE.Language.D4.CompilerMessages AMessages, ErrorList AErrors)
+		public static bool ConvertCompilerErrors(CompilerMessages AMessages, ErrorList AErrors)
 		{
 			bool LAnyErrors = false;
-			DAE.Language.D4.CompilerException LCompilerException;
+			CompilerException LCompilerException;
 			foreach (Exception LException in AMessages)
 			{
-				LCompilerException = LException as DAE.Language.D4.CompilerException;
-				LAnyErrors = LAnyErrors || (LCompilerException == null) || (LCompilerException.ErrorLevel != DAE.Language.D4.CompilerErrorLevel.Warning);
+				LCompilerException = LException as CompilerException;
+				LAnyErrors = LAnyErrors || (LCompilerException == null) || (LCompilerException.ErrorLevel != CompilerErrorLevel.Warning);
 				AErrors.Add(LException);
 			}
 			return !LAnyErrors;
@@ -214,11 +215,11 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public static bool ContainsError(ErrorList AErrors)
 		{
-			Alphora.Dataphor.DAE.Language.D4.CompilerException LCompilerException;
+			CompilerException LCompilerException;
 			foreach (Exception LException in AErrors)
 			{
-				LCompilerException = LException as Alphora.Dataphor.DAE.Language.D4.CompilerException;
-				if ((LCompilerException == null) || (LCompilerException.ErrorLevel != Alphora.Dataphor.DAE.Language.D4.CompilerErrorLevel.Warning))
+				LCompilerException = LException as CompilerException;
+				if ((LCompilerException == null) || (LCompilerException.ErrorLevel != CompilerErrorLevel.Warning))
 					return true;
 			}
 			return false;

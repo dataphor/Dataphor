@@ -6,25 +6,24 @@
 #define UseReferenceDerivation
 #define USEUPDATEVALUEFLAGS
 	
+using System;
+using System.Text;
+using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	using System.Text;
-	using System.Threading;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Collections.Specialized;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	
+
 	// TODO: Make sure the cursors only select the columns that are absolutely necessary to perform their task.
 	// (i.e. make sure a join only selects the fields it needs to compare to do the join from its source cursors.)
             

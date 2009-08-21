@@ -22,23 +22,6 @@ using System.Reflection;
 using System.Resources;
 using System.Security.Principal;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.Logging;
-using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Memory;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Schema = Alphora.Dataphor.DAE.Schema;
-using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
-
 /*
 	DAE Object Hierarchy ->
 	
@@ -87,6 +70,22 @@ using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
 
 namespace Alphora.Dataphor.DAE.Server
 {
+	using Alphora.Dataphor.Logging;
+	using Alphora.Dataphor.BOP;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Device.Memory;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+	using Schema = Alphora.Dataphor.DAE.Schema;
+	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+
 	/// <summary> Dataphor DAE Server class. </summary>
 	/// <remarks>
 	///		Provides an instance of a Dataphor DAE Server.  This object is usually accessed

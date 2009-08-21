@@ -9,17 +9,18 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Debug;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Catalog;
-
-namespace Alphora.Dataphor.DAE.Server
+namespace Alphora.Dataphor.DAE.Compiling
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Debug;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	// Plan provides compile time state	for the compiler.
 	public class Plan : Disposable
 	{

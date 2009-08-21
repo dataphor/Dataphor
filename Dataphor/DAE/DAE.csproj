@@ -801,7 +801,6 @@
     <EmbeddedResource Include="Strings.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Content Include="Compiler\QuickReference.txt" />
     <Content Include="Language.D4\BNF.txt" />
     <Content Include="Language.RealSQL\BNF.txt" />
     <Content Include="Language.SQL\BNF.txt" />

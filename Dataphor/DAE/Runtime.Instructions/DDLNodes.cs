@@ -3,24 +3,26 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.Text;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	using System.Text;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Collections.Specialized;
-
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Device.Memory;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	
+
 	public abstract class DDLNode : PlanNode 
 	{
 		protected void DropDeviceMaps(ServerProcess AProcess, Schema.Device ADevice)

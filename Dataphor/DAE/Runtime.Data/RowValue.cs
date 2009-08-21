@@ -6,17 +6,20 @@
 
 #define USEDATATYPESINNATIVEROW // Determines whether or not the native row tracks the data type of the values it contains
 
+using System;
+using System.IO;
+using System.Text;
+using System.Collections;
+
+#if USEDATATYPESINNATIVEROW
+using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+#endif
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Streams;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	using System.IO;
-	using System.Collections;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
-	using System.Text;
-	
 	/*
 		Row ->
 		
@@ -626,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						case 4 : // native specialized value
 							#if USEDATATYPESINNATIVEROW
 							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Language.D4.Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Language.D4.Parser().ParseTypeSpecifier(LDataTypeName));
+							LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
 							AOffset += LStringConveyor.GetSize(LDataTypeName);
 							LScalarType = LDataType as Schema.ScalarType;
 							if ((LScalarType != null) && !LScalarType.IsCompound)
@@ -670,7 +673,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						case 5 : // non-native specialized value
 							#if USEDATATYPESINNATIVEROW
 							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Language.D4.Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Language.D4.Parser().ParseTypeSpecifier(LDataTypeName));
+							LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
 							AOffset += LStringConveyor.GetSize(LDataTypeName);
 							LScalarType = LDataType as Schema.ScalarType;
 							if (LScalarType != null)

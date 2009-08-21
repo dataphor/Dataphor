@@ -20,6 +20,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Device.Memory;
 	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Schema = Alphora.Dataphor.DAE.Schema;

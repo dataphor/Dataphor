@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Compiling;
 
 namespace Alphora.Dataphor.DAE.Device.Oracle
 {
@@ -189,7 +190,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				case "clob": return (ScalarType)(IsCaseSensitive ? AProcess.Plan.Catalog[CSQLTextScalarType] : AProcess.Plan.Catalog[CSQLITextScalarType]);
 #else
                 case "clob":
-                    return (ScalarType) Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+                    return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
 #endif
                 case "blob":
                     return AProcess.DataTypes.SystemBinary;

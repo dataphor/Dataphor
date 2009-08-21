@@ -6,25 +6,24 @@
 #define UseReferenceDerivation
 #define NILPROPOGATION
 	
+using System;
+using System.Text;
+using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using System;
-	using System.Text;
-	using System.Threading;
-	using System.Collections;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	using System.Collections.Generic;
-	
+
     public class RowNode : PlanNode
     {
 		// constructor

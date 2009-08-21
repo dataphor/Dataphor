@@ -17,9 +17,6 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	using System.Data.SqlClient;
 	using System.Resources;
 
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Device;
 	using Alphora.Dataphor.DAE.Device.SQL;
 	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Schema;
@@ -28,6 +25,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 	using Alphora.Dataphor.DAE.Language.SQL;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
 	using MySQL = Alphora.Dataphor.DAE.Language.MySQL;
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
@@ -174,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 				#if USEISTRING
 				case "ntext": return (ScalarType)(IsCaseSensitive ? AProcess.Plan.Catalog[CSQLTextScalarType] : AProcess.Plan.Catalog[CSQLITextScalarType]);
 				#else
-				case "ntext": return (ScalarType)D4.Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+				case "ntext": return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
 				#endif
 				case "blob": return AProcess.DataTypes.SystemBinary;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
