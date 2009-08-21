@@ -44,6 +44,8 @@ namespace Alphora.Dataphor.Dataphoria
 
 			FServices.Add(typeof(DAE.Client.Controls.Design.IPropertyTextEditorService), new PropertyTextEditorService());
 
+			CreateDebugger();
+
 			FExplorer = new DataTree();
 			FExplorer.AllowDrop = true;
 			FExplorer.BorderStyle = BorderStyle.None;
@@ -91,6 +93,18 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentSessionView.Text = "Sessions - Dataphoria";
 			FDockContentSessionView.ShowHint = DockState.DockBottomAutoHide;
 			
+			FCallStackView = new CallStackView();
+			FCallStackView.Dataphoria = this;
+			FCallStackView.Name = "FCallStackView";
+			FCallStackView.Dock = DockStyle.Fill;
+
+			FDockContentCallStackView = new DockContent();
+			FDockContentCallStackView.HideOnClose = true;
+			FDockContentCallStackView.Controls.Add(FCallStackView);
+			FDockContentCallStackView.TabText = "Call Stack";
+			FDockContentCallStackView.Text = "Call Stack - Dataphoria";
+			FDockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
+			
 			FDockContentExplorer.Show(this.FDockPanel);
 			FDockContentErrorListView.Show(this.FDockPanel);
 
@@ -100,8 +114,6 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockPanel.DockBottomPortion = 240;
 
 			LoadSettings();
-			
-			CreateDebugger();
 		}
 
 		#if TRACEFOCUS
@@ -154,10 +166,12 @@ namespace Alphora.Dataphor.Dataphoria
 		private DataTree FExplorer;
 		private ErrorListView FErrorListView;
 		private SessionView FSessionView;
+		private CallStackView FCallStackView;
 
 		private DockContent FDockContentExplorer;
 		private DockContent FDockContentErrorListView;
 		private DockContent FDockContentSessionView;
+		private DockContent FDockContentCallStackView;
 
 		#region Settings
 
@@ -442,9 +456,8 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			// Make sure we can safely disconnect
 			CloseChildren();
-			if (MdiChildren.Length > 0){
+			if (MdiChildren.Length > 0)
 				throw new AbortException();
-			}
 
 			InternalDisconnect();
 		}
@@ -457,6 +470,11 @@ namespace Alphora.Dataphor.Dataphoria
 				LSource = AHost.Children[0] as IErrorSource;
 
 			Warnings.AppendErrors(LSource, AErrors, true);
+		}
+		
+		public bool IsConnected
+		{
+			get { return FDataSession != null; }
 		}
 
 		#endregion
@@ -1545,7 +1563,7 @@ namespace Alphora.Dataphor.Dataphoria
 				LaunchAlphoraGroups();
 			else if (ASender == FDocumentTypesToolStripMenuItem)
 				BrowseDocumentTypes(); 
-			else if (ASender == FStopDebuggerMenuItem || ASender == FStopDebuggerButton)
+			else if (ASender == FStopDebuggerMenuItem || ASender == FDebugStopButton)
 				Debugger.Stop();
 			else if (ASender == FViewSessionsMenuItem || ASender == FViewSessionsButton)
 				ViewSessions();
@@ -1553,6 +1571,8 @@ namespace Alphora.Dataphor.Dataphoria
 				Debugger.Pause();
 			else if (ASender == FDebugRunMenuItem || ASender == FDebugRunButton)
 				Debugger.Run();
+			else if (ASender == FViewCallStackMenuItem || ASender == FViewCallStackButton)
+				FDockContentCallStackView.Show(FDockPanel);
 		}
 
 		private void ViewSessions()

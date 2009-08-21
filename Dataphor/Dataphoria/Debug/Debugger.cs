@@ -16,6 +16,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FDataphoria = ADataphoria;
 			FDataphoria.Connected += new EventHandler(DataphoriaConnected);
 			FDataphoria.Disconnected += new EventHandler(DataphoriaDisconnected);
+			UpdateDebuggerState();
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -41,11 +42,63 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void DataphoriaConnected(object sender, EventArgs e)
 		{
-			
+			UpdateDebuggerState();
 		}
 
-		private bool FIsStarted;
+		private void UpdateDebuggerState()
+		{
+			if (FDataphoria.IsConnected)
+			{
+				var LDebugger = FDataphoria.EvaluateQuery("(.System.Debug.GetDebuggers() where Session_ID = SessionID())[]") as Row;
+				if (LDebugger != null)
+					InternalInitializeState((bool)LDebugger["IsPaused"], (bool)LDebugger["BreakOnException"]);
+				else
+					InternalClearState();
+			}
+			else
+				InternalClearState();
+		}
+
+		private void InternalInitializeState(bool AIsPaused, bool ABreakOnException)
+		{
+			FIsStarted = true;
+			FIsPaused = AIsPaused;
+			FBreakOnException = ABreakOnException;
+			FSelectedProcessID = -1;
+			FSelectedCallStackIndex = -1;
+			FCurrentLocation = null;
+
+			NotifyPropertyChanged("IsStarted");
+			NotifyPropertyChanged("IsPaused");
+			NotifyPropertyChanged("BreakOnException");
+			NotifyPropertyChanged("SelectedProcessID");
+			NotifyPropertyChanged("SelectedCallStackIndex");
+			NotifyPropertyChanged("CurrentLocation");
+
+			ResetSelectedProcess();
+		}
+
+		private void InternalClearState()
+		{
+			FIsStarted = false;
+			FIsPaused = false;
+			FBreakOnException = false;
+			FSelectedProcessID = -1;
+			FSelectedCallStackIndex = -1;
+			FCurrentLocation = null;
+
+			NotifyPropertyChanged("IsStarted");
+			NotifyPropertyChanged("IsPaused");
+			NotifyPropertyChanged("BreakOnException");
+			NotifyPropertyChanged("SelectedProcessID");
+			NotifyPropertyChanged("SelectedCallStackIndex");
+			NotifyPropertyChanged("CurrentLocation");
+		}
+
+		// IsStarted
 		
+		private bool FIsStarted;
+
 		public bool IsStarted
 		{
 			get { return FIsStarted; }
@@ -61,31 +114,37 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 		
-		public void Start()
+		private void InternalSetIsStarted(bool AValue)
 		{
-			if (!FIsStarted)
-			{
-				FDataphoria.ExecuteScript(@".System.Debug.Start();");
-				FIsStarted = true;
+				FIsStarted = AValue;
 				NotifyPropertyChanged("IsStarted");
-			}
 		}
 		
+		public void Start()
+		{
+			if (!FIsStarted && FDataphoria.IsConnected)
+			{
+				FDataphoria.ExecuteScript(@".System.Debug.Start();");
+				UpdateDebuggerState();
+			}
+		}
+
 		public void Stop()
 		{
 			if (FIsStarted)
 			{
 				FDataphoria.ExecuteScript(@".System.Debug.Stop();");
-				FIsStarted = true;
-				NotifyPropertyChanged("IsStarted");
+				InternalClearState();
 			}
 		}
+
+		// IsPaused
 		
 		private bool FIsPaused;
 		
 		public bool IsPaused { get { return FIsPaused; } }
 		
-		private void SetIsPaused(bool AValue)
+		private void InternalSetIsPaused(bool AValue)
 		{
 			if (AValue != FIsPaused)
 			{
@@ -93,7 +152,53 @@ namespace Alphora.Dataphor.Dataphoria
 				NotifyPropertyChanged("IsPaused");
 			}
 		}
+
+		public void Run()
+		{
+			if (IsStarted && IsPaused && FDataphoria.IsConnected)
+			{
+				FDataphoria.ExecuteScript(@".System.Debug.Run();");
+				InternalUnpause();
+			}
+		}
+
+		/// <summary> Requests that the debugger pause. </summary>
+		/// <remarks> IsPaused will not in general be set immediately following this call.  
+		///  IsPaused is set when the debugger indicates that all debugged processes are fully paused. </remarks>
+		public void Pause()
+		{
+			if (!IsPaused)
+			{
+				Start();
+				// Note: Pause is asynchronous, so we aren't actually paused until our debugger thread is woken by a response to WaitForBreak
+				FDataphoria.ExecuteScript(@".System.Debug.Pause();");
+			}
+		}
+
+		// BreakOnException
 		
+		private bool FBreakOnException;
+		
+		public bool BreakOnException 
+		{ 
+			get { return FBreakOnException; } 
+			set 
+			{
+				if (FBreakOnException != value)
+				{
+					if (FIsStarted)
+						UpdateBreakOnException();
+					FBreakOnException = value;
+					NotifyPropertyChanged("BreakOnException");
+				}
+			}
+		}
+
+		private void UpdateBreakOnException()
+		{
+			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnException(" + FBreakOnException.ToString().ToLowerInvariant() + ")");
+		}
+
 		private int FSelectedProcessID = -1;
 		
 		public int SelectedProcessID
@@ -168,9 +273,11 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FSelectedProcessID >= 0)
 			{
+				DebugLocator LLocation = null;
 				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
-				DebugLocator LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
-					InternalSetCurrentLocation(LLocation);
+				if (LWindow != null)
+					LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
+				InternalSetCurrentLocation(LLocation);
 			}
 			else
 				if (FCurrentLocation != null)
@@ -192,35 +299,15 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		public void Run()
-		{
-			if (IsPaused)
-			{
-				FDataphoria.ExecuteScript(@".System.Debug.Run();");
-				InternalUnpause();
-			}
-		}
-
-		/// <summary> Requests that the debugger pause. </summary>
-		/// <remarks> IsPaused will not in general be set immediately following this call.  
-		///  IsPaused is set when the debugger indicates that all debugged processes are fully paused. </remarks>
-		public void Pause()
-		{
-			if (!IsPaused)
-			{
-				// Note: Pause is asynchronous, so we aren't actually paused until our debugger thread is woken by a response to WaitForBreak
-				FDataphoria.ExecuteScript(@".System.Debug.Pause();");
-			}
-		}
-		
 		public void AttachSession(int ASessionID)
 		{
+			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachSession({0});", ASessionID));
 		}
 
 		private void InternalUnpause()
 		{
-			SetIsPaused(false);
+			InternalSetIsPaused(false);
 			new Thread(new ThreadStart(DebuggerThread)).Start();
 		}
 
@@ -232,7 +319,7 @@ namespace Alphora.Dataphor.Dataphoria
 				try
 				{
 					var LDebugBreakDelegate = new ThreadStart(delegate { DebuggerPaused(); });
-					LProcess.Execute("Debug.WaitForPause();", null);
+					LProcess.Execute(".System.Debug.WaitForPause();", null);
 					FDataphoria.Invoke(LDebugBreakDelegate);
 				}
 				finally
@@ -249,7 +336,7 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Invoked when the debugger pauses or breaks. </summary>
 		private void DebuggerPaused()
 		{
-			SetIsPaused(true);
+			InternalSetIsPaused(true);
 			ResetSelectedProcess();
 		}
 	}

@@ -21,7 +21,7 @@ namespace Alphora.Dataphor.Dataphoria
         DataSession DataSession { get; }
         ErrorListView Warnings { get; }
         Settings Settings { get; }
-        
+        bool IsConnected { get; }
         Debugger Debugger { get; }
         
         FileDesignBuffer PromptForFileBuffer(IDesigner ADesigner, string AFileName);

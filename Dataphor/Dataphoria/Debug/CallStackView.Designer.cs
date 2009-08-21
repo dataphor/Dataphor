@@ -1,6 +1,6 @@
 ﻿namespace Alphora.Dataphor.Dataphoria
 {
-	partial class ViewCallStack
+	partial class CallStackView
 	{
 		/// <summary>
 		/// Required designer variable.
