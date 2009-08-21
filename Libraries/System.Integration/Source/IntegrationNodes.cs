@@ -6,18 +6,17 @@
 using System;
 using System.Text;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Schema = Alphora.Dataphor.DAE.Schema;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-
 namespace Alphora.Dataphor.Libraries.System.Integration
 {
+	using Alphora.Dataphor.DAE;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Schema = Alphora.Dataphor.DAE.Schema;
+
 	// operator Insert(ASource : table, ATarget : table) : String
 	public class InsertNode : InstructionNodeBase
 	{
@@ -130,7 +129,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			try
 			{
 				// Have the target process use the main process' context
-				Context LOldTargetContext = ((ServerProcess)LTargetProcess).SwitchContext(AProcess.Context);
+				Stack LOldTargetContext = ((ServerProcess)LTargetProcess).SwitchContext(AProcess.Stack);
 				try
 				{
 					LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
@@ -138,7 +137,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 					try
 					{
 						// Have the source process use the main process' context
-						Context LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Context);
+						Stack LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Stack);
 						try
 						{
 							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess);

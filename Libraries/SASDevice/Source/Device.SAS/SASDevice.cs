@@ -10,19 +10,20 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 	using System.Resources;
 	using System.Globalization;
 
-	using Alphora.Dataphor.DAE.Server;	
-	using Alphora.Dataphor.DAE.Schema;	
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.SQL;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using SAS = Alphora.Dataphor.DAE.Language.SAS;
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Device;
 	using Alphora.Dataphor.DAE.Device.SQL;
+	using Alphora.Dataphor.DAE.Server;	
+	using Alphora.Dataphor.DAE.Schema;	
 	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.SQL;
-	using D4 = Alphora.Dataphor.DAE.Language.D4;
-	using SAS = Alphora.Dataphor.DAE.Language.SAS;
 	
 	/*
 		Data Type Mapping ->
@@ -109,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 		}
 
 		// FindScalarType
-		public override ScalarType FindScalarType(ServerProcess AProcess, string ADomainName, int ALength, D4.MetaData AMetaData)
+		public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
         {
 			switch (ADomainName.ToLower())
 			{
@@ -118,9 +119,9 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 					#if USEISTRING
 					return IsCaseSensitive ? AProcess.DataTypes.SystemString : AProcess.DataTypes.SystemIString;
 					#else
-					return AProcess.DataTypes.SystemString;
+					return APlan.DataTypes.SystemString;
 					#endif
-				case "num" : return AProcess.DataTypes.SystemDecimal;
+				case "num" : return APlan.DataTypes.SystemDecimal;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
 			}
         }

@@ -863,7 +863,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				LServerCatalog.Add(ATableVar);
 			else
 			{
-				AProcess.Context.PushWindow(0);
+				AProcess.Stack.PushWindow(0);
 				try
 				{
 					DataParams LParams = new DataParams();
@@ -902,7 +902,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				finally
 				{
-					AProcess.Context.PopWindow();
+					AProcess.Stack.PopWindow();
 				}
 			}
 
@@ -952,7 +952,7 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			Schema.DeviceOperator LDeviceOperator = FDeviceOperators[AOperator];
 			if (LDeviceOperator == null)
-				LDeviceOperator = APlan.ServerProcess.CatalogDeviceSession.ResolveDeviceOperator(this, AOperator);
+				LDeviceOperator = APlan.CatalogDeviceSession.ResolveDeviceOperator(this, AOperator);
 			if (LDeviceOperator != null)
 				APlan.AttachDependency(LDeviceOperator);
 			return LDeviceOperator;
@@ -987,7 +987,7 @@ namespace Alphora.Dataphor.DAE.Schema
         {
 			Schema.DeviceScalarType LDeviceScalarType = FDeviceScalarTypes[AScalarType];
 			if (LDeviceScalarType == null)
-				LDeviceScalarType = APlan.ServerProcess.CatalogDeviceSession.ResolveDeviceScalarType(this, AScalarType);
+				LDeviceScalarType = APlan.CatalogDeviceSession.ResolveDeviceScalarType(this, AScalarType);
 			if (LDeviceScalarType != null)
 				APlan.AttachDependency(LDeviceScalarType);
 			return LDeviceScalarType;

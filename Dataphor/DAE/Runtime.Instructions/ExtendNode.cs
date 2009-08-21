@@ -55,8 +55,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LKeyColumns.Add(LTableVarColumn.Name, new Schema.Key(new Schema.TableVarColumn[]{LTableVarColumn}));
 			
 			ApplicationTransaction LTransaction = null;
-			if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				if (LTransaction != null)
@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								Schema.TableVarColumn LNewColumn;
 								foreach (NamedColumnExpression LColumn in FExpressions)
 								{
-									LNewColumn = new Schema.TableVarColumn(new Schema.Column(LColumn.ColumnAlias, APlan.Catalog.DataTypes.SystemScalar));
+									LNewColumn = new Schema.TableVarColumn(new Schema.Column(LColumn.ColumnAlias, APlan.DataTypes.SystemScalar));
 									APlan.PushCreationObject(LNewColumn);
 									try
 									{

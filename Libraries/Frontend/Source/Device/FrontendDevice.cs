@@ -86,24 +86,24 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FWatcher.Renamed += new RenamedEventHandler(DirectoryRenamed);
 			FWatcher.EnableRaisingEvents = true;
 			#endif
-			AProcess.Plan.Catalog.Libraries.OnLibraryCreated += new Schema.LibraryNotifyEvent(LibraryCreated);
-			AProcess.Plan.Catalog.Libraries.OnLibraryDeleted += new Schema.LibraryNotifyEvent(LibraryDeleted);
-			AProcess.Plan.Catalog.Libraries.OnLibraryAdded += new Schema.LibraryNotifyEvent(LibraryAdded);
-			AProcess.Plan.Catalog.Libraries.OnLibraryRemoved += new Schema.LibraryNotifyEvent(LibraryRemoved);
-			AProcess.Plan.Catalog.Libraries.OnLibraryRenamed += new Schema.LibraryRenameEvent(LibraryRenamed);
-			AProcess.Plan.Catalog.Libraries.OnLibraryLoaded += new Schema.LibraryNotifyEvent(LibraryLoaded);
-			AProcess.Plan.Catalog.Libraries.OnLibraryUnloaded += new Schema.LibraryNotifyEvent(LibraryUnloaded);
+			AProcess.Catalog.Libraries.OnLibraryCreated += new Schema.LibraryNotifyEvent(LibraryCreated);
+			AProcess.Catalog.Libraries.OnLibraryDeleted += new Schema.LibraryNotifyEvent(LibraryDeleted);
+			AProcess.Catalog.Libraries.OnLibraryAdded += new Schema.LibraryNotifyEvent(LibraryAdded);
+			AProcess.Catalog.Libraries.OnLibraryRemoved += new Schema.LibraryNotifyEvent(LibraryRemoved);
+			AProcess.Catalog.Libraries.OnLibraryRenamed += new Schema.LibraryRenameEvent(LibraryRenamed);
+			AProcess.Catalog.Libraries.OnLibraryLoaded += new Schema.LibraryNotifyEvent(LibraryLoaded);
+			AProcess.Catalog.Libraries.OnLibraryUnloaded += new Schema.LibraryNotifyEvent(LibraryUnloaded);
 		}
 		
 		protected override void InternalStop(ServerProcess AProcess)
 		{
-			AProcess.Plan.Catalog.Libraries.OnLibraryCreated -= new Schema.LibraryNotifyEvent(LibraryCreated);
-			AProcess.Plan.Catalog.Libraries.OnLibraryDeleted -= new Schema.LibraryNotifyEvent(LibraryDeleted);
-			AProcess.Plan.Catalog.Libraries.OnLibraryAdded -= new Schema.LibraryNotifyEvent(LibraryAdded);
-			AProcess.Plan.Catalog.Libraries.OnLibraryRemoved -= new Schema.LibraryNotifyEvent(LibraryRemoved);
-			AProcess.Plan.Catalog.Libraries.OnLibraryRenamed -= new Schema.LibraryRenameEvent(LibraryRenamed);
-			AProcess.Plan.Catalog.Libraries.OnLibraryLoaded -= new Schema.LibraryNotifyEvent(LibraryLoaded);
-			AProcess.Plan.Catalog.Libraries.OnLibraryUnloaded -= new Schema.LibraryNotifyEvent(LibraryUnloaded);
+			AProcess.Catalog.Libraries.OnLibraryCreated -= new Schema.LibraryNotifyEvent(LibraryCreated);
+			AProcess.Catalog.Libraries.OnLibraryDeleted -= new Schema.LibraryNotifyEvent(LibraryDeleted);
+			AProcess.Catalog.Libraries.OnLibraryAdded -= new Schema.LibraryNotifyEvent(LibraryAdded);
+			AProcess.Catalog.Libraries.OnLibraryRemoved -= new Schema.LibraryNotifyEvent(LibraryRemoved);
+			AProcess.Catalog.Libraries.OnLibraryRenamed -= new Schema.LibraryRenameEvent(LibraryRenamed);
+			AProcess.Catalog.Libraries.OnLibraryLoaded -= new Schema.LibraryNotifyEvent(LibraryLoaded);
+			AProcess.Catalog.Libraries.OnLibraryUnloaded -= new Schema.LibraryNotifyEvent(LibraryUnloaded);
 			#if USEWATCHERS
 			FWatcher.Changed -= new FileSystemEventHandler(DirectoryChanged);
 			FWatcher.Created -= new FileSystemEventHandler(DirectoryChanged);
@@ -431,7 +431,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private FrontendLibrary GetFrontendLibrary(ServerProcess AProcess, string AName)
 		{
 			FrontendLibrary LResult = null;
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				if (!FLibraries.Contains(AName))
 					LoadLibrary(AProcess, AName);
@@ -575,7 +575,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		private void LoadLibrary(ServerProcess AProcess, string AName)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				if (FLibraries.Contains(AName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, AName);
@@ -616,7 +616,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 		private void UnloadLibrary(ServerProcess AProcess, string AName)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				int LIndex = FLibraries.IndexOf(AName);
 				if (LIndex >= 0)
@@ -626,18 +626,18 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		private void UnloadLibrary(ServerProcess AProcess, FrontendLibrary ALibrary)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 				InternalUnloadLibrary(AProcess, ALibrary);
 		}
 		
 		private bool FLibrariesLoaded;
 		public void EnsureLibrariesLoaded(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				if (!FLibrariesLoaded)
 				{
-					foreach (Schema.Library LLibrary in AProcess.Plan.Catalog.Libraries)
+					foreach (Schema.Library LLibrary in AProcess.Catalog.Libraries)
 						if (!Schema.Object.NamesEqual(LLibrary.Name, DAE.Server.Server.CSystemLibraryName) && !FLibraries.ContainsName(LLibrary.Name))
 							LoadLibrary(AProcess, Schema.Object.EnsureRooted(LLibrary.Name));
 					FLibrariesLoaded = true;

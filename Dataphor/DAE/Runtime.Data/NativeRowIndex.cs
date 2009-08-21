@@ -627,13 +627,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					else
 					{
 					*/
-						AProcess.Context.Push(AIndexKey.Values[LIndex]);
-						AProcess.Context.Push(ACompareKey.Values[LIndex]);
+						AProcess.Stack.Push(AIndexKey.Values[LIndex]);
+						AProcess.Stack.Push(ACompareKey.Values[LIndex]);
 						LResult = Key.Columns[LIndex].Ascending ? 
 							(int)Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess) : 
 							-(int)(Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess));
-						AProcess.Context.Pop();
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
+						AProcess.Stack.Pop();
 					//} 
 				}
 				else if (AIndexKey.Values[LIndex] != null)

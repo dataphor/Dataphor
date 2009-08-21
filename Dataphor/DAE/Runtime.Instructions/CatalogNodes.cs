@@ -333,7 +333,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
-			return AProcess.Plan.Catalog.TimeStamp;
+			return AProcess.Catalog.TimeStamp;
 		}
 	}
     
@@ -342,7 +342,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
-			return AProcess.Plan.Catalog.CacheTimeStamp;
+			return AProcess.Catalog.CacheTimeStamp;
 		}
     }
     
@@ -351,7 +351,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object NilaryInternalExecute(ServerProcess AProcess)
 		{
-			return AProcess.Plan.Catalog.DerivationTimeStamp;
+			return AProcess.Catalog.DerivationTimeStamp;
 		}
     }
     
@@ -380,7 +380,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			D4TextEmitter LEmitter = new D4TextEmitter();
 
 			Schema.Object LObject;		
-			if (Operator.Operands[0].DataType.Is(AProcess.Plan.Catalog.DataTypes.SystemName))
+			if (Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemName))
 				LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], true);
 			else
 				LObject = Compiler.ResolveCatalogObjectSpecifier(AProcess.Plan, (string)AArguments[0], true);
@@ -391,7 +391,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return 
 				LEmitter.Emit
 				(
-					AProcess.Plan.Catalog.EmitStatement
+					AProcess.Catalog.EmitStatement
 					(
 						AProcess.CatalogDeviceSession, 
 						EmitMode.ForCopy, 
@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			D4TextEmitter LEmitter = new D4TextEmitter();
 		
-			AProcess.Context.PushWindow(0);
+			AProcess.Stack.PushWindow(0);
 			try
 			{
 				IServerExpressionPlan LPlan = ((IServerProcess)AProcess).PrepareExpression((string)AArguments[0], null);
@@ -429,7 +429,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Stack.PopWindow();
 			}
 		}
     }
@@ -620,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			bool LIncludeDependents = AArguments.Length > 1 ? (bool)AArguments[1] : true;
 			bool LIncludeObject = AArguments.Length > 2 ? (bool)AArguments[2] : true;
 		
-			return LEmitter.Emit(AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, new string[] { LObject.Name }, String.Empty, true, true, LIncludeDependents, LIncludeObject));
+			return LEmitter.Emit(AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, new string[] { LObject.Name }, String.Empty, true, true, LIncludeDependents, LIncludeObject));
 		}
     }
     
@@ -666,7 +666,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (AProcess.ServerSession.User.ID != AProcess.ServerSession.Server.AdminUser.ID)
 					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
 					
-				if (Nodes[0].DataType.Is(AProcess.Plan.Catalog.DataTypes.SystemInteger))
+				if (Nodes[0].DataType.Is(AProcess.DataTypes.SystemInteger))
 					return AProcess.CatalogDeviceSession.ResolveCachedCatalogObject((int)AArguments[0], false) != null;
 
 				return AProcess.CatalogDeviceSession.ResolveCachedCatalogObject((string)AArguments[0], false) != null;
@@ -684,7 +684,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
 
 			Schema.CatalogObject LCatalogObject;
-			if (Nodes[0].DataType.Is(AProcess.Plan.Catalog.DataTypes.SystemInteger))
+			if (Nodes[0].DataType.Is(AProcess.DataTypes.SystemInteger))
 				LCatalogObject = AProcess.CatalogDeviceSession.ResolveCachedCatalogObject((int)AArguments[0]);
 			else
 				LCatalogObject = AProcess.CatalogDeviceSession.ResolveCachedCatalogObject((string)AArguments[0]);
@@ -702,13 +702,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (AProcess.ServerSession.User.ID != AProcess.ServerSession.Server.AdminUser.ID)
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
-			string LLibraryName = AProcess.Plan.Catalog.Libraries[(string)AArguments[0]].Name;
+			string LLibraryName = AProcess.Catalog.Libraries[(string)AArguments[0]].Name;
 			Schema.Objects LObjects = new Schema.Objects();
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
-				for (int LIndex = 0; LIndex < AProcess.Plan.Catalog.Count; LIndex++)
-					if ((AProcess.Plan.Catalog[LIndex].Library != null) && (AProcess.Plan.Catalog[LIndex].Library.Name == LLibraryName))
-						LObjects.Add(AProcess.Plan.Catalog[LIndex]);
+				for (int LIndex = 0; LIndex < AProcess.Catalog.Count; LIndex++)
+					if ((AProcess.Catalog[LIndex].Library != null) && (AProcess.Catalog[LIndex].Library.Name == LLibraryName))
+						LObjects.Add(AProcess.Catalog[LIndex]);
 			}
 			
 			AProcess.CatalogDeviceSession.ClearCachedCatalogObjects(LObjects);
@@ -744,11 +744,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -826,11 +826,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_ID", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Object_Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Object_Description", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -931,9 +931,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -1024,9 +1024,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Level", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Level", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -1061,7 +1061,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
 			{
 				ASequence += 1;
-				PopulateRequiredLibrary(AProcess, ATable, ARow, AProcess.Plan.Catalog.Libraries[LLibrary.Name], ARecursive, ref ASequence, ALevel);
+				PopulateRequiredLibrary(AProcess, ATable, ARow, AProcess.Catalog.Libraries[LLibrary.Name], ARecursive, ref ASequence, ALevel);
 			}
 		}
 		
@@ -1083,7 +1083,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						AProcess, 
 						LResult, 
 						LRow, 
-						AProcess.Plan.Catalog.Libraries[(string)Nodes[0].Execute(AProcess)],
+						AProcess.Catalog.Libraries[(string)Nodes[0].Execute(AProcess)],
 						Nodes.Count == 2 ? (bool)Nodes[1].Execute(AProcess) : true, 
 						ref LSequence, 
 						1
@@ -1125,14 +1125,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Operation", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("TableName", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("IndexName", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("IsMatched", APlan.Catalog.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsRanged", APlan.Catalog.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsUpdatable", APlan.Catalog.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("Duration", APlan.Catalog.DataTypes.SystemTimeSpan));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Operation", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("TableName", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("IndexName", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("IsMatched", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsRanged", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsUpdatable", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Duration", APlan.DataTypes.SystemTimeSpan));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				

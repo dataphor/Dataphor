@@ -139,42 +139,42 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
         }
         
 		// FindScalarType
-        public override ScalarType FindScalarType(ServerProcess AProcess, string ADomainName, int ALength, D4.MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
         {
 			switch (ADomainName.ToLower())
 			{
-				case "bit": return AProcess.DataTypes.SystemBoolean;
-				case "tinyint": return AProcess.DataTypes.SystemByte;
-				case "smallint": return AProcess.DataTypes.SystemShort;
+				case "bit": return APlan.DataTypes.SystemBoolean;
+				case "tinyint": return APlan.DataTypes.SystemByte;
+				case "smallint": return APlan.DataTypes.SystemShort;
 				case "int": 
-				case "integer": return AProcess.DataTypes.SystemInteger;
-				case "bigint": return AProcess.DataTypes.SystemLong;
+				case "integer": return APlan.DataTypes.SystemInteger;
+				case "bigint": return APlan.DataTypes.SystemLong;
 				case "decimal":
 				case "numeric":
 				case "double":
 				case "float": 
-				case "real": return AProcess.DataTypes.SystemDecimal;
-				case "datetime": return AProcess.DataTypes.SystemDateTime;
-				case "date": return AProcess.DataTypes.SystemDate;
-				case "time":  return AProcess.DataTypes.SystemTime;
-				case "timestamp": return AProcess.DataTypes.SystemDateTime;
+				case "real": return APlan.DataTypes.SystemDecimal;
+				case "datetime": return APlan.DataTypes.SystemDateTime;
+				case "date": return APlan.DataTypes.SystemDate;
+				case "time":  return APlan.DataTypes.SystemTime;
+				case "timestamp": return APlan.DataTypes.SystemDateTime;
 				case "char":
 				case "varchar":
 				case "nchar":
 				case "nvarchar": 
 					AMetaData.Tags.Add(new D4.Tag("Storage.Length", ALength.ToString()));
 					#if USEISTRING
-					return IsCaseSensitive ? AProcess.DataTypes.SystemString : AProcess.DataTypes.SystemIString;
+					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 					#else
-					return AProcess.DataTypes.SystemString;
+					return APlan.DataTypes.SystemString;
 					#endif
 				case "text":
 				#if USEISTRING
-				case "ntext": return (ScalarType)(IsCaseSensitive ? AProcess.Plan.Catalog[CSQLTextScalarType] : AProcess.Plan.Catalog[CSQLITextScalarType]);
+				case "ntext": return (ScalarType)(IsCaseSensitive ? APlan.Catalog[CSQLTextScalarType] : APlan.Catalog[CSQLITextScalarType]);
 				#else
-				case "ntext": return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+				case "ntext": return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
 				#endif
-				case "blob": return AProcess.DataTypes.SystemBinary;
+				case "blob": return APlan.DataTypes.SystemBinary;
 				default: throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
 			}
         }

@@ -25,9 +25,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("BreakOnException", APlan.Catalog.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.Catalog.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("BreakOnException", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -160,12 +160,12 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Process_ID", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.Catalog.DataTypes.SystemBoolean));
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.Catalog.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Process_ID", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -283,8 +283,8 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Index", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Description", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Description", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -351,10 +351,10 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Index", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Type", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Value", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Type", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Value", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -437,14 +437,14 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Index", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("OperatorName", APlan.Catalog.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("OperatorName", APlan.DataTypes.SystemName));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
-			TableVar.DetermineRemotable(APlan.ServerProcess);
+			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = TableVar.FindClusteringOrder(APlan);
 
 			// Ensure the order exists in the orders list
@@ -506,9 +506,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 

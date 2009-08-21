@@ -157,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// Call AProcess.Context.PushFrame();
 			AGenerator.Emit(OpCodes.Ldarg_1);
 			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PushFrame", new Type[] { }));
+			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PushFrame", new Type[] { }));
 			AGenerator.BeginExceptionBlock();
 			
 			EmitExecute(APlan, AGenerator, LExecutePath, 0);
@@ -166,14 +166,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AGenerator.BeginFinallyBlock();
 			AGenerator.Emit(OpCodes.Ldarg_1);
 			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("PopFrame"));
+			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("PopFrame"));
 				
 			AGenerator.EndExceptionBlock();
 		}
 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.PushFrame();
+			AProcess.Stack.PushFrame();
 			try
 			{
 				Nodes[0].Execute(AProcess);
@@ -181,7 +181,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopFrame();
+				AProcess.Stack.PopFrame();
 			}
 		}
 		
@@ -535,14 +535,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					int LStackIndex = 0;
 					if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-						AProcess.Context.Push(null);
+						AProcess.Stack.Push(null);
 					else
 						LStackIndex = Location;
 					try
 					{
 						using (Row LRow = new Row(AProcess, (Schema.IRowType)FVariableType))
 						{
-							AProcess.Context.Poke(LStackIndex, LRow);
+							AProcess.Stack.Poke(LStackIndex, LRow);
 							try
 							{
 								while (CursorNext(AProcess, LCursor))
@@ -558,14 +558,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								AProcess.Context.Poke(LStackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
+								AProcess.Stack.Poke(LStackIndex, null); // TODO: Stack imbalance if the iteration statement allocates a variable
 							}
 						}
 					}
 					finally
 					{
 						if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-							AProcess.Context.Pop();
+							AProcess.Stack.Pop();
 					}
 				}
 				catch (BreakError) {}
@@ -583,7 +583,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						int LStackIndex = 0;
 						if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-							AProcess.Context.Push(null);
+							AProcess.Stack.Push(null);
 						else
 							LStackIndex = Location;
 						
@@ -594,7 +594,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								try
 								{
 									// Select iteration value
-									AProcess.Context.Poke(LStackIndex, LValue[LIndex]);
+									AProcess.Stack.Poke(LStackIndex, LValue[LIndex]);
 									Nodes[1].Execute(AProcess);
 								}
 								catch (ContinueError) {}
@@ -603,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						finally
 						{
 							if ((FStatement.VariableName == String.Empty) || FStatement.IsAllocation)
-								AProcess.Context.Pop();
+								AProcess.Stack.Pop();
 						}
 					}
 					catch (BreakError) {}
@@ -733,10 +733,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (NodeCount > 0)
-				AProcess.Context.ErrorVar = Nodes[0].Execute(AProcess);
-			if (AProcess.Context.ErrorVar == null)
+				AProcess.Stack.ErrorVar = Nodes[0].Execute(AProcess);
+			if (AProcess.Stack.ErrorVar == null)
 				throw new RuntimeException(RuntimeException.Codes.NilEncountered, this);
-			throw (Exception)AProcess.Context.ErrorVar;
+			throw (Exception)AProcess.Stack.ErrorVar;
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -881,17 +881,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.PushFrame();
+			AProcess.Stack.PushFrame();
 			try
 			{
 				if (FVariableName != String.Empty)
-					AProcess.Context.Push(DataValue.CopyValue(AProcess, AProcess.Context.ErrorVar));
+					AProcess.Stack.Push(DataValue.CopyValue(AProcess, AProcess.Stack.ErrorVar));
 				Nodes[0].Execute(AProcess);	   
 				return null;
 			}
 			finally
 			{
-				AProcess.Context.PopFrame();
+				AProcess.Stack.PopFrame();
 			}
 		}
 		
@@ -945,11 +945,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			catch (Exception LException)
 			{
 				// if this is a host exception, set the error variable
-				if (AProcess.Context.ErrorVar == null)
-					AProcess.Context.ErrorVar = LException;
+				if (AProcess.Stack.ErrorVar == null)
+					AProcess.Stack.ErrorVar = LException;
 					
 				ErrorHandlerNode LNode;
-				object LErrorVar = AProcess.Context.ErrorVar;
+				object LErrorVar = AProcess.Stack.ErrorVar;
 				for (int LIndex = 1; LIndex < NodeCount; LIndex++)
 				{
 					LNode = GetErrorHandlerNode(Nodes[LIndex]);
@@ -959,7 +959,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						break;
 					}
 				}
-				AProcess.Context.ErrorVar = null;
+				AProcess.Stack.ErrorVar = null;
 			}
 			return null;
 		}
@@ -1137,7 +1137,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object LSelector = Nodes[0].Execute(AProcess);
 			try
 			{
-				AProcess.Context.Push(LSelector);
+				AProcess.Stack.Push(LSelector);
 				try
 				{
 					for (int LIndex = 2; LIndex < Nodes.Count; LIndex++)
@@ -1149,7 +1149,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							object LWhenVar = LNode.Nodes[0].Execute(AProcess);
 							try
 							{
-								AProcess.Context.Push(LWhenVar);
+								AProcess.Stack.Push(LWhenVar);
 								try
 								{
 									object LObject = Nodes[1].Execute(AProcess);
@@ -1162,7 +1162,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Context.Pop();
+									AProcess.Stack.Pop();
 								}
 							}
 							finally
@@ -1185,7 +1185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{	
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
@@ -1415,15 +1415,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			bool LSaveIsInsert = APlan.ServerProcess.IsInsert;
-			APlan.ServerProcess.IsInsert = false;
+			bool LSaveIsInsert = APlan.IsInsert;
+			APlan.IsInsert = false;
 			try
 			{
 				base.InternalDetermineBinding(APlan);
 			}
 			finally
 			{
-				APlan.ServerProcess.IsInsert = LSaveIsInsert;
+				APlan.IsInsert = LSaveIsInsert;
 			}
 
 			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
@@ -1650,7 +1650,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-				AProcess.Context.Push(AArguments[LIndex]);
+				AProcess.Stack.Push(AArguments[LIndex]);
 				
 			AProcess.Plan.PushSecurityContext(new SecurityContext(Operator.Owner));
 			try
@@ -1673,7 +1673,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								FAllocateResultNode.Execute(AProcess);
 
 							// Record the stack depth
-							int LStackDepth = AProcess.Context.Count;
+							int LStackDepth = AProcess.Stack.Count;
 
 							try
 							{
@@ -1684,11 +1684,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							// Pass any var arguments back out to the instruction
 							for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
 								if (Operator.Operands[LIndex].Modifier == Modifier.Var)
-									AArguments[LIndex] = AProcess.Context[AProcess.Context.Count - LStackDepth + (Operator.Operands.Count + (FAllocateResultNode != null ? 1 : 0) - 1 - LIndex)];
+									AArguments[LIndex] = AProcess.Stack[AProcess.Stack.Count - LStackDepth + (Operator.Operands.Count + (FAllocateResultNode != null ? 1 : 0) - 1 - LIndex)];
 							
 							// Return the result
 							if (FAllocateResultNode != null)
-								return AProcess.Context[AProcess.Context.Count - LStackDepth];
+								return AProcess.Stack[AProcess.Stack.Count - LStackDepth];
 
 							return null;
 						}
@@ -1754,7 +1754,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void InternalDetermineBinding(Plan APlan)
 		{
 			if (NodeCount > 0)
-				APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
+				APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemGeneric));
 			try
 			{
 				base.InternalDetermineBinding(APlan);
@@ -1843,20 +1843,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Note that initialization is more efficient than the equivalent declaration / assignment construct 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(null);
-			int LStackDepth = AProcess.Context.Count;
+			AProcess.Stack.Push(null);
+			int LStackDepth = AProcess.Stack.Count;
 
 			if (NodeCount > 0)
 			{
 				object LValue = Nodes[0].Execute(AProcess);
 				if (Nodes[0].DataType is Schema.ScalarType)
 					LValue = ((Schema.ScalarType)Nodes[0].DataType).ValidateValue(AProcess, LValue);
-				AProcess.Context.Poke(AProcess.Context.Count - LStackDepth, LValue);
+				AProcess.Stack.Poke(AProcess.Stack.Count - LStackDepth, LValue);
 			}
 			else
 			{
 				if (FHasDefault && (VariableType is Schema.ScalarType))
-					AProcess.Context.Poke(0, ((Schema.ScalarType)VariableType).DefaultValue(AProcess));
+					AProcess.Stack.Poke(0, ((Schema.ScalarType)VariableType).DefaultValue(AProcess));
 			}
 
 
@@ -1890,12 +1890,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			AGenerator.Emit(OpCodes.Ldarg_1);
 			AGenerator.Emit(OpCodes.Call, typeof(ServerProcess).GetProperty("Context").GetGetMethod());
-			AGenerator.Emit(OpCodes.Call, typeof(Context).GetMethod("Pop", new Type[] { }));
+			AGenerator.Emit(OpCodes.Call, typeof(Stack).GetMethod("Pop", new Type[] { }));
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Pop();
+			AProcess.Stack.Pop();
 			return null;
 		}
 	}
@@ -1942,7 +1942,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			DataValue.DisposeValue(AProcess, AProcess.Context[Location]);
+			DataValue.DisposeValue(AProcess, AProcess.Stack[Location]);
 			return null;
 		}
 		
@@ -2033,7 +2033,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			object LObject = Nodes[1].Execute(AProcess);
 			if (Nodes[1].DataType is Schema.ScalarType)
 				LObject = ((Schema.ScalarType)Nodes[1].DataType).ValidateValue(AProcess, LObject);
-			AProcess.Context.Poke(((StackReferenceNode)Nodes[0]).Location, LObject);
+			AProcess.Stack.Poke(((StackReferenceNode)Nodes[0]).Location, LObject);
 			return null;
 		}
 		
@@ -2055,7 +2055,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			if (!Nodes[0].DataType.Is(APlan.Catalog.DataTypes.SystemBoolean))
+			if (!Nodes[0].DataType.Is(APlan.DataTypes.SystemBoolean))
 				throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, APlan.CurrentStatement());
 				
 			if (Nodes[2].DataType.Is(Nodes[1].DataType))
@@ -2228,10 +2228,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						object LWhenVar = LNode.Nodes[0].Execute(AProcess);
 						try
 						{
-							AProcess.Context.Push(LSelector);
+							AProcess.Stack.Push(LSelector);
 							try
 							{
-								AProcess.Context.Push(LWhenVar);
+								AProcess.Stack.Push(LWhenVar);
 								try
 								{
 									object LObject = Nodes[1].Execute(AProcess);
@@ -2244,12 +2244,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Context.Pop();
+									AProcess.Stack.Pop();
 								}
 							}
 							finally
 							{	
-								AProcess.Context.Pop();
+								AProcess.Stack.Pop();
 							}
 						}
 						finally
@@ -2437,9 +2437,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			if (ByReference)
-				return AProcess.Context[Location];
+				return AProcess.Stack[Location];
 			else
-				return DataValue.CopyValue(AProcess, AProcess.Context[Location]);
+				return DataValue.CopyValue(AProcess, AProcess.Stack[Location]);
 		}
 
 		protected override void WritePlanAttributes(System.Xml.XmlWriter AWriter)
@@ -2642,7 +2642,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		// Execute
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			Row LRow = (Row)AProcess.Context[Location];
+			Row LRow = (Row)AProcess.Stack[Location];
 			#if NILPROPOGATION
 			if ((LRow == null) || LRow.IsNil)
 				return null;

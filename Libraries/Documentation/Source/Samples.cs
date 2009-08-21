@@ -134,8 +134,8 @@ namespace DocSamples
 		{
 			// non-formatted output is name \n comment \n\n
 
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 
 			// get the metadata for the row and print it
 
@@ -167,8 +167,8 @@ namespace DocSamples
 
 		protected virtual void WriteTopicXMLData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 
 			AOutputFile.WriteLine("		<topic name=\"{0}\">", LObject.Name);
 			AOutputFile.WriteLine("			<title>{0}</title>", LObject.Name);
@@ -199,8 +199,8 @@ namespace DocSamples
 
 		protected virtual void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 			AOutputFile.WriteLine("		<title><indexterm><primary>{0}</primary></indexterm>{0}</title>", LObject.Name);
 			AOutputFile.WriteLine("		<para>");
 			//AOutputFile.WriteLine("			{0}", (LObject.MetaData == null ? String.Empty : LObject.MetaData.Comment));
@@ -241,8 +241,8 @@ namespace DocSamples
 	{
 		protected override void WriteData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 
 			// todo: see if it is an operator, in which case may check IsBuiltin
 
@@ -260,8 +260,8 @@ namespace DocSamples
 		protected override void WriteTopicXMLData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];			
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];			
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 			// todo: see if it is an operator, in which case may check IsBuiltin
 			//if (LOperator.IsSystem && ! LOperator.IsBuiltin)
 			//{
@@ -310,8 +310,8 @@ namespace DocSamples
 		protected void WriteTopicFile(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
 			D4TextEmitter Emitter = new D4TextEmitter();
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 			string LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
 			
 			string LName;
@@ -395,8 +395,8 @@ namespace DocSamples
 
 		protected override void WriteDocbookData(ServerProcess AProcess, string AFilepath, StreamWriter AOutputFile, Table ATable, Row ARow)
 		{
-			//Schema.Object LObject = AProcess.Plan.Catalog[ARow["ID"].ToGuid()];
-			Schema.Object LObject = AProcess.Plan.Catalog.Objects[(string)ARow["Name"]];
+			//Schema.Object LObject = AProcess.Catalog[ARow["ID"].ToGuid()];
+			Schema.Object LObject = AProcess.Catalog.Objects[(string)ARow["Name"]];
 			string LFilename = "c:\\src\\Alphora\\Docs\\DocbookManuals\\OperatorDocs\\" + GetJustName(LObject) + ".xml";
 			
 			if (System.IO.File.Exists(LFilename))
@@ -447,8 +447,8 @@ namespace DocSamples
 			while (ATable.Next())
 			{
 				LRow = ATable.Select();
-				//LObject = AProcess.Plan.Catalog[LRow["ID"].ToGuid()];
-				LObject = AProcess.Plan.Catalog.Objects[(string)LRow["Name"]];
+				//LObject = AProcess.Catalog[LRow["ID"].ToGuid()];
+				LObject = AProcess.Catalog.Objects[(string)LRow["Name"]];
 				if (GetJustName(LObject) == GetJustName(AObject))
 				{
 					LString = Emitter.Emit(LObject.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy));
@@ -528,9 +528,9 @@ namespace DocSamples
 				Schema.RowType LRowType = new Schema.RowType();
 				LRowType.Columns.Add(new Schema.Column("ID", Schema.DataType.SystemGuid));
 				Row LRow = new Row(LRowType, AProcess);
-				for (int LIndex = 0; LIndex < AProcess.Plan.Catalog.Count; LIndex++)
+				for (int LIndex = 0; LIndex < AProcess.Catalog.Count; LIndex++)
 				{
-					LRow[0] = Scalar.FromGuid(AProcess.Plan.Catalog[LIndex].ID);
+					LRow[0] = Scalar.FromGuid(AProcess.Catalog[LIndex].ID);
 					switch(ATemplateName)
 					{
 						case "TopicXML":

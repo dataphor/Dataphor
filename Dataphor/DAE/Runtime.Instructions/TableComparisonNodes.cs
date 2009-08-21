@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			FDataType = APlan.DataTypes.SystemBoolean;
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
 				Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
@@ -132,10 +132,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (ARightTable.Next())
 						{
 							ARightTable.Select(LRightRow);
-							AProcess.Context.Push(LLeftRow);
+							AProcess.Stack.Push(LLeftRow);
 							try
 							{
-								AProcess.Context.Push(LRightRow);
+								AProcess.Stack.Push(LRightRow);
 								try
 								{
 									object LResult = RowEqualNode.Execute(AProcess);
@@ -147,12 +147,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Context.Pop();
+									AProcess.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Context.Pop();
+								AProcess.Stack.Pop();
 							}
 						}
 						if (!LHasRow)
@@ -194,10 +194,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (ALeftTable.Next())
 						{
 							ALeftTable.Select(LLeftRow);
-							AProcess.Context.Push(LLeftRow);
+							AProcess.Stack.Push(LLeftRow);
 							try
 							{
-								AProcess.Context.Push(LRightRow);
+								AProcess.Stack.Push(LRightRow);
 								try
 								{
 									object LResult = RowEqualNode.Execute(AProcess);
@@ -209,12 +209,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Context.Pop();
+									AProcess.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Context.Pop();
+								AProcess.Stack.Pop();
 							}
 						}
 						if (!LHasRow)

@@ -115,10 +115,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							break;
 						}
 						
-						Process.Context.Push(FCurrentRow);
+						Process.Stack.Push(FCurrentRow);
 						try
 						{
-							Process.Context.Push(FLastRow);
+							Process.Stack.Push(FLastRow);
 							try
 							{
 								object LEqual = Node.EqualNode.Execute(Process);
@@ -127,12 +127,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							finally
 							{
-								Process.Context.Pop();
+								Process.Stack.Pop();
 							}
 						}
 						finally
 						{
-							Process.Context.Pop();
+							Process.Stack.Pop();
 						}
 					}
 					else

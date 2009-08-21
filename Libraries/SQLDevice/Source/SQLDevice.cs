@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						// changes the dependency reporting for scalar type maps, and causes some catalog dependency errors,
 						// so I cannot justify making this change in this version. Perhaps at some point, but not now...
 						LStatement.CreateDeviceScalarTypeMaps.Add(new D4.DeviceScalarTypeMap(LColumn.DataType.Name));
-						Compiler.BindNode(APlan, Compiler.CompileAlterDeviceStatement(APlan, LStatement)).Execute(APlan.ServerProcess);
+						APlan.ExecuteNode(Compiler.BindNode(APlan, Compiler.CompileAlterDeviceStatement(APlan, LStatement)));
 						ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType); // Reresolve to attach a dependency to the generated map
 					}
 					else
@@ -2244,26 +2244,26 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return true;
 		}
         
-		public virtual ScalarType FindScalarType(ServerProcess AProcess, string ADomainName, int ALength, D4.MetaData AMetaData)
+		public virtual ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, D4.MetaData AMetaData)
 		{
 			throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
 		}
 		
-		public virtual ScalarType FindScalarType(ServerProcess AProcess, SQLDomain ADomain)
+		public virtual ScalarType FindScalarType(Plan APlan, SQLDomain ADomain)
 		{
-			if (ADomain.Type.Equals(typeof(bool))) return AProcess.DataTypes.SystemBoolean;
-			else if (ADomain.Type.Equals(typeof(byte))) return AProcess.DataTypes.SystemByte;
-			else if (ADomain.Type.Equals(typeof(short))) return AProcess.DataTypes.SystemShort;
-			else if (ADomain.Type.Equals(typeof(int))) return AProcess.DataTypes.SystemInteger;
-			else if (ADomain.Type.Equals(typeof(long))) return AProcess.DataTypes.SystemLong;
-			else if (ADomain.Type.Equals(typeof(decimal))) return AProcess.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(float))) return AProcess.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(double))) return AProcess.DataTypes.SystemDecimal;
-			else if (ADomain.Type.Equals(typeof(string))) return AProcess.DataTypes.SystemString;
-			else if (ADomain.Type.Equals(typeof(byte[]))) return AProcess.DataTypes.SystemBinary;
-			else if (ADomain.Type.Equals(typeof(Guid))) return AProcess.DataTypes.SystemGuid;
-			else if (ADomain.Type.Equals(typeof(DateTime))) return AProcess.DataTypes.SystemDateTime;
-			else if (ADomain.Type.Equals(typeof(TimeSpan))) return AProcess.DataTypes.SystemTimeSpan;
+			if (ADomain.Type.Equals(typeof(bool))) return APlan.DataTypes.SystemBoolean;
+			else if (ADomain.Type.Equals(typeof(byte))) return APlan.DataTypes.SystemByte;
+			else if (ADomain.Type.Equals(typeof(short))) return APlan.DataTypes.SystemShort;
+			else if (ADomain.Type.Equals(typeof(int))) return APlan.DataTypes.SystemInteger;
+			else if (ADomain.Type.Equals(typeof(long))) return APlan.DataTypes.SystemLong;
+			else if (ADomain.Type.Equals(typeof(decimal))) return APlan.DataTypes.SystemDecimal;
+			else if (ADomain.Type.Equals(typeof(float))) return APlan.DataTypes.SystemDecimal;
+			else if (ADomain.Type.Equals(typeof(double))) return APlan.DataTypes.SystemDecimal;
+			else if (ADomain.Type.Equals(typeof(string))) return APlan.DataTypes.SystemString;
+			else if (ADomain.Type.Equals(typeof(byte[]))) return APlan.DataTypes.SystemBinary;
+			else if (ADomain.Type.Equals(typeof(Guid))) return APlan.DataTypes.SystemGuid;
+			else if (ADomain.Type.Equals(typeof(DateTime))) return APlan.DataTypes.SystemDateTime;
+			else if (ADomain.Type.Equals(typeof(TimeSpan))) return APlan.DataTypes.SystemTimeSpan;
 			else throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomain.Type.Name);
 		}
         
@@ -2450,7 +2450,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							TableVarColumn LColumn =
 								new TableVarColumn
 								(
-									new Column(LColumnName, FindScalarType(AProcess, LNativeDomainName, LLength, LMetaData)),
+									new Column(LColumnName, FindScalarType(AProcess.Plan, LNativeDomainName, LLength, LMetaData)),
 									LMetaData, 
 									TableVarColumnType.Stored
 								);
@@ -4892,9 +4892,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
     public static class SQLDeviceUtility
     {
-		public static SQLDevice ResolveSQLDevice(ServerProcess AProcess, string ADeviceName)
+		public static SQLDevice ResolveSQLDevice(Plan APlan, string ADeviceName)
 		{
-			Device LDevice = Compiler.ResolveCatalogIdentifier(AProcess.Plan, ADeviceName, true) as Schema.Device;
+			Device LDevice = Compiler.ResolveCatalogIdentifier(APlan, ADeviceName, true) as Schema.Device;
 			if (LDevice == null)
 				throw new CompilerException(CompilerException.Codes.DeviceIdentifierExpected);
 
@@ -4932,7 +4932,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				LStatementString = (string)AArguments[0];
 			else
 			{
-				LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess, (string)AArguments[0]);
+				LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, (string)AArguments[0]);
 				LDevice = LSQLDevice;
 				LStatementString = (string)AArguments[1];
 			}
@@ -5185,7 +5185,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						LOutValues = (Row)AArguments[2];
 				}
 
-				SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess, LDeviceName);
+				SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
 				SQLDeviceSession LDeviceSession = AProcess.DeviceConnect(LSQLDevice) as SQLDeviceSession;				
 				PlanNode[] LConversionNodes = LInValues == null ? new PlanNode[0] : new PlanNode[LInValues.DataType.Columns.Count];
 				SQLParameters LParameters = PrepareParameters(AProcess.Plan, LSQLDevice, LStatement, LInValues == null ? null : LInValues.DataType, LOutValues == null ? null : LOutValues.DataType, LConversionNodes);
@@ -5230,30 +5230,31 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			string LTableType = String.Empty;
 			string LKeyDefinition = String.Empty;
 			
-			if (APlan.ServerProcess.ServerSession.Server.IsRepository && (Modifiers != null))
+			if (APlan.IsRepository && (Modifiers != null))
 			{
 				LTableType = LanguageModifiers.GetModifier(Modifiers, "TableType", LTableType);
 				LKeyDefinition = LanguageModifiers.GetModifier(Modifiers, "KeyInfo", LKeyDefinition);
 			}
 
 			// ADeviceName and AStatement must be literal
-			if (Nodes[0].DataType.Is(APlan.Catalog.DataTypes.SystemName))
+			if (Nodes[0].DataType.Is(APlan.DataTypes.SystemName))
 			{
+				// NOTE: We are deliberately not using APlan.ExecuteLiteralArgument here because we want to throw the SQLException, not the CompilerException.
 				if (!Nodes[0].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ADeviceName");
-				LDeviceName = (string)Nodes[0].Execute(APlan.ServerProcess);
+				LDeviceName = (string)APlan.ExecuteNode(Nodes[0]);
 					
 				if (!Nodes[1].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AStatement");
-				FStatement = (string)Nodes[1].Execute(APlan.ServerProcess);
+				FStatement = (string)APlan.ExecuteNode(Nodes[1]);
 				
 				if (Nodes.Count >= 3)
 				{
-					if (Nodes[2].DataType.Is(APlan.Catalog.DataTypes.SystemString))
+					if (Nodes[2].DataType.Is(APlan.DataTypes.SystemString))
 					{
 						if (!Nodes[2].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)Nodes[2].Execute(APlan.ServerProcess);
+						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[2]);
 					}
 					else
 						LInRowType = Nodes[2].DataType as Schema.RowType;
@@ -5261,11 +5262,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 				if (Nodes.Count >= 4)
 				{
-					if (Nodes[3].DataType.Is(APlan.Catalog.DataTypes.SystemString))
+					if (Nodes[3].DataType.Is(APlan.DataTypes.SystemString))
 					{
 						if (!Nodes[3].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)Nodes[3].Execute(APlan.ServerProcess);
+						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[3]);
 					}
 					else
 						LOutRowType = Nodes[3].DataType as Schema.RowType;
@@ -5275,17 +5276,17 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)Nodes[4].Execute(APlan.ServerProcess);
+					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[4]);
 				}
 				else if (Nodes.Count == 6)
 				{
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ATableType");
-					LTableType = (string)Nodes[4].Execute(APlan.ServerProcess);
+					LTableType = (string)APlan.ExecuteNode(Nodes[4]);
 					
 					if (!Nodes[5].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)Nodes[5].Execute(APlan.ServerProcess);
+					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[5]);
 				}
 			}
 			else
@@ -5293,15 +5294,15 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				LDeviceName = APlan.DefaultDeviceName;
 				if (!Nodes[0].IsLiteral)
 					throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AStatement");
-				FStatement = (string)Nodes[0].Execute(APlan.ServerProcess);
+				FStatement = (string)APlan.ExecuteNode(Nodes[0]);
 				
 				if (Nodes.Count >= 2)
 				{
-					if (Nodes[1].DataType.Is(APlan.Catalog.DataTypes.SystemString))
+					if (Nodes[1].DataType.Is(APlan.DataTypes.SystemString))
 					{
 						if (!Nodes[1].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)Nodes[1].Execute(APlan.ServerProcess);
+						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[1]);
 					}
 					else
 						LInRowType = Nodes[1].DataType as Schema.RowType;
@@ -5309,11 +5310,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 				if (Nodes.Count >= 3)
 				{
-					if (Nodes[2].DataType.Is(APlan.Catalog.DataTypes.SystemString))
+					if (Nodes[2].DataType.Is(APlan.DataTypes.SystemString))
 					{
 						if (!Nodes[2].IsLiteral)
 							throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-						LKeyDefinition = (string)Nodes[2].Execute(APlan.ServerProcess);
+						LKeyDefinition = (string)APlan.ExecuteNode(Nodes[2]);
 					}
 					else
 						LOutRowType = Nodes[2].DataType as Schema.RowType;
@@ -5323,17 +5324,17 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					if (!Nodes[3].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)Nodes[3].Execute(APlan.ServerProcess);
+					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[3]);
 				}
 				else if (Nodes.Count == 5)
 				{
 					if (!Nodes[3].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "ATableType");
-					LTableType = (string)Nodes[3].Execute(APlan.ServerProcess);
+					LTableType = (string)APlan.ExecuteNode(Nodes[3]);
 					
 					if (!Nodes[4].IsLiteral)
 						throw new SQLException(SQLException.Codes.ArgumentMustBeLiteral, "AKeyInfo");
-					LKeyDefinition = (string)Nodes[4].Execute(APlan.ServerProcess);
+					LKeyDefinition = (string)APlan.ExecuteNode(Nodes[4]);
 				}
 			}
 			
@@ -5342,10 +5343,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			CursorType = APlan.CursorContext.CursorType;
 
 			SQLDeviceSession LDeviceSession = null;
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+			if (!APlan.IsRepository)
 			{			
-				FSQLDevice = SQLDeviceUtility.ResolveSQLDevice(APlan.ServerProcess, LDeviceName);
-				LDeviceSession = APlan.ServerProcess.DeviceConnect(FSQLDevice) as SQLDeviceSession;
+				FSQLDevice = SQLDeviceUtility.ResolveSQLDevice(APlan, LDeviceName);
+				LDeviceSession = APlan.DeviceConnect(FSQLDevice) as SQLDeviceSession;
 				FConversionNodes = LInRowType == null ? new PlanNode[0] : new PlanNode[LInRowType.Columns.Count];
 				FParameters = SQLExecuteNode.PrepareParameters(APlan, FSQLDevice, FStatement, LInRowType, LOutRowType, FConversionNodes);
 			}
@@ -5407,7 +5408,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					FSQLColumns = new SQLTableColumns();
 					foreach (SQLColumn LSQLColumn in LSchema.Columns)
 					{
-						Schema.Column LColumn = new Schema.Column(LSQLColumn.Name, FSQLDevice.FindScalarType(APlan.ServerProcess, LSQLColumn.Domain));
+						Schema.Column LColumn = new Schema.Column(LSQLColumn.Name, FSQLDevice.FindScalarType(APlan, LSQLColumn.Domain));
 						DataType.Columns.Add(LColumn);
 						FTableVar.Columns.Add(new Schema.TableVarColumn(LColumn, Schema.TableVarColumnType.Stored));
 					}
@@ -5452,7 +5453,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				foreach (Schema.Column LColumn in DataType.Columns)
 					TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
-				if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+				if (!APlan.IsRepository)
 				{				
 					FSQLDevice.CheckSupported(APlan, FTableVar);
 					foreach (Schema.TableVarColumn LTableVarColumn in FTableVar.Columns)
@@ -5471,7 +5472,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 				
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+			if (!APlan.IsRepository)
 			{
 				if (Modifiers == null)
 					Modifiers = new LanguageModifiers();
@@ -5587,8 +5588,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("StorageName", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("StorageName", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -5622,7 +5623,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			string LDeviceName = (Nodes.Count == 0) ? AProcess.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProcess);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess, LDeviceName);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
 			{
@@ -5663,8 +5664,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("StorageName", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("StorageName", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -5698,7 +5699,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override object InternalExecute(ServerProcess AProcess)
 		{
 			string LDeviceName = (Nodes.Count == 0) ? AProcess.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProcess);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess, LDeviceName);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
 			LocalTable LResult = new LocalTable(this, AProcess);
 			try
 			{
@@ -5735,13 +5736,13 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess, (string)AArguments[0]);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, (string)AArguments[0]);
 			string LTableName = String.Empty;
 			ReconcileOptions LOptions = ReconcileOptions.All;
 			switch (AArguments.Length)
 			{
 				case 2 :
-					if (Operator.Operands[1].DataType.Is(AProcess.Plan.Catalog.DataTypes.SystemName))
+					if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemName))
 						LTableName = (string)AArguments[1];
 					else
 						LOptions = SQLDeviceUtility.ResolveReconcileOptions(AProcess, AArguments[1] as ListValue);

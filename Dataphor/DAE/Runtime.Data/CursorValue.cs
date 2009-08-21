@@ -93,13 +93,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		protected Context FContext;
+		protected Stack FContext;
 		
 		public void SnapshotContext(ServerProcess AProcess)
 		{
-			FContext = new Context(AProcess.Context.MaxStackDepth, AProcess.Context.MaxCallDepth);
-			for (int LIndex = AProcess.Context.Count - 1; LIndex >= 0; LIndex--)
-				FContext.Push(DataValue.CopyValue(AProcess, AProcess.Context.Peek(LIndex)));
+			FContext = new Stack(AProcess.Stack.MaxStackDepth, AProcess.Stack.MaxCallDepth);
+			for (int LIndex = AProcess.Stack.Count - 1; LIndex >= 0; LIndex--)
+				FContext.Push(DataValue.CopyValue(AProcess, AProcess.Stack.Peek(LIndex)));
 		}
 		
 		public void SwitchContext(ServerProcess AProcess)

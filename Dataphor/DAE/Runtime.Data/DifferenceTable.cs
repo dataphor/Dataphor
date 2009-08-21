@@ -183,10 +183,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected bool RowsEqual()
         {
-			Process.Context.Push(FRightRow);
+			Process.Stack.Push(FRightRow);
 			try
 			{
-				Process.Context.Push(FLeftRow);
+				Process.Stack.Push(FLeftRow);
 				try
 				{
 					object LObject = Node.EqualNode.Execute(Process);
@@ -194,12 +194,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
-					Process.Context.Pop();
+					Process.Stack.Pop();
 				}
 			}
 			finally
 			{
-				Process.Context.Pop();
+				Process.Stack.Pop();
 			}
         }
         

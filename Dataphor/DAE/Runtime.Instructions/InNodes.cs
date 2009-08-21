@@ -60,16 +60,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			AProcess.Context.Push(AArgument1);
+			AProcess.Stack.Push(AArgument1);
 			try
 			{
-				AProcess.Context.Push(null);
+				AProcess.Stack.Push(null);
 				try
 				{
 					object LResult = false;
 					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 					{
-						AProcess.Context.Poke(0, LList[LIndex]);
+						AProcess.Stack.Poke(0, LList[LIndex]);
 						object LValue = FEqualNode.Execute(AProcess);
 						#if NILPROPOGATION
 						if (LValue == null)
@@ -85,12 +85,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 		}
 	}
@@ -147,13 +147,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if ((LTable == null) || (AArgument1 == null))
 				return null;
 			#endif
-			AProcess.Context.Push(AArgument1);
+			AProcess.Stack.Push(AArgument1);
 			try
 			{
 				Row LRow = new Row(AProcess, LTable.DataType.RowType);
 				try
 				{
-					AProcess.Context.Push(LRow);
+					AProcess.Stack.Push(LRow);
 					try
 					{
 						object LResult = false;
@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 				finally
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 		}
 	}

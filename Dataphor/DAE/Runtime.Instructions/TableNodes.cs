@@ -435,15 +435,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 			try
 			{
-				bool LSaveIsInsert = APlan.ServerProcess.IsInsert;
-				APlan.ServerProcess.IsInsert = true;
+				bool LSaveIsInsert = APlan.IsInsert;
+				APlan.IsInsert = true;
 				try
 				{
 					Nodes[1].DetermineBinding(APlan);
 				}
 				finally
 				{
-					APlan.ServerProcess.IsInsert = LSaveIsInsert;
+					APlan.IsInsert = LSaveIsInsert;
 				}
 			}
 			finally
@@ -470,15 +470,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				APlan.PushCursorContext(new CursorContext(CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 				try
 				{
-					bool LSaveIsInsert = APlan.ServerProcess.IsInsert;
-					APlan.ServerProcess.IsInsert = true;
+					bool LSaveIsInsert = APlan.IsInsert;
+					APlan.IsInsert = true;
 					try
 					{
 						Nodes[1].BindToProcess(APlan);
 					}
 					finally
 					{
-						APlan.ServerProcess.IsInsert = LSaveIsInsert;
+						APlan.IsInsert = LSaveIsInsert;
 					}
 				}
 				finally
@@ -742,8 +742,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					Nodes[0] = Compiler.EmitCopyNode(APlan, (TableNode)Nodes[0]);
 					ApplicationTransaction LTransaction = null;
-					if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-						LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					if (APlan.ApplicationTransactionID != Guid.Empty)
+						LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (LTransaction != null)
@@ -844,7 +844,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								{
 									LTable.Select(LOldRow);
 									LTable.Select(LNewRow);
-									AProcess.Context.Push(LOldRow);
+									AProcess.Stack.Push(LOldRow);
 									try
 									{
 										for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -866,7 +866,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 									finally
 									{
-										AProcess.Context.Pop();
+										AProcess.Stack.Pop();
 									}
 									
 									#if USEUPDATEVALUEFLAGS
@@ -991,8 +991,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (!IsGeneric)
 			{
-				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location);
-				AProcess.Context.Push(LTarget);
+				Row LTarget = (Row)AProcess.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
+				AProcess.Stack.Push(LTarget);
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
@@ -1014,12 +1014,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			else
 			{
-				Row LTarget = (Row)AProcess.Context.Peek(((StackReferenceNode)Nodes[0]).Location);
+				Row LTarget = (Row)AProcess.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
 				UpdateColumnNode[] LColumnNodes = new UpdateColumnNode[FColumnExpressions.Count];
 				AProcess.Plan.EnterRowContext();
 				try
@@ -1040,7 +1040,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.Plan.ExitRowContext();
 				}
 				
-				AProcess.Context.Push(LTarget);
+				AProcess.Stack.Push(LTarget);
 				try
 				{
 					for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
@@ -1087,8 +1087,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					Nodes[0] = Compiler.EmitCopyNode(APlan, (TableNode)Nodes[0]);
 					ApplicationTransaction LTransaction = null;
-					if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-						LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					if (APlan.ApplicationTransactionID != Guid.Empty)
+						LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (LTransaction != null)
@@ -1394,7 +1394,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			StackReferenceNode LNode = Nodes[0] as StackReferenceNode;
 			if (LNode != null)
 			{
-				TableValue LTableValue = AProcess.Context.Peek(LNode.Location) as TableValue;
+				TableValue LTableValue = AProcess.Stack.Peek(LNode.Location) as TableValue;
 				if (LTableValue != null)
 					return LTableValue.AsNative as NativeTable;
 			}
@@ -1797,7 +1797,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (FDevice != null)
 			{
-				APlan.ServerProcess.EnsureDeviceStarted(FDevice);
+				APlan.EnsureDeviceStarted(FDevice);
 				Schema.DevicePlan LDevicePlan = FDevice.Prepare(APlan, this);
 				if (!LDevicePlan.IsSupported)
 					throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice, FDevice.Name, FTableVar.DisplayName);
@@ -1829,7 +1829,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			CheckDeviceRights(APlan);
 			DetermineRights(APlan);
-			APlan.ServerProcess.EnsureApplicationTransactionTableVar(FTableVar);
+			APlan.EnsureApplicationTransactionTableVar(FTableVar);
 			base.BindToProcess(APlan);
 		}
 		
@@ -1957,7 +1957,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LInsertStatement,
 							null
 						);
-					ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						LTransaction.PushGlobalContext();
@@ -2001,14 +2001,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FTableVar.SourceTableName != null)
 			{
 				EnsureJoinATNode(AProcess.Plan, (Schema.RowType)ARow.DataType);
-				AProcess.Context.Push(ARow);
+				AProcess.Stack.Push(ARow);
 				try
 				{
 					FJoinATNode.Execute(AProcess);
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 		}
@@ -2082,7 +2082,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void BindToProcess(Plan APlan)
 		{
 			DetermineRights(APlan);
-			APlan.ServerProcess.EnsureApplicationTransactionTableVar(FTableVar);
+			APlan.EnsureApplicationTransactionTableVar(FTableVar);
 
 			// Binding below the derived table variable should be based on the security context of the view owner
 			if (FTableVar.Owner != null)
@@ -2445,7 +2445,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LCursorDefinition == null)
 				LCursorDefinition = new CursorDefinition(FOnExpression.Expression);
 			FExpression = new D4TextEmitter().Emit(new SelectStatement(LCursorDefinition));
-			Schema.TableVar LTableVar = APlan.ServerProcess.RemoteConnect(FServerLink).PrepareTableVar(FExpression, new DataParams());
+			Schema.TableVar LTableVar = APlan.RemoteConnect(FServerLink).PrepareTableVar(FExpression, new DataParams());
 			
 			FDataType = new Schema.TableType();
 			FTableVar = new Schema.ResultTableVar(this);

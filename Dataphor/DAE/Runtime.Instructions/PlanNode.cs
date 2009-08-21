@@ -227,7 +227,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Schema.DevicePlan LDevicePlan = null;
 					if (ShouldSupport)
 					{
-						APlan.ServerProcess.EnsureDeviceStarted(FDevice);
+						APlan.EnsureDeviceStarted(FDevice);
 						LDevicePlan = FDevice.Prepare(APlan, this);
 					}
 					

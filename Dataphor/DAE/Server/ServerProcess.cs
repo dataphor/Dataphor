@@ -17,20 +17,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Debug;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-
 namespace Alphora.Dataphor.DAE.Server
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Debug;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+
 	// ServerProcess
 	public class ServerProcess : ServerChildObject, IServerProcess
 	{
@@ -58,7 +58,7 @@ namespace Alphora.Dataphor.DAE.Server
 			#if PROCESSSTREAMSOWNED
 			FOwnedStreams = new Dictionary<StreamID, bool>();
 			#endif
-			FContext = new Context(FServerSession.SessionInfo.DefaultMaxStackDepth, FServerSession.SessionInfo.DefaultMaxCallDepth);
+			FStack = new Stack(FServerSession.SessionInfo.DefaultMaxStackDepth, FServerSession.SessionInfo.DefaultMaxCallDepth);
 			FProcessPlan = new ServerStatementPlan(this);
 			PushExecutingPlan(FProcessPlan);
 			
@@ -76,8 +76,8 @@ namespace Alphora.Dataphor.DAE.Server
 		#if ALLOWPROCESSCONTEXT	
 		protected void DeallocateContextVariables()
 		{
-			for (int LIndex = 0; LIndex < FContext.Count; LIndex++)
-				DataValue.DisposeValue(this, FContext[LIndex]);
+			for (int LIndex = 0; LIndex < FStack.Count; LIndex++)
+				DataValue.DisposeValue(this, FStack[LIndex]);
 		}
 		#endif
 		
@@ -135,12 +135,12 @@ namespace Alphora.Dataphor.DAE.Server
 											}
 											finally
 											{
-												if (FContext != null)
+												if (FStack != null)
 												{
 													#if ALLOWPROCESSCONTEXT
 													DeallocateContextVariables();
 													#endif
-													FContext = null;
+													FStack = null;
 												}
 											}
 										}
@@ -287,13 +287,13 @@ namespace Alphora.Dataphor.DAE.Server
 		public Plan Plan { get { return ExecutingPlan.Plan; } }
 		
 		// Context		
-		private Context FContext;
-		public Context Context { get { return FContext; } }
+		private Stack FStack;
+		public Stack Stack { get { return FStack; } }
 		
-		public Context SwitchContext(Context AContext)
+		public Stack SwitchContext(Stack AContext)
 		{
-			Context LContext = FContext;
-			FContext = AContext;
+			Stack LContext = FStack;
+			FStack = AContext;
 			return LContext;
 		}
 		
@@ -778,39 +778,39 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		#if ALLOWPROCESSCONTEXT
-		private Symbols FProcessContext = new Symbols();
-		internal Symbols ProcessContext { get { return FProcessContext; } }
+		private Symbols FProcessSymbols = new Symbols();
+		internal Symbols ProcessSymbols { get { return FProcessSymbols; } }
 
-		internal void ReportProcessContext(Symbols ASymbols)
+		internal void ReportProcessSymbols(Symbols ASymbols)
 		{
 			for (int LIndex = ASymbols.FrameCount - 1; LIndex >= 0; LIndex--)
-				FProcessContext.Push(ASymbols[LIndex]);
+				FProcessSymbols.Push(ASymbols[LIndex]);
 		}
 		
-		internal void ClearProcessContext()
+		internal void ClearProcessSymbols()
 		{
-			while (FProcessContext.Count > 0)
-				FProcessContext.Pop();
+			while (FProcessSymbols.Count > 0)
+				FProcessSymbols.Pop();
 		}
 
-		internal void PushProcessContext(Plan APlan)
+		internal void PushProcessSymbols(Plan APlan)
 		{
 			APlan.Symbols.PushFrame();
 			
 			// Note that this uses the current context count rather than the symbols count to 
 			// allow for the possibility that a window has been pushed on the current context
 			// For example, a dynamic evaluation.
-			for (int LIndex = Math.Min(FProcessContext.Count, FContext.Count) - 1; LIndex >= 0; LIndex--)
-				APlan.Symbols.Push(FProcessContext[LIndex]);
+			for (int LIndex = Math.Min(FProcessSymbols.Count, FStack.Count) - 1; LIndex >= 0; LIndex--)
+				APlan.Symbols.Push(FProcessSymbols[LIndex]);
 
-			if (FContext.AllowExtraWindowAccess)
+			if (FStack.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = true;
 		}
 				
-		internal void PopProcessContext(Plan APlan)
+		internal void PopProcessSymbols(Plan APlan)
 		{
 			APlan.Symbols.PopFrame();
-			if (FContext.AllowExtraWindowAccess)
+			if (FStack.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = false;
 		}
 		
@@ -823,7 +823,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				#if ALLOWPROCESSCONTEXT
 				// Push process context on the symbols for the plan
-				PushProcessContext(AServerPlan.Plan);
+				PushProcessSymbols(AServerPlan.Plan);
 				try
 				{
 				#endif
@@ -847,8 +847,8 @@ namespace Alphora.Dataphor.DAE.Server
 						#if ALLOWPROCESSCONTEXT
 						// Include dependencies for any process context that may be being referenced by the plan
 						// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-						for (int LIndex = FProcessContext.Count - 1; LIndex >= 0; LIndex--)
-							AServerPlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, AServerPlan.Plan.Catalog, FProcessContext[LIndex].DataType, EmitMode.ForRemote);
+						for (int LIndex = FProcessSymbols.Count - 1; LIndex >= 0; LIndex--)
+							AServerPlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, AServerPlan.Plan.Catalog, FProcessSymbols[LIndex].DataType, EmitMode.ForRemote);
 						#endif
 
 						if (!AServerPlan.Plan.Messages.HasErrors && AIsExpression)
@@ -873,7 +873,7 @@ namespace Alphora.Dataphor.DAE.Server
 				finally
 				{
 					// Pop process context from the plan
-					PopProcessContext(AServerPlan.Plan);
+					PopProcessSymbols(AServerPlan.Plan);
 				}
 				#endif
 			}
@@ -924,8 +924,8 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			StringBuilder LContextName = new StringBuilder();
 			#if ALLOWPROCESSCONTEXT
-			for (int LIndex = 0; LIndex < FProcessContext.Count; LIndex++)
-				LContextName.Append(FProcessContext[LIndex].DataType.Name);
+			for (int LIndex = 0; LIndex < FProcessSymbols.Count; LIndex++)
+				LContextName.Append(FProcessSymbols[LIndex].DataType.Name);
 			#endif
 			if (AParams != null)
 				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
@@ -1676,38 +1676,6 @@ namespace Alphora.Dataphor.DAE.Server
 			return ApplicationTransactionUtility.GetTransaction(this, FApplicationTransactionID);
 		}
 		
-		public void EnsureApplicationTransactionOperator(Schema.Operator AOperator)
-		{
-			if (FApplicationTransactionID != Guid.Empty && AOperator.IsATObject)
-			{
-				ApplicationTransaction LTransaction = GetApplicationTransaction();
-				try
-				{
-					LTransaction.EnsureATOperatorMapped(this, AOperator);
-				}
-				finally
-				{
-					Monitor.Exit(LTransaction);
-				}
-			}
-		}
-		
-		public void EnsureApplicationTransactionTableVar(Schema.TableVar ATableVar)
-		{
-			if (FApplicationTransactionID != Guid.Empty && ATableVar.IsATObject)
-			{
-				ApplicationTransaction LTransaction = GetApplicationTransaction();
-				try
-				{
-					LTransaction.EnsureATTableVarMapped(this, ATableVar);
-				}
-				finally
-				{
-					Monitor.Exit(LTransaction);
-				}
-			}
-		}
-		
 		// BeginApplicationTransaction
 		public Guid BeginApplicationTransaction(bool AShouldJoin, bool AIsInsert)
 		{
@@ -1959,7 +1927,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)
-						FContext.Push(LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : DataValue.CopyValue(this, LParam.Value)) : LParam.Value);
+						FStack.Push(LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : DataValue.CopyValue(this, LParam.Value)) : LParam.Value);
 			}
 			catch
 			{
@@ -1975,7 +1943,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (AParams != null)
 					for (int LIndex = AParams.Count - 1; LIndex >= 0; LIndex--)
 					{
-						object LValue = FContext.Pop();
+						object LValue = FStack.Pop();
 						if (AParams[LIndex].Modifier != Modifier.In)
 							AParams[LIndex].Value = LValue;
 					}
@@ -2363,6 +2331,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Catalog
+		public Schema.Catalog Catalog { get { return FServerSession.Server.Catalog; } }
+		
 		public Schema.DataTypes DataTypes { get { return FServerSession.Server.Catalog.DataTypes; } }
 
 		// Loading
@@ -2401,6 +2371,25 @@ namespace Alphora.Dataphor.DAE.Server
 			SuppressWarnings = LContext.FSuppressWarnings;
 		}
 		
+		/// <summary>Returns true if the Server-level loading flag is set, or this process is in a loading context</summary>
+		public bool IsLoading()
+		{
+			return InLoadingContext();
+		}
+		
+		/// <summary>Returns true if this process is in a loading context.</summary>
+		public bool InLoadingContext()
+		{
+			return (FLoadingContexts != null) && (FLoadingContexts.Count > 0) && (FLoadingContexts[FLoadingContexts.Count - 1].IsLoadingContext);
+		}
+		
+		public LoadingContext CurrentLoadingContext()
+		{
+			if ((FLoadingContexts != null) && FLoadingContexts.Count > 0)
+				return FLoadingContexts[FLoadingContexts.Count - 1];
+			return null;
+		}
+
 		private int FReconciliationDisabledCount = 0;
 		public void DisableReconciliation()
 		{
@@ -2427,25 +2416,6 @@ namespace Alphora.Dataphor.DAE.Server
 		public void ResumeReconciliationState(int AReconciliationDisabledCount)
 		{
 			FReconciliationDisabledCount = AReconciliationDisabledCount;
-		}
-		
-		/// <summary>Returns true if the Server-level loading flag is set, or this process is in a loading context</summary>
-		public bool IsLoading()
-		{
-			return InLoadingContext();
-		}
-		
-		/// <summary>Returns true if this process is in a loading context.</summary>
-		public bool InLoadingContext()
-		{
-			return (FLoadingContexts != null) && (FLoadingContexts.Count > 0) && (FLoadingContexts[FLoadingContexts.Count - 1].IsLoadingContext);
-		}
-		
-		public LoadingContext CurrentLoadingContext()
-		{
-			if ((FLoadingContexts != null) && FLoadingContexts.Count > 0)
-				return FLoadingContexts[FLoadingContexts.Count - 1];
-			return null;
 		}
 	}
 

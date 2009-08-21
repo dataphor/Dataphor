@@ -484,12 +484,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public static void CreateLibrary(ServerProcess AProcess, Schema.Library ALibrary, bool AUpdateCatalogTimeStamp, bool AShouldNotify)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				string LLibraryDirectory = ALibrary.GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
-				if (AProcess.Plan.Catalog.Libraries.Contains(ALibrary.Name))
+				if (AProcess.Catalog.Libraries.Contains(ALibrary.Name))
 				{
-					Schema.Library LExistingLibrary = AProcess.Plan.Catalog.Libraries[ALibrary.Name];
+					Schema.Library LExistingLibrary = AProcess.Catalog.Libraries[ALibrary.Name];
 
 					if (ALibrary.Directory != String.Empty)
 					{
@@ -542,11 +542,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				else
 				{
 					Compiler.CheckValidCatalogObjectName(AProcess.Plan, null, ALibrary.Name);
-					AProcess.Plan.Catalog.Libraries.Add(ALibrary);
+					AProcess.Catalog.Libraries.Add(ALibrary);
 					try
 					{
 						if (AUpdateCatalogTimeStamp)
-							AProcess.Plan.Catalog.UpdateTimeStamp();
+							AProcess.Catalog.UpdateTimeStamp();
 						AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
 						try
 						{
@@ -561,15 +561,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					catch
 					{
-						AProcess.Plan.Catalog.Libraries.Remove(ALibrary);
+						AProcess.Catalog.Libraries.Remove(ALibrary);
 						throw;
 					}
 				}
 
 				if (AShouldNotify)
 				{
-					AProcess.Plan.Catalog.Libraries.DoLibraryCreated(AProcess, ALibrary.Name);
-					AProcess.Plan.Catalog.Libraries.DoLibraryAdded(AProcess, ALibrary.Name);
+					AProcess.Catalog.Libraries.DoLibraryCreated(AProcess, ALibrary.Name);
+					AProcess.Catalog.Libraries.DoLibraryAdded(AProcess, ALibrary.Name);
 					if (ALibrary.Directory != String.Empty)
 						AProcess.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 				}
@@ -578,13 +578,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void AttachLibrary(ServerProcess AProcess, Schema.Library ALibrary, bool AIsAttached)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				string LLibraryDirectory = ALibrary.GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
 
-				AProcess.Plan.Catalog.Libraries.Add(ALibrary);
-				AProcess.Plan.Catalog.UpdateTimeStamp();
-				AProcess.Plan.Catalog.Libraries.DoLibraryAdded(AProcess, ALibrary.Name);
+				AProcess.Catalog.Libraries.Add(ALibrary);
+				AProcess.Catalog.UpdateTimeStamp();
+				AProcess.Catalog.Libraries.DoLibraryAdded(AProcess, ALibrary.Name);
 				if ((ALibrary.Directory != String.Empty) && !AIsAttached)
 					AProcess.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 			}
@@ -602,23 +602,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public static void DropLibrary(ServerProcess AProcess, string ALibraryName, bool AUpdateCatalogTimeStamp)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (AProcess.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDropRegisteredLibrary, LLibrary.Name);
 					
 				string LLibraryDirectory = LLibrary.GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
 
-				AProcess.Plan.Catalog.Libraries.DoLibraryRemoved(AProcess, LLibrary.Name);
-				AProcess.Plan.Catalog.Libraries.DoLibraryDeleted(AProcess, LLibrary.Name);
+				AProcess.Catalog.Libraries.DoLibraryRemoved(AProcess, LLibrary.Name);
+				AProcess.Catalog.Libraries.DoLibraryDeleted(AProcess, LLibrary.Name);
 				try
 				{
-					AProcess.Plan.Catalog.Libraries.Remove(LLibrary);
+					AProcess.Catalog.Libraries.Remove(LLibrary);
 					try
 					{
 						if (AUpdateCatalogTimeStamp)
-							AProcess.Plan.Catalog.UpdateTimeStamp();
+							AProcess.Catalog.UpdateTimeStamp();
 						AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
 						try
 						{		
@@ -641,7 +641,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					catch
 					{
 						if (Directory.Exists(LLibraryDirectory))
-							AProcess.Plan.Catalog.Libraries.Add(LLibrary);
+							AProcess.Catalog.Libraries.Add(LLibrary);
 						throw;
 					}
 				}
@@ -649,8 +649,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (Directory.Exists(LLibraryDirectory))
 					{
-						AProcess.Plan.Catalog.Libraries.DoLibraryCreated(AProcess, LLibrary.Name);
-						AProcess.Plan.Catalog.Libraries.DoLibraryAdded(AProcess, LLibrary.Name);
+						AProcess.Catalog.Libraries.DoLibraryCreated(AProcess, LLibrary.Name);
+						AProcess.Catalog.Libraries.DoLibraryAdded(AProcess, LLibrary.Name);
 					}
 					throw;
 				}
@@ -659,17 +659,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void DetachLibrary(ServerProcess AProcess, string ALibraryName)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (AProcess.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotDetachRegisteredLibrary, LLibrary.Name);
 					
 				string LLibraryDirectory = LLibrary.GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
 
-				AProcess.Plan.Catalog.Libraries.DoLibraryRemoved(AProcess, LLibrary.Name);
-				AProcess.Plan.Catalog.Libraries.Remove(LLibrary);
-				AProcess.Plan.Catalog.UpdateTimeStamp();
+				AProcess.Catalog.Libraries.DoLibraryRemoved(AProcess, LLibrary.Name);
+				AProcess.Catalog.Libraries.Remove(LLibrary);
+				AProcess.Catalog.UpdateTimeStamp();
 				AProcess.CatalogDeviceSession.DeleteLibraryDirectory(LLibrary.Name);
 			}
 		}
@@ -687,9 +687,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void RenameLibrary(ServerProcess AProcess, string ALibraryName, string ANewLibraryName, bool AUpdateCatalogTimeStamp)
 		{
 			ANewLibraryName = Schema.Object.EnsureUnrooted(ANewLibraryName);
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CGeneralLibraryName))
@@ -701,7 +701,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotRenameRegisteredLibrary, LLibrary.Name);
 						
 					string LOldName = LLibrary.Name;
-					AProcess.Plan.Catalog.Libraries.Remove(LLibrary);
+					AProcess.Catalog.Libraries.Remove(LLibrary);
 					try
 					{
 						LLibrary.Name = ANewLibraryName;
@@ -712,7 +712,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LLibrary.Name));
 						try
 						{
-							AProcess.Plan.Catalog.Libraries.Add(LLibrary);
+							AProcess.Catalog.Libraries.Add(LLibrary);
 							try
 							{
 								AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
@@ -747,11 +747,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 
 								if (AUpdateCatalogTimeStamp)
-									AProcess.Plan.Catalog.UpdateTimeStamp();
+									AProcess.Catalog.UpdateTimeStamp();
 							}
 							catch
 							{
-								AProcess.Plan.Catalog.Libraries.Remove(LLibrary);
+								AProcess.Catalog.Libraries.Remove(LLibrary);
 								throw;
 							}
 						}
@@ -772,10 +772,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					catch
 					{
-						AProcess.Plan.Catalog.Libraries.Add(LLibrary);
+						AProcess.Catalog.Libraries.Add(LLibrary);
 						throw;
 					}
-					AProcess.Plan.Catalog.Libraries.DoLibraryRenamed(AProcess, LOldName, LLibrary.Name);
+					AProcess.Catalog.Libraries.DoLibraryRenamed(AProcess, LOldName, LLibrary.Name);
 				}
 			}
 		}
@@ -796,7 +796,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LLoadedLibrary != null)
 			{
 				while (LLoadedLibrary.RequiredByLibraries.Count > 0)
-					EnsureLibraryUnregistered(AProcess, AProcess.Plan.Catalog.Libraries[LLoadedLibrary.RequiredByLibraries[0].Name], AWithReconciliation);
+					EnsureLibraryUnregistered(AProcess, AProcess.Catalog.Libraries[LLoadedLibrary.RequiredByLibraries[0].Name], AWithReconciliation);
 				SystemUnregisterLibraryNode.UnregisterLibrary(AProcess, ALibrary.Name, AWithReconciliation);
 			}
 		}
@@ -815,16 +815,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.Libraries LOldLibraries = new Schema.Libraries();
 			Schema.Library.GetAvailableLibraries(AProcess.ServerSession.Server.InstanceDirectory, AProcess.ServerSession.Server.LibraryDirectory, LLibraries);
 			
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				// Ensure that each library in the directory is available in the DAE
 				foreach (Schema.Library LLibrary in LLibraries)
-					if (!AProcess.Plan.Catalog.Libraries.ContainsName(LLibrary.Name) && !AProcess.Plan.Catalog.ContainsName(LLibrary.Name))
+					if (!AProcess.Catalog.Libraries.ContainsName(LLibrary.Name) && !AProcess.Catalog.ContainsName(LLibrary.Name))
 						SystemCreateLibraryNode.AttachLibrary(AProcess, LLibrary, false);
 						
 				// Ensure that each library in the DAE is supported by a library in the directory, remove non-existent libraries
 				// The System library is not required to have a directory.
-				foreach (Schema.Library LLibrary in AProcess.Plan.Catalog.Libraries)
+				foreach (Schema.Library LLibrary in AProcess.Catalog.Libraries)
 					if ((Server.CSystemLibraryName != LLibrary.Name) && (LLibrary.Directory == String.Empty) && !LLibraries.ContainsName(LLibrary.Name))
 						LOldLibraries.Add(LLibrary);
 						
@@ -851,11 +851,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.Libraries LLibraries = new Schema.Libraries();
 			Schema.Library.GetAvailableLibraries(AProcess.ServerSession.Server.InstanceDirectory, LLibraryDirectory, LLibraries, true);
 
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				// Ensure that each library in the directory is available in the DAE
 				foreach (Schema.Library LLibrary in LLibraries)
-					if (!AProcess.Plan.Catalog.Libraries.ContainsName(LLibrary.Name) && !AProcess.Plan.Catalog.ContainsName(LLibrary.Name))
+					if (!AProcess.Catalog.Libraries.ContainsName(LLibrary.Name) && !AProcess.Catalog.ContainsName(LLibrary.Name))
 						SystemCreateLibraryNode.AttachLibrary(AProcess, LLibrary, false);
 			}
 			
@@ -880,7 +880,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void AttachLibrary(ServerProcess AProcess, string ALibraryName, string ALibraryDirectory, bool AIsAttached)
 		{
 			Schema.Library LLibrary = Schema.Library.GetAvailableLibrary(AProcess.ServerSession.Server.InstanceDirectory, ALibraryName, ALibraryDirectory);
-			if ((LLibrary != null) && !AProcess.Plan.Catalog.Libraries.ContainsName(LLibrary.Name))
+			if ((LLibrary != null) && !AProcess.Catalog.Libraries.ContainsName(LLibrary.Name))
 				SystemCreateLibraryNode.AttachLibrary(AProcess, LLibrary, AIsAttached);
 		}
 	}
@@ -902,9 +902,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[(string)AArguments[0]];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[(string)AArguments[0]];
 				return (Schema.Library)LLibrary.Clone();
 			}
 		}
@@ -915,9 +915,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public static void ChangeLibraryVersion(ServerProcess AProcess, string ALibraryName, VersionNumber AVersion, bool AUpdateTimeStamp)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (!(LLibrary.Version.Equals(AVersion)))
 				{
 					Schema.LoadedLibrary LLoadedLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
@@ -925,7 +925,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						foreach (Schema.LoadedLibrary LDependentLoadedLibrary in LLoadedLibrary.RequiredByLibraries)
 						{
-							Schema.Library LDependentLibrary = AProcess.Plan.Catalog.Libraries[LDependentLoadedLibrary.Name];
+							Schema.Library LDependentLibrary = AProcess.Catalog.Libraries[LDependentLoadedLibrary.Name];
 							Schema.LibraryReference LLibraryReference = LDependentLibrary.Libraries[LLibrary.Name];
 							if (!VersionNumber.Compatible(LLibraryReference.Version, AVersion))
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.RegisteredLibraryHasDependents, LLibrary.Name, LDependentLibrary.Name, LLibraryReference.Version.ToString());
@@ -934,7 +934,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LLibrary.Version = AVersion;
 
 					if (AUpdateTimeStamp)
-						AProcess.Plan.Catalog.UpdateTimeStamp();
+						AProcess.Catalog.UpdateTimeStamp();
 
 					AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
 					try
@@ -954,15 +954,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void SetLibraryDefaultDeviceName(ServerProcess AProcess, string ALibraryName, string ADefaultDeviceName, bool AUpdateTimeStamp)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (LLibrary.DefaultDeviceName != ADefaultDeviceName)
 				{	
 					LLibrary.DefaultDeviceName = ADefaultDeviceName;
 
 					if (AUpdateTimeStamp)
-						AProcess.Plan.Catalog.UpdateTimeStamp();
+						AProcess.Catalog.UpdateTimeStamp();
 						
 					AProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
 					try
@@ -979,12 +979,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void AddLibraryRequisite(ServerProcess AProcess, string ALibraryName, Schema.LibraryReference ARequisiteLibrary)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				if (!AProcess.Plan.Catalog.Libraries.Contains(ALibraryName))
+				if (!AProcess.Catalog.Libraries.Contains(ALibraryName))
 					SystemCreateLibraryNode.CreateLibrary(AProcess, new Schema.Library(Schema.Object.EnsureUnrooted(ALibraryName)), true, false);
 					
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1002,7 +1002,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (!LLoadedLibrary.RequiredLibraries.Contains(ARequisiteLibrary.Name))
 						{
 							LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ARequisiteLibrary.Name));
-							AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
+							AProcess.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
 							LLoadedLibrary.ClearNameResolutionPath();
 						}
 						LLoadedLibrary.AttachLibrary();
@@ -1028,9 +1028,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void UpdateLibraryRequisite(ServerProcess AProcess, string ALibraryName, Schema.LibraryReference AOldReference, Schema.LibraryReference ANewReference)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1049,7 +1049,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (AProcess.CatalogDeviceSession.IsLoadedLibrary(LLibrary.Name))
 						{
 							// Ensure that the registered library satisfies the new requisite
-							Schema.Library LRequiredLibrary = AProcess.Plan.Catalog.Libraries[AOldReference.Name];
+							Schema.Library LRequiredLibrary = AProcess.Catalog.Libraries[AOldReference.Name];
 							if (!VersionNumber.Compatible(ANewReference.Version, LRequiredLibrary.Version))
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.InvalidLibraryReference, AOldReference.Name, ALibraryName, ANewReference.Version.ToString(), LRequiredLibrary.Version.ToString());
 						}
@@ -1072,9 +1072,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void RemoveLibraryRequisite(ServerProcess AProcess, string ALibraryName, Schema.LibraryReference ARequisiteLibrary)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1099,12 +1099,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void AddLibraryFile(ServerProcess AProcess, string ALibraryName, Schema.FileReference AFile)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				if (!AProcess.Plan.Catalog.Libraries.Contains(ALibraryName))
+				if (!AProcess.Catalog.Libraries.Contains(ALibraryName))
 					SystemCreateLibraryNode.CreateLibrary(AProcess, new Schema.Library(Schema.Object.EnsureUnrooted(ALibraryName)), true, false);
 
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1139,9 +1139,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void RemoveLibraryFile(ServerProcess AProcess, string ALibraryName, Schema.FileReference AFile)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 
@@ -1171,12 +1171,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void AddLibrarySetting(ServerProcess AProcess, string ALibraryName, Tag ASetting)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				if (!AProcess.Plan.Catalog.Libraries.Contains(ALibraryName))
+				if (!AProcess.Catalog.Libraries.Contains(ALibraryName))
 					SystemCreateLibraryNode.CreateLibrary(AProcess, new Schema.Library(Schema.Object.EnsureUnrooted(ALibraryName)), true, false);
 					
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1209,9 +1209,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void UpdateLibrarySetting(ServerProcess AProcess, string ALibraryName, Tag AOldSetting, Tag ANewSetting)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1255,9 +1255,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void RemoveLibrarySetting(ServerProcess AProcess, string ALibraryName, Tag ATag)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				if (Schema.Object.NamesEqual(LLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
 					
@@ -1287,9 +1287,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void SetLibraryDescriptor(ServerProcess AProcess, string AOldLibraryName, Schema.Library ANewLibrary, bool AUpdateTimeStamp)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LOldLibrary = AProcess.Plan.Catalog.Libraries[AOldLibraryName];
+				Schema.Library LOldLibrary = AProcess.Catalog.Libraries[AOldLibraryName];
 				
 				if (Schema.Object.NamesEqual(LOldLibrary.Name, Server.CSystemLibraryName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.CannotModifySystemLibrary);
@@ -1325,7 +1325,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (!LLoadedLibrary.RequiredLibraries.Contains(LReference.Name))
 						{
 							LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-							AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
+							AProcess.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
 							LLoadedLibrary.ClearNameResolutionPath();
 						}
 					}
@@ -1335,14 +1335,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					SystemRegisterLibraryNode.RegisterLibraryFiles(AProcess, ANewLibrary, AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ANewLibrary.Name));
 				}
 				
-				AProcess.Plan.Catalog.Libraries.Remove(LOldLibrary);
+				AProcess.Catalog.Libraries.Remove(LOldLibrary);
 				try
 				{
-					AProcess.Plan.Catalog.Libraries.Add(ANewLibrary);
+					AProcess.Catalog.Libraries.Add(ANewLibrary);
 					try
 					{
 						if (AUpdateTimeStamp)
-							AProcess.Plan.Catalog.UpdateTimeStamp();
+							AProcess.Catalog.UpdateTimeStamp();
 
 						string LLibraryDirectory = ANewLibrary.GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
 						string LLibraryName = Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(ANewLibrary.Name));
@@ -1369,7 +1369,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										Directory.Move(LLibraryDirectory, LOldLibraryDirectory);
 										throw;
 									}
-									AProcess.Plan.Catalog.Libraries.DoLibraryRenamed(AProcess, LOldLibrary.Name, ANewLibrary.Name);
+									AProcess.Catalog.Libraries.DoLibraryRenamed(AProcess, LOldLibrary.Name, ANewLibrary.Name);
 								}
 								ANewLibrary.SaveToFile(LLibraryName);
 							}
@@ -1387,13 +1387,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					catch
 					{
-						AProcess.Plan.Catalog.Libraries.Remove(ANewLibrary);
+						AProcess.Catalog.Libraries.Remove(ANewLibrary);
 						throw;
 					}
 				}
 				catch
 				{
-					AProcess.Plan.Catalog.Libraries.Add(LOldLibrary);
+					AProcess.Catalog.Libraries.Add(LOldLibrary);
 					throw;
 				}
 			}
@@ -1470,7 +1470,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Schema.LoadedLibrary LCurrentLibrary = AProcess.ServerSession.CurrentLibrary;
 				try
 				{
-					Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryReference.Name];
+					Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryReference.Name];
 					if (!VersionNumber.Compatible(ALibraryReference.Version, LLibrary.Version))
 						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, ALibraryReference.Name, ALibraryReference.Version.ToString(), LLibrary.Version.ToString());
 					RegisterLibrary(AProcess, LLibrary.Name, AWithReconciliation);
@@ -1482,7 +1482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			else
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryReference.Name];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryReference.Name];
 				if (!VersionNumber.Compatible(ALibraryReference.Version, LLibrary.Version))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, ALibraryReference.Name, ALibraryReference.Version.ToString(), LLibrary.Version.ToString());
 			}
@@ -1547,7 +1547,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static bool IsCircularLibraryReference(ServerProcess AProcess, Schema.Library ALibrary, string ARequiredLibraryName)
 		{
-			Schema.Library LRequiredLibrary = AProcess.Plan.Catalog.Libraries[ARequiredLibraryName];
+			Schema.Library LRequiredLibrary = AProcess.Catalog.Libraries[ARequiredLibraryName];
 			if (Schema.Object.NamesEqual(ALibrary.Name, ARequiredLibraryName))
 				return true;
 				
@@ -1567,9 +1567,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.DisableReconciliation();
 				try
 				{
-					lock (AProcess.Plan.Catalog.Libraries)
+					lock (AProcess.Catalog.Libraries)
 					{
-						Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+						Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 						
 						Schema.LoadedLibrary LLoadedLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LLibrary.Name, false);
 						if (LLoadedLibrary != null)
@@ -1584,7 +1584,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							CheckCircularLibraryReference(AProcess, LLibrary, LReference.Name);
 							EnsureLibraryRegistered(AProcess, LReference, AWithReconciliation);
 							LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-							AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
+							AProcess.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
 							LLoadedLibrary.ClearNameResolutionPath();
 						}
 						
@@ -1645,7 +1645,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								LLoadedLibrary.DetachLibrary();
 								throw;
 							}
-							AProcess.Plan.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
+							AProcess.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
 						}
 						finally
 						{
@@ -1669,7 +1669,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			string LLibraryName = (string)AArguments[0];
 			bool LWithReconciliation = AArguments.Length > 1 ? (bool)AArguments[1] : true;
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				if (!AProcess.CatalogDeviceSession.IsLoadedLibrary(LLibraryName))
 					RegisterLibrary(AProcess, LLibraryName, LWithReconciliation);
@@ -1683,7 +1683,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public static void EnsureLibraryRegistered(ServerProcess AProcess, string ALibraryName, bool AWithReconciliation)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
 				if (AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName, false) == null)
 					SystemRegisterLibraryNode.RegisterLibrary(AProcess, ALibraryName, AWithReconciliation);
@@ -1710,7 +1710,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProcess.DisableReconciliation();
 				try
 				{
-					lock (AProcess.Plan.Catalog.Libraries)
+					lock (AProcess.Catalog.Libraries)
 					{
 						Schema.LoadedLibrary LLoadedLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
 						
@@ -1741,11 +1741,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						
 						// Unregister each assembly that was loaded with this library
 						foreach (Assembly LAssembly in LLoadedLibrary.Assemblies)
-							AProcess.Plan.Catalog.ClassLoader.UnregisterAssembly(LAssembly);
+							AProcess.Catalog.ClassLoader.UnregisterAssembly(LAssembly);
 
 						// TODO: Unregister assemblies when the .NET framework supports it
 						
-						AProcess.Plan.Catalog.Libraries.DoLibraryUnloaded(AProcess, LLoadedLibrary.Name);
+						AProcess.Catalog.Libraries.DoLibraryUnloaded(AProcess, LLoadedLibrary.Name);
 					}
 				}
 				finally
@@ -1777,12 +1777,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private static void LoadLibrary(ServerProcess AProcess, string ALibraryName, bool AIsKnown)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				VersionNumber LCurrentVersion = AProcess.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
 				
-				if (AProcess.Plan.Catalog.LoadedLibraries.Contains(LLibrary.Name))
+				if (AProcess.Catalog.LoadedLibraries.Contains(LLibrary.Name))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
 
 				bool LIsLoaded = false;				
@@ -1796,11 +1796,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					//	Ensure that each required library is loaded
 					foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
 					{
-						Schema.Library LRequiredLibrary = AProcess.Plan.Catalog.Libraries[LReference.Name];
+						Schema.Library LRequiredLibrary = AProcess.Catalog.Libraries[LReference.Name];
 						if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
 							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
 
-						if (!AProcess.Plan.Catalog.LoadedLibraries.Contains(LReference.Name))
+						if (!AProcess.Catalog.LoadedLibraries.Contains(LReference.Name))
 						{
 							if (!LRequiredLibrary.IsSuspect)
 								LoadLibrary(AProcess, LReference.Name, AIsKnown);
@@ -1809,7 +1809,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						
 						LLoadedLibrary.RequiredLibraries.Add(AProcess.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-						AProcess.Plan.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
+						AProcess.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProcess.ServerSession.Server.SystemLibrary));
 						LLoadedLibrary.ClearNameResolutionPath();
 					}
 					
@@ -1862,7 +1862,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				AProcess.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
 				
-				AProcess.Plan.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
+				AProcess.Catalog.Libraries.DoLibraryLoaded(AProcess, LLibrary.Name);
 			}
 		}
 		
@@ -2024,7 +2024,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		private static void InternalUpgradeLibrary(ServerProcess AProcess, string ALibraryName, VersionNumber ACurrentVersion, VersionNumber ATargetVersion)
 		{
 			DataParams LParams = new DataParams();
-			LParams.Add(new DataParam("ALibraryName", AProcess.Plan.Catalog.DataTypes.SystemName, Modifier.Const, ALibraryName));
+			LParams.Add(new DataParam("ALibraryName", AProcess.DataTypes.SystemName, Modifier.Const, ALibraryName));
 			LParams.Add(new DataParam("ACurrentVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, ACurrentVersion));
 			LParams.Add(new DataParam("ATargetVersion", Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.VersionNumber", true) as Schema.IDataType, Modifier.Const, ATargetVersion));
 			IServerStatementPlan LPlan =
@@ -2072,9 +2072,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public static void UpgradeLibrary(ServerProcess AProcess, string ALibraryName)
 		{
-			lock (AProcess.Plan.Catalog.Libraries)
+			lock (AProcess.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+				Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 				Schema.LoadedLibrary LLoadedLibrary = AProcess.CatalogDeviceSession.ResolveLoadedLibrary(ALibraryName);
 				VersionNumber LCurrentVersion = AProcess.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
 				if (VersionNumber.Compare(LLibrary.Version, LCurrentVersion) > 0)
@@ -2115,7 +2115,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void UpgradeLibraries(ServerProcess AProcess)
 		{
 			Schema.LoadedLibraries LLibraries = new Schema.LoadedLibraries();
-			foreach (Schema.LoadedLibrary LLibrary in AProcess.Plan.Catalog.LoadedLibraries)
+			foreach (Schema.LoadedLibrary LLibrary in AProcess.Catalog.LoadedLibraries)
 				GatherRequisites(LLibrary, LLibraries);
 			string[] LLibraryArray = new string[LLibraries.Count];
 			for (int LIndex = 0; LIndex < LLibraries.Count; LIndex++)
@@ -2255,7 +2255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void PopulateUpgradeVersions(ServerProcess AProcess, Table ATable, Row ARow, string ALibraryName)
 		{
-			Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+			Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 			string LUpgradeDirectory = UpgradeUtility.GetUpgradeDirectory(AProcess, LLibrary.Name, LLibrary.Directory);
 			if (Directory.Exists(LUpgradeDirectory))
 			{
@@ -2330,7 +2330,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void PopulateUpgradeVersions(ServerProcess AProcess, Table ATable, Row ARow, string ALibraryName)
 		{
-			Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+			Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 			string LUpgradeDirectory = UpgradeUtility.GetUpgradeDirectory(AProcess, LLibrary.Name, LLibrary.Directory);
 			if (Directory.Exists(LUpgradeDirectory))
 			{
@@ -2403,7 +2403,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void PopulateUpgradeVersions(ServerProcess AProcess, Table ATable, Row ARow, string ALibraryName)
 		{
-			Schema.Library LLibrary = AProcess.Plan.Catalog.Libraries[ALibraryName];
+			Schema.Library LLibrary = AProcess.Catalog.Libraries[ALibraryName];
 			string LUpgradeDirectory = UpgradeUtility.GetUpgradeDirectory(AProcess, LLibrary.Name, LLibrary.Directory);
 			if (Directory.Exists(LUpgradeDirectory))
 			{
@@ -2467,7 +2467,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LoadUpgrade
 				(
 					AProcess, 
-					AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], 
+					AProcess.Catalog.Libraries[(string)AArguments[0]], 
 					(VersionNumber)AArguments[1]
 				);
 		}
@@ -2496,9 +2496,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			if (AArguments[1] == null)
-				InjectUpgradeNode.InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[2]);
+				InjectUpgradeNode.InjectUpgrade(AProcess, AProcess.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[2]);
 			else
-				SaveUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1], (string)AArguments[2]);
+				SaveUpgrade(AProcess, AProcess.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1], (string)AArguments[2]);
 			return null;
 		}
 	}
@@ -2515,7 +2515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			DeleteUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1]);
+			DeleteUpgrade(AProcess, AProcess.Catalog.Libraries[(string)AArguments[0]], (VersionNumber)AArguments[1]);
 			return null;
 		}
 	}
@@ -2545,7 +2545,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			return InjectUpgrade(AProcess, AProcess.Plan.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[1]);
+			return InjectUpgrade(AProcess, AProcess.Catalog.Libraries[(string)AArguments[0]], (string)AArguments[1]);
 		}
 	}
 }

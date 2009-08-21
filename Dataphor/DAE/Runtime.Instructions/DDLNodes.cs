@@ -39,7 +39,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.BindNode(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true))).Execute(AProcess);
+				Compiler.BindNode(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true))).Execute(AProcess);
 			}
 		}
 		
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 					LObjectNames[LIndex] = LHeaders[LIndex].Name;
 					
-				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNames, String.Empty, false, true, false, true)).Execute(AProcess);
 			}
 		}
 		
@@ -77,7 +77,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDeviceMapNames = new string[LDeviceMaps.Count];
 				LDeviceMaps.CopyTo(LDeviceMapNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDeviceMapNames, String.Empty, false, true, true, true));
+				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDeviceMapNames, String.Empty, false, true, true, true));
 				LNode.Execute(AProcess);
 			}
 						
@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, true, true));
+				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, true, true));
 				LNode.Execute(AProcess);
 			}
 		}
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true)).Execute(AProcess);
 			}
 		}
 		
@@ -305,7 +305,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override	object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				foreach (Schema.Conversion LConversion in SourceScalarType.ImplicitConversions)
 					if (LConversion.TargetScalarType.Equals(TargetScalarType))
@@ -348,7 +348,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override	object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				AProcess.CatalogDeviceSession.CreateSort(FSort);
 				AProcess.CatalogDeviceSession.AttachSort(FScalarType, FSort, FIsUnique);
@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override	object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				if (FScalarType.Sort != null)
 				{
@@ -410,7 +410,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override	object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				Schema.Sort LSort = FIsUnique ? FScalarType.UniqueSort : FScalarType.Sort;
 				if (LSort != null)
@@ -702,8 +702,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			
 			AProcess.CatalogDeviceSession.CreateReference(FReference);
-			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+			AProcess.Catalog.UpdatePlanCacheTimeStamp();
+			AProcess.Catalog.UpdateDerivationTimeStamp();
 			
 			return null;
 		}
@@ -1658,9 +1658,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			AProcess.CatalogDeviceSession.AlterMetaData(FTableVar, FAlterTableVarStatement.AlterMetaData);
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+				AProcess.Catalog.UpdateCacheTimeStamp();
+				AProcess.Catalog.UpdatePlanCacheTimeStamp();
+				AProcess.Catalog.UpdateDerivationTimeStamp();
 			}
 
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(FTableVar);
@@ -1727,9 +1727,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+				AProcess.Catalog.UpdateCacheTimeStamp();
+				AProcess.Catalog.UpdatePlanCacheTimeStamp();
+				AProcess.Catalog.UpdateDerivationTimeStamp();
 			}
 			
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(LView);
@@ -2218,9 +2218,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			)
 				LScalarType.ResetNativeRepresentationCache();
 			
-			AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+			AProcess.Catalog.UpdateCacheTimeStamp();
+			AProcess.Catalog.UpdatePlanCacheTimeStamp();
+			AProcess.Catalog.UpdateDerivationTimeStamp();
 			
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(LScalarType);
 			
@@ -2284,8 +2284,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 				
 			AProcess.CatalogDeviceSession.AlterMetaData(LOperator, FAlterOperatorStatement.AlterMetaData);
-			AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
+			AProcess.Catalog.UpdateCacheTimeStamp();
+			AProcess.Catalog.UpdatePlanCacheTimeStamp();
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(LOperator);
 			
 			return null;
@@ -2383,8 +2383,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			AProcess.CatalogDeviceSession.AlterMetaData(LAggregateOperator, FAlterAggregateOperatorStatement.AlterMetaData);
-			AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
+			AProcess.Catalog.UpdateCacheTimeStamp();
+			AProcess.Catalog.UpdatePlanCacheTimeStamp();
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(LAggregateOperator);
 
 			return null;
@@ -2505,8 +2505,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FReference.SourceTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
 			FReference.TargetTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
 
-			AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+			AProcess.Catalog.UpdatePlanCacheTimeStamp();
+			AProcess.Catalog.UpdateDerivationTimeStamp();
 			
 			AProcess.CatalogDeviceSession.UpdateCatalogObject(FReference);
 			
@@ -2784,7 +2784,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				CheckNotSystem(AProcess, FTable);
 				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, FTable);
@@ -2798,9 +2798,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				if (ShouldAffectDerivationTimeStamp)
 				{
-					AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-					AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-					AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+					AProcess.Catalog.UpdateCacheTimeStamp();
+					AProcess.Catalog.UpdatePlanCacheTimeStamp();
+					AProcess.Catalog.UpdateDerivationTimeStamp();
 				}
 				return null;
 			}
@@ -2836,7 +2836,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				CheckNotSystem(AProcess, FDerivedTableVar);
 				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, FDerivedTableVar);
@@ -2850,9 +2850,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				if (ShouldAffectDerivationTimeStamp)
 				{
-					AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-					AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-					AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+					AProcess.Catalog.UpdateCacheTimeStamp();
+					AProcess.Catalog.UpdatePlanCacheTimeStamp();
+					AProcess.Catalog.UpdateDerivationTimeStamp();
 				}
 
 				return null;
@@ -2897,7 +2897,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				CheckNotSystem(AProcess, FScalarType);
 				
@@ -2908,11 +2908,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				CheckNoDependents(AProcess, FScalarType);
 				
 				AProcess.CatalogDeviceSession.DropScalarType(FScalarType);
-				AProcess.Plan.Catalog.OperatorResolutionCache.Clear(FScalarType, FScalarType);					
+				AProcess.Catalog.OperatorResolutionCache.Clear(FScalarType, FScalarType);					
 				
-				AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+				AProcess.Catalog.UpdateCacheTimeStamp();
+				AProcess.Catalog.UpdatePlanCacheTimeStamp();
+				AProcess.Catalog.UpdateDerivationTimeStamp();
 				return null;
 			}
 		}
@@ -2972,8 +2972,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
+				AProcess.Catalog.UpdateCacheTimeStamp();
+				AProcess.Catalog.UpdatePlanCacheTimeStamp();
 			}
 			return null;
 		}
@@ -2996,7 +2996,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				CheckNotSystem(AProcess, FConstraint);
 				CheckNoDependents(AProcess, FConstraint);
@@ -3040,16 +3040,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FReference == null)
 				FReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProcess.Plan, FReferenceName);
 
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				CheckNotSystem(AProcess, FReference);
 				CheckNoDependents(AProcess, FReference);
 				
 				AProcess.CatalogDeviceSession.DropReference(FReference);
 
-				AProcess.Plan.Catalog.UpdateCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Plan.Catalog.UpdateDerivationTimeStamp();
+				AProcess.Catalog.UpdateCacheTimeStamp();
+				AProcess.Catalog.UpdatePlanCacheTimeStamp();
+				AProcess.Catalog.UpdateDerivationTimeStamp();
 				return null;
 			}
 		}
@@ -3072,7 +3072,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				// TODO: Prevent dropping when server sessions are active
 				// TODO: Drop server link users
@@ -3104,7 +3104,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				AProcess.CatalogDeviceSession.StopDevice(FDropDevice);
 				

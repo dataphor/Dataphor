@@ -92,8 +92,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ASourceNode.DetermineBinding(APlan);
 				
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (LTransaction != null)

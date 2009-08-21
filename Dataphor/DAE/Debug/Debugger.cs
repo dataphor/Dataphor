@@ -383,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
 					
-				List<StackWindow> LStackWindows = LProcess.Context.GetCallStack();
+				List<StackWindow> LStackWindows = LProcess.Stack.GetCallStack();
 				
 				CallStack LCallStack = new CallStack();
 				
@@ -421,7 +421,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			lock (FSyncHandle)
 			{
 				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
-				object[] LStackWindow = LProcess.Context.GetStack(AWindowIndex);
+				object[] LStackWindow = LProcess.Stack.GetStack(AWindowIndex);
 				List<StackEntry> LStack = new List<StackEntry>();
 				for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
 					LStack.Add

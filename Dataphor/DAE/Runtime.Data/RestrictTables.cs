@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             while (FSourceTable.Next())
             {
                 FSourceTable.Select(FSourceRow);
-                Process.Context.Push(FSourceRow);
+                Process.Stack.Push(FSourceRow);
                 try
                 {
 					object LValue = Node.Nodes[1].Execute(Process);
@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
-					Process.Context.Pop();
+					Process.Stack.Pop();
 				}
             }
             return false;
@@ -174,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FLastKeys = new ScanKey[Node.ClosedConditions.Count + Node.OpenConditions.Count];
 			}
 		
-			Process.Context.Push(null); // var Dummy : Scalar?
+			Process.Stack.Push(null); // var Dummy : Scalar?
 			try
 			{
 				for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
@@ -372,7 +372,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Context.Pop();
+				Process.Stack.Pop();
 			}
 		}
 		
@@ -723,11 +723,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Context.Push(AKeyValue1);
-			Process.Context.Push(AKeyValue2);
+			Process.Stack.Push(AKeyValue1);
+			Process.Stack.Push(AKeyValue2);
 			int LResult = (int)ACompareNode.Execute(Process);
-			Process.Context.Pop();
-			Process.Context.Pop();
+			Process.Stack.Pop();
+			Process.Stack.Pop();
 			return LResult;
         }
         
@@ -988,7 +988,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			base.InternalOpen();
 			int FKeyCount = 0;
 			FKeyRow = new Row(Process, new Schema.RowType(FSourceTable.Order.Columns));
-			Process.Context.Push(FKeyRow);
+			Process.Stack.Push(FKeyRow);
 			try
 			{
 				object LVar;
@@ -1004,7 +1004,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Context.Pop();
+				Process.Stack.Pop();
 			}
 			FRowFound = (FKeyCount > 0) && FSourceTable.FindKey(FKeyRow);
 			InternalFirst();

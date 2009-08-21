@@ -6,6 +6,7 @@
 
 using System;
 using System.Text;
+using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Debug;
 	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
@@ -28,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			FServerProcess = AServerProcess;
 			FCatalogLocks = new ArrayList();
-			FSymbols = new Symbols(FServerProcess.Context.MaxStackDepth, FServerProcess.Context.MaxCallDepth);
+			FSymbols = new Symbols(FServerProcess.Stack.MaxStackDepth, FServerProcess.Stack.MaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
 		}
@@ -129,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			object LDevicePlan = FDevicePlans[APlanNode];
 			if (LDevicePlan == null)
 			{
-				FServerProcess.EnsureDeviceStarted(APlanNode.Device);
+				EnsureDeviceStarted(APlanNode.Device);
 				Schema.DevicePlan LNewDevicePlan = APlanNode.Device.Prepare(this, APlanNode);
 				AddDevicePlan(LNewDevicePlan);
 				return LNewDevicePlan;
@@ -142,6 +144,45 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			if (!FDevicePlans.Contains(ADevicePlan.Node))
 				FDevicePlans.Add(ADevicePlan.Node, ADevicePlan);
+		}
+		
+		public void EnsureDeviceStarted(Schema.Device ADevice)
+		{
+			FServerProcess.EnsureDeviceStarted(ADevice);
+		}
+		
+		public void CheckDeviceReconcile(Schema.BaseTableVar ATableVar)
+		{
+			ATableVar.Device.CheckReconcile(FServerProcess, ATableVar);
+		}
+		
+		public Schema.DeviceSession DeviceConnect(Schema.Device ADevice)
+		{
+			return FServerProcess.DeviceConnect(ADevice);
+		}
+		
+		public RemoteSession RemoteConnect(Schema.ServerLink ALink)
+		{
+			return FServerProcess.RemoteConnect(ALink);
+		}
+		
+		/// <summary>
+		/// Used to evaluate literal arguments at compile-time. The given node must be literal, or an exception is raised.
+		/// </summary>
+		public object EvaluateLiteralArgument(PlanNode ANode, string AArgumentName)
+		{
+			if (!ANode.IsLiteral)
+				throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, CompilerErrorLevel.NonFatal, AArgumentName);
+				
+			return ANode.Execute(FServerProcess);
+		}
+		
+		/// <summary>
+		/// Used to execute arbitrary plan nodes at compile-time. Note that the process stack is potentially affected by this run.
+		/// </summary>
+		public object ExecuteNode(PlanNode ANode)
+		{
+			return ANode.Execute(FServerProcess);
 		}
 		
 		// CatalogLocks
@@ -181,6 +222,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Symbols        
 		protected Symbols FSymbols;
 		public Symbols Symbols { get { return FSymbols; } }
+		
+		public void ReportProcessSymbols()
+		{
+			FServerProcess.ReportProcessSymbols(FSymbols);
+		}
 		
 		// InErrorContext
 		protected int FErrorContextCount;
@@ -242,6 +288,52 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void PopATCreationContext()
 		{
 			FATCreationContext--;
+		}
+		
+		// ApplicationTransactionID
+		public Guid ApplicationTransactionID { get { return FServerProcess.ApplicationTransactionID; } }
+		
+		public ApplicationTransaction GetApplicationTransaction()
+		{
+			return FServerProcess.GetApplicationTransaction();
+		}
+		
+		public bool IsInsert 
+		{
+			get { return FServerProcess.IsInsert; } 
+			set { FServerProcess.IsInsert = true; }
+		}
+		
+		public void EnsureApplicationTransactionOperator(Schema.Operator AOperator)
+		{
+			if (ApplicationTransactionID != Guid.Empty && AOperator.IsATObject)
+			{
+				ApplicationTransaction LTransaction = GetApplicationTransaction();
+				try
+				{
+					LTransaction.EnsureATOperatorMapped(FServerProcess, AOperator);
+				}
+				finally
+				{
+					Monitor.Exit(LTransaction);
+				}
+			}
+		}
+		
+		public void EnsureApplicationTransactionTableVar(Schema.TableVar ATableVar)
+		{
+			if (ApplicationTransactionID != Guid.Empty && ATableVar.IsATObject)
+			{
+				ApplicationTransaction LTransaction = GetApplicationTransaction();
+				try
+				{
+					LTransaction.EnsureATTableVarMapped(FServerProcess, ATableVar);
+				}
+				finally
+				{
+					Monitor.Exit(LTransaction);
+				}
+			}
 		}
 		
 		/// <summary>Indicates whether time stamps should be affected by alter and drop table variable and operator statements.</summary>
@@ -398,6 +490,32 @@ namespace Alphora.Dataphor.DAE.Compiling
 					FSecurityContexts[LIndex].SetUser(AUser);
 		}
 		
+		// LoadingContext
+		public void PushLoadingContext(LoadingContext AContext)
+		{
+			FServerProcess.PushLoadingContext(AContext);
+		}
+		
+		public void PopLoadingContext()
+		{
+			FServerProcess.PopLoadingContext();
+		}
+		
+		public LoadingContext CurrentLoadingContext()
+		{
+			return FServerProcess.CurrentLoadingContext();
+		}
+		
+		public bool IsLoading()
+		{
+			return FServerProcess.IsLoading();
+		}
+		
+		public bool InLoadingContext()
+		{
+			return FServerProcess.InLoadingContext();
+		}
+		
 		// A Temporary catalog where catalog objects are registered during compilation
 		protected Schema.Catalog FPlanCatalog;
 		public Schema.Catalog PlanCatalog
@@ -432,9 +550,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 				return FPlanSessionOperators;
 			}
 		}
+		
+		// SessionObjects
+		public Schema.Objects SessionObjects { get { return FServerProcess.ServerSession.SessionObjects; } }
+		
+		public Schema.Objects SessionOperators { get { return FServerProcess.ServerSession.SessionOperators; } }
+		
+		public int SessionID { get { return FServerProcess.ServerSession.SessionID; } }
+		
+		public int GetNextResourceManagerID()
+		{
+			return FServerProcess.ServerSession.Server.GetNextResourceManagerID();
+		}
 
 		// Catalog		
+		public bool IsRepository { get { return FServerProcess.ServerSession.Server.IsRepository; } }
+		
 		public Schema.Catalog Catalog { get { return FServerProcess.ServerSession.Server.Catalog; } }
+		
+		public Schema.DataTypes DataTypes { get { return FServerProcess.DataTypes; } }
+		
+		public QueryLanguage Language { get { return FServerProcess.ServerSession.SessionInfo.Language; } }
+		
+		public bool ShouldEmitIL { get { return FServerProcess.ServerSession.SessionInfo.ShouldEmitIL; } }
 		
 		public bool SuppressWarnings
 		{
@@ -544,7 +682,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void CheckRight(string ARight)
 		{
 			if (!InATCreationContext)
-				ServerProcess.CatalogDeviceSession.CheckUserHasRight(SecurityContext.User.ID, ARight);
+				FServerProcess.CatalogDeviceSession.CheckUserHasRight(SecurityContext.User.ID, ARight);
 		}
 		
 		public bool HasRight(string ARight)

@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							LPlan = LPlans[LPlanIndex];
 							LPlans.RemoveAt(LPlanIndex);
-							if (AProcess.Plan.Catalog.PlanCacheTimeStamp > LPlan.PlanCacheTimeStamp)
+							if (AProcess.Catalog.PlanCacheTimeStamp > LPlan.PlanCacheTimeStamp)
 							{
 								DisposeCachedPlan(AProcess, LPlan);
 								LPlan = null;
@@ -151,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Server
 			CachedPlans LBumped = null;
 			CachedPlanHeader LHeader = GetPlanHeader(AProcess, AStatement, AContextHashCode);
 			APlan.Header = LHeader;
-			APlan.PlanCacheTimeStamp = AProcess.Plan.Catalog.PlanCacheTimeStamp;
+			APlan.PlanCacheTimeStamp = AProcess.Catalog.PlanCacheTimeStamp;
 
 			lock (this)
 			{

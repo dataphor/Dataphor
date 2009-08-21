@@ -255,9 +255,9 @@ namespace Alphora.Dataphor.DAE.Server
 					
 					#if ALLOWPROCESSCONTEXT
 					// Add variable declaration statements for any process context that may be being referenced by the plan
-					for (int LIndex = ServerExpressionPlan.ServerProcess.ProcessContext.Count - 1; LIndex >= 0; LIndex--)
-						if (!ContainsParam(AParams, ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].Name))
-							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].Name, ServerExpressionPlan.ServerProcess.ProcessContext[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
+					for (int LIndex = ServerExpressionPlan.ServerProcess.ProcessSymbols.Count - 1; LIndex >= 0; LIndex--)
+						if (!ContainsParam(AParams, ServerExpressionPlan.ServerProcess.ProcessSymbols[LIndex].Name))
+							LStatement.Statements.Add(new VariableStatement(ServerExpressionPlan.ServerProcess.ProcessSymbols[LIndex].Name, ServerExpressionPlan.ServerProcess.ProcessSymbols[LIndex].DataType.EmitSpecifier(EmitMode.ForRemote)));
 					#endif
 					
 					Block LCatalogObjectStatement = (Block)ServerExpressionPlan.Plan.PlanCatalog.EmitStatement(ServerExpressionPlan.ServerProcess.CatalogDeviceSession, EmitMode.ForRemote, new string[]{ ACatalogObjectName });

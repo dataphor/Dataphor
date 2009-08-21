@@ -119,11 +119,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Context.Push(AKeyValue1);
-			Process.Context.Push(AKeyValue2);
+			Process.Stack.Push(AKeyValue1);
+			Process.Stack.Push(AKeyValue2);
 			int LResult = (int)ACompareNode.Execute(Process);
-			Process.Context.Pop();
-			Process.Context.Pop();
+			Process.Stack.Pop();
+			Process.Stack.Pop();
 			return LResult;
         }
         

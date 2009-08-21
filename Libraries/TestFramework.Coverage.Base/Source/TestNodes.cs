@@ -1834,7 +1834,7 @@ drop table Testing;
 //			BlockNode LNode = new BlockNode();
 //			VariableNode LVarNode = new VariableNode();
 //			LVarNode.VariableName = "AValue";
-//			LVarNode.VariableType = APlan.Catalog.DataTypes.SystemInteger;
+//			LVarNode.VariableType = APlan.DataTypes.SystemInteger;
 //			//LVarNode.Nodes.Add(Compiler.EmitBinaryNode(AProcess, new ValueNode(new ReferenceTypeValue(Schema.IDataType.SystemInteger, 5)), Instructions.Multiplication, new ValueNode(new ReferenceTypeValue(Schema.IDataType.SystemInteger, 5))));
 //			LVarNode.Nodes.Add(Compiler.EmitBinaryNode(APlan, new ValueNode(Scalar.FromInt32(APlan.ServerProcess, 5)), Instructions.Multiplication, new ValueNode(Scalar.FromInt32(APlan.ServerProcess, 5))));
 //			LNode.Nodes.Add(LVarNode);
@@ -1954,10 +1954,10 @@ drop table Testing;
 		
 		protected bool RowsSame(ServerProcess AProcess, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
-			AProcess.Context.Push(ARow);
+			AProcess.Stack.Push(ARow);
 			try
 			{
-				AProcess.Context.Push(AExpectedRow);
+				AProcess.Stack.Push(AExpectedRow);
 				try
 				{
 					object LResult = ARowEqualNode.Execute(AProcess);
@@ -1977,12 +1977,12 @@ drop table Testing;
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 		}
 

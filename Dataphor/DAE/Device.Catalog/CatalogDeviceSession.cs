@@ -1787,10 +1787,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				LProcess.UseImplicitTransactions = (bool)ANewRow["UseImplicitTransactions"];
 				
 			if ((int)AOldRow["MaxStackDepth"] != (int)ANewRow["MaxStackDepth"])
-				LProcess.Context.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
+				LProcess.Stack.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
 				
 			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
-				LProcess.Context.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
+				LProcess.Stack.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
 		}
 		
 		protected void InsertLibrary(Schema.TableVar ATableVar, Row ARow)

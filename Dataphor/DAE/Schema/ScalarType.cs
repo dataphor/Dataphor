@@ -467,50 +467,50 @@ namespace Alphora.Dataphor.DAE.Schema
         public DataValue GetAsDataValue(ServerProcess AProcess, object AValue)
         {
 			EnsureReadNode(AProcess.Plan);
-			AProcess.Context.Push(AValue);
+			AProcess.Stack.Push(AValue);
 			try
 			{
 				return DataValue.FromNative(AProcess, ScalarType, FReadNode.Execute(AProcess));
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
         }
         
         public object GetAsNative(ServerProcess AProcess, object AValue)
         {
 			EnsureReadNode(AProcess.Plan);
-			AProcess.Context.Push(AValue);
+			AProcess.Stack.Push(AValue);
 			try
 			{
 				return FReadNode.Execute(AProcess);
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
         }
         
         public object SetAsNative(ServerProcess AProcess, object AValue, object ANewValue)
         {
 			EnsureWriteNode(AProcess.Plan);
-			AProcess.Context.Push(AValue);
+			AProcess.Stack.Push(AValue);
 			try
 			{
-				AProcess.Context.Push(ANewValue);
+				AProcess.Stack.Push(ANewValue);
 				try
 				{
 					return FWriteNode.Execute(AProcess);
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
         }
         
@@ -1938,7 +1938,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (FSort == null)
 			{
 				if (FSortID >= 0)
-					APlan.ServerProcess.CatalogDeviceSession.ResolveCatalogObject(FSortID);
+					APlan.CatalogDeviceSession.ResolveCatalogObject(FSortID);
 				else
 					return GetUniqueSort(APlan);
 			}
@@ -1951,21 +1951,21 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (FUniqueSort == null)
 			{
 				if (FUniqueSortID >= 0)
-					APlan.ServerProcess.CatalogDeviceSession.ResolveCatalogObject(FUniqueSortID);
+					APlan.CatalogDeviceSession.ResolveCatalogObject(FUniqueSortID);
 				else
 				{
-					APlan.ServerProcess.PushLoadingContext(new LoadingContext(Owner, Library.Name, false));
+					APlan.PushLoadingContext(new LoadingContext(Owner, Library.Name, false));
 					try
 					{
 						CreateSortNode LCreateSortNode = new CreateSortNode();
 						LCreateSortNode.ScalarType = this;
 						LCreateSortNode.Sort = Compiler.CompileSortDefinition(APlan, this);
 						LCreateSortNode.IsUnique = true;
-						LCreateSortNode.Execute(APlan.ServerProcess);
+						APlan.ExecuteNode(LCreateSortNode);
 					}
 					finally
 					{
-						APlan.ServerProcess.PopLoadingContext();
+						APlan.PopLoadingContext();
 					}
 				}
 			}
@@ -2013,7 +2013,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public object ValidateValue(ServerProcess AProcess, object AValue, Schema.Operator AFromOperator)
 		{
-			AProcess.Context.Push(AValue);
+			AProcess.Stack.Push(AValue);
 			try
 			{
 				TableNode.ValidateScalarTypeConstraints(AProcess, this, false);
@@ -2021,7 +2021,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 			finally
 			{
-				AValue = AProcess.Context.Pop();
+				AValue = AProcess.Stack.Pop();
 			}
 			
 			return AValue;
@@ -2030,7 +2030,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public object DefaultValue(ServerProcess AProcess)
 		{
 			// ScalarType level default trigger handlers
-			AProcess.Context.Push(null);
+			AProcess.Stack.Push(null);
 			try
 			{
 				if (FEventHandlers != null)
@@ -2039,12 +2039,12 @@ namespace Alphora.Dataphor.DAE.Schema
 						{
 							object LResult = LHandler.PlanNode.Execute(AProcess);
 							if ((LResult != null) && (bool)LResult)
-								return AProcess.Context.Peek(0);
+								return AProcess.Stack.Peek(0);
 						}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 
 			if (FDefault != null)

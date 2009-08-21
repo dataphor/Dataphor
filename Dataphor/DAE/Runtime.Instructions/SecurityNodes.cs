@@ -119,7 +119,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				Schema.Object LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0], false);
 				return LObject is Schema.Role;

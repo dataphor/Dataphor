@@ -152,21 +152,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (Operator != null)
 			{
 				APlan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
-				APlan.ServerProcess.EnsureApplicationTransactionOperator(Operator);
+				APlan.EnsureApplicationTransactionOperator(Operator);
 			}
 			base.BindToProcess(APlan);
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+			AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 			try
 			{
 				Table LTable = null;
 				try
 				{
-					AProcess.Context.Push(null); // result
-					int LStackDepth = AProcess.Context.Count;
+					AProcess.Stack.Push(null); // result
+					int LStackDepth = AProcess.Stack.Count;
 
 					// Initialization
 					try
@@ -184,7 +184,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						Schema.IDataType LType = SourceNode.TableVar.Columns[FAggregateColumnIndexes[LIndex]].DataType;
 						//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
-						AProcess.Context.Push(null);
+						AProcess.Stack.Push(null);
 					}
 					try
 					{
@@ -193,7 +193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#if DEBUG
 							// This AllowExtraWindowAccess call is only necessary debug because the check is not
 							// made in release executables
-							AProcess.Context.AllowExtraWindowAccess = true;
+							AProcess.Stack.AllowExtraWindowAccess = true;
 							try
 							{
 							#endif
@@ -212,17 +212,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								AProcess.Context.AllowExtraWindowAccess = false;
+								AProcess.Stack.AllowExtraWindowAccess = false;
 							}
 							#endif
 							
 							for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
 								if (LRow.HasValue(FAggregateColumnIndexes[LIndex]))
-									AProcess.Context.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
+									AProcess.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
 								else
-									AProcess.Context.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
+									AProcess.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
 							
-							AProcess.Context.PushFrame();
+							AProcess.Stack.PushFrame();
 							try
 							{
 								Nodes[2].Execute(AProcess);
@@ -230,14 +230,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							catch (ExitError){}
 							finally
 							{
-								AProcess.Context.PopFrame();
+								AProcess.Stack.PopFrame();
 							}
 						}
 					}
 					finally
 					{
 						for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-							AProcess.Context.Pop();
+							AProcess.Stack.Pop();
 
 						if (FAggregateColumnIndexes.Length > 0)
 							LRow.Dispose();
@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					catch (ExitError){}
 					
-					return AProcess.Context.Peek(AProcess.Context.Count - LStackDepth);
+					return AProcess.Stack.Peek(AProcess.Stack.Count - LStackDepth);
 				}
 				finally
 				{
@@ -260,7 +260,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Stack.PopWindow();
 			}
 		}
 		
@@ -293,7 +293,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = 0;
+			AProcess.Stack[0] = 0;
 			return null;
 		}
 	}
@@ -302,7 +302,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = null;
+			AProcess.Stack[0] = null;
 			return null;
 		}
     }
@@ -319,7 +319,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = checked((int)AProcess.Context[0] + 1);
+			AProcess.Stack[0] = checked((int)AProcess.Stack[0] + 1);
 			return null;
 		}
     }
@@ -328,8 +328,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
 			return null;
 		}
     }
@@ -338,12 +338,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] =
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] =
 					checked
 					(
-						(int)AProcess.Context[0] +
-						(AProcess.Context[1] == null ? 0 : (int)AProcess.Context[1])
+						(int)AProcess.Stack[0] +
+						(AProcess.Stack[1] == null ? 0 : (int)AProcess.Stack[1])
 					);
 			return null;
 		}
@@ -355,13 +355,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if 
 			(
-				AProcess.Context[0] != null && 
+				AProcess.Stack[0] != null && 
 				(
-					AProcess.Context[1] == null || 
-					((int)AProcess.Context[0] < (int)AProcess.Context[1])
+					AProcess.Stack[1] == null || 
+					((int)AProcess.Stack[0] < (int)AProcess.Stack[1])
 				)
 			)
-				AProcess.Context[1] = AProcess.Context[0];
+				AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -372,13 +372,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if 
 			(
-				AProcess.Context[0] != null && 
+				AProcess.Stack[0] != null && 
 				(
-					AProcess.Context[1] == null || 
-					((int)AProcess.Context[0] > (int)AProcess.Context[1])
+					AProcess.Stack[1] == null || 
+					((int)AProcess.Stack[0] > (int)AProcess.Stack[1])
 				)
 			)
-				AProcess.Context[1] = AProcess.Context[0];
+				AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -387,13 +387,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(0);
-			AProcess.Context[1] = 0;
+			AProcess.Stack.Push(0);
+			AProcess.Stack[1] = 0;
 			return null;
 		}
     }
@@ -402,10 +402,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
+			if (AProcess.Stack[0] != null)
 			{
-				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
-				AProcess.Context[2] = checked((int)AProcess.Context[2] + (int)AProcess.Context[0]);
+				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
+				AProcess.Stack[2] = checked((int)AProcess.Stack[2] + (int)AProcess.Stack[0]);
 			}
 			return null;
 		}
@@ -415,10 +415,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((int)AProcess.Context[0] == 0)
-				AProcess.Context[1] = null;
+			if ((int)AProcess.Stack[0] == 0)
+				AProcess.Stack[1] = null;
 			else
-				AProcess.Context[1] = (decimal)(int)AProcess.Context[1] / (decimal)(int)AProcess.Context[0];
+				AProcess.Stack[1] = (decimal)(int)AProcess.Stack[1] / (decimal)(int)AProcess.Stack[0];
 			return null;
 		}
     }
@@ -519,7 +519,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = null;
+			AProcess.Stack[0] = null;
 			return null;
 		}
     }
@@ -528,11 +528,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] = 
-					AProcess.Context[1] == null ? 
-						(decimal)AProcess.Context[0] : 
-						((decimal)AProcess.Context[1] + (decimal)AProcess.Context[0]);
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] = 
+					AProcess.Stack[1] == null ? 
+						(decimal)AProcess.Stack[0] : 
+						((decimal)AProcess.Stack[1] + (decimal)AProcess.Stack[0]);
 			return null;
 		}
     }
@@ -541,9 +541,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] < (decimal)AProcess.Context[1]))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] < (decimal)AProcess.Stack[1]))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -552,9 +552,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] > (decimal)AProcess.Context[1]))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] > (decimal)AProcess.Stack[1]))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -563,13 +563,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(0);
-			AProcess.Context[1] = 0.0m;
+			AProcess.Stack.Push(0);
+			AProcess.Stack[1] = 0.0m;
 			return null;
 		}
     }
@@ -578,10 +578,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
+			if (AProcess.Stack[0] != null)
 			{
-				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
-				AProcess.Context[2] = (decimal)AProcess.Context[2] + (decimal)AProcess.Context[0];
+				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
+				AProcess.Stack[2] = (decimal)AProcess.Stack[2] + (decimal)AProcess.Stack[0];
 			}
 			return null;
 		}
@@ -591,10 +591,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((int)AProcess.Context[0] == 0)
-				AProcess.Context[1] = null;
+			if ((int)AProcess.Stack[0] == 0)
+				AProcess.Stack[1] = null;
 			else
-				AProcess.Context[1] = (decimal)AProcess.Context[1] / (int)AProcess.Context[0];
+				AProcess.Stack[1] = (decimal)AProcess.Stack[1] / (int)AProcess.Stack[0];
 			return null;
 		}
     }
@@ -603,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = null;
+			AProcess.Stack[0] = null;
 			return null;
 		}
 	}
@@ -612,11 +612,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] = 
-					AProcess.Context[1] == null ? 
-						(decimal)AProcess.Context[0] :
-						((decimal)AProcess.Context[1] + (decimal)AProcess.Context[0]);
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] = 
+					AProcess.Stack[1] == null ? 
+						(decimal)AProcess.Stack[0] :
+						((decimal)AProcess.Stack[1] + (decimal)AProcess.Stack[0]);
 			return null;
 		}
 	}
@@ -625,9 +625,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] < (decimal)AProcess.Context[1]))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] < (decimal)AProcess.Stack[1]))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
 	}
@@ -636,9 +636,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || ((decimal)AProcess.Context[0] > (decimal)AProcess.Context[1]))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] > (decimal)AProcess.Stack[1]))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
 	}
@@ -647,13 +647,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override void InternalDetermineBinding(Plan APlan)
 		{
-			APlan.Symbols.Push(new Symbol("LCounter", APlan.Catalog.DataTypes.SystemInteger));
+			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context.Push(0);
-			AProcess.Context[1] = 0.0m;
+			AProcess.Stack.Push(0);
+			AProcess.Stack[1] = 0.0m;
 			return null;
 		}
 	}
@@ -662,10 +662,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
+			if (AProcess.Stack[0] != null)
 			{
-				AProcess.Context[1] = checked((int)AProcess.Context[1] + 1);
-				AProcess.Context[2] = (decimal)AProcess.Context[2] + (decimal)AProcess.Context[0];
+				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
+				AProcess.Stack[2] = (decimal)AProcess.Stack[2] + (decimal)AProcess.Stack[0];
 			}
 			return null;
 		}
@@ -675,10 +675,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if ((int)AProcess.Context[0] == 0)
-				AProcess.Context[1] = null;
+			if ((int)AProcess.Stack[0] == 0)
+				AProcess.Stack[1] = null;
 			else
-				AProcess.Context[1] = (decimal)AProcess.Context[1] / (int)AProcess.Context[0];
+				AProcess.Stack[1] = (decimal)AProcess.Stack[1] / (int)AProcess.Stack[0];
 			return null;
 		}
 	}
@@ -687,7 +687,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = null;
+			AProcess.Stack[0] = null;
 			return null;
 		}
     }
@@ -696,9 +696,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], false) < 0))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || (String.Compare((string)AProcess.Stack[0], (string)AProcess.Stack[1], false) < 0))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -707,9 +707,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], false) > 0))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if (AProcess.Stack[1] == null || (String.Compare((string)AProcess.Stack[0], (string)AProcess.Stack[1], false) > 0))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -718,9 +718,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if ((AProcess.Context[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Context[0], (VersionNumber)AProcess.Context[1]) < 0))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if ((AProcess.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Stack[0], (VersionNumber)AProcess.Stack[1]) < 0))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -729,9 +729,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				if ((AProcess.Context[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Context[0], (VersionNumber)AProcess.Context[1]) > 0))
-					AProcess.Context[1] = AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				if ((AProcess.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Stack[0], (VersionNumber)AProcess.Stack[1]) > 0))
+					AProcess.Stack[1] = AProcess.Stack[0];
 			return null;
 		}
     }
@@ -773,7 +773,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = true;
+			AProcess.Stack[0] = true;
 			return null;
 		}
 	}
@@ -782,8 +782,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] = (bool)AProcess.Context[1] && (bool)AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] = (bool)AProcess.Stack[1] && (bool)AProcess.Stack[0];
 			return null;
 		}
     }
@@ -792,7 +792,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			AProcess.Context[0] = false;
+			AProcess.Stack[0] = false;
 			return null;
 		}
     }
@@ -801,8 +801,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     {
 		public override object InternalExecute(ServerProcess AProcess)
 		{
-			if (AProcess.Context[0] != null)
-				AProcess.Context[1] = (bool)AProcess.Context[1] || (bool)AProcess.Context[0];
+			if (AProcess.Stack[0] != null)
+				AProcess.Stack[1] = (bool)AProcess.Stack[1] || (bool)AProcess.Stack[0];
 			return null;
 		}
     }

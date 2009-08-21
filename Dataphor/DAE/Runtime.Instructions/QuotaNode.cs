@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			if (LQuotaOrderIncludesKey)
 			{
-				if ((Nodes[1].IsLiteral) && ((int)Compiler.BindNode(APlan, Nodes[1]).Execute(APlan.ServerProcess) == 1))
+				if ((Nodes[1].IsLiteral) && ((int)APlan.EvaluateLiteralArgument(Compiler.BindNode(APlan, Nodes[1]), "quota") == 1))
 				{
 					Schema.Key LKey = new Schema.Key();
 					LKey.IsInherited = true;

@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan,
 						FLevelColumn,
 						Keywords.Level,
-						APlan.Catalog.DataTypes.SystemInteger,
+						APlan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Level
 					);
 				DataType.Columns.Add(LLevelColumn.Column);
@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan,
 						FSequenceColumn,
 						Keywords.Sequence,
-						APlan.Catalog.DataTypes.SystemInteger,
+						APlan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Sequence
 					);
 				DataType.Columns.Add(LSequenceColumn.Column);
@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Schema.TableVarColumn LSequenceColumn =
 					new Schema.TableVarColumn
 					(
-						new Schema.Column(Keywords.Sequence, APlan.Catalog.DataTypes.SystemInteger),
+						new Schema.Column(Keywords.Sequence, APlan.DataTypes.SystemInteger),
 						Schema.TableVarColumnType.Sequence
 					);
 				DataType.Columns.Add(LSequenceColumn.Column);

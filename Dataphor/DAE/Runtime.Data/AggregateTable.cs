@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FSourceTable.Select(FSourceRow);
 			FSourceRow.CopyTo(ARow);
 			
-			Process.Context.Push(FSourceRow);
+			Process.Stack.Push(FSourceRow);
 			try
 			{
 				int LNodeIndex;
@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Context.Pop();
+				Process.Stack.Pop();
 			}
         }
         

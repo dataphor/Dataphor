@@ -590,8 +590,8 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					ARow[2] = LProcess.DefaultIsolationLevel.ToString();
 					ARow[3] = LProcess.UseDTC;
 					ARow[4] = LProcess.UseImplicitTransactions;
-					ARow[5] = LProcess.Context.MaxStackDepth;
-					ARow[6] = LProcess.Context.MaxCallDepth;
+					ARow[5] = LProcess.Stack.MaxStackDepth;
+					ARow[6] = LProcess.Stack.MaxCallDepth;
 					ARow[7] = LProcess.ExecutingThread != null;
 					ANativeTable.Insert(AProcess, ARow);
 				}
@@ -645,7 +645,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 
 		private void PopulateLibraries(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
+			foreach (Library LLibrary in AProcess.Catalog.Libraries)
 			{
 				ARow[0] = LLibrary.Name;
 				ARow[1] = LLibrary.Directory;
@@ -660,7 +660,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateLibraryFiles(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
+			foreach (Library LLibrary in AProcess.Catalog.Libraries)
 				foreach (Schema.FileReference LReference in LLibrary.Files)
 				{
 					ARow[0] = LLibrary.Name;
@@ -672,7 +672,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateLibraryRequisites(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
+			foreach (Library LLibrary in AProcess.Catalog.Libraries)
 				foreach (LibraryReference LReference in LLibrary.Libraries)
 				{
 					ARow[0] = LLibrary.Name;
@@ -684,7 +684,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateLibrarySettings(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Plan.Catalog.Libraries)
+			foreach (Library LLibrary in AProcess.Catalog.Libraries)
 				if (LLibrary.MetaData != null)
 				{
 					#if USEHASHTABLEFORTAGS
@@ -716,7 +716,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 
 		private void PopulateRegisteredAssemblies(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (RegisteredAssembly LAssembly in AProcess.Plan.Catalog.ClassLoader.Assemblies)
+			foreach (RegisteredAssembly LAssembly in AProcess.Catalog.ClassLoader.Assemblies)
 			{
 				ARow[0] = LAssembly.Name.ToString();
 				ARow[1] = LAssembly.Library.Name;
@@ -727,7 +727,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateRegisteredClasses(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (RegisteredClass LClass in AProcess.Plan.Catalog.ClassLoader.Classes)
+			foreach (RegisteredClass LClass in AProcess.Catalog.ClassLoader.Classes)
 			{
 				ARow[0] = LClass.Name;
 				ARow[1] = LClass.Library.Name;
@@ -762,7 +762,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		#if USETYPEINHERITANCE
 		private void PopulateScalarTypeParentScalarTypes(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			foreach (Schema.Object LObject in AProcess.Catalog)
 				if (LObject is Schema.ScalarType)
 					foreach (Schema.ScalarType LParentScalarType in ((Schema.ScalarType)LObject).ParentTypes)
 					{
@@ -777,7 +777,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		#if USETYPEINHERITANCE		
 		private void PopulateScalarTypeExplicitCastFunctions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			foreach (Schema.Object LObject in AProcess.Catalog)
 				if (LObject is Schema.ScalarType)
 				{
 					Schema.ScalarType LScalarType = (Schema.ScalarType)LObject;
@@ -793,7 +793,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateServerLinks(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			foreach (Schema.Object LObject in AProcess.Catalog)
 			{
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
@@ -815,7 +815,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateServerLinkUsers(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Plan.Catalog)
+			foreach (Schema.Object LObject in AProcess.Catalog)
 			{
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
@@ -910,7 +910,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				LRow.Dispose();
 			}
 
-			AHeader.TimeStamp = AProcess.Plan.Catalog.TimeStamp;
+			AHeader.TimeStamp = AProcess.Catalog.TimeStamp;
 		}
 	}
 }

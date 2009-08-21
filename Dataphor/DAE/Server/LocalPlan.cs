@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Server
 				LocalServer.AcquireCacheLock(FProcess, FDescriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
 				try
 				{
-					FProcess.FInternalProcess.Context.PushWindow(0);
+					FProcess.FInternalProcess.Stack.PushWindow(0);
 					try
 					{
 						if (FDescriptor.CacheChanged)
@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Server
 										foreach (DataParam LParam in FParams)
 											LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
 											
-									FProcess.FInternalProcess.PushProcessContext(LPlan);
+									FProcess.FInternalProcess.PushProcessSymbols(LPlan);
 									FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
 								}
 								finally
@@ -281,7 +281,7 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 					finally
 					{
-						FProcess.FInternalProcess.Context.PopWindow();
+						FProcess.FInternalProcess.Stack.PopWindow();
 					}
 				}
 				finally

@@ -51,8 +51,8 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
 			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AProcess.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = AProcess.ServerSession.CurrentLibrary.Name; // Still not sure if this makes sense...
-			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.Context.MaxCallDepth;
-			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.Context.MaxStackDepth;
+			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.Stack.MaxCallDepth;
+			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.Stack.MaxStackDepth;
 			LNativeSessionInfo.DefaultUseDTC = AProcess.UseDTC;
 			LNativeSessionInfo.DefaultUseImplicitTransactions = AProcess.UseImplicitTransactions;
 			LNativeSessionInfo.ShouldEmitIL = AProcess.ServerSession.SessionInfo.ShouldEmitIL;

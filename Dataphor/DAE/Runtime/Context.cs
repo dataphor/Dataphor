@@ -10,10 +10,10 @@ using System.Collections.Specialized;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
-	public class Context : Stack<object>
+	public class Stack : Stack<object>
 	{
-		public Context() : base() { }
-		public Context(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) { }
+		public Stack() : base() { }
+		public Stack(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) { }
 		
 		protected object FErrorVar;
 		public object ErrorVar

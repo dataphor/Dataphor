@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								((InstructionNodeBase)LNode.Nodes[0]).Operator != null) 
 									&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[0]).Operator.OperatorName), Instructions.Compare) == 0) 
 									&& (LNode.Nodes[1] is ValueNode) 
-									&& LNode.Nodes[1].DataType.Is(APlan.Catalog.DataTypes.SystemInteger)
+									&& LNode.Nodes[1].DataType.Is(APlan.DataTypes.SystemInteger)
 							)
 						{
 							if (IsColumnReferencing(LNode.Nodes[0].Nodes[0], ref LColumnName))
@@ -284,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									((InstructionNodeBase)LNode.Nodes[1]).Operator != null) 
 										&& (String.Compare(Schema.Object.Unqualify(((InstructionNodeBase)LNode.Nodes[1]).Operator.OperatorName), Instructions.Compare) == 0) 
 										&& (LNode.Nodes[0] is ValueNode) 
-										&& LNode.Nodes[0].DataType.Is(APlan.Catalog.DataTypes.SystemInteger)
+										&& LNode.Nodes[0].DataType.Is(APlan.DataTypes.SystemInteger)
 								)
 						{
 							if (IsColumnReferencing(LNode.Nodes[1].Nodes[0], ref LColumnName))

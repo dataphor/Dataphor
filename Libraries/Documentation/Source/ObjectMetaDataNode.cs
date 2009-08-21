@@ -46,11 +46,11 @@ namespace DocSamples
 			#endif
 			{
 				if (Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemString))
-					LObject = AProcess.Plan.Catalog.Objects[(string)AArguments[0]];
+					LObject = AProcess.Catalog.Objects[(string)AArguments[0]];
 				else if (Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemName))
 					LObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArguments[0]);
 				else
-					LObject = AProcess.Plan.Catalog.Objects[(int)AArguments[0]];
+					LObject = AProcess.Catalog.Objects[(int)AArguments[0]];
 				return MetaData.GetTag(LObject.MetaData, (string)AArguments[1], (string)AArguments[2]);
 			}
 		}

@@ -177,9 +177,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				SetExplicitBind(ANode.Nodes[LIndex]);
 		}
 		
-		public static TableNode PrepareJoinExpression(Plan APlan, Guid AID, TableNode ASourceNode, out TableNode APopulateNode)
+		public static TableNode PrepareJoinExpression(Plan APlan, TableNode ASourceNode, out TableNode APopulateNode)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(APlan.ServerProcess, AID);
+			ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				LTransaction.PushGlobalContext();
@@ -209,9 +209,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public static void JoinExpression(ServerProcess AProcess, Guid AID, TableNode APopulateNode, TableNode ATranslatedNode)
+		public static void JoinExpression(ServerProcess AProcess, TableNode APopulateNode, TableNode ATranslatedNode)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+			ApplicationTransaction LTransaction = AProcess.GetApplicationTransaction();
 			try
 			{
 				LTransaction.BeginPopulateSource(AProcess);
@@ -860,7 +860,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public void EnsureATTableVarMapped(ServerProcess AProcess, Schema.TableVar AATTableVar)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				lock (Device)
 				{
@@ -885,7 +885,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public Schema.TableVar AddTableVar(ServerProcess AProcess, Schema.TableVar ASourceTableVar)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				lock (Device)
 				{
@@ -933,7 +933,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 		public Schema.Operator AddOperator(ServerProcess AProcess, Schema.Operator ASourceOperator)
 		{
-			lock (AProcess.Plan.Catalog)
+			lock (AProcess.Catalog)
 			{
 				lock (Device)
 				{
@@ -1192,7 +1192,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			{
 				TableMap LTableMap = new TableMap(LSourceTableVarName);
 				LTableMap.TableVar = ATableVar;
-				LTableMap.SourceTableVar = (TableVar)AProcess.Plan.Catalog[LSourceTableVarName];
+				LTableMap.SourceTableVar = (TableVar)AProcess.Catalog[LSourceTableVarName];
 				AProcess.CatalogDeviceSession.AddTableMap(this, LTableMap);
 			}
 			else
@@ -1224,7 +1224,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					
 			if (!AProcess.ServerSession.Server.IsRepository)
 			{
-				lock (AProcess.Plan.Catalog)
+				lock (AProcess.Catalog)
 				{
 					lock (this)
 					{
@@ -1262,7 +1262,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 									Compiler.Compile
 									(
 										AProcess.Plan, 
-										AProcess.Plan.Catalog.EmitDropStatement
+										AProcess.Catalog.EmitDropStatement
 										(
 											AProcess.CatalogDeviceSession, 
 											LObjectNameArray, 
@@ -1303,7 +1303,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					
 			if (!AProcess.ServerSession.Server.IsRepository)
 			{
-				lock (AProcess.Plan.Catalog)
+				lock (AProcess.Catalog)
 				{
 					lock (this)
 					{
@@ -1381,7 +1381,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 							AProcess.Plan.EnterTimeStampSafeContext();
 							try
 							{
-								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Plan.Catalog.EmitDropStatement(AProcess.Plan.CatalogDeviceSession, LObjectNameArray, String.Empty))).Execute(AProcess);
+								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNameArray, String.Empty))).Execute(AProcess);
 							}
 							finally
 							{
@@ -2072,7 +2072,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 				try
 				{
-					ServerProcess.Context.Push(LRow);
+					ServerProcess.Stack.Push(LRow);
 					try
 					{
 						if (!(bool)LTableMap.HasRowNode.Execute(ServerProcess))
@@ -2080,7 +2080,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 					finally
 					{
-						ServerProcess.Context.Pop();
+						ServerProcess.Stack.Pop();
 					}
 				}
 				finally
@@ -2136,7 +2136,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 			try
 			{
-				ServerProcess.Context.Push(LRow);
+				ServerProcess.Stack.Push(LRow);
 				try
 				{
 					if (!(bool)LTableMap.HasDeletedRowNode.Execute(ServerProcess))
@@ -2144,7 +2144,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				}
 				finally
 				{
-					ServerProcess.Context.Pop();
+					ServerProcess.Stack.Pop();
 				}
 			}
 			finally

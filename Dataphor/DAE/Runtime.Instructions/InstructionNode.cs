@@ -183,7 +183,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (Operator != null)
 			{
 				APlan.CheckRight(Operator.GetRight(Schema.RightNames.Execute));
-				APlan.ServerProcess.EnsureApplicationTransactionOperator(Operator);
+				APlan.EnsureApplicationTransactionOperator(Operator);
 			}
 			base.BindToProcess(APlan);
 		}
@@ -256,7 +256,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				case Modifier.Var :
 					if (AArgumentNode.DataType is Schema.ScalarType)
 						AArgumentValue = ((Schema.ScalarType)AArgumentNode.DataType).ValidateValue(AProcess, AArgumentValue, FOperator);
-					AProcess.Context.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
+					AProcess.Stack.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
 				break;
 			}
 		}
@@ -280,14 +280,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return NilaryInternalExecute(AProcess);
 				    }
 				    finally
 				    {
-				        AProcess.Context.PopWindow();
+				        AProcess.Stack.PopWindow();
 				    }
 				}
 				else
@@ -318,14 +318,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument);
 				    }
 				    finally
 				    {
-				        AProcess.Context.PopWindow();
+				        AProcess.Stack.PopWindow();
 				    }
 				}
 				else
@@ -359,14 +359,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument1, LArgument2);
 				    }
 				    finally
 				    {
-				        AProcess.Context.PopWindow();
+				        AProcess.Stack.PopWindow();
 				    }
 				}
 				else
@@ -404,14 +404,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
 				    }
 				    finally
 				    {
-				        AProcess.Context.PopWindow();
+				        AProcess.Stack.PopWindow();
 				    }
 				}
 				else
@@ -450,14 +450,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 				    try
 				    {
 				        return InternalExecute(AProcess, LArguments);
 				    }
 				    finally
 				    {
-				        AProcess.Context.PopWindow();
+				        AProcess.Stack.PopWindow();
 				    }
 				}
 				else

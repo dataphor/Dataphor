@@ -427,9 +427,9 @@ namespace Alphora.Dataphor.Frontend.Server
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("Name", APlan.Catalog.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("TimeStamp", APlan.Catalog.DataTypes.SystemDateTime));
+			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("TimeStamp", APlan.DataTypes.SystemDateTime));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -455,7 +455,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			}
 			
 			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
-				PopulateRequiredFiles(AProcess, AProcess.Plan.Catalog.Libraries[LLibrary.Name], ATable, ARow);
+				PopulateRequiredFiles(AProcess, AProcess.Catalog.Libraries[LLibrary.Name], ATable, ARow);
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)
@@ -477,7 +477,7 @@ namespace Alphora.Dataphor.Frontend.Server
 							while (LLibraries.Next())
 							{
 								LLibraries.Select(LLibraryRow);
-								PopulateRequiredFiles(AProcess, AProcess.Plan.Catalog.Libraries[(string)LLibraryRow["Library_Name"]], LResult, LRow);
+								PopulateRequiredFiles(AProcess, AProcess.Catalog.Libraries[(string)LLibraryRow["Library_Name"]], LResult, LRow);
 							}
 						}
 					}

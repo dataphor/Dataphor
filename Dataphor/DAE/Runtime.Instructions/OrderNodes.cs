@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan,
 						FSequenceColumn,
 						Keywords.Sequence,
-						APlan.Catalog.DataTypes.SystemInteger,
+						APlan.DataTypes.SystemInteger,
 						Schema.TableVarColumnType.Sequence
 					);
 				DataType.Columns.Add(LColumn.Column);
@@ -655,7 +655,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 
 			if (LNode == null)
-				LNode = new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, AInclusive);
+				LNode = new ValueNode(APlan.DataTypes.SystemBoolean, AInclusive);
 
 			return LNode;
 		}

@@ -106,10 +106,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 					if (FHasLastCompareRow)
 					{		            
-						Process.Context.Push(FCompareRow);
+						Process.Stack.Push(FCompareRow);
 						try
 						{
-							Process.Context.Push(FLastCompareRow);
+							Process.Stack.Push(FLastCompareRow);
 							try
 							{
 								object LResult = Node.EqualNode.Execute(Process);
@@ -121,12 +121,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							finally
 							{
-								Process.Context.Pop();
+								Process.Stack.Pop();
 							}
 						}
 						finally
 						{
-							Process.Context.Pop();
+							Process.Stack.Pop();
 						}
 					}
 					else

@@ -198,7 +198,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 									else
 									{
-										Schema.ObjectHeader LHeader = APlan.ServerProcess.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
+										Schema.ObjectHeader LHeader = APlan.CatalogDeviceSession.SelectObjectHeader(LNewConstraint.Dependencies.IDs[LIndex]);
 										if (!LHeader.IsRemotable)
 										{
 											LNewConstraint.IsRemotable = false;
@@ -420,7 +420,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.DerivedReferences.Add(LReference);					
 			}
 
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+			if (!APlan.IsRepository)
 				foreach (AlterReferenceDefinition LAlterReference in FAlterReferences)
 				{
 					int LReferenceIndex = TableVar.DerivedReferences.IndexOf(LAlterReference.ReferenceName);
@@ -431,8 +431,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					(
 						(LReferenceIndex >= 0) || 
 						(
-							(APlan.ServerProcess.ApplicationTransactionID == Guid.Empty) && 
-							(!APlan.ServerProcess.InLoadingContext()) && 
+							(APlan.ApplicationTransactionID == Guid.Empty) && 
+							(!APlan.InLoadingContext()) && 
 							!APlan.InATCreationContext // We will be in an A/T creation context if we are reinfering view references for an A/T view
 						)
 					)
@@ -532,7 +532,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected void InternalValidateColumnConstraints(Row ARow, Schema.TableVarColumn AColumn, ServerProcess AProcess)
 		{
-			AProcess.Context.Push(ARow[AColumn.Name]);
+			AProcess.Stack.Push(ARow[AColumn.Name]);
 			try
 			{
 				foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)
@@ -540,7 +540,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 		}
 		

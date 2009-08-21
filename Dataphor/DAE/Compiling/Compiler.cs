@@ -567,7 +567,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static PlanNode Compile(Plan APlan, string AStatement, DataParams AParams, bool AIsCursor)
 		{
 			Statement LStatement;
-			if (APlan.ServerProcess.ServerSession.SessionInfo.Language == QueryLanguage.RealSQL)
+			if (APlan.Language == QueryLanguage.RealSQL)
 				LStatement = new RealSQL.Compiler().Compile(new RealSQL.Parser().ParseStatement(AStatement));
 			else
 				LStatement = AIsCursor ? new Parser().ParseCursorDefinition(AStatement) : new Parser().ParseScript(AStatement, null);
@@ -621,7 +621,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						try
 						{
 							LNode = CompileStatement(APlan, AStatement);
-							APlan.ServerProcess.ReportProcessContext(APlan.Symbols);
+							APlan.ReportProcessSymbols();
 						}
 						finally
 						{
@@ -669,7 +669,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			try
 			{
-				if (APlan.ServerProcess.ServerSession.SessionInfo.ShouldEmitIL)
+				if (APlan.ShouldEmitIL)
 					APlanNode.EmitIL(APlan, false);
 			}
 			catch (Exception LException)
@@ -702,7 +702,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			try
 			{
-				if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+				if (!APlan.IsRepository)
 					APlanNode.DetermineBinding(APlan);
 			}
 			catch (Exception LException)
@@ -955,7 +955,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LNode.SetLineInfo(AStatement.LineInfo);
 			LNode.DetermineCharacteristics(APlan);
 			#if ALLOWSTATEMENTSASEXPRESSIONS
-			if ((LNode.Nodes[0].DataType != null) && !LNode.Nodes[0].DataType.Equals(APlan.Catalog.DataTypes.SystemScalar) && LNode.Nodes[0].IsFunctional && !APlan.SuppressWarnings)
+			if ((LNode.Nodes[0].DataType != null) && !LNode.Nodes[0].DataType.Equals(APlan.DataTypes.SystemScalar) && LNode.Nodes[0].IsFunctional && !APlan.SuppressWarnings)
 			#else
 			if ((LNode.Nodes[0].DataType != null) && LNode.Nodes[0].IsFunctional && !APlan.SuppressWarnings)
 			#endif
@@ -1275,7 +1275,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (LStatement.Expression != null)
 			{
 				PlanNode LPlanNode = CompileExpression(APlan, LStatement.Expression);
-				if (!LPlanNode.DataType.Is(APlan.Catalog.DataTypes.SystemError))
+				if (!LPlanNode.DataType.Is(APlan.DataTypes.SystemError))
 					throw new CompilerException(CompilerException.Codes.ErrorExpressionExpected, AStatement);
 				LNode.Nodes.Add(LPlanNode);
 			}
@@ -1317,7 +1317,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LErrorNode.ErrorType = (Schema.IScalarType)CompileTypeSpecifier(APlan, new ScalarTypeSpecifier(((SpecificErrorHandler)LHandler).ErrorTypeName));
 					else
 					{
-						LErrorNode.ErrorType = APlan.Catalog.DataTypes.SystemError;
+						LErrorNode.ErrorType = APlan.DataTypes.SystemError;
 						LErrorNode.IsGeneric = true;
 					}
 					APlan.AttachDependency((Schema.ScalarType)LErrorNode.ErrorType);
@@ -1413,7 +1413,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LNode.VariableType = LVariableType;
 				if (LStatement.Expression != null)
 				{
-					APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
+					APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemGeneric));
 					try
 					{
 						LNode.Nodes.Add(EnsureTableValueNode(APlan, CompileTypedExpression(APlan, LStatement.Expression, LNode.VariableType)));
@@ -1430,7 +1430,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			else if (LStatement.Expression != null)
 			{
 				PlanNode LValueNode;
-				APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemGeneric));
+				APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemGeneric));
 				try
 				{
 					LValueNode = EnsureTableValueNode(APlan, CompileExpression(APlan, LStatement.Expression));
@@ -1544,13 +1544,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (AContext.Names.Count == 0)
 				{
 					// If the identifier is unresolved, and there is a default device, attempt an automatic reconciliation				
-					if ((APlan.DefaultDeviceName != String.Empty) && (!APlan.ServerProcess.InLoadingContext()))
+					if ((APlan.DefaultDeviceName != String.Empty) && (!APlan.InLoadingContext()))
 					{
 						Schema.Device LDevice = GetDefaultDevice(APlan, false);
 						if (LDevice != null)
 						{
 							Schema.BaseTableVar LTableVar = new Schema.BaseTableVar(AContext.Identifier, new Schema.TableType(), LDevice);
-							LTableVar.Device.CheckReconcile(APlan.ServerProcess, LTableVar);
+							APlan.CheckDeviceReconcile(LTableVar);
 							return EmitCatalogIdentifierNode(APlan, AStatement, AContext);
 						}
 					}
@@ -1658,9 +1658,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				// if this process is part of an application transaction, search for an application transaction variable named AIdentifier
-				if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (!APlan.ServerProcess.InLoadingContext()))
+				if ((APlan.ApplicationTransactionID != Guid.Empty) && (!APlan.InLoadingContext()))
 				{
-					ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (!LTransaction.IsGlobalContext && !LTransaction.IsLookup)
@@ -1709,12 +1709,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 				}
 				
-				lock (APlan.ServerProcess.ServerSession.SessionObjects)
+				lock (APlan.SessionObjects)
 				{
-					int LIndex = APlan.ServerProcess.ServerSession.SessionObjects.ResolveName(AContext.Identifier, APlan.NameResolutionPath, AContext.Names);
+					int LIndex = APlan.SessionObjects.ResolveName(AContext.Identifier, APlan.NameResolutionPath, AContext.Names);
 					if (LIndex >= 0)
 					{
-						NameBindingContext LContext = new NameBindingContext(Schema.Object.EnsureRooted(((Schema.SessionObject)APlan.ServerProcess.ServerSession.SessionObjects[LIndex]).GlobalName), APlan.NameResolutionPath);
+						NameBindingContext LContext = new NameBindingContext(Schema.Object.EnsureRooted(((Schema.SessionObject)APlan.SessionObjects[LIndex]).GlobalName), APlan.NameResolutionPath);
 						ResolveCatalogIdentifier(APlan, LContext);
 						if (LContext.IsAmbiguous)
 							return;
@@ -1743,7 +1743,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				lock (APlan.Catalog)
 				{
-					AContext.Object = APlan.ServerProcess.CatalogDeviceSession.ResolveName(AContext.Identifier, APlan.NameResolutionPath, AContext.Names);
+					AContext.Object = APlan.CatalogDeviceSession.ResolveName(AContext.Identifier, APlan.NameResolutionPath, AContext.Names);
 					//int LIndex = APlan.Catalog.ResolveName(AContext.Identifier, APlan.NameResolutionPath, AContext.Names);
 					if (AContext.IsAmbiguous)
 						return;
@@ -1766,9 +1766,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				// AT Variable Enlistment
 				Schema.TableVar LTableVar = AContext.Object as Schema.TableVar;
-				if ((LTableVar != null) && (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (!APlan.ServerProcess.InLoadingContext()))
+				if ((LTableVar != null) && (APlan.ApplicationTransactionID != Guid.Empty) && (!APlan.InLoadingContext()))
 				{
-					ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (!LTableVar.IsATObject)
@@ -2103,7 +2103,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				else
 				{
-					LDummyCreationObject = new Schema.TableVarColumn(new Schema.Column(LCurrentCreationObject.Name, APlan.ServerProcess.DataTypes.SystemScalar));
+					LDummyCreationObject = new Schema.TableVarColumn(new Schema.Column(LCurrentCreationObject.Name, APlan.DataTypes.SystemScalar));
 				}
 			}
 			bool LObjectPopped = false;
@@ -3048,7 +3048,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							try
 							{
-								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 								LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 								LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 								LNewConstraint.ViolationMessageNode = LViolationMessageNode;
@@ -3064,9 +3064,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 						if (!LNewConstraint.IsRemotable)
 							LNewConstraint.ConstraintType = Schema.ConstraintType.Database;
 							
-						// Verify the custom violation message and report dependencies from it
-						//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint);
-
 						return LNewConstraint;
 					}
 					finally
@@ -3119,7 +3116,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							{
 								try
 								{
-									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 									LNewConstraint.OnInsertViolationMessageNode = LViolationMessageNode;
@@ -3129,9 +3126,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
 								}
 							}
-							
-							// Verify the custom violation message and report dependencies from it
-							//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraint.OnInsertExpression);
 						}
 						finally
 						{
@@ -3160,7 +3154,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								{
 									try
 									{
-										PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+										PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 										LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 										LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 										LNewConstraint.OnUpdateViolationMessageNode = LViolationMessageNode;
@@ -3170,9 +3164,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 										throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
 									}
 								}
-								
-								// Verify the custom violation message and report dependencies from it
-								//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Update, AConstraint.OnUpdateExpression);
 							}
 							finally
 							{
@@ -3203,7 +3194,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							{
 								try
 								{
-									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+									PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 									LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 									LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 									LNewConstraint.OnDeleteViolationMessageNode = LViolationMessageNode;
@@ -3213,9 +3204,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 									throw new CompilerException(CompilerException.Codes.InvalidCustomConstraintMessage, AConstraint, LException, LNewConstraint.Name);
 								}
 							}
-							
-							// Verify the custom violation message and report dependencies from it
-							//LNewConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Delete, AConstraint.OnDeleteExpression);
 						}
 						finally
 						{
@@ -3289,8 +3277,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static void CompileCreateTableVarStatement(Plan APlan, CreateTableVarStatement AStatement, CreateTableVarNode ANode, BlockNode ABlockNode)
 		{
 			ApplicationTransaction LTransaction = null;
-			if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				if (LTransaction != null)
@@ -3299,10 +3287,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					CompileTableVarKeys(APlan, ANode.TableVar, AStatement.Keys);
 					CompileTableVarOrders(APlan, ANode.TableVar, AStatement.Orders);
-					if ((ANode.TableVar is Schema.BaseTableVar) && (!APlan.ServerProcess.InLoadingContext()))
+					if ((ANode.TableVar is Schema.BaseTableVar) && (!APlan.InLoadingContext()))
 						((Schema.BaseTableVar)ANode.TableVar).Device.CheckSupported(APlan, ANode.TableVar);
 					CompileTableVarConstraints(APlan, ANode.TableVar, AStatement.Constraints);
-					if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+					if (!APlan.IsRepository)
 						CompileTableVarKeyConstraints(APlan, ANode.TableVar);
 				}
 				finally
@@ -3639,7 +3627,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionTableName = LTableName;
-					if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+					if (APlan.IsRepository)
 						LTableName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LTableName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -3653,7 +3641,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				LNode.Table = new Schema.BaseTableVar(Schema.Object.GetObjectID(LStatement.MetaData), LTableName);
 				LNode.Table.SessionObjectName = LSessionTableName;
-				LNode.Table.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LNode.Table.SessionID = APlan.SessionID;
 				LNode.Table.SourceTableName = LSourceTableName;
 				LNode.Table.IsDeletedTable = Boolean.Parse(MetaData.GetTag(LStatement.MetaData, "DAE.IsDeletedTable", "False"));
 				LNode.Table.IsGenerated = LStatement.IsSession || (LSourceTableName != null);
@@ -3663,9 +3651,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 				APlan.PlanCatalog.Add(LNode.Table);
 				try
 				{
-					if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (LSourceTableName != null) && !APlan.ServerProcess.IsLoading())
+					if ((APlan.ApplicationTransactionID != Guid.Empty) && (LSourceTableName != null) && !APlan.IsLoading())
 					{
-						ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+						ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 						try
 						{
 							LTransaction.Device.AddTableMap(APlan.ServerProcess, LNode.Table);
@@ -3680,12 +3668,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 					try
 					{
 						Schema.Object LObject = null;
-						if ((LStatement.DeviceName != null) && !APlan.ServerProcess.ServerSession.Server.IsRepository)
+						if ((LStatement.DeviceName != null) && !APlan.IsRepository)
 							LObject = ResolveCatalogIdentifier(APlan, LStatement.DeviceName.Identifier);
 
 						if (LObject == null)
 							if (LNode.Table.SessionObjectName != null)
-								LObject = APlan.ServerProcess.ServerSession.Server.TempDevice;
+								LObject = APlan.TempDevice;
 							else
 								LObject = GetDefaultDevice(APlan, true);
 						
@@ -3694,7 +3682,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							
 						APlan.AttachDependency(LObject);
 						LNode.Table.Device = (Schema.Device)LObject;
-						LNode.Table.Device.CheckReconcile(APlan.ServerProcess, LNode.Table);
+						APlan.CheckDeviceReconcile(LNode.Table);
 						
 						if (LStatement.FromExpression == null)
 						{
@@ -3708,7 +3696,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								LNode.Table.Columns.Add(LNewTableVarColumn);
 							}
 							
-							APlan.ServerProcess.EnsureDeviceStarted(LNode.Table.Device);
+							APlan.EnsureDeviceStarted(LNode.Table.Device);
 							LNode.Table.Device.CheckSupported(APlan, LNode.Table); // This call must be made before any attempt to compile keys for the table is made
 		
 							CompileCreateTableVarStatement(APlan, LStatement, LNode, LBlockNode);
@@ -3790,7 +3778,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								APlan.PushCreationObject(LNode.Table);
 							}
 
-							APlan.ServerProcess.EnsureDeviceStarted(LNode.Table.Device);
+							APlan.EnsureDeviceStarted(LNode.Table.Device);
 							LNode.Table.Device.CheckSupported(APlan, LNode.Table);
 		
 							foreach (Schema.TableVarColumn LColumn in LNode.Table.Columns)
@@ -3838,7 +3826,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (LStatement.IsSession)
 			{
 				LSessionViewName = LViewName;
-				if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+				if (APlan.IsRepository)
 					LViewName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 				else
 					LViewName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -3854,19 +3842,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 			LNode.View = new Schema.DerivedTableVar(Schema.Object.GetObjectID(LStatement.MetaData), LViewName);
 			LNode.View.SessionObjectName = LSessionViewName;
-			LNode.View.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+			LNode.View.SessionID = APlan.SessionID;
 			LNode.View.SourceTableName = LSourceTableName;
 			LNode.View.IsGenerated = LStatement.IsSession || (LSourceTableName != null);
 			LNode.View.Owner = APlan.User;
 			LNode.View.Library = LNode.View.IsGenerated ? null : APlan.CurrentLibrary;
 			LNode.View.MetaData = LStatement.MetaData;
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository) // if this is a repository, a view could be parameterized, because it will never be executed
+			if (!APlan.IsRepository) // if this is a repository, a view could be parameterized, because it will never be executed
 				APlan.Symbols.PushWindow(0); // make sure the view expression is evaluated in a private context
 			try
 			{
-				if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (LSourceTableName != null) && !APlan.ServerProcess.IsLoading())
+				if ((APlan.ApplicationTransactionID != Guid.Empty) && (LSourceTableName != null) && !APlan.IsLoading())
 				{
-					ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						LTransaction.Device.AddTableMap(APlan.ServerProcess, LNode.View);
@@ -3892,7 +3880,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LNode.View.CopyTableVar((TableNode)LPlanNode, LPlanNode is TableVarNode);
 					
 					// If we are in an A/T, or we are loading an A/T object
-					if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) || LNode.View.IsATObject)
+					if ((APlan.ApplicationTransactionID != Guid.Empty) || LNode.View.IsATObject)
 					{
 						// Set the explicit bind for A/T variables resolved within the view expression
 						ApplicationTransactionUtility.SetExplicitBind(LPlanNode);
@@ -3927,14 +3915,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			finally
 			{
-				if (!APlan.ServerProcess.ServerSession.Server.IsRepository)
+				if (!APlan.IsRepository)
 					APlan.Symbols.PopWindow();
 			}
 		}
 		
 		public static void ReinferViewReferences(Plan APlan, Schema.DerivedTableVar AView)
 		{
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository && AView.ShouldReinferReferences) // && !APlan.ServerProcess.IsLoading())
+			if (!APlan.IsRepository && AView.ShouldReinferReferences)
 			{
 				Schema.Objects LSaveSourceReferences = new Schema.Objects();
 				Schema.Objects LSaveTargetReferences = new Schema.Objects();
@@ -3954,8 +3942,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				try
 				{
 					ApplicationTransaction LTransaction = null;
-					if (!AView.IsATObject && (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty))
-						LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					if (!AView.IsATObject && (APlan.ApplicationTransactionID != Guid.Empty))
+						LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (LTransaction != null)
@@ -4229,7 +4217,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 
 				// Compile the read accessor
-				if (APlan.ServerProcess.InLoadingContext())
+				if (APlan.InLoadingContext())
 				{
 					AProperty.LoadReadAccessorID();
 					AProperty.LoadDependencies(APlan.CatalogDeviceSession);
@@ -4259,7 +4247,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LWriteAccessorBlock.ClassDefinition = DefaultCompoundWriteAccessor(AProperty.Name);
 				}
 				
-				if (APlan.ServerProcess.InLoadingContext())
+				if (APlan.InLoadingContext())
 				{
 					AProperty.LoadWriteAccessorID();
 				}
@@ -4334,7 +4322,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						AScalarType.IsDefaultConveyor = true;
 					}
 					
-					if (APlan.ServerProcess.InLoadingContext())
+					if (APlan.InLoadingContext())
 					{
 						LRepresentation.LoadSelectorID();
 						LRepresentation.LoadDependencies(APlan.CatalogDeviceSession);
@@ -4445,14 +4433,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LOperator.IsGenerated = true;
 			LOperator.Generator = AScalarType;
 			LOperator.Operands.Add(new Schema.Operand(LOperator, "AValue", AScalarType, Modifier.Const));
-			LOperator.ReturnDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 			LOperator.Owner = AScalarType.Owner;
 			LOperator.Library = AScalarType.Library;
 
 			APlan.PushCreationObject(LOperator);
 			try
 			{
-				APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
+				APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 				APlan.AttachDependency(AScalarType);
 				
 				APlan.Symbols.Push(new Symbol("AValue", AScalarType));
@@ -4485,7 +4473,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						#endif
 
 						if (LAnySpecialNode == null)
-							LAnySpecialNode = new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, false);
+							LAnySpecialNode = new ValueNode(APlan.DataTypes.SystemBoolean, false);
 							
 						foreach (Schema.Special LSpecial in AScalarType.Specials)
 						{
@@ -4495,7 +4483,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 						// make sure that the scalar type includes a dependency on the boolean or operator					
 						if (LAttachOr)
-							AScalarType.AddDependency(ResolveOperator(APlan, Instructions.Or, new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemBoolean, Modifier.Const), new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemBoolean, Modifier.Const)}), false));
+							AScalarType.AddDependency(ResolveOperator(APlan, Instructions.Or, new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(APlan.DataTypes.SystemBoolean, Modifier.Const), new Schema.SignatureElement(APlan.DataTypes.SystemBoolean, Modifier.Const)}), false));
 							
 						LOperator.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, LOperator.ReturnDataType, 0), LAnySpecialNode);
 						LOperator.Block.BlockNode.Line = 1;
@@ -4573,11 +4561,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				LOperator.Operands.Add(new Schema.Operand(LOperator, "AValue", AScalarType, Modifier.Const));
-				LOperator.ReturnDataType = APlan.Catalog.DataTypes.SystemBoolean;
+				LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 				LOperator.Owner = AScalarType.Owner;
 				LOperator.Library = AScalarType.Library;
 				
-				APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
+				APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 				APlan.AttachDependency(AScalarType);
 
 				APlan.Symbols.Push(new Symbol("AValue", AScalarType));
@@ -4587,7 +4575,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					try
 					{
 						PlanNode LPlanNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode("AValue", AScalarType, 1), Instructions.Equal, AValueNode);
-						LOperator.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, APlan.Catalog.DataTypes.SystemBoolean, 0), LPlanNode);
+						LOperator.Block.BlockNode = new AssignmentNode(new StackReferenceNode(Keywords.Result, APlan.DataTypes.SystemBoolean, 0), LPlanNode);
 						LOperator.Block.BlockNode.Line = 1;
 						LOperator.Block.BlockNode.LinePos = 1;
 						LOperator.Block.BlockNode = OptimizeNode(APlan, LOperator.Block.BlockNode);
@@ -4638,11 +4626,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						LOperator.Operands.Add(new Schema.Operand(LOperator, "ALeftValue", AScalarType, Modifier.Const));
 						LOperator.Operands.Add(new Schema.Operand(LOperator, "ARightValue", AScalarType, Modifier.Const));
-						LOperator.ReturnDataType = APlan.Catalog.DataTypes.SystemBoolean;
+						LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 						LOperator.Owner = AScalarType.Owner;
 						LOperator.Library = AScalarType.Library;
 
-						APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
+						APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 						APlan.AttachDependency(AScalarType);
 						
 						if (LComponentOperator.Block.ClassDefinition != null)
@@ -4673,11 +4661,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						LOperator.Operands.Add(new Schema.Operand(LOperator, "ALeftValue", AScalarType, Modifier.Const));
 						LOperator.Operands.Add(new Schema.Operand(LOperator, "ARightValue", AScalarType, Modifier.Const));
-						LOperator.ReturnDataType = APlan.Catalog.DataTypes.SystemInteger;
+						LOperator.ReturnDataType = APlan.DataTypes.SystemInteger;
 						LOperator.Owner = AScalarType.Owner;
 						LOperator.Library = AScalarType.Library;
 
-						APlan.AttachDependency(APlan.Catalog.DataTypes.SystemInteger);
+						APlan.AttachDependency(APlan.DataTypes.SystemInteger);
 						APlan.AttachDependency(AScalarType);
 						
 						if (LComponentOperator.Block.ClassDefinition != null)
@@ -4706,11 +4694,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					LOperator.Operands.Add(new Schema.Operand(LOperator, "ALeftValue", AScalarType, Modifier.Const));
 					LOperator.Operands.Add(new Schema.Operand(LOperator, "ARightValue", AScalarType, Modifier.Const));
-					LOperator.ReturnDataType = APlan.Catalog.DataTypes.SystemBoolean;
+					LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 					LOperator.Owner = AScalarType.Owner;
 					LOperator.Library = AScalarType.Library;
 
-					APlan.AttachDependency(APlan.Catalog.DataTypes.SystemBoolean);
+					APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 					APlan.AttachDependency(AScalarType);
 					
 					LOperator.Block.ClassDefinition = new ClassDefinition("System.CompoundScalarEqualNode");
@@ -4811,7 +4799,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						try
 						{
-							PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+							PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 							LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 							LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 							AConstraint.ViolationMessageNode = LViolationMessageNode;
@@ -4825,9 +4813,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 					AConstraint.DetermineRemotable(APlan.CatalogDeviceSession);
 					if (!AConstraint.IsRemotable)
 						throw new CompilerException(CompilerException.Codes.NonRemotableCustomConstraintMessage, AConstraintDefinition);
-						
-					// Verify the violation message for the constraint, and report any dependencies
-					//AConstraint.GetViolationMessage(APlan.ServerProcess, Schema.Transition.Insert, AConstraintDefinition);
 						
 					return AConstraint;
 				}
@@ -4858,7 +4843,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					throw new CompilerException(CompilerException.Codes.InvalidSpecialExpression, ASpecialDefinition.Value);
 				LSpecial.ValueNode = OptimizeNode(APlan, LSpecial.ValueNode);
 				LSpecial.ValueNode = BindNode(APlan, LSpecial.ValueNode);
-				if (!APlan.ServerProcess.InLoadingContext())
+				if (!APlan.InLoadingContext())
 				{
 					LSpecial.Selector = CompileSpecialSelector(APlan, AScalarType, LSpecial, ASpecialDefinition.Name, LSpecial.ValueNode);
 					if (LSpecial.HasDependencies())
@@ -4874,7 +4859,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LSpecial.LoadDependencies(APlan.CatalogDeviceSession);
 				}
 				
-				if (!APlan.ServerProcess.InLoadingContext())
+				if (!APlan.InLoadingContext())
 				{
 					LSpecial.Comparer = CompileSpecialComparer(APlan, AScalarType, LSpecial, ASpecialDefinition.Name, LSpecial.ValueNode);
 					if (LSpecial.HasDependencies())
@@ -4991,7 +4976,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							// Check first to see if the catalog contains the alpha data type, if it does not, the system is starting up and we are creating the alpha scalar type, so it is allowed to be parentless.
 							if (APlan.Catalog.Contains(Schema.DataTypes.CSystemScalar))
 							{
-								Schema.ScalarType LParentType = APlan.Catalog.DataTypes.SystemScalar;
+								Schema.ScalarType LParentType = APlan.DataTypes.SystemScalar;
 								LNode.ScalarType.ParentTypes.Add(LParentType);
 								LNode.ScalarType.InheritMetaData(LParentType.MetaData);
 								APlan.AttachDependency(LParentType);
@@ -5003,7 +4988,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							LNode.ScalarType.LikeType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, new ScalarTypeSpecifier(LStatement.LikeScalarTypeName));
 
-							if (!APlan.ServerProcess.InLoadingContext())
+							if (!APlan.InLoadingContext())
 							{
 								Schema.Representation LLikeTypeLikeRepresentation = FindLikeRepresentation(LNode.ScalarType.LikeType);
 								RepresentationDefinition LRepresentationDefinition;
@@ -5133,7 +5118,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						if (LNode.ScalarType.IsDefaultConveyor)
 						{
 							// Compile the default equality and comparison operator for the type
-							if (!APlan.ServerProcess.InLoadingContext())
+							if (!APlan.InLoadingContext())
 							{
 								CompileComparisonOperator(APlan, LNode.ScalarType);
 								if (LNode.ScalarType.EqualityOperator != null)
@@ -5154,7 +5139,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								throw new CompilerException(CompilerException.Codes.ConveyorRequired, AStatement, LNode.ScalarType.Name);
 						}
 						
-						if (APlan.ServerProcess.InLoadingContext())
+						if (APlan.InLoadingContext())
 						{
 							LNode.ScalarType.LoadEqualityOperatorID();
 							LNode.ScalarType.LoadComparisonOperatorID();
@@ -5176,7 +5161,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						// Create implicit conversions
 						Schema.Conversion LNarrowingConversion = null;
 						Schema.Conversion LWideningConversion = null;
-						if ((!APlan.ServerProcess.InLoadingContext()) && (LStatement.LikeScalarTypeName != String.Empty))
+						if ((!APlan.InLoadingContext()) && (LStatement.LikeScalarTypeName != String.Empty))
 						{
 							// create conversion LikeScalarTypeName to ScalarTypeName using ScalarTypeName.LikeRepresentation.Selector narrowing
 							// create conversion ScalarTypeName to LikeScalarTypeName using ScalarTypeName.LikeRepresentation.ReadAccessor widening
@@ -5238,7 +5223,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 								
 							if (APlan.Catalog.Contains(Schema.DataTypes.CSystemBoolean))
 							{
-								if (!APlan.ServerProcess.InLoadingContext())
+								if (!APlan.InLoadingContext())
 								{
 									LOperator = CompileSpecialOperator(APlan, LNode.ScalarType);
 									LNode.ScalarType.IsSpecialOperator = LOperator;
@@ -5329,7 +5314,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						try
 						{
 							PlanNode LNode = CompileExpression(APlan, ASortDefinition.Expression);
-							if (!(LNode.DataType.Is(APlan.Catalog.DataTypes.SystemInteger)))
+							if (!(LNode.DataType.Is(APlan.DataTypes.SystemInteger)))
 								throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, ASortDefinition.Expression);
 							if (!(LNode.IsFunctional && LNode.IsDeterministic))
 								throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, ASortDefinition.Expression);
@@ -5385,7 +5370,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							try
 							{
 								PlanNode LNode = CompileExpression(APlan, new BinaryExpression(new IdentifierExpression(LLeftIdentifier), Instructions.Compare, new IdentifierExpression(LRightIdentifier)));
-								if (!(LNode.DataType.Is(APlan.Catalog.DataTypes.SystemInteger)))
+								if (!(LNode.DataType.Is(APlan.DataTypes.SystemInteger)))
 									throw new CompilerException(CompilerException.Codes.IntegerExpressionExpected, APlan.CurrentStatement());
 								if (!(LNode.IsFunctional && LNode.IsDeterministic))
 									throw new CompilerException(CompilerException.Codes.InvalidCompareExpression, APlan.CurrentStatement());
@@ -5437,14 +5422,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static Schema.IDataType CompileTypeSpecifier(Plan APlan, TypeSpecifier ATypeSpecifier)
 		{
 			if (ATypeSpecifier is GenericTypeSpecifier)
-				return APlan.Catalog.DataTypes.SystemGeneric;
+				return APlan.DataTypes.SystemGeneric;
 			else if (ATypeSpecifier is ScalarTypeSpecifier)
 			{
 				if (ATypeSpecifier.IsGeneric)
-					return APlan.Catalog.DataTypes.SystemScalar;
+					return APlan.DataTypes.SystemScalar;
 				else if (Schema.Object.NamesEqual(((ScalarTypeSpecifier)ATypeSpecifier).ScalarTypeName, Schema.DataTypes.CSystemGeneric))
 				{
-					return APlan.Catalog.DataTypes.SystemGeneric;
+					return APlan.DataTypes.SystemGeneric;
 				}
 				else
 				{
@@ -5529,7 +5514,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				// Push a dummy creation object to prevent dependencies on typeof expression sources
 				Schema.BaseTableVar LDummy = new Schema.BaseTableVar("Dummy");
 				LDummy.SessionObjectName = LDummy.Name; // This will allow the typeof expression to reference session specific objects
-				LDummy.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LDummy.SessionID = APlan.SessionID;
 				//LDummy.Library = APlan.CurrentLibrary;
 				Schema.IDataType LDataType;
 				APlan.PushCreationObject(LDummy);
@@ -5745,12 +5730,12 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperatorName = ((Schema.SessionObject)APlan.PlanSessionOperators[LIndex]).GlobalName;
 				else
 				{
-					LIndex = APlan.ServerProcess.ServerSession.SessionOperators.IndexOfName(LOperatorName);
+					LIndex = APlan.SessionOperators.IndexOfName(LOperatorName);
 					if (LIndex >= 0)
-						LOperatorName = ((Schema.SessionObject)APlan.ServerProcess.ServerSession.SessionOperators[LIndex]).GlobalName;
+						LOperatorName = ((Schema.SessionObject)APlan.SessionOperators[LIndex]).GlobalName;
 					else
 					{
-						if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+						if (APlan.IsRepository)
 							LOperatorName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 						else
 							LOperatorName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -5766,11 +5751,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LNode.CreateOperator = new Schema.Operator(Schema.Object.GetObjectID(LStatement.MetaData), LOperatorName);
 				LNode.CreateOperator.MetaData = LStatement.MetaData;
 				LNode.CreateOperator.SessionObjectName = LSessionOperatorName;
-				LNode.CreateOperator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LNode.CreateOperator.SessionID = APlan.SessionID;
 				LNode.CreateOperator.SourceOperatorName = LSourceOperatorName;
 				LNode.CreateOperator.IsGenerated = (LSessionOperatorName != null) || (LSourceOperatorName != null);
 				// If this is an A/T operator and we are not in an A/T, then it must be recompiled when it is first used within an A/T
-				LNode.CreateOperator.ShouldRecompile = LNode.CreateOperator.IsATObject && (APlan.ServerProcess.ApplicationTransactionID == Guid.Empty);
+				LNode.CreateOperator.ShouldRecompile = LNode.CreateOperator.IsATObject && (APlan.ApplicationTransactionID == Guid.Empty);
 				
 				APlan.PushCreationObject(LNode.CreateOperator);
 				try
@@ -5790,7 +5775,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						// If this is a repository, and we are creating a duplicate operator, ignore this statement and move on
 						// This will allow us to move operators into the base catalog object set without having to upgrade the
 						// system catalog.
-						if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+						if (APlan.IsRepository)
 							return new NoOpNode();
 						throw;
 					}
@@ -5884,8 +5869,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				try
 				{
 					ApplicationTransaction LTransaction = null;
-					if (!AOperator.IsATObject && (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty))
-						LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+					if (!AOperator.IsATObject && (APlan.ApplicationTransactionID != Guid.Empty))
+						LTransaction = APlan.GetApplicationTransaction();
 					try
 					{
 						if (LTransaction != null)
@@ -5941,7 +5926,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 														if (!AOperator.IsDeterministic && AOperator.IsLiteral)
 															AOperator.IsLiteral = false;
 
-														APlan.ServerProcess.CatalogDeviceSession.UpdateCatalogObject(AOperator);
+														APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
 													}
 													finally
 													{
@@ -5994,7 +5979,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				
 				// If this is an A/T operator and we are not in an A/T, then it must be recompiled when it is first used within an A/T
-				AOperator.ShouldRecompile = AOperator.IsATObject && (APlan.ServerProcess.ApplicationTransactionID == Guid.Empty);
+				AOperator.ShouldRecompile = AOperator.IsATObject && (APlan.ApplicationTransactionID == Guid.Empty);
 			}
 			finally
 			{
@@ -6081,7 +6066,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperatorName = ((Schema.SessionObject)APlan.PlanSessionOperators[LIndex]).GlobalName;
 				else
 				{
-					if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+					if (APlan.IsRepository)
 						LOperatorName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LOperatorName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -6095,7 +6080,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LOperator.MetaData = LStatement.MetaData;
 				LOperator.IsOrderDependent = Convert.ToBoolean(MetaData.GetTag(LOperator.MetaData, "DAE.IsOrderDependent", "false"));
 				LOperator.SessionObjectName = LSessionOperatorName;
-				LOperator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LOperator.SessionID = APlan.SessionID;
 				LNode.CreateOperator = LOperator;
 				APlan.PushCreationObject(LOperator);
 				try
@@ -6274,8 +6259,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			try
 			{
 				ApplicationTransaction LTransaction = null;
-				if (!AOperator.IsATObject && (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty))
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (!AOperator.IsATObject && (APlan.ApplicationTransactionID != Guid.Empty))
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (LTransaction != null)
@@ -6415,7 +6400,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 												if (!AOperator.IsDeterministic && AOperator.IsLiteral)
 													AOperator.IsLiteral = false;
 
-												APlan.ServerProcess.CatalogDeviceSession.UpdateCatalogObject(AOperator);
+												APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
 											}
 											finally
 											{
@@ -6484,7 +6469,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionConstraintName = LConstraintName;
-					if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+					if (APlan.IsRepository)
 						LConstraintName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LConstraintName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -6496,7 +6481,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				LNode.Constraint = new Schema.CatalogConstraint(Schema.Object.GetObjectID(LStatement.MetaData), LConstraintName);
 				LNode.Constraint.SessionObjectName = LSessionConstraintName;
-				LNode.Constraint.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LNode.Constraint.SessionID = APlan.SessionID;
 				LNode.Constraint.IsGenerated = LStatement.IsSession;
 				LNode.Constraint.Owner = APlan.User;
 				LNode.Constraint.Library = LNode.Constraint.IsGenerated ? null : APlan.CurrentLibrary;
@@ -6521,7 +6506,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							try
 							{
-								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.Catalog.DataTypes.SystemString);
+								PlanNode LViolationMessageNode = CompileTypedExpression(APlan, new D4.Parser().ParseExpression(LCustomMessage), APlan.DataTypes.SystemString);
 								LViolationMessageNode = OptimizeNode(APlan, LViolationMessageNode);
 								LViolationMessageNode = BindNode(APlan, LViolationMessageNode);
 								LNode.Constraint.ViolationMessageNode = LViolationMessageNode;
@@ -6533,9 +6518,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 						}
 						
 						LNode.Constraint.DetermineRemotable(APlan.CatalogDeviceSession);
-						
-						// Verify the violation message and report dependencies for it.
-						//LNode.Constraint.GetViolationMessage(APlan.ServerProcess, AStatement);
 						
 						return LNode;
 					}
@@ -7234,7 +7216,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 							RaiseNode LRaiseNode = new RaiseNode();
 							LRaiseNode.IsBreakable = false;
-							LRaiseNode.Nodes.Add(EmitUnaryNode(APlan, "System.Error", new ValueNode(APlan.ServerProcess.DataTypes.SystemString, new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, AReference.Name, AReference.TargetTable.Name, String.Empty).Message))); // Schema.Constraint.GetViolationMessage(AReference.MetaData)).Message))));
+							LRaiseNode.Nodes.Add(EmitUnaryNode(APlan, "System.Error", new ValueNode(APlan.DataTypes.SystemString, new RuntimeException(RuntimeException.Codes.InsertConstraintViolation, AReference.Name, AReference.TargetTable.Name, String.Empty).Message))); // Schema.Constraint.GetViolationMessage(AReference.MetaData)).Message))));
 							LIfNode.Nodes.Add(BindNode(APlan, LRaiseNode));
 							LIfNode.DetermineDevice(APlan);
 							LBlockNode.Nodes.Add(LIfNode);
@@ -7702,7 +7684,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				if (LStatement.IsSession)
 				{
 					LSessionReferenceName = LReferenceName;
-					if (APlan.ServerProcess.ServerSession.Server.IsRepository)
+					if (APlan.IsRepository)
 						LReferenceName = MetaData.GetTag(LStatement.MetaData, "DAE.GlobalObjectName", Schema.Object.NameFromGuid(Guid.NewGuid()));
 					else
 						LReferenceName = Schema.Object.NameFromGuid(Guid.NewGuid());
@@ -7714,7 +7696,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 				LNode.Reference = new Schema.Reference(Schema.Object.GetObjectID(LStatement.MetaData), LReferenceName);
 				LNode.Reference.SessionObjectName = LSessionReferenceName;
-				LNode.Reference.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+				LNode.Reference.SessionID = APlan.SessionID;
 				LNode.Reference.IsGenerated = LStatement.IsSession;
 				LNode.Reference.Owner = APlan.User;
 				LNode.Reference.Library = LNode.Reference.IsGenerated ? null : APlan.CurrentLibrary;
@@ -7769,7 +7751,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LNode.Reference.UpdateReferenceAction = LStatement.ReferencesDefinition.UpdateReferenceAction;
 						LNode.Reference.DeleteReferenceAction = LStatement.ReferencesDefinition.DeleteReferenceAction;
 						
-						if (!((DAE.Server.Server)APlan.ServerProcess.ServerSession.Server).IsRepository && LNode.Reference.Enforced)
+						if (!APlan.IsRepository && LNode.Reference.Enforced)
 						{
 							if ((LNode.Reference.SourceTable is Schema.BaseTableVar) && (LNode.Reference.TargetTable is Schema.BaseTableVar))
 							{
@@ -7810,7 +7792,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
-									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
 									try
 									{
@@ -7856,7 +7838,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
-									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
 									try
 									{
@@ -7888,7 +7870,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
-									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
 									try
 									{
@@ -7926,7 +7908,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
-									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Delete));
 									try
 									{
@@ -7977,7 +7959,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
-									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
 									try
 									{
@@ -8015,7 +7997,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
-									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.ServerProcess.ServerSession.SessionID;
+									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
 									try
 									{
@@ -8082,17 +8064,17 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static bool CouldGenerateDeviceScalarTypeMap(Plan APlan, Schema.Device ADevice, Schema.ScalarType AScalarType)
 		{
-			APlan.ServerProcess.EnsureDeviceStarted(ADevice);
+			APlan.EnsureDeviceStarted(ADevice);
 			Schema.Representation LRepresentation = FindSystemRepresentation(AScalarType);
 			return (LRepresentation != null) && (LRepresentation.Properties.Count == 1) && (LRepresentation.Properties[0].DataType is Schema.ScalarType) && (ADevice.ResolveDeviceScalarType(APlan, (Schema.ScalarType)LRepresentation.Properties[0].DataType) != null);
 		}
 		
 		public static Schema.DeviceScalarType CompileDeviceScalarTypeMap(Plan APlan, Schema.Device ADevice, DeviceScalarTypeMap ADeviceScalarTypeMap)
 		{
-			APlan.ServerProcess.EnsureDeviceStarted(ADevice);
+			APlan.EnsureDeviceStarted(ADevice);
 			Schema.ScalarType LDataType = (Schema.ScalarType)CompileScalarTypeSpecifier(APlan, new ScalarTypeSpecifier(ADeviceScalarTypeMap.ScalarTypeName));
 			
-			if (!APlan.ServerProcess.InLoadingContext())
+			if (!APlan.InLoadingContext())
 			{
 				Schema.DeviceScalarType LExistingMap = ADevice.ResolveDeviceScalarType(APlan, LDataType);
 				if ((LExistingMap != null) && !LExistingMap.IsGenerated)
@@ -8156,7 +8138,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static Schema.DeviceOperator CompileDeviceOperatorMap(Plan APlan, Schema.Device ADevice, DeviceOperatorMap ADeviceOperatorMap)
 		{
-			APlan.ServerProcess.EnsureDeviceStarted(ADevice);
+			APlan.EnsureDeviceStarted(ADevice);
 			bool LIsSystemClassDefinition = false;
 			if (ADeviceOperatorMap.ClassDefinition == null)
 			{
@@ -8172,7 +8154,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 			Schema.Operator LOperator = ResolveOperatorSpecifier(APlan, ADeviceOperatorMap.OperatorSpecifier);
 			
-			if (!APlan.ServerProcess.InLoadingContext())
+			if (!APlan.InLoadingContext())
 			{
 				Schema.DeviceOperator LExistingMap = ADevice.ResolveDeviceOperator(APlan, LOperator);
 				if ((LExistingMap != null) && !LExistingMap.IsGenerated)
@@ -8229,7 +8211,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					APlan.AttachDependency(ADevice);
 					LDeviceOperator.ClassDefinition = AClassDefinition;
 					APlan.CheckClassDependency(LDeviceOperator.ClassDefinition);
-					APlan.ServerProcess.CatalogDeviceSession.CreateDeviceOperator(LDeviceOperator);
+					APlan.CatalogDeviceSession.CreateDeviceOperator(LDeviceOperator);
 				}
 				finally
 				{
@@ -8246,7 +8228,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 /*
 				if (LDeviceOperator.IsGenerated)
-					APlan.ServerProcess.CatalogDeviceSession.AddDeviceScalarTypeDeviceOperator(ADeviceScalarType, LDeviceOperator);
+					APlan.CatalogDeviceSession.AddDeviceScalarTypeDeviceOperator(ADeviceScalarType, LDeviceOperator);
 					//ADeviceScalarType.DeviceOperators.Add(LDeviceOperator);
 */
 			}
@@ -8262,7 +8244,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static void CompileDeviceScalarTypeMapOperatorMaps(Plan APlan, Schema.Device ADevice, Schema.DeviceScalarType ADeviceScalarType)
 		{
 			// if the equality or comparison operators are set, map them based on the property type of the default representation
-			APlan.ServerProcess.EnsureDeviceStarted(ADevice);
+			APlan.EnsureDeviceStarted(ADevice);
 			Schema.Representation LSystemRepresentation = FindSystemRepresentation(ADeviceScalarType.ScalarType);
 			if (LSystemRepresentation != null)
 			{
@@ -8375,7 +8357,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			string LDeviceName = Schema.Object.Qualify(LStatement.DeviceName, APlan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(APlan, AStatement, LDeviceName);
 			CreateDeviceNode LNode = new CreateDeviceNode();
-			int LResourceManagerID = Int32.Parse(MetaData.GetTag(LStatement.MetaData, "DAE.ResourceManagerID", APlan.ServerProcess.ServerSession.Server.GetNextResourceManagerID().ToString()));
+			int LResourceManagerID = Int32.Parse(MetaData.GetTag(LStatement.MetaData, "DAE.ResourceManagerID", APlan.GetNextResourceManagerID().ToString()));
 			APlan.CheckRight(Schema.RightNames.HostImplementation);
 			APlan.CheckClassDependency(APlan.CurrentLibrary, LStatement.ClassDefinition);
 			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[]{Schema.Object.GetObjectID(LStatement.MetaData), LDeviceName, LResourceManagerID});
@@ -8441,15 +8423,15 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidSessionObjectName(Plan APlan, Statement AStatement, string AObjectName)
 		{
-			CheckValidObjectName(APlan, APlan.ServerProcess.ServerSession.SessionObjects, AStatement, AObjectName);
+			CheckValidObjectName(APlan, APlan.SessionObjects, AStatement, AObjectName);
 			CheckValidObjectName(APlan, APlan.PlanSessionObjects, AStatement, AObjectName);
 		}
 		
 		public static void CheckValidCatalogObjectName(Plan APlan, Statement AStatement, string AObjectName)
 		{
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository && (!APlan.ServerProcess.InLoadingContext()))
+			if (!APlan.IsRepository && (!APlan.InLoadingContext()))
 			{
-				if (APlan.ServerProcess.CatalogDeviceSession.CatalogObjectExists(AObjectName))
+				if (APlan.CatalogDeviceSession.CatalogObjectExists(AObjectName))
 					throw new CompilerException(CompilerException.Codes.CreatingDuplicateObjectName, AStatement, AObjectName);
 			}
 			else
@@ -8484,9 +8466,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidCatalogOperatorName(Plan APlan, Statement AStatement, string AOperatorName, Schema.Signature ASignature)
 		{
-			if (!APlan.ServerProcess.ServerSession.Server.IsRepository && (!APlan.ServerProcess.InLoadingContext()))
+			if (!APlan.IsRepository && (!APlan.InLoadingContext()))
 			{
-				APlan.ServerProcess.CatalogDeviceSession.ResolveOperatorName(AOperatorName);
+				APlan.CatalogDeviceSession.ResolveOperatorName(AOperatorName);
 				CheckValidOperatorName(APlan, APlan.Catalog, AStatement, AOperatorName, ASignature);
 			}
 			else
@@ -8514,9 +8496,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			// Operator resolutions for application-transaction or session-specific operators are never cached
 			// search for an application transaction-specific operator
-			if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (!APlan.ServerProcess.InLoadingContext()))
+			if ((APlan.ApplicationTransactionID != Guid.Empty) && (!APlan.InLoadingContext()))
 			{
-				ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (!LTransaction.IsGlobalContext && !LTransaction.IsLookup)
@@ -8569,7 +8551,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if ((AContext.Operator == null) || AContext.Matches.IsPartial)
 			{
 				NameBindingContext LNameContext = new NameBindingContext(AContext.OperatorName, APlan.NameResolutionPath);
-				int LIndex = APlan.ServerProcess.ServerSession.SessionOperators.ResolveName(LNameContext.Identifier, LNameContext.ResolutionPath, LNameContext.Names);
+				int LIndex = APlan.SessionOperators.ResolveName(LNameContext.Identifier, LNameContext.ResolutionPath, LNameContext.Names);
 				if (LNameContext.IsAmbiguous)
 				{
 					AContext.OperatorNameContext.SetBindingDataFromContext(LNameContext);
@@ -8578,7 +8560,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				if (LIndex >= 0)
 				{
-					OperatorBindingContext LContext = new OperatorBindingContext(AContext.Statement, ((Schema.SessionObject)APlan.ServerProcess.ServerSession.SessionOperators[LIndex]).GlobalName, AContext.ResolutionPath, AContext.CallSignature, AContext.IsExact);
+					OperatorBindingContext LContext = new OperatorBindingContext(AContext.Statement, ((Schema.SessionObject)APlan.SessionOperators[LIndex]).GlobalName, AContext.ResolutionPath, AContext.CallSignature, AContext.IsExact);
 					ResolveOperator(APlan, LContext);
 					
 					if (LContext.Operator != null)
@@ -8611,8 +8593,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 							if ((AContext.Operator == null) || AContext.Matches.IsPartial)
 							{
 								// NOTE: If this is a repository, or we are currently loading, there is no need to force the resolve of arbitrary matches, the required operator will be in the cache because of the dependency loading mechanism in the catalog device
-								if (!APlan.ServerProcess.ServerSession.Server.IsRepository && (!APlan.ServerProcess.InLoadingContext()))
-									APlan.ServerProcess.CatalogDeviceSession.ResolveOperatorName(AContext.OperatorName);
+								if (!APlan.IsRepository && (!APlan.InLoadingContext()))
+									APlan.CatalogDeviceSession.ResolveOperatorName(AContext.OperatorName);
 								ResolveCall(APlan, APlan.Catalog, AContext);
 							}
 				#if USEOPERATORRESOLUTIONCACHE
@@ -8632,9 +8614,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 			// If a resolution occurred, and we are in an application transaction, 
 			// and the operator should be translated, and it is not an application transaction specific operator
 			//   Translate the operator into the application transaction space
-			if ((AContext.Operator != null) && (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && (!APlan.ServerProcess.InLoadingContext()))
+			if ((AContext.Operator != null) && (APlan.ApplicationTransactionID != Guid.Empty) && (!APlan.InLoadingContext()))
 			{
-				ApplicationTransaction LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				ApplicationTransaction LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (!AContext.Operator.IsATObject)
@@ -8997,7 +8979,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.Device LDevice = GetDefaultDevice(APlan, false);
 				if (LDevice != null)
 				{
-					LDevice.CheckReconcile(APlan.ServerProcess, new Schema.BaseTableVar(LStatement.TableVarName, new Schema.TableType(), LDevice));
+					APlan.CheckDeviceReconcile(new Schema.BaseTableVar(LStatement.TableVarName, new Schema.TableType(), LDevice));
 					LObject = ResolveCatalogIdentifier(APlan, LStatement.TableVarName, true);
 				}
 			}
@@ -9187,7 +9169,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.Device LDevice = GetDefaultDevice(APlan, false);
 				if (LDevice != null)
 				{
-					LDevice.CheckReconcile(APlan.ServerProcess, new Schema.BaseTableVar(LStatement.ObjectName, new Schema.TableType(), LDevice));
+					APlan.CheckDeviceReconcile(new Schema.BaseTableVar(LStatement.ObjectName, new Schema.TableType(), LDevice));
 					LObject = ResolveCatalogIdentifier(APlan, LStatement.ObjectName, true);	
 				}
 			}
@@ -9469,7 +9451,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						new Schema.SignatureElement[]
 						{
 							new Schema.SignatureElement(ATableVar.DataType.RowType, Modifier.Var),
-							new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemBoolean, Modifier.Var)
+							new Schema.SignatureElement(APlan.DataTypes.SystemBoolean, Modifier.Var)
 						};
 
 				case EventType.AfterInsert:
@@ -9485,7 +9467,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						{
 							new Schema.SignatureElement(ATableVar.DataType.RowType, Modifier.Const),
 							new Schema.SignatureElement(ATableVar.DataType.RowType, Modifier.Var),
-							new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemBoolean, Modifier.Var)
+							new Schema.SignatureElement(APlan.DataTypes.SystemBoolean, Modifier.Var)
 						};
 				
 				case EventType.AfterUpdate:
@@ -9501,7 +9483,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						new Schema.SignatureElement[]
 						{
 							new Schema.SignatureElement(ATableVar.DataType.RowType, Modifier.Const),
-							new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemBoolean, Modifier.Var)
+							new Schema.SignatureElement(APlan.DataTypes.SystemBoolean, Modifier.Var)
 						};
 				
 				case EventType.AfterDelete:
@@ -9516,7 +9498,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						new Schema.SignatureElement[]
 						{
 							new Schema.SignatureElement(new Schema.RowType(ATableVar.DataType.Columns), Modifier.Var),
-							new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemString, Modifier.Const)
+							new Schema.SignatureElement(APlan.DataTypes.SystemString, Modifier.Const)
 						};
 
 				case EventType.Validate:
@@ -9526,7 +9508,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							new Schema.SignatureElement[]
 							{
 								new Schema.SignatureElement(new Schema.RowType(ATableVar.DataType.Columns), Modifier.Var),
-								new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemString, Modifier.Const)
+								new Schema.SignatureElement(APlan.DataTypes.SystemString, Modifier.Const)
 							};
 
 					return
@@ -9534,7 +9516,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 						{
 							new Schema.SignatureElement(new Schema.RowType(ATableVar.DataType.Columns), Modifier.Const),
 							new Schema.SignatureElement(new Schema.RowType(ATableVar.DataType.Columns), Modifier.Var),
-							new Schema.SignatureElement(APlan.Catalog.DataTypes.SystemString, Modifier.Const)
+							new Schema.SignatureElement(APlan.DataTypes.SystemString, Modifier.Const)
 						};
 				
 				default: throw new CompilerException(CompilerException.Codes.InvalidEventType, AStatement, ATableVar.Name, AEventType.ToString());
@@ -9941,11 +9923,11 @@ indicative of other problems, a reference will never be attached as an explicit 
 					AInstruction, 
 					new PlanNode[]
 					{
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, ARightName)}),
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.DataTypes.SystemString, ARightName)}),
 						#if USEISTRING
-						new ValueNode(APlan.ServerProcess.DataTypes.SystemIString, AGrantee)
+						new ValueNode(APlan.DataTypes.SystemIString, AGrantee)
 						#else
-						new ValueNode(APlan.ServerProcess.DataTypes.SystemString, AGrantee)
+						new ValueNode(APlan.DataTypes.SystemString, AGrantee)
 						#endif
 					}
 				);
@@ -9960,8 +9942,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 					AInstruction,
 					new PlanNode[]
 					{
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, ARightName)}),
-						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.ServerProcess.DataTypes.SystemString, AGrantee)})
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.DataTypes.SystemString, ARightName)}),
+						EmitCallNode(APlan, "System.Name", new PlanNode[]{new ValueNode(APlan.DataTypes.SystemString, AGrantee)})
 					}
 				);
 		}
@@ -10118,12 +10100,12 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 		public static PlanNode CompileBooleanExpression(Plan APlan, Expression AExpression)
 		{
-			return CompileTypedExpression(APlan, AExpression, APlan.Catalog.DataTypes.SystemBoolean);
+			return CompileTypedExpression(APlan, AExpression, APlan.DataTypes.SystemBoolean);
 		}
 		
 		public static PlanNode CompileTableExpression(Plan APlan, Expression AExpression)
 		{
-			return CompileTypedExpression(APlan, AExpression, APlan.Catalog.DataTypes.SystemTable);
+			return CompileTypedExpression(APlan, AExpression, APlan.DataTypes.SystemTable);
 		}
 		
 		public static PlanNode CompileTypedExpression(Plan APlan, Expression AExpression, Schema.IDataType ADataType)
@@ -10170,7 +10152,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			PlanNode LNode = InternalCompileExpression(APlan, AExpression);
 			if (LNode.DataType == null)
-				LNode.DataType = APlan.Catalog.DataTypes.SystemScalar;
+				LNode.DataType = APlan.DataTypes.SystemScalar;
 			return LNode;
 		}
 		
@@ -10330,7 +10312,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand = 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Equal, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Equal, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Equal, new ValueNode(APlan.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10350,7 +10332,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand < 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Less, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Less, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCallNode(APlan, AStatement, Instructions.Compare, new PlanNode[]{ALeftOperand, ARightOperand}), Instructions.Less, new ValueNode(APlan.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10360,7 +10342,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand <= 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.InclusiveLess, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveLess, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveLess, new ValueNode(APlan.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10370,7 +10352,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand > 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.Greater, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.Greater, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.Greater, new ValueNode(APlan.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10380,7 +10362,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				// ALeftOperand ?= ARightOperand >= 0
 			PlanNode LNode = EmitCallNode(APlan, AStatement, Instructions.InclusiveGreater, new PlanNode[]{ALeftOperand, ARightOperand}, false);
 			if (LNode == null)
-				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveGreater, new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0));
+				LNode = EmitBinaryNode(APlan, AStatement, EmitCompareNode(APlan, AStatement, ALeftOperand, ARightOperand), Instructions.InclusiveGreater, new ValueNode(APlan.DataTypes.SystemInteger, 0));
 			return LNode;
 		}
 		
@@ -10402,7 +10384,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							Instructions.Equal,
 							new PlanNode[]{ALeftOperand, ARightOperand}
 						),
-						new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 0),
+						new ValueNode(APlan.DataTypes.SystemInteger, 0),
 						EmitConditionNode
 						(
 							APlan,
@@ -10413,8 +10395,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 								Instructions.Less,
 								new PlanNode[]{ALeftOperand, ARightOperand}
 							),
-							new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, -1),
-							new ValueNode(APlan.ServerProcess.DataTypes.SystemInteger, 1)
+							new ValueNode(APlan.DataTypes.SystemInteger, -1),
+							new ValueNode(APlan.DataTypes.SystemInteger, 1)
 						)
 					);
 					
@@ -10864,7 +10846,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static PlanNode DowncastScalar(Plan APlan, PlanNode APlanNode, Schema.ScalarType ATargetDataType)
 		{
-			if (!ATargetDataType.Equals(APlan.Catalog.DataTypes.SystemScalar) && !APlanNode.DataType.Equals(APlan.Catalog.DataTypes.SystemScalar))
+			if (!ATargetDataType.Equals(APlan.DataTypes.SystemScalar) && !APlanNode.DataType.Equals(APlan.DataTypes.SystemScalar))
 			{
 				ArrayList LCastingPath = new ArrayList();
 				if (!FindCastingPath(ATargetDataType, (Schema.ScalarType)APlanNode.DataType, LCastingPath))
@@ -10893,7 +10875,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static PlanNode UpcastScalar(Plan APlan, PlanNode APlanNode, Schema.ScalarType ATargetDataType)
 		{
 			// If the target data type is not scalar or alpha
-			if (!ATargetDataType.Equals(APlan.Catalog.DataTypes.SystemScalar))
+			if (!ATargetDataType.Equals(APlan.DataTypes.SystemScalar))
 			{
 				ArrayList LCastingPath = new ArrayList();
 				if (!FindCastingPath((Schema.ScalarType)APlanNode.DataType, ATargetDataType, LCastingPath))
@@ -10960,7 +10942,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static PlanNode Downcast(Plan APlan, PlanNode APlanNode, Schema.IDataType ATargetDataType)
 		{
 			#if USETYPEINHERITANCE
-			if (!ATargetDataType.Equals(APlan.ServerProcess.DataTypes.SystemGeneric) && !APlanNode.DataType.Equals(APlan.ServerProcess.DataTypes.SystemGeneric))
+			if (!ATargetDataType.Equals(APlan.DataTypes.SystemGeneric) && !APlanNode.DataType.Equals(APlan.DataTypes.SystemGeneric))
 			{
 				if (APlanNode.DataType is Schema.IScalarType)
 					return DowncastScalar(APlan, APlanNode, (Schema.ScalarType)ATargetDataType);
@@ -11366,7 +11348,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							{
 								int LStackDisplacement = LAggregateNode.Operator.Initialization.StackDisplacement + LAggregateNode.Operator.Operands.Count + 1; // add 1 to account for the result variable
 								for (int LStackIndex = 0; LStackIndex < LStackDisplacement; LStackIndex++)
-									APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
+									APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemScalar));
 								try
 								{
 									LAggregateNode.Nodes[0] = EnsureTableNode(APlan, CompileExpression(APlan, (Expression)LAggregateNode.Nodes[0].EmitStatement(EmitMode.ForCopy)));
@@ -11400,7 +11382,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 								{
 									int LStackDisplacement = LAggregateNode.Operator.Initialization.StackDisplacement + 1; // add 1 to account for the result variable
 									for (int LStackIndex = 0; LStackIndex < LStackDisplacement; LStackIndex++)
-										APlan.Symbols.Push(new Symbol(String.Empty, APlan.Catalog.DataTypes.SystemScalar));
+										APlan.Symbols.Push(new Symbol(String.Empty, APlan.DataTypes.SystemScalar));
 									try
 									{
 										LAggregateNode.Nodes[0] = EnsureTableNode(APlan, CompileExpression(APlan, (Expression)LAggregateNode.Nodes[0].EmitStatement(EmitMode.ForCopy)));
@@ -11852,32 +11834,32 @@ indicative of other problems, a reference will never be attached as an explicit 
 			switch (AExpression.Token)
 			{
 				#if NILISSCALAR
-				case LexerToken.Nil: LNode.DataType = APlan.Catalog.DataTypes.SystemScalar; LNode.IsNilable = true; break;
+				case LexerToken.Nil: LNode.DataType = APlan.DataTypes.SystemScalar; LNode.IsNilable = true; break;
 				#else
-				case TokenType.Nil: LNode.DataType = APlan.Catalog.DataTypes.SystemGeneric; LNode.IsNilable = true; break;
+				case TokenType.Nil: LNode.DataType = APlan.DataTypes.SystemGeneric; LNode.IsNilable = true; break;
 				#endif
-				case TokenType.Boolean: LNode.DataType = APlan.Catalog.DataTypes.SystemBoolean; LNode.Value = (bool)AExpression.Value; break;
+				case TokenType.Boolean: LNode.DataType = APlan.DataTypes.SystemBoolean; LNode.Value = (bool)AExpression.Value; break;
 				case TokenType.Integer: 
 				case TokenType.Hex:
 					if ((Convert.ToInt64(AExpression.Value) > Int32.MaxValue) || (Convert.ToInt64(AExpression.Value) < Int32.MinValue))
 					{
-						LNode.DataType = APlan.Catalog.DataTypes.SystemLong;
+						LNode.DataType = APlan.DataTypes.SystemLong;
 						LNode.Value = Convert.ToInt64(AExpression.Value);
 					}
 					else
 					{
-						LNode.DataType = APlan.Catalog.DataTypes.SystemInteger;
+						LNode.DataType = APlan.DataTypes.SystemInteger;
 						LNode.Value = Convert.ToInt32(AExpression.Value);
 					}
 				break;
-				case TokenType.Decimal: LNode.DataType = APlan.Catalog.DataTypes.SystemDecimal; LNode.Value = (decimal)AExpression.Value; break;
-				case TokenType.Money: LNode.DataType = APlan.Catalog.DataTypes.SystemMoney; LNode.Value = (decimal)AExpression.Value; break;
+				case TokenType.Decimal: LNode.DataType = APlan.DataTypes.SystemDecimal; LNode.Value = (decimal)AExpression.Value; break;
+				case TokenType.Money: LNode.DataType = APlan.DataTypes.SystemMoney; LNode.Value = (decimal)AExpression.Value; break;
 				#if USEDOUBLES
-				case LexerToken.Float: LNode.DataType = APlan.Catalog.DataTypes.SystemDouble; LNode.Value = Scalar.FromDouble((double)AExpression.Value); break;
+				case LexerToken.Float: LNode.DataType = APlan.DataTypes.SystemDouble; LNode.Value = Scalar.FromDouble((double)AExpression.Value); break;
 				#endif
-				case TokenType.String: LNode.DataType = APlan.Catalog.DataTypes.SystemString; LNode.Value = (string)AExpression.Value; break;
+				case TokenType.String: LNode.DataType = APlan.DataTypes.SystemString; LNode.Value = (string)AExpression.Value; break;
 				#if USEISTRING
-				case LexerToken.IString: LNode.DataType = APlan.Catalog.DataTypes.SystemIString; LNode.Value = (string)AExpression.Value; break;
+				case LexerToken.IString: LNode.DataType = APlan.DataTypes.SystemIString; LNode.Value = (string)AExpression.Value; break;
 				#endif
 				default: throw new CompilerException(CompilerException.Codes.UnknownLiteralType, AExpression, Enum.GetName(typeof(TokenType), AExpression.Token));
 			}
@@ -12473,8 +12455,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static ApplicationTransaction PrepareShouldTranslate(Plan APlan, Statement AStatement, string AQualifier)
 		{
 			ApplicationTransaction LTransaction = null;
-			if ((APlan.ServerProcess.ApplicationTransactionID != Guid.Empty) && !Convert.ToBoolean(LanguageModifiers.GetModifier(AStatement.Modifiers, Schema.Object.Qualify("ShouldTranslate", AQualifier), "true")))
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if ((APlan.ApplicationTransactionID != Guid.Empty) && !Convert.ToBoolean(LanguageModifiers.GetModifier(AStatement.Modifiers, Schema.Object.Qualify("ShouldTranslate", AQualifier), "true")))
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				if (LTransaction != null)
@@ -13180,8 +13162,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if ((ASourceNode.Order == null) || !ASearchOrder.Equivalent(ASourceNode.Order) || !ASourceNode.Supports(CursorCapability.Searchable))
 			{
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (LTransaction != null)
@@ -14134,8 +14116,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			}
 
 			LTransaction = null;
-			if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				bool LIsLookup = AExpression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(AExpression.Modifiers, "IsDetailLookup", "false")) : AExpression.IsLookup;
@@ -14236,8 +14218,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			}
 			
 			LTransaction = null;
-			if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				bool LIsLookup = AExpression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(AExpression.Modifiers, "IsDetailLookup", "false")) : AExpression.IsLookup;
@@ -14309,8 +14291,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			}
 			
 			LTransaction = null;
-			if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				bool LIsLookup = AExpression.IsLookup ? !Convert.ToBoolean(LanguageModifiers.GetModifier(AExpression.Modifiers, "IsDetailLookup", "false")) : AExpression.IsLookup;

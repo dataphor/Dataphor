@@ -3,18 +3,14 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+using System;
+using System.Collections;
+using System.Diagnostics;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	using System.Collections;
-	using System.Diagnostics;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Device.Memory;
@@ -31,10 +27,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public new ExplodeNode Node { get { return (ExplodeNode)FNode; } }
 		
 		// The current set of cursors being used to produce the result set
-		protected Context FSourceTables;
+		protected Stack FSourceTables;
 		
 		// For every cursor but the root, this stack will contain the parent row variable for that cursor.
-		protected Context FParentRows;
+		protected Stack FParentRows;
 		
 		protected Row FSourceRow;
 		protected Row FTargetRow;
@@ -70,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				// Otherwise, use the given row to build a parent row and open a new cursor for the child expression with that row to parameterize it
 				Row LParentRow = NewParentRow(ACurrentRow);
-				Process.Context.Push(LParentRow);
+				Process.Stack.Push(LParentRow);
 				try
 				{
 					Table LTable = (Table)Node.Nodes[2].Execute(Process);
@@ -89,7 +85,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
-					Process.Context.Pop();
+					Process.Stack.Pop();
 				}
 			}
 		}
@@ -107,8 +103,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override void InternalOpen()
 		{
-			FSourceTables = new Context(Process.Context.MaxStackDepth, Process.Context.MaxCallDepth);
-			FParentRows = new Context(Process.Context.MaxStackDepth, Process.Context.MaxCallDepth);
+			FSourceTables = new Stack(Process.Stack.MaxStackDepth, Process.Stack.MaxCallDepth);
+			FParentRows = new Stack(Process.Stack.MaxStackDepth, Process.Stack.MaxCallDepth);
 		 	PushSourceTable(null);
 			FSourceRow = new Row(Process, ((TableNode)Node.Nodes[0]).DataType.RowType);
 			FTableType = new Schema.TableType();
@@ -123,7 +119,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 			if (Node.SequenceColumnIndex < 0)
 			{
-				LNewColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Process.Plan.Catalog.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
+				LNewColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Process.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
 				FTableType.Columns.Add(LNewColumn.Column);
 				FTableVar.Columns.Add(LNewColumn);
 				FSequenceColumnIndex = FTableVar.Columns.Count - 1;
@@ -210,7 +206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (FSourceTables.Count > 1)
 					{
 						// Push it's parent row context, if necessary
-						Process.Context.Push(FParentRows.Peek(0));
+						Process.Stack.Push(FParentRows.Peek(0));
 						LContextPushed = true;
 					}
 					try
@@ -223,7 +219,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							if (LContextPushed)
 							{
 								LContextPopped = true;
-								Process.Context.Pop();
+								Process.Stack.Pop();
 							}
 							
 							FTargetRow.ClearValues();
@@ -249,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					finally
 					{
 						if (LContextPushed && !LContextPopped)
-							Process.Context.Pop();
+							Process.Stack.Pop();
 					}
 				}
 				return false;

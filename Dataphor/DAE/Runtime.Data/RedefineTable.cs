@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
             }
 
-	        Process.Context.Push(FSourceRow);
+	        Process.Stack.Push(FSourceRow);
             try
             {
 				for (int LIndex = 0; LIndex < Node.RedefineColumnOffsets.Length; LIndex++)
@@ -96,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             }
             finally
             {
-				Process.Context.Pop();
+				Process.Stack.Pop();
             }
         }
         

@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Name", APlan.ServerProcess.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 

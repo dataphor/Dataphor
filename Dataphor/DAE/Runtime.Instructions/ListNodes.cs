@@ -231,13 +231,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LStartIndex = Math.Max(Math.Min(AStartIndex, AList.Count() - 1), 0);
 			int LEndIndex = Math.Max(Math.Min(AStartIndex + ((ALength - 1) * AIncrementor), AList.Count() - 1), 0);
 			
-			AProcess.Context.Push(AValue);
+			AProcess.Stack.Push(AValue);
 			try
 			{
 				int LIndex = LStartIndex;
 				while (((AIncrementor > 0) && (LIndex <= LEndIndex)) || ((AIncrementor < 0) && (LIndex >= LEndIndex)))
 				{
-					AProcess.Context.Push(AList[LIndex]);
+					AProcess.Stack.Push(AList[LIndex]);
 					try
 					{
 						object LValue = FEqualNode.Execute(AProcess);
@@ -246,14 +246,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 					LIndex += AIncrementor;
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 
 			return -1;
@@ -401,12 +401,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			ListValue LList = (ListValue)AArgument1;
 			int LListIndex = -1;
-			AProcess.Context.Push(AArgument2);
+			AProcess.Stack.Push(AArgument2);
 			try
 			{
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 				{
-					AProcess.Context.Push(LList[LIndex]);
+					AProcess.Stack.Push(LList[LIndex]);
 					try
 					{
 						object LValue = FEqualNode.Execute(AProcess);
@@ -418,13 +418,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 
 			((ListValue)AArgument1).RemoveAt(LListIndex);
@@ -495,10 +495,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				for (int LIndex = 0; LIndex < LLeftList.Count(); LIndex++)
 				{
-					AProcess.Context.Push(LLeftList[LIndex]);
+					AProcess.Stack.Push(LLeftList[LIndex]);
 					try
 					{
-						AProcess.Context.Push(LRightList[LIndex]);
+						AProcess.Stack.Push(LRightList[LIndex]);
 						try
 						{
 							object LValue = FEqualNode.Execute(AProcess);
@@ -513,12 +513,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Context.Pop();
+							AProcess.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 			}
@@ -555,9 +555,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				string LColumnName = CDefaultColumnName;
 				if (Nodes.Count >= 2)
 				{
-					if (!Nodes[1].IsLiteral)
-						throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, 2.ToString());
-					LColumnName = (string)Nodes[1].Execute(APlan.ServerProcess);
+					LColumnName = (string)APlan.EvaluateLiteralArgument(Nodes[1], "AColumnName");
 					SystemNameSelectorNode.CheckValidName(LColumnName);
 				}
 				
@@ -568,9 +566,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			string LSequenceName = CDefaultSequenceName;
 			if (Nodes.Count == 3)
 			{
-				if (!Nodes[2].IsLiteral)
-					throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, "ASequenceName");
-				LSequenceName = (string)Nodes[2].Execute(APlan.ServerProcess);
+				LSequenceName = (string)APlan.EvaluateLiteralArgument(Nodes[2], "ASequenceName");
 				SystemNameSelectorNode.CheckValidName(LSequenceName);
 			}
 			
@@ -578,7 +574,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LSequencePrefix = 0;
 			while (DataType.Columns.ContainsName(BuildName(LSequenceName, LSequencePrefix)))
 				LSequencePrefix++;
-			Schema.Column LSequenceColumn = new Schema.Column(BuildName(LSequenceName, LSequencePrefix), APlan.Catalog.DataTypes.SystemInteger);
+			Schema.Column LSequenceColumn = new Schema.Column(BuildName(LSequenceName, LSequencePrefix), APlan.DataTypes.SystemInteger);
 			DataType.Columns.Add(LSequenceColumn);
 			FTableVar.EnsureTableVarColumns();
 			FTableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { FTableVar.Columns[LSequenceColumn.Name] }));

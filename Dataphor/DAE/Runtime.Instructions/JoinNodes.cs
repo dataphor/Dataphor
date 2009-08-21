@@ -304,8 +304,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FLeftExistsNode == null)
 			{
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (LTransaction != null)
@@ -393,8 +393,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FRightExistsNode == null)
 			{
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if (LTransaction != null)
@@ -615,12 +615,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (FExpression != null)
 						{
 							PlanNode LPlanNode = Compiler.CompileExpression(APlan, FExpression);
-							if (!(LPlanNode.DataType.Is(APlan.Catalog.DataTypes.SystemBoolean)))
+							if (!(LPlanNode.DataType.Is(APlan.DataTypes.SystemBoolean)))
 								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, FExpression);
 							Nodes.Add(LPlanNode);
 						}
 						else
-							Nodes.Add(new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, true));
+							Nodes.Add(new ValueNode(APlan.DataTypes.SystemBoolean, true));
 					}
 					finally
 					{
@@ -1827,12 +1827,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (FExpression != null)
 						{
 							PlanNode LPlanNode = Compiler.CompileExpression(APlan, FExpression);
-							if (!(LPlanNode.DataType.Is(APlan.Catalog.DataTypes.SystemBoolean)))
+							if (!(LPlanNode.DataType.Is(APlan.DataTypes.SystemBoolean)))
 								throw new CompilerException(CompilerException.Codes.BooleanExpressionExpected, FExpression);
 							Nodes.Add(LPlanNode);
 						}
 						else
-							Nodes.Add(new ValueNode(APlan.ServerProcess.DataTypes.SystemBoolean, true));
+							Nodes.Add(new ValueNode(APlan.DataTypes.SystemBoolean, true));
 						
 					}
 					finally
@@ -2005,8 +2005,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FLeftSelectNode == null)
 			{
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if ((LTransaction != null) && (!ShouldTranslateLeft || (IsLookup && !IsDetailLookup)))
@@ -2089,8 +2089,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (FRightSelectNode == null)
 			{
 				ApplicationTransaction LTransaction = null;
-				if (APlan.ServerProcess.ApplicationTransactionID != Guid.Empty)
-					LTransaction = APlan.ServerProcess.GetApplicationTransaction();
+				if (APlan.ApplicationTransactionID != Guid.Empty)
+					LTransaction = APlan.GetApplicationTransaction();
 				try
 				{
 					if ((LTransaction != null) && (!ShouldTranslateRight || (IsLookup && !IsDetailLookup)))
@@ -2276,14 +2276,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					ANewRow.CopyTo(LLeftRow);
-					AProcess.Context.Push(LLeftRow);
+					AProcess.Stack.Push(LLeftRow);
 					try
 					{
 						Row LRightRow = new Row(AProcess, RightTableType.RowType);
 						try
 						{
 							ANewRow.CopyTo(LRightRow);
-							AProcess.Context.Push(LRightRow);
+							AProcess.Stack.Push(LRightRow);
 							try
 							{
 								object LObject = Nodes[2].Execute(AProcess);
@@ -2292,7 +2292,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								AProcess.Context.Pop();
+								AProcess.Stack.Pop();
 							}
 						}
 						finally
@@ -2302,7 +2302,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 				finally
@@ -2935,7 +2935,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan,
 						FRowExistsColumn, 
 						Keywords.RowExists, 
-						APlan.Catalog.DataTypes.SystemBoolean, 
+						APlan.DataTypes.SystemBoolean, 
 						Schema.TableVarColumnType.RowExists
 					);
 				DataType.Columns.Add(LRowExistsColumn.Column);
@@ -3740,7 +3740,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						APlan,
 						FRowExistsColumn, 
 						Keywords.RowExists, 
-						APlan.Catalog.DataTypes.SystemBoolean, 
+						APlan.DataTypes.SystemBoolean, 
 						Schema.TableVarColumnType.RowExists
 					);
 				DataType.Columns.Add(LRowExistsColumn.Column);

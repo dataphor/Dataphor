@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			FDataType = APlan.DataTypes.SystemBoolean;
 			
 			if (!Nodes[0].DataType.IsGeneric && !Nodes[1].DataType.IsGeneric) // Generic row comparison must be done at run-time
 			{
@@ -131,22 +131,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (FComparisonNode != null)
 			{
-				AProcess.Context.Push(LLeftValue);
+				AProcess.Stack.Push(LLeftValue);
 				try
 				{
-					AProcess.Context.Push(LRightValue);
+					AProcess.Stack.Push(LRightValue);
 					try
 					{
 						return FComparisonNode.Execute(AProcess);
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			else
@@ -167,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			FDataType = APlan.DataTypes.SystemBoolean;
 			
 			if (Nodes[0].DataType.Is(Nodes[1].DataType))
 				Nodes[0] = Compiler.Upcast(APlan, Nodes[0], Nodes[1].DataType);
@@ -259,22 +259,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			object LLeftValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar);
 			object LRightValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar);
-			AProcess.Context.Push(LLeftValue);
+			AProcess.Stack.Push(LLeftValue);
 			try
 			{
-				AProcess.Context.Push(LRightValue);
+				AProcess.Stack.Push(LRightValue);
 				try
 				{
 					return FComparisonNode.Execute(AProcess);
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Context.Pop();
+				AProcess.Stack.Pop();
 			}
 		}
 	}

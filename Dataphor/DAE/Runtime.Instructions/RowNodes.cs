@@ -259,7 +259,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Row LNewRow = new Row(AProcess, DataType);
 				try
 				{
-					AProcess.Context.Push(LSourceRow);
+					AProcess.Stack.Push(LSourceRow);
 					try
 					{
 						LSourceRow.CopyTo(LNewRow);
@@ -282,7 +282,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 					return LNewRow;
 				}
@@ -418,7 +418,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			try
 			{
-				AProcess.Context.Push(LSourceRow);
+				AProcess.Stack.Push(LSourceRow);
 				try
 				{
 					Row LNewRow = new Row(AProcess, DataType);
@@ -464,7 +464,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
@@ -682,10 +682,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			if (FEqualNode != null)
 			{
-				AProcess.Context.Push(AArgument1);
+				AProcess.Stack.Push(AArgument1);
 				try
 				{
-					AProcess.Context.Push(AArgument2);
+					AProcess.Stack.Push(AArgument2);
 					try
 					{
 						object LValue = FEqualNode.Execute(AProcess);
@@ -694,12 +694,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			Row LResult = new Row(AProcess, DataType);

@@ -273,7 +273,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			FDataType = APlan.DataTypes.SystemBoolean;
 		}
 		
 		public override object InternalExecute(ServerProcess AProcess)

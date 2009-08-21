@@ -530,12 +530,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected void EnterTableContext(BrowseTableItem ATableItem)
         {
-			Process.Context.Push(ATableItem.ContextVar);
+			Process.Stack.Push(ATableItem.ContextVar);
         }
         
         protected void ExitTableContext(BrowseTableItem ATableItem)
         {
-			Process.Context.Pop();
+			Process.Stack.Pop();
         }
         
         // Must be called with the original stack
@@ -593,7 +593,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		
 			// Execute the variant with the current context variable
-			Process.Context.Push(LContextVar);
+			Process.Stack.Push(LContextVar);
 			try
 			{
 				PlanNode LBrowseVariantNode = Node.GetBrowseVariantNode(Process.Plan, LOriginIndex, AForward, LInclusive);
@@ -613,7 +613,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Context.Pop();
+				Process.Stack.Pop();
 			}
         }
         
@@ -909,10 +909,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 				if (AIndexKey.HasValue(LIndex) && ACompareKey.HasValue(LIndex))
 				{
-					Process.Context.Push(AIndexKey[LIndex]);
+					Process.Stack.Push(AIndexKey[LIndex]);
 					try
 					{
-						Process.Context.Push(ACompareKey[LIndex]);
+						Process.Stack.Push(ACompareKey[LIndex]);
 						try
 						{
 							LResult = (int)Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Process);
@@ -923,12 +923,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						finally
 						{
-							Process.Context.Pop();
+							Process.Stack.Pop();
 						}
 					}
 					finally
 					{
-						Process.Context.Pop();
+						Process.Stack.Pop();
 					}
 				}
 				else if (AIndexKey.HasValue(LIndex))

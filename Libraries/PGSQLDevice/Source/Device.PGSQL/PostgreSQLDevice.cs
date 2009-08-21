@@ -322,60 +322,59 @@ if not exists (select * from pg_database where datname = '{0}')
         }
 
         // FindScalarType
-        public override ScalarType FindScalarType(ServerProcess AProcess, string ADomainName, int ALength,
-                                                  MetaData AMetaData)
+        public override ScalarType FindScalarType(Plan APlan, string ADomainName, int ALength, MetaData AMetaData)
         {
             switch (ADomainName.ToLower())
             {
                 case "boolean":
-                    return AProcess.DataTypes.SystemBoolean;                
+                    return APlan.DataTypes.SystemBoolean;                
                 case "smallint":
-                    return AProcess.DataTypes.SystemShort;
+                    return APlan.DataTypes.SystemShort;
                 case "int":
                 case "integer":
-                    return AProcess.DataTypes.SystemInteger;
+                    return APlan.DataTypes.SystemInteger;
                 case "bigint":
-                    return AProcess.DataTypes.SystemLong;
+                    return APlan.DataTypes.SystemLong;
                 case "decimal":
                 case "numeric":
                 case "float":
                 case "real":
-                    return AProcess.DataTypes.SystemDecimal;
+                    return APlan.DataTypes.SystemDecimal;
                 case "datetime":
                 case "smalldatetime":
-                    return AProcess.DataTypes.SystemDateTime;
+                    return APlan.DataTypes.SystemDateTime;
                 case "money":
                 case "smallmoney":
-                    return AProcess.DataTypes.SystemMoney;
+                    return APlan.DataTypes.SystemMoney;
                 case "uniqueidentifier":
-                    return AProcess.DataTypes.SystemGuid;
+                    return APlan.DataTypes.SystemGuid;
                 case "char":
                 case "varchar":
                 case "nchar":
                 case "nvarchar":
                     AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
 #if USEISTRING
-					return IsCaseSensitive ? AProcess.DataTypes.SystemString : AProcess.DataTypes.SystemIString;
+					return IsCaseSensitive ? APlan.DataTypes.SystemString : APlan.DataTypes.SystemIString;
 #else
-                    return AProcess.DataTypes.SystemString;
+                    return APlan.DataTypes.SystemString;
 #endif
 #if USEISTRING
 				case "text":
-				case "ntext": return (ScalarType)(IsCaseSensitive ? AProcess.ServerSession.Server.Catalog[CSQLTextScalarType] : AProcess.ServerSession.Server.Catalog[CSQLITextScalarType]);
+				case "ntext": return (ScalarType)(IsCaseSensitive ? APlan.ServerSession.Server.Catalog[CSQLTextScalarType] : APlan.ServerSession.Server.Catalog[CSQLITextScalarType]);
 #else
                 case "text":
                 case "ntext":
-                    return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CSQLTextScalarType, true);
+                    return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CSQLTextScalarType, true);
 #endif
                 case "binary":
                 case "timestamp":
                     AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
-                    return (ScalarType)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CPostgreSQLBinaryScalarType, true);
+                    return (ScalarType)Compiler.ResolveCatalogIdentifier(APlan, CPostgreSQLBinaryScalarType, true);
                 case "varbinary":
                     AMetaData.Tags.Add(new Tag("Storage.Length", ALength.ToString()));
-                    return AProcess.DataTypes.SystemBinary;
+                    return APlan.DataTypes.SystemBinary;
                 case "image":
-                    return AProcess.DataTypes.SystemBinary;
+                    return APlan.DataTypes.SystemBinary;
                 default:
                     throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomainName);
             }

@@ -11,16 +11,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.EnterpriseServices;
 
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-
 namespace Alphora.Dataphor.DAE.Server
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+
 	[Transaction(TransactionOption.RequiresNew)]
 	public class ServerDTCTransaction : ServicedComponent
 	{
@@ -586,7 +586,7 @@ namespace Alphora.Dataphor.DAE.Server
 					Process.ServerSession.SessionInfo.UsePlanCache = false;
 					try
 					{
-						Process.Context.PushWindow(0);
+						Process.Stack.PushWindow(0);
 						try
 						{
 							FPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName), null);
@@ -597,7 +597,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						finally
 						{
-							Process.Context.PopWindow();
+							Process.Stack.PopWindow();
 						}
 					}
 					finally
@@ -875,14 +875,14 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LRow = (Row)LCheckRow[FNewRowColumnName];
 								try
 								{
-									AProcess.Context.Push(LRow);
+									AProcess.Stack.Push(LRow);
 									try
 									{
 										ValidateCheck(Schema.Transition.Insert);
 									}
 									finally
 									{
-										AProcess.Context.Pop();
+										AProcess.Stack.Pop();
 									}
 								}
 								finally
@@ -897,20 +897,20 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LOldRow = (Row)LCheckRow[FOldRowColumnName];
 								try
 								{
-									AProcess.Context.Push(LOldRow);
+									AProcess.Stack.Push(LOldRow);
 									try
 									{
 										Row LNewRow = (Row)LCheckRow[FNewRowColumnName];
 										try
 										{
-											AProcess.Context.Push(LNewRow);
+											AProcess.Stack.Push(LNewRow);
 											try
 											{
 												ValidateCheck(Schema.Transition.Update);
 											}
 											finally
 											{
-												AProcess.Context.Pop();
+												AProcess.Stack.Pop();
 											}
 										}
 										finally
@@ -920,7 +920,7 @@ namespace Alphora.Dataphor.DAE.Server
 									}
 									finally
 									{
-										AProcess.Context.Pop();
+										AProcess.Stack.Pop();
 									}
 								}
 								finally
@@ -935,14 +935,14 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LRow = (Row)LCheckRow[FOldRowColumnName];
 								try
 								{
-									AProcess.Context.Push(LRow);
+									AProcess.Stack.Push(LRow);
 									try
 									{
 										ValidateCheck(Schema.Transition.Delete);
 									}
 									finally
 									{
-										AProcess.Context.Pop();
+										AProcess.Stack.Pop();
 									}
 								}
 								finally
@@ -971,10 +971,10 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				case Schema.Transition.Insert :
 				{
-					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Context.Peek(0)).AsNative);
+					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Stack.Peek(0)).AsNative);
 					try
 					{
-						Process.Context.Push(LNewRow);
+						Process.Stack.Push(LNewRow);
 						try
 						{
 							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
@@ -983,7 +983,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						finally
 						{
-							Process.Context.Pop();
+							Process.Stack.Pop();
 						}
 					}
 					finally
@@ -999,10 +999,10 @@ namespace Alphora.Dataphor.DAE.Server
 
 				case Schema.Transition.Update :
 				{
-					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Context.Peek(0)).AsNative);
+					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Stack.Peek(0)).AsNative);
 					try
 					{
-						Process.Context.Push(LNewRow);
+						Process.Stack.Push(LNewRow);
 						try
 						{
 							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
@@ -1011,7 +1011,7 @@ namespace Alphora.Dataphor.DAE.Server
 						}
 						finally
 						{
-							Process.Context.Pop();
+							Process.Stack.Pop();
 						}
 					}
 					finally
@@ -1081,14 +1081,14 @@ namespace Alphora.Dataphor.DAE.Server
 			Row LRow = new Row(AProcess, FNewRowType, NativeRow);
 			try
 			{
-				AProcess.Context.Push(LRow);
+				AProcess.Stack.Push(LRow);
 				try
 				{
 					FHandler.PlanNode.Execute(AProcess);
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally
@@ -1128,22 +1128,22 @@ namespace Alphora.Dataphor.DAE.Server
 				Row LNewRow = new Row(AProcess, FNewRowType, NewNativeRow);
 				try
 				{
-					AProcess.Context.Push(LOldRow);
+					AProcess.Stack.Push(LOldRow);
 					try
 					{
-						AProcess.Context.Push(LNewRow);
+						AProcess.Stack.Push(LNewRow);
 						try
 						{
 							FHandler.PlanNode.Execute(AProcess);
 						}
 						finally
 						{
-							AProcess.Context.Pop();
+							AProcess.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProcess.Context.Pop();
+						AProcess.Stack.Pop();
 					}
 				}
 				finally
@@ -1188,14 +1188,14 @@ namespace Alphora.Dataphor.DAE.Server
 			Row LRow = new Row(AProcess, FOldRowType, NativeRow);
 			try
 			{
-				AProcess.Context.Push(LRow);
+				AProcess.Stack.Push(LRow);
 				try
 				{
 					FHandler.PlanNode.Execute(AProcess);
 				}
 				finally
 				{
-					AProcess.Context.Pop();
+					AProcess.Stack.Pop();
 				}
 			}
 			finally

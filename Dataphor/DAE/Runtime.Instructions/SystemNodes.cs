@@ -924,8 +924,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));			
-			DataType.Columns.Add(new Schema.Column("Error", APlan.Catalog.DataTypes.SystemError));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));			
+			DataType.Columns.Add(new Schema.Column("Error", APlan.DataTypes.SystemError));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -1147,7 +1147,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void ExecuteScript(ServerProcess AProcess, PlanNode ANode, string AScript, Row AInParams, Row AOutParams, DebugLocator ALocator)
 		{
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProcess, AInParams, AOutParams);
-			AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, ANode);
+			AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1163,7 +1163,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Stack.PopWindow();
 			}
 			SystemEvaluateNode.UpdateRowFromParams(AOutParams, LParams);
 		}
@@ -1234,7 +1234,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			DataParams LParams = ParamsFromRows(AProcess, AInParams, AOutParams);
 
-			AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, ANode);
+			AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, ANode);
 			try
 			{
 				IServerProcess LProcess = (IServerProcess)AProcess;
@@ -1258,7 +1258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Stack.PopWindow();
 			}
 		}
 		
@@ -1349,7 +1349,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Schema.ServerLink LServerLink;
 			lock (AProcess.Plan)
 			{
-				LServerLink = (Schema.ServerLink)AProcess.Plan.Catalog[LServerName];
+				LServerLink = (Schema.ServerLink)AProcess.Catalog[LServerName];
 				AProcess.Plan.AcquireCatalogLock(LServerLink, LockMode.Shared);
 			}
 			string LCode = (string)AArguments[1];
@@ -1459,7 +1459,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						try
 						{
-							((ServerProcess)LProcess).Context.PopWindow();
+							((ServerProcess)LProcess).Stack.PopWindow();
 						}
 						finally
 						{
@@ -1482,7 +1482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private void ExecuteAsync(IServerProcess AProcess, string AScript, Row AInParams, bool AShouldCleanup)
 		{
-			((ServerProcess)AProcess).Context.PushWindow(0);
+			((ServerProcess)AProcess).Stack.PushWindow(0);
 			IServerScript LScript = AProcess.PrepareScript(AScript);
 			((ServerScript)LScript).ShouldCleanupProcess = AShouldCleanup;
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProcess.GetServerProcess(), AInParams, null);
@@ -1533,7 +1533,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			FDone = false;
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProcess.GetServerProcess(), AInParams, AOutParams);
-			((ServerProcess)AProcess).Context.PushWindow(0);
+			((ServerProcess)AProcess).Stack.PushWindow(0);
 			try
 			{
 				FScript = AProcess.PrepareScript(AScript);
@@ -1553,7 +1553,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				((ServerProcess)AProcess).Context.PopWindow();
+				((ServerProcess)AProcess).Stack.PopWindow();
 			}
 		}
 		
@@ -1658,7 +1658,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
 			string LString = (string)AArguments[0];
-			AProcess.Context.PushWindow(0); //, AProcess.ExecutingPlan, this);
+			AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
 			try
 			{
 				IServerExpressionPlan LPlan = ((IServerProcess)AProcess).PrepareExpression(LString, null);
@@ -1678,7 +1678,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Context.PopWindow();
+				AProcess.Stack.PopWindow();
 			}
 		}
 	}
@@ -2165,7 +2165,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			AProcess.Context.MaxStackDepth = (int)AArguments[0];
+			AProcess.Stack.MaxStackDepth = (int)AArguments[0];
 			return null;
 		}
 	}
@@ -2175,7 +2175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	{
 		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
 		{
-			AProcess.Context.MaxCallDepth = (int)AArguments[0];
+			AProcess.Stack.MaxCallDepth = (int)AArguments[0];
 			return null;
 		}
 	}
@@ -2335,8 +2335,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			
-			DataType.Columns.Add(new Schema.Column("Sequence", APlan.Catalog.DataTypes.SystemInteger));
-			DataType.Columns.Add(new Schema.Column("LogName", APlan.Catalog.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Sequence", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LogName", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -2466,7 +2466,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override void DetermineDataType(Plan APlan)
 		{
 			DetermineModifiers(APlan);
-			FDataType = APlan.Catalog.DataTypes.SystemBoolean;
+			FDataType = APlan.DataTypes.SystemBoolean;
 		}
 		
 		public override void DetermineCharacteristics(Plan APlan)
@@ -2709,7 +2709,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (AProcess.ServerSession.User.ID != AProcess.ServerSession.Server.AdminUser.ID)
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
-			AProcess.Plan.Catalog.OperatorResolutionCache.Clear();
+			AProcess.Catalog.OperatorResolutionCache.Clear();
 			return null;
 		}
 	}
@@ -2721,7 +2721,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (AProcess.ServerSession.User.ID != AProcess.ServerSession.Server.AdminUser.ID)
 				throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProcess.ServerSession.User.ID);
-			AProcess.Plan.Catalog.ConversionPathCache.Clear();
+			AProcess.Catalog.ConversionPathCache.Clear();
 			return null;
 		}
 	}
@@ -2762,10 +2762,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("DeclaringType", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("FieldName", APlan.Catalog.DataTypes.SystemName));			
-			DataType.Columns.Add(new Schema.Column("FieldType", APlan.Catalog.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("FieldSize", APlan.Catalog.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("DeclaringType", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("FieldName", APlan.DataTypes.SystemName));			
+			DataType.Columns.Add(new Schema.Column("FieldType", APlan.DataTypes.SystemName));
+			DataType.Columns.Add(new Schema.Column("FieldSize", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
