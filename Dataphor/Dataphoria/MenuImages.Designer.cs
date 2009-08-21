@@ -102,6 +102,62 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap DebugBreakException {
+            get {
+                object obj = ResourceManager.GetObject("DebugBreakException", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugCallStack {
+            get {
+                object obj = ResourceManager.GetObject("DebugCallStack", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugDebugProcesses {
+            get {
+                object obj = ResourceManager.GetObject("DebugDebugProcesses", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugPause {
+            get {
+                object obj = ResourceManager.GetObject("DebugPause", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugProcesses {
+            get {
+                object obj = ResourceManager.GetObject("DebugProcesses", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugRun {
+            get {
+                object obj = ResourceManager.GetObject("DebugRun", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugSessions {
+            get {
+                object obj = ResourceManager.GetObject("DebugSessions", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugStop {
+            get {
+                object obj = ResourceManager.GetObject("DebugStop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap Delete {
             get {
                 object obj = ResourceManager.GetObject("Delete", resourceCulture);
