@@ -56,11 +56,12 @@ namespace Alphora.Dataphor.Dataphoria
 		private void UpdateDataView()
 		{
 			FCallStackDataView.Close();
-			if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
-			{
-				FCallStackDataView.Expression = "GetCallStack(" + FDataphoria.Debugger.SelectedProcessID.ToString() + ")";
-				FCallStackDataView.Open();
-			}
+			// TODO:
+			//if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
+			//{
+			//    FCallStackDataView.Expression = "GetCallStack(" + FDataphoria.Debugger.SelectedProcessID.ToString() + ")";
+			//    FCallStackDataView.Open();
+			//}
 		}
 
 		private void FDataphoria_Disconnected(object sender, EventArgs e)

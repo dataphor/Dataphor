@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-	public partial class SessionView : UserControl
+	public partial class SessionsView : UserControl
 	{
-		public SessionView()
+		public SessionsView()
 		{
 			InitializeComponent();
 		}
@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
+						FDataphoria.Debugger.PropertyChanged -= new PropertyChangedEventHandler(Debugger_PropertyChanged);
 					}
 					FDataphoria = value;
 					if (FDataphoria != null)

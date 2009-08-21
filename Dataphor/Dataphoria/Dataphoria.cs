@@ -81,17 +81,17 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
-			FSessionView = new SessionView();
-			FSessionView.Dataphoria = this;
-			FSessionView.Name = "FSessionView";
-			FSessionView.Dock = DockStyle.Fill;
+			FSessionsView = new SessionsView();
+			FSessionsView.Dataphoria = this;
+			FSessionsView.Name = "FSessionView";
+			FSessionsView.Dock = DockStyle.Fill;
 
-			FDockContentSessionView = new DockContent();
-			FDockContentSessionView.HideOnClose = true;
-			FDockContentSessionView.Controls.Add(FSessionView);
-			FDockContentSessionView.TabText = "Sessions";
-			FDockContentSessionView.Text = "Sessions - Dataphoria";
-			FDockContentSessionView.ShowHint = DockState.DockBottomAutoHide;
+			FDockContentSessionsView = new DockContent();
+			FDockContentSessionsView.HideOnClose = true;
+			FDockContentSessionsView.Controls.Add(FSessionsView);
+			FDockContentSessionsView.TabText = "Sessions";
+			FDockContentSessionsView.Text = "Sessions - Dataphoria";
+			FDockContentSessionsView.ShowHint = DockState.DockBottomAutoHide;
 			
 			FCallStackView = new CallStackView();
 			FCallStackView.Dataphoria = this;
@@ -105,6 +105,30 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentCallStackView.Text = "Call Stack - Dataphoria";
 			FDockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
 			
+			FDebugProcessesView = new DebugProcessesView();
+			FDebugProcessesView.Dataphoria = this;
+			FDebugProcessesView.Name = "FDebugProcessesView";
+			FDebugProcessesView.Dock = DockStyle.Fill;
+
+			FDockContentDebugProcessesView = new DockContent();
+			FDockContentDebugProcessesView.HideOnClose = true;
+			FDockContentDebugProcessesView.Controls.Add(FDebugProcessesView);
+			FDockContentDebugProcessesView.TabText = "Debug Processes";
+			FDockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
+			FDockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
+
+			FProcessesView = new ProcessesView();
+			FProcessesView.Dataphoria = this;
+			FProcessesView.Name = "FProcessesView";
+			FProcessesView.Dock = DockStyle.Fill;
+
+			FDockContentProcessesView = new DockContent();
+			FDockContentProcessesView.HideOnClose = true;
+			FDockContentProcessesView.Controls.Add(FProcessesView);
+			FDockContentProcessesView.TabText = "Processes";
+			FDockContentProcessesView.Text = "Processes - Dataphoria";
+			FDockContentProcessesView.ShowHint = DockState.DockBottomAutoHide;
+
 			FDockContentExplorer.Show(this.FDockPanel);
 			FDockContentErrorListView.Show(this.FDockPanel);
 
@@ -165,13 +189,17 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private DataTree FExplorer;
 		private ErrorListView FErrorListView;
-		private SessionView FSessionView;
+		private SessionsView FSessionsView;
 		private CallStackView FCallStackView;
+		private DebugProcessesView FDebugProcessesView;
+		private ProcessesView FProcessesView;
 
 		private DockContent FDockContentExplorer;
 		private DockContent FDockContentErrorListView;
-		private DockContent FDockContentSessionView;
+		private DockContent FDockContentSessionsView;
 		private DockContent FDockContentCallStackView;
+		private DockContent FDockContentDebugProcessesView;
+		private DockContent FDockContentProcessesView;
 
 		#region Settings
 
@@ -1587,13 +1615,21 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FDocumentTypesToolStripMenuItem" :
 					BrowseDocumentTypes(); 
 					break;
-				case "FStopDebuggerMenuItem" :
+				case "FDebugStopMenuItem" :
 				case "FDebugStopButton" :
 					Debugger.Stop();
 					break;
 				case "FViewSessionsMenuItem" :
 				case "FViewSessionsButton" :
-					ViewSessions();
+					FDockContentSessionsView.Show(FDockPanel);
+					break;
+				case "FViewProcessesMenuItem":
+				case "FViewProcessesButton":
+					FDockContentProcessesView.Show(FDockPanel);
+					break;
+				case "FViewDebugProcessesButton":
+				case "FViewDebugProcessesMenuItem" :
+					FDockContentDebugProcessesView.Show(FDockPanel);
 					break;
 				case "FDebugPauseMenuItem" :
 				case "FDebugPauseButton" :
@@ -1625,12 +1661,49 @@ namespace Alphora.Dataphor.Dataphoria
 		private void CreateDebugger()
 		{
 			if (FDebugger == null)
+			{
 				FDebugger = new Debugger(this);
+				FDebugger.PropertyChanged += new PropertyChangedEventHandler(DebuggerPropertyChanged);
+			}
 		}
 
-		private void ViewSessions()
+		private void DebuggerPropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
 		{
-			FDockContentSessionView.Show(FDockPanel);
+ 			switch (AArgs.PropertyName)
+ 			{
+ 				case "IsStarted" : 
+ 				case "IsPaused" :
+ 					UpdateDebuggerState();
+ 					UpdateBreakOnException();
+ 					break;
+ 				case "BreakOnException" :
+ 					UpdateBreakOnException();
+ 					break;
+ 			}
+		}
+
+		private void UpdateDebuggerState()
+		{
+			FDebugStopButton.Enabled = IsConnected && Debugger.IsStarted;
+			FDebugStopMenuItem.Enabled = FDebugStopButton.Enabled;
+			FDebugPauseButton.Enabled = IsConnected && Debugger.IsStarted && !Debugger.IsPaused;
+			FDebugPauseMenuItem.Enabled = FDebugPauseButton.Enabled;
+			FViewSessionsButton.Enabled = IsConnected;
+			FViewSessionsMenuItem.Enabled = FViewSessionsButton.Enabled;
+			FViewProcessesButton.Enabled = IsConnected;
+			FViewProcessesMenuItem.Enabled = FViewProcessesButton.Enabled;
+			FViewDebugProcessesButton.Enabled = IsConnected && Debugger.IsStarted;
+			FViewDebugProcessesMenuItem.Enabled = FViewDebugProcessesButton.Enabled;
+			FViewCallStackButton.Enabled = IsConnected && Debugger.IsStarted;
+			FViewCallStackMenuItem.Enabled = FViewCallStackButton.Enabled;
+			FDebugRunButton.Enabled = IsConnected && Debugger.IsPaused;
+			FDebugRunMenuItem.Enabled = FDebugRunButton.Enabled;
+		}
+
+		private void UpdateBreakOnException()
+		{
+			FBreakOnExceptionButton.Enabled = IsConnected;
+			FBreakOnExceptionButton.Checked = IsConnected && Debugger.BreakOnException;
 		}
 
 		#endregion

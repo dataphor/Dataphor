@@ -1,6 +1,6 @@
 ﻿namespace Alphora.Dataphor.Dataphoria
 {
-	partial class SessionView
+	partial class SessionsView
 	{
 		/// <summary> 
 		/// Required designer variable.

@@ -246,9 +246,21 @@
       <DependentUpon>DataphoriaException.cs</DependentUpon>
     </Compile>
     <Compile Include="Debug\BreakBookmark.cs" />
+    <Compile Include="Debug\ProcessesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Debug\ProcessesView.Designer.cs">
+      <DependentUpon>ProcessesView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Debug\CurrentLineBookmark.cs" />
     <Compile Include="Debug\DebugBookmark.cs" />
     <Compile Include="Debug\Debugger.cs" />
+    <Compile Include="Debug\DebugProcessesView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Debug\DebugProcessesView.Designer.cs">
+      <DependentUpon>DebugProcessesView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Designers\DesignBuffer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -365,11 +377,11 @@
     <Compile Include="Services\PropertyTextEditor.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SessionView.cs">
+    <Compile Include="Debug\SessionsView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SessionView.Designer.cs">
-      <DependentUpon>SessionView.cs</DependentUpon>
+    <Compile Include="Debug\SessionsView.Designer.cs">
+      <DependentUpon>SessionsView.cs</DependentUpon>
     </Compile>
     <Compile Include="Strings.cs" />
     <Compile Include="Strings.Designer.cs">
@@ -456,12 +468,18 @@
       <DependentUpon>Dataphoria.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Debug\ProcessesView.resx">
+      <DependentUpon>ProcessesView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Debug\DebugProcessesView.resx">
+      <DependentUpon>DebugProcessesView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormDesigner\ToolBox\ToolBox.resx">
       <DependentUpon>ToolBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SessionView.resx">
-      <DependentUpon>SessionView.cs</DependentUpon>
+    <EmbeddedResource Include="Debug\SessionsView.resx">
+      <DependentUpon>SessionsView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Strings.resx">
       <DependentUpon>Strings.cs</DependentUpon>

@@ -36,8 +36,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void DataphoriaDisconnected(object sender, EventArgs e)
 		{
-			Run();
-			Stop();
+			InternalClearState();
 		}
 
 		private void DataphoriaConnected(object sender, EventArgs e)
@@ -314,7 +313,19 @@ namespace Alphora.Dataphor.Dataphoria
 			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachSession({0});", ASessionID));
 		}
-		
+
+		public void AttachProcess(int AProcessID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachProcess({0});", AProcessID));
+		}
+
+		public void DetachProcess(int AProcessID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachProcess({0});", AProcessID));
+		}
+
 		private void InternalUnpause()
 		{
 			InternalSetIsPaused(false);
