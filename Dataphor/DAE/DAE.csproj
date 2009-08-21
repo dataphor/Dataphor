@@ -145,11 +145,11 @@
     <Compile Include="CLI.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Compiler\Compiler.cs" />
-    <Compile Include="Compiler\CompilerException.cs" />
-    <Compile Include="Compiler\Plan.cs" />
-    <Compile Include="Compiler\PlanStructures.cs" />
-    <Compile Include="Compiler\Symbols.cs" />
+    <Compile Include="Compiling\Compiler.cs" />
+    <Compile Include="Compiling\CompilerException.cs" />
+    <Compile Include="Compiling\Plan.cs" />
+    <Compile Include="Compiling\PlanStructures.cs" />
+    <Compile Include="Compiling\Symbols.cs" />
     <Compile Include="Connection\ConnectionException.cs" />
     <Compile Include="Connection\DotNetCommand.cs" />
     <Compile Include="Connection\DotNetConnection.cs" />
@@ -735,7 +735,7 @@
     <Compile Include="Utility.cs">
       <SubType>Code</SubType>
     </Compile>
-    <EmbeddedResource Include="Compiler\CompilerException.resx">
+    <EmbeddedResource Include="Compiling\CompilerException.resx">
       <DependentUpon>CompilerException.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Connection\ConnectionException.resx">
