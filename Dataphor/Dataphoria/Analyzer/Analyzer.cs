@@ -24,7 +24,6 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 
 	public class Analyzer : BaseForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner
 	{
-		private System.ComponentModel.IContainer components;
 		private AnalyzerControl FAnalyzerControl;
 		private MenuStrip MenuStip;
 		private ToolStrip ToolStrip;
@@ -57,15 +56,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 				}
 				finally
 				{
-					try
-					{
-						if (components != null)
-							components.Dispose();
-					}
-					finally
-					{
-						base.Dispose(ADisposed);
-					}
+					base.Dispose(ADisposed);
 				}
 			}
 		}

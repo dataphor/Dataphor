@@ -511,8 +511,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
             get { return FIsMultiDrop; }
         }
 
-       
-
         private bool IsTypeListed(Type AType)
         {
             var LListIn =

@@ -13,24 +13,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 {
 	public class DialogForm : BaseForm
 	{
-		private System.ComponentModel.IContainer components;
-
 		public DialogForm() : base()
 		{
 			InitializeComponent();
-
-		}
-
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
 		}
 
 		#region Windows Form Designer generated code
