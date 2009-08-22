@@ -3,20 +3,20 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-//create device TestingDevice
-//	reconciliation {mode={none}, master=device}
-//	class "MSSQLDevice.MSSQLDevice"
-//	attributes
-//	{
-//		"ServerName" = "at-at",
-//		"DatabaseName" = "Testing",
-//		"ConnectionClass" = "ADOConnection.ADOConnection"	
-//	};
-//
-//CreateDeviceUserWithEncryptedPassword("Admin", "TestingDevice", "sa", "EP2o1xgS1qTLwPBKKXnEql0=");
-//CreateDeviceUserWithEncryptedPassword("System", "TestingDevice", "sa", "EP2o1xgS1qTLwPBKKXnEql0=");
-//
-//SetDefaultDeviceName("TestingDevice");
+create device TestingDevice
+	reconciliation {mode={none}, master=device}
+class "MSSQLDevice.MSSQLDevice"
+	attributes
+{
+	"ServerName" = "HUITZILOPOCHTLI",
+	"DatabaseName" = "Testing",
+	"ConnectionClass" = "Connection.MSSQLConnection"	
+};
+
+CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
+CreateDeviceUser("System", "TestingDevice", "sa", "welcome=");
+
+SetDefaultDeviceName("TestingDevice");
 
 /*
 create device TestingDevice
