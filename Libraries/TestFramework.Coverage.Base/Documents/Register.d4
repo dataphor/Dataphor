@@ -7,7 +7,7 @@
 ExecuteScript('Coverage.Base', 'DiagnosticsLogic');
 //ExecuteScript('Coverage.Base', 'Device');
 //SetDefaultDeviceName('Coverage.Base.CoverageDevice');
-//ExecuteScript('Coverage.Base', 'Types');
+ExecuteScript('Coverage.Base', 'Types');
 //ExecuteScript('Coverage.Base', 'TypesMSSQL');
 ExecuteScript('Coverage.Base', 'Tables'); 
 //ExecuteScript('Coverage.Base', 'Logic');
