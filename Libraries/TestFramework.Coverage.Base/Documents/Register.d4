@@ -9,7 +9,7 @@ ExecuteScript('Coverage.Base', 'DiagnosticsLogic');
 //SetDefaultDeviceName('Coverage.Base.CoverageDevice');
 //ExecuteScript('Coverage.Base', 'Types');
 //ExecuteScript('Coverage.Base', 'TypesMSSQL');
-//ExecuteScript('Coverage.Base', 'Tables'); 
+ExecuteScript('Coverage.Base', 'Tables'); 
 //ExecuteScript('Coverage.Base', 'Logic');
 // Insert the test cases for the main coverage:
 //if not exists (Cases) then
