@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				FSessionDataView.Close();
 				FSessionDataView.Session = null;
-				UpdateButtonEnabled();
+				UpdateButtonsEnabled();
 			}
 			catch (Exception LException)
 			{
@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.Dataphoria
 			try
 			{
 				FSessionDataView.Open();
-				UpdateButtonEnabled();
+				UpdateButtonsEnabled();
 			}
 			catch (Exception LException)
 			{
@@ -123,10 +123,10 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void FSessionDataView_DataChanged(object sender, EventArgs e)
 		{
-			UpdateButtonEnabled();
+			UpdateButtonsEnabled();
 		}
 
-		private void UpdateButtonEnabled()
+		private void UpdateButtonsEnabled()
 		{
 			var LHasRow = FSessionDataView.Active && !FSessionDataView.IsEmpty();
 			var LIsAttached = LHasRow && (bool)FSessionDataView["IsAttached"];

@@ -56,12 +56,11 @@ namespace Alphora.Dataphor.Dataphoria
 		private void UpdateDataView()
 		{
 			FCallStackDataView.Close();
-			// TODO:
-			//if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
-			//{
-			//    FCallStackDataView.Expression = "GetCallStack(" + FDataphoria.Debugger.SelectedProcessID.ToString() + ")";
-			//    FCallStackDataView.Open();
-			//}
+			if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
+			{
+				FCallStackDataView.Expression = "GetCallStack(" + FDataphoria.Debugger.SelectedProcessID.ToString() + ")";
+				FCallStackDataView.Open();
+			}
 		}
 
 		private void FDataphoria_Disconnected(object sender, EventArgs e)
@@ -73,14 +72,29 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FDataphoria_Connected(object sender, EventArgs e)
 		{
 			FCallStackDataView.Session = FDataphoria.DataSession;
-			try
-			{
-				UpdateDataView();
-			}
-			catch (Exception LException)
-			{
-				FDataphoria.Warnings.AppendError(null, LException, false);
-			}
+		}
+
+		private void FRefreshButton_Click(object sender, EventArgs e)
+		{
+			if (FCallStackDataView.Active)
+				FCallStackDataView.Refresh();
+		}
+
+		private void FSelectButton_Click(object sender, EventArgs e)
+		{
+			if (FCallStackDataView.Active && !FCallStackDataView.IsEmpty())
+				Dataphoria.Debugger.SelectedCallStackIndex = FCallStackDataView["Index"].AsInt32;
+		}
+
+		private void FCallStackDataView_DataChanged(object sender, EventArgs e)
+		{
+			UpdateButtonsEnabled();
+		}
+
+		private void UpdateButtonsEnabled()
+		{
+			FRefreshButton.Enabled = FCallStackDataView.Active;
+			FSelectButton.Enabled = FCallStackDataView.Active && !FCallStackDataView.IsEmpty();
 		}
 	}
 }
