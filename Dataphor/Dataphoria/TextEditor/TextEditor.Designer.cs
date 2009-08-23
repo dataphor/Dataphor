@@ -96,6 +96,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.FSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FSaveAsFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FSaveAsDocumentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
 			this.FCloseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
 			this.FPrintToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -184,6 +185,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FSaveToolStripMenuItem,
             this.FSaveAsFileToolStripMenuItem,
             this.FSaveAsDocumentToolStripMenuItem,
+            this.toolStripMenuItem5,
             this.FCloseToolStripMenuItem,
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
@@ -195,52 +197,71 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// FSaveToolStripMenuItem
 			// 
 			this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
+			this.FSaveToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveToolStripMenuItem.MergeIndex = 8;
 			this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
 			this.FSaveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
 			this.FSaveToolStripMenuItem.Text = "Save";
 			this.FSaveToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FSaveAsFileToolStripMenuItem
 			// 
 			this.FSaveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
+			this.FSaveAsFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveAsFileToolStripMenuItem.MergeIndex = 9;
 			this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
 			this.FSaveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.F)));
-			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
 			this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
 			this.FSaveAsFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FSaveAsDocumentToolStripMenuItem
 			// 
 			this.FSaveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
+			this.FSaveAsDocumentToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveAsDocumentToolStripMenuItem.MergeIndex = 10;
 			this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
 			this.FSaveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.D)));
-			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
 			this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
 			this.FSaveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// toolStripMenuItem5
+			// 
+			this.toolStripMenuItem5.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.toolStripMenuItem5.MergeIndex = 12;
+			this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+			this.toolStripMenuItem5.Size = new System.Drawing.Size(258, 6);
 			// 
 			// FCloseToolStripMenuItem
 			// 
 			this.FCloseToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
+			this.FCloseToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FCloseToolStripMenuItem.MergeIndex = 13;
 			this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
 			this.FCloseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
-			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
 			this.FCloseToolStripMenuItem.Text = "Close";
 			this.FCloseToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem1
 			// 
+			this.toolStripMenuItem1.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.toolStripMenuItem1.MergeIndex = 14;
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(244, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(258, 6);
 			// 
 			// FPrintToolStripMenuItem
 			// 
 			this.FPrintToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Print;
+			this.FPrintToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FPrintToolStripMenuItem.MergeIndex = 15;
 			this.FPrintToolStripMenuItem.Name = "FPrintToolStripMenuItem";
 			this.FPrintToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-			this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
 			this.FPrintToolStripMenuItem.Text = "Print";
 			this.FPrintToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
@@ -367,7 +388,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
 			this.FSplitWindowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.D1)));
-			this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+			this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
 			this.FSplitWindowToolStripMenuItem.Text = "Split Window";
 			this.FSplitWindowToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
@@ -564,6 +585,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         protected ToolStripMenuItem FFileToolStripMenuItem;
         protected ToolStripMenuItem FEditToolStripMenuItem;
         protected ToolStripMenuItem FViewToolStripMenuItem;
+		private ToolStripSeparator toolStripMenuItem5;
 
 		
     }
