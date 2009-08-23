@@ -92,8 +92,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[Test]
 		public void Run()
 		{
-			ExecuteScript("TestFramework.Coverage.Devices", "InsertIntoIdealDeviceOperatorsTable");
-			ExecuteScript("TestFramework.Coverage.Devices", "Logic");
+			
 		}
 	}
 }
