@@ -173,6 +173,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			// FSaveAsFileToolStripMenuItem
 			// 
 			this.FSaveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
+			this.FSaveAsFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveAsFileToolStripMenuItem.MergeIndex = 8;
 			this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
 			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
 			this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
@@ -181,6 +183,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			// FSaveAsDocumentToolStripMenuItem
 			// 
 			this.FSaveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
+			this.FSaveAsDocumentToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveAsDocumentToolStripMenuItem.MergeIndex = 9;
 			this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
 			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
 			this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
@@ -189,6 +193,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			// FCloseToolStripMenuItem
 			// 
 			this.FCloseToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
+			this.FCloseToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FCloseToolStripMenuItem.MergeIndex = 12;
 			this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
 			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
 			this.FCloseToolStripMenuItem.Text = "Close";
@@ -405,5 +411,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         }
         #endregion
 
-    }
+
+	}
 }
