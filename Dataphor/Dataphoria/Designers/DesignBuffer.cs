@@ -43,7 +43,9 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public abstract void LoadData(Stream AData);
 
-		public abstract string GetLocator();
+		public abstract string GetLocatorName();
+
+		public abstract bool LocatorNameMatches(string AName);
 	}
 
 	public class FileDesignBuffer : DesignBuffer
@@ -69,7 +71,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public override bool Equals(object AObject)
 		{
 			FileDesignBuffer LBuffer = AObject as FileDesignBuffer;
-			if ((LBuffer != null) && (String.Compare(LBuffer.FileName, FileName, true) == 0))
+			if (LBuffer != null && String.Equals(LBuffer.FileName, FileName, StringComparison.OrdinalIgnoreCase))
 				return true;
 			else
 				return base.Equals(AObject);
@@ -77,7 +79,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override int GetHashCode()
 		{
-			return FileName.ToLower().GetHashCode();	// may not be in case-insensitive hashtable so make insensitive through ToLower()
+			return FileName.ToLowerInvariant().GetHashCode();	// may not be in case-insensitive hashtable so make insensitive through ToLower()
 		}
 
 		public FileDesignBuffer PromptForBuffer(IDesigner ADesigner)
@@ -134,9 +136,19 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			}
 		}
 
-		public override string GetLocator()
+		public const string CFileLocatorPrefix = "file:";
+		
+		public override string GetLocatorName()
 		{
-			return "file:" + FFileName;
+			return CFileLocatorPrefix + FFileName;
+		}
+
+		public override bool LocatorNameMatches(string AName)
+		{
+			return 
+				AName != null 
+					&& AName.StartsWith(CFileLocatorPrefix) 
+					&& String.Equals(FFileName, AName.Substring(CFileLocatorPrefix.Length), StringComparison.OrdinalIgnoreCase);
 		}
 	}
 
@@ -253,9 +265,22 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			}
 		}
 
-		public override string GetLocator()
+		public const string CDocLocatorPrefix = "doc:";
+		
+		public override string GetLocatorName()
 		{
-			return "doc:" + FLibraryName + ":" + FDocumentName;
+			return CDocLocatorPrefix + FLibraryName + ":" + FDocumentName;
+		}
+
+		public override bool LocatorNameMatches(string AName)
+		{
+			if (AName != null && AName.StartsWith(CDocLocatorPrefix))
+			{
+				var LSegments = AName.Split(':');
+				return LSegments.Length == 3 && FLibraryName == LSegments[1] && FDocumentName == LSegments[2];
+			}
+			else
+				return false;
 		}
 	}
 
@@ -336,9 +361,14 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			Error.Fail("LoadData(Stream) is not supported for PropertyDesignBuffer");
 		}
 
-		public override string GetLocator()
+		public override string GetLocatorName()
 		{
 			return null;
+		}
+
+		public override bool LocatorNameMatches(string AName)
+		{
+			return false;
 		}
 	}
 }

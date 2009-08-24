@@ -37,7 +37,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		event RequestHandler AfterSaveAsDocument;
 		void SaveAsDocument();
 		void SaveAsFile();
-		string GetLocator();
+		string GetLocatorName();
+		bool LocatorNameMatches(string AName);
 	}
 
 	public class DesignService : IDesignService
@@ -305,12 +306,20 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			}
 		}
 
-		public string GetLocator()
+		public string GetLocatorName()
 		{
 			if (FBuffer == null)
 				return null;
 			else
-				return FBuffer.GetLocator();
+				return FBuffer.GetLocatorName();
+		}
+
+		public bool LocatorNameMatches(string AName)
+		{
+			if (FBuffer == null)
+				return false;
+			else
+				return FBuffer.LocatorNameMatches(AName);
 		}
 	}
 

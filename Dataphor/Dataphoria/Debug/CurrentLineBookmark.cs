@@ -9,8 +9,8 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public class CurrentLineBookmark : DebugBookmark
 	{
-		public CurrentLineBookmark(string ALocator, IDocument ADocument, TextLocation ALocation)
-			: base(ALocator, ADocument, ALocation)
+		public CurrentLineBookmark(IDocument ADocument, TextLocation ALocation)
+			: base(ADocument, ALocation)
 		{
 		}
 

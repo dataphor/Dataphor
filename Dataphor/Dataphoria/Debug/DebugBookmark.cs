@@ -9,26 +9,10 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public abstract class DebugBookmark : Bookmark
 	{
-		public DebugBookmark(string ALocator, IDocument ADocument, TextLocation ALocation)
+		public DebugBookmark(IDocument ADocument, TextLocation ALocation)
 			: base(ADocument, ALocation)
 		{
-			FLocator = ALocator;
 			SetMarker();
-		}
-
-		private string FLocator;
-
-		public string Locator
-		{
-			get { return FLocator; }
-		}
-
-		public event EventHandler LineNumberChanged;
-
-		internal void RaiseLineNumberChanged()
-		{
-			if (LineNumberChanged != null)
-				LineNumberChanged(this, EventArgs.Empty);
 		}
 
 		TextMarker FOldMarker;

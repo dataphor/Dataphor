@@ -10,7 +10,7 @@ namespace Alphora.Dataphor.Dataphoria
 	public class BreakpointBookmark : DebugBookmark
 	{
 		public BreakpointBookmark(string ALocator, IDocument ADocument, TextLocation ALocation)
-			: base(ALocator, ADocument, ALocation)
+			: base(ADocument, ALocation)
 		{
 		}
 

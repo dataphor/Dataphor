@@ -83,6 +83,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FResultPanel.BeginningFind += BeginningFind;
 			FResultPanel.ReplacementsPerformed += ReplacementsPerformed;
 			FResultPanel.TextNotFound += TextNotFound;
+
+			ADataphoria.Debugger.PropertyChanged += new PropertyChangedEventHandler(Debugger_PropertyChanged);
+			UpdateCurrentLocation();
 		}
 
 		private void InitializeDocking()
@@ -712,7 +715,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				LLine = LSelectionStart.Line;
 				LColumn = LSelectionStart.Column;
 			}
-			return new DebugLocator(Service.GetLocator(), LLine, LColumn);
+			return new DebugLocator(Service.GetLocatorName(), LLine, LColumn);
 		}
 
 		public bool SelectLine()
@@ -990,7 +993,50 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FExecutionTimeStatus = null;*/
 		}
 
+		#endregion
+
+		#region Debugger
+
+		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		{
+			switch (AArgs.PropertyName)
+			{
+				case "IsPaused" :
+				case "CurrentLocation" :
+					UpdateCurrentLocation();
+					break;
+			}
+		}
+
+		private DebugLocator FCurrentLocator;
+		private CurrentLineBookmark FCurrentBookmark;
 		
+		private void UpdateCurrentLocation()
+		{
+			var LNewCurrent = Dataphoria.Debugger.CurrentLocation;
+ 			if (FCurrentLocator != null && (LNewCurrent == null || !FCurrentLocator.Equals(LNewCurrent)))
+ 			{
+ 				FTextEdit.Document.BookmarkManager.RemoveMark(FCurrentBookmark);
+ 				FCurrentBookmark.RemoveMarker();
+ 				FCurrentBookmark = null;
+ 				FCurrentLocator = null;
+ 			}
+			if 
+			(
+				FCurrentLocator == null 
+					&& LNewCurrent != null 
+					&& Service.LocatorNameMatches(LNewCurrent.Locator) 
+					&& LNewCurrent.Line >= 1 
+					&& LNewCurrent.Line <= FTextEdit.Document.TotalNumberOfLines
+			)
+ 			{
+ 				var LLocation = new TextLocation(LNewCurrent.LinePos < 1 ? 0 : LNewCurrent.LinePos - 1, LNewCurrent.Line - 1);
+ 				FCurrentBookmark = new CurrentLineBookmark(FTextEdit.Document, LLocation);
+ 				FTextEdit.Document.BookmarkManager.AddMark(FCurrentBookmark);
+ 				FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, LLocation.Y, LLocation.Y));
+				FTextEdit.Document.CommitUpdate();
+ 			}
+		}
 
 		#endregion
 	}

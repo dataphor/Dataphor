@@ -11,7 +11,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.IO;
 using System.Text;
-
+using System.Threading;
 #if TRACEHANDLECOLLECTOR 
 using System.Reflection;
 using System.Diagnostics;
@@ -25,10 +25,10 @@ using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Dataphoria.Services;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using WeifenLuo.WinFormsUI.Docking;
 using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 using Alphora.Dataphor.DAE.Server;
-using System.Threading;
+
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -1125,17 +1125,17 @@ namespace Alphora.Dataphor.Dataphoria
 		
 		public void SaveCatalog()
 		{
-			ExecuteScript("SaveCatalog();");
+			ExecuteScript(".System.SaveCatalog();");
 		}
 
 		public void BackupCatalog()
 		{
-			ExecuteScript("BackupCatalog();");
+			ExecuteScript(".System.BackupCatalog();");
 		}
 		
 		public void UpgradeLibraries()
 		{
-			ExecuteScript("UpgradeLibraries();");
+			ExecuteScript(".System.UpgradeLibraries();");
 		}
 
 		#endregion
@@ -1627,8 +1627,8 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FViewProcessesButton":
 					FDockContentProcessesView.Show(FDockPanel);
 					break;
-				case "FViewDebugProcessesButton":
 				case "FViewDebugProcessesMenuItem" :
+				case "FViewDebugProcessesButton":
 					FDockContentDebugProcessesView.Show(FDockPanel);
 					break;
 				case "FDebugPauseMenuItem" :
@@ -1642,6 +1642,10 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FViewCallStackMenuItem" :
 				case "FViewCallStackButton" :
 					FDockContentCallStackView.Show(FDockPanel);
+					break;
+				case "FBreakOnExceptionMenuItem" :
+				case "FBreakOnExceptionButton" :
+					Debugger.BreakOnException = !Debugger.BreakOnException;
 					break;
 			}
 		}
@@ -1676,10 +1680,62 @@ namespace Alphora.Dataphor.Dataphoria
  					UpdateDebuggerState();
  					UpdateBreakOnException();
  					break;
+ 				case "CurentLocation" :
+ 					EnsureEditorForCurrentLocation();
+ 					break;
  				case "BreakOnException" :
  					UpdateBreakOnException();
  					break;
  			}
+		}
+
+		private void EnsureEditorForCurrentLocation()
+		{
+			if (Debugger.CurrentLocation != null)
+			{
+				try
+				{
+					DesignBuffer LBuffer = null;
+					DesignerInfo LInfo = new DesignerInfo();
+					if (Debugger.CurrentLocation.Locator.StartsWith(FileDesignBuffer.CFileLocatorPrefix))
+					{
+						var LFileName = Debugger.CurrentLocation.Locator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
+						LBuffer = new FileDesignBuffer(this, LFileName);
+						LInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
+					}
+					else if (Debugger.CurrentLocation.Locator.StartsWith(DocumentDesignBuffer.CDocLocatorPrefix))
+					{
+						var LSegments = Debugger.CurrentLocation.Locator.Split(':');
+						if (LSegments.Length == 3)
+						{
+							LBuffer = new DocumentDesignBuffer(this, LSegments[1], LSegments[2]);
+							LInfo = 
+								GetDefaultDesigner
+								(
+									(
+										(Alphora.Dataphor.DAE.Runtime.Data.Scalar)EvaluateQuery
+										(
+											String.Format(".Frontend.GetDocumentType('{0}', '{1}')", LSegments[1], LSegments[2])
+										)
+									).AsString
+								); 
+						}
+					}
+					if (LBuffer != null)
+					{
+						IDesigner LDesigner = this.GetDesigner(LBuffer);
+						if (LDesigner != null)
+							LDesigner.Select();
+						else
+							OpenDesigner(LInfo, LBuffer);
+					}
+				}
+				catch (Exception LException)
+				{
+					// Log errors, don't pop-up
+					Warnings.AppendError(null, LException, false);
+				}
+			}
 		}
 
 		private void UpdateDebuggerState()

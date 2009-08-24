@@ -128,6 +128,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				FDataphoria.ExecuteScript(@".System.Debug.Start();");
 				UpdateDebuggerState();
+				ApplyBreakOnException();
 			}
 		}
 
@@ -189,14 +190,14 @@ namespace Alphora.Dataphor.Dataphoria
 				if (FBreakOnException != value)
 				{
 					if (FIsStarted)
-						UpdateBreakOnException();
+						ApplyBreakOnException();
 					FBreakOnException = value;
 					NotifyPropertyChanged("BreakOnException");
 				}
 			}
 		}
 
-		private void UpdateBreakOnException()
+		private void ApplyBreakOnException()
 		{
 			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnException(" + FBreakOnException.ToString().ToLowerInvariant() + ")");
 		}
