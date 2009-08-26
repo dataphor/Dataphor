@@ -146,12 +146,12 @@ namespace Alphora.Dataphor.DAE.Debug
 		
 		public static bool operator ==(DebugLocator ALeft, DebugLocator ARight)
 		{
-			return ALeft.Equals(ARight);
+			return !Object.ReferenceEquals(ALeft, null) && ALeft.Equals(ARight);
 		}
 
 		public static bool operator !=(DebugLocator ALeft, DebugLocator ARight)
 		{
-			return !ALeft.Equals(ARight);
+			return Object.ReferenceEquals(ALeft, null) || !ALeft.Equals(ARight);
 		}
 	}
 }

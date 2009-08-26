@@ -1650,7 +1650,15 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FDebugRunButton" :
 					Debugger.Run();
 					break;
-				case "FViewCallStackMenuItem" :
+				case "FDebugStepOverMenuItem" :
+				case "FDebugStepOverButton" :
+					Debugger.StepOver();
+					break;
+				case "FDebugStepIntoMenuItem":
+				case "FDebugStepIntoButton":
+					Debugger.StepInto();
+					break;
+				case "FViewCallStackMenuItem":
 				case "FViewCallStackButton" :
 					FDockContentCallStackView.Show(FDockPanel);
 					break;
@@ -1767,6 +1775,10 @@ namespace Alphora.Dataphor.Dataphoria
 			FViewCallStackMenuItem.Enabled = FViewCallStackButton.Enabled;
 			FDebugRunButton.Enabled = IsConnected && Debugger.IsPaused;
 			FDebugRunMenuItem.Enabled = FDebugRunButton.Enabled;
+			FDebugStepOverButton.Enabled = IsConnected && Debugger.IsPaused;
+			FDebugStepOverMenuItem.Enabled = FDebugStepOverButton.Enabled;
+			FDebugStepIntoButton.Enabled = IsConnected && Debugger.IsPaused;
+			FDebugStepIntoMenuItem.Enabled = FDebugStepIntoButton.Enabled;
 		}
 
 		private void UpdateBreakOnException()

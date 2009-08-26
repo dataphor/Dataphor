@@ -99,6 +99,8 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FViewCallStackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
 			this.FBreakOnExceptionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FDebugStepOverMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FDebugStepIntoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
 			this.FNewToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.FNewScriptToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -109,6 +111,8 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FDebugStopButton = new System.Windows.Forms.ToolStripButton();
 			this.FDebugRunButton = new System.Windows.Forms.ToolStripButton();
 			this.FDebugPauseButton = new System.Windows.Forms.ToolStripButton();
+			this.FDebugStepIntoButton = new System.Windows.Forms.ToolStripButton();
+			this.FDebugStepOverButton = new System.Windows.Forms.ToolStripButton();
 			this.FBreakOnExceptionButton = new System.Windows.Forms.ToolStripButton();
 			this.FViewSessionsButton = new System.Windows.Forms.ToolStripButton();
 			this.FViewProcessesButton = new System.Windows.Forms.ToolStripButton();
@@ -411,7 +415,9 @@ namespace Alphora.Dataphor.Dataphoria
             this.FViewDebugProcessesMenuItem,
             this.FViewCallStackMenuItem,
             this.toolStripMenuItem8,
-            this.FBreakOnExceptionMenuItem});
+            this.FBreakOnExceptionMenuItem,
+            this.FDebugStepOverMenuItem,
+            this.FDebugStepIntoMenuItem});
 			this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
 			this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
 			this.debugToolStripMenuItem.Text = "Debug";
@@ -419,8 +425,9 @@ namespace Alphora.Dataphor.Dataphoria
 			// 
 			// FDebugStopMenuItem
 			// 
-			this.FDebugStopMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("FDebugStopMenuItem.Image")));
+			this.FDebugStopMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStop;
 			this.FDebugStopMenuItem.Name = "FDebugStopMenuItem";
+			this.FDebugStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F5)));
 			this.FDebugStopMenuItem.Size = new System.Drawing.Size(191, 22);
 			this.FDebugStopMenuItem.Text = "Stop";
 			// 
@@ -428,6 +435,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// 
 			this.FDebugRunMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugRun;
 			this.FDebugRunMenuItem.Name = "FDebugRunMenuItem";
+			this.FDebugRunMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
 			this.FDebugRunMenuItem.Size = new System.Drawing.Size(191, 22);
 			this.FDebugRunMenuItem.Text = "Run";
 			// 
@@ -484,6 +492,22 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FBreakOnExceptionMenuItem.Size = new System.Drawing.Size(191, 22);
 			this.FBreakOnExceptionMenuItem.Text = "Break On Exception";
 			// 
+			// FDebugStepOverMenuItem
+			// 
+			this.FDebugStepOverMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStepOver;
+			this.FDebugStepOverMenuItem.Name = "FDebugStepOverMenuItem";
+			this.FDebugStepOverMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
+			this.FDebugStepOverMenuItem.Size = new System.Drawing.Size(191, 22);
+			this.FDebugStepOverMenuItem.Text = "Step Over";
+			// 
+			// FDebugStepIntoMenuItem
+			// 
+			this.FDebugStepIntoMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStepInto;
+			this.FDebugStepIntoMenuItem.Name = "FDebugStepIntoMenuItem";
+			this.FDebugStepIntoMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
+			this.FDebugStepIntoMenuItem.Size = new System.Drawing.Size(191, 22);
+			this.FDebugStepIntoMenuItem.Text = "Step Into";
+			// 
 			// FToolStrip
 			// 
 			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -496,6 +520,8 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDebugStopButton,
             this.FDebugRunButton,
             this.FDebugPauseButton,
+            this.FDebugStepIntoButton,
+            this.FDebugStepOverButton,
             this.FBreakOnExceptionButton,
             this.FViewSessionsButton,
             this.FViewProcessesButton,
@@ -560,7 +586,8 @@ namespace Alphora.Dataphor.Dataphoria
 			// FDebugStopButton
 			// 
 			this.FDebugStopButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.FDebugStopButton.Image = ((System.Drawing.Image)(resources.GetObject("FDebugStopButton.Image")));
+			this.FDebugStopButton.Enabled = false;
+			this.FDebugStopButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStop;
 			this.FDebugStopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FDebugStopButton.Name = "FDebugStopButton";
 			this.FDebugStopButton.Size = new System.Drawing.Size(23, 22);
@@ -569,6 +596,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// FDebugRunButton
 			// 
 			this.FDebugRunButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugRunButton.Enabled = false;
 			this.FDebugRunButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugRun;
 			this.FDebugRunButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FDebugRunButton.Name = "FDebugRunButton";
@@ -578,16 +606,38 @@ namespace Alphora.Dataphor.Dataphoria
 			// FDebugPauseButton
 			// 
 			this.FDebugPauseButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugPauseButton.Enabled = false;
 			this.FDebugPauseButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugPause;
 			this.FDebugPauseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FDebugPauseButton.Name = "FDebugPauseButton";
 			this.FDebugPauseButton.Size = new System.Drawing.Size(23, 22);
 			this.FDebugPauseButton.Text = "Debug Pause";
 			// 
+			// FDebugStepIntoButton
+			// 
+			this.FDebugStepIntoButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugStepIntoButton.Enabled = false;
+			this.FDebugStepIntoButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStepInto;
+			this.FDebugStepIntoButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FDebugStepIntoButton.Name = "FDebugStepIntoButton";
+			this.FDebugStepIntoButton.Size = new System.Drawing.Size(23, 22);
+			this.FDebugStepIntoButton.Text = "Step Into";
+			// 
+			// FDebugStepOverButton
+			// 
+			this.FDebugStepOverButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FDebugStepOverButton.Enabled = false;
+			this.FDebugStepOverButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStepOver;
+			this.FDebugStepOverButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FDebugStepOverButton.Name = "FDebugStepOverButton";
+			this.FDebugStepOverButton.Size = new System.Drawing.Size(23, 22);
+			this.FDebugStepOverButton.Text = "Step Over";
+			// 
 			// FBreakOnExceptionButton
 			// 
 			this.FBreakOnExceptionButton.CheckOnClick = true;
 			this.FBreakOnExceptionButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FBreakOnExceptionButton.Enabled = false;
 			this.FBreakOnExceptionButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugBreakException;
 			this.FBreakOnExceptionButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FBreakOnExceptionButton.Name = "FBreakOnExceptionButton";
@@ -597,6 +647,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// FViewSessionsButton
 			// 
 			this.FViewSessionsButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewSessionsButton.Enabled = false;
 			this.FViewSessionsButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugSessions;
 			this.FViewSessionsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FViewSessionsButton.Name = "FViewSessionsButton";
@@ -606,6 +657,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// FViewProcessesButton
 			// 
 			this.FViewProcessesButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewProcessesButton.Enabled = false;
 			this.FViewProcessesButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugProcesses;
 			this.FViewProcessesButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FViewProcessesButton.Name = "FViewProcessesButton";
@@ -615,6 +667,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// FViewDebugProcessesButton
 			// 
 			this.FViewDebugProcessesButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewDebugProcessesButton.Enabled = false;
 			this.FViewDebugProcessesButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugDebugProcesses;
 			this.FViewDebugProcessesButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FViewDebugProcessesButton.Name = "FViewDebugProcessesButton";
@@ -624,6 +677,7 @@ namespace Alphora.Dataphor.Dataphoria
 			// FViewCallStackButton
 			// 
 			this.FViewCallStackButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FViewCallStackButton.Enabled = false;
 			this.FViewCallStackButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
 			this.FViewCallStackButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.FViewCallStackButton.Name = "FViewCallStackButton";
@@ -723,5 +777,9 @@ namespace Alphora.Dataphor.Dataphoria
 		private System.Windows.Forms.ToolStripButton FBreakOnExceptionButton;
 		private System.Windows.Forms.ToolStripButton FViewCallStackButton;
 		private System.Windows.Forms.ToolStripMenuItem FViewCallStackMenuItem;
+		private System.Windows.Forms.ToolStripButton FDebugStepOverButton;
+		private System.Windows.Forms.ToolStripButton FDebugStepIntoButton;
+		private System.Windows.Forms.ToolStripMenuItem FDebugStepOverMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FDebugStepIntoMenuItem;
     }
 }

@@ -327,6 +327,31 @@
         edpIabZxCMCBSqs7Ey7CKfPWBpYAAAAASUVORK5CYII=
 </value>
   </data>
+  <data name="DebugStepInto" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAALEgAA
+        CxIB0t1+/AAAAaRJREFUOE+lk2svgmEYxx/zOXwKLxpNkUOTsjQ1hpXCkFovMGZrQ6Ho/JBHVHJozodN
+        tTJeOE6IxAfw0pf4e55nszktWfd2v7l23b/7uu7fdRcAIPJaDCCfTVTP8FDrEqDeWwPZogiKkAQt4QYo
+        t+XQHDShK9Ia7Y0rDboTddFvFxEVk6WYvBjF9JUZzhsLyKQNVMqJpQcSy0/zcNMx0/kwehPKfd2puuQ7
+        hCgb48B8ZoTlcgy26wm4klbM3dqxkHLD/zgH34Mb689LdHwK2oRqX3/6tRKixFgM3jgHAgsXQjsfdWQl
+        pJQQjYE69Ee08N45sJLxIfzih/lyBNpjleFzFVkfUB4UO5rXpK/UvYuuhsTs3Qy6Y23RnAFMIgMZiOkQ
+        ylAIpr3oPGp5+xeASVYsS9jDq3QratrMvwGMXsZK6Ili9eYMqLbxRkRuQbpvtwO+lIe1MhQ3QLkjT2sO
+        m4fYKc42hRVT3MIaGz/QvdnO2mDUDkZ0aN2QLap2FYV/Aj7gtF5Pz1Y79HudjF5nzi18ThQ6yq1issr0
+        YxLz+Ug5t5DtknfK8Z3w+foCiQAAAABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="DebugStepOver" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAASBJREFUOE9j/P//
+        PwNFAGQAJZgizWDXU2I7yQb4z3Tf7TnRkQ3ZUpJcANT83anD+jaGASXHM/6DcOHh1P+5+xL/Z+yI/Z+0
+        MeJ/zMrg/2ELff8Dbf4P1Pw/aXHU/5i5of9NK/QvwgwBuwCked2tpf9X31j0f/m1ef8XX5n1f/6laf9n
+        nZ/8f+qZvv8TTnX+7z7e+r/9aOP/pkO1/wMmev3XzFQ9CQ8DkM0rry/4v/TqnP8LL8/4P/fClP8zzk34
+        P/l09/++k+3/O481/W85XPe/4WDV/5p9Zf+9elz/qyQrHoEbgM/ZQD//t24w/e/aYf8/bmHkf89uF5Dm
+        8yheICYq9Qu0LIDO/g7UfJPsWABq3qEQJ0t+NGJzKUnpYHAaAABvYKkCkr/+vQAAAABJRU5ErkJggg==
+</value>
+  </data>
   <data name="DebugStop" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8

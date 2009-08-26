@@ -165,6 +165,20 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap DebugStepInto {
+            get {
+                object obj = ResourceManager.GetObject("DebugStepInto", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DebugStepOver {
+            get {
+                object obj = ResourceManager.GetObject("DebugStepOver", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap DebugStop {
             get {
                 object obj = ResourceManager.GetObject("DebugStop", resourceCulture);
