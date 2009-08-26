@@ -324,31 +324,12 @@ using System.Text;
 
 		public override object Read(byte[] ABuffer, int AOffset)
 		{
-			int LLength = ByteArrayUtility.ReadInt32(ABuffer, AOffset);
-			
-			if (LLength > 0)
-			{
-				AOffset += sizeof(int);
-				StringBuilder LBuilder = new StringBuilder(LLength, LLength);
-				for (int i = 0; i < LLength; i++)
-					LBuilder.Append((char)((ushort)ByteArrayUtility.ReadInt16(ABuffer, AOffset + i)));
-				return LBuilder.ToString();
-			}
-			else
-				return String.Empty;
+			return ByteArrayUtility.ReadString(ABuffer, AOffset);
 		}
 
 		public override void Write(object AValue, byte[] ABuffer, int AOffset)
 		{
-			string LString = (String)AValue;
-			ByteArrayUtility.WriteInt32(ABuffer, AOffset, LString.Length);
-
-			if (LString.Length > 0)
-			{
-				AOffset += sizeof(int);
-				for (int i = 0; i < LString.Length; i++)
-					ByteArrayUtility.WriteInt16(ABuffer, AOffset + i, (short)LString[i]);
-			}
+			ByteArrayUtility.WriteString(ABuffer, AOffset, (String)AValue);
 		}
 		
 		#endif

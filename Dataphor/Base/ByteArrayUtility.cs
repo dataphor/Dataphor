@@ -112,5 +112,33 @@ namespace Alphora.Dataphor
 			for (int i = 0; i < LBytes.Length; i++)
 				ABuffer[AOffset + i] = LBytes[i];
 		}
+
+		public static string ReadString(byte[] ABuffer, int AOffset)
+		{
+			int LLength = ReadInt32(ABuffer, AOffset);
+
+			if (LLength > 0)
+			{
+				AOffset += sizeof(int);
+				StringBuilder LBuilder = new StringBuilder(LLength, LLength);
+				for (int i = 0; i < LLength; i++)
+					LBuilder.Append((char)((ushort)ReadInt16(ABuffer, AOffset + i * 2)));
+				return LBuilder.ToString();
+			}
+			else
+				return String.Empty;
+		}
+
+		public static void WriteString(byte[] ABuffer, int AOffset, string AValue)
+		{
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset, AValue.Length);
+
+			if (AValue.Length > 0)
+			{
+				AOffset += sizeof(int);
+				for (int i = 0; i < AValue.Length; i++)
+					ByteArrayUtility.WriteInt16(ABuffer, AOffset + i * 2, (short)AValue[i]);
+			}
+		}
 	}
 }
