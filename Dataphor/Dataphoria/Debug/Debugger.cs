@@ -13,6 +13,7 @@ namespace Alphora.Dataphor.Dataphoria
 	{
 		public Debugger(IDataphoria ADataphoria)
 		{
+			InitializeBreakpoints();
 			FDataphoria = ADataphoria;
 			FDataphoria.Connected += new EventHandler(DataphoriaConnected);
 			FDataphoria.Disconnected += new EventHandler(DataphoriaDisconnected);
@@ -78,6 +79,9 @@ namespace Alphora.Dataphor.Dataphoria
 				InternalUnpause();
 			
 			ResetSelectedProcess();
+			
+			if (((Scalar)Dataphoria.EvaluateQuery("exists(.Debug.GetBreakpoints())")).AsBoolean)
+				RefreshBreakpoints();
 		}
 
 		private void InternalClearState()
@@ -95,6 +99,8 @@ namespace Alphora.Dataphor.Dataphoria
 			NotifyPropertyChanged("SelectedProcessID");
 			NotifyPropertyChanged("SelectedCallStackIndex");
 			NotifyPropertyChanged("CurrentLocation");
+
+			RefreshBreakpoints();
 		}
 
 		// IsStarted
@@ -178,155 +184,6 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		// BreakOnException
-		
-		private bool FBreakOnException;
-		
-		public bool BreakOnException 
-		{ 
-			get { return FBreakOnException; } 
-			set 
-			{
-				if (FBreakOnException != value)
-				{
-					if (FIsStarted)
-						ApplyBreakOnException();
-					FBreakOnException = value;
-					NotifyPropertyChanged("BreakOnException");
-				}
-			}
-		}
-
-		private void ApplyBreakOnException()
-		{
-			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnException(" + FBreakOnException.ToString().ToLowerInvariant() + ")");
-		}
-
-		private int FSelectedProcessID = -1;
-		
-		public int SelectedProcessID
-		{
-			get { return FSelectedProcessID; }
-			set 
-			{ 
-				if (value != FSelectedProcessID)
-				{
-					FSelectedProcessID = value; 
-					NotifyPropertyChanged("SelectedProcessID");
-					ResetSelectedCallStackIndex();
-				}
-			}
-		}
-
-		/// <summary> Sets the selected process to a debugged process, preferrably the one that broke. </summary>
-		private void ResetSelectedProcess()
-		{
-			var LProcesses = FDataphoria.OpenCursor(".System.Debug.GetProcesses()");
-			try
-			{
-				int LCandidateID = -1;
-				while (LProcesses.Next())
-				{
-					var LRow = LProcesses.Select();
-					LCandidateID = (int)LRow["Process_ID"];
-					if (LRow.HasValue("DidBreak") && (bool)LRow["DidBreak"])
-						break;
-				}
-				SelectedProcessID = LCandidateID;
-			}
-			finally
-			{
-				FDataphoria.CloseCursor(LProcesses);
-			}
-		}
-
-		private int FSelectedCallStackIndex = -1;
-		
-		public int SelectedCallStackIndex
-		{
-			get { return FSelectedCallStackIndex; }
-			set
-			{
-				if (value != FSelectedCallStackIndex)
-					InternalSetCallStackIndex(value);
-			}
-		}
-
-		private void InternalSetCallStackIndex(int AValue)
-		{
-			FSelectedCallStackIndex = AValue;
-			NotifyPropertyChanged("SelectedCallStackIndex");
-			UpdateCurrentLocation();
-		}
-
-		private void ResetSelectedCallStackIndex()
-		{
-			// Don't check that it's different in a reset
-			InternalSetCallStackIndex(0);
-		}
-
-		private DebugLocator FCurrentLocation;
-		
-		public DebugLocator CurrentLocation
-		{
-			get { return FCurrentLocation; }
-		}
-		
-		private void UpdateCurrentLocation()
-		{
-			if (FSelectedProcessID >= 0)
-			{
-				DebugLocator LLocation = null;
-				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
-				// TODO: Uncomment this once GetCallStack returns location information
-				//if (LWindow != null)
-				//    LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
-				InternalSetCurrentLocation(LLocation);
-			}
-			else
-				if (FCurrentLocation != null)
-					InternalSetCurrentLocation(null);
-		}
-
-		private void InternalSetCurrentLocation(DebugLocator LLocation)
-		{
-			if 
-			(
-				((LLocation == null) != (FCurrentLocation == null)) 
-					|| (LLocation == null 
-					|| FCurrentLocation == null 
-					|| !LLocation.Equals(FCurrentLocation))
-			)
-			{
-				FCurrentLocation = LLocation;
-				NotifyPropertyChanged("CurrentLocation");
-			}
-		}
-
-		public void AttachSession(int ASessionID)
-		{
-			Start();
-			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachSession({0});", ASessionID));
-		}
-
-		public void DetachSession(int ASessionID)
-		{
-			Start();
-			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachSession({0});", ASessionID));
-		}
-
-		public void AttachProcess(int AProcessID)
-		{
-			Start();
-			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachProcess({0});", AProcessID));
-		}
-
-		public void DetachProcess(int AProcessID)
-		{
-			Start();
-			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachProcess({0});", AProcessID));
-		}
-
 		private void InternalUnpause()
 		{
 			InternalSetIsPaused(false);
@@ -361,6 +218,270 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				InternalSetIsPaused(true);
 				ResetSelectedProcess();
+			}
+		}
+
+		// BreakOnException
+		
+		private bool FBreakOnException;
+		
+		public bool BreakOnException 
+		{ 
+			get { return FBreakOnException; } 
+			set 
+			{
+				if (FBreakOnException != value)
+				{
+					if (FIsStarted)
+						ApplyBreakOnException();
+					FBreakOnException = value;
+					NotifyPropertyChanged("BreakOnException");
+				}
+			}
+		}
+
+		private void ApplyBreakOnException()
+		{
+			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnException(" + FBreakOnException.ToString().ToLowerInvariant() + ")");
+		}
+
+		// SelectedProcessID
+		
+		private int FSelectedProcessID = -1;
+		
+		public int SelectedProcessID
+		{
+			get { return FSelectedProcessID; }
+			set 
+			{ 
+				if (value != FSelectedProcessID)
+				{
+					FSelectedProcessID = value; 
+					NotifyPropertyChanged("SelectedProcessID");
+					ResetSelectedCallStackIndex();
+				}
+			}
+		}
+
+		/// <summary> Sets the selected process to a debugged process, preferrably the one that broke. </summary>
+		private void ResetSelectedProcess()
+		{
+			var LProcesses = FDataphoria.OpenCursor(".System.Debug.GetProcesses()");
+			try
+			{
+				int LCandidateID = -1;
+				Row LRow = null;
+				while (LProcesses.Next())
+				{
+					if (LRow == null)
+						LRow = LProcesses.Select();
+					else
+						LProcesses.Select(LRow);
+					LCandidateID = (int)LRow["Process_ID"];
+					if (LRow.HasValue("DidBreak") && (bool)LRow["DidBreak"])
+						break;
+				}
+				SelectedProcessID = LCandidateID;
+			}
+			finally
+			{
+				FDataphoria.CloseCursor(LProcesses);
+			}
+		}
+
+		// SelectedCallStackIndex
+		
+		private int FSelectedCallStackIndex = -1;
+		
+		public int SelectedCallStackIndex
+		{
+			get { return FSelectedCallStackIndex; }
+			set
+			{
+				if (value != FSelectedCallStackIndex)
+					InternalSetCallStackIndex(value);
+			}
+		}
+
+		private void InternalSetCallStackIndex(int AValue)
+		{
+			FSelectedCallStackIndex = AValue;
+			NotifyPropertyChanged("SelectedCallStackIndex");
+			UpdateCurrentLocation();
+		}
+
+		private void ResetSelectedCallStackIndex()
+		{
+			// Don't check that it's different in a reset
+			InternalSetCallStackIndex(0);
+		}
+
+		// CurrentLocation
+		
+		private DebugLocator FCurrentLocation;
+		
+		public DebugLocator CurrentLocation
+		{
+			get { return FCurrentLocation; }
+		}
+		
+		private void UpdateCurrentLocation()
+		{
+			if (FSelectedProcessID >= 0)
+			{
+				DebugLocator LLocation = null;
+				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
+				if (LWindow != null)
+				    LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
+				InternalSetCurrentLocation(LLocation);
+			}
+			else
+				if (FCurrentLocation != null)
+					InternalSetCurrentLocation(null);
+		}
+
+		private void InternalSetCurrentLocation(DebugLocator LLocation)
+		{
+			if 
+			(
+				((LLocation == null) != (FCurrentLocation == null)) 
+					|| (LLocation == null 
+					|| FCurrentLocation == null 
+					|| !LLocation.Equals(FCurrentLocation))
+			)
+			{
+				FCurrentLocation = LLocation;
+				NotifyPropertyChanged("CurrentLocation");
+			}
+		}
+		
+		// Breakpoints
+
+		private bool FSettingBreakpoint;
+		
+		private NotifyingBaseList<DebugLocator> FBreakpoints;
+
+		public NotifyingBaseList<DebugLocator> Breakpoints
+		{
+			get { return FBreakpoints; }
+		}
+
+		private void InitializeBreakpoints()
+		{
+			FBreakpoints = new NotifyingBaseList<DebugLocator>();
+			FBreakpoints.Changed += new NotifyingListChangeEventHandler<DebugLocator>(BreakpointsChanged);
+		}
+
+		private void BreakpointsChanged(NotifyingBaseList<DebugLocator> ASender, bool AIsAdded, DebugLocator AItem, int AIndex)
+		{
+			if (!FSettingBreakpoint)
+			{
+				// Assumption: AIsAdded should always be in sync with the toggle
+				InternalToggleBreakpoint(AItem);
+			}
+		}
+
+		public void ToggleBreakpoint(DebugLocator ALocator)
+		{
+			if (ALocator != null && !String.IsNullOrEmpty(ALocator.Locator))
+			{
+				InternalToggleBreakpoint(ALocator);
+				RefreshBreakpoints();
+			}
+		}
+
+		private void InternalToggleBreakpoint(DebugLocator ALocator)
+		{
+			if (ALocator != null && !String.IsNullOrEmpty(ALocator.Locator))
+			{
+				Start();
+				FDataphoria.ExecuteScript(String.Format(".System.Debug.ToggleBreakpoint('{0}', {1}, {2});", ALocator.Locator.Replace("'", "''"), ALocator.Line, ALocator.LinePos));
+			}
+		}
+
+		private void RefreshBreakpoints()
+		{
+			FSettingBreakpoint = true;
+			try
+			{
+				if (IsStarted)
+				{
+					Set<DebugLocator> LRemaining = new Set<DebugLocator>(FBreakpoints);
+					
+					var LBreakpoints = FDataphoria.OpenCursor(".System.Debug.GetBreakpoints()");
+					try
+					{
+						Row LRow = null;
+						while (LBreakpoints.Next())
+						{
+							if (LRow == null)
+								LRow = LBreakpoints.Select();
+							else
+								LBreakpoints.Select(LRow);
+							
+							var LLocator = new DebugLocator((string)LRow["Locator"], (int)LRow["Line"], (int)LRow["LinePos"]);
+							if (!LRemaining.Remove(LLocator))
+								FBreakpoints.Add(LLocator);
+						}
+					}
+					finally
+					{
+						FDataphoria.CloseCursor(LBreakpoints);
+					}
+					
+					foreach (var LLocator in LRemaining)
+						FBreakpoints.Remove(LLocator);
+				}
+				else
+					FBreakpoints.Clear();
+			}
+			finally
+			{
+				FSettingBreakpoint = false;
+			}
+		}
+
+		// Functions
+
+		public void AttachSession(int ASessionID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachSession({0});", ASessionID));
+		}
+
+		public void DetachSession(int ASessionID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachSession({0});", ASessionID));
+		}
+
+		public void AttachProcess(int AProcessID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachProcess({0});", AProcessID));
+		}
+
+		public void DetachProcess(int AProcessID)
+		{
+			Start();
+			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachProcess({0});", AProcessID));
+		}
+		
+		public void StepOver()
+		{
+			if (IsPaused && FSelectedProcessID >= 0)
+			{
+				FDataphoria.ExecuteScript(String.Format(".System.Debug.StepOver({0});", FSelectedProcessID));
+				InternalUnpause();
+			}
+		}
+		
+		public void StepInto()
+		{
+			if (IsPaused && FSelectedProcessID >= 0)
+			{
+				FDataphoria.ExecuteScript(String.Format(".System.Debug.StepInto({0});", FSelectedProcessID));
+				InternalUnpause();
 			}
 		}
 	}

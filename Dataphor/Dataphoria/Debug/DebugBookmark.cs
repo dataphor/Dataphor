@@ -1,20 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-using ICSharpCode.TextEditor.Document;
+using Alphora.Dataphor.DAE.Debug;
+
 using ICSharpCode.TextEditor;
+using ICSharpCode.TextEditor.Document;
 
 namespace Alphora.Dataphor.Dataphoria
 {
 	public abstract class DebugBookmark : Bookmark
 	{
-		public DebugBookmark(IDocument ADocument, TextLocation ALocation)
+		public DebugBookmark(IDocument ADocument, TextLocation ALocation, DebugLocator ALocator)
 			: base(ADocument, ALocation)
 		{
+			FLocator = ALocator;
 			SetMarker();
 		}
 
+		private DebugLocator FLocator;
+		
+		public DebugLocator Locator
+		{
+			get { return FLocator; }
+		}
+		
 		TextMarker FOldMarker;
 		IDocument FOldDocument;
 

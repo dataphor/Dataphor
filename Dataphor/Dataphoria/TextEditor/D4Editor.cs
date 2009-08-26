@@ -84,7 +84,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FResultPanel.ReplacementsPerformed += ReplacementsPerformed;
 			FResultPanel.TextNotFound += TextNotFound;
 
-			ADataphoria.Debugger.PropertyChanged += new PropertyChangedEventHandler(Debugger_PropertyChanged);
+			ADataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+			ADataphoria.Debugger.Breakpoints.Changed += Debugger_BreakpointsChanged;
 			UpdateCurrentLocation();
 		}
 
@@ -1008,22 +1009,24 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			}
 		}
 
-		private DebugLocator FCurrentLocator;
 		private CurrentLineBookmark FCurrentBookmark;
 		
 		private void UpdateCurrentLocation()
 		{
 			var LNewCurrent = Dataphoria.Debugger.CurrentLocation;
- 			if (FCurrentLocator != null && (LNewCurrent == null || !FCurrentLocator.Equals(LNewCurrent)))
+			
+			// Remove the existing current bookmark if it is no longer accurate
+ 			if (FCurrentBookmark != null && (LNewCurrent == null || !FCurrentBookmark.Locator.Equals(LNewCurrent)))
  			{
  				FTextEdit.Document.BookmarkManager.RemoveMark(FCurrentBookmark);
  				FCurrentBookmark.RemoveMarker();
  				FCurrentBookmark = null;
- 				FCurrentLocator = null;
  			}
+ 			
+ 			// Add a new current bookmark if needed and appropriate
 			if 
 			(
-				FCurrentLocator == null 
+				FCurrentBookmark == null 
 					&& LNewCurrent != null 
 					&& Service.LocatorNameMatches(LNewCurrent.Locator) 
 					&& LNewCurrent.Line >= 1 
@@ -1031,11 +1034,38 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			)
  			{
  				var LLocation = new TextLocation(LNewCurrent.LinePos < 1 ? 0 : LNewCurrent.LinePos - 1, LNewCurrent.Line - 1);
- 				FCurrentBookmark = new CurrentLineBookmark(FTextEdit.Document, LLocation);
- 				FTextEdit.Document.BookmarkManager.AddMark(FCurrentBookmark);
- 				FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, LLocation.Y, LLocation.Y));
-				FTextEdit.Document.CommitUpdate();
+ 				FCurrentBookmark = new CurrentLineBookmark(FTextEdit.Document, LLocation, LNewCurrent);
+				AddBookmark(FCurrentBookmark, LLocation.Y);
  			}
+		}
+
+		private void AddBookmark(DebugBookmark ABookmark, int ALine)
+		{
+			FTextEdit.Document.BookmarkManager.AddMark(ABookmark);
+			FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, ALine, ALine));
+			FTextEdit.Document.CommitUpdate();
+		}
+
+		private void Debugger_BreakpointsChanged(NotifyingBaseList<DebugLocator> ASender, bool AIsAdded, DebugLocator AItem, int AIndex)
+		{
+			if (Service.LocatorNameMatches(AItem.Locator))
+			{
+				if (AIsAdded)
+				{
+					var LLocation = new TextLocation(AItem.LinePos - 1, AItem.Line - 1);
+					var LNewBookmark = new BreakpointBookmark(FTextEdit.Document, LLocation, AItem);
+					AddBookmark(LNewBookmark, LLocation.Y);
+				}
+				else
+				{
+					var LOldBookmark = (BreakpointBookmark)FTextEdit.Document.BookmarkManager.GetFirstMark((Bookmark APredicate) => { return (APredicate is BreakpointBookmark) && ((BreakpointBookmark)APredicate).Locator == AItem; });
+					if (LOldBookmark != null)
+					{
+						FTextEdit.Document.BookmarkManager.RemoveMark(LOldBookmark);
+						LOldBookmark.RemoveMarker();
+					}
+				}
+			}
 		}
 
 		#endregion

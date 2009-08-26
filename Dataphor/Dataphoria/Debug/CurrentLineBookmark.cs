@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
+
+using Alphora.Dataphor.DAE.Debug;
+
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
 
@@ -9,8 +9,8 @@ namespace Alphora.Dataphor.Dataphoria
 {
 	public class CurrentLineBookmark : DebugBookmark
 	{
-		public CurrentLineBookmark(IDocument ADocument, TextLocation ALocation)
-			: base(ADocument, ALocation)
+		public CurrentLineBookmark(IDocument ADocument, TextLocation ALocation, DebugLocator ALocator)
+			: base(ADocument, ALocation, ALocator)
 		{
 		}
 

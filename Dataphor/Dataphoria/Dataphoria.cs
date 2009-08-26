@@ -973,6 +973,17 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
+		public string GetDocumentType(string ALibraryName, string ADocumentName)
+		{
+			return
+			(
+				(Alphora.Dataphor.DAE.Runtime.Data.Scalar)EvaluateQuery
+				(
+					String.Format(".Frontend.GetDocumentType('{0}', '{1}')", ALibraryName, ADocumentName)
+				)
+			).AsString;
+		}
+
 		#endregion
 
 		#region IServiceProvider Members
@@ -1691,36 +1702,12 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void EnsureEditorForCurrentLocation()
 		{
-			if (Debugger.CurrentLocation != null)
+			if (Debugger.CurrentLocation != null && !String.IsNullOrEmpty(Debugger.CurrentLocation.Locator))
 			{
 				try
 				{
-					DesignBuffer LBuffer = null;
-					DesignerInfo LInfo = new DesignerInfo();
-					if (Debugger.CurrentLocation.Locator.StartsWith(FileDesignBuffer.CFileLocatorPrefix))
-					{
-						var LFileName = Debugger.CurrentLocation.Locator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
-						LBuffer = new FileDesignBuffer(this, LFileName);
-						LInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
-					}
-					else if (Debugger.CurrentLocation.Locator.StartsWith(DocumentDesignBuffer.CDocLocatorPrefix))
-					{
-						var LSegments = Debugger.CurrentLocation.Locator.Split(':');
-						if (LSegments.Length == 3)
-						{
-							LBuffer = new DocumentDesignBuffer(this, LSegments[1], LSegments[2]);
-							LInfo = 
-								GetDefaultDesigner
-								(
-									(
-										(Alphora.Dataphor.DAE.Runtime.Data.Scalar)EvaluateQuery
-										(
-											String.Format(".Frontend.GetDocumentType('{0}', '{1}')", LSegments[1], LSegments[2])
-										)
-									).AsString
-								); 
-						}
-					}
+					DesignerInfo LInfo;
+					DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, Debugger.CurrentLocation.Locator);
 					if (LBuffer != null)
 					{
 						IDesigner LDesigner = this.GetDesigner(LBuffer);
@@ -1736,6 +1723,32 @@ namespace Alphora.Dataphor.Dataphoria
 					Warnings.AppendError(null, LException, false);
 				}
 			}
+		}
+
+		private DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, string ALocator)
+		{
+			AInfo = new DesignerInfo();
+			DesignBuffer LBuffer = null;
+			
+			// Files
+			if (ALocator.StartsWith(FileDesignBuffer.CFileLocatorPrefix))
+			{
+				var LFileName = ALocator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
+				LBuffer = new FileDesignBuffer(this, LFileName);
+				AInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
+			}
+			// Documents
+			else if (ALocator.StartsWith(DocumentDesignBuffer.CDocLocatorPrefix))
+			{
+				var LSegments = ALocator.Split(':');
+				if (LSegments.Length == 3)
+				{
+					LBuffer = new DocumentDesignBuffer(this, LSegments[1], LSegments[2]);
+					AInfo = GetDefaultDesigner(GetDocumentType(LSegments[1], LSegments[2]));
+				}
+			}
+			
+			return LBuffer;
 		}
 
 		private void UpdateDebuggerState()

@@ -143,5 +143,15 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			return (FLocator == null ? 0 : FLocator.GetHashCode()) ^ FLine.GetHashCode() ^ FLinePos.GetHashCode();
 		}
+		
+		public static bool operator ==(DebugLocator ALeft, DebugLocator ARight)
+		{
+			return ALeft.Equals(ARight);
+		}
+
+		public static bool operator !=(DebugLocator ALeft, DebugLocator ARight)
+		{
+			return !ALeft.Equals(ARight);
+		}
 	}
 }

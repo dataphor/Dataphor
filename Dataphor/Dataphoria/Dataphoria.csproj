@@ -245,7 +245,7 @@
     <Compile Include="DataphoriaException.Designer.cs">
       <DependentUpon>DataphoriaException.cs</DependentUpon>
     </Compile>
-    <Compile Include="Debug\BreakBookmark.cs" />
+    <Compile Include="Debug\BreakpointBookmark.cs" />
     <Compile Include="Debug\ProcessesView.cs">
       <SubType>UserControl</SubType>
     </Compile>

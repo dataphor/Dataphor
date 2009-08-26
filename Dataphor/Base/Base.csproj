@@ -112,8 +112,10 @@
     </Compile>
     <Compile Include="FixedSizeCache.cs" />
     <Compile Include="Frame.cs" />
+    <Compile Include="Set.cs" />
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
+    <Compile Include="NotifyingBaseList.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="StackWindow.cs" />
     <Compile Include="TemporaryStream.cs" />
