@@ -78,6 +78,7 @@ namespace Alphora.Dataphor
 			return ~LResult;
 		}
 
+		#if USE_UNSAFE
 		/// <summary> Calculates a 32 bit Cyclic Redundancy Check hash for the given byte pointer. </summary>
 		public static unsafe uint GetCRC32(byte* ABytes, int ACount)
 		{
@@ -86,6 +87,7 @@ namespace Alphora.Dataphor
 				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
 			return ~LResult;
 		}
+		#endif
 
 		/// <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte array. </summary>
 		public static uint GetAmendedCRC32(uint ACRC32, byte[] ABytes)
@@ -96,6 +98,7 @@ namespace Alphora.Dataphor
 			return ~LResult;
 		}
 
+		#if USE_UNSAFE
 		/// <summary> Computes a CRC32 given an existing CRC32 value and amended data in a byte pointer. </summary>
 		public static unsafe uint GetAmendedCRC32(uint ACRC32, byte* ABytes, int ACount)
 		{
@@ -104,6 +107,7 @@ namespace Alphora.Dataphor
 				LResult = (LResult >> 8) ^ CCRC32Lookup[(LResult & 0xFF) ^ ABytes[i]];
 			return ~LResult;
 		}
+		#endif
 
 		/// <summary> Calculates a 32 bit Cyclic Redundancy Check hash for a range within the given byte array. </summary>
 		public static uint GetCRC32(byte[] ABytes, int AOffset, int ACount)

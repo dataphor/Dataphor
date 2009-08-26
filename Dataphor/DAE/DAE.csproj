@@ -45,7 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
@@ -641,45 +641,46 @@
     <Compile Include="SessionInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Storage\Database.cs">
+    <None Include="Storage\Database.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\DataFile.cs">
+    </None>
+    <None Include="Storage\DataFile.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\FastFile.cs">
+    </None>
+    <None Include="Storage\DataFiles.cs" />
+    <None Include="Storage\FastFile.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\FileGroup.cs">
+    </None>
+    <None Include="Storage\FileGroup.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\Page.cs">
+    </None>
+    <None Include="Storage\Page.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\PageBuffer.cs">
+    </None>
+    <None Include="Storage\PageBuffer.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\PageCache.cs">
+    </None>
+    <None Include="Storage\PageCache.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\ProperFraction.cs">
+    </None>
+    <None Include="Storage\ProperFraction.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\ResourceManager.cs">
+    </None>
+    <None Include="Storage\ResourceManager.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\StorageException.cs">
+    </None>
+    <None Include="Storage\StorageException.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\Transaction.cs">
+    </None>
+    <None Include="Storage\Transaction.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\TransactionLog.cs">
+    </None>
+    <None Include="Storage\TransactionLog.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Storage\Utilities.cs">
+    </None>
+    <None Include="Storage\Utilities.cs">
       <SubType>Code</SubType>
-    </Compile>
+    </None>
     <Compile Include="Store\SQLStore.cs" />
     <Compile Include="Store\SQLStoreConnection.cs" />
     <Compile Include="Store\SQLStoreCounter.cs" />
@@ -780,9 +781,9 @@
     <EmbeddedResource Include="Server\ServerException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Storage\StorageException.resx">
+    <None Include="Storage\StorageException.resx">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
     <EmbeddedResource Include="Store\StoreException.resx">
       <DependentUpon>StoreException.cs</DependentUpon>
       <LastGenOutput>StoreException.Designer.cs</LastGenOutput>

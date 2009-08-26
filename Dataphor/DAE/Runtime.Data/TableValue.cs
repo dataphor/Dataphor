@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private ArrayList FRowList;
 		private ArrayList FSizeList;
 		
-		public unsafe override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool AExpandStreams)
 		{
 			int LSize = 1;
 			
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return LSize;
 		}
 
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
 		{
 			if (IsNil)
 				ABuffer[AOffset] = 0;
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
 			FTable.Truncate(Process.GetServerProcess());
 			

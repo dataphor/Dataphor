@@ -397,7 +397,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <summary> Positions the cursor on the DataBuffer denoted by the given bookmark obtained from a previous call to <c> GetBookmark </c> . </summary>
 		/// <param name="ABookmark"> A <see cref="RemoteRowBody"/> structure containing the data for the bookmark. </param>
 		/// <returns> A <see cref="RemoteGotoData"/> structure containing the results of the goto call. </returns>
-		public unsafe RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
+		public RemoteGotoData GotoBookmark(Guid ABookmark, bool AForward, ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
@@ -416,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Server
 		/// <param name="ABookmark1"> A <see cref="RemoteRowBody"/> structure containing the data for the first bookmark to compare. </param>
 		/// <param name="ABookmark2"> A <see cref="RemoteRowBody"/> structure containing the data for the second bookmark to compare. </param>
 		/// <returns> An integer value indicating whether the first bookmark was less than (negative), equal to (0) or greater than (positive) the second bookmark. </returns>
-		public unsafe int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
+		public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2, ProcessCallInfo ACallInfo)
 		{
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try

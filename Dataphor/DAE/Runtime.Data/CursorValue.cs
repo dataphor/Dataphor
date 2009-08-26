@@ -28,11 +28,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		public override bool IsNil { get { return false; } }
-		
-		public unsafe override int GetPhysicalSize(bool AExpandStreams)
+
+		public override int GetPhysicalSize(bool AExpandStreams)
 		{
-			return (sizeof(int));
+			return sizeof(int);
 		}
+
+		#if USE_UNSAFE 
 
 		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
 		{
@@ -41,7 +43,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				*((int*)LBufferPtr) = FID;
 			}
 		}
-
+		
 		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -49,6 +51,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FID = *((int*)LBufferPtr);
 			}
 		}
+
+		#else
+
+		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		{
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset, FID);
+		}
+
+		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		{
+			FID = ByteArrayUtility.ReadInt32(ABuffer, AOffset);
+		}
+
+		#endif
 		
 		public override object CopyNativeAs(Schema.IDataType ADataType)
 		{

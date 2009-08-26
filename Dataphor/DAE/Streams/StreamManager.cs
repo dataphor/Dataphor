@@ -13,7 +13,8 @@ namespace Alphora.Dataphor.DAE.Streams
 	/// <remarks>Value type for a stream identifier.</remarks>
 	[Serializable]
 	public struct StreamID : IComparable
-	{		
+	{
+		public const int CSizeOf = sizeof(UInt64);
 		public static StreamID Null = new StreamID(0);
 		
 		public StreamID(UInt64 AValue)
@@ -79,6 +80,38 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			return ALeftStreamID.CompareTo(ARightStreamID) <= 0;
 		}
+
+		#if USE_UNSAFE
+		
+		public unsafe void Write(byte[] ABuffer, int AOffset)
+		{
+			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			{
+				*((StreamID*)LBufferPtr) = (StreamID)Value;
+			}
+		}
+		
+		public static unsafe StreamID Read(byte[] ABuffer, int AOffset)
+		{
+			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			{
+				return *((StreamID*)LBufferPtr);
+			}
+		}
+		
+		#else
+
+		public void Write(byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt64(ABuffer, AOffset, (long)Value);
+		}
+
+		public static StreamID Read(byte[] ABuffer, int AOffset)
+		{
+			return new StreamID((ulong)ByteArrayUtility.ReadInt64(ABuffer, AOffset));
+		}
+		
+		#endif
 	}
 	
 	#if USETYPEDLIST

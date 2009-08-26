@@ -13,9 +13,8 @@ namespace Alphora.Dataphor.DAE.Streams
     using Alphora.Dataphor;
 	using Alphora.Dataphor.BOP;
 	using Alphora.Dataphor.DAE.Runtime.Data;
+using System.Text;
 	
-	// TODO: Investigate the usage of BitConverter instead of unsafe fixes
-
 	/// <remarks>    
     /// A Conveyor provides host language access to the physical representation of Dataphor values stored in streams
     /// All Conveyors must descend from this base and provide a single constructor which takes a Stream as its only parameter
@@ -65,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public BooleanConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(bool));
 		}
@@ -85,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public ByteConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(byte));
 		}
@@ -105,11 +104,13 @@ namespace Alphora.Dataphor.DAE.Streams
     {
 		public Int16Conveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(short));
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -125,17 +126,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((short*)LBufferPtr) = (short)AValue;
 			}
 		}
+		
+		#else
+		
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadInt16(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt16(ABuffer, AOffset, (short)AValue);
+		}
+		
+		#endif		
     }
     
     public class Int32Conveyor : Conveyor
     {
 		public Int32Conveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(int));
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -151,17 +168,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((int*)LBufferPtr) = (int)AValue;
 			}
 		}
-    }
+		
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadInt32(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset, (int)AValue);
+		}
+
+		#endif
+	}
     	
     public class Int64Conveyor : Conveyor
     {
 		public Int64Conveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(long));
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -177,17 +210,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((long*)LBufferPtr) = (long)AValue;
 			}
 		}
-    }
+		
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt64(ABuffer, AOffset, (long)AValue);
+		}
+
+		#endif
+	}
     
     public class DecimalConveyor : Conveyor
     {
 		public DecimalConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(decimal));
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -203,17 +252,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((decimal*)LBufferPtr) = (decimal)AValue;
 			}
 		}
-    }
+		
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadDecimal(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteDecimal(ABuffer, AOffset, (decimal)AValue);
+		}
+
+		#endif
+	}
     
     public class StringConveyor : Conveyor
     {
 		public StringConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return sizeof(int) + (((string)AValue).Length * 2); 
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			int LLength = 0;
@@ -254,17 +319,52 @@ namespace Alphora.Dataphor.DAE.Streams
 				}
 			}
 		}
+		
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			int LLength = ByteArrayUtility.ReadInt32(ABuffer, AOffset);
+			
+			if (LLength > 0)
+			{
+				AOffset += sizeof(int);
+				StringBuilder LBuilder = new StringBuilder(LLength, LLength);
+				for (int i = 0; i < LLength; i++)
+					LBuilder.Append((char)((ushort)ByteArrayUtility.ReadInt16(ABuffer, AOffset + i)));
+				return LBuilder.ToString();
+			}
+			else
+				return String.Empty;
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			string LString = (String)AValue;
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset, LString.Length);
+
+			if (LString.Length > 0)
+			{
+				AOffset += sizeof(int);
+				for (int i = 0; i < LString.Length; i++)
+					ByteArrayUtility.WriteInt16(ABuffer, AOffset + i, (short)LString[i]);
+			}
+		}
+		
+		#endif
     }
     
     public class DateTimeConveyor : Conveyor
     {
 		public DateTimeConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return (sizeof(long));
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -280,17 +380,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((long*)LBufferPtr) = ((DateTime)AValue).Ticks;
 			}
 		}
+	
+		#else
+		
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt64(ABuffer, AOffset, ((DateTime)AValue).Ticks);
+		}
+
+		#endif		
     }
     
     public class TimeSpanConveyor : Conveyor
     {
 		public TimeSpanConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
 			return sizeof(long);
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -306,17 +422,33 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((long*)LBufferPtr) = ((TimeSpan)AValue).Ticks;
 			}
 		}
-    }
+
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt64(ABuffer, AOffset, ((TimeSpan)AValue).Ticks);
+		}
+
+		#endif
+	}
     
     public class GuidConveyor : Conveyor
     {
 		public GuidConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
-			return (sizeof(Guid));
+			return 16;
 		}
 
+		#if USE_UNSAFE
+		
 		public unsafe override object Read(byte[] ABuffer, int AOffset)
 		{
 			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
@@ -332,6 +464,20 @@ namespace Alphora.Dataphor.DAE.Streams
 				*((Guid*)LBufferPtr) = (Guid)AValue;
 			}
 		}
+
+		#else
+
+		public override object Read(byte[] ABuffer, int AOffset)
+		{
+			return ByteArrayUtility.ReadGuid(ABuffer, AOffset);
+		}
+
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteGuid(ABuffer, AOffset, (Guid)AValue);
+		}
+
+		#endif
     }
     
 	public class ObjectConveyor : Conveyor

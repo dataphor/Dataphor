@@ -201,7 +201,7 @@ namespace Alphora.Dataphor.DAE.Storage
 		/// <summary> Allocates a data page with preferencial proximity to a specified page. </summary>
 		/// <param name="AProximity"> The page by which proximity is requested. </param>
 		/// <returns> The newly allocated page's PageID. </returns>
-		public unsafe PageID AllocatePage(PageID AProximity)
+		public PageID AllocatePage(PageID AProximity)
 		{
 			// TODO: Contiguous allocation
 			return AllocatePage(AProximity.FileNumber, false);

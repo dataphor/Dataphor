@@ -30,7 +30,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
@@ -100,6 +100,7 @@
     <Compile Include="BaseList.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ByteArrayUtility.cs" />
     <Compile Include="CRC32.cs">
       <SubType>Code</SubType>
     </Compile>

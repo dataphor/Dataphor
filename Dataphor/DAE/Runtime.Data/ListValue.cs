@@ -127,8 +127,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						XX+1-XX+4 -> The lnegth of the physical representation of this value
 						XX+5-YY -> The physical representation of this value (expanded based on the expanded setting for the list value)
 		*/
-		
-		public unsafe override int GetPhysicalSize(bool AExpandStreams)
+
+		public override int GetPhysicalSize(bool AExpandStreams)
 		{
 			int LSize = 1; // write the value indicator
 			if (!IsNil)
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									if (LStreamID != StreamID.Null)
 									{
-										LElementSize = sizeof(StreamID);
+										LElementSize = StreamID.CSizeOf;
 										FWriteList[LIndex] = LElementSize;
 										LSize += LElementSize;
 									}
@@ -208,7 +208,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return LSize;
 		}
 		
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
 		{
 			if (FWriteList == null)
 				throw new RuntimeException(RuntimeException.Codes.UnpreparedWriteToPhysicalCall);
@@ -352,7 +352,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
 			Clear(); // Clear the current value of the list
 			

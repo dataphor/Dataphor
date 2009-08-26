@@ -700,7 +700,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private Stream FWriteStream; // saves the write stream between the GetPhysicalSize and WriteToPhysical calls
 		private DataValue FWriteValue; // saves the row instantiated to write the compound value if this is a compound scalar
 		
-		public unsafe override int GetPhysicalSize(bool AExpandStreams)
+		public override int GetPhysicalSize(bool AExpandStreams)
 		{
 			int LSize = 1; // Scalar header
 			if (!IsNil)
@@ -731,12 +731,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					return LSize + (int)FWriteStream.Length;
 				}
 
-				return LSize + sizeof(StreamID);
+				return LSize + StreamID.CSizeOf;
 			}
 			return LSize;
 		}
 
-		public unsafe override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
+		public override void WriteToPhysical(byte[] ABuffer, int AOffset, bool AExpandStreams)
 		{
 			// Write scalar header
 			byte LHeader = (byte)(IsNil ? 0 : 1);
@@ -777,17 +777,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						FWriteStream.Close();
 					}
 					else
-					{
-						fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-						{
-							*((StreamID*)LBufferPtr) = (StreamID)Value;
-						}
-					}
+						((StreamID)Value).Write(ABuffer, AOffset);
 				}
 			}
 		}
 
-		public unsafe override void ReadFromPhysical(byte[] ABuffer, int AOffset)
+		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
 			// Clear current value
 			if (ValuesOwned && !IsNative && (StreamID != StreamID.Null))
@@ -833,12 +828,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LStream.Close();
 					}
 					else
-					{
-						fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-						{
-							StreamID = *((StreamID*)LBufferPtr);
-						}
-					}
+						StreamID = StreamID.Read(ABuffer, AOffset);
 				}
 			}
 			else
@@ -849,7 +839,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					StreamID = StreamID.Null;
 			}
 		}
-		
+						
 		/// <summary>Opens a stream to read the data for this value. If this instance is native, the stream will be read only.</summary>
 		public override Stream OpenStream()
 		{

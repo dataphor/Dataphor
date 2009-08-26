@@ -27,6 +27,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	[TypeConverter(typeof(VersionNumberConverter))]
 	public struct VersionNumber
 	{
+		public const int CSizeOf = sizeof(int) * 4;
+		
 		public VersionNumber(int AMajor, int AMinor, int ARevision, int ABuild)
 		{
 			FMajor = -1;
@@ -245,6 +247,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 				return true;
 		}
+
+		#if USE_UNSAFE
+		
+		public static unsafe VersionNumber Read(byte[] ABuffer, int AOffset)
+		{
+			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			{
+				return *((VersionNumber*)LBufferPtr);
+			}
+		}
+
+		public unsafe void Write(byte[] ABuffer, int AOffset)
+		{
+			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
+			{
+				*((VersionNumber*)LBufferPtr) = this;
+			}
+		}
+	
+		#else
+
+		public static VersionNumber Read(byte[] ABuffer, int AOffset)
+		{
+			return 
+				new VersionNumber
+				(
+					ByteArrayUtility.ReadInt32(ABuffer, AOffset), 
+					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int)),
+					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int) * 2),
+					ByteArrayUtility.ReadInt32(ABuffer, AOffset + sizeof(int) * 3)
+				);
+		}
+
+		public void Write(byte[] ABuffer, int AOffset)
+		{
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset, Major);
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int), Minor);
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int) * 2, Revision);
+			ByteArrayUtility.WriteInt32(ABuffer, AOffset + sizeof(int) * 3, Build);
+		}
+		
+		#endif
 	}
 	
 	public class VersionNumberConverter : TypeConverter
@@ -262,25 +306,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     {
 		public VersionNumberConveyor() : base() {}
 		
-		public unsafe override int GetSize(object AValue)
+		public override int GetSize(object AValue)
 		{
-			return sizeof(VersionNumber);
+			return VersionNumber.CSizeOf;
 		}
 
-		public unsafe override object Read(byte[] ABuffer, int AOffset)
+		public override object Read(byte[] ABuffer, int AOffset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-			{
-				return *((VersionNumber*)LBufferPtr);
-			}
+			return VersionNumber.Read(ABuffer, AOffset);
 		}
 
-		public unsafe override void Write(object AValue, byte[] ABuffer, int AOffset)
+		public override void Write(object AValue, byte[] ABuffer, int AOffset)
 		{
-			fixed (byte* LBufferPtr = &(ABuffer[AOffset]))
-			{
-				*((VersionNumber*)LBufferPtr) = (VersionNumber)AValue;
-			}
+			((VersionNumber)AValue).Write(ABuffer, AOffset);
 		}
     }
     
