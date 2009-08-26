@@ -369,7 +369,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 			if (FCursor.Next())
 			{
 				if (FInternalRow == null)
-					FInternalRow = new DAE.Runtime.Data.Row(FCursor.Plan.Process, ((TableType)FCursor.Plan.DataType).RowType);
+					FInternalRow = new DAE.Runtime.Data.Row(FCursor.Plan.Process.ValueManager, ((TableType)FCursor.Plan.DataType).RowType);
 				FCursor.Select(FInternalRow);
 				if (!FCursor.EOF())
 					FRowCount++;

@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private CachedPlanHeader GetPlanHeader(ServerProcess AProcess, string AStatement, int AContextHashCode)
 		{
-			return new CachedPlanHeader(AStatement, AProcess.Plan.CurrentLibrary.Name, AContextHashCode, AProcess.ApplicationTransactionID != Guid.Empty);
+			return new CachedPlanHeader(AStatement, AProcess.ServerSession.CurrentLibrary.Name, AContextHashCode, AProcess.ApplicationTransactionID != Guid.Empty);
 		}
 
 		/// <summary>Gets a cached plan for the given statement, if available.</summary>

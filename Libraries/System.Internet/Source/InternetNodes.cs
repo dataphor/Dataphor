@@ -27,7 +27,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
     // operator System.Internet.SendEmail(const ASmtpServer: System.String, const AFromEmailAddress: System.String, const AToEmailAddress: System.String, const ASubject: System.String, const AMessage: System.String, const AHtmlAlternateView : String);
     public class SendEmailNode : InstructionNode
 	{
-        public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+        public override object InternalExecute(Program AProgram, object[] AArguments)
         {       
             //MailMessage constructor does not support semi-colon seperated list of "To" addresses
             MailMessage LMailMessage = new MailMessage();       
@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
             LMailMessage.Subject = (string)AArguments[3];
             
             //if using AlternateView don't set Body properties (this and the order of the addition of the AlternateViews has an effect on what some clients display).
-            if ((AArguments.Length == 6) && (!Operator.Operands[5].DataType.Is(AProcess.DataTypes.SystemBoolean)))
+            if ((AArguments.Length == 6) && (!Operator.Operands[5].DataType.Is(AProgram.DataTypes.SystemBoolean)))
             {        
                 LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[4], null, MediaTypeNames.Text.Plain));   
                 LMailMessage.AlternateViews.Add(AlternateView.CreateAlternateViewFromString((string)AArguments[5], null, MediaTypeNames.Text.Html));               
@@ -55,7 +55,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator HTMLAttributeEncode(const AValue : String) : String
 	public class HTMLAttributeEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			return HttpUtility.HtmlAttributeEncode((string)AArguments[0]);
 		}
@@ -64,7 +64,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator HTMLEncode(const AValue : String) : String
 	public class HTMLEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			return HttpUtility.HtmlEncode((string)AArguments[0]);
 		}
@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator HTMLDecode(const AValue : String) : String
 	public class HTMLDecodeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			return HttpUtility.HtmlDecode((string)AArguments[0]);
 		}
@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator URLEncode(const AValue : String) : String
 	public class URLEncodeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			return HttpUtility.UrlEncode((string)AArguments[0]);
 		}
@@ -91,7 +91,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator URLDecode(const AValue : String) : String
 	public class URLDecodeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			return HttpUtility.UrlDecode((string)AArguments[0]);
 		}
@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator PostHTTP(const AURL : String, AFields : table { FieldName : String, Value : String }) : String
 	public class PostHTTPNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			string LResult;
 			
@@ -109,7 +109,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			// Build the URL encoding for the body
 			StringBuilder LBody = new StringBuilder();
-			using (Row LRow = new Row(AProcess, LFields.DataType.RowType))
+			using (Row LRow = new Row(AProgram.ValueManager, LFields.DataType.RowType))
 			{
 				while (LFields.Next())
 				{
@@ -151,14 +151,14 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator LoadXML(ADocument : String) : XMLDocumentID
 	public class LoadXMLNode : InstructionNode
 	{
-		private static void WriteContent(ServerProcess AProcess, Guid AElementID, string AContent, int AChildSequence, byte AType)
+		private static void WriteContent(IServerProcess AProcess, Guid AElementID, string AContent, int AChildSequence, byte AType)
 		{
 			DataParams LParams = new DataParams();
 			LParams.Add(DataParam.Create(AProcess, "AElementID", AElementID));
 			LParams.Add(DataParam.Create(AProcess, "ASequence", AChildSequence));
 			LParams.Add(DataParam.Create(AProcess, "AContent", AContent));
 			LParams.Add(DataParam.Create(AProcess, "AType", AType));
-			((IServerProcess)AProcess).Execute
+			AProcess.Execute
 			(
 				"insert table { row { AElementID Element_ID, ASequence Sequence, AContent Content, AType Type }, key { } } into .System.Internet.XMLContent",
 				LParams
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 		}
 
 
-		private static Guid InsertElement(ServerProcess AProcess, Guid ADocumentID, XmlTextReader AReader, Guid AParentID, int ASequence)
+		private static Guid InsertElement(IServerProcess AProcess, Guid ADocumentID, XmlTextReader AReader, Guid AParentID, int ASequence)
 		{
 			Guid LElementID = Guid.NewGuid();
 			DataParams LParams = new DataParams();
@@ -176,7 +176,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			LParams.Add(DataParam.Create(AProcess, "ADocumentID", ADocumentID));
 			LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.Prefix));
 			LParams.Add(DataParam.Create(AProcess, "AName", AReader.LocalName));
-			((IServerProcess)AProcess).Execute
+			AProcess.Execute
 			(
 				"insert table { row { AElementID ID, ADocumentID Document_ID, ANamespaceAlias NamespaceAlias, "
 					+ "AName Name }, key { } } into .System.Internet.XMLElement",
@@ -190,7 +190,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				LParams.Add(DataParam.Create(AProcess, "AElementID", LElementID));
 				LParams.Add(DataParam.Create(AProcess, "AParentElementID", AParentID));
 				LParams.Add(DataParam.Create(AProcess, "ASequence", ASequence));
-				((IServerProcess)AProcess).Execute
+				AProcess.Execute
 				(
 					"insert table { row { AElementID Element_ID, AParentElementID Parent_Element_ID, ASequence Sequence }, key { } } into .System.Internet.XMLElementParent",
 					LParams
@@ -204,7 +204,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				LParams.Add(DataParam.Create(AProcess, "AElementID", LElementID));
 				LParams.Add(DataParam.Create(AProcess, "AValue", AReader.Value));
 				if (String.Compare(AReader.Name, "xmlns", true) == 0)	// Default namespace
-					((IServerProcess)AProcess).Execute
+					AProcess.Execute
 					(
 						"insert table { row { AElementID Element_ID, AValue URI }, key { } } into .System.Internet.XMLDefaultNamespace",
 						LParams
@@ -212,7 +212,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				else if (String.Compare(AReader.Prefix, "xmlns", true) == 0)	// Namespace alias
 				{
 					LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.LocalName));
-					((IServerProcess)AProcess).Execute
+					AProcess.Execute
 					(
 						"insert table { row { AElementID Element_ID, ANamespaceAlias NamespaceAlias, AValue URI }, key { } } into .System.Internet.XMLNamespaceAlias",
 						LParams
@@ -222,7 +222,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				{
 					LParams.Add(DataParam.Create(AProcess, "ANamespaceAlias", AReader.Prefix));
 					LParams.Add(DataParam.Create(AProcess, "AName", AReader.LocalName));
-					((IServerProcess)AProcess).Execute
+					AProcess.Execute
 					(
 						"insert table { row { AElementID Element_ID, ANamespaceAlias NamespaceAlias, AName Name, AValue Value }, key { } } into .System.Internet.XMLAttribute",
 						LParams
@@ -252,19 +252,19 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			return LElementID;
 		}
 
-		private static void InsertDocument(ServerProcess AProcess, Guid ADocumentID, Guid ARootElementID)
+		private static void InsertDocument(IServerProcess AProcess, Guid ADocumentID, Guid ARootElementID)
 		{
 			DataParams LParams = new DataParams();
 			LParams.Add(DataParam.Create(AProcess, "ADocumentID", ADocumentID));
 			LParams.Add(DataParam.Create(AProcess, "AElementID", ARootElementID));
-			((IServerProcess)AProcess).Execute
+			AProcess.Execute
 			(
 				"insert table { row { ADocumentID ID, AElementID Root_Element_ID }, key { } } into .System.Internet.XMLDocument",
 				LParams
 			);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{	
 			XmlTextReader LReader = new XmlTextReader(new StringReader((string)AArguments[0]));
 			LReader.WhitespaceHandling = WhitespaceHandling.None;
@@ -274,15 +274,15 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			Guid LDocumentID = Guid.NewGuid();
 			
-			AProcess.BeginTransaction(IsolationLevel.Isolated);
+			AProgram.ServerProcess.BeginTransaction(IsolationLevel.Isolated);
 			try
 			{
-				InsertDocument(AProcess, LDocumentID, InsertElement(AProcess, LDocumentID, LReader, Guid.Empty, 0));
-				AProcess.CommitTransaction();
+				InsertDocument(AProgram.ServerProcess, LDocumentID, InsertElement(AProgram.ServerProcess, LDocumentID, LReader, Guid.Empty, 0));
+				AProgram.ServerProcess.CommitTransaction();
 			}
 			catch
 			{
-				AProcess.RollbackTransaction();
+				AProgram.ServerProcess.RollbackTransaction();
 				throw;
 			}
 			
@@ -293,15 +293,15 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator SaveXML(ADocumentID : XMLDocumentID) : String
 	public class SaveXMLNode : InstructionNode
 	{
-		private void WriteElement(ServerProcess AProcess, XmlTextWriter AWriter, Guid AElementID)
+		private void WriteElement(Program AProgram, XmlTextWriter AWriter, Guid AElementID)
 		{
 			// Write the element header
 			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProcess, "AElementID", AElementID));
+			LParams.Add(DataParam.Create(AProgram.ServerProcess, "AElementID", AElementID));
 			using 
 			(
 				Row LElement = 
-					(Row)((IServerProcess)AProcess).Evaluate
+					(Row)((IServerProcess)AProgram.ServerProcess).Evaluate
 					(
 						"row from (XMLElement where ID = AElementID)",
 						LParams
@@ -317,7 +317,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			// Write any default namespace changes
 			Scalar LDefault =
-				(Scalar)((IServerProcess)AProcess).Evaluate
+				(Scalar)((IServerProcess)AProgram.ServerProcess).Evaluate
 				(
 					"URI from row from (XMLDefaultNamespace where Element_ID = AElementID)",
 					LParams
@@ -327,7 +327,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			// Write namespace aliases
 			IServerCursor LAliases = 
-				(IServerCursor)((IServerProcess)AProcess).OpenCursor
+				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
 				(
 					"XMLNamespaceAlias where Element_ID = AElementID",
 					LParams
@@ -342,12 +342,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			}
 			finally
 			{
-				((IServerProcess)AProcess).CloseCursor(LAliases);
+				((IServerProcess)AProgram.ServerProcess).CloseCursor(LAliases);
 			}
 
 			// Write the attributes
 			IServerCursor LAttributes = 
-				(IServerCursor)((IServerProcess)AProcess).OpenCursor
+				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
 				(
 					"XMLAttribute where Element_ID = AElementID",
 					LParams
@@ -367,12 +367,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			}
 			finally
 			{
-				((IServerProcess)AProcess).CloseCursor(LAttributes);
+				((IServerProcess)AProgram.ServerProcess).CloseCursor(LAttributes);
 			}
 
 			// Write the child content and elements
 			IServerCursor LChildren = 
-				(IServerCursor)((IServerProcess)AProcess).OpenCursor
+				(IServerCursor)((IServerProcess)AProgram.ServerProcess).OpenCursor
 				(
 					@"
 						(XMLContent where Element_ID = AElementID over { Element_ID, Sequence })
@@ -402,21 +402,21 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 						}
 						else	// Child element
 						{
-							WriteElement(AProcess, AWriter, (Guid)LRow["Child_Element_ID"]);
+							WriteElement(AProgram, AWriter, (Guid)LRow["Child_Element_ID"]);
 						}
 					}
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProcess).CloseCursor(LChildren);
+				((IServerProcess)AProgram.ServerProcess).CloseCursor(LChildren);
 			}
 
 			// Write the end element
 			AWriter.WriteEndElement();
 		}
 
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{			
 			StringWriter LText = new StringWriter();
 			XmlTextWriter LWriter = new XmlTextWriter(LText);
@@ -424,10 +424,10 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 
 			// Find the root element
 			DataParams LParams = new DataParams();
-			LParams.Add(DataParam.Create(AProcess, "ADocumentID", (Guid)AArguments[0]));
+			LParams.Add(DataParam.Create(AProgram.ServerProcess, "ADocumentID", (Guid)AArguments[0]));
 			Guid LRootElementID =
 				((Scalar)
-					((IServerProcess)AProcess).Evaluate
+					((IServerProcess)AProgram.ServerProcess).Evaluate
 					(
 						"Root_Element_ID from row from (XMLDocument where ID = ADocumentID)",
 						LParams
@@ -435,7 +435,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 				).AsGuid;
 
 			// Write the root element
-			WriteElement(AProcess, LWriter, LRootElementID);
+			WriteElement(AProgram, LWriter, LRootElementID);
 
 			LWriter.Flush();
 			return LText.ToString();

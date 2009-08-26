@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class ConditionedTable : Table
 	{
-		public ConditionedTable(ConditionedTableNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public ConditionedTable(ConditionedTableNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		public new ConditionedTableNode Node { get { return (ConditionedTableNode)FNode; } }
 
@@ -33,10 +33,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Process);
-			FLeftRow = new Row(Process, new Schema.RowType(Node.LeftKey.Columns));
-			FRightTable = (Table)Node.Nodes[1].Execute(Process);
-			FRightRow = new Row(Process, new Schema.RowType(Node.RightKey.Columns));
+			FLeftTable = (Table)Node.Nodes[0].Execute(Program);
+			FLeftRow = new Row(Manager, new Schema.RowType(Node.LeftKey.Columns));
+			FRightTable = (Table)Node.Nodes[1].Execute(Program);
+			FRightRow = new Row(Manager, new Schema.RowType(Node.RightKey.Columns));
         }
         
         protected override void InternalClose()
@@ -119,11 +119,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Stack.Push(AKeyValue1);
-			Process.Stack.Push(AKeyValue2);
-			int LResult = (int)ACompareNode.Execute(Process);
-			Process.Stack.Pop();
-			Process.Stack.Pop();
+			Program.Stack.Push(AKeyValue1);
+			Program.Stack.Push(AKeyValue2);
+			int LResult = (int)ACompareNode.Execute(Program);
+			Program.Stack.Pop();
+			Program.Stack.Pop();
 			return LResult;
         }
         
@@ -169,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class SemiTable : ConditionedTable
 	{
-		public SemiTable(SemiTableNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SemiTable(SemiTableNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
         protected override void InternalSelect(Row ARow)
         {
@@ -179,20 +179,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class HavingTable : SemiTable
 	{
-		public HavingTable(HavingNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public HavingTable(HavingNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	
 	/*
 	// TODO: Implement Merge having algorithm
 	public class MergeHavingTable : HavingTable
 	{
-		public MergeHavingTable(HavingNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public MergeHavingTable(HavingNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	*/
 	
 	public class SearchedHavingTable : HavingTable
 	{
-		public SearchedHavingTable(HavingNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SearchedHavingTable(HavingNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected override bool InternalNext()
 		{
@@ -221,20 +221,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public abstract class WithoutTable : SemiTable
 	{
-		public WithoutTable(WithoutNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public WithoutTable(WithoutNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	
 	/*
 	// TODO: Implement Merge without algorithm
 	public class MergeWithoutTable : WithoutTable
 	{
-		public MergeWithoutTable(WithoutNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public MergeWithoutTable(WithoutNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	*/
 	
 	public class SearchedWithoutTable : WithoutTable
 	{
-		public SearchedWithoutTable(WithoutNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SearchedWithoutTable(WithoutNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected bool FBOF;
 
@@ -317,7 +317,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class JoinTable : ConditionedTable
     {
-		public JoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public JoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		public new JoinNode Node { get { return (JoinNode)FNode; } }
 
@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key unique
     public class LeftUniqueNestedLoopJoinTable : JoinTable
     {
-		public LeftUniqueNestedLoopJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalBOF()
 		{
@@ -402,7 +402,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key unique
     public class RightUniqueNestedLoopJoinTable : JoinTable
     {
-		public RightUniqueNestedLoopJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
         protected override bool InternalNext()
         {
@@ -443,7 +443,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// Non unique nested loop join algorithm, works on any input
     public class NonUniqueNestedLoopJoinTable : JoinTable
     {
-		public NonUniqueNestedLoopJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueNestedLoopJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
         protected override bool InternalNext()
         {
@@ -496,7 +496,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// times algorithm, works on any input
     public class TimesTable : JoinTable
     {
-		public TimesTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public TimesTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		private bool FHitEOF;
 		private bool FHitBOF;
@@ -586,7 +586,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left and right join keys are unique
     public class UniqueMergeJoinTable : JoinTable
     {
-		public UniqueMergeJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public UniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -638,7 +638,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left key is unique, right key is non-unique
     public class LeftUniqueMergeJoinTable : JoinTable
     {
-		public LeftUniqueMergeJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -696,7 +696,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left key is non-unique, right key is unique
     public class RightUniqueMergeJoinTable : JoinTable
     {
-		public RightUniqueMergeJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueMergeJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -751,12 +751,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public abstract class RightSearchedJoinTable : JoinTable
     {
-		public RightSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
     }
     
     public abstract class LeftSearchedJoinTable : JoinTable
     {
-		public LeftSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
         protected override bool InternalBOF()
         {
@@ -791,7 +791,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the left input is ordered and the left key is unique
     public class LeftUniqueSearchedJoinTable : LeftSearchedJoinTable
     {
-		public LeftUniqueSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -822,7 +822,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works when only the right input is ordered and the right key is unique
     public class RightUniqueSearchedJoinTable : RightSearchedJoinTable
     {
-		public RightUniqueSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -853,7 +853,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the right input is ordered and the right key is non-unique
     public class NonUniqueRightSearchedJoinTable : RightSearchedJoinTable
     {
-		public NonUniqueRightSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueRightSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool OnRightRow()
 		{
@@ -978,7 +978,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // works when only the left input is ordered and the left key is non-unique
     public class NonUniqueLeftSearchedJoinTable : LeftSearchedJoinTable
     {
-		public NonUniqueLeftSearchedJoinTable(JoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueLeftSearchedJoinTable(JoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool OnLeftRow()
 		{
@@ -1101,7 +1101,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public abstract class OuterJoinTable : JoinTable
     {
-		public OuterJoinTable(OuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public OuterJoinTable(OuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		/// <summary>Indicates that the current row in the right cursor is a match for the current row in the left cursor.</summary>
 		protected bool FRowFound;
@@ -1119,7 +1119,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public abstract class LeftJoinTable : OuterJoinTable
     {
-		public LeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		public new LeftOuterJoinNode Node { get { return (LeftOuterJoinNode)FNode; } }
         
@@ -1152,7 +1152,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key unique
     public class RightUniqueNestedLoopLeftJoinTable : LeftJoinTable
     {
-		public RightUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -1206,7 +1206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works on any inputs
     public class NonUniqueNestedLoopLeftJoinTable : LeftJoinTable
     {
-		public NonUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueNestedLoopLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
         protected override bool InternalNext()
         {
@@ -1301,7 +1301,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left or right keys unique    
     public class MergeLeftJoinTable : LeftJoinTable
     {
-		public MergeLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public MergeLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected void NextLeft()
 		{
@@ -1446,7 +1446,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
 	public abstract class SearchedLeftJoinTable : LeftJoinTable
 	{
-		public SearchedLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	
 	// right unique searched left join algorithm
@@ -1454,7 +1454,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key is unique
 	public class RightUniqueSearchedLeftJoinTable : SearchedLeftJoinTable
 	{
-		public RightUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -1486,7 +1486,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// right join key is nonunique
 	public class NonUniqueSearchedLeftJoinTable : SearchedLeftJoinTable
 	{
-		public NonUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueSearchedLeftJoinTable(LeftOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool OnRightRow()
 		{
@@ -1623,7 +1623,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class RightJoinTable : OuterJoinTable
     {
-		public RightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
         public new RightOuterJoinNode Node { get { return (RightOuterJoinNode)FNode; } }
         
@@ -1684,7 +1684,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// left join key unique
     public class LeftUniqueNestedLoopRightJoinTable : RightJoinTable
     {
-		public LeftUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
         protected override bool InternalNext()
         {
@@ -1738,7 +1738,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// works on any inputs    
     public class NonUniqueNestedLoopRightJoinTable : RightJoinTable
     {
-		public NonUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public NonUniqueNestedLoopRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         protected override bool InternalNext()
         {
@@ -1833,7 +1833,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left or right join keys unique
     public class MergeRightJoinTable : RightJoinTable
     {
-		public MergeRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public MergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected void NextRight()
 		{
@@ -1978,7 +1978,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class UniqueMergeRightJoinTable : RightJoinTable
     {
-		public UniqueMergeRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public UniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected override bool InternalNext()
 		{
@@ -2028,7 +2028,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is unique, right join key is not
 	public class LeftUniqueMergeRightJoinTable : RightJoinTable
 	{
-		public LeftUniqueMergeRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -2130,7 +2130,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // right join key is unique, left join key is not
 	public class RightUniqueMergeRightJoinTable : RightJoinTable
 	{
-		public RightUniqueMergeRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public RightUniqueMergeRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected override bool InternalNext()
 		{
@@ -2230,7 +2230,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
 	public abstract class SearchedRightJoinTable : RightJoinTable
 	{
-		public SearchedRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 	}
 	
     // left unique searched right join algorithm
@@ -2238,7 +2238,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is unique
 	public class LeftUniqueSearchedRightJoinTable : SearchedRightJoinTable
 	{
-		public LeftUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public LeftUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected override bool InternalNext()
 		{
@@ -2270,7 +2270,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // left join key is nonunique
     public class NonUniqueSearchedRightJoinTable : SearchedRightJoinTable
     {
-		public NonUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public NonUniqueSearchedRightJoinTable(RightOuterJoinNode ANode, Program AProgram) : base(ANode, AProgram) {}
 
 		protected bool OnLeftRow()
 		{

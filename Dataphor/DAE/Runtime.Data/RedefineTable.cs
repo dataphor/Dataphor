@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class RedefineTable : Table
     {
-		public RedefineTable(RedefineNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public RedefineTable(RedefineNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new RedefineNode Node { get { return (RedefineNode)FNode; } }
         
@@ -31,10 +31,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = Node.Nodes[0].Execute(Process) as Table;
+			FSourceTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
 			}
 			catch
 			{
@@ -82,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
             }
 
-	        Process.Stack.Push(FSourceRow);
+	        Program.Stack.Push(FSourceRow);
             try
             {
 				for (int LIndex = 0; LIndex < Node.RedefineColumnOffsets.Length; LIndex++)
@@ -90,13 +90,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.RedefineColumnOffsets[LIndex]].Name);
 					if (LColumnIndex >= 0)
 					{
-						ARow[LColumnIndex] = Node.Nodes[LIndex + 1].Execute(Process);
+						ARow[LColumnIndex] = Node.Nodes[LIndex + 1].Execute(Program);
 					}
 				}
             }
             finally
             {
-				Process.Stack.Pop();
+				Program.Stack.Pop();
             }
         }
         

@@ -3,6 +3,7 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
 using System.IO;
 using System.Text;
@@ -11,19 +12,17 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
-
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
+
+	// TODO: Refactor these dependencies
+	using Alphora.Dataphor.DAE.Runtime; // Program
+	using Alphora.Dataphor.DAE.Runtime.Data; // DataValue
+	using Alphora.Dataphor.DAE.Runtime.Instructions; // PlanNode
+
     public enum ConstraintType 
     { 
 		/// <summary>A scalar type constraint is a truth valued expression which limits the set of values in a scalar type.</summary>
@@ -110,15 +109,15 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LMessage;
 		}
 		
-		protected abstract PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition);
-		public string GetViolationMessage(ServerProcess AProcess, Transition ATransition)
+		protected abstract PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition);
+		public string GetViolationMessage(Program AProgram, Transition ATransition)
 		{
 			try
 			{
-				PlanNode LNode = GetViolationMessageNode(AProcess, ATransition);
+				PlanNode LNode = GetViolationMessageNode(AProgram, ATransition);
 				if (LNode != null)
 				{
-					string LMessage = (string)LNode.Execute(AProcess);
+					string LMessage = (string)LNode.Execute(AProgram);
 					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
 						LMessage = LMessage + '.';
 					return LMessage;
@@ -131,7 +130,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public abstract void Validate(ServerProcess AProcess, Transition ATransition);
+		public abstract void Validate(Program AProgram, Transition ATransition);
     }
     
     public abstract class SimpleConstraint : Constraint
@@ -154,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			set { FViolationMessageNode = value; }
 		}
 
-		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
 		{
 			return FViolationMessageNode;
 		}
@@ -224,12 +223,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LStatement;
 		}
 		
-		public override void Validate(ServerProcess AProcess, Transition ATransition)
+		public override void Validate(Program AProgram, Transition ATransition)
 		{
 			object LObject;
 			try
 			{
-				LObject = Node.Execute(AProcess);
+				LObject = Node.Execute(AProgram);
 			}
 			catch (Exception E)
 			{
@@ -238,7 +237,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				
 			if ((LObject != null) && !(bool)LObject)
 			{
-				string LMessage = GetViolationMessage(AProcess, ATransition);
+				string LMessage = GetViolationMessage(AProgram, ATransition);
 				if (LMessage != String.Empty)
 					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 				else
@@ -314,12 +313,12 @@ namespace Alphora.Dataphor.DAE.Schema
 				return new Block();
 		}
 
-		public override void Validate(ServerProcess AProcess, Transition ATransition)
+		public override void Validate(Program AProgram, Transition ATransition)
 		{
 			object LObject;
 			try
 			{
-				LObject = Node.Execute(AProcess);
+				LObject = Node.Execute(AProgram);
 			}
 			catch (Exception E)
 			{
@@ -328,7 +327,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			if ((LObject != null) && !(bool)LObject)
 			{
-				string LMessage = GetViolationMessage(AProcess, ATransition);
+				string LMessage = GetViolationMessage(AProgram, ATransition);
 				if (LMessage != String.Empty)
 					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 				else
@@ -447,17 +446,17 @@ namespace Alphora.Dataphor.DAE.Schema
 			return true;
 		}
 
-		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
 		{
 			return FViolationMessageNode;
 		}
 
-		public override void Validate(ServerProcess AProcess, Transition ATransition)
+		public override void Validate(Program AProgram, Transition ATransition)
 		{
 			object LObject;
 			try
 			{
-				LObject = Node.Execute(AProcess);
+				LObject = Node.Execute(AProgram);
 			}
 			catch (Exception E)
 			{
@@ -466,7 +465,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			if ((LObject != null) && !(bool)LObject)
 			{
-				string LMessage = GetViolationMessage(AProcess, ATransition);
+				string LMessage = GetViolationMessage(AProgram, ATransition);
 				if (LMessage != String.Empty)
 					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 				else
@@ -657,7 +656,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		protected override PlanNode GetViolationMessageNode(ServerProcess AProcess, Transition ATransition)
+		protected override PlanNode GetViolationMessageNode(Program AProgram, Transition ATransition)
 		{
 			switch (ATransition)
 			{
@@ -668,7 +667,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return null;
 		}
 
-		public override void Validate(ServerProcess AProcess, Transition ATransition)
+		public override void Validate(Program AProgram, Transition ATransition)
 		{
 			object LObject;
 			switch (ATransition)
@@ -676,7 +675,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				case Transition.Insert :
 					try
 					{
-						LObject = OnInsertNode.Execute(AProcess);
+						LObject = OnInsertNode.Execute(AProgram);
 					}
 					catch (Exception E)
 					{
@@ -685,7 +684,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					
 					if ((LObject != null) && !(bool)LObject)
 					{
-						string LMessage = GetViolationMessage(AProcess, ATransition);
+						string LMessage = GetViolationMessage(AProgram, ATransition);
 						if (LMessage != String.Empty)
 							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 						else
@@ -696,7 +695,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				case Transition.Update :
 					try
 					{
-						LObject = OnUpdateNode.Execute(AProcess);
+						LObject = OnUpdateNode.Execute(AProgram);
 					}
 					catch (Exception E)
 					{
@@ -705,7 +704,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 					if ((LObject != null) && !(bool)LObject)
 					{
-						string LMessage = GetViolationMessage(AProcess, ATransition);
+						string LMessage = GetViolationMessage(AProgram, ATransition);
 						if (LMessage != String.Empty)
 							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 						else
@@ -716,7 +715,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				case Transition.Delete :
 					try
 					{
-						LObject = OnDeleteNode.Execute(AProcess);
+						LObject = OnDeleteNode.Execute(AProgram);
 					}
 					catch (Exception E)
 					{
@@ -725,7 +724,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					
 					if ((LObject != null) && !(bool)LObject)
 					{
-						string LMessage = GetViolationMessage(AProcess, ATransition);
+						string LMessage = GetViolationMessage(AProgram, ATransition);
 						if (LMessage != String.Empty)
 							throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 						else
@@ -1048,13 +1047,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LMessage;
 		}
 		
-		public string GetViolationMessage(ServerProcess AProcess)
+		public string GetViolationMessage(Program AProgram)
 		{
 			try
 			{
 				if (FViolationMessageNode != null)
 				{
-					string LMessage = (string)FViolationMessageNode.Execute(AProcess);
+					string LMessage = (string)FViolationMessageNode.Execute(AProgram);
 					if ((LMessage != String.Empty) && (LMessage[LMessage.Length - 1] != '.'))
 						LMessage = LMessage + '.';
 					return LMessage;
@@ -1067,12 +1066,12 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		public void Validate(ServerProcess AProcess)
+		public void Validate(Program AProgram)
 		{
 			object LObject;
 			try
 			{
-				LObject = Node.Execute(AProcess);
+				LObject = Node.Execute(AProgram);
 			}
 			catch (Exception E)
 			{
@@ -1081,7 +1080,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			if ((LObject != null) && !(bool)LObject)
 			{
-				string LMessage = GetViolationMessage(AProcess);
+				string LMessage = GetViolationMessage(AProgram);
 				if (LMessage != String.Empty)
 					throw new RuntimeException(RuntimeException.Codes.GeneralConstraintViolation, ErrorSeverity.User, LMessage);
 				else

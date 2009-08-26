@@ -199,9 +199,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		protected Type FDifferenceAlgorithm;
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			DifferenceTable LTable = (DifferenceTable)Activator.CreateInstance(FDifferenceAlgorithm, new object[]{this, AProcess});
+			DifferenceTable LTable = (DifferenceTable)Activator.CreateInstance(FDifferenceAlgorithm, new object[]{this, AProgram});
 			try
 			{
 				LTable.Open();
@@ -237,37 +237,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			if (AIsDescending && PropagateDefaultLeft)
-				return LeftNode.Default(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return LeftNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (PropagateChangeLeft)
-				return LeftNode.Change(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return LeftNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (AIsDescending && PropagateValidateLeft)
-				return LeftNode.Validate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return LeftNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
-		protected void ValidatePredicate(ServerProcess AProcess, Row ARow)
+		protected void ValidatePredicate(Program AProgram, Row ARow)
 		{
 			if (EnforcePredicate)
 			{
 				bool LRightNodeValid = false;
 				try
 				{
-					RightNode.Insert(AProcess, null, ARow, null, false);
+					RightNode.Insert(AProgram, null, ARow, null, false);
 					LRightNodeValid = true;
-					RightNode.Delete(AProcess, ARow, false, false);
+					RightNode.Delete(AProgram, ARow, false, false);
 				}
 				catch (DataphorException LException)
 				{
@@ -280,58 +280,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			switch (PropagateInsertLeft)
 			{
 				case PropagateAction.True :
 					if (!AUnchecked)
-						ValidatePredicate(AProcess, ANewRow);
-					LeftNode.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+						ValidatePredicate(AProgram, ANewRow);
+					LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
 					if (!AUnchecked)
-						ValidatePredicate(AProcess, ANewRow);
+						ValidatePredicate(AProgram, ANewRow);
 					
-					using (Row LLeftRow = new Row(AProcess, LeftNode.DataType.RowType))
+					using (Row LLeftRow = new Row(AProgram.ValueManager, LeftNode.DataType.RowType))
 					{
 						ANewRow.CopyTo(LLeftRow);
-						using (Row LCurrentRow = LeftNode.Select(AProcess, LLeftRow))
+						using (Row LCurrentRow = LeftNode.Select(AProgram, LLeftRow))
 						{
 							if (LCurrentRow != null)
 							{
 								if (PropagateInsertLeft == PropagateAction.Ensure)
-									LeftNode.Update(AProcess, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									LeftNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
 							}
 							else
-								LeftNode.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								LeftNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 						}
 					}
 				break;
 			}
 		}
 		
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateUpdateLeft)
 			{
 				if (!AUnchecked)
-					ValidatePredicate(AProcess, ANewRow);
-				LeftNode.Update(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					ValidatePredicate(AProgram, ANewRow);
+				LeftNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 			}
 		}
 		
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateDeleteLeft)
-				LeftNode.Delete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+				LeftNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
-			LeftNode.JoinApplicationTransaction(AProcess, ARow);
+			LeftNode.JoinApplicationTransaction(AProgram, ARow);
 		}
 	}
 }

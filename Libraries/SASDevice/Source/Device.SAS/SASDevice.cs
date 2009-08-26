@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 		}
 
 		// ShouldIncludeColumn
-		public override bool ShouldIncludeColumn(ServerProcess AProcess, string ATableName, string AColumnName, string ADomainName)
+		public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
 		{
 			switch (ADomainName.ToLower())
 			{
@@ -292,7 +292,7 @@ order by libname, memname, indxname, indxpos
 						"SASDevice.SASOLEDBConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
 				
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("ServerID", Device.ServerID);
@@ -304,7 +304,7 @@ order by libname, memname, indxname, indxpos
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);
 
-			SQLConnection LConnection = (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			SQLConnection LConnection = (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
 			LConnection.DefaultUseParametersForCursors = false;
 			return LConnection;
 		}
@@ -365,7 +365,7 @@ order by libname, memname, indxname, indxpos
 				{
 					SQLScalarType LScalarType;
 					Schema.TableVarColumn LColumn;
-					Schema.Key LKey = ATableVar.FindClusteringKey();
+					Schema.Key LKey = Program.FindClusteringKey(ATableVar);
 					#if USESEEKTOUPDATE
 					object[] LKeyValues = new object[LKey.Columns.Count];
 					for (int LIndex = 0; LIndex < LKeyValues.Length; LIndex++)
@@ -439,7 +439,7 @@ order by libname, memname, indxname, indxpos
 				{
 					SQLScalarType LScalarType;
 					Schema.TableVarColumn LColumn;
-					Schema.Key LKey = ATableVar.FindClusteringKey();
+					Schema.Key LKey = Program.FindClusteringKey(ATableVar);
 					
 					#if USESEEKTOUPDATE
 					object[] LKeyValues = new object[LKey.Columns.Count];
@@ -537,7 +537,7 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASBoolean(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToBoolean(AValue);
 		}
@@ -567,7 +567,7 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASByte(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToByte(AValue);
 		}
@@ -597,7 +597,7 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASShort(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt16(AValue);
 		}
@@ -627,7 +627,7 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASInteger(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			 return Convert.ToInt32(AValue);
 		}
@@ -657,7 +657,7 @@ order by libname, memname, indxname, indxpos
 	{
 		public SASLong(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt64(AValue);
 		}
@@ -691,7 +691,7 @@ order by libname, memname, indxname, indxpos
     {
 		public SASDecimal(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToDecimal(AValue);
 		}
@@ -741,7 +741,7 @@ order by libname, memname, indxname, indxpos
     {
 		public SASTimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
@@ -791,7 +791,7 @@ order by libname, memname, indxname, indxpos
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 		
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue));
 		}
@@ -841,7 +841,7 @@ order by libname, memname, indxname, indxpos
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new DateTime(1960, 1, 1).AddDays(Convert.ToDouble(AValue));
 		}
@@ -891,7 +891,7 @@ order by libname, memname, indxname, indxpos
 			return String.Format("'{0}'", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo));
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LDateTime = new DateTime(1960, 1, 1).AddSeconds(Convert.ToDouble(AValue));
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
@@ -926,7 +926,7 @@ order by libname, memname, indxname, indxpos
     {
 		public SASMoney(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToDecimal(AValue);
 		}
@@ -972,7 +972,7 @@ order by libname, memname, indxname, indxpos
     {
 		public SASString(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (string)AValue;
 		}
@@ -1015,7 +1015,7 @@ order by libname, memname, indxname, indxpos
 		public SASUInteger(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		public SASUInteger(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromUInt32(AProcess, Convert.ToUInt32((decimal)AValue));
 		}
@@ -1044,7 +1044,7 @@ order by libname, memname, indxname, indxpos
 		public SASUShort(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		public SASUShort(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromUInt16(AProcess, Convert.ToUInt16((decimal)AValue));
 		}
@@ -1073,7 +1073,7 @@ order by libname, memname, indxname, indxpos
 		public SASSByte(ScalarType AScalarType, D4.ClassDefinition AClassDefinition) : base(AScalarType, AClassDefinition){}
 		public SASSByte(ScalarType AScalarType, D4.ClassDefinition AClassDefinition, bool AIsSystem) : base(AScalarType, AClassDefinition, AIsSystem){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromSByte(AProcess, Convert.ToSByte((decimal)AValue));
 		}

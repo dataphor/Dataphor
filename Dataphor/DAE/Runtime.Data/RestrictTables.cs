@@ -6,13 +6,11 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
 	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
@@ -22,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class RestrictTable : Table
     {
-        public RestrictTable(RestrictNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+        public RestrictTable(RestrictNode ANode, Program AProgram) : base(ANode, AProgram){}
         
         public new RestrictNode Node { get { return (RestrictNode)FNode; } }
 		
@@ -31,10 +29,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
 			try
 			{
-				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
 			}
 			catch
 			{
@@ -66,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class FilterTable : RestrictTable
     {
-		public FilterTable(RestrictNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public FilterTable(RestrictNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool FBOF;
 		
@@ -87,10 +85,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             while (FSourceTable.Next())
             {
                 FSourceTable.Select(FSourceRow);
-                Process.Stack.Push(FSourceRow);
+                Program.Stack.Push(FSourceRow);
                 try
                 {
-					object LValue = Node.Nodes[1].Execute(Process);
+					object LValue = Node.Nodes[1].Execute(Program);
 					if ((LValue != null) && (bool)LValue)
 					{
 						FBOF = false;
@@ -99,7 +97,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
-					Process.Stack.Pop();
+					Program.Stack.Pop();
 				}
             }
             return false;
@@ -145,7 +143,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class ScanTable : RestrictTable
     {
-		public ScanTable(RestrictNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public ScanTable(RestrictNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool FBOF;
 		protected bool FEOF;
@@ -174,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				FLastKeys = new ScanKey[Node.ClosedConditions.Count + Node.OpenConditions.Count];
 			}
 		
-			Process.Stack.Push(null); // var Dummy : Scalar?
+			Program.Stack.Push(null); // var Dummy : Scalar?
 			try
 			{
 				for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
@@ -187,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						// A condition in which there is only one condition that is equal, or either both conditions are equal, or both conditions are not equal, and comparison operators are opposite
 						if (LCondition.Count == 1)
 						{
-							FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), false);
+							FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Program), false);
 							FLastKeys[LIndex] = new ScanKey(FFirstKeys[LIndex].Argument, false);
 						}
 						else
@@ -195,9 +193,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							// If both conditions are equal, and the arguments are not equal, this is a contradiction
 							if (LCondition[0].Instruction == Instructions.Equal)
 							{
-								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), false);
-								FLastKeys[LIndex] = new ScanKey(LCondition[1].Argument.Execute(Process), false);
-								if (!(bool)Compiler.EmitEqualNode(Process.Plan, new ValueNode(LCondition[0].Argument.DataType, FFirstKeys[LIndex].Argument), new ValueNode(LCondition[1].Argument.DataType, FLastKeys[LIndex].Argument)).Execute(Process))
+								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Program), false);
+								FLastKeys[LIndex] = new ScanKey(LCondition[1].Argument.Execute(Program), false);
+								if (!(bool)Compiler.EmitEqualNode(Program.Plan, new ValueNode(LCondition[0].Argument.DataType, FFirstKeys[LIndex].Argument), new ValueNode(LCondition[1].Argument.DataType, FLastKeys[LIndex].Argument)).Execute(Program))
 								{
 									FIsContradiction = true;
 									return;
@@ -223,10 +221,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									LGreaterCondition = LCondition[0];
 								}
 								
-								FFirstKeys[LIndex] = new ScanKey(LGreaterCondition.Argument.Execute(Process), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 1 : 0].Instruction));
-								FLastKeys[LIndex] = new ScanKey(LLessCondition.Argument.Execute(Process), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 0 : 1].Instruction));
+								FFirstKeys[LIndex] = new ScanKey(LGreaterCondition.Argument.Execute(Program), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 1 : 0].Instruction));
+								FLastKeys[LIndex] = new ScanKey(LLessCondition.Argument.Execute(Program), Instructions.IsExclusiveInstruction(Node.ClosedConditions[LIndex][LIsFirstLess ? 0 : 1].Instruction));
 								
-								int LCompareValue = (int)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LLessCondition.Argument.DataType, FLastKeys[LIndex].Argument), Instructions.Compare, new ValueNode(LGreaterCondition.Argument.DataType, FFirstKeys[LIndex].Argument)).Execute(Process);
+								int LCompareValue = (int)Compiler.EmitBinaryNode(Program.Plan, new ValueNode(LLessCondition.Argument.DataType, FLastKeys[LIndex].Argument), Instructions.Compare, new ValueNode(LGreaterCondition.Argument.DataType, FFirstKeys[LIndex].Argument)).Execute(Program);
 								if ((LLessCondition.Instruction == Instructions.Less) && (LGreaterCondition.Instruction == Instructions.Greater))
 								{
 									if (LCompareValue <= 0)
@@ -260,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						if (LCondition.Count == 1)
 							if (Instructions.IsLessInstruction(LCondition[0].Instruction))
 							{
-								FLastKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
+								FLastKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Program), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
 								if ((FLastKeys[LIndex].Argument == null))
 								{
 									FIsContradiction = true;
@@ -269,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else
 							{
-								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Process), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
+								FFirstKeys[LIndex] = new ScanKey(LCondition[0].Argument.Execute(Program), Instructions.IsExclusiveInstruction(LCondition[0].Instruction));
 								if ((FFirstKeys[LIndex].Argument == null))
 								{
 									FIsContradiction = true;
@@ -294,8 +292,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									LCompareCondition = LCondition[0];
 								}
 								
-								object LEqualVar = LEqualCondition.Argument.Execute(Process);
-								object LCompareVar = LCompareCondition.Argument.Execute(Process);
+								object LEqualVar = LEqualCondition.Argument.Execute(Program);
+								object LCompareVar = LCompareCondition.Argument.Execute(Program);
 								
 								if (Instructions.IsLessInstruction(LCompareCondition.Instruction))
 								{
@@ -316,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									}
 								}
 									
-								if (!(bool)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LEqualCondition.Argument.DataType, LEqualVar), LCompareCondition.Instruction, new ValueNode(LCompareCondition.Argument.DataType, LCompareVar)).Execute(Process))
+								if (!(bool)Compiler.EmitBinaryNode(Program.Plan, new ValueNode(LEqualCondition.Argument.DataType, LEqualVar), LCompareCondition.Instruction, new ValueNode(LCompareCondition.Argument.DataType, LCompareVar)).Execute(Program))
 								{
 									FIsContradiction = true;
 									return;
@@ -324,9 +322,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else 
 							{
-								object LZeroVar = LCondition[0].Argument.Execute(Process);
-								object LOneVar = LCondition[1].Argument.Execute(Process);
-								int LCompareValue = (int)Compiler.EmitBinaryNode(Process.Plan, new ValueNode(LCondition[0].Argument.DataType, LZeroVar), Instructions.Compare, new ValueNode(LCondition[1].Argument.DataType, LOneVar)).Execute(Process);
+								object LZeroVar = LCondition[0].Argument.Execute(Program);
+								object LOneVar = LCondition[1].Argument.Execute(Program);
+								int LCompareValue = (int)Compiler.EmitBinaryNode(Program.Plan, new ValueNode(LCondition[0].Argument.DataType, LZeroVar), Instructions.Compare, new ValueNode(LCondition[1].Argument.DataType, LOneVar)).Execute(Program);
 								if (Instructions.IsLessInstruction(LCondition[0].Instruction))
 								{
 									// both are less instructions
@@ -372,7 +370,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Stack.Pop();
+				Program.Stack.Pop();
 			}
 		}
 		
@@ -385,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				LRowType = new Schema.RowType();
 				for (int LIndex = 0; LIndex < FFirstKeys.Length; LIndex++)
 					LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
-				FFirstKey = new Row(Process, LRowType);
+				FFirstKey = new Row(Manager, LRowType);
 				for (int LIndex = 0; LIndex < FFirstKeys.Length; LIndex++)
 					if (FFirstKeys[LIndex].Argument != null)
 						FFirstKey[LIndex] = FFirstKeys[LIndex].Argument;
@@ -398,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				LRowType = new Schema.RowType();
 				for (int LIndex = 0; LIndex < FLastKeys.Length; LIndex++)
 					LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
-				FLastKey = new Row(Process, LRowType);
+				FLastKey = new Row(Manager, LRowType);
 				for (int LIndex = 0; LIndex < FLastKeys.Length; LIndex++)
 					if (FLastKeys[LIndex].Argument != null)
 						FLastKey[LIndex] = FLastKeys[LIndex].Argument;
@@ -723,11 +721,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected int CompareKeyValues(object AKeyValue1, object AKeyValue2, PlanNode ACompareNode)
         {
-			Process.Stack.Push(AKeyValue1);
-			Process.Stack.Push(AKeyValue2);
-			int LResult = (int)ACompareNode.Execute(Process);
-			Process.Stack.Pop();
-			Process.Stack.Pop();
+			Program.Stack.Push(AKeyValue1);
+			Program.Stack.Push(AKeyValue2);
+			int LResult = (int)ACompareNode.Execute(Program);
+			Program.Stack.Pop();
+			Program.Stack.Pop();
 			return LResult;
         }
         
@@ -976,7 +974,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class SeekTable : RestrictTable
     {
-		public SeekTable(RestrictNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SeekTable(RestrictNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected bool FBOF;
 		protected bool FEOF;
@@ -987,14 +985,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			base.InternalOpen();
 			int FKeyCount = 0;
-			FKeyRow = new Row(Process, new Schema.RowType(FSourceTable.Order.Columns));
-			Process.Stack.Push(FKeyRow);
+			FKeyRow = new Row(Manager, new Schema.RowType(FSourceTable.Order.Columns));
+			Program.Stack.Push(FKeyRow);
 			try
 			{
 				object LVar;
 				for (int LIndex = 0; LIndex < Node.FirstKeyNodes.Length; LIndex++)
 				{
-					LVar = Node.FirstKeyNodes[LIndex].Argument.Execute(Process);
+					LVar = Node.FirstKeyNodes[LIndex].Argument.Execute(Program);
 					if ((LVar != null))
 					{
 						FKeyRow[LIndex] = LVar;
@@ -1004,7 +1002,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Stack.Pop();
+				Program.Stack.Pop();
 			}
 			FRowFound = (FKeyCount > 0) && FSourceTable.FindKey(FKeyRow);
 			InternalFirst();

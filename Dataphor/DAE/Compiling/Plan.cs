@@ -30,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		{
 			FServerProcess = AServerProcess;
 			FCatalogLocks = new ArrayList();
-			FSymbols = new Symbols(FServerProcess.Stack.MaxStackDepth, FServerProcess.Stack.MaxCallDepth);
+			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
 		}
@@ -97,6 +97,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// Process        
 		protected ServerProcess FServerProcess;
 		public ServerProcess ServerProcess { get { return FServerProcess; } }
+		
+		private Program FInternalProgram;
+		protected Program InternalProgram
+		{
+			get
+			{
+				if (FInternalProgram == null)
+					FInternalProgram = new Program(FServerProcess);
+				return FInternalProgram;
+			}
+		}
 		
 		public void BindToProcess(ServerProcess AProcess)
 		{
@@ -174,15 +185,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (!ANode.IsLiteral)
 				throw new CompilerException(CompilerException.Codes.LiteralArgumentRequired, CompilerErrorLevel.NonFatal, AArgumentName);
 				
-			return ANode.Execute(FServerProcess);
+			InternalProgram.Code = ANode;
+			return InternalProgram.Execute(null);
 		}
 		
 		/// <summary>
-		/// Used to execute arbitrary plan nodes at compile-time. Note that the process stack is potentially affected by this run.
+		/// Used to execute arbitrary plan nodes at compile-time.
 		/// </summary>
 		public object ExecuteNode(PlanNode ANode)
 		{
-			return ANode.Execute(FServerProcess);
+			InternalProgram.Code = ANode;
+			return InternalProgram.Execute(null);
 		}
 		
 		// CatalogLocks
@@ -586,9 +599,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public Schema.LoadedLibrary CurrentLibrary { get { return FServerProcess.ServerSession.CurrentLibrary; } }
 		
-		public Schema.NameResolutionPath NameResolutionPath { get { return FServerProcess.ServerSession.CurrentLibrary.GetNameResolutionPath(FServerProcess.ServerSession.Server.SystemLibrary); } }
+		public Schema.NameResolutionPath NameResolutionPath { get { return FServerProcess.ServerSession.NameResolutionPath; } }
 		
-		public IStreamManager StreamManager { get { return (IStreamManager)FServerProcess; } }
+		public IStreamManager StreamManager { get { return FServerProcess.StreamManager; } }
+		
+		public IValueManager ValueManager { get { return FServerProcess.ValueManager; } }
 
 		public Schema.Device TempDevice { get { return FServerProcess.ServerSession.Server.TempDevice; } }
 		

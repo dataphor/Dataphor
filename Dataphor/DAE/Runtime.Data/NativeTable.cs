@@ -20,20 +20,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public const int CDefaultFanout = 100;
 		public const int CDefaultCapacity = 100;
 
-		public NativeTable(ServerProcess AProcess, Schema.TableVar ATableVar) : base()
+		public NativeTable(IValueManager AManager, Schema.TableVar ATableVar) : base()
 		{
 			TableVar = ATableVar;
 			FFanout = CDefaultFanout;
 			FCapacity = CDefaultCapacity;
-			Create(AProcess);
+			Create(AManager);
 		}
 		
-		public NativeTable(ServerProcess AProcess, Schema.TableVar ATableVar, int AFanout, int ACapacity) : base()
+		public NativeTable(IValueManager AManager, Schema.TableVar ATableVar, int AFanout, int ACapacity) : base()
 		{
 			TableVar = ATableVar;
 			FFanout = AFanout;
 			FCapacity = ACapacity;
-			Create(AProcess);
+			Create(AManager);
 		}
 		
 		public Schema.TableVar TableVar;
@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		#endif
 		
 		// TODO: Compile row types for each index, saving column indexes to prevent the need for lookup during insert, update, and delete.		
-		private void Create(ServerProcess AProcess)
+		private void Create(IValueManager AManager)
 		{
 			TableType = TableVar.DataType;
 			RowType = TableType.RowType;
@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 			// Create the indexes required to store data as described by the given table variable
 			// Determine Fanout, Capacity, Clustering Key
-			Schema.Order LClusteringKey = TableVar.FindClusteringOrder(AProcess.Plan);
+			Schema.Order LClusteringKey = AManager.FindClusteringOrder(TableVar);
 			LKeyRowType = new Schema.RowType(LClusteringKey.Columns);
 			LDataRowType = new Schema.RowType();
 			foreach (Schema.Column LColumn in TableVar.DataType.Columns)
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				
 			// Add an internal identifier for uniqueness of keys in nonunique indexes
 			#if USEINTERNALID
-			FInternalIDColumn = new Schema.TableVarColumn(new Schema.Column(CInternalIDColumnName, AProcess.DataTypes.SystemGuid), Schema.TableVarColumnType.InternalID);
+			FInternalIDColumn = new Schema.TableVarColumn(new Schema.Column(CInternalIDColumnName, AManager.DataTypes.SystemGuid), Schema.TableVarColumnType.InternalID);
 			LDataRowType.Columns.Add(FInternalIDColumn.Column);
 			#endif
 					
@@ -105,9 +105,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			foreach (Schema.Key LNonClusteredKey in TableVar.Keys)
 				if (!LNonClusteredKey.IsSparse && LNonClusteredKey.Enforced)
 				{
-					if (!ClusteredIndex.Key.Includes(AProcess.Plan, LNonClusteredKey))
+					if (!AManager.OrderIncludesKey(ClusteredIndex.Key, LNonClusteredKey))
 					{
-						LKey = new Schema.Order(LNonClusteredKey, AProcess.Plan);
+						LKey = AManager.OrderFromKey(LNonClusteredKey);
 						if (!NonClusteredIndexes.Contains(LKey))
 						{
 							LKeyRowType = new Schema.RowType(LKey.Columns);
@@ -130,10 +130,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else
 				{
 					// This is a potentially non-unique index, so add a GUID to ensure uniqueness of the key in the BTree
-					LKey = new Schema.Order(LNonClusteredKey, AProcess.Plan);
+					LKey = AManager.OrderFromKey(LNonClusteredKey);
 					#if USEINTERNALID
 					Schema.OrderColumn LUniqueColumn = new Schema.OrderColumn(FInternalIDColumn, LKey.IsAscending);
-					LUniqueColumn.Sort = ((Schema.ScalarType)LUniqueColumn.Column.DataType).GetUniqueSort(AProcess.Plan);
+					LUniqueColumn.Sort = AManager.GetUniqueSort(LUniqueColumn.Column.DataType);
 					LKey.Columns.Add(LUniqueColumn);
 					#endif
 
@@ -161,10 +161,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				// This is a potentially non-unique index, so add a GUID to ensure uniqueness of the key in the BTree
 				LKey = new Schema.Order(LOrder);
 				#if USEINTERNALID
-				if (!LKey.Includes(AProcess.Plan, LClusteringKey))
+				if (!AManager.OrderIncludesOrder(LKey, LClusteringKey))
 				{
 					Schema.OrderColumn LUniqueColumn = new Schema.OrderColumn(FInternalIDColumn, LOrder.IsAscending);
-					LUniqueColumn.Sort = ((Schema.ScalarType)LUniqueColumn.Column.DataType).GetUniqueSort(AProcess.Plan);
+					LUniqueColumn.Sort = AManager.GetUniqueSort(LUniqueColumn.Column.DataType);
 					LKey.Columns.Add(LUniqueColumn);
 				}
 				#endif
@@ -189,30 +189,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public void Drop(ServerProcess AProcess)
+		public void Drop(IValueManager AManager)
 		{
 			for (int LIndex = NonClusteredIndexes.Count - 1; LIndex >= 0; LIndex--)
 			{
-				NonClusteredIndexes[LIndex].Drop(AProcess);
+				NonClusteredIndexes[LIndex].Drop(AManager);
 				NonClusteredIndexes.RemoveAt(LIndex);
 			}
 			
-			ClusteredIndex.Drop(AProcess);
+			ClusteredIndex.Drop(AManager);
 			
 			FRowCount = 0;
 		}
 		
 		#if USEINTERNALID
-		private void IndexInsert(ServerProcess AProcess, NativeRowTree AIndex, Row ARow, Guid AInternalID)
+		private void IndexInsert(IValueManager AManager, NativeRowTree AIndex, Row ARow, Guid AInternalID)
 		#else
-		private void IndexInsert(ServerProcess AProcess, NativeRowTree AIndex, Row ARow)
+		private void IndexInsert(IValueManager AManager, NativeRowTree AIndex, Row ARow)
 		#endif
 		{
 			int LColumnIndex;
-			Row LKey = new Row(AProcess, AIndex.KeyRowType);
+			Row LKey = new Row(AManager, AIndex.KeyRowType);
 			try
 			{
-				Row LData = new Row(AProcess, AIndex.DataRowType);
+				Row LData = new Row(AManager, AIndex.DataRowType);
 				try
 				{
 					LKey.ValuesOwned = false;
@@ -250,7 +250,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 					}
 
-					AIndex.Insert(AProcess, (NativeRow)LKey.AsNative, (NativeRow)LData.AsNative);
+					AIndex.Insert(AManager, (NativeRow)LKey.AsNative, (NativeRow)LData.AsNative);
 				}
 				finally
 				{
@@ -265,26 +265,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		/// <summary>Inserts the given row into all the indexes of the table value.</summary>
 		/// <param name="ARow">The given row must conform to the structure of the table value.</param>
-		public void Insert(ServerProcess AProcess, Row ARow)
+		public void Insert(IValueManager AManager, Row ARow)
 		{
 			// Insert the row into all indexes
 			#if USEINTERNALID
 			Guid LInternalID = Guid.NewGuid();
-			IndexInsert(AProcess, ClusteredIndex, ARow, LInternalID);
+			IndexInsert(AManager, ClusteredIndex, ARow, LInternalID);
 			foreach (NativeRowTree LIndex in NonClusteredIndexes)
-				IndexInsert(AProcess, LIndex, ARow, LInternalID);
+				IndexInsert(AManager, LIndex, ARow, LInternalID);
 			#else
-			IndexInsert(AProcess, ClusteredIndex, ARow);
+			IndexInsert(AManager, ClusteredIndex, ARow);
 			foreach (NativeRowTree LIndex in NonClusteredIndexes)
-				IndexInsert(AProcess, LIndex, ARow);
+				IndexInsert(AManager, LIndex, ARow);
 			#endif
 			
 			FRowCount++;
 		}
 		
-		private Row GetIndexData(ServerProcess AProcess, Schema.RowType ARowType, Row[] ASourceRows)
+		private Row GetIndexData(IValueManager AManager, Schema.RowType ARowType, Row[] ASourceRows)
 		{
-			Row LRow = new Row(AProcess, ARowType);
+			Row LRow = new Row(AManager, ARowType);
 			try
 			{
 				int LColumnIndex;
@@ -327,15 +327,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return false;
 		}
 		
-		public bool HasRow(ServerProcess AProcess, Row ARow)
+		public bool HasRow(IValueManager AManager, Row ARow)
 		{
-			Row LKey = GetIndexData(AProcess, ClusteredIndex.KeyRowType, new Row[]{ARow});
+			Row LKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ARow});
 			try
 			{
 				using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
 				{
 					int LEntryNumber;
-					return ClusteredIndex.FindKey(AProcess, ClusteredIndex.KeyRowType, (NativeRow)LKey.AsNative, LSearchPath, out LEntryNumber);
+					return ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LKey.AsNative, LSearchPath, out LEntryNumber);
 				}
 			}
 			finally
@@ -344,10 +344,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 		
-		public void Update(ServerProcess AProcess, Row AOldRow, Row ANewRow)
+		public void Update(IValueManager AManager, Row AOldRow, Row ANewRow)
 		{
 			// AOldRow must have at least the columns of the clustered index key
-			Row LOldClusteredKey = GetIndexData(AProcess, ClusteredIndex.KeyRowType, new Row[]{AOldRow});
+			Row LOldClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{AOldRow});
 			try
 			{
 				bool LIsClusteredIndexKeyAffected = GetIsIndexAffected(ClusteredIndex.KeyRowType, ANewRow);
@@ -361,11 +361,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
 					{
 						int LEntryNumber;
-						bool LResult = ClusteredIndex.FindKey(AProcess, ClusteredIndex.KeyRowType, (NativeRow)LOldClusteredKey.AsNative, LSearchPath, out LEntryNumber);
+						bool LResult = ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LOldClusteredKey.AsNative, LSearchPath, out LEntryNumber);
 						if (!LResult)
 							throw new IndexException(IndexException.Codes.KeyNotFound);
 							
-						Row LOldClusteredData = new Row(AProcess, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
+						Row LOldClusteredData = new Row(AManager, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
 						try
 						{
 							bool LIsIndexAffected;
@@ -375,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								
 								if (LIsClusteredIndexKeyAffected || LIsIndexAffected)
 								{
-									Row LOldIndexKey = GetIndexData(AProcess, LTree.KeyRowType, new Row[]{LOldClusteredKey, LOldClusteredData});
+									Row LOldIndexKey = GetIndexData(AManager, LTree.KeyRowType, new Row[]{LOldClusteredKey, LOldClusteredData});
 									try
 									{
 										Row LNewIndexKey = null;
@@ -383,25 +383,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 										try
 										{
 											if (LIsIndexAffected)
-												LNewIndexKey = GetIndexData(AProcess, LTree.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+												LNewIndexKey = GetIndexData(AManager, LTree.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
 												
 											if (LIsClusteredIndexKeyAffected)
-												LNewIndexData = GetIndexData(AProcess, LTree.DataRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+												LNewIndexData = GetIndexData(AManager, LTree.DataRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
 												
 											if (LIsIndexAffected && LIsClusteredIndexKeyAffected)
 											{
-												LTree.Update(AProcess, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
+												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
 												LNewIndexKey.ValuesOwned = false;
 												LNewIndexData.ValuesOwned = false;
 											}
 											else if (LIsIndexAffected)
 											{
-												LTree.Update(AProcess, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative);
+												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexKey.AsNative);
 												LNewIndexKey.ValuesOwned = false;
 											}
 											else if (LIsClusteredIndexKeyAffected)
 											{
-												LTree.Update(AProcess, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
+												LTree.Update(AManager, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LOldIndexKey.AsNative, (NativeRow)LNewIndexData.AsNative);
 												LNewIndexData.ValuesOwned = false;
 											}
 										}
@@ -422,10 +422,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							
 							if (LIsClusteredIndexKeyAffected)
-								LNewClusteredKey = GetIndexData(AProcess, ClusteredIndex.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
+								LNewClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ANewRow, LOldClusteredKey, LOldClusteredData});
 								
 							if (LIsClusteredIndexDataAffected)
-								LNewClusteredData = GetIndexData(AProcess, ClusteredIndex.DataRowType, new Row[]{ANewRow, LOldClusteredData});
+								LNewClusteredData = GetIndexData(AManager, ClusteredIndex.DataRowType, new Row[]{ANewRow, LOldClusteredData});
 						}
 						finally
 						{
@@ -435,18 +435,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 					if (LIsClusteredIndexKeyAffected && LIsClusteredIndexDataAffected)
 					{
-						ClusteredIndex.Update(AProcess, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
+						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
 						LNewClusteredKey.ValuesOwned = false;
 						LNewClusteredData.ValuesOwned = false;
 					}				
 					else if (LIsClusteredIndexKeyAffected)
 					{
-						ClusteredIndex.Update(AProcess, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative);
+						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredKey.AsNative);
 						LNewClusteredKey.ValuesOwned = false;
 					}
 					else if (LIsClusteredIndexDataAffected)
 					{
-						ClusteredIndex.Update(AProcess, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
+						ClusteredIndex.Update(AManager, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LOldClusteredKey.AsNative, (NativeRow)LNewClusteredData.AsNative);
 						LNewClusteredData.ValuesOwned = false;
 					}
 				}
@@ -465,28 +465,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 		}
 
-		public void Delete(ServerProcess AProcess, Row ARow)
+		public void Delete(IValueManager AManager, Row ARow)
 		{
 			// Delete the row from all indexes
-			Row LClusteredKey = GetIndexData(AProcess, ClusteredIndex.KeyRowType, new Row[]{ARow});
+			Row LClusteredKey = GetIndexData(AManager, ClusteredIndex.KeyRowType, new Row[]{ARow});
 			try
 			{
 				using (RowTreeSearchPath LSearchPath = new RowTreeSearchPath())
 				{
 					int LEntryNumber;
-					bool LResult = ClusteredIndex.FindKey(AProcess, ClusteredIndex.KeyRowType, (NativeRow)LClusteredKey.AsNative, LSearchPath, out LEntryNumber);
+					bool LResult = ClusteredIndex.FindKey(AManager, ClusteredIndex.KeyRowType, (NativeRow)LClusteredKey.AsNative, LSearchPath, out LEntryNumber);
 					if (!LResult)
 						throw new IndexException(IndexException.Codes.KeyNotFound);
 						
-					Row LClusteredData = new Row(AProcess, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
+					Row LClusteredData = new Row(AManager, ClusteredIndex.DataRowType, LSearchPath.DataNode.DataNode.Rows[LEntryNumber]);
 					try
 					{
 						foreach (NativeRowTree LBufferIndex in NonClusteredIndexes)
 						{
-							Row LKey = GetIndexData(AProcess, LBufferIndex.KeyRowType, new Row[]{LClusteredKey, LClusteredData});
+							Row LKey = GetIndexData(AManager, LBufferIndex.KeyRowType, new Row[]{LClusteredKey, LClusteredData});
 							try
 							{
-								LBufferIndex.Delete(AProcess, (NativeRow)LKey.AsNative);
+								LBufferIndex.Delete(AManager, (NativeRow)LKey.AsNative);
 							}
 							finally
 							{
@@ -500,7 +500,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					}
 				}
 
-				ClusteredIndex.Delete(AProcess, (NativeRow)LClusteredKey.AsNative);
+				ClusteredIndex.Delete(AManager, (NativeRow)LClusteredKey.AsNative);
 			}
 			finally
 			{	
@@ -510,10 +510,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FRowCount--;
 		}
 		
-		public void Truncate(ServerProcess AProcess)
+		public void Truncate(IValueManager AManager)
 		{
-			Drop(AProcess);
-			Create(AProcess);
+			Drop(AManager);
+			Create(AManager);
 		}
 	}
 

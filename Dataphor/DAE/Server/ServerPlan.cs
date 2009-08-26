@@ -24,6 +24,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FProcess = AProcess;
 			FPlan = new Plan(AProcess);
+			FProgram = new Program(AProcess, FID);
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
 			if (FProcess.ServerSession.Server.FPlanCounter != null)
@@ -62,8 +63,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
-				FCode = null;
-				FDataType = null;
+				FProgram = null;
 				FProcess = null;
 	            
 				base.Dispose(ADisposing);
@@ -86,12 +86,18 @@ namespace Alphora.Dataphor.DAE.Server
 		public long PlanCacheTimeStamp; // Server.PlanCacheTimeStamp when the plan was compiled
 
 		// Plan		
-		private Plan FPlan;
+		protected Plan FPlan;
 		public Plan Plan { get { return FPlan; } }
 		
-		// Statistics
-		public PlanStatistics Statistics { get { return FPlan.Statistics; } }
+		// Program
+		protected Program FProgram;
+		public Program Program { get { return FProgram; } }
 		
+		// Statistics
+		public PlanStatistics PlanStatistics { get { return FPlan.Statistics; } }
+		public ProgramStatistics ProgramStatistics { get { return FProgram.Statistics; } }
+		
+/*
 		// Code
 		protected PlanNode FCode;
 		public PlanNode Code
@@ -131,6 +137,7 @@ namespace Alphora.Dataphor.DAE.Server
 				FSource = ASourceContext.Script;
 			}
 		}
+*/
 		
 		// Process        
 		protected ServerProcess FProcess;
@@ -138,13 +145,13 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public IServerProcess Process  { get { return (IServerProcess)FProcess; } }
 		
-		public CompilerMessages Messages { get { return Plan.Messages; } }
+		public CompilerMessages Messages { get { return FPlan.Messages; } }
 
 		public void BindToProcess(ServerProcess AProcess)
 		{
 			FProcess = AProcess;
 			FPlan.BindToProcess(AProcess);
-			FCode.BindToProcess(AProcess.Plan);
+			FProgram.BindToProcess(AProcess, FPlan);
 		}
 		
 		// ActiveCursor
@@ -156,15 +163,16 @@ namespace Alphora.Dataphor.DAE.Server
 			if (FActiveCursor != null)
 				throw new ServerException(ServerException.Codes.PlanCursorActive);
 			FActiveCursor = AActiveCursor;
-			FProcess.SetActiveCursor(FActiveCursor);
+			//FProcess.SetActiveCursor(FActiveCursor);
 		}
 		
 		public void ClearActiveCursor()
 		{
 			FActiveCursor = null;
-			FProcess.ClearActiveCursor();
+			//FProcess.ClearActiveCursor();
 		}
 		
+/*
 		protected Schema.IDataType FDataType;
 		public Schema.IDataType DataType 
 		{ 
@@ -175,17 +183,18 @@ namespace Alphora.Dataphor.DAE.Server
 			} 
 			set { FDataType = value; } 
 		}
+*/
 		
 		public virtual Statement EmitStatement()
 		{
 			CheckCompiled();
-			return FCode.EmitStatement(EmitMode.ForCopy);
+			return FProgram.Code.EmitStatement(EmitMode.ForCopy);
 		}
 
 		public void WritePlan(System.Xml.XmlWriter AWriter)
 		{
 			CheckCompiled();
-			FCode.WritePlan(AWriter);
+			FProgram.Code.WritePlan(AWriter);
 		}
 		
 		protected Exception WrapException(Exception AException)
@@ -227,7 +236,7 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				CheckCompiled();
-				FProcess.Execute(this, FCode, AParams);
+				FProgram.Execute(AParams);
 			}
 			catch (Exception E)
 			{
@@ -246,6 +255,15 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 		protected internal ServerExpressionPlan(ServerProcess AProcess) : base(AProcess) {}
 		
+		public Schema.IDataType DataType
+		{
+			get
+			{
+				CheckCompiled();
+				return FProgram.DataType;
+			}
+		}
+		
 		public DataValue Evaluate(DataParams AParams)
 		{
 			Exception LException = null;
@@ -253,15 +271,12 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				CheckCompiled();
-				object LResult = ServerProcess.Execute(this, Code, AParams);
+				object LResult = FProgram.Execute(AParams);
 				DataValue LDataValue = LResult as DataValue;
 				if (LDataValue != null)
 					return LDataValue;
 
-				if ((this.DataType == Process.DataTypes.SystemGeneric) || (this.DataType == Process.DataTypes.SystemScalar))
-					return DataValue.FromNative(FProcess, DataValue.NativeTypeToScalarType(Process.GetServerProcess(), LResult.GetType()), LResult);
-					
-				return DataValue.FromNative(FProcess, this.DataType, LResult);
+				return DataValue.FromNative(FProgram.ValueManager, FProgram.DataType, LResult);
 			}
 			catch (Exception E)
 			{
@@ -288,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Server
 				DateTime LStartTime = DateTime.Now;
 				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerExpressionPlan.Open", DateTime.Now.ToString("hh:mm:ss.ffff")));
 				#endif
-				ServerCursor LCursor = new ServerCursor(this, AParams);
+				ServerCursor LCursor = new ServerCursor(this, FProgram, AParams);
 				try
 				{
 					LCursor.Open();
@@ -345,17 +360,17 @@ namespace Alphora.Dataphor.DAE.Server
 			{ 
 				CheckCompiled();
 				if (FTableVar == null)
-					FTableVar = (Schema.TableVar)Plan.PlanCatalog[Schema.Object.NameFromGuid(ID)];
+					FTableVar = (Schema.TableVar)FPlan.PlanCatalog[Schema.Object.NameFromGuid(ID)];
 				return FTableVar; 
 			} 
 		}
 		
-		Schema.Catalog IServerExpressionPlan.Catalog { get { return Plan.PlanCatalog; } }
+		Schema.Catalog IServerExpressionPlan.Catalog { get { return FPlan.PlanCatalog; } }
 		
 		public Row RequestRow()
 		{
 			CheckCompiled();
-			return new Row(FProcess, ((Schema.TableType)DataType).RowType);
+			return new Row(FProcess.ValueManager, ((Schema.TableType)FProgram.DataType).RowType);
 		}
 		
 		public void ReleaseRow(Row ARow)
@@ -367,11 +382,13 @@ namespace Alphora.Dataphor.DAE.Server
 		public override Statement EmitStatement()
 		{
 			CheckCompiled();
-			return FCode.EmitStatement(EmitMode.ForRemote);
+			return FProgram.Code.EmitStatement(EmitMode.ForRemote);
 		}
 
 		// SourceNode
-		private TableNode SourceNode { get { return (TableNode)Code.Nodes[0]; } }
+		internal TableNode SourceNode { get { return (TableNode)FProgram.Code.Nodes[0]; } }
+		
+		internal CursorNode CursorNode { get { return (CursorNode)FProgram.Code; } }
         
 		// Isolation
 		public CursorIsolation Isolation 

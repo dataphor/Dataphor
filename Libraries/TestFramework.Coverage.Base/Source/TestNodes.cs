@@ -3,16 +3,17 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+using System.Text;
+using System.Resources;
+using System.Reflection;
+using System.Collections.Specialized;
+using System.Windows.Forms;
+
 namespace Alphora.Dataphor.DAE.Diagnostics
 {
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Resources;
-	using System.Reflection;
-	using System.Collections.Specialized;
-	using System.Windows.Forms;
-
 	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
@@ -70,7 +71,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator System.Diagnostics.TestCatalog();
 	public class TestCatalogNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Schema.Objects LObjects = new Schema.Objects();
 			for (int LIndex = 0; LIndex < 100; LIndex++)
@@ -168,7 +169,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator System.Diagnostics.TestStreams();
 	public class TestStreamsNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// Test the DeferredWriteStream
 			Stream LStream = new MemoryStream();
@@ -214,7 +215,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestLocalStreamManager();
 //	public class TestLocalStreamManagerNode : InstructionNode
 //	{
-//		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+//		public override object InternalExecute(Program AProgram, object[] AArguments)
 //		{
 //			LocalStreamManager LStreamManager = new LocalStreamManager((IStreamManager)AProcess);
 //			Schema.RowType LRowType = new Schema.RowType();
@@ -245,7 +246,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestConveyors();
 	public class TestConveyorsNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Scalar LScalar;
 			LScalar = AProcess.ScalarManager.RequestScalar(AProcess, AProcess.DataTypes.SystemBoolean);
@@ -463,7 +464,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	
 	public class TestRowManagerNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			RowManager LRowManager = new RowManager(-1);
 			for (int LIndex = 0; LIndex < (LRowManager.MaxRows * 2); LIndex++)
@@ -485,7 +486,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	#if USESCALARMANAGER	
 	public class TestScalarManagerNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			ScalarManager LScalarManager = new ScalarManager(-1);
 			for (int LIndex = 0; LIndex < (LScalarManager.MaxScalars * 2); LIndex++)
@@ -506,7 +507,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestStreamManager()
 	public class TestStreamManagerNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			IStreamManager LStreamManager = AProcess.Plan.StreamManager;
 
@@ -638,7 +639,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestSemaphore()
 	public class TestSemaphoreNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// verify that the semaphore is functioning properly
 			Semaphore LSemaphore = new Semaphore();
@@ -659,7 +660,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestRowValues()
 	public class TestRowValuesNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// Test row values
 			Schema.RowType LRowType = new Schema.RowType();
@@ -711,7 +712,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	// operator TestOverflow()
 	public class TestOverflowNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// Build a row with an overflowing column
 			Schema.RowType LRowType = new Schema.RowType();
@@ -747,7 +748,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 	public class TestExceptionsNode : InstructionNode
 	{
 		// operator TestExceptions(const AAssemblyFileName : String, const AExceptionClassName : String);
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			StringCollection LUnknownCodes = new StringCollection();
 			string LAssemblyFileName = ((Scalar)AArguments[0].Value).ToString();
@@ -884,7 +885,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			FData.ClearValues();
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// Gather variables for the diagnostic...
 			int LFanout = 5;
@@ -1175,7 +1176,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			int LFanout = 5;
 			int LCapacity = 5;
@@ -1380,16 +1381,16 @@ drop table Testing;
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// Create and populate a test data set
-			PrepareTestData(AProcess);
+			PrepareTestData(AProgram.ServerProcess);
 			try
 			{
 				Random LRandom = new Random();
 				Guid[] LBookmarks = new Guid[100];
 				
-				IServerExpressionPlan LPlan = ((IServerProcess)AProcess).PrepareExpression("select Testing browse by {ID} isolation chaos", null);
+				IServerExpressionPlan LPlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression("select Testing browse by {ID} isolation chaos", null);
 				try
 				{
 					IServerCursor LCursor = LPlan.Open(null);
@@ -1471,7 +1472,7 @@ drop table Testing;
 //						if (LCounter < LRandomValues.Length / 2)
 //							throw new RuntimeException("BOF reached before known rows");
 //							
-						Row LNewRow = new Row(AProcess, ((Schema.TableType)LCursor.Plan.DataType).CreateRowType());
+						Row LNewRow = new Row(AProgram.ValueManager, ((Schema.TableType)LCursor.Plan.DataType).CreateRowType());
 						try
 						{
 							LNewRow[0] = LRandom.Next();
@@ -1522,12 +1523,12 @@ drop table Testing;
 				}
 				finally
 				{
-					((IServerProcess)AProcess).UnprepareExpression(LPlan);
+					((IServerProcess)AProgram.ServerProcess).UnprepareExpression(LPlan);
 				}
 			}
 			finally
 			{
-				UnprepareTestData(AProcess);
+				UnprepareTestData(AProgram.ServerProcess);
 			}
 			
 			return null;
@@ -1861,7 +1862,7 @@ drop table Testing;
 //			PrepareD4Multiply(APlan);
 //		}
 //		
-//		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+//		public override object InternalExecute(Program AProgram, object[] AArguments)
 //		{
 //			int ACount = ((Scalar)AArguments[0].Value).ToInt32();
 //
@@ -1917,7 +1918,7 @@ drop table Testing;
 //	
 //	public class TestNode : InstructionNode
 //	{
-//		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+//		public override object InternalExecute(Program AProgram, object[] AArguments)
 //		{
 //			int LCount = ((Scalar)AArguments[0].Value).ToInt32();
 //			
@@ -1950,17 +1951,17 @@ drop table Testing;
 	// operator TestNext(const AExpression : String, const AExpectedExpression : String) : Boolean
 	public abstract class TestCursorNode : InstructionNode
 	{
-		protected abstract void InternalTest(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode);
+		protected abstract void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode);
 		
-		protected bool RowsSame(ServerProcess AProcess, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected bool RowsSame(Program AProgram, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
-			AProcess.Stack.Push(ARow);
+			AProgram.Stack.Push(ARow);
 			try
 			{
-				AProcess.Stack.Push(AExpectedRow);
+				AProgram.Stack.Push(AExpectedRow);
 				try
 				{
-					object LResult = ARowEqualNode.Execute(AProcess);
+					object LResult = ARowEqualNode.Execute(AProgram);
 					if (LResult == null)
 					{
 						bool LSame = true;
@@ -1977,61 +1978,61 @@ drop table Testing;
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
 
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			string AExpression = (string)AArguments[0];
 			string AExpectedExpression = (string)AArguments[1];
-			CursorNode LNode = (CursorNode)Compiler.BindNode(AProcess.Plan, Compiler.OptimizeNode(AProcess.Plan, Compiler.CompileCursor(AProcess.Plan, new Parser().ParseCursorDefinition(AExpression))));
-			Table LTable = (Table)LNode.SourceNode.Execute(AProcess);
+			CursorNode LNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpression))));
+			Table LTable = (Table)LNode.SourceNode.Execute(AProgram);
 			try
 			{
-				CursorNode LExpectedNode = (CursorNode)Compiler.BindNode(AProcess.Plan, Compiler.OptimizeNode(AProcess.Plan, Compiler.CompileCursor(AProcess.Plan, new Parser().ParseCursorDefinition(AExpectedExpression))));
-				Table LExpectedTable = (Table)LExpectedNode.SourceNode.Execute(AProcess);
+				CursorNode LExpectedNode = (CursorNode)Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, Compiler.CompileCursor(AProgram.Plan, new Parser().ParseCursorDefinition(AExpectedExpression))));
+				Table LExpectedTable = (Table)LExpectedNode.SourceNode.Execute(AProgram);
 				try
 				{
-					Row LRow = new Row(AProcess, LTable.DataType.CreateRowType());
+					Row LRow = new Row(AProgram.ValueManager, LTable.DataType.CreateRowType());
 					try
 					{
-						Row LExpectedRow = new Row(AProcess, LExpectedTable.DataType.CreateRowType());
+						Row LExpectedRow = new Row(AProgram.ValueManager, LExpectedTable.DataType.CreateRowType());
 						try
 						{
 							PlanNode LEqualNode = null;
-							AProcess.Plan.Symbols.Push(new Symbol("ALeftRow", LRow.DataType));
+							AProgram.Plan.Symbols.Push(new Symbol("ALeftRow", LRow.DataType));
 							try
 							{
-								AProcess.Plan.Symbols.Push(new Symbol("ARightRow", LExpectedRow.DataType));
+								AProgram.Plan.Symbols.Push(new Symbol("ARightRow", LExpectedRow.DataType));
 								try
 								{
-									AProcess.Plan.EnterRowContext();
+									AProgram.Plan.EnterRowContext();
 									try
 									{
-										LEqualNode = Compiler.CompileExpression(AProcess.Plan, Compiler.BuildRowEqualExpression(AProcess.Plan, "ALeftRow", "ARightRow", LRow.DataType.Columns));
+										LEqualNode = Compiler.CompileExpression(AProgram.Plan, Compiler.BuildRowEqualExpression(AProgram.Plan, "ALeftRow", "ARightRow", LRow.DataType.Columns));
 									}
 									finally
 									{
-										AProcess.Plan.ExitRowContext();
+										AProgram.Plan.ExitRowContext();
 									}
 								}
 								finally
 								{
-									AProcess.Plan.Symbols.Pop();
+									AProgram.Plan.Symbols.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Plan.Symbols.Pop();
+								AProgram.Plan.Symbols.Pop();
 							}
 							
-							InternalTest(AProcess, LTable, LExpectedTable, LRow, LExpectedRow, LEqualNode);
+							InternalTest(AProgram, LTable, LExpectedTable, LRow, LExpectedRow, LEqualNode);
 							return null;
 						}
 						finally
@@ -2056,7 +2057,7 @@ drop table Testing;
 		}
 
 		// Opens the cursor, walks through it, resets it, calls last, resets it and walks through it again.
-		protected void TestNavigable(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestNavigable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
 			if (!ATable.BOF())
 				throw new TestException("BOF() failed.");
@@ -2068,7 +2069,7 @@ drop table Testing;
 					
 				ATable.Select(ARow);
 				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProcess, ARow, AExpectedRow, ARowEqualNode))
+				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
 					throw new TestException("Next() returned an unexpected row.");
 			}
 			
@@ -2099,7 +2100,7 @@ drop table Testing;
 					
 				ATable.Select(ARow);
 				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProcess, ARow, AExpectedRow, ARowEqualNode))
+				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
 					throw new TestException("Next() after Reset() returned an unexpected row.");
 			}
 
@@ -2111,7 +2112,7 @@ drop table Testing;
 
 		// Calls last and walks backwards through it, walks forward through it, then calls first and walks forward through it again.
 		// Expects ATable and AExpectedTable to be on the EOF crack
-		protected void TestBackwardsNavigable(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestBackwardsNavigable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
 			if (!ATable.EOF())
 				throw new TestException("EOF() failed.");
@@ -2123,7 +2124,7 @@ drop table Testing;
 					
 				ATable.Select(ARow);
 				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProcess, ARow, AExpectedRow, ARowEqualNode))
+				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
 					throw new TestException("Prior() returned an unexpected row.");
 			}
 			
@@ -2142,7 +2143,7 @@ drop table Testing;
 					
 				ATable.Select(ARow);
 				AExpectedTable.Select(AExpectedRow);
-				if (!RowsSame(AProcess, ARow, AExpectedRow, ARowEqualNode))
+				if (!RowsSame(AProgram, ARow, AExpectedRow, ARowEqualNode))
 					throw new TestException("Next() after Prior() returned an unexpected row.");
 			}
 			
@@ -2151,7 +2152,7 @@ drop table Testing;
 				throw new TestException("First() failed.");
 		}
 		
-		protected void TestSearchable(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected void TestSearchable(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
 			bool LFirst = true;
 			Row LFirstKey = null;
@@ -2210,35 +2211,35 @@ drop table Testing;
 	
 	public class TestNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
-			TestNavigable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
 		}
 	}
 
 	public class TestBackwardsNavigableNode : TestCursorNode
 	{
-		protected override void InternalTest(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
-			TestNavigable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestBackwardsNavigable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestBackwardsNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
 		}
 	}
 
 	public class TestSearchableNode : TestCursorNode
 	{
-		protected override void InternalTest(ServerProcess AProcess, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
+		protected override void InternalTest(Program AProgram, Table ATable, Table AExpectedTable, Row ARow, Row AExpectedRow, PlanNode ARowEqualNode)
 		{
-			TestNavigable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestBackwardsNavigable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
-			TestSearchable(AProcess, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestBackwardsNavigable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
+			TestSearchable(AProgram, ATable, AExpectedTable, ARow, AExpectedRow, ARowEqualNode);
 		}
 	}
 	
 	// operator TestParserEmitter(AScript : String);
 	public class TestParserEmitterNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			string LSource = (string)AArguments[0];
 			Parser LParser = new Parser();
@@ -2255,13 +2256,13 @@ drop table Testing;
 	
 	public class TestOperatorTextNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			// Emit the text of the operator, then attempt to re-parse it
 			Schema.Object LOperator = 
-				(Operator.Operands[0].DataType.Is(AProcess.DataTypes.SystemString))
-					? Compiler.ResolveCatalogObjectSpecifier(AProcess.Plan, (string)AArgument1)
-					: Compiler.ResolveCatalogIdentifier(AProcess.Plan, (string)AArgument1);
+				(Operator.Operands[0].DataType.Is(AProgram.DataTypes.SystemString))
+					? Compiler.ResolveCatalogObjectSpecifier(AProgram.Plan, (string)AArgument1)
+					: Compiler.ResolveCatalogIdentifier(AProgram.Plan, (string)AArgument1);
 					
 			new Parser().ParseStatement(new D4TextEmitter().Emit(LOperator.EmitStatement(EmitMode.ForCopy)), null);
 			
@@ -2271,9 +2272,9 @@ drop table Testing;
 
 	public class TestIsPlanCachedNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
-			return AProcess.ExecutingPlan.Header != null;
+			return AProgram.IsCached;
 		}
 	}
 }

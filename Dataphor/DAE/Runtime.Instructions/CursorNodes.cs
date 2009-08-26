@@ -183,9 +183,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			return new CursorValue(AProcess, CursorType, AProcess.Plan.CursorManager.CreateCursor((Table)Nodes[0].Execute(AProcess)));
+			return new CursorValue(AProgram.ValueManager, CursorType, AProgram.CursorManager.CreateCursor((Table)Nodes[0].Execute(AProgram)));
 		}
 		
 		public override Statement EmitStatement(EmitMode AMode)
@@ -198,9 +198,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Close(ACursor : cursor);
 	public class CursorCloseNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			AProcess.Plan.CursorManager.CloseCursor(((CursorValue)AArguments[0]).ID);
+			AProgram.CursorManager.CloseCursor(((CursorValue)AArguments[0]).ID);
 			return null;
 		}
 	}
@@ -208,17 +208,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // operator First(ACursor : cursor);
     public class CursorFirstNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.First();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 			return null;
 		}
@@ -227,17 +227,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Last(ACursor : cursor);
 	public class CursorLastNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.Last();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 			return null;
 		}
@@ -246,17 +246,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Next(Cursor) : boolean;
 	public class CursorNextNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.Next();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -264,17 +264,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Prior(Cursor) : boolean;
 	public class CursorPriorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.Prior();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -282,17 +282,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator BOF(Cursor) : boolean;
 	public class CursorBOFNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.BOF();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -300,17 +300,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator EOF(Cursor) : boolean;
 	public class CursorEOFNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.EOF();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -324,17 +324,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = ((Schema.CursorType)Nodes[0].DataType).TableType.RowType;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.Select();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -345,10 +345,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Insert(Cursor, row{})
 	public class CursorInsertNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.CheckCapability(CursorCapability.Updateable);
@@ -356,7 +356,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 			return null;
 		}
@@ -365,10 +365,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Update(Cursor, row{})
 	public class CursorUpdateNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.CheckCapability(CursorCapability.Updateable);
@@ -376,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 			return null;
 		}
@@ -385,10 +385,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Delete(Cursor)
 	public class CursorDeleteNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.CheckCapability(CursorCapability.Updateable);
@@ -396,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 			return null;
 		}
@@ -406,20 +406,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Default(const ACursor : cursor, var ARow : row, const AColumnName : String) : Boolean;
 	public class CursorDefaultNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				Table LTable = LCursor.Table;
 				Row LRow = (Row)AArguments[1];
 				string LColumnName = AArguments.Length == 3 ? (string)AArguments[2] : String.Empty;
-				return LTable.Node.Default(AProcess, null, LRow, null, LColumnName);
+				return LTable.Node.Default(AProgram, null, LRow, null, LColumnName);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -428,21 +428,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Change(const ACursor : cursor, const AOldRow : row, var ANewRow : row, const AColumnName : String) : Boolean
 	public class CursorChangeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				Table LTable = LCursor.Table;
 				Row LOldRow = (Row)AArguments[1];
 				Row LNewRow = (Row)AArguments[2];
 				string LColumnName = AArguments.Length == 4 ? (string)AArguments[3] : String.Empty;
-				return LTable.Node.Change(AProcess, LOldRow, LNewRow, null, LColumnName);
+				return LTable.Node.Change(AProgram, LOldRow, LNewRow, null, LColumnName);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -451,21 +451,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Validate(const ACursor : cursor, const AOldRow : row, var ANewRow : row, const AColumnName : String) : Boolean;	
 	public class CursorValidateNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				Table LTable = LCursor.Table;
 				Row LOldRow = (Row)AArguments[1];
 				Row LNewRow = (Row)AArguments[2];
 				string LColumnName = AArguments.Length == 4 ? (string)AArguments[3] : String.Empty;
-				return LTable.Node.Validate(AProcess, LOldRow, LNewRow, null, LColumnName);
+				return LTable.Node.Validate(AProgram, LOldRow, LNewRow, null, LColumnName);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -480,17 +480,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			// TODO: This is wrong, the capabilities and order of a cursor should be part of the cursor type specifier
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.GetKey();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -498,17 +498,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator FindKey(cursor, row) : boolean
 	public class CursorFindKeyNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.FindKey((Row)AArguments[1]);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -516,10 +516,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator FindNearest(cursor, row);
 	public class CursorFindNearestNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.FindNearest((Row)AArguments[1]);
@@ -527,7 +527,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -536,10 +536,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Refresh(cursor, row);
 	public class CursorRefreshNode: InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				if (AArguments.Length == 1)
@@ -550,7 +550,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -558,10 +558,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Reset(cursor);
 	public class CursorResetNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				LCursor.Table.Reset();
@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -577,17 +577,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator GetBookmark(cursor) : row;
 	public class CursorGetBookmarkNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.GetBookmark();
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -595,17 +595,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator GotoBookmark(cursor, row) : boolean;
 	public class CursorGotoBookmarkNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.GotoBookmark((Row)AArguments[1]);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}
@@ -613,17 +613,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator CompareBookmarks(cursor, row, row) : integer;
 	public class CursorCompareBookmarksNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
-			LCursor.SwitchContext(AProcess);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)AArguments[0]).ID);
+			LCursor.SwitchContext(AProgram);
 			try
 			{
 				return LCursor.Table.CompareBookmarks((Row)AArguments[1], (Row)AArguments[1]);
 			}
 			finally
 			{
-				LCursor.SwitchContext(AProcess);
+				LCursor.SwitchContext(AProgram);
 			}
 		}
 	}

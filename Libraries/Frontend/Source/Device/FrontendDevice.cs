@@ -122,39 +122,39 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		#endif
 		
 		// DAE Library Events		
-		private void LibraryCreated(ServerProcess AProcess, string ALibraryName)
+		private void LibraryCreated(Program AProgram, string ALibraryName)
 		{
 		}
 		
-		private void LibraryAdded(ServerProcess AProcess, string ALibraryName)
+		private void LibraryAdded(Program AProgram, string ALibraryName)
 		{
-			LoadLibrary(AProcess, Schema.Object.EnsureRooted(ALibraryName));
-			EnsureRegisterScript(AProcess, Schema.Object.EnsureRooted(ALibraryName));
+			LoadLibrary(AProgram, Schema.Object.EnsureRooted(ALibraryName));
+			EnsureRegisterScript(AProgram, Schema.Object.EnsureRooted(ALibraryName));
 		}
 		
-		private void LibraryRenamed(ServerProcess AProcess, string AOldLibraryName, string ANewLibraryName)
+		private void LibraryRenamed(Program AProgram, string AOldLibraryName, string ANewLibraryName)
 		{
-			UnloadLibrary(AProcess, Schema.Object.EnsureRooted(AOldLibraryName));
-			LoadLibrary(AProcess, Schema.Object.EnsureRooted(ANewLibraryName));
+			UnloadLibrary(AProgram, Schema.Object.EnsureRooted(AOldLibraryName));
+			LoadLibrary(AProgram, Schema.Object.EnsureRooted(ANewLibraryName));
 		}
 		
-		private void LibraryRemoved(ServerProcess AProcess, string ALibraryName)
+		private void LibraryRemoved(Program AProgram, string ALibraryName)
 		{
-			UnloadLibrary(AProcess, Schema.Object.EnsureRooted(ALibraryName));
+			UnloadLibrary(AProgram, Schema.Object.EnsureRooted(ALibraryName));
 		}
 		
-		private void LibraryDeleted(ServerProcess AProcess, string ALibraryName)
+		private void LibraryDeleted(Program AProgram, string ALibraryName)
 		{
 		}
 		
-		private void LibraryLoaded(ServerProcess AProcess, string ALibraryName)
+		private void LibraryLoaded(Program AProgram, string ALibraryName)
 		{
-			EnsureLibrariesLoaded(AProcess);
+			EnsureLibrariesLoaded(AProgram);
 		}
 		
-		private void LibraryUnloaded(ServerProcess AProcess, string ALibraryName)
+		private void LibraryUnloaded(Program AProgram, string ALibraryName)
 		{
-			EnsureLibrariesLoaded(AProcess);
+			EnsureLibrariesLoaded(AProgram);
 		}
 		
 		#if USEWATCHERS
@@ -204,23 +204,23 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return new FrontendDeviceSession(this, AServerProcess, ADeviceSessionInfo);
 		}
 		
-		public static FrontendDevice GetFrontendDevice(ServerProcess AProcess)
+		public static FrontendDevice GetFrontendDevice(Program AProgram)
 		{
-			return (FrontendDevice)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CFrontendDeviceName, true);
+			return (FrontendDevice)Compiler.ResolveCatalogIdentifier(AProgram.Plan, CFrontendDeviceName, true);
 		}
 		
-		public static Schema.TableVar GetDocumentsTableVar(ServerProcess AProcess)
+		public static Schema.TableVar GetDocumentsTableVar(Plan APlan)
 		{
 			ApplicationTransaction LTransaction = null;
-			if (AProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = AProcess.GetApplicationTransaction();
+			if (APlan.ApplicationTransactionID != Guid.Empty)
+				LTransaction = APlan.GetApplicationTransaction();
 			try
 			{
 				if (LTransaction != null)
 					LTransaction.PushGlobalContext();
 				try
 				{
-					return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(AProcess.Plan, CDocumentsTableVarName, true);
+					return (Schema.TableVar)Compiler.ResolveCatalogIdentifier(APlan, CDocumentsTableVarName, true);
 				}
 				finally
 				{
@@ -428,13 +428,13 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		public FrontendLibraries Libraries { get { return FLibraries; } }
 		
 		/// <remarks> GetFrontendLibrary takes a monitor lock on the returned library.  (Caller must exit the monitor!)</remarks>
-		private FrontendLibrary GetFrontendLibrary(ServerProcess AProcess, string AName)
+		private FrontendLibrary GetFrontendLibrary(Program AProgram, string AName)
 		{
 			FrontendLibrary LResult = null;
-			lock (AProcess.Catalog.Libraries)
+			lock (AProgram.Catalog.Libraries)
 			{
 				if (!FLibraries.Contains(AName))
-					LoadLibrary(AProcess, AName);
+					LoadLibrary(AProgram, AName);
 				LResult = FLibraries[AName];
 			}
 
@@ -457,25 +457,25 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		public NativeTable EnsureNativeTable(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public NativeTable EnsureNativeTable(Program AProgram, Schema.TableVar ATableVar)
 		{
 			int LIndex = Tables.IndexOf(ATableVar);
 			if (LIndex < 0)
-				LIndex= Tables.Add(new NativeTable(AProcess, ATableVar));
+				LIndex= Tables.Add(new NativeTable(AProgram.ValueManager, ATableVar));
 			return Tables[LIndex];
 		}
 		
-		private void InsertDocument(ServerProcess AProcess, FrontendLibrary ALibrary, Document ADocument)
+		private void InsertDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
 		{
-			EnsureLibrariesLoaded(AProcess);
-			NativeTable LNativeTable = EnsureNativeTable(AProcess, GetDocumentsTableVar(AProcess));
-			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
+			EnsureLibrariesLoaded(AProgram);
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
 				LRow[0] = ALibrary.Name;
 				LRow[1] = ADocument.Name;
 				LRow[2] = ADocument.DocumentType.ID;
-				LNativeTable.Insert(AProcess, LRow);
+				LNativeTable.Insert(AProgram.ValueManager, LRow);
 			}
 			finally
 			{
@@ -483,11 +483,11 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		private void InsertLibraryDocuments(ServerProcess AProcess, FrontendLibrary ALibrary)
+		private void InsertLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
 		{
 			// Insert all the documents from this library
-			NativeTable LNativeTable = EnsureNativeTable(AProcess, GetDocumentsTableVar(AProcess));
-			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
 				foreach (Document LDocument in ALibrary.Documents)
@@ -495,7 +495,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 					LRow[0] = ALibrary.Name;
 					LRow[1] = LDocument.Name;
 					LRow[2] = LDocument.DocumentType.ID;
-					LNativeTable.Insert(AProcess, LRow);
+					LNativeTable.Insert(AProgram.ValueManager, LRow);
 				}
 			}
 			finally
@@ -519,17 +519,17 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void DeleteDocument(ServerProcess AProcess, FrontendLibrary ALibrary, Document ADocument)
+		private void DeleteDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument)
 		{	
-			EnsureLibrariesLoaded(AProcess);
-			NativeTable LNativeTable = EnsureNativeTable(AProcess, GetDocumentsTableVar(AProcess));
-			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
+			EnsureLibrariesLoaded(AProgram);
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
 				LRow[0] = ALibrary.Name;
 				LRow[1] = ADocument.Name;
-				if (LNativeTable.HasRow(AProcess, LRow))
-					LNativeTable.Delete(AProcess, LRow);
+				if (LNativeTable.HasRow(AProgram.ValueManager, LRow))
+					LNativeTable.Delete(AProgram.ValueManager, LRow);
 			}
 			finally
 			{
@@ -537,19 +537,19 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		private void DeleteLibraryDocuments(ServerProcess AProcess, FrontendLibrary ALibrary)
+		private void DeleteLibraryDocuments(Program AProgram, FrontendLibrary ALibrary)
 		{
 			// Delete all the documents from this library
-			NativeTable LNativeTable = EnsureNativeTable(AProcess, GetDocumentsTableVar(AProcess));
-			Row LRow = new Row(AProcess, LNativeTable.TableVar.DataType.CreateRowType());
+			NativeTable LNativeTable = EnsureNativeTable(AProgram, GetDocumentsTableVar(AProgram.Plan));
+			Row LRow = new Row(AProgram.ValueManager, LNativeTable.TableVar.DataType.CreateRowType());
 			try
 			{
 				foreach (Document LDocument in ALibrary.Documents)
 				{
 					LRow[0] = ALibrary.Name;
 					LRow[1] = LDocument.Name;
-					if (LNativeTable.HasRow(AProcess, LRow))
-						LNativeTable.Delete(AProcess, LRow);
+					if (LNativeTable.HasRow(AProgram.ValueManager, LRow))
+						LNativeTable.Delete(AProgram.ValueManager, LRow);
 				}
 			}
 			finally
@@ -573,13 +573,13 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void LoadLibrary(ServerProcess AProcess, string AName)
+		private void LoadLibrary(Program AProgram, string AName)
 		{
-			lock (AProcess.Catalog.Libraries)
+			lock (AProgram.Catalog.Libraries)
 			{
 				if (FLibraries.Contains(AName))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, AName);
-				FrontendLibrary LLibrary = new FrontendLibrary(AProcess, Schema.Object.EnsureUnrooted(AName));
+				FrontendLibrary LLibrary = new FrontendLibrary(AProgram, Schema.Object.EnsureUnrooted(AName));
 				#if USEWATCHERS
 				LLibrary.OnDocumentCreated += new DocumentEventHandler(DocumentCreated);
 				LLibrary.OnDocumentDeleted += new DocumentEventHandler(DocumentDeleted);
@@ -587,7 +587,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				FLibraries.Add(LLibrary);
 
 				// Insert all the documents in this library
-				InsertLibraryDocuments(AProcess, LLibrary);
+				InsertLibraryDocuments(AProgram, LLibrary);
 			}
 		}
 		
@@ -606,59 +606,59 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 		#endif
 		
-		private void InternalUnloadLibrary(ServerProcess AProcess, FrontendLibrary ALibrary)
+		private void InternalUnloadLibrary(Program AProgram, FrontendLibrary ALibrary)
 		{
-			DeleteLibraryDocuments(AProcess, ALibrary);
+			DeleteLibraryDocuments(AProgram, ALibrary);
 
-			ALibrary.Close(AProcess);
+			ALibrary.Close(AProgram);
 			FLibraries.Remove(ALibrary);
 		}
 
-		private void UnloadLibrary(ServerProcess AProcess, string AName)
+		private void UnloadLibrary(Program AProgram, string AName)
 		{
-			lock (AProcess.Catalog.Libraries)
+			lock (AProgram.Catalog.Libraries)
 			{
 				int LIndex = FLibraries.IndexOf(AName);
 				if (LIndex >= 0)
-					InternalUnloadLibrary(AProcess, FLibraries[LIndex]);
+					InternalUnloadLibrary(AProgram, FLibraries[LIndex]);
 			}
 		}
 		
-		private void UnloadLibrary(ServerProcess AProcess, FrontendLibrary ALibrary)
+		private void UnloadLibrary(Program AProgram, FrontendLibrary ALibrary)
 		{
-			lock (AProcess.Catalog.Libraries)
-				InternalUnloadLibrary(AProcess, ALibrary);
+			lock (AProgram.Catalog.Libraries)
+				InternalUnloadLibrary(AProgram, ALibrary);
 		}
 		
 		private bool FLibrariesLoaded;
-		public void EnsureLibrariesLoaded(ServerProcess AProcess)
+		public void EnsureLibrariesLoaded(Program AProgram)
 		{
-			lock (AProcess.Catalog.Libraries)
+			lock (AProgram.Catalog.Libraries)
 			{
 				if (!FLibrariesLoaded)
 				{
-					foreach (Schema.Library LLibrary in AProcess.Catalog.Libraries)
+					foreach (Schema.Library LLibrary in AProgram.Catalog.Libraries)
 						if (!Schema.Object.NamesEqual(LLibrary.Name, DAE.Server.Server.CSystemLibraryName) && !FLibraries.ContainsName(LLibrary.Name))
-							LoadLibrary(AProcess, Schema.Object.EnsureRooted(LLibrary.Name));
+							LoadLibrary(AProgram, Schema.Object.EnsureRooted(LLibrary.Name));
 					FLibrariesLoaded = true;
 				}
 			}
 		}
 		
-		private void EnsureRegisterScript(ServerProcess AProcess, string ALibraryName)
+		private void EnsureRegisterScript(Program AProgram, string ALibraryName)
 		{
 			string LDocumentName = Path.GetFileNameWithoutExtension(DAE.Runtime.Instructions.SystemRegisterLibraryNode.CRegisterFileName);
 			string LDocumentType = Path.GetExtension(DAE.Runtime.Instructions.SystemRegisterLibraryNode.CRegisterFileName);
 			LDocumentType = LDocumentType.Substring(1, LDocumentType.Length - 1);
-			if (!HasDocument(AProcess, ALibraryName, Schema.Object.EnsureRooted(LDocumentName)))
-				CreateDocument(AProcess, ALibraryName, LDocumentName, LDocumentType, true);
+			if (!HasDocument(AProgram, ALibraryName, Schema.Object.EnsureRooted(LDocumentName)))
+				CreateDocument(AProgram, ALibraryName, LDocumentName, LDocumentType, true);
 		}
 		
 		// Documents
 
-		public bool HasDocument(ServerProcess AProcess, string ALibraryName, string AName)
+		public bool HasDocument(Program AProgram, string ALibraryName, string AName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				return LLibrary.Documents.IndexOf(AName) >= 0;
@@ -669,7 +669,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		private Document InternalCreateDocument(ServerProcess AProcess, FrontendLibrary ALibrary, string AName, string ADocumentType, bool AMaintainTable)
+		private Document InternalCreateDocument(Program AProgram, FrontendLibrary ALibrary, string AName, string ADocumentType, bool AMaintainTable)
 		{
 			Document LDocument = new Document(Schema.Object.EnsureUnrooted(AName), DocumentTypes[ADocumentType]);
 			ALibrary.MaintainedUpdate = true;
@@ -685,7 +685,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 					try
 					{
 						if (AMaintainTable)
-							InsertDocument(AProcess, ALibrary, LDocument);
+							InsertDocument(AProgram, ALibrary, LDocument);
 					}
 					catch
 					{
@@ -706,12 +706,12 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return LDocument;
 		}
 
-		public void CreateDocument(ServerProcess AProcess, string ALibraryName, string AName, string ADocumentType, bool AMaintainTable)
+		public void CreateDocument(Program AProgram, string ALibraryName, string AName, string ADocumentType, bool AMaintainTable)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
-				InternalCreateDocument(AProcess, LLibrary, AName, ADocumentType, AMaintainTable);
+				InternalCreateDocument(AProgram, LLibrary, AName, ADocumentType, AMaintainTable);
 			}
 			finally
 			{
@@ -719,10 +719,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		private void InternalDeleteDocument(ServerProcess AProcess, FrontendLibrary ALibrary, Document ADocument, bool AMaintainTable)
+		private void InternalDeleteDocument(Program AProgram, FrontendLibrary ALibrary, Document ADocument, bool AMaintainTable)
 		{
 			if (AMaintainTable)
-				DeleteDocument(AProcess, ALibrary, ADocument);
+				DeleteDocument(AProgram, ALibrary, ADocument);
 			try
 			{
 				ALibrary.Documents.Remove(ADocument);
@@ -751,17 +751,17 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			catch
 			{
 				if (AMaintainTable)
-					InsertDocument(AProcess, ALibrary, ADocument);
+					InsertDocument(AProgram, ALibrary, ADocument);
 				throw;
 			}
 		}
 
-		public void DeleteDocument(ServerProcess AProcess, string ALibraryName, string AName, bool AMaintainTable)
+		public void DeleteDocument(Program AProgram, string ALibraryName, string AName, bool AMaintainTable)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
-				InternalDeleteDocument(AProcess, LLibrary, LLibrary.Documents[AName], AMaintainTable);
+				InternalDeleteDocument(AProgram, LLibrary, LLibrary.Documents[AName], AMaintainTable);
 			}
 			finally
 			{
@@ -769,12 +769,12 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public void RenameDocument(ServerProcess AProcess, string AOldLibraryName, string AOldName, string ANewLibraryName, string ANewName, bool AMaintainTable)
+		public void RenameDocument(Program AProgram, string AOldLibraryName, string AOldName, string ANewLibraryName, string ANewName, bool AMaintainTable)
 		{
-			FrontendLibrary LOldLibrary = GetFrontendLibrary(AProcess, AOldLibraryName);
+			FrontendLibrary LOldLibrary = GetFrontendLibrary(AProgram, AOldLibraryName);
 			try
 			{
-				FrontendLibrary LNewLibrary = GetFrontendLibrary(AProcess, ANewLibraryName);
+				FrontendLibrary LNewLibrary = GetFrontendLibrary(AProgram, ANewLibraryName);
 				try
 				{
 					Document LDocument = LOldLibrary.Documents[AOldName];
@@ -786,7 +786,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 						try
 						{
 							if (AMaintainTable)
-								DeleteDocument(AProcess, LOldLibrary, LDocument);
+								DeleteDocument(AProgram, LOldLibrary, LDocument);
 							try
 							{
 								LOldLibrary.Documents.Remove(LDocument);
@@ -808,7 +808,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 											try
 											{
 												if (AMaintainTable)
-													InsertDocument(AProcess, LNewLibrary, LDocument);	
+													InsertDocument(AProgram, LNewLibrary, LDocument);	
 											}
 											catch
 											{
@@ -840,7 +840,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 							catch
 							{
 								if (AMaintainTable)
-									InsertDocument(AProcess, LOldLibrary, LDocument);
+									InsertDocument(AProgram, LOldLibrary, LDocument);
 								throw;
 							}
 						}
@@ -866,16 +866,16 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public void RefreshDocuments(ServerProcess AProcess, string ALibraryName)
+		public void RefreshDocuments(Program AProgram, string ALibraryName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				// Remove all the documents from the documents buffer
-				DeleteLibraryDocuments(AProcess, LLibrary);
+				DeleteLibraryDocuments(AProgram, LLibrary);
 				LLibrary.LoadDocuments();
 				// Add all the documents to the documents buffer
-				InsertLibraryDocuments(AProcess, LLibrary);
+				InsertLibraryDocuments(AProgram, LLibrary);
 			}
 			finally
 			{
@@ -883,12 +883,12 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		private void InternalCopyMoveDocument(ServerProcess AProcess, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument, bool AMove)
+		private void InternalCopyMoveDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument, bool AMove)
 		{
-			FrontendLibrary LSourceLibrary = GetFrontendLibrary(AProcess, ASourceLibrary);
+			FrontendLibrary LSourceLibrary = GetFrontendLibrary(AProgram, ASourceLibrary);
 			try
 			{
-				FrontendLibrary LTargetLibrary = GetFrontendLibrary(AProcess, ATargetLibrary);
+				FrontendLibrary LTargetLibrary = GetFrontendLibrary(AProgram, ATargetLibrary);
 				try
 				{
 					Document LSourceDocument = LSourceLibrary.Documents[ASourceDocument];
@@ -901,11 +901,11 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 						LTargetDocument = LTargetLibrary.Documents[LTargetDocumentIndex];
 						if (System.Object.ReferenceEquals(LSourceLibrary, LTargetLibrary) && System.Object.ReferenceEquals(LSourceDocument, LTargetDocument))
 							throw new FrontendDeviceException(FrontendDeviceException.Codes.CannotCopyDocumentToSelf, ASourceLibrary, ASourceDocument);
-						InternalDeleteDocument(AProcess, LTargetLibrary, LTargetDocument, true);
+						InternalDeleteDocument(AProgram, LTargetLibrary, LTargetDocument, true);
 					}
 
 					// create the target document
-					LTargetDocument = InternalCreateDocument(AProcess, LTargetLibrary, ATargetDocument, LSourceDocument.DocumentType.ID, true);
+					LTargetDocument = InternalCreateDocument(AProgram, LTargetLibrary, ATargetDocument, LSourceDocument.DocumentType.ID, true);
 
 					// copy the document
 					using (FileStream LSourceStream = new FileStream(Path.Combine(LSourceLibrary.DocumentsDirectoryName, LSourceDocument.GetFileName()), FileMode.Open, FileAccess.Read))
@@ -926,7 +926,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 
 					// delete the old if we are doing a move
 					if (AMove)
-						InternalDeleteDocument(AProcess, LSourceLibrary, LSourceDocument, true);
+						InternalDeleteDocument(AProgram, LSourceLibrary, LSourceDocument, true);
 				}
 				finally
 				{
@@ -939,24 +939,24 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		public void CopyDocument(ServerProcess AProcess, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
+		public void CopyDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
 		{
-			InternalCopyMoveDocument(AProcess, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, false);
+			InternalCopyMoveDocument(AProgram, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, false);
 		}
 		
-		public void MoveDocument(ServerProcess AProcess, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
+		public void MoveDocument(Program AProgram, string ASourceLibrary, string ASourceDocument, string ATargetLibrary, string ATargetDocument)
 		{
-			InternalCopyMoveDocument(AProcess, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, true);
+			InternalCopyMoveDocument(AProgram, ASourceLibrary, ASourceDocument, ATargetLibrary, ATargetDocument, true);
 		}
 		
-		public string LoadDocument(ServerProcess AProcess, string ALibraryName, string AName)
+		public string LoadDocument(Program AProgram, string ALibraryName, string AName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				Document LDocument = LLibrary.Documents[AName];
 
-				LDocument.CheckDataType(AProcess, AProcess.DataTypes.SystemString);
+				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
 
 				using (StreamReader LReader = new StreamReader(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName())))
 				{
@@ -969,11 +969,11 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		public string LoadCustomization(ServerProcess AProcess, string ADilxDocument)
+		public string LoadCustomization(Program AProgram, string ADilxDocument)
 		{
 			DilxDocument LDilxDocument = new DilxDocument();
 			LDilxDocument.Read(ADilxDocument);
-			return ProcessDilxDocument(AProcess, LDilxDocument);
+			return ProcessDilxDocument(AProgram, LDilxDocument);
 		}
 
 		public string Merge(string AForm, string ADelta)
@@ -999,14 +999,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return LWriter.ToString();
 		}
 
-		public string LoadAndProcessDocument(ServerProcess AProcess, string ALibraryName, string AName)
+		public string LoadAndProcessDocument(Program AProgram, string ALibraryName, string AName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				Document LDocument = LLibrary.Documents[AName];
 
-				LDocument.CheckDataType(AProcess, AProcess.DataTypes.SystemString);
+				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
 
 				string LDocumentData;
 				using (StreamReader LReader = new StreamReader(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName())))
@@ -1019,7 +1019,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 					// Read the document
 					DilxDocument LDilxDocument = new DilxDocument();
 					LDilxDocument.Read(LDocumentData);
-					return ProcessDilxDocument(AProcess, LDilxDocument);
+					return ProcessDilxDocument(AProgram, LDilxDocument);
 				}
 				else
 					return LDocumentData;
@@ -1030,10 +1030,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		private static string ProcessDilxDocument(ServerProcess AProcess, DilxDocument ADocument)
+		private static string ProcessDilxDocument(Program AProgram, DilxDocument ADocument)
 		{
 			// Process ancestors
-			XmlDocument LCurrent = MergeAncestors(AProcess, ADocument.Ancestors);
+			XmlDocument LCurrent = MergeAncestors(AProgram, ADocument.Ancestors);
 
 			if (LCurrent == null)
 				return ADocument.Content;
@@ -1048,23 +1048,23 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		private static XmlDocument MergeAncestors(ServerProcess AProcess, Ancestors AAncestors)
+		private static XmlDocument MergeAncestors(Program AProgram, Ancestors AAncestors)
 		{
 			XmlDocument LDocument = null;
 			// Process any ancestors
 			foreach (string LAncestor in AAncestors)
 			{
 				if (LDocument == null)
-					LDocument = LoadAncestor(AProcess, LAncestor);
+					LDocument = LoadAncestor(AProgram, LAncestor);
 				else
-					Inheritance.Merge(LDocument, LoadAncestor(AProcess, LAncestor));
+					Inheritance.Merge(LDocument, LoadAncestor(AProgram, LAncestor));
 			}
 			return LDocument;
 		}
 
-		private static XmlDocument LoadAncestor(ServerProcess AProcess, string ADocumentExpression)
+		private static XmlDocument LoadAncestor(Program AProgram, string ADocumentExpression)
 		{
-			IServerProcess LProcess = ((IServerProcess)AProcess);
+			IServerProcess LProcess = ((IServerProcess)AProgram.ServerProcess);
 			IServerExpressionPlan LPlan = LProcess.PrepareExpression(ADocumentExpression, null);
 			try
 			{
@@ -1089,14 +1089,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public MemoryStream LoadBinary(ServerProcess AProcess, string ALibraryName, string AName)
+		public MemoryStream LoadBinary(Program AProgram, string ALibraryName, string AName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				Document LDocument = LLibrary.Documents[AName];
 				
-				LDocument.CheckDataType(AProcess, AProcess.DataTypes.SystemBinary);
+				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemBinary);
 				
 				using (FileStream LStream = new FileStream(Path.Combine(LLibrary.DocumentsDirectoryName, LDocument.GetFileName()), FileMode.Open, FileAccess.Read))
 				{
@@ -1112,22 +1112,22 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public StreamID RegisterBinary(ServerProcess AProcess, Stream AData)
+		public StreamID RegisterBinary(Program AProgram, Stream AData)
 		{
-			FrontendDeviceSession LDeviceSession = (FrontendDeviceSession)AProcess.DeviceConnect(this);
-			StreamID LStreamID = AProcess.Register(LDeviceSession);
+			FrontendDeviceSession LDeviceSession = (FrontendDeviceSession)AProgram.DeviceConnect(this);
+			StreamID LStreamID = AProgram.ServerProcess.Register(LDeviceSession);
 			LDeviceSession.Create(LStreamID, AData);
 			return LStreamID;
 		}
 		
-		public void SaveDocument(ServerProcess AProcess, string ALibraryName, string AName, string AData)
+		public void SaveDocument(Program AProgram, string ALibraryName, string AName, string AData)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				Document LDocument = LLibrary.Documents[AName];
 
-				LDocument.CheckDataType(AProcess, AProcess.DataTypes.SystemString);
+				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemString);
 
 				LLibrary.MaintainedUpdate = true;
 				try
@@ -1155,14 +1155,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 		
-		public void SaveBinary(ServerProcess AProcess, string ALibraryName, string AName, Stream AData)
+		public void SaveBinary(Program AProgram, string ALibraryName, string AName, Stream AData)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				Document LDocument = LLibrary.Documents[AName];
 
-				LDocument.CheckDataType(AProcess, AProcess.DataTypes.SystemBinary);							
+				LDocument.CheckDataType(AProgram.Plan, AProgram.DataTypes.SystemBinary);							
 
 				LLibrary.MaintainedUpdate = true;
 				try
@@ -1187,9 +1187,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		public string GetDocumentType(ServerProcess AProcess, string ALibraryName, string AName)
+		public string GetDocumentType(Program AProgram, string ALibraryName, string AName)
 		{
-			FrontendLibrary LLibrary = GetFrontendLibrary(AProcess, ALibraryName);
+			FrontendLibrary LLibrary = GetFrontendLibrary(AProgram, ALibraryName);
 			try
 			{
 				return LLibrary.Documents[AName].DocumentType.ID;
@@ -1215,48 +1215,48 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		public new FrontendDevice Device { get { return (FrontendDevice)base.Device; } }
 		
-		protected void PopulateDocuments(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocuments(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			Device.EnsureLibrariesLoaded(AProcess);
+			Device.EnsureLibrariesLoaded(AProgram);
 		}
 		
-		protected void PopulateDocumentTypes(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypes(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DocumentTypesBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
-				ANativeTable.Truncate(AProcess);
+				ANativeTable.Truncate(AProgram.ValueManager);
 				Device.UpdateDocumentTypesBufferTimeStamp();
 				foreach (DocumentType LDocumentType in Device.DocumentTypes.Values)
 				{
 					ARow[0] = LDocumentType.ID;
 					ARow[1] = LDocumentType.Description;
 					ARow[2] = LDocumentType.DataType;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 			}
 		}
 		
-		protected void PopulateDesigners(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DesignersBufferTimeStamp < Device.DesignersTimeStamp)
 			{
-				ANativeTable.Truncate(AProcess);
+				ANativeTable.Truncate(AProgram.ValueManager);
 				Device.UpdateDesignersBufferTimeStamp();
 				foreach (Designer LDesigner in Device.Designers.Values)
 				{
 					ARow[0] = LDesigner.ID;
 					ARow[1] = LDesigner.Description;
 					ARow[2] = LDesigner.ClassName;
-					ANativeTable.Insert(AProcess,ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 			}
 		}
 		
-		protected void PopulateDocumentTypeDesigners(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		protected void PopulateDocumentTypeDesigners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			if (Device.DocumentTypeDesignersBufferTimeStamp < Device.DocumentTypesTimeStamp)
 			{
-				ANativeTable.Truncate(AProcess);
+				ANativeTable.Truncate(AProgram.ValueManager);
 				Device.UpdateDocumentTypeDesignersBufferTimeStamp();
 				foreach (DocumentType LDocumentType in Device.DocumentTypes.Values)
 				{
@@ -1264,24 +1264,24 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 					{
 						ARow[0] = LDocumentType.ID;
 						ARow[1] = (string)LDocumentType.Designers[LDesignerIndex];
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 			}
 		}
 
-		protected virtual void PopulateTableVar(Schema.TableVar ATableVar)
+		protected virtual void PopulateTableVar(Program AProgram, Schema.TableVar ATableVar)
 		{
 			NativeTable LNativeTable = Device.Tables[ATableVar];
-			Row LRow = new Row(ServerProcess, ATableVar.DataType.CreateRowType());
+			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.CreateRowType());
 			try
 			{
 				switch (ATableVar.Name)
 				{
-					case "Frontend.Documents" : PopulateDocuments(ServerProcess, LNativeTable, LRow); break;
-					case "Frontend.DocumentTypes" : PopulateDocumentTypes(ServerProcess, LNativeTable, LRow); break;
-					case "Frontend.Designers" : PopulateDesigners(ServerProcess, LNativeTable, LRow); break;
-					case "Frontend.DocumentTypeDesigners" : PopulateDocumentTypeDesigners(ServerProcess, LNativeTable, LRow); break;
+					case "Frontend.Documents" : PopulateDocuments(AProgram, LNativeTable, LRow); break;
+					case "Frontend.DocumentTypes" : PopulateDocumentTypes(AProgram, LNativeTable, LRow); break;
+					case "Frontend.Designers" : PopulateDesigners(AProgram, LNativeTable, LRow); break;
+					case "Frontend.DocumentTypeDesigners" : PopulateDocumentTypeDesigners(AProgram, LNativeTable, LRow); break;
 				}
 			}
 			finally
@@ -1290,7 +1290,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
 		{
 			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
 			{
@@ -1300,9 +1300,9 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				else if (ADevicePlan.Node is OrderNode)
 					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
 				if (LTableVar != null)
-					PopulateTableVar(LTableVar);
+					PopulateTableVar(AProgram, LTableVar);
 			}
-			object LResult = base.InternalExecute(ADevicePlan);
+			object LResult = base.InternalExecute(AProgram, ADevicePlan);
 			if (ADevicePlan.Node is CreateTableNode)
 			{
 				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
@@ -1482,11 +1482,11 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			FrontendServer.GetFrontendServer(ServerProcess.ServerSession.Server).ClearDerivationCache();
 		}
 
-		protected void InsertDocument(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertDocument(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			Device.CreateDocument
 			(
-				ServerProcess, 
+				AProgram, 
 				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
 				(string)ARow["Name"],
 				(string)ARow["Type_ID"],
@@ -1494,7 +1494,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			);
 		}
 		
-		protected void UpdateDocument(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateDocument(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			string LOldLibraryName = (string)AOldRow["Library_Name"];
 			string LNewLibraryName = (string)ANewRow["Library_Name"];
@@ -1507,7 +1507,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			if ((LOldLibraryName != LNewLibraryName) || (LOldName != LNewName))
 				Device.RenameDocument
 				(
-					ServerProcess, 
+					AProgram, 
 					Schema.Object.EnsureRooted(LOldLibraryName), 
 					Schema.Object.EnsureRooted(LOldName), 
 					Schema.Object.EnsureRooted(LNewLibraryName), 
@@ -1516,54 +1516,54 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				);
 		}
 		
-		protected void DeleteDocument(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteDocument(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			Device.DeleteDocument
 			(
-				ServerProcess, 
+				AProgram, 
 				Schema.Object.EnsureRooted((string)ARow["Library_Name"]), 
 				Schema.Object.EnsureRooted((string)ARow["Name"]), 
 				false
 			);
 		}
 
-		protected override void InternalInsertRow(Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
 			{
 				case "Frontend.DocumentTypes" : InsertDocumentType(ATableVar, ARow); break;
 				case "Frontend.Designers" : InsertDesigner(ATableVar, ARow); break;
 				case "Frontend.DocumentTypeDesigners" : InsertDocumentTypeDesigner(ATableVar, ARow); break;
-				case "Frontend.Documents" : InsertDocument(ATableVar, ARow); break;
+				case "Frontend.Documents" : InsertDocument(AProgram, ATableVar, ARow); break;
 				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
-			base.InternalInsertRow(ATableVar, ARow, AValueFlags);
+			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
 			{
 				case "Frontend.DocumentTypes" : UpdateDocumentType(ATableVar, AOldRow, ANewRow); break;
 				case "Frontend.Designers" : UpdateDesigner(ATableVar, AOldRow, ANewRow); break;
 				case "Frontend.DocumentTypeDesigners" : UpdateDocumentTypeDesigner(ATableVar, AOldRow, ANewRow); break;
-				case "Frontend.Documents" : UpdateDocument(ATableVar, AOldRow, ANewRow); break;
+				case "Frontend.Documents" : UpdateDocument(AProgram, ATableVar, AOldRow, ANewRow); break;
 				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
-			base.InternalUpdateRow(ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Schema.TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			switch (ATableVar.Name)
 			{
 				case "Frontend.DocumentTypes" : DeleteDocumentType(ATableVar, ARow); break;
 				case "Frontend.Designers" : DeleteDesigner(ATableVar, ARow); break;
 				case "Frontend.DocumentTypeDesigners" : DeleteDocumentTypeDesigner(ATableVar, ARow); break;
-				case "Frontend.Documents" : DeleteDocument(ATableVar, ARow); break;
+				case "Frontend.Documents" : DeleteDocument(AProgram, ATableVar, ARow); break;
 				default : throw new FrontendDeviceException(FrontendDeviceException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
-			base.InternalDeleteRow(ATableVar, ARow);
+			base.InternalDeleteRow(AProgram, ATableVar, ARow);
 		}
 
 		// IStreamProvider

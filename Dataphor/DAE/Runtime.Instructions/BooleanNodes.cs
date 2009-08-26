@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks>operator System.iNot(System.Boolean) : System.Boolean</remarks>    
     public class BooleanNotNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			return BooleanUtility.Not(AArgument);
 		}
@@ -116,7 +116,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// </remarks>
     public class BooleanAndNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			return BooleanUtility.And(AArgument1, AArgument2);
 		}
@@ -125,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator System.iOr(System.Boolean, System.Boolean) : System.Boolean</remarks>
     public class BooleanOrNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			return BooleanUtility.Or(AArgument1, AArgument2);
 		}
@@ -134,7 +134,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks>operator System.iXor(System.Boolean, System.Boolean) : System.Boolean</remarks>
     public class BooleanXorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			return BooleanUtility.Xor(AArgument1, AArgument2);
 		}

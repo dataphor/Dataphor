@@ -557,7 +557,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 							string LText;
 							while (LCursor.Next())
 							{
-								LKey = new Row(FProcess, new Schema.RowType(((TableDataSet)FLink.DataSet).Order.Columns));
+								LKey = new Row(FProcess.ValueManager, new Schema.RowType(((TableDataSet)FLink.DataSet).Order.Columns));
 								try
 								{
 									using (Row LRow = LCursor.Select())
@@ -630,7 +630,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				if (LCursor.Next())
 				{
-					AKey = new Row(FProcess, new RowType(((TableDataSet)Source.DataSet).Order.Columns));
+					AKey = new Row(FProcess.ValueManager, new RowType(((TableDataSet)Source.DataSet).Order.Columns));
 					LCursor.Select().CopyTo(AKey);
 				}
 				else
@@ -889,7 +889,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				int LColumnIndex;
 				while (LCursor.Next())
 				{
-					LKey = new Row(DBTreeView.FProcess, new Schema.RowType(((TableDataSet)DBTreeView.Source.DataSet).Order.Columns));
+					LKey = new Row(DBTreeView.FProcess.ValueManager, new Schema.RowType(((TableDataSet)DBTreeView.Source.DataSet).Order.Columns));
 					try
 					{
 						using (Row LRow = LCursor.Select())

@@ -3,26 +3,20 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.Collections;
+using System.Diagnostics;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	using System.Collections;
-	using System.Diagnostics;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Device.Memory;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
     public class ExtendTable : Table
     {
-		public ExtendTable(ExtendNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public ExtendTable(ExtendNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new ExtendNode Node { get { return (ExtendNode)FNode; } }
         
@@ -31,10 +25,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = Node.Nodes[0].Execute(Process) as Table;
+			FSourceTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
 			}
 			catch
 			{
@@ -70,7 +64,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             FSourceRow.CopyTo(ARow);
             int LIndex;
             int LColumnIndex;
-	        Process.Stack.Push(FSourceRow);
+	        Program.Stack.Push(FSourceRow);
             try
             {
 				for (LIndex = 1; LIndex < Node.Nodes.Count; LIndex++)
@@ -78,16 +72,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LColumnIndex = ARow.DataType.Columns.IndexOfName(Node.DataType.Columns[Node.ExtendColumnOffset + LIndex - 1].Name);
 					if (LColumnIndex >= 0)
 					{
-						object LObject = Node.Nodes[LIndex].Execute(Process);
+						object LObject = Node.Nodes[LIndex].Execute(Program);
 						if (ARow.DataType.Columns[LColumnIndex].DataType is Schema.ScalarType)
-							LObject = ((Schema.ScalarType)ARow.DataType.Columns[LColumnIndex].DataType).ValidateValue(Process, LObject);
+							LObject = ValueUtility.ValidateValue(Program, (Schema.ScalarType)ARow.DataType.Columns[LColumnIndex].DataType, LObject);
 						ARow[LColumnIndex] = LObject;
 					}
 				}
             }
             finally
             {
-				Process.Stack.Pop();
+				Program.Stack.Pop();
             }
         }
         

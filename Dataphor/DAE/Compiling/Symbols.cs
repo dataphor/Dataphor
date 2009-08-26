@@ -86,8 +86,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 
 	public class Symbols : Stack<Symbol>
 	{
-		public Symbols() : base() { }
-		public Symbols(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) { }
+		public Symbols() : base() 
+		{ 
+			// Push an empty window onto the stack
+			PushWindow(0);
+		}
+		
+		public Symbols(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) 
+		{ 
+			// Push an empty window onto the stack
+			PushWindow(0);
+		}
 		
 		public void SetIsModified(int AOffset)
 		{

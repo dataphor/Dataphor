@@ -359,9 +359,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		[Reference]
 		public Schema.Operator Operator;
 		
-		private Schema.OperatorMatches FMatches = new Schema.OperatorMatches();
+		private OperatorMatches FMatches = new OperatorMatches();
 		/// <summary>All the possible matches found for the calling signature.</summary>
-		public Schema.OperatorMatches Matches { get { return FMatches; } }
+		public OperatorMatches Matches { get { return FMatches; } }
 		
 		/// <summary>Sets the binding data for this context to the binding data of the given context.</summary>
 		public void SetBindingDataFromContext(OperatorBindingContext AContext)
@@ -375,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void MergeBindingDataFromContext(OperatorBindingContext AContext)
 		{
 			FOperatorNameContext.SetBindingDataFromContext(AContext.OperatorNameContext);
-			foreach (Schema.OperatorMatch LMatch in AContext.Matches)
+			foreach (OperatorMatch LMatch in AContext.Matches)
 				if (!FMatches.Contains(LMatch))
 					FMatches.Add(LMatch);
 
@@ -2902,10 +2902,79 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 		}
 		
+		public static Schema.Key KeyFromKeyColumnDefinitions(Plan APlan, Schema.TableVar ATableVar, KeyColumnDefinitions AKeyColumns)
+		{
+			Schema.Key LKey = new Schema.Key();
+			foreach (KeyColumnDefinition LColumn in AKeyColumns)
+				LKey.Columns.Add(ATableVar.Columns[LColumn.ColumnName]);
+			return LKey;
+		}
+		
+		public static Schema.Key FindKey(Plan APlan, Schema.TableVar ATableVar, KeyColumnDefinitions AKeyColumns)
+		{
+			Schema.Key LKey = KeyFromKeyColumnDefinitions(APlan, ATableVar, AKeyColumns);
+			
+			int LIndex = ATableVar.IndexOfKey(LKey);
+			if (LIndex >= 0)
+				return ATableVar.Keys[LIndex];
+			
+			throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LKey.Name);
+		}
+		
+		public static Schema.Key FindKey(Plan APlan, Schema.TableVar ATableVar, KeyDefinitionBase AKeyDefinition)
+		{
+			return FindKey(APlan, ATableVar, AKeyDefinition.Columns);
+		}
+		
+		public static Schema.Key FindClusteringKey(Plan APlan, Schema.TableVar ATableVar)
+		{
+			Schema.Key LMinimumKey = null;
+			foreach (Schema.Key LKey in ATableVar.Keys)
+			{
+				if (Convert.ToBoolean(MetaData.GetTag(LKey.MetaData, "DAE.IsClustered", "false")))
+					return LKey;
+				
+				if (!LKey.IsSparse)
+					if (LMinimumKey == null)
+						LMinimumKey = LKey;
+					else
+						if (LMinimumKey.Columns.Count > LKey.Columns.Count)
+							LMinimumKey = LKey;
+			}
+					
+			if (LMinimumKey != null)
+				return LMinimumKey;
+
+			throw new Schema.SchemaException(Schema.SchemaException.Codes.KeyRequired, ATableVar.DisplayName);
+		}
+		
+		public static void EnsureKey(Plan APlan, Schema.TableVar ATableVar)
+		{
+			if (ATableVar.Keys.Count == 0)
+			{
+				Schema.Key LKey = new Schema.Key();
+				foreach (Schema.TableVarColumn LColumn in ATableVar.Columns)
+					if (SupportsComparison(APlan, LColumn.DataType))
+						LKey.Columns.Add(LColumn);
+				ATableVar.Keys.Add(LKey);
+			}
+		}
+
 		public static Schema.Sort GetSort(Plan APlan, Schema.IDataType ADataType)
 		{
-			if (ADataType is Schema.ScalarType)
-				return ((Schema.ScalarType)ADataType).GetSort(APlan);
+			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;
+			if (LScalarType != null)
+			{
+				if (LScalarType.Sort == null)
+				{
+					if (LScalarType.SortID >= 0)
+						APlan.CatalogDeviceSession.ResolveCatalogObject(LScalarType.SortID);
+					else
+						return GetUniqueSort(APlan, ADataType);
+				}
+
+				return LScalarType.Sort;
+			}
 			else
 			{
 				Schema.Sort LSort = CompileSortDefinition(APlan, ADataType);
@@ -2915,8 +2984,33 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.Sort GetUniqueSort(Plan APlan, Schema.IDataType ADataType)
 		{
-			if (ADataType is Schema.ScalarType)
-				return ((Schema.ScalarType)ADataType).GetUniqueSort(APlan);
+			Schema.ScalarType LScalarType = ADataType as Schema.ScalarType;
+			if (LScalarType != null)
+			{
+				if (LScalarType.UniqueSort == null)
+				{
+					if (LScalarType.UniqueSortID >= 0)
+						APlan.CatalogDeviceSession.ResolveCatalogObject(LScalarType.UniqueSortID);
+					else
+					{
+						APlan.PushLoadingContext(new LoadingContext(LScalarType.Owner, LScalarType.Library.Name, false));
+						try
+						{
+							CreateSortNode LCreateSortNode = new CreateSortNode();
+							LCreateSortNode.ScalarType = LScalarType;
+							LCreateSortNode.Sort = CompileSortDefinition(APlan, LScalarType);
+							LCreateSortNode.IsUnique = true;
+							APlan.ExecuteNode(LCreateSortNode);
+						}
+						finally
+						{
+							APlan.PopLoadingContext();
+						}
+					}
+				}
+
+				return LScalarType.UniqueSort;
+			}
 			else
 			{
 				Schema.Sort LSort = CompileSortDefinition(APlan, ADataType);
@@ -2927,7 +3021,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static bool IsOrderUnique(Plan APlan, Schema.TableVar ATableVar, Schema.Order AOrder)
 		{
 			foreach (Schema.Key LKey in ATableVar.Keys)
-				if (!LKey.IsSparse && AOrder.Includes(APlan, LKey))
+				if (!LKey.IsSparse && OrderIncludesKey(APlan, AOrder, LKey))
 					return true;
 			return false;
 		}
@@ -2937,7 +3031,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			if (!IsOrderUnique(APlan, ATableVar, AOrder))
 			{
 				bool LIsDescending = AOrder.IsDescending;
-				foreach (Schema.TableVarColumn LColumn in ATableVar.FindClusteringKey().Columns)
+				foreach (Schema.TableVarColumn LColumn in FindClusteringKey(APlan, ATableVar).Columns)
 				{
 					Schema.Sort LUniqueSort = GetUniqueSort(APlan, LColumn.DataType);
 					if (!AOrder.Columns.Contains(LColumn.Name, LUniqueSort))
@@ -3015,6 +3109,94 @@ namespace Alphora.Dataphor.DAE.Compiling
 				else
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, LOrder.Name);
 			}
+		}
+		
+		public static Schema.Order OrderFromKey(Plan APlan, Schema.Key AKey)
+		{
+			Schema.Order LOrder = new Schema.Order();
+			Schema.OrderColumn LOrderColumn;
+			Schema.TableVarColumn LColumn;
+			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
+			{
+				LColumn = AKey.Columns[LIndex];
+				LOrderColumn = new Schema.OrderColumn(LColumn, true, true);
+				if (LColumn.DataType is Schema.ScalarType)
+					LOrderColumn.Sort = GetUniqueSort(APlan, LColumn.DataType);
+				else
+					LOrderColumn.Sort = CompileSortDefinition(APlan, LColumn.DataType);
+				LOrderColumn.IsDefaultSort = true;
+				if (LOrderColumn.Sort.HasDependencies())
+					APlan.AttachDependencies(LOrderColumn.Sort.Dependencies);
+				LOrder.Columns.Add(LOrderColumn);
+			}
+			return LOrder;
+		}
+
+		public static Schema.Order FindOrder(Plan APlan, Schema.TableVar ATableVar, OrderDefinitionBase AOrderDefinition)
+		{
+			Schema.Order LOrder = CompileOrderDefinition(APlan, ATableVar, AOrderDefinition, false);
+			
+			int LIndex = ATableVar.IndexOfOrder(LOrder);
+			if (LIndex >= 0)
+				return ATableVar.Orders[LIndex];
+
+			throw new Schema.SchemaException(Schema.SchemaException.Codes.ObjectNotFound, LOrder.Name);
+		}
+		
+		public static Schema.Order FindClusteringOrder(Plan APlan, Schema.TableVar ATableVar)
+		{
+			Schema.Key LMinimumKey = null;
+			foreach (Schema.Key LKey in ATableVar.Keys)
+			{
+				if (Convert.ToBoolean(MetaData.GetTag(LKey.MetaData, "DAE.IsClustered", "false")))
+					return OrderFromKey(APlan, LKey);
+					
+				if (!LKey.IsSparse)
+					if (LMinimumKey == null)
+						LMinimumKey = LKey;
+					else
+						if (LMinimumKey.Columns.Count > LKey.Columns.Count)
+							LMinimumKey = LKey;
+			}
+
+			foreach (Schema.Order LOrder in ATableVar.Orders)
+				if (Convert.ToBoolean(MetaData.GetTag(LOrder.MetaData, "DAE.IsClustered", "false")))
+					return LOrder;
+					
+			if (LMinimumKey != null)
+				return OrderFromKey(APlan, LMinimumKey);
+					
+			if (ATableVar.Orders.Count > 0)
+				return ATableVar.Orders[0];
+				
+			throw new Schema.SchemaException(Schema.SchemaException.Codes.KeyRequired, ATableVar.DisplayName);
+		}
+		
+		// returns true if the order includes the key as a subset, including the use of the unique sort algorithm for the type of each column
+		public static bool OrderIncludesKey(Plan APlan, Schema.Order AIncludingOrder, Schema.Key AIncludedKey)
+		{
+			Schema.TableVarColumn LColumn;
+			for (int LIndex = 0; LIndex < AIncludedKey.Columns.Count; LIndex++)
+			{
+				LColumn = AIncludedKey.Columns[LIndex];
+				if (!AIncludingOrder.Columns.Contains(LColumn.Name, GetUniqueSort(APlan, LColumn.DataType)))
+					return false;
+			}
+
+			return true;
+		}
+		
+		public static bool OrderIncludesOrder(Plan APlan, Schema.Order AIncludingOrder, Schema.Order AIncludedOrder)
+		{
+			Schema.OrderColumn LColumn;
+			for (int LIndex = 0; LIndex < AIncludedOrder.Columns.Count; LIndex++)
+			{
+				LColumn = AIncludedOrder.Columns[LIndex];
+				if (!AIncludingOrder.Columns.Contains(LColumn.Column.Name, LColumn.Sort))
+					return false;
+			}
+			
+			return true;
 		}
 		
 		public static Schema.RowConstraint CompileRowConstraint(Plan APlan, Schema.TableVar ATableVar, ConstraintDefinition AConstraint)
@@ -3950,41 +4132,33 @@ namespace Alphora.Dataphor.DAE.Compiling
 							LTransaction.PushGlobalContext();
 						try
 						{
-							ServerStatementPlan LPlan = new ServerStatementPlan(APlan.ServerProcess);
+							Plan LPlan = new Plan(APlan.ServerProcess);
 							try
 							{
-								APlan.ServerProcess.PushExecutingPlan(LPlan);
+								LPlan.PushATCreationContext();
 								try
 								{
-									LPlan.Plan.PushATCreationContext();
+									LPlan.PushSecurityContext(new SecurityContext(AView.Owner));
 									try
 									{
-										LPlan.Plan.PushSecurityContext(new SecurityContext(AView.Owner));
-										try
-										{
-											#if USEORIGINALEXPRESSION
-											PlanNode LPlanNode = CompileExpression(LPlan.Plan, AView.OriginalExpression);
-											#else
-											PlanNode LPlanNode = CompileExpression(LPlan.Plan, AView.InvocationExpression);
-											#endif
-											LPlan.CheckCompiled();
-											LPlanNode = EnsureTableNode(LPlan.Plan, LPlanNode);
-											AView.CopyReferences((TableNode)LPlanNode);
-											AView.ShouldReinferReferences = false;
-										}
-										finally
-										{
-											LPlan.Plan.PopSecurityContext();
-										}
+										#if USEORIGINALEXPRESSION
+										PlanNode LPlanNode = CompileExpression(LPlan, AView.OriginalExpression);
+										#else
+										PlanNode LPlanNode = CompileExpression(LPlan, AView.InvocationExpression);
+										#endif
+										LPlan.CheckCompiled();
+										LPlanNode = EnsureTableNode(LPlan, LPlanNode);
+										AView.CopyReferences((TableNode)LPlanNode);
+										AView.ShouldReinferReferences = false;
 									}
 									finally
 									{
-										LPlan.Plan.PopATCreationContext();
+										LPlan.PopSecurityContext();
 									}
 								}
 								finally
 								{
-									APlan.ServerProcess.PopExecutingPlan(LPlan);
+									LPlan.PopATCreationContext();
 								}
 							}
 							finally
@@ -5882,75 +6056,67 @@ namespace Alphora.Dataphor.DAE.Compiling
 								AOperator.Dependencies.Clear();
 								AOperator.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(AOperator.OperatorName));
 
-								ServerStatementPlan LPlan = new ServerStatementPlan(APlan.ServerProcess);
+								Plan LPlan = new Plan(APlan.ServerProcess);
 								try
 								{
-									APlan.ServerProcess.PushExecutingPlan(LPlan);
+									LPlan.PushATCreationContext();
 									try
 									{
-										LPlan.Plan.PushATCreationContext();
+										LPlan.PushCreationObject(AOperator);
 										try
 										{
-											LPlan.Plan.PushCreationObject(AOperator);
+											LPlan.PushStatementContext(new StatementContext(StatementType.Select));
 											try
 											{
-												LPlan.Plan.PushStatementContext(new StatementContext(StatementType.Select));
+												LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
 												try
 												{
-													LPlan.Plan.PushSecurityContext(new SecurityContext(AOperator.Owner));
-													try
-													{
-														// Report dependencies for the signature and return types
-														Schema.Catalog LDependencies = new Schema.Catalog();
-														foreach (Schema.Operand LOperand in AOperator.Operands)
-															LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-														if (AOperator.ReturnDataType != null)
-															AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-														foreach (Schema.Object LObject in LDependencies)
-															LPlan.Plan.AttachDependency(LObject);
+													// Report dependencies for the signature and return types
+													Schema.Catalog LDependencies = new Schema.Catalog();
+													foreach (Schema.Operand LOperand in AOperator.Operands)
+														LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+													if (AOperator.ReturnDataType != null)
+														AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+													foreach (Schema.Object LObject in LDependencies)
+														LPlan.AttachDependency(LObject);
 
-														PlanNode LBlockNode = BindOperatorBlock(LPlan.Plan, AOperator, CompileOperatorBlock(LPlan.Plan, AOperator, new Parser().ParseStatement(AOperator.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
-														LPlan.Plan.CheckCompiled();
-														AOperator.Block.BlockNode = LBlockNode;
-														AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
+													PlanNode LBlockNode = BindOperatorBlock(LPlan, AOperator, CompileOperatorBlock(LPlan, AOperator, new Parser().ParseStatement(AOperator.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
+													LPlan.CheckCompiled();
+													AOperator.Block.BlockNode = LBlockNode;
+													AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
 
-														AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
-														AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
-														AOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsFunctional", AOperator.IsFunctional.ToString()));
-														AOperator.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsDeterministic", AOperator.IsDeterministic.ToString()));
-														AOperator.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRepeatable", AOperator.IsRepeatable.ToString()));
-														AOperator.IsNilable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsNilable", AOperator.IsNilable.ToString()));
-														
-														if (!AOperator.IsRepeatable && AOperator.IsDeterministic)
-															AOperator.IsDeterministic = false;
-														if (!AOperator.IsDeterministic && AOperator.IsLiteral)
-															AOperator.IsLiteral = false;
+													AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
+													AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
+													AOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsFunctional", AOperator.IsFunctional.ToString()));
+													AOperator.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsDeterministic", AOperator.IsDeterministic.ToString()));
+													AOperator.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRepeatable", AOperator.IsRepeatable.ToString()));
+													AOperator.IsNilable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsNilable", AOperator.IsNilable.ToString()));
+													
+													if (!AOperator.IsRepeatable && AOperator.IsDeterministic)
+														AOperator.IsDeterministic = false;
+													if (!AOperator.IsDeterministic && AOperator.IsLiteral)
+														AOperator.IsLiteral = false;
 
-														APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
-													}
-													finally
-													{
-														LPlan.Plan.PopSecurityContext();
-													}
+													APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
 												}
 												finally
 												{
-													LPlan.Plan.PopStatementContext();
+													LPlan.PopSecurityContext();
 												}
 											}
 											finally
 											{
-												LPlan.Plan.PopCreationObject();
+												LPlan.PopStatementContext();
 											}
 										}
 										finally
 										{
-											LPlan.Plan.PopATCreationContext();
+											LPlan.PopCreationObject();
 										}
 									}
 									finally
 									{
-										APlan.ServerProcess.PopExecutingPlan(LPlan);
+										LPlan.PopATCreationContext();
 									}
 								}
 								finally
@@ -6273,158 +6439,150 @@ namespace Alphora.Dataphor.DAE.Compiling
 						PlanNode LSaveFinalizationNode = AOperator.Finalization.BlockNode;
 						AOperator.Dependencies.Clear();
 						AOperator.IsBuiltin = Instructions.Contains(Schema.Object.Unqualify(AOperator.OperatorName));
-						ServerStatementPlan LPlan = new ServerStatementPlan(APlan.ServerProcess);
+						Plan LPlan = new Plan(APlan.ServerProcess);
 						try
 						{
-							APlan.ServerProcess.PushExecutingPlan(LPlan);
+							LPlan.PushATCreationContext();
 							try
 							{
-								LPlan.Plan.PushATCreationContext();
+								LPlan.PushCreationObject(AOperator);
 								try
 								{
-									LPlan.Plan.PushCreationObject(AOperator);
+									LPlan.PushStatementContext(new StatementContext(StatementType.Select));
 									try
 									{
-										LPlan.Plan.PushStatementContext(new StatementContext(StatementType.Select));
+										LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
 										try
 										{
-											LPlan.Plan.PushSecurityContext(new SecurityContext(AOperator.Owner));
+											// Report dependencies for the signature and return types
+											Schema.Catalog LDependencies = new Schema.Catalog();
+											foreach (Schema.Operand LOperand in AOperator.Operands)
+												LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+											if (AOperator.ReturnDataType != null)
+												AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+											foreach (Schema.Object LObject in LDependencies)
+												LPlan.AttachDependency(LObject);
+
+											PlanNode LInitializationNode = null;
+											int LInitializationDisplacement = 0;
+											PlanNode LAggregationNode = null;
+											PlanNode LFinalizationNode = null;
+
+											LPlan.Symbols.PushWindow(0);
 											try
 											{
-												// Report dependencies for the signature and return types
-												Schema.Catalog LDependencies = new Schema.Catalog();
-												foreach (Schema.Operand LOperand in AOperator.Operands)
-													LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-												if (AOperator.ReturnDataType != null)
-													AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-												foreach (Schema.Object LObject in LDependencies)
-													LPlan.Plan.AttachDependency(LObject);
-
-												PlanNode LInitializationNode = null;
-												int LInitializationDisplacement = 0;
-												PlanNode LAggregationNode = null;
-												PlanNode LFinalizationNode = null;
-
-												LPlan.Plan.Symbols.PushWindow(0);
-												try
-												{
-													Symbol LResultVar = new Symbol(Keywords.Result, AOperator.ReturnDataType);
-													LPlan.Plan.Symbols.Push(LResultVar);
-													
-													if (AOperator.Initialization.ClassDefinition == null)
-													{
-														int LSymbolCount = LPlan.Plan.Symbols.Count;
-														LInitializationNode = CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
-														LInitializationDisplacement = LPlan.Plan.Symbols.Count - LSymbolCount;
-													}
-					
-													if (AOperator.Aggregation.ClassDefinition == null)
-													{
-														LPlan.Plan.Symbols.PushFrame();
-														try
-														{
-															foreach (Schema.Operand LOperand in AOperator.Operands)
-																LPlan.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
-
-															LAggregationNode = CompileDeallocateFrameVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
-														}
-														finally
-														{
-															LPlan.Plan.Symbols.PopFrame();
-														}
-													}
-
-													if (AOperator.Finalization.ClassDefinition == null)
-														LFinalizationNode = CompileDeallocateVariablesNode(LPlan.Plan, CompileStatement(LPlan.Plan, new Parser().ParseStatement(AOperator.FinalizationText, null)), LResultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
-												}
-												finally
-												{
-													LPlan.Plan.Symbols.PopWindow();
-												}
-
-												LPlan.Plan.Symbols.PushWindow(0);
-												try
-												{
-													LPlan.Plan.Symbols.Push(new Symbol(Keywords.Result, AOperator.ReturnDataType));
-
-													if (AOperator.Initialization.ClassDefinition == null)
-														LInitializationNode = BindNode(LPlan.Plan, OptimizeNode(LPlan.Plan, LInitializationNode));
-													
-													if (AOperator.Aggregation.ClassDefinition == null)
-													{
-														LPlan.Plan.Symbols.PushFrame();
-														try
-														{
-															foreach (Schema.Operand LOperand in AOperator.Operands)
-																LPlan.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
-															LAggregationNode = BindNode(LPlan.Plan, OptimizeNode(LPlan.Plan, LAggregationNode));
-														}
-														finally
-														{
-															LPlan.Plan.Symbols.PopFrame();
-														}
-													}
-
-													if (AOperator.Finalization.ClassDefinition == null)
-														LFinalizationNode = BindNode(LPlan.Plan, OptimizeNode(LPlan.Plan, LFinalizationNode));
-												}
-												finally
-												{
-													LPlan.Plan.Symbols.PopWindow();
-												}
-
-												LPlan.Plan.CheckCompiled();
-
-												if (LInitializationNode != null)
-												{
-													AOperator.Initialization.BlockNode = LInitializationNode;
-													AOperator.Initialization.StackDisplacement = LInitializationDisplacement;
-												}
+												Symbol LResultVar = new Symbol(Keywords.Result, AOperator.ReturnDataType);
+												LPlan.Symbols.Push(LResultVar);
 												
-												if (LAggregationNode != null)
-													AOperator.Aggregation.BlockNode = LAggregationNode;
-													
-												if (LFinalizationNode != null)
-													AOperator.Finalization.BlockNode = LFinalizationNode;
+												if (AOperator.Initialization.ClassDefinition == null)
+												{
+													int LSymbolCount = LPlan.Symbols.Count;
+													LInitializationNode = CompileStatement(LPlan, new Parser().ParseStatement(AOperator.InitializationText, null)); //AOperator.Initialization.BlockNode.EmitStatement(EmitMode.ForCopy)); 
+													LInitializationDisplacement = LPlan.Symbols.Count - LSymbolCount;
+												}
+				
+												if (AOperator.Aggregation.ClassDefinition == null)
+												{
+													LPlan.Symbols.PushFrame();
+													try
+													{
+														foreach (Schema.Operand LOperand in AOperator.Operands)
+															LPlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 
-												AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
-												AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
-												AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
-												AOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsFunctional", AOperator.IsFunctional.ToString()));
-												AOperator.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsDeterministic", AOperator.IsDeterministic.ToString()));
-												AOperator.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRepeatable", AOperator.IsRepeatable.ToString()));
-												AOperator.IsNilable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsNilable", AOperator.IsNilable.ToString()));
-												
-												if (!AOperator.IsRepeatable && AOperator.IsDeterministic)
-													AOperator.IsDeterministic = false;
-												if (!AOperator.IsDeterministic && AOperator.IsLiteral)
-													AOperator.IsLiteral = false;
+														LAggregationNode = CompileDeallocateFrameVariablesNode(LPlan, CompileStatement(LPlan, new Parser().ParseStatement(AOperator.AggregationText, null))); //AOperator.Aggregation.BlockNode.EmitStatement(EmitMode.ForCopy)));
+													}
+													finally
+													{
+														LPlan.Symbols.PopFrame();
+													}
+												}
 
-												APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
+												if (AOperator.Finalization.ClassDefinition == null)
+													LFinalizationNode = CompileDeallocateVariablesNode(LPlan, CompileStatement(LPlan, new Parser().ParseStatement(AOperator.FinalizationText, null)), LResultVar); //AOperator.Finalization.BlockNode.EmitStatement(EmitMode.ForCopy)), LResultVar);
 											}
 											finally
 											{
-												LPlan.Plan.PopSecurityContext();
+												LPlan.Symbols.PopWindow();
 											}
+
+											LPlan.Symbols.PushWindow(0);
+											try
+											{
+												LPlan.Symbols.Push(new Symbol(Keywords.Result, AOperator.ReturnDataType));
+
+												if (AOperator.Initialization.ClassDefinition == null)
+													LInitializationNode = BindNode(LPlan, OptimizeNode(LPlan, LInitializationNode));
+												
+												if (AOperator.Aggregation.ClassDefinition == null)
+												{
+													LPlan.Symbols.PushFrame();
+													try
+													{
+														foreach (Schema.Operand LOperand in AOperator.Operands)
+															LPlan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+														LAggregationNode = BindNode(LPlan, OptimizeNode(LPlan, LAggregationNode));
+													}
+													finally
+													{
+														LPlan.Symbols.PopFrame();
+													}
+												}
+
+												if (AOperator.Finalization.ClassDefinition == null)
+													LFinalizationNode = BindNode(LPlan, OptimizeNode(LPlan, LFinalizationNode));
+											}
+											finally
+											{
+												LPlan.Symbols.PopWindow();
+											}
+
+											LPlan.CheckCompiled();
+
+											if (LInitializationNode != null)
+											{
+												AOperator.Initialization.BlockNode = LInitializationNode;
+												AOperator.Initialization.StackDisplacement = LInitializationDisplacement;
+											}
+											
+											if (LAggregationNode != null)
+												AOperator.Aggregation.BlockNode = LAggregationNode;
+												
+											if (LFinalizationNode != null)
+												AOperator.Finalization.BlockNode = LFinalizationNode;
+
+											AOperator.DetermineRemotable(APlan.CatalogDeviceSession);
+											AOperator.IsRemotable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRemotable", AOperator.IsRemotable.ToString()));
+											AOperator.IsLiteral = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsLiteral", AOperator.IsLiteral.ToString()));
+											AOperator.IsFunctional = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsFunctional", AOperator.IsFunctional.ToString()));
+											AOperator.IsDeterministic = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsDeterministic", AOperator.IsDeterministic.ToString()));
+											AOperator.IsRepeatable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsRepeatable", AOperator.IsRepeatable.ToString()));
+											AOperator.IsNilable = Convert.ToBoolean(MetaData.GetTag(AOperator.MetaData, "DAE.IsNilable", AOperator.IsNilable.ToString()));
+											
+											if (!AOperator.IsRepeatable && AOperator.IsDeterministic)
+												AOperator.IsDeterministic = false;
+											if (!AOperator.IsDeterministic && AOperator.IsLiteral)
+												AOperator.IsLiteral = false;
+
+											APlan.CatalogDeviceSession.UpdateCatalogObject(AOperator);
 										}
 										finally
 										{
-											LPlan.Plan.PopStatementContext();
+											LPlan.PopSecurityContext();
 										}
 									}
 									finally
 									{
-										LPlan.Plan.PopCreationObject();
+										LPlan.PopStatementContext();
 									}
 								}
 								finally
 								{
-									LPlan.Plan.PopATCreationContext();
+									LPlan.PopCreationObject();
 								}
 							}
 							finally
 							{
-								APlan.ServerProcess.PopExecutingPlan(LPlan);
+								LPlan.PopATCreationContext();
 							}
 						}
 						finally
@@ -8666,7 +8824,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					
 				if ((AContext.Matches.Count > 0) && !AContext.Matches.IsMatch)
 				{
-					Schema.OperatorMatch LMatch = AContext.Matches.ClosestMatch;
+					OperatorMatch LMatch = AContext.Matches.ClosestMatch;
 					if (LMatch != null)
 					{
 						APlan.Messages.Add(new CompilerException(CompilerException.Codes.InvalidOperatorCall, AContext.Statement, AContext.OperatorName, AContext.CallSignature.ToString(), LMatch.Signature.Signature.ToString()));
@@ -8702,7 +8860,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				
 				if (AContext.Matches.IsPartial)
 				{
-					Schema.OperatorMatch LOperatorMatch = AContext.Matches.Match;
+					OperatorMatch LOperatorMatch = AContext.Matches.Match;
 					for (int LIndex = 0; LIndex < LOperatorMatch.Signature.Signature.Count; LIndex++)
 						if (LOperatorMatch.ConversionContexts[LIndex] != null)
 							CheckConversionContext(APlan, LOperatorMatch.ConversionContexts[LIndex], false);
@@ -10860,7 +11018,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				for (int LIndex = LCastingPath.Count - 1; LIndex >= 0; LIndex--)
 				{
 					LTargetDataType = (Schema.ScalarType)LCastingPath[LIndex];
-					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(((Schema.ScalarType)APlanNode.DataType).GetConveyor(APlan.ServerProcess).GetType(), LTargetDataType.GetConveyor(APlan.ServerProcess).GetType()))
+					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(APlan.ValueManager.GetConveyor((Schema.ScalarType)APlanNode.DataType).GetType(), APlan.ValueManager.GetConveyor(LTargetDataType).GetType()))
 					{
 						LPlanNode = EmitCallNode(APlan, LTargetDataType.Name, new PlanNode[]{APlanNode}, false);
 						if (LPlanNode == null)
@@ -10889,7 +11047,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				for (int LIndex = 0; LIndex < LCastingPath.Count; LIndex++)
 				{
 					LTargetDataType = (Schema.ScalarType)LCastingPath[LIndex];
-					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(((Schema.ScalarType)APlanNode.DataType).GetConveyor(APlan.ServerProcess).GetType(), LTargetDataType.GetConveyor(APlan.ServerProcess).GetType()))
+					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(APlan.ValueManager.GetConveyor((Schema.ScalarType)APlanNode.DataType).GetType(), APlan.ValueManager.GetConveyor(LTargetDataType).GetType()))
 					{
 						LPlanNode = EmitCallNode(APlan, LTargetDataType.Name, new PlanNode[]{APlanNode}, false);
 						if (LPlanNode == null)
@@ -10993,7 +11151,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			if (!AContext.Matches.IsExact)
 			{
 				ConversionContext LContext;
-				Schema.OperatorMatch LPartialMatch = AContext.Matches.Match;
+				OperatorMatch LPartialMatch = AContext.Matches.Match;
 				for (int LIndex = 0; LIndex < LArguments.Length; LIndex++)
 				{
 					LContext = LPartialMatch.ConversionContexts[LIndex];
@@ -11529,7 +11687,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							throw new CompilerException(CompilerException.Codes.TooManyTermsForImplicitTableIndexer, AExpression);
 							
 						// construct operators for each potential key
-						Schema.OperatorSignatures LOperatorSignatures = new Schema.OperatorSignatures(null);
+						OperatorSignatures LOperatorSignatures = new OperatorSignatures(null);
 						for (int LIndex = 0; LIndex < LTableNode.TableVar.Keys.Count; LIndex++)
 							if (LTableNode.TableVar.Keys[LIndex].Columns.Count == LTerms.Length)
 							{
@@ -11538,7 +11696,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 									LOperator.Operands.Add(new Schema.Operand(LOperator, LColumn.Name, LColumn.DataType));
 								if (LOperatorSignatures.Contains(LOperator.Signature))
 									throw new CompilerException(CompilerException.Codes.PotentiallyAmbiguousImplicitTableIndexer, AExpression);
-								LOperatorSignatures.Add(new Schema.OperatorSignature(LOperator));
+								LOperatorSignatures.Add(new OperatorSignature(LOperator));
 							}
 
 						// If there is at least one potentially matching key						
@@ -11979,13 +12137,13 @@ indicative of other problems, a reference will never be attached as an explicit 
 
 			LNode.TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			CompileTableVarKeys(APlan, LNode.TableVar, AExpression.Keys);
-			Schema.Key LClusteringKey = LNode.TableVar.FindClusteringKey();
+			Schema.Key LClusteringKey = FindClusteringKey(APlan, LNode.TableVar);
 
 			int LMessageIndex = APlan.Messages.Count;			
 			try
 			{
 				if (LClusteringKey.Columns.Count > 0)
-					LNode.Order = new Schema.Order(LClusteringKey, APlan);
+					LNode.Order = OrderFromKey(APlan, LClusteringKey);
 			}
 			catch (Exception LException)
 			{
@@ -12938,7 +13096,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static PlanNode EmitCopyNode(Plan APlan, TableNode ASourceNode)
 		{
 			if (ASourceNode.Order == null)
-				return EmitCopyNode(APlan, ASourceNode, ASourceNode.TableVar.FindClusteringKey());
+				return EmitCopyNode(APlan, ASourceNode, Compiler.FindClusteringKey(APlan, ASourceNode.TableVar));
 			else
 				return EmitCopyNode(APlan, ASourceNode, ASourceNode.Order);
 		}
@@ -12972,7 +13130,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static PlanNode EmitOrderNode(Plan APlan, TableNode ASourceNode, bool AIsAccelerator)
 		{
 			if (ASourceNode.Order == null)
-				return EmitOrderNode(APlan, ASourceNode, ASourceNode.TableVar.FindClusteringKey(), AIsAccelerator);
+				return EmitOrderNode(APlan, ASourceNode, Compiler.FindClusteringKey(APlan, ASourceNode.TableVar), AIsAccelerator);
 			else
 				return EmitOrderNode(APlan, ASourceNode, ASourceNode.Order, AIsAccelerator);
 		}
@@ -13077,7 +13235,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		public static PlanNode EmitBrowseNode(Plan APlan, TableNode ASourceNode, bool AIsAccelerator)
 		{
 			if (ASourceNode.Order == null)
-				return EmitBrowseNode(APlan, ASourceNode, ASourceNode.TableVar.FindClusteringKey(), AIsAccelerator);
+				return EmitBrowseNode(APlan, ASourceNode, Compiler.FindClusteringKey(APlan, ASourceNode.TableVar), AIsAccelerator);
 			else
 				return EmitBrowseNode(APlan, ASourceNode, ASourceNode.Order, AIsAccelerator);
 		}
@@ -13146,7 +13304,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static PlanNode EnsureSearchableNode(Plan APlan, TableNode ASourceNode, Schema.Key AKey)
 		{
-			return EnsureSearchableNode(APlan, ASourceNode, new Schema.Order(AKey, APlan));
+			return EnsureSearchableNode(APlan, ASourceNode, OrderFromKey(APlan, AKey));
 		}
 		
 		/// <summary>Ensures that the node given by ASourceNode is searchable by the order given by ASearchOrder. This method should only be called in a binding context.</summary>
@@ -13261,7 +13419,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 					CompileExpression(APlan, AExpression.Quota),
 					AExpression.HasByClause ?
 						CompileOrderColumnDefinitions(APlan, ((TableNode)LSourceNode).TableVar, AExpression.Columns, null, false) :
-						new Schema.Order(((TableNode)LSourceNode).TableVar.FindClusteringKey(), APlan)
+						OrderFromKey(APlan, FindClusteringKey(APlan, ((TableNode)LSourceNode).TableVar))
 				);
 		}
 
@@ -13769,7 +13927,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			LNode.DetermineDataType(APlan);
 			LNode.DetermineCharacteristics(APlan);
 			if ((LNode is RedefineNode) && ((RedefineNode)LNode).DistinctRequired)
-				return EmitProjectNode(APlan, LNode, ((TableNode)LNode).TableVar.FindClusteringKey());
+				return EmitProjectNode(APlan, LNode, FindClusteringKey(APlan, ((TableNode)LNode).TableVar));
 			return LNode;
 			#else
 			NamedColumnExpressions LAddExpressions = new NamedColumnExpressions();

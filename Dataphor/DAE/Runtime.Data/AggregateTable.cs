@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class AggregateTable : Table
     {
-		public AggregateTable(AggregateNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public AggregateTable(AggregateNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new AggregateNode Node { get { return (AggregateNode)FNode; } }
         
@@ -31,8 +31,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
-			FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
+			FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
         }
         
         protected override void InternalClose()
@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FSourceTable.Select(FSourceRow);
 			FSourceRow.CopyTo(ARow);
 			
-			Process.Stack.Push(FSourceRow);
+			Program.Stack.Push(FSourceRow);
 			try
 			{
 				int LNodeIndex;
@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LNodeIndex = (LIndex - Node.AggregateColumnOffset) + 1;
 						if (LNodeIndex >= 1)
 						{
-							ARow[LColumnIndex] = Node.Nodes[LNodeIndex].Execute(Process);
+							ARow[LColumnIndex] = Node.Nodes[LNodeIndex].Execute(Program);
 						}
 						else
 						{
@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Stack.Pop();
+				Program.Stack.Pop();
 			}
         }
         

@@ -75,8 +75,8 @@ namespace Alphora.Dataphor.DAE.Client
 										{
 											int LRowCount = ReadResult(LResult, LPlan);
 
-											AppendStatistics(LResult, AOptions, LPlan.Statistics, LRowCount);
-											LStatistics = LPlan.Statistics;
+											AppendStatistics(LResult, AOptions, LPlan.PlanStatistics, LPlan.ProgramStatistics, LRowCount);
+											LStatistics = LPlan.PlanStatistics;
 										}
 									}
 									finally
@@ -94,8 +94,8 @@ namespace Alphora.Dataphor.DAE.Client
 										{
 											LPlan.Execute(null);
 
-											AppendStatistics(LResult, AOptions, LPlan.Statistics, -1);
-											LStatistics = LPlan.Statistics;
+											AppendStatistics(LResult, AOptions, LPlan.PlanStatistics, LPlan.ProgramStatistics, -1);
+											LStatistics = LPlan.PlanStatistics;
 										}
 									}
 									finally
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Client
 			return LRowCount;
 		}
 
-		private static void AppendStatistics(StringBuilder AResult, ScriptExecuteOption AOptions, PlanStatistics AStatistics, int ARowCount)
+		private static void AppendStatistics(StringBuilder AResult, ScriptExecuteOption AOptions, PlanStatistics AStatistics, ProgramStatistics AProgramStatistics, int ARowCount)
 		{
 			if ((AOptions & ScriptExecuteOption.ShowSuccessStatus) != 0)
 			{
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			if ((AOptions & ScriptExecuteOption.ShowExecutionTime) != 0)
 			{
-				AResult.AppendFormat(Strings.Get("ExecuteTime"), AStatistics.ExecuteTime.ToString(), AStatistics.DeviceExecuteTime.ToString(), AStatistics.ExecuteTime == TimeSpan.Zero ? "N/A" : String.Format("{0}%", ((Convert.ToDecimal(AStatistics.DeviceExecuteTime.Ticks) / AStatistics.ExecuteTime.Ticks) * 100).ToString("F6")));
+				AResult.AppendFormat(Strings.Get("ExecuteTime"), AProgramStatistics.ExecuteTime.ToString(), AProgramStatistics.DeviceExecuteTime.ToString(), AProgramStatistics.ExecuteTime == TimeSpan.Zero ? "N/A" : String.Format("{0}%", ((Convert.ToDecimal(AProgramStatistics.DeviceExecuteTime.Ticks) / AProgramStatistics.ExecuteTime.Ticks) * 100).ToString("F6")));
 				AResult.Append("\r\n");
 			}
 		}
@@ -300,7 +300,7 @@ namespace Alphora.Dataphor.DAE.Client
 			int LRowCount;
 			try
 			{
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ACursor.Plan.Process, LRowType))
+				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ACursor.Plan.Process.ValueManager, LRowType))
 				{
 					while (ACursor.Next())
 					{

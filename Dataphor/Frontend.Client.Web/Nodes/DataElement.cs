@@ -903,7 +903,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				DataField.ClearValue();
 			else
 			{
-				using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(Source.DataView.Process, Source.DataView.Process.DataTypes.SystemGraphic))
+				using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(Source.DataView.Process.ValueManager, Source.DataView.Process.DataTypes.SystemGraphic))
 				{
 					Stream LStream = LNewValue.OpenStream();
 					try

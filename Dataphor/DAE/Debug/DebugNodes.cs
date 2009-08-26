@@ -7,14 +7,15 @@
 using System;
 using System.Collections.Generic;
 
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-
 namespace Alphora.Dataphor.DAE.Debug
 {
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	// operator GetDebuggers() : table { Session_ID : Integer, BreakOnException : Boolean, IsPaused : Boolean }
 	public class DebugGetDebuggersNode : TableNode
 	{
@@ -34,27 +35,27 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 
-					foreach (Debugger LDebugger in AProcess.ServerSession.Server.GetDebuggers())
+					foreach (Debugger LDebugger in AProgram.ServerProcess.ServerSession.Server.GetDebuggers())
 					{
 						LRow[0] = LDebugger.Session.SessionID;
 						LRow[1] = LDebugger.BreakOnException;
@@ -82,9 +83,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.SetBreakOnException(ABreakOnException : Boolean)
 	public class DebugSetBreakOnExceptionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			AProcess.ServerSession.CheckedDebugger.BreakOnException = (bool)AArgument1;
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.BreakOnException = (bool)AArgument1;
 			return null;
 		}
 	}
@@ -106,28 +107,28 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Session_ID"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 
-					if (AProcess.ServerSession.Debugger != null)
-						foreach (DebugSessionInfo LSession in AProcess.ServerSession.CheckedDebugger.GetSessions())
+					if (AProgram.ServerProcess.ServerSession.Debugger != null)
+						foreach (DebugSessionInfo LSession in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetSessions())
 						{
 							LRow[0] = LSession.SessionID;
 							LResult.Insert(LRow);
@@ -172,28 +173,28 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Process_ID"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 					
-					if (AProcess.ServerSession.Debugger != null)
-						foreach (DebugProcessInfo LProcess in AProcess.ServerSession.CheckedDebugger.GetProcesses())
+					if (AProgram.ServerProcess.ServerSession.Debugger != null)
+						foreach (DebugProcessInfo LProcess in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetProcesses())
 						{
 							LRow[0] = LProcess.ProcessID;
 							LRow[1] = LProcess.IsPaused;
@@ -235,9 +236,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator AttachProcess(AProcessID : Integer)
 	public class DebugAttachProcessNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			AProcess.ServerSession.CheckedDebugger.Attach(AProcess.ServerSession.Server.GetProcess((int)AArgument1));
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.Attach(AProgram.ServerProcess.ServerSession.Server.GetProcess((int)AArgument1));
 			return null;
 		}
 	}
@@ -246,9 +247,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator DetachProcess(AProcessID : Integer) 
 	public class DebugDetachProcessNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			AProcess.ServerSession.CheckedDebugger.Detach(AProcess.ServerSession.Server.GetProcess((int)AArgument1));
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.Detach(AProgram.ServerProcess.ServerSession.Server.GetProcess((int)AArgument1));
 			return null;
 		}
 	}
@@ -256,9 +257,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator AttachSession(ASessionID : Integer)
 	public class DebugAttachSessionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			AProcess.ServerSession.CheckedDebugger.AttachSession(AProcess.ServerSession.Server.GetSession((int)AArgument1));
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.AttachSession(AProgram.ServerProcess.ServerSession.Server.GetSession((int)AArgument1));
 			return null;
 		}
 	}
@@ -266,9 +267,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator DetachSession(ASessionID : Integer)
 	public class DebugDetachSessionNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			AProcess.ServerSession.CheckedDebugger.DetachSession(AProcess.ServerSession.Server.GetSession((int)AArgument1));
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.DetachSession(AProgram.ServerProcess.ServerSession.Server.GetSession((int)AArgument1));
 			return null;
 		}
 	}
@@ -291,29 +292,29 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			int LProcessID = (int)Nodes[0].Execute(AProcess);
+			int LProcessID = (int)Nodes[0].Execute(AProgram);
 
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 
-					var LDebugger = AProcess.ServerSession.CheckedDebugger;
+					var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
 					if (LDebugger != null)
 					{
 						foreach (CallStackEntry LEntry in LDebugger.GetCallStack(LProcessID))
@@ -361,30 +362,30 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			int LProcessID = (int)Nodes[0].Execute(AProcess);
-			int LWindowIndex = (int)Nodes[1].Execute(AProcess);
+			int LProcessID = (int)Nodes[0].Execute(AProgram);
+			int LWindowIndex = (int)Nodes[1].Execute(AProgram);
 
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 
-					foreach (StackEntry LEntry in AProcess.ServerSession.CheckedDebugger.GetStack(LProcessID, LWindowIndex))
+					foreach (StackEntry LEntry in AProgram.ServerProcess.ServerSession.CheckedDebugger.GetStack(LProcessID, LWindowIndex))
 					{
 						LRow[0] = LEntry.Index;
 						LRow[1] = LEntry.Name;
@@ -413,15 +414,18 @@ namespace Alphora.Dataphor.DAE.Debug
 	//* Operator: GetContext(AProcessID : Integer) : row { Locator : String, Line : Integer, LinePos : Integer, Script : String }
 	public class DebugGetContextNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			DebugContext LContext = AProcess.ServerSession.CheckedDebugger.GetContext((int)AArgument1);
-			Row LRow = new Row(AProcess, (Schema.RowType)DataType);
+			throw new NotImplementedException();
+/*
+			DebugContext LContext = AProgram.ServerProcess.ServerSession.CheckedDebugger.GetContext((int)AArgument1);
+			Row LRow = new Row(AProgram.ValueManager, (Schema.RowType)DataType);
 			LRow[0] = LContext.Locator;
 			LRow[1] = LContext.Line;
 			LRow[2] = LContext.LinePos;
 			LRow[3] = LContext.Script;
 			return LRow;
+*/
 		}
 	}
 		
@@ -445,14 +449,14 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			int LProcessID = (int)Nodes[0].Execute(AProcess);
 
@@ -462,7 +466,7 @@ namespace Alphora.Dataphor.DAE.Debug
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -515,27 +519,27 @@ namespace Alphora.Dataphor.DAE.Debug
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
 
-					var LDebugger = AProcess.ServerSession.CheckedDebugger;
+					var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
 					if (LDebugger != null)
 					{
 						foreach (Breakpoint LEntry in LDebugger.Breakpoints)
@@ -567,18 +571,18 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.ToggleBreakpoint(ALocator : String, ALine : Integer, ALinePos : Integer) : Bool
 	public class DebugToggleBreakpointNode : TernaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
 		{
- 			return AProcess.ServerSession.CheckedDebugger.ToggleBreakpoint((string)AArgument1, (int)AArgument2, AArgument3 == null ? -1 : (int)AArgument3);
+ 			return AProgram.ServerProcess.ServerSession.CheckedDebugger.ToggleBreakpoint((string)AArgument1, (int)AArgument2, AArgument3 == null ? -1 : (int)AArgument3);
 		}
 	}
 	
 	// operator Debug.Start()
 	public class DebugStartNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
-			AProcess.ServerSession.StartDebugger();
+			AProgram.ServerProcess.ServerSession.StartDebugger();
 			return null;
 		}
 	}
@@ -586,9 +590,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Stop()
 	public class DebugStopNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
- 			AProcess.ServerSession.StopDebugger();
+ 			AProgram.ServerProcess.ServerSession.StopDebugger();
  			return null;
 		}
 	}
@@ -596,9 +600,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.WaitForPause()
 	public class DebugWaitForPauseNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
-			AProcess.ServerSession.CheckedDebugger.WaitForPause(AProcess);
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.WaitForPause(AProgram.ServerProcess);
 			return null;
 		}
 	}
@@ -606,9 +610,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Pause()
 	public class DebugPauseNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
-			AProcess.ServerSession.CheckedDebugger.Pause();
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.Pause();
 			return null;
  		}
 	}
@@ -616,9 +620,9 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.Run()
 	public class DebugRunNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
- 			AProcess.ServerSession.CheckedDebugger.Run();
+ 			AProgram.ServerProcess.ServerSession.CheckedDebugger.Run();
  			return null;
  		}
 	}
@@ -627,12 +631,12 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.RunTo(AProcessID : Integer, ALocator : string, ALine : Integer, ALinePos : Integer) 
 	public class DebugRunToNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
- 			var LDebugger = AProcess.ServerSession.CheckedDebugger;
+ 			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
  			if (LDebugger != null)
  			{
- 				var LProcess = AProcess.ServerSession.Processes.GetProcess((int)AArguments[0]);
+ 				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArguments[0]);
  				LDebugger.RunTo(LProcess, new DebugLocator((string)AArguments[1], (int)AArguments[2], AArguments[3] == null ? -1 : (int)AArguments[3]));
  			}
  		}
@@ -641,12 +645,12 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.StepOver(AProcessID : Integer) 
 	public class DebugStepOverNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
- 			var LDebugger = AProcess.ServerSession.CheckedDebugger;
+ 			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
  			if (LDebugger != null)
  			{
- 				var LProcess = AProcess.ServerSession.Processes.GetProcess((int)AArgument1);
+ 				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArgument1);
  				LDebugger.StepOver(LProcess);
  			}
 		}
@@ -655,12 +659,12 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator Debug.StepInto(AProcessID : Integer) 
 	public class DebugStepIntoNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			var LDebugger = AProcess.ServerSession.CheckedDebugger;
+			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
 			if (LDebugger != null)
 			{
-				var LProcess = AProcess.ServerSession.Processes.GetProcess((int)AArgument1);
+				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArgument1);
 				LDebugger.StepInto(LProcess);
 			}
 		}
@@ -669,12 +673,12 @@ namespace Alphora.Dataphor.DAE.Debug
 	// operator StepIntoSpecific(AProcessID : Integer, AOperatorName : Name) 
 	public class DebugStepIntoSpecificNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
-			var LDebugger = AProcess.ServerSession.CheckedDebugger;
+			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
 			if (LDebugger != null)
 			{
-				var LProcess = AProcess.ServerSession.Processes.GetProcess((int)AArgument1);
+				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArgument1);
 				LDebugger.StepIntoSpecific(LProcess, (string)AArgument2);
 			}
 		}

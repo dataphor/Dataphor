@@ -807,94 +807,102 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		#endif
 		
-		protected PlanNode CompileSelectNode(ServerProcess AProcess, bool AFullSelect)
+		protected PlanNode CompileSelectNode(Program AProgram, bool AFullSelect)
 		{
 			ApplicationTransaction LTransaction = null;
-			if (AProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = AProcess.GetApplicationTransaction();
+			if (AProgram.ServerProcess.ApplicationTransactionID != Guid.Empty)
+				LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
 			try
 			{
 				if (LTransaction != null)
 					LTransaction.PushGlobalContext();
 				try
 				{
-					AProcess.Plan.PushATCreationContext();
+					Plan LPlan = new Plan(AProgram.ServerProcess);
 					try
 					{
-						PushSymbols(AProcess.Plan, FSymbols);
+						LPlan.PushATCreationContext();
 						try
 						{
-							// Generate a select statement for use in optimistic concurrency checks
-							AProcess.Plan.EnterRowContext();
+							PushSymbols(LPlan, FSymbols);
 							try
 							{
-								AProcess.Plan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
+								// Generate a select statement for use in optimistic concurrency checks
+								LPlan.EnterRowContext();
 								try
 								{
-									AProcess.Plan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
+									LPlan.Symbols.Push(new Symbol("ASelectRow", DataType.RowType));
 									try
 									{
-										if (TableVar.Owner != null)
-											AProcess.Plan.PushSecurityContext(new SecurityContext(TableVar.Owner));
+										LPlan.PushCursorContext(new CursorContext(CursorType.Dynamic, CursorCapability.Navigable | (CursorCapabilities & CursorCapability.Updateable), ((CursorCapabilities & CursorCapability.Updateable) != 0) ? CursorIsolation.Isolated : CursorIsolation.None));
 										try
 										{
-											Schema.Columns LColumns;
-											if (AFullSelect)
-												LColumns = DataType.RowType.Columns;
-											else
+											if (TableVar.Owner != null)
+												LPlan.PushSecurityContext(new SecurityContext(TableVar.Owner));
+											try
 											{
-												LColumns = new Schema.Columns();
-												Schema.Key LKey = TableVar.FindClusteringKey();
-												foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-													LColumns.Add(LColumn.Column);
-											}
-											return
-												Compiler.Bind
-												(
-													AProcess.Plan,
-													Compiler.EmitRestrictNode
+												Schema.Columns LColumns;
+												if (AFullSelect)
+													LColumns = DataType.RowType.Columns;
+												else
+												{
+													LColumns = new Schema.Columns();
+													Schema.Key LKey = Compiler.FindClusteringKey(LPlan, TableVar);
+													foreach (Schema.TableVarColumn LColumn in LKey.Columns)
+														LColumns.Add(LColumn.Column);
+												}
+												return
+													Compiler.Bind
 													(
-														AProcess.Plan,
-														Compiler.CompileExpression(AProcess.Plan, (Expression)EmitStatement(EmitMode.ForCopy)),
-														Compiler.BuildOptimisticRowEqualExpression
+														LPlan,
+														Compiler.EmitRestrictNode
 														(
-															AProcess.Plan, 
-															"",
-															"ASelectRow",
-															LColumns
+															LPlan,
+															Compiler.CompileExpression(LPlan, (Expression)EmitStatement(EmitMode.ForCopy)),
+															Compiler.BuildOptimisticRowEqualExpression
+															(
+																LPlan, 
+																"",
+																"ASelectRow",
+																LColumns
+															)
 														)
-													)
-												);
+													);
+											}
+											finally
+											{
+												if (TableVar.Owner != null)
+													LPlan.PopSecurityContext();
+											}
 										}
 										finally
 										{
-											if (TableVar.Owner != null)
-												AProcess.Plan.PopSecurityContext();
+											LPlan.PopCursorContext();
 										}
 									}
 									finally
 									{
-										AProcess.Plan.PopCursorContext();
+										LPlan.Symbols.Pop();
 									}
 								}
 								finally
 								{
-									AProcess.Plan.Symbols.Pop();
+									LPlan.ExitRowContext();
 								}
 							}
 							finally
 							{
-								AProcess.Plan.ExitRowContext();
+								PopSymbols(LPlan, FSymbols);
 							}
 						}
 						finally
 						{
-							PopSymbols(AProcess.Plan, FSymbols);
+							LPlan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						AProcess.Plan.PopATCreationContext();
+						LPlan.Dispose();
 					}
 				}
 				finally
@@ -910,24 +918,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void EnsureSelectNode(ServerProcess AProcess)
+		protected void EnsureSelectNode(Program AProgram)
 		{
 			lock (this)
 			{
 				if (FSelectNode == null)
 				{
-					FSelectNode = CompileSelectNode(AProcess, false);
+					FSelectNode = CompileSelectNode(AProgram, false);
 				}
 			}
 		}
 		
-		protected void EnsureFullSelectNode(ServerProcess AProcess)
+		protected void EnsureFullSelectNode(Program AProgram)
 		{
 			lock (this)
 			{
 				if (FFullSelectNode == null)
 				{
-					FFullSelectNode = CompileSelectNode(AProcess, true);
+					FFullSelectNode = CompileSelectNode(AProgram, true);
 				}
 			}
 		}
@@ -952,8 +960,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									APlan.PushSecurityContext(new SecurityContext(TableVar.Owner));
 								try
 								{
-									Schema.RowType LOldKey = new Schema.RowType(TableVar.FindClusteringKey().Columns, Keywords.Old);
-									Schema.RowType LKey = new Schema.RowType(TableVar.FindClusteringKey().Columns);
+									Schema.RowType LOldKey = new Schema.RowType(Compiler.FindClusteringKey(APlan, TableVar).Columns, Keywords.Old);
+									Schema.RowType LKey = new Schema.RowType(Compiler.FindClusteringKey(APlan, TableVar).Columns);
 									FInsertNode = new InsertNode();
 									FInsertNode.IsBreakable = false;
 									FUpdateNode = new UpdateNode();
@@ -1207,11 +1215,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// of columns in the type is the same, where this is not necessarily true for row types
 		/// which are Equal.
 		/// </remarks>
-		public virtual Row PrepareNewRow(ServerProcess AProcess, Row AOldRow, Row ANewRow, ref BitArray AValueFlags)
+		public virtual Row PrepareNewRow(Program AProgram, Row AOldRow, Row ANewRow, ref BitArray AValueFlags)
 		{
 			if (!ANewRow.DataType.Columns.Equivalent(DataType.Columns))
 			{
-				Row LRow = new Row(AProcess, DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, DataType.RowType);
 				BitArray LValueFlags = AValueFlags != null ? new BitArray(LRow.DataType.Columns.Count) : null;
 				int LColumnIndex;
 				for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
@@ -1245,32 +1253,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return ANewRow;
 		}
 		
-		public void PushRow(ServerProcess AProcess, Row ARow)
+		public void PushRow(Program AProgram, Row ARow)
 		{
 			if (ARow != null)
 			{
-				Row LRow = new Row(AProcess, DataType.RowType, (NativeRow)ARow.AsNative);
-				AProcess.Stack.Push(LRow);
+				Row LRow = new Row(AProgram.ValueManager, DataType.RowType, (NativeRow)ARow.AsNative);
+				AProgram.Stack.Push(LRow);
 			}
 			else
-				AProcess.Stack.Push(null);
+				AProgram.Stack.Push(null);
 		}
 		
-		public void PushNewRow(ServerProcess AProcess, Row ARow)
+		public void PushNewRow(Program AProgram, Row ARow)
 		{
-			Row LRow = new Row(AProcess, DataType.NewRowType, (NativeRow)ARow.AsNative);
-			AProcess.Stack.Push(LRow);
+			Row LRow = new Row(AProgram.ValueManager, DataType.NewRowType, (NativeRow)ARow.AsNative);
+			AProgram.Stack.Push(LRow);
 		}
 		
-		public void PushOldRow(ServerProcess AProcess, Row ARow)
+		public void PushOldRow(Program AProgram, Row ARow)
 		{
-			Row LOldRow = new Row(AProcess, DataType.OldRowType, (NativeRow)ARow.AsNative);
-			AProcess.Stack.Push(LOldRow);
+			Row LOldRow = new Row(AProgram.ValueManager, DataType.OldRowType, (NativeRow)ARow.AsNative);
+			AProgram.Stack.Push(LOldRow);
 		}
 
-		public void PopRow(ServerProcess AProcess)
+		public void PopRow(Program AProgram)
 		{
-			Row LRow = (Row)AProcess.Stack.Pop();
+			Row LRow = (Row)AProgram.Stack.Pop();
 			if (LRow != null)
 				LRow.Dispose();
 		}
@@ -1280,17 +1288,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row Select(ServerProcess AProcess, Row ARow)
+		public Row Select(Program AProgram, Row ARow)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
 			if (FSymbols != null)
 			{
-				EnsureSelectNode(AProcess);
-				AProcess.Stack.Push(ARow);
+				EnsureSelectNode(AProgram);
+				AProgram.Stack.Push(ARow);
 				try
 				{
-					using (Table LTable = (Table)FSelectNode.Execute(AProcess))
+					using (Table LTable = (Table)FSelectNode.Execute(AProgram))
 					{
 						if (LTable.Next())
 							return LTable.Select();
@@ -1300,7 +1308,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			return null;
@@ -1311,17 +1319,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// Select restricts the result set based on the clustering key of the node, whereas FullSelect restricts
 		/// the result set based on all columns declared of a type that has an equality operator defined.
 		/// </remarks>
-		public Row FullSelect(ServerProcess AProcess, Row ARow)
+		public Row FullSelect(Program AProgram, Row ARow)
 		{
 			// Symbols will only be null if this node is not bound
 			// The node will not be bound if it is functioning in a local server context evaluating change proposals in the client
 			if (FSymbols != null)
 			{
-				EnsureFullSelectNode(AProcess);
-				AProcess.Stack.Push(ARow);
+				EnsureFullSelectNode(AProgram);
+				AProgram.Stack.Push(ARow);
 				try
 				{
-					using (Table LTable = (Table)FFullSelectNode.Execute(AProcess))
+					using (Table LTable = (Table)FFullSelectNode.Execute(AProgram))
 					{
 						if (LTable.Next())
 							return LTable.Select();
@@ -1331,7 +1339,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			return null;
@@ -1350,7 +1358,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// but ACurrentRow will always be a row type with the same heading as the table type
 		/// for this node.
 		/// </remarks>
-		protected void CheckConcurrency(ServerProcess AProcess, Row AOldRow, Row ACurrentRow)
+		protected void CheckConcurrency(Program AProgram, Row AOldRow, Row ACurrentRow)
 		{
 			#if !USENATIVECONCURRENCYCOMPARE
 			EnsureConcurrencyNodes(AProcess);
@@ -1372,7 +1380,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LOldValue = AOldRow[LIndex];
 							LCurrentValue = ACurrentRow[LColumnIndex];
 							#if USENATIVECONCURRENCYCOMPARE
-							LRowsEqual = DataValue.NativeValuesEqual(AProcess, LOldValue, LCurrentValue);
+							LRowsEqual = DataValue.NativeValuesEqual(AProgram.ValueManager, LOldValue, LCurrentValue);
 							#else
 							AProcess.Context.Push(LOldValue);
 							AProcess.Context.Push(LCurrentValue);
@@ -1418,23 +1426,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		/// stronger than Equality in that the order of columns in the type is the same, 
 		/// where this is not necessarily true for row types which are Equal.
 		/// </remarks>
-		public virtual Row PrepareOldRow(ServerProcess AProcess, Row ARow, bool ACheckConcurrency)
+		public virtual Row PrepareOldRow(Program AProgram, Row ARow, bool ACheckConcurrency)
 		{
 			if ((ACheckConcurrency && ShouldCheckConcurrency) || !ARow.DataType.Columns.Equivalent(DataType.Columns))
 			{
 				// reselect the full row buffer for this row
 				bool LSelectRowReturned = false;
-				Row LSelectRow = new Row(AProcess, DataType.RowType);
+				Row LSelectRow = new Row(AProgram.ValueManager, DataType.RowType);
 				try
 				{
 					ARow.CopyTo(LSelectRow);
-					if (((ACheckConcurrency && ShouldCheckConcurrency) || LSelectRow.DataType.Columns.IsProperSupersetOf(ARow.DataType.Columns)) && !AProcess.ServerSession.Server.IsRepository)
+					if (((ACheckConcurrency && ShouldCheckConcurrency) || LSelectRow.DataType.Columns.IsProperSupersetOf(ARow.DataType.Columns)) && !AProgram.ServerProcess.ServerSession.Server.IsRepository)
 					{
-						Row LRow = Select(AProcess, LSelectRow);
+						Row LRow = Select(AProgram, LSelectRow);
 						if (LRow != null)
 						{
 							if (ACheckConcurrency && ShouldCheckConcurrency)
-								CheckConcurrency(AProcess, ARow, LRow);
+								CheckConcurrency(AProgram, ARow, LRow);
 							else
 								ARow.CopyTo(LRow);
 
@@ -1466,15 +1474,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// If AValueFlags are specified, they indicate whether or not each column of ANewRow was specified as part of the insert.
-		public virtual void Insert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		public virtual void Insert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			Row LNewPreparedRow;
 			Row LOldPreparedRow = null;
 			if (AOldRow != null)
-				LOldPreparedRow = PrepareOldRow(AProcess, AOldRow, false);
+				LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, false);
 			try
 			{
-				LNewPreparedRow = PrepareNewRow(AProcess, LOldPreparedRow, ANewRow, ref AValueFlags);
+				LNewPreparedRow = PrepareNewRow(AProgram, LOldPreparedRow, ANewRow, ref AValueFlags);
 			}
 			catch
 			{
@@ -1485,14 +1493,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			try
 			{
-				if (AUnchecked || ((AOldRow == null) && BeforeInsert(AProcess, LNewPreparedRow, AValueFlags)) || ((AOldRow != null) && BeforeUpdate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags)))
+				if (AUnchecked || ((AOldRow == null) && BeforeInsert(AProgram, LNewPreparedRow, AValueFlags)) || ((AOldRow != null) && BeforeUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags)))
 				{
-					ExecuteInsert(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, AUnchecked);
+					ExecuteInsert(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AUnchecked);
 					if (!AUnchecked)
 						if (AOldRow == null)
-							AfterInsert(AProcess, LNewPreparedRow, AValueFlags);
+							AfterInsert(AProgram, LNewPreparedRow, AValueFlags);
 						else
-							AfterUpdate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags);
+							AfterUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags);
 				}
 			}
 			finally
@@ -1504,27 +1512,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected internal bool BeforeInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
+		protected internal bool BeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags)
 		{
 			#if USEPROPOSALEVENTS
-			DoBeforeInsert(ARow, AProcess);
+			DoBeforeInsert(ARow, AProgram);
 			#endif
-			PreparedDefault(AProcess, null, ARow, AValueFlags, String.Empty, false);
+			PreparedDefault(AProgram, null, ARow, AValueFlags, String.Empty, false);
 			bool LPerform = true;
 			if (TableVar.HasHandlers(EventType.BeforeInsert))
 			{
-				PushRow(AProcess, ARow);
+				PushRow(AProgram, ARow);
 				try
 				{
 					object LPerformVar = LPerform;
-					AProcess.Stack.Push(LPerformVar);
+					AProgram.Stack.Push(LPerformVar);
 					try
 					{
 						if (AValueFlags != null)
 							ARow.BeginModifiedContext();
 						try
 						{
-							ExecuteHandlers(AProcess, EventType.BeforeInsert);
+							ExecuteHandlers(AProgram, EventType.BeforeInsert);
 						}
 						finally
 						{
@@ -1539,30 +1547,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						LPerformVar = AProcess.Stack.Pop();
+						LPerformVar = AProgram.Stack.Pop();
 					}
 					LPerform = (LPerformVar != null) && (bool)LPerformVar;
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			
 			if (LPerform)
 			{
-				PreparedValidate(AProcess, null, ARow, AValueFlags, String.Empty, false, false);
-				InternalBeforeInsert(AProcess, ARow, AValueFlags);
-				if ((TableVar.InsertConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				PreparedValidate(AProgram, null, ARow, AValueFlags, String.Empty, false, false);
+				InternalBeforeInsert(AProgram, ARow, AValueFlags);
+				if ((TableVar.InsertConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushNewRow(AProcess, ARow);
+					PushNewRow(AProgram, ARow);
 					try
 					{
-						ValidateInsertConstraints(AProcess);
+						ValidateInsertConstraints(AProgram);
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 			}
@@ -1570,39 +1578,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LPerform;
 		}
 		
-		protected internal void ExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected internal void ExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
-			InternalExecuteInsert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+			InternalExecuteInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 		}
 		
-		protected internal void AfterInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
+		protected internal void AfterInsert(Program AProgram, Row ARow, BitArray AValueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterInsert))
 			{
-				PushRow(AProcess, ARow);
+				PushRow(AProgram, ARow);
 				try
 				{
-					ExecuteHandlers(AProcess, EventType.AfterInsert);
+					ExecuteHandlers(AProgram, EventType.AfterInsert);
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
-			ValidateCatalogConstraints(AProcess);
-			InternalAfterInsert(AProcess, ARow, AValueFlags);
+			ValidateCatalogConstraints(AProgram);
+			InternalAfterInsert(AProgram, ARow, AValueFlags);
 			#if USEPROPOSALEVENTS
-			DoAfterInsert(ARow, AProcess);
+			DoAfterInsert(ARow, AProgram);
 			#endif
 		}
 		
-		public virtual void Update(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		public virtual void Update(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			Row LNewPreparedRow;
-			Row LOldPreparedRow = PrepareOldRow(AProcess, AOldRow, ACheckConcurrency);
+			Row LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, ACheckConcurrency);
 			try
 			{
-				LNewPreparedRow = PrepareNewRow(AProcess, LOldPreparedRow, ANewRow, ref AValueFlags);
+				LNewPreparedRow = PrepareNewRow(AProgram, LOldPreparedRow, ANewRow, ref AValueFlags);
 			}
 			catch
 			{
@@ -1613,11 +1621,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			
 			try
 			{
-				if (AUnchecked || BeforeUpdate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags))
+				if (AUnchecked || BeforeUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags))
 				{
-					ExecuteUpdate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, ACheckConcurrency, AUnchecked);
+					ExecuteUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, ACheckConcurrency, AUnchecked);
 					if (!AUnchecked)
-						AfterUpdate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags);
+						AfterUpdate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags);
 				}
 			}
 			finally
@@ -1629,29 +1637,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected internal bool BeforeUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected internal bool BeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			#if USEPROPOSALEVENTS
-			DoBeforeUpdate(AOldRow, ANewRow, AProcess);
+			DoBeforeUpdate(AOldRow, ANewRow, AProgram);
 			#endif
 			bool LPerform = true;
 			if (TableVar.HasHandlers(EventType.BeforeUpdate))
 			{
-				PushRow(AProcess, AOldRow);
+				PushRow(AProgram, AOldRow);
 				try
 				{
-					PushRow(AProcess, ANewRow);
+					PushRow(AProgram, ANewRow);
 					try
 					{
 						object LPerformVar = LPerform;
-						AProcess.Stack.Push(LPerformVar);
+						AProgram.Stack.Push(LPerformVar);
 						try
 						{
 							if (AValueFlags != null)
 								ANewRow.BeginModifiedContext();
 							try
 							{
-								ExecuteHandlers(AProcess, EventType.BeforeUpdate);
+								ExecuteHandlers(AProgram, EventType.BeforeUpdate);
 							}
 							finally
 							{
@@ -1666,43 +1674,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							LPerformVar = AProcess.Stack.Pop();
+							LPerformVar = AProgram.Stack.Pop();
 						}
 						LPerform = (LPerformVar != null) && (bool)LPerformVar;
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			
 			if (LPerform)
 			{
-				PreparedValidate(AProcess, AOldRow, ANewRow, AValueFlags, String.Empty, false, false);
-				InternalBeforeUpdate(AProcess, AOldRow, ANewRow, AValueFlags);
-				if ((TableVar.UpdateConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, String.Empty, false, false);
+				InternalBeforeUpdate(AProgram, AOldRow, ANewRow, AValueFlags);
+				if ((TableVar.UpdateConstraints.Count > 0) || (TableVar.RowConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushOldRow(AProcess, AOldRow);
+					PushOldRow(AProgram, AOldRow);
 					try
 					{
-						PushNewRow(AProcess, ANewRow);
+						PushNewRow(AProgram, ANewRow);
 						try
 						{
-							ValidateUpdateConstraints(AProcess, AValueFlags);
+							ValidateUpdateConstraints(AProgram, AValueFlags);
 						}
 						finally
 						{
-							PopRow(AProcess);
+							PopRow(AProgram);
 						}
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 			}
@@ -1710,51 +1718,51 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LPerform;
 		}
 		
-		protected internal void ExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected internal void ExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
-			InternalExecuteUpdate(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+			InternalExecuteUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 		}
 		
-		protected internal void AfterUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected internal void AfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			if (TableVar.HasHandlers(EventType.AfterUpdate))
 			{
-				PushRow(AProcess, AOldRow);
+				PushRow(AProgram, AOldRow);
 				try
 				{
-					PushRow(AProcess, ANewRow);
+					PushRow(AProgram, ANewRow);
 					try
 					{
-						ExecuteHandlers(AProcess, EventType.AfterUpdate);
+						ExecuteHandlers(AProgram, EventType.AfterUpdate);
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 
-			ValidateCatalogConstraints(AProcess);
-			InternalAfterUpdate(AProcess, AOldRow, ANewRow, AValueFlags);
+			ValidateCatalogConstraints(AProgram);
+			InternalAfterUpdate(AProgram, AOldRow, ANewRow, AValueFlags);
 			#if USEPROPOSALEVENTS
-			DoAfterUpdate(AOldRow, ANewRow, AProcess);
+			DoAfterUpdate(AOldRow, ANewRow, AProgram);
 			#endif
 		}
 		
-		public virtual void Delete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		public virtual void Delete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
-			Row LPreparedRow = PrepareOldRow(AProcess, ARow, false);
+			Row LPreparedRow = PrepareOldRow(AProgram, ARow, false);
 			try
 			{
-				if (AUnchecked || BeforeDelete(AProcess, LPreparedRow))
+				if (AUnchecked || BeforeDelete(AProgram, LPreparedRow))
 				{
-					ExecuteDelete(AProcess, LPreparedRow, ACheckConcurrency, AUnchecked);
+					ExecuteDelete(AProgram, LPreparedRow, ACheckConcurrency, AUnchecked);
 					if (!AUnchecked)
-						AfterDelete(AProcess, LPreparedRow);
+						AfterDelete(AProgram, LPreparedRow);
 				}
 			}
 			finally
@@ -1764,48 +1772,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected internal bool BeforeDelete(ServerProcess AProcess, Row ARow)
+		protected internal bool BeforeDelete(Program AProgram, Row ARow)
 		{
 			#if USEPROPOSALEVENTS
-			DoBeforeDelete(ARow, AProcess);
+			DoBeforeDelete(ARow, AProgram);
 			#endif
 			bool LPerform = true;
 			if (TableVar.HasHandlers(EventType.BeforeDelete))
 			{
-				PushRow(AProcess, ARow);
+				PushRow(AProgram, ARow);
 				try
 				{
 					object LPerformVar = LPerform;
-					AProcess.Stack.Push(LPerformVar);
+					AProgram.Stack.Push(LPerformVar);
 					try
 					{
-						ExecuteHandlers(AProcess, EventType.BeforeDelete);
+						ExecuteHandlers(AProgram, EventType.BeforeDelete);
 					}
 					finally
 					{
-						LPerformVar = AProcess.Stack.Pop();
+						LPerformVar = AProgram.Stack.Pop();
 					}
 					LPerform = (LPerformVar != null) && (bool)LPerformVar;
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			
 			if (LPerform)
 			{
-				InternalBeforeDelete(AProcess, ARow);
-				if ((TableVar.DeleteConstraints.Count > 0) || (AProcess.InTransaction && TableVar.HasDeferredConstraints()))
+				InternalBeforeDelete(AProgram, ARow);
+				if ((TableVar.DeleteConstraints.Count > 0) || (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints()))
 				{
-					PushOldRow(AProcess, ARow);
+					PushOldRow(AProgram, ARow);
 					try
 					{
-						ValidateDeleteConstraints(AProcess);
+						ValidateDeleteConstraints(AProgram);
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 			}
@@ -1813,29 +1821,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LPerform;
 		}
 		
-		protected internal void ExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected internal void ExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
-			InternalExecuteDelete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+			InternalExecuteDelete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 		}
 		
-		protected internal void AfterDelete(ServerProcess AProcess, Row ARow)
+		protected internal void AfterDelete(Program AProgram, Row ARow)
 		{
 			if (TableVar.HasHandlers(EventType.AfterDelete))
 			{
-				PushRow(AProcess, ARow);
+				PushRow(AProgram, ARow);
 				try
 				{
-					ExecuteHandlers(AProcess, EventType.AfterDelete);
+					ExecuteHandlers(AProgram, EventType.AfterDelete);
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
-			ValidateCatalogConstraints(AProcess);
-			InternalAfterDelete(AProcess, ARow);
+			ValidateCatalogConstraints(AProgram);
+			InternalAfterDelete(AProgram, ARow);
 			#if USEPROPOSALEVENTS
-			DoAfterDelete(ARow, AProcess);
+			DoAfterDelete(ARow, AProgram);
 			#endif
 		}
 		
@@ -1846,17 +1854,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FTableVar.ShouldValidate || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldValidate;
 		}
 		
-		public virtual bool Validate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Validate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (ShouldValidate(AColumnName))
 			{
-				Row LOldPreparedRow = AOldRow == null ? null : PrepareOldRow(AProcess, AOldRow, false);
+				Row LOldPreparedRow = AOldRow == null ? null : PrepareOldRow(AProgram, AOldRow, false);
 				try
 				{
-					Row LNewPreparedRow = PrepareNewRow(AProcess, AOldRow, ANewRow, ref AValueFlags);
+					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref AValueFlags);
 					try
 					{
-						bool LChanged = PreparedValidate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName, true, true);
+						bool LChanged = PreparedValidate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName, true, true);
 						if (LChanged && !Object.ReferenceEquals(LNewPreparedRow, ANewRow))
 							LNewPreparedRow.CopyTo(ANewRow);
 						return LChanged;
@@ -1877,35 +1885,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected bool PreparedValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected bool PreparedValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			#if USEPROPOSALEVENTS
-			DoValidateRow(ANewRow, AColumnName, AProcess);
+			DoValidateRow(ANewRow, AColumnName, AProgram);
 			#endif
-			bool LChanged = ExecuteValidateHandlers(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			LChanged = ValidateColumns(AProcess, TableVar, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
-			LChanged = InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
+			bool LChanged = ExecuteValidateHandlers(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			LChanged = ValidateColumns(AProgram, TableVar, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
+			LChanged = InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
 			if ((AColumnName == String.Empty) && (TableVar.RowConstraints.Count > 0) && !AIsProposable)
 			{
-				PushRow(AProcess, ANewRow);
+				PushRow(AProgram, ANewRow);
 				try
 				{
 					// If this is an insert (AOldRow == null) then the constraints must be validated regardless of whether or not a value was specified in the insert
-					ValidateImmediateConstraints(AProcess, AIsDescending, AOldRow == null ? null : AValueFlags);
+					ValidateImmediateConstraints(AProgram, AIsDescending, AOldRow == null ? null : AValueFlags);
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			return LChanged;
 		}
 		
-		protected bool InternalPreparedValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AIsDescending, bool AIsProposable)
+		protected bool InternalPreparedValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AIsDescending, bool AIsProposable)
 		{
 			// Given AOldRow and ANewRow, propagate a validate if necessary based on the difference between the row values
 			#if !USENATIVECONCURRENCYCOMPARE
-			EnsureConcurrencyNodes(AProcess);
+			EnsureConcurrencyNodes(AProgram);
 			#endif
 			
 			int LDifferentColumnIndex = -1;
@@ -1921,17 +1929,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (ANewRow.HasValue(LColumnIndex))
 						{
 							#if USENATIVECONCURRENCYCOMPARE
-							if (!(DataValue.NativeValuesEqual(AProcess, AOldRow[LIndex], ANewRow[LColumnIndex])))
+							if (!(DataValue.NativeValuesEqual(AProgram.ValueManager, AOldRow[LIndex], ANewRow[LColumnIndex])))
 								if (LDifferentColumnIndex >= 0)
 									LRowsEqual = false;
 								else
 									LDifferentColumnIndex = LColumnIndex;
 							#else
-							AProcess.Context.Push(AOldRow[LIndex]);
-							AProcess.Context.Push(ANewRow[LColumnIndex]);
+							AProgram.Context.Push(AOldRow[LIndex]);
+							AProgram.Context.Push(ANewRow[LColumnIndex]);
 							try
 							{
-								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProcess);
+								object LResult = FConcurrencyNodes[LColumnIndex].Execute(AProgram);
 								if (!((LResult != null) && (bool)LResult))
 									if (LDifferentColumnIndex >= 0)
 										LRowsEqual = false;
@@ -1940,8 +1948,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								AProcess.Context.Pop();
-								AProcess.Context.Pop();
+								AProgram.Context.Pop();
+								AProgram.Context.Pop();
 							}
 							#endif
 						}
@@ -1963,10 +1971,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			
 			if (!LRowsEqual)
-				return PreparedValidate(AProcess, AOldRow, ANewRow, AValueFlags, String.Empty, AIsDescending, AIsProposable);
+				return PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, String.Empty, AIsDescending, AIsProposable);
 			else
 				if (LDifferentColumnIndex >= 0)
-					return PreparedValidate(AProcess, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LDifferentColumnIndex].Name, AIsDescending, AIsProposable);
+					return PreparedValidate(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LDifferentColumnIndex].Name, AIsDescending, AIsProposable);
 					
 			return false;
 		}
@@ -1978,24 +1986,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FTableVar.ShouldChange || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldChange;
 		}
 		
-		public virtual bool Change(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Change(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (ShouldChange(AColumnName))
 			{
-				Row LOldPreparedRow = PrepareOldRow(AProcess, AOldRow, false);
+				Row LOldPreparedRow = PrepareOldRow(AProgram, AOldRow, false);
 				try
 				{
-					Row LNewPreparedRow = PrepareNewRow(AProcess, AOldRow, ANewRow, ref AValueFlags);
+					Row LNewPreparedRow = PrepareNewRow(AProgram, AOldRow, ANewRow, ref AValueFlags);
 					try
 					{
 						#if USEPROPOSALEVENTS
-						bool LChanged = DoChangeRow(LRow, AColumnName, AProcess);
+						bool LChanged = DoChangeRow(LRow, AColumnName, AProgram);
 						#endif
-						bool LChanged = ExecuteChangeHandlers(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName);
-						LChanged = InternalChange(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
-						LChanged = ChangeColumns(AProcess, TableVar, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
+						bool LChanged = ExecuteChangeHandlers(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName);
+						LChanged = InternalChange(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
+						LChanged = ChangeColumns(AProgram, TableVar, LOldPreparedRow, LNewPreparedRow, AValueFlags, AColumnName) || LChanged;
 						if (LChanged)
-							InternalPreparedValidate(AProcess, LOldPreparedRow, LNewPreparedRow, AValueFlags, false, true);
+							InternalPreparedValidate(AProgram, LOldPreparedRow, LNewPreparedRow, AValueFlags, false, true);
 						if (LChanged && !Object.ReferenceEquals(LNewPreparedRow, ANewRow))
 							LNewPreparedRow.CopyTo(ANewRow);
 						return LChanged;
@@ -2023,22 +2031,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FTableVar.ShouldDefault || FTableVar.Columns[FTableVar.Columns.IndexOfName(AColumnName)].ShouldDefault;
 		}
 		
-		public virtual bool Default(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public virtual bool Default(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (ShouldDefault(AColumnName))
 			{
 				Row LOldRow;
 				BitArray LValueFlags = null;
 				if (AOldRow == null)
-					LOldRow = new Row(AProcess, DataType.RowType);
+					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
 				else
-					LOldRow = PrepareNewRow(AProcess, null, AOldRow, ref LValueFlags);
+					LOldRow = PrepareNewRow(AProgram, null, AOldRow, ref LValueFlags);
 				try
 				{
-					Row LNewRow = PrepareNewRow(AProcess, null, ANewRow, ref AValueFlags);
+					Row LNewRow = PrepareNewRow(AProgram, null, ANewRow, ref AValueFlags);
 					try
 					{
-						bool LChanged = PreparedDefault(AProcess, LOldRow, LNewRow, AValueFlags, AColumnName, true);
+						bool LChanged = PreparedDefault(AProgram, LOldRow, LNewRow, AValueFlags, AColumnName, true);
 						if (LChanged && !Object.ReferenceEquals(LNewRow, ANewRow))
 							LNewRow.CopyTo(ANewRow);
 						return LChanged;
@@ -2059,20 +2067,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		protected bool PreparedDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected bool PreparedDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			Row LOldRow;
 			if ((AOldRow == null) && AIsDescending)
-				LOldRow = new Row(AProcess, DataType.RowType);
+				LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
 			else
 				LOldRow = AOldRow;
 			try
 			{
 				#if USEPROPOSALEVENTS
-				bool LChanged = DoDefaultRow(ARow, AColumnName, AProcess);
+				bool LChanged = DoDefaultRow(ARow, AColumnName, AProgram);
 				#endif
-				bool LChanged = ExecuteDefaultHandlers(AProcess, ANewRow, AValueFlags, AColumnName);
-				LChanged = InternalDefault(AProcess, LOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+				bool LChanged = ExecuteDefaultHandlers(AProgram, ANewRow, AValueFlags, AColumnName);
+				LChanged = InternalDefault(AProgram, LOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
 				return LChanged;
 			}
 			finally
@@ -2083,21 +2091,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// DefaultColumns
-		public static bool DefaultColumns(ServerProcess AProcess, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
+		public static bool DefaultColumns(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
 		{
 			if (AColumnName != String.Empty)
-				return DefaultColumn(AProcess, ATableVar, ARow, AValueFlags, AColumnName);
+				return DefaultColumn(AProgram, ATableVar, ARow, AValueFlags, AColumnName);
 			else
 			{
 				bool LChanged = false;
 				for (int LIndex = 0; LIndex < ATableVar.Columns.Count; LIndex++)
-					LChanged = DefaultColumn(AProcess, ATableVar, ARow, AValueFlags, ATableVar.Columns[LIndex].Name) || LChanged;
+					LChanged = DefaultColumn(AProgram, ATableVar, ARow, AValueFlags, ATableVar.Columns[LIndex].Name) || LChanged;
 				return LChanged;
 			}
 		}
 		
 		// DefaultColumn
-		public static bool DefaultColumn(ServerProcess AProcess, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
+		public static bool DefaultColumn(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags, string AColumnName)
 		{
 			int LRowIndex = ARow.DataType.Columns.IndexOfName(AColumnName);
 			if (LRowIndex >= 0)
@@ -2106,17 +2114,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!ARow.HasValue(LRowIndex) && ((AValueFlags == null) || !AValueFlags[LRowIndex]))
 				{
 					// Column level default trigger handlers
-					AProcess.Stack.Push(null);
+					AProgram.Stack.Push(null);
 					try
 					{
 						if (ATableVar.Columns[LIndex].HasHandlers())
 							foreach (Schema.EventHandler LHandler in ATableVar.Columns[LIndex].EventHandlers)
 								if ((LHandler.EventType & EventType.Default) != 0)
 								{
-									object LResult = LHandler.PlanNode.Execute(AProcess);
+									object LResult = LHandler.PlanNode.Execute(AProgram);
 									if ((LResult != null) && (bool)LResult)
 									{
-										ARow[LRowIndex] = AProcess.Stack.Peek(0);
+										ARow[LRowIndex] = AProgram.Stack.Peek(0);
 										if (AValueFlags != null)
 											AValueFlags[LRowIndex] = true;
 										return true;
@@ -2125,13 +2133,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 					
 					// Column level default
 					if (ATableVar.Columns[LIndex].Default != null)
 					{
-						ARow[LRowIndex] = ATableVar.Columns[LIndex].Default.Node.Execute(AProcess);
+						ARow[LRowIndex] = ATableVar.Columns[LIndex].Default.Node.Execute(AProgram);
 						if (AValueFlags != null)
 							AValueFlags[LRowIndex] = true;
 						return true;
@@ -2141,17 +2149,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Schema.ScalarType LScalarType = ATableVar.Columns[LIndex].DataType as Schema.ScalarType;
 					if (LScalarType != null)
 					{
-						AProcess.Stack.Push(null);
+						AProgram.Stack.Push(null);
 						try
 						{
 							if (LScalarType.HasHandlers())
 								foreach (Schema.EventHandler LHandler in LScalarType.EventHandlers)
 									if ((LHandler.EventType & EventType.Default) != 0)
 									{
-										object LResult = LHandler.PlanNode.Execute(AProcess);
+										object LResult = LHandler.PlanNode.Execute(AProgram);
 										if ((LResult != null) && (bool)LResult)
 										{
-											ARow[LRowIndex] = AProcess.Stack.Peek(0);
+											ARow[LRowIndex] = AProgram.Stack.Peek(0);
 											if (AValueFlags != null)
 												AValueFlags[LRowIndex] = true;
 											return true;
@@ -2160,13 +2168,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 
 						// Scalar type level default													   
 						if (LScalarType.Default != null)
 						{
-							ARow[LRowIndex] = LScalarType.Default.Node.Execute(AProcess);
+							ARow[LRowIndex] = LScalarType.Default.Node.Execute(AProgram);
 							if (AValueFlags != null)
 								AValueFlags[LRowIndex] = true;
 							return true;
@@ -2177,40 +2185,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		public static bool ExecuteChangeHandlers(ServerProcess AProcess, Schema.EventHandlers AHandlers)
+		public static bool ExecuteChangeHandlers(Program AProgram, Schema.EventHandlers AHandlers)
 		{
 			bool LChanged = false;
 			foreach (Schema.EventHandler LEventHandler in AHandlers)
 				if ((LEventHandler.EventType & EventType.Change) != 0)
 				{
-					object LResult = LEventHandler.PlanNode.Execute(AProcess);
+					object LResult = LEventHandler.PlanNode.Execute(AProgram);
 					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
 				}
 			return LChanged;
 		}
 		
-		public static bool ExecuteScalarTypeChangeHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType)
+		public static bool ExecuteScalarTypeChangeHandlers(Program AProgram, Schema.ScalarType AScalarType)
 		{
 			bool LChanged = false;
 			if (AScalarType.HasHandlers())
-				LChanged = ExecuteChangeHandlers(AProcess, AScalarType.EventHandlers);
+				LChanged = ExecuteChangeHandlers(AProgram, AScalarType.EventHandlers);
 			#if USETYPEINHERITANCE
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				LChanged = ExecuteScalarTypeChangeHandlers(AProcess, LParentType) || LChanged;
+				LChanged = ExecuteScalarTypeChangeHandlers(AProgram, LParentType) || LChanged;
 			#endif
 			return LChanged;
 		}
 		
 		// ChangeColumns
-		public static bool ChangeColumns(ServerProcess AProcess, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public static bool ChangeColumns(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (AColumnName != String.Empty)
 			{
 				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
-				AProcess.Stack.Push(AOldRow);
+				AProgram.Stack.Push(AOldRow);
 				try
 				{
-					AProcess.Stack.Push(ANewRow);
+					AProgram.Stack.Push(ANewRow);
 					try
 					{
 						bool LChanged = false;
@@ -2219,16 +2227,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						try
 						{
 							if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].HasHandlers())
-								if (ExecuteChangeHandlers(AProcess, ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].EventHandlers))
+								if (ExecuteChangeHandlers(AProgram, ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].EventHandlers))
 									LChanged = true;
 								
-							if (LChanged && (!Object.ReferenceEquals(ANewRow, AProcess.Stack.Peek(0))))
+							if (LChanged && (!Object.ReferenceEquals(ANewRow, AProgram.Stack.Peek(0))))
 							{
-								Row LRow = (Row)AProcess.Stack.Peek(0);
+								Row LRow = (Row)AProgram.Stack.Peek(0);
 								LRow.CopyTo(ANewRow);
 								LRow.ValuesOwned = false;
 								LRow.Dispose();
-								AProcess.Stack.Poke(0, ANewRow);
+								AProgram.Stack.Poke(0, ANewRow);
 							}
 						}
 						finally
@@ -2244,16 +2252,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 						if (ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType is Schema.ScalarType)
 						{
-							AProcess.Stack.Push(AOldRow[LRowIndex]);
+							AProgram.Stack.Push(AOldRow[LRowIndex]);
 							try
 							{
-								AProcess.Stack.Push(ANewRow[LRowIndex]);
+								AProgram.Stack.Push(ANewRow[LRowIndex]);
 								try
 								{
-									bool LColumnChanged = ExecuteScalarTypeChangeHandlers(AProcess, (Schema.ScalarType)ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType);
+									bool LColumnChanged = ExecuteScalarTypeChangeHandlers(AProgram, (Schema.ScalarType)ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)].DataType);
 									if (LColumnChanged)
 									{
-										ANewRow[LRowIndex] = AProcess.Stack.Peek(0);
+										ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
 										if (AValueFlags != null)
 											AValueFlags[LRowIndex] = true;
 										LChanged = true;
@@ -2263,31 +2271,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Stack.Pop();
+									AProgram.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Stack.Pop();
+								AProgram.Stack.Pop();
 							}
 						}
 						return LChanged;
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			else
 			{
 				int LRowIndex;
 				bool LChanged = false;
-				AProcess.Stack.Push(ANewRow);
+				AProgram.Stack.Push(ANewRow);
 				try
 				{
 					foreach (Schema.TableVarColumn LColumn in ATableVar.Columns)
@@ -2301,18 +2309,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							try
 							{
 								if (LColumn.HasHandlers())
-									LColumnChanged = ExecuteChangeHandlers(AProcess, LColumn.EventHandlers);
+									LColumnChanged = ExecuteChangeHandlers(AProgram, LColumn.EventHandlers);
 
 								if (LColumnChanged)
 								{
 									LChanged = true;
-									if (!Object.ReferenceEquals(ANewRow, AProcess.Stack.Peek(0)))
+									if (!Object.ReferenceEquals(ANewRow, AProgram.Stack.Peek(0)))
 									{
-										Row LRow = (Row)AProcess.Stack.Peek(0);
+										Row LRow = (Row)AProgram.Stack.Peek(0);
 										LRow.CopyTo(ANewRow);
 										LRow.ValuesOwned = false;
 										LRow.Dispose();
-										AProcess.Stack.Poke(0, ANewRow);
+										AProgram.Stack.Poke(0, ANewRow);
 									}
 								}
 							}
@@ -2329,17 +2337,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 							if (LColumn.DataType is Schema.ScalarType)
 							{
-								AProcess.Stack.Push(AOldRow[LRowIndex]);
+								AProgram.Stack.Push(AOldRow[LRowIndex]);
 								try
 								{
-									AProcess.Stack.Push(ANewRow[LRowIndex]);
+									AProgram.Stack.Push(ANewRow[LRowIndex]);
 									try
 									{
-										LColumnChanged = ExecuteScalarTypeChangeHandlers(AProcess, (Schema.ScalarType)LColumn.DataType);
+										LColumnChanged = ExecuteScalarTypeChangeHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
 											
 										if (LColumnChanged)
 										{
-											ANewRow[LRowIndex] = AProcess.Stack.Peek(0);
+											ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
 											if (AValueFlags != null)
 												AValueFlags[LRowIndex] = true;
 											LChanged = true;
@@ -2347,12 +2355,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 								}
 								finally
 								{
-									AProcess.Stack.Pop();
+									AProgram.Stack.Pop();
 								}
 							}
 						}
@@ -2361,47 +2369,47 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 		}
 		
-		public static bool ExecuteValidateHandlers(ServerProcess AProcess, Schema.EventHandlers AHandlers)
+		public static bool ExecuteValidateHandlers(Program AProgram, Schema.EventHandlers AHandlers)
 		{
-			return ExecuteValidateHandlers(AProcess, AHandlers, null);
+			return ExecuteValidateHandlers(AProgram, AHandlers, null);
 		}
 		
-		public static bool ExecuteValidateHandlers(ServerProcess AProcess, Schema.EventHandlers AHandlers, Schema.Operator AFromOperator)
+		public static bool ExecuteValidateHandlers(Program AProgram, Schema.EventHandlers AHandlers, Schema.Operator AFromOperator)
 		{
 			bool LChanged = false;
 			foreach (Schema.EventHandler LEventHandler in AHandlers)
 				if (((LEventHandler.EventType & EventType.Validate) != 0) && ((AFromOperator == null) || (AFromOperator.Name != LEventHandler.Operator.Name)))
 				{
-					object LResult = LEventHandler.PlanNode.Execute(AProcess);
+					object LResult = LEventHandler.PlanNode.Execute(AProgram);
 					LChanged = ((LResult != null) && (bool)LResult) || LChanged;
 				}
 			return LChanged;
 		}
 		
-		public static bool ExecuteScalarTypeValidateHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType)
+		public static bool ExecuteScalarTypeValidateHandlers(Program AProgram, Schema.ScalarType AScalarType)
 		{
-			return ExecuteScalarTypeValidateHandlers(AProcess, AScalarType, null);
+			return ExecuteScalarTypeValidateHandlers(AProgram, AScalarType, null);
 		}
 		
-		public static bool ExecuteScalarTypeValidateHandlers(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Operator AFromOperator)
+		public static bool ExecuteScalarTypeValidateHandlers(Program AProgram, Schema.ScalarType AScalarType, Schema.Operator AFromOperator)
 		{
 			bool LChanged = false;
 			if (AScalarType.HasHandlers())
-				LChanged = ExecuteValidateHandlers(AProcess, AScalarType.EventHandlers, AFromOperator);
+				LChanged = ExecuteValidateHandlers(AProgram, AScalarType.EventHandlers, AFromOperator);
 			#if USETYPEINHERITANCE
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				LChanged = ExecuteScalarTypeValidateHandlers(AProcess, LParentType) || LChanged;
+				LChanged = ExecuteScalarTypeValidateHandlers(AProgram, LParentType) || LChanged;
 			#endif
 			return LChanged;
 		}
 		
 		// ValidateColumns
-		public static bool ValidateColumns(ServerProcess AProcess, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		public static bool ValidateColumns(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (AColumnName != String.Empty)
 			{
@@ -2409,58 +2417,58 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				int LRowIndex = ANewRow.DataType.Columns.IndexOfName(AColumnName);
 				if (ANewRow.HasValue(LRowIndex))
 				{
-					AProcess.Stack.Push(AOldRow);
+					AProgram.Stack.Push(AOldRow);
 					try
 					{
-						AProcess.Stack.Push(ANewRow);
+						AProgram.Stack.Push(ANewRow);
 						try
 						{
 							bool LChanged = false;
 							Schema.TableVarColumn LColumn = ATableVar.Columns[ATableVar.Columns.IndexOfName(AColumnName)];
 							if (LColumn.HasHandlers())
-								LChanged = ExecuteValidateHandlers(AProcess, LColumn.EventHandlers);
+								LChanged = ExecuteValidateHandlers(AProgram, LColumn.EventHandlers);
 							int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(AColumnName);
-							AProcess.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
+							AProgram.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
 							try
 							{
-								AProcess.Stack.Push(ANewRow[LRowIndex]);
+								AProgram.Stack.Push(ANewRow[LRowIndex]);
 								try
 								{
 									bool LColumnChanged;
 									if (LColumn.DataType is Schema.ScalarType)
-										LColumnChanged = ExecuteScalarTypeValidateHandlers(AProcess, (Schema.ScalarType)LColumn.DataType);
+										LColumnChanged = ExecuteScalarTypeValidateHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
 									else
 										LColumnChanged = false;
 
 									if (LColumnChanged)
 									{
-										ANewRow[LRowIndex] = AProcess.Stack.Peek(0);
+										ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
 										LChanged = true;
 									}
 
-									ValidateColumnConstraints(AProcess, LColumn, AIsDescending);
+									ValidateColumnConstraints(AProgram, LColumn, AIsDescending);
 									if (LColumn.DataType is Schema.ScalarType)
-										ValidateScalarTypeConstraints(AProcess, (Schema.ScalarType)LColumn.DataType, AIsDescending);
+										ValidateScalarTypeConstraints(AProgram, (Schema.ScalarType)LColumn.DataType, AIsDescending);
 									return LChanged;
 								}
 								finally
 								{
-									AProcess.Stack.Pop();
+									AProgram.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Stack.Pop();
+								AProgram.Stack.Pop();
 							}
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				return false;
@@ -2469,10 +2477,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				// If there is no column name, this call is the validation for an insert, and should only be allowed to have no value if the column is nilable
 				int LRowIndex;
-				AProcess.Stack.Push(AOldRow);
+				AProgram.Stack.Push(AOldRow);
 				try
 				{
-					AProcess.Stack.Push(ANewRow);
+					AProgram.Stack.Push(ANewRow);
 					try
 					{
 						bool LChanged = false;
@@ -2490,7 +2498,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											ANewRow.BeginModifiedContext();
 										try
 										{
-											if (ExecuteValidateHandlers(AProcess, LColumn.EventHandlers))
+											if (ExecuteValidateHandlers(AProgram, LColumn.EventHandlers))
 												LChanged = true;
 										}
 										finally
@@ -2506,37 +2514,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									}
 
 									int LOldRowIndex = AOldRow == null ? -1 : AOldRow.DataType.Columns.IndexOfName(LColumn.Name);
-									AProcess.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
+									AProgram.Stack.Push(LOldRowIndex >= 0 ? AOldRow[LOldRowIndex] : null);
 									try
 									{
-										AProcess.Stack.Push(ANewRow[LRowIndex]);
+										AProgram.Stack.Push(ANewRow[LRowIndex]);
 										try
 										{
 											if (LColumn.DataType is Schema.ScalarType)
-												LColumnChanged = ExecuteScalarTypeValidateHandlers(AProcess, (Schema.ScalarType)LColumn.DataType);
+												LColumnChanged = ExecuteScalarTypeValidateHandlers(AProgram, (Schema.ScalarType)LColumn.DataType);
 											else
 												LColumnChanged = false;
 
 											if (LColumnChanged)
 											{
-												ANewRow[LRowIndex] = AProcess.Stack.Peek(0);
+												ANewRow[LRowIndex] = AProgram.Stack.Peek(0);
 												if (AValueFlags != null)
 													AValueFlags[LRowIndex] = true;
 												LChanged = true;
 											}
 
-											ValidateColumnConstraints(AProcess, LColumn, AIsDescending);
+											ValidateColumnConstraints(AProgram, LColumn, AIsDescending);
 											if (LColumn.DataType is Schema.ScalarType)
-												ValidateScalarTypeConstraints(AProcess, (Schema.ScalarType)LColumn.DataType, AIsDescending);
+												ValidateScalarTypeConstraints(AProgram, (Schema.ScalarType)LColumn.DataType, AIsDescending);
 										}
 										finally
 										{
-											AProcess.Stack.Pop();
+											AProgram.Stack.Pop();
 										}
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 								}
 
@@ -2548,78 +2556,78 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}	 
 		}
 		
 		// ValidateScalarTypeConstraints
-		public static void ValidateScalarTypeConstraints(ServerProcess AProcess, Schema.ScalarType AScalarType, bool AIsDescending)
+		public static void ValidateScalarTypeConstraints(Program AProgram, Schema.ScalarType AScalarType, bool AIsDescending)
 		{
 			Schema.ScalarTypeConstraint LConstraint;
 			for (int LIndex = 0; LIndex < AScalarType.Constraints.Count; LIndex++)
 			{
 				LConstraint = AScalarType.Constraints[LIndex];
 				if (AIsDescending || LConstraint.Enforced)
-					LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					LConstraint.Validate(AProgram, Schema.Transition.Insert);
 			}
 			
 			#if USETYPEINHERITANCE	
 			foreach (Schema.ScalarType LParentType in AScalarType.ParentTypes)
-				ValidateScalarTypeConstraints(AProcess, LParentType, AIsDescending);
+				ValidateScalarTypeConstraints(AProgram, LParentType, AIsDescending);
 			#endif
 		}
 		
 		// ValidateColumnConstraints
 		// This method expects that the value of the column to be validated is at location 0 on the stack
-		public static void ValidateColumnConstraints(ServerProcess AProcess, Schema.TableVarColumn AColumn, bool AIsDescending)
+		public static void ValidateColumnConstraints(Program AProgram, Schema.TableVarColumn AColumn, bool AIsDescending)
 		{
 			foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)
 				if (AIsDescending || LConstraint.Enforced)
-					LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					LConstraint.Validate(AProgram, Schema.Transition.Insert);
 		}
 		
 		// ValidateImmediateConstraints
 		// This method expects that the row to be validated is at location 0 on the stack
-		protected virtual void ValidateImmediateConstraints(ServerProcess AProcess, bool AIsDescending, BitArray AValueFlags)
+		protected virtual void ValidateImmediateConstraints(Program AProgram, bool AIsDescending, BitArray AValueFlags)
 		{
 			Schema.RowConstraint LConstraint;
 			for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
 			{
 				LConstraint = TableVar.RowConstraints[LIndex];
 				if ((LConstraint.ConstraintType != Schema.ConstraintType.Database) && (AIsDescending || LConstraint.Enforced) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Insert))
-					LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					LConstraint.Validate(AProgram, Schema.Transition.Insert);
 			}
 		} 
 		
 		// ValidateCatalogConstraints
 		// This method does not have any expectations for the stack
-		protected virtual void ValidateCatalogConstraints(ServerProcess AProcess)
+		protected virtual void ValidateCatalogConstraints(Program AProgram)
 		{
 			foreach (Schema.CatalogConstraint LConstraint in TableVar.CatalogConstraints)
 			{
 				if (LConstraint.Enforced)
 				{
-					if (LConstraint.IsDeferred && AProcess.InTransaction)
+					if (LConstraint.IsDeferred && AProgram.ServerProcess.InTransaction)
 					{
 						bool LHasCheck = false;
-						for (int LIndex = 0; LIndex < AProcess.Transactions.Count; LIndex++)
-							if (AProcess.Transactions[LIndex].CatalogConstraints.Contains(LConstraint.Name))
+						for (int LIndex = 0; LIndex < AProgram.ServerProcess.Transactions.Count; LIndex++)
+							if (AProgram.ServerProcess.Transactions[LIndex].CatalogConstraints.Contains(LConstraint.Name))
 							{
 								LHasCheck = true;
 								break;
 							}
 							
 						if (!LHasCheck)
-							AProcess.CurrentTransaction.CatalogConstraints.Add(LConstraint);
+							AProgram.ServerProcess.CurrentTransaction.CatalogConstraints.Add(LConstraint);
 					}
 					else
-						LConstraint.Validate(AProcess);
+						LConstraint.Validate(AProgram);
 				}
 			}
 		}
@@ -2634,25 +2642,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// ValidateInsertConstraints
 		// This method expects that the stack contains the new row at location 0 on the stack
-		protected virtual void ValidateInsertConstraints(ServerProcess AProcess)
+		protected virtual void ValidateInsertConstraints(Program AProgram)
 		{
-			if (AProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProcess.AddInsertTableVarCheck(TableVar, (Row)AProcess.Stack.Peek(0));
+			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
+				AProgram.ServerProcess.AddInsertTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(0));
 
-			PushRow(AProcess, (Row)AProcess.Stack.Peek(0));
+			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
 			{			
 				Schema.RowConstraint LConstraint;
 				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
 				{
 					LConstraint = TableVar.RowConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred))
-						LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred))
+						LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 			}
 			finally
 			{
-				PopRow(AProcess);
+				PopRow(AProgram);
 			}
 	
 			if (TableVar.InsertConstraints.Count > 0)
@@ -2662,33 +2670,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < TableVar.InsertConstraints.Count; LIndex++)
 				{
 					LConstraint = TableVar.InsertConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints))
-						LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints))
+						LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 			}
 		}
 		
 		// ValidateUpdateConstraints
 		// This method expects that the stack contain the old row in location 1, and the new row in location 0
-		protected virtual void ValidateUpdateConstraints(ServerProcess AProcess, BitArray AValueFlags)
+		protected virtual void ValidateUpdateConstraints(Program AProgram, BitArray AValueFlags)
 		{
-			if (AProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
-				AProcess.AddUpdateTableVarCheck(TableVar, (Row)AProcess.Stack.Peek(1), (Row)AProcess.Stack.Peek(0));
+			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints(AValueFlags, Schema.Transition.Update))
+				AProgram.ServerProcess.AddUpdateTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0));
 			
-			PushRow(AProcess, (Row)AProcess.Stack.Peek(0));
+			PushRow(AProgram, (Row)AProgram.Stack.Peek(0));
 			try
 			{
 				Schema.RowConstraint LConstraint;
 				for (int LIndex = 0; LIndex < TableVar.RowConstraints.Count; LIndex++)
 				{
 					LConstraint = TableVar.RowConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Insert))
-						LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Insert))
+						LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 			}
 			finally
 			{
-				PopRow(AProcess);
+				PopRow(AProgram);
 			}
 	
 			if (TableVar.UpdateConstraints.Count > 0)
@@ -2698,26 +2706,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < TableVar.UpdateConstraints.Count; LIndex++)
 				{
 					LConstraint = TableVar.UpdateConstraints[LIndex];
-					if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Update))
-						LConstraint.Validate(AProcess, Schema.Transition.Update);
+					if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred) && ((LConstraint.ConstraintType != Schema.ConstraintType.Table) || LShouldValidateKeyConstraints) && LConstraint.ShouldValidate(AValueFlags, Schema.Transition.Update))
+						LConstraint.Validate(AProgram, Schema.Transition.Update);
 				}
 			}
 		}
 		
 		// ValidateDeleteConstraints
 		// This method expects that the stack contain the old row in location 0
-		protected virtual void ValidateDeleteConstraints(ServerProcess AProcess)
+		protected virtual void ValidateDeleteConstraints(Program AProgram)
 		{
-			if (AProcess.InTransaction && TableVar.HasDeferredConstraints())
-				AProcess.AddDeleteTableVarCheck(TableVar, (Row)AProcess.Stack.Peek(0));
+			if (AProgram.ServerProcess.InTransaction && TableVar.HasDeferredConstraints())
+				AProgram.ServerProcess.AddDeleteTableVarCheck(TableVar, (Row)AProgram.Stack.Peek(0));
 
 			foreach (Schema.Constraint LConstraint in TableVar.DeleteConstraints)
-				if (LConstraint.Enforced && (!AProcess.InTransaction || !LConstraint.IsDeferred))
-					LConstraint.Validate(AProcess, Schema.Transition.Delete);
+				if (LConstraint.Enforced && (!AProgram.ServerProcess.InTransaction || !LConstraint.IsDeferred))
+					LConstraint.Validate(AProgram, Schema.Transition.Delete);
 		}
 
 		// ExecuteHandlers executes each handler associated with the given event type
-		protected virtual void ExecuteHandlers(ServerProcess AProcess, EventType AEventType)
+		protected virtual void ExecuteHandlers(Program AProgram, EventType AEventType)
 		{
 			// If the process is in an application transaction, and this is an AT table
 				// if we are populating source tables
@@ -2725,8 +2733,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// If we are in an AT replay context, do not invoke any handler that was invoked within the AT
 				// otherwise record that the handler was invoked in this AT
 			ApplicationTransaction LTransaction = null;
-			if (AProcess.ApplicationTransactionID != Guid.Empty)
-				LTransaction = AProcess.GetApplicationTransaction();
+			if (AProgram.ServerProcess.ApplicationTransactionID != Guid.Empty)
+				LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
 			try
 			{
 				if ((LTransaction == null) || !LTransaction.IsPopulatingSource)
@@ -2737,25 +2745,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							bool LInvoked = false;
 							if ((LTransaction == null) || !LTransaction.InATReplayContext || !LTransaction.WasInvoked(LHandler))
 							{
-								if (LHandler.IsDeferred && AProcess.InTransaction)
+								if (LHandler.IsDeferred && AProgram.ServerProcess.InTransaction)
 									switch (AEventType)
 									{
-										case EventType.AfterInsert : AProcess.CurrentTransaction.AddInsertHandler(LHandler, (Row)AProcess.Stack.Peek(0)); LInvoked = true; break;
-										case EventType.AfterUpdate : AProcess.CurrentTransaction.AddUpdateHandler(LHandler, (Row)AProcess.Stack.Peek(1), (Row)AProcess.Stack.Peek(0)); LInvoked = true; break;
-										case EventType.AfterDelete : AProcess.CurrentTransaction.AddDeleteHandler(LHandler, (Row)AProcess.Stack.Peek(0)); LInvoked = true; break;
+										case EventType.AfterInsert : AProgram.ServerProcess.CurrentTransaction.AddInsertHandler(LHandler, (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
+										case EventType.AfterUpdate : AProgram.ServerProcess.CurrentTransaction.AddUpdateHandler(LHandler, (Row)AProgram.Stack.Peek(1), (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
+										case EventType.AfterDelete : AProgram.ServerProcess.CurrentTransaction.AddDeleteHandler(LHandler, (Row)AProgram.Stack.Peek(0)); LInvoked = true; break;
 										default : break; // only after handlers should be deferred to transaction commit
 									}
 
 								if (!LInvoked)
 								{
-									AProcess.PushHandler();
+									AProgram.ServerProcess.PushHandler();
 									try
 									{
-										LHandler.PlanNode.Execute(AProcess);
+										LHandler.PlanNode.Execute(AProgram);
 									}
 									finally
 									{
-										AProcess.PopHandler();
+										AProgram.ServerProcess.PopHandler();
 									}
 								}
 								
@@ -2764,7 +2772,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								// is invoked from within another event handler.  This behavior is incorrect, and I cannot understand why it matters whether
 								// or not an event handler was invoked from within another event handler.  If the handler is invoked during an A/T, it should
 								// be recorded as invoked, and not invoked during the replay, end of story.
-								//if ((LTransaction != null) && !LTransaction.InATReplayContext && !AProcess.InHandler && !LTransaction.InvokedHandlers.Contains(LHandler))
+								//if ((LTransaction != null) && !LTransaction.InATReplayContext && !AProgram.InHandler && !LTransaction.InvokedHandlers.Contains(LHandler))
 								if ((LTransaction != null) && !LTransaction.InATReplayContext && !LTransaction.InvokedHandlers.Contains(LHandler))
 									LTransaction.InvokedHandlers.Add(LHandler);
 							}
@@ -2779,17 +2787,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// ExecuteValidateHandlers prepares the stack and executes each handler associated with the validate event
-		protected virtual bool ExecuteValidateHandlers(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteValidateHandlers(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (TableVar.HasHandlers(EventType.Validate))
 			{
-				PushRow(AProcess, AOldRow);
+				PushRow(AProgram, AOldRow);
 				try
 				{
-					PushRow(AProcess, ANewRow);
+					PushRow(AProgram, ANewRow);
 					try
 					{
-						AProcess.Stack.Push(AColumnName);
+						AProgram.Stack.Push(AColumnName);
 						try
 						{
 							bool LChanged = false;
@@ -2800,7 +2808,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										ANewRow.BeginModifiedContext();
 									try
 									{
-										object LObject = LHandler.PlanNode.Execute(AProcess);
+										object LObject = LHandler.PlanNode.Execute(AProgram);
 										if ((LObject != null) && (bool)LObject)
 											LChanged = true;
 									}
@@ -2819,31 +2827,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			return false;
 		}
 		
 		// ExecuteDefaultHandlers prepares the stack and executes each handler associated with the default event
-		protected virtual bool ExecuteDefaultHandlers(ServerProcess AProcess, Row ARow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteDefaultHandlers(Program AProgram, Row ARow, BitArray AValueFlags, string AColumnName)
 		{
 			if (TableVar.HasHandlers(EventType.Default))
 			{
-				PushRow(AProcess, ARow);
+				PushRow(AProgram, ARow);
 				try
 				{
-					AProcess.Stack.Push(AColumnName);
+					AProgram.Stack.Push(AColumnName);
 					try
 					{
 						bool LChanged = false;
@@ -2854,7 +2862,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									ARow.BeginModifiedContext();
 								try
 								{
-									object LResult = LHandler.PlanNode.Execute(AProcess);
+									object LResult = LHandler.PlanNode.Execute(AProgram);
 									if ((LResult != null) && (bool)LResult)
 										LChanged = true;
 								}
@@ -2874,28 +2882,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			return false;
 		}
 		
-		protected virtual bool ExecuteChangeHandlers(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected virtual bool ExecuteChangeHandlers(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (TableVar.HasHandlers(EventType.Change))
 			{
-				PushRow(AProcess, AOldRow);
+				PushRow(AProgram, AOldRow);
 				try
 				{
-					PushRow(AProcess, ANewRow);
+					PushRow(AProgram, ANewRow);
 					try
 					{
-						AProcess.Stack.Push(AColumnName);
+						AProgram.Stack.Push(AColumnName);
 						try
 						{
 							bool LChanged = false;
@@ -2906,7 +2914,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										ANewRow.BeginModifiedContext();
 									try
 									{
-										object LResult = LHandler.PlanNode.Execute(AProcess);
+										object LResult = LHandler.PlanNode.Execute(AProgram);
 										if ((LResult != null) && (bool)LResult)
 											LChanged = true;
 									}
@@ -2926,17 +2934,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
 					{
-						PopRow(AProcess);
+						PopRow(AProgram);
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			return false;
@@ -2983,10 +2991,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
         // Insert
-        protected virtual void ExecuteDeviceInsert(ServerProcess AProcess, Row ARow)
+        protected virtual void ExecuteDeviceInsert(Program AProgram, Row ARow)
         {
 			CheckModifySupported();
-			EnsureModifyNodes(AProcess.Plan);
+			EnsureModifyNodes(AProgram.Plan);
 			
 			// Create a table constructor node to serve as the source for the insert
 			TableSelectorNode LSourceNode = new TableSelectorNode(new Schema.TableType());
@@ -3006,7 +3014,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FInsertNode.Nodes.Add(this);
 			try
 			{	
-				AProcess.DeviceExecute(FDevice, FInsertNode);
+				AProgram.DeviceExecute(FDevice, FInsertNode);
 			}
 			finally
 			{
@@ -3017,10 +3025,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         }
         
 		// Update
-		protected virtual void ExecuteDeviceUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow)
+		protected virtual void ExecuteDeviceUpdate(Program AProgram, Row AOldRow, Row ANewRow)
 		{
 			CheckModifySupported();
-			EnsureModifyNodes(AProcess.Plan);
+			EnsureModifyNodes(AProgram.Plan);
 			
 			// Add update column nodes for each row to be updated
 			for (int LColumnIndex = 0; LColumnIndex < ANewRow.DataType.Columns.Count; LColumnIndex++)
@@ -3049,15 +3057,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			try
 			{
-				AProcess.Stack.Push(AOldRow);
+				AProgram.Stack.Push(AOldRow);
 				try
 				{
 					// Execute the Update Statement
-					AProcess.DeviceExecute(FDevice, FUpdateNode);
+					AProgram.DeviceExecute(FDevice, FUpdateNode);
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
@@ -3069,46 +3077,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
         
 		// Delete
-		protected virtual void ExecuteDeviceDelete(ServerProcess AProcess, Row ARow)
+		protected virtual void ExecuteDeviceDelete(Program AProgram, Row ARow)
 		{
 			CheckModifySupported();
-			EnsureModifyNodes(AProcess.Plan);
+			EnsureModifyNodes(AProgram.Plan);
 			
-			AProcess.Stack.Push(ARow);
+			AProgram.Stack.Push(ARow);
 			try
 			{
-				AProcess.DeviceExecute(FDevice, FDeleteNode);
+				AProgram.DeviceExecute(FDevice, FDeleteNode);
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
         
-		protected virtual void InternalBeforeInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags) {}
-		protected virtual void InternalAfterInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags) {}
-		protected virtual void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected virtual void InternalBeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags) {}
+		protected virtual void InternalAfterInsert(Program AProgram, Row ARow, BitArray AValueFlags) {}
+		protected virtual void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformInsert);
 		}
 
-		protected virtual void InternalBeforeUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
-		protected virtual void InternalAfterUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
-		protected virtual void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected virtual void InternalBeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
+		protected virtual void InternalAfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags) {}
+		protected virtual void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformUpdate);
 		}
 		
-		protected virtual void InternalBeforeDelete(ServerProcess AProcess, Row ARow) {}
-		protected virtual void InternalAfterDelete(ServerProcess AProcess, Row ARow) {}
-		protected virtual void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected virtual void InternalBeforeDelete(Program AProgram, Row ARow) {}
+		protected virtual void InternalAfterDelete(Program AProgram, Row ARow) {}
+		protected virtual void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			throw new RuntimeException(RuntimeException.Codes.UnableToPerformDelete);
 		}
 		
-		protected virtual bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable) { return false; }
-		protected virtual bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending) { return false; }
-		protected virtual bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName) { return false; }
+		protected virtual bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable) { return false; }
+		protected virtual bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending) { return false; }
+		protected virtual bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName) { return false; }
 		
 		// PopulateNode
 		protected TableNode FPopulateNode;
@@ -3143,13 +3151,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public virtual void InferPopulateNode(Plan APlan) { }
 
-		protected override void InternalBeforeExecute(ServerProcess AProcess)
+		protected override void InternalBeforeExecute(Program AProgram)
 		{
-			if ((FPopulateNode != null) && !AProcess.IsInsert)
-				ApplicationTransactionUtility.JoinExpression(AProcess, FPopulateNode, this);
+			if ((FPopulateNode != null) && !AProgram.ServerProcess.IsInsert)
+				ApplicationTransactionUtility.JoinExpression(AProgram, FPopulateNode, this);
 		}
 		
-		public virtual void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) {}
+		public virtual void JoinApplicationTransaction(Program AProgram, Row ARow) {}
 
 		#region ShowPlan
 

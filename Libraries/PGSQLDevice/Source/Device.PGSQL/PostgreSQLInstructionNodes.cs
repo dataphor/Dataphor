@@ -23,18 +23,18 @@ namespace Alphora.Dataphor.Device.PGSQL
 
     public class PostgreSQLPostgreSQLBinaryCompareNode : BinaryInstructionNode
     {
-        public static int Compare(ServerProcess AProcess, object ALeftValue, object ARightValue)
+        public static int Compare(Program AProgram, object ALeftValue, object ARightValue)
         {
             Stream LLeftStream =
                 ALeftValue is byte[]
                     ? new MemoryStream((byte[])ALeftValue, 0, ((byte[])ALeftValue).Length, false, true)
-                    : AProcess.StreamManager.Open((StreamID)ALeftValue, LockMode.Exclusive);
+                    : AProgram.StreamManager.Open((StreamID)ALeftValue, LockMode.Exclusive);
             try
             {
                 Stream LRightStream =
                     ARightValue is byte[]
                         ? new MemoryStream((byte[])ARightValue, 0, ((byte[])ARightValue).Length, false, true)
-                        : AProcess.StreamManager.Open((StreamID)ARightValue, LockMode.Exclusive);
+                        : AProgram.StreamManager.Open((StreamID)ARightValue, LockMode.Exclusive);
                 try
                 {
                     int LLeftByte;
@@ -68,78 +68,78 @@ namespace Alphora.Dataphor.Device.PGSQL
             }
         }
 
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return Compare(AProcess, AArgument1, AArgument2);
+                return Compare(AProgram, AArgument1, AArgument2);
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryEqualNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) == 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) == 0;
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryNotEqualNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) != 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) != 0;
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryLessNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) < 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) < 0;
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryInclusiveLessNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) <= 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) <= 0;
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryGreaterNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) > 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) > 0;
         }
     }
 
     public class PostgreSQLPostgreSQLBinaryInclusiveGreaterNode : BinaryInstructionNode
     {
-        public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+        public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
         {
             if ((AArgument1 == null) || (AArgument2 == null))
                 return null;
             else
-                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProcess, AArgument1, AArgument2) >= 0;
+                return PostgreSQLPostgreSQLBinaryCompareNode.Compare(AProgram, AArgument1, AArgument2) >= 0;
         }
     }
 

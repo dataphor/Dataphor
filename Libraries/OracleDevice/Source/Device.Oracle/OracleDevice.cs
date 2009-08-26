@@ -125,7 +125,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
         // HostName
 
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(ServerProcess AProcess, string ATableName, string AColumnName,
+        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName,
                                                  string ADomainName)
         {
             switch (ADomainName.ToLower())
@@ -371,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
                     );
             var LConnectionStringBuilder =
                 (ConnectionStringBuilder)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[] {});
+                ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[] {});
 
             var LTags = new Tags();
             LTags.AddOrUpdate("HostName", Device.HostName);
@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 
             return
                 (SQLConnection)
-                ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] {LConnectionString});
+                ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[] {LConnectionString});
         }
     }
 }

@@ -492,28 +492,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.IsReconciliationEnabled())
+			if (AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the source expression
 				// Open a table for the target expression
 				// Insert each row of the source expression into the target expression
-				object LSource = Nodes[0].Execute(AProcess);
+				object LSource = Nodes[0].Execute(AProgram);
 
 				object LTarget;
-				bool LSaveIsInsert = AProcess.IsInsert; 
-				bool LSaveIsOpeningInsertCursor = AProcess.IsOpeningInsertCursor; 
-				AProcess.IsInsert = true; // To indicate to application transactions that data should not be populated
-				AProcess.IsOpeningInsertCursor = true; // To indicate to devices involved in the expression that it is not necessary to open the cursor
+				bool LSaveIsInsert = AProgram.ServerProcess.IsInsert; 
+				bool LSaveIsOpeningInsertCursor = AProgram.ServerProcess.IsOpeningInsertCursor; 
+				AProgram.ServerProcess.IsInsert = true; // To indicate to application transactions that data should not be populated
+				AProgram.ServerProcess.IsOpeningInsertCursor = true; // To indicate to devices involved in the expression that it is not necessary to open the cursor
 				try
 				{
-					LTarget = Nodes[1].Execute(AProcess);
+					LTarget = Nodes[1].Execute(AProgram);
 				}
 				finally
 				{
-					AProcess.IsInsert = LSaveIsInsert;
-					AProcess.IsOpeningInsertCursor = LSaveIsOpeningInsertCursor;
+					AProgram.ServerProcess.IsInsert = LSaveIsInsert;
+					AProgram.ServerProcess.IsOpeningInsertCursor = LSaveIsOpeningInsertCursor;
 				}
 
 				if (LSource is Row)
@@ -532,9 +532,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 									else
 										LNewRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
 										
-								using (Row LOldRow = new Row(AProcess, LOldRowType))
+								using (Row LOldRow = new Row(AProgram.ValueManager, LOldRowType))
 								{
-									using (Row LNewRow = new Row(AProcess, LNewRowType))
+									using (Row LNewRow = new Row(AProgram.ValueManager, LNewRowType))
 									{
 										for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
 											if (Schema.Object.Qualifier(LRow.DataType.Columns[LIndex].Name) == Keywords.Old)
@@ -581,7 +581,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					using (Table LSourceTable = ((Table)LSource))
 					{
-						using (Row LRow = new Row(AProcess, LSourceTable.DataType.RowType))
+						using (Row LRow = new Row(AProgram.ValueManager, LSourceTable.DataType.RowType))
 						{
 							using (Table LTargetTable = ((Table)LTarget))
 							{
@@ -596,9 +596,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										else
 											LNewRowType.Columns.Add(LRow.DataType.Columns[LIndex].CopyAndRename(Schema.Object.Dequalify(LRow.DataType.Columns[LIndex].Name)));
 											
-									using (Row LOldRow = new Row(AProcess, LOldRowType))
+									using (Row LOldRow = new Row(AProgram.ValueManager, LOldRowType))
 									{
-										using (Row LNewRow = new Row(AProcess, LNewRowType))
+										using (Row LNewRow = new Row(AProgram.ValueManager, LNewRowType))
 										{
 											#if USEUPDATEVALUEFLAGS
 											BitArray LValueFlags = new BitArray(LNewRow.DataType.Columns.Count);
@@ -703,9 +703,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public string ColumnName;
 		#endif
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			return Nodes[0].Execute(AProcess);
+			return Nodes[0].Execute(AProgram);
 		}
     }
     
@@ -815,18 +815,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Nodes[LIndex].BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.IsReconciliationEnabled())
+			if (AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// for each row in the table, update the value of each column to the given expression
-				using (Table LTable = (Table)Nodes[0].Execute(AProcess))
+				using (Table LTable = (Table)Nodes[0].Execute(AProgram))
 				{
-					Row LOldRow = new Row(AProcess, LTable.DataType.RowType);
+					Row LOldRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
 					try
 					{
-						Row LNewRow = new Row(AProcess, LTable.DataType.RowType);
+						Row LNewRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
 						try
 						{
 							if (LTable.Next())
@@ -844,12 +844,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								{
 									LTable.Select(LOldRow);
 									LTable.Select(LNewRow);
-									AProcess.Stack.Push(LOldRow);
+									AProgram.Stack.Push(LOldRow);
 									try
 									{
 										for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
 										{
-											object LObject = Nodes[LIndex].Execute(AProcess);
+											object LObject = Nodes[LIndex].Execute(AProgram);
 											try
 											{
 												#if USECOLUMNLOCATIONBINDING
@@ -860,13 +860,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 											}
 											finally
 											{
-												DataValue.DisposeValue(AProcess, LObject);
+												DataValue.DisposeValue(AProgram.ValueManager, LObject);
 											}
 										}
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 									
 									#if USEUPDATEVALUEFLAGS
@@ -987,17 +987,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				base.InternalDetermineBinding(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (!IsGeneric)
 			{
-				Row LTarget = (Row)AProcess.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
-				AProcess.Stack.Push(LTarget);
+				Row LTarget = (Row)AProgram.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
+				AProgram.Stack.Push(LTarget);
 				try
 				{
 					for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
 					{
-						object LObject = Nodes[LIndex].Execute(AProcess);
+						object LObject = Nodes[LIndex].Execute(AProgram);
 						try
 						{
 							#if USECOLUMNLOCATIONBINDING
@@ -1008,57 +1008,67 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							DataValue.DisposeValue(AProcess, LObject);
+							DataValue.DisposeValue(AProgram.ValueManager, LObject);
 						}
 					}
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			else
 			{
-				Row LTarget = (Row)AProcess.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
+				Row LTarget = (Row)AProgram.Stack.Peek(((StackReferenceNode)Nodes[0]).Location);
 				UpdateColumnNode[] LColumnNodes = new UpdateColumnNode[FColumnExpressions.Count];
-				AProcess.Plan.EnterRowContext();
+				AProgram.Plan.EnterRowContext();
 				try
 				{
-					AProcess.Plan.Symbols.Push(new Symbol(LTarget.DataType));
+					AProgram.Plan.Symbols.Push(new Symbol(LTarget.DataType));
 					try
 					{
 						for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
-							LColumnNodes[LIndex] = Compiler.EmitUpdateColumnNode(AProcess.Plan, FColumnExpressions[LIndex], new ValueNode(Nodes[LIndex + 1].DataType, Nodes[LIndex + 1].Execute(AProcess)));
+							LColumnNodes[LIndex] = 
+								Compiler.EmitUpdateColumnNode
+								(
+									AProgram.Plan, 
+									FColumnExpressions[LIndex], 
+									new ValueNode
+									(
+										Nodes[LIndex + 1].DataType, 
+										Nodes[LIndex + 1].Execute(AProgram)
+									)
+								);
 					}
 					finally
 					{
-						AProcess.Plan.Symbols.Pop();
+						AProgram.Plan.Symbols.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Plan.ExitRowContext();
+					AProgram.Plan.ExitRowContext();
 				}
 				
-				AProcess.Stack.Push(LTarget);
+				AProgram.Stack.Push(LTarget);
 				try
 				{
 					for (int LIndex = 0; LIndex < FColumnExpressions.Count; LIndex++)
 					{
-						object LObject = LColumnNodes[LIndex].Execute(AProcess);
+						object LObject = LColumnNodes[LIndex].Execute(AProgram);
 						try
 						{
 							LTarget[LColumnNodes[LIndex].ColumnName] = LObject;
 						}
 						finally
 						{
-							DataValue.DisposeValue(AProcess, LObject);
+							DataValue.DisposeValue(AProgram.ValueManager, LObject);
 						}
 					}
 				}
 				finally
 				{
-					AProcess.Plan.Symbols.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			return null;
@@ -1138,13 +1148,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.IsReconciliationEnabled())
+			if (AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				// Open a table for the expression
 				// delete all the rows
-				using (Table LTable = (Table)Nodes[0].Execute(AProcess))
+				using (Table LTable = (Table)Nodes[0].Execute(AProgram))
 				{
 					if (LTable.Next())
 					{
@@ -1199,7 +1209,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			FTableVar.Owner = APlan.User;
 			if (Order == null)
-				Order = new Schema.Order(FTableVar.FindClusteringKey(), APlan);
+				Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, FTableVar));
 		}
 		
 		public override void DetermineCursorBehavior(Plan APlan)
@@ -1208,22 +1218,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FRequestedCursorType = APlan.CursorContext.CursorType;
 			FCursorCapabilities = CursorCapability.Navigable | CursorCapability.BackwardsNavigable | CursorCapability.Searchable | CursorCapability.Bookmarkable;
 			FCursorIsolation = CursorIsolation.None;
-			Order = new Schema.Order(FTableVar.FindClusteringKey(), APlan);
+			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, FTableVar));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LTable = new LocalTable(this, AProcess);
+			LocalTable LTable = new LocalTable(this, AProgram);
 			try
 			{
 				LTable.Open();
 				// Insert each row from the arguments into this new table
 				for (int LIndex = 0; LIndex < NodeCount; LIndex++)
 				{
-					Row LRow = (Row)Nodes[LIndex].Execute(AProcess);
+					Row LRow = (Row)Nodes[LIndex].Execute(AProgram);
 					try
 					{
-						LTable.FNativeTable.Insert(AProcess, LRow); // Insert directly into the native table value to avoid the updatable capability check
+						LTable.FNativeTable.Insert(AProgram.ValueManager, LRow); // Insert directly into the native table value to avoid the updatable capability check
 					}
 					finally
 					{
@@ -1301,9 +1311,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = SourceNode.DataType;
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{	
-			Table LTable = SourceNode.Execute(AProcess) as Table;
+			Table LTable = SourceNode.Execute(AProgram) as Table;
 			LTable.Open();
 			try
 			{
@@ -1311,19 +1321,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// will be constructed with the keys inferred for the source, resulting in
 				// incorrect access plans (see Defect #33978 for more).
 				Schema.ResultTableVar LTableVar = new Schema.ResultTableVar(SourceNode);
-				LTableVar.Owner = AProcess.Plan.User;
+				LTableVar.Owner = AProgram.Plan.User;
 				LTableVar.EnsureTableVarColumns();
-				LTableVar.EnsureKey(AProcess.Plan);
+				AProgram.EnsureKey(LTableVar);
 				
-				NativeTable LNativeTable = new NativeTable(AProcess, LTableVar);
+				NativeTable LNativeTable = new NativeTable(AProgram.ValueManager, LTableVar);
 				while (LTable.Next())
 				{
 					using (Row LRow = LTable.Select())
 					{	
-						LNativeTable.Insert(AProcess, LRow);
+						LNativeTable.Insert(AProgram.ValueManager, LRow);
 					}
 				}
-				return new TableValue(AProcess, LNativeTable);
+				return new TableValue(AProgram.ValueManager, LNativeTable);
 			}
 			finally
 			{
@@ -1358,7 +1368,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			TableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 			TableVar.EnsureTableVarColumns();
-			TableVar.EnsureKey(APlan);
+			Compiler.EnsureKey(APlan, TableVar);
 		}
 
 		public override void DetermineCursorBehavior(Plan APlan)
@@ -1369,18 +1379,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (Nodes[0] is StackReferenceNode)
 				FCursorCapabilities |= CursorCapability.Updateable;
 			FCursorIsolation = CursorIsolation.None;
-			Order = FTableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, FTableVar);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			TableValue LTableValue = Nodes[0].Execute(AProcess) as TableValue;
-			TableScan LTable = new TableValueScan(this, AProcess);
-			LTable.NativeTable = LTableValue.AsNative as NativeTable;
-			LTable.Key = LTable.NativeTable.TableVar.FindClusteringOrder(AProcess.Plan);
-			LTable.Direction = ScanDirection.Forward;
+			TableScan LTable = new TableValueScan(this, Nodes[0].Execute(AProgram) as TableValue);
 			LTable.Open();
-
 			return LTable;
 		}
 		
@@ -1389,12 +1394,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return Nodes[0].EmitStatement(AMode);
 		}
 		
-		protected NativeTable GetNativeTable(ServerProcess AProcess)
+		protected NativeTable GetNativeTable(Program AProgram)
 		{
 			StackReferenceNode LNode = Nodes[0] as StackReferenceNode;
 			if (LNode != null)
 			{
-				TableValue LTableValue = AProcess.Stack.Peek(LNode.Location) as TableValue;
+				TableValue LTableValue = AProgram.Stack.Peek(LNode.Location) as TableValue;
 				if (LTableValue != null)
 					return LTableValue.AsNative as NativeTable;
 			}
@@ -1402,32 +1407,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 
 		// TODO: Revisit update semantics here. Why are we updating what should be an rvalue?		
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProcess);
+			NativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
-				LNativeTable.Insert(AProcess, ANewRow);
+				LNativeTable.Insert(AProgram.ValueManager, ANewRow);
 			else
-				base.InternalExecuteInsert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				base.InternalExecuteInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 		}
 		
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 		
-			NativeTable LNativeTable = GetNativeTable(AProcess);
+			NativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
-				LNativeTable.Update(AProcess, AOldRow, ANewRow);
+				LNativeTable.Update(AProgram.ValueManager, AOldRow, ANewRow);
 			else
-				base.InternalExecuteUpdate(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				base.InternalExecuteUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 		}
 		
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
-			NativeTable LNativeTable = GetNativeTable(AProcess);
+			NativeTable LNativeTable = GetNativeTable(AProgram);
 			if (LNativeTable != null)
-				LNativeTable.Delete(AProcess, ARow);
+				LNativeTable.Delete(AProgram.ValueManager, ARow);
 			else
-				base.InternalExecuteDelete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+				base.InternalExecuteDelete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 		}
     }
     
@@ -1637,53 +1642,53 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Insert
-		public override void Insert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		public override void Insert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			if (FPropagateInsert != PropagateAction.False)
 			{
-				base.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				base.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 			}
 		}
 
 		// Update
-		public override void Update(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		public override void Update(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (FPropagateUpdate)
 			{
-				base.Update(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				base.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 			}
 		}
 
 		// Delete
-		public override void Delete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		public override void Delete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (FPropagateDelete)
 			{
-				base.Delete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+				base.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 			}
 		}
 
 		// Validate
-		public override bool Validate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Validate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (FPropagateValidate)
-				return base.Validate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return base.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
 		// Change
-		public override bool Change(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Change(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (FPropagateChange)
-				return base.Change(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return base.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
 		// Default
-		public override bool Default(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		public override bool Default(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (FPropagateDefault)
-				return base.Default(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return base.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 
@@ -1704,14 +1709,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			BitArray LValueFlags = ANewRow.GetValueFlags();
-			bool LChanged = DefaultColumns(AProcess, TableVar, ANewRow, AValueFlags, AColumnName);
+			bool LChanged = DefaultColumns(AProgram, TableVar, ANewRow, AValueFlags, AColumnName);
 			if (AIsDescending && LChanged)
 				for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
 					if (!LValueFlags[LIndex] && ANewRow.HasValue(LIndex))
-						Change(AProcess, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name);
+						Change(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name);
 			return LChanged;
 		}
 		
@@ -1834,69 +1839,69 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			throw new RuntimeException(RuntimeException.Codes.NoSupportingDevice);
 		}
 		
-		protected void InternalInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
+		protected void InternalInsert(Program AProgram, Row ARow, BitArray AValueFlags)
 		{
 			if (!FHasInsertRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FInsertRight);
-			AProcess.DeviceConnect(FDevice).InsertRow(FTableVar, ARow, AValueFlags);
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FInsertRight);
+			AProgram.DeviceConnect(FDevice).InsertRow(AProgram, FTableVar, ARow, AValueFlags);
 		}
 		
 		// Insert
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					InternalInsert(AProcess, ANewRow, AValueFlags); 
+					InternalInsert(AProgram, ANewRow, AValueFlags); 
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProcess, DataType.RowType))
+					using (Row LSourceRow = new Row(AProgram.ValueManager, DataType.RowType))
 					{
 						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = Select(AProcess, LSourceRow))
+						using (Row LCurrentRow = Select(AProgram, LSourceRow))
 						{
 							if (LCurrentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									InternalUpdate(AProcess, LCurrentRow, ANewRow, AValueFlags, false);
+									InternalUpdate(AProgram, LCurrentRow, ANewRow, AValueFlags, false);
 							}
 							else
-								InternalInsert(AProcess, ANewRow, AValueFlags);
+								InternalInsert(AProgram, ANewRow, AValueFlags);
 						}
 					}
 				break;
 			}
 		}
 		
-		protected void InternalUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency)
+		protected void InternalUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency)
 		{
 			if (!FHasUpdateRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FUpdateRight);
-			AProcess.DeviceConnect(FDevice).UpdateRow(FTableVar, AOldRow, ANewRow, AValueFlags);
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FUpdateRight);
+			AProgram.DeviceConnect(FDevice).UpdateRow(AProgram, FTableVar, AOldRow, ANewRow, AValueFlags);
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateUpdate)
-				InternalUpdate(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency);
+				InternalUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateDelete)
 			{
 				if (!FHasDeleteRight)
-					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FDeleteRight);
-				AProcess.DeviceConnect(FDevice).DeleteRow(FTableVar, ARow);
+					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FDeleteRight);
+				AProgram.DeviceConnect(FDevice).DeleteRow(AProgram, FTableVar, ARow);
 			}
 		}
 		
@@ -1906,7 +1911,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			if (FJoinATNode == null)
 			{
-				Schema.RowType LKeyType = new Schema.RowType(FTableVar.FindClusteringKey().Columns);
+				Schema.RowType LKeyType = new Schema.RowType(Compiler.FindClusteringKey(APlan, FTableVar).Columns);
 				APlan.Symbols.Push(new Symbol("ATRow", ARowType));
 				try
 				{
@@ -1991,7 +1996,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) 
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
 		{
 			/*
 				if this retrieve is from an ATTable
@@ -2000,15 +2005,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			*/
 			if (FTableVar.SourceTableName != null)
 			{
-				EnsureJoinATNode(AProcess.Plan, (Schema.RowType)ARow.DataType);
-				AProcess.Stack.Push(ARow);
+				EnsureJoinATNode(AProgram.Plan, (Schema.RowType)ARow.DataType);
+				AProgram.Stack.Push(ARow);
 				try
 				{
-					FJoinATNode.Execute(AProcess);
+					FJoinATNode.Execute(AProgram);
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 		}
@@ -2108,59 +2113,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.TableType SourceTableType { get { return (Schema.TableType)SourceNode.DataType; } }
 		
 		// Default
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			bool LChanged = false;
 			if (AIsDescending)
-				LChanged = SourceNode.Default(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+				LChanged = SourceNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
 		}
 		
 		// Validate
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			bool LChanged = false;
 			if (AIsDescending)
-				LChanged = SourceNode.Validate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
+				LChanged = SourceNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable) || LChanged;
 		}
 		
 		// Change
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
-			return SourceNode.Change(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return SourceNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 		}
 		
 		// Insert
-		protected void InternalInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected void InternalInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			if (!FHasInsertRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FInsertRight);
-			SourceNode.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FInsertRight);
+			SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 		}
 		
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					InternalInsert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+					InternalInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProcess, SourceNode.DataType.RowType))
+					using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
 					{
 						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = SourceNode.Select(AProcess, LSourceRow))
+						using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
 						{
 							if (LCurrentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									InternalUpdate(AProcess, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									InternalUpdate(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
 							}
 							else
-								InternalInsert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								InternalInsert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 						}
 					}
 				break;
@@ -2168,38 +2173,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected void InternalUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected void InternalUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (!FHasUpdateRight)
-				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FUpdateRight);
-			SourceNode.Update(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FUpdateRight);
+			SourceNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 		}
 		
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateUpdate)
-				InternalUpdate(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				InternalUpdate(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateDelete)
 			{
 				if (!FHasDeleteRight)
-					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProcess.Plan.User.ID, FDeleteRight);
-				SourceNode.Delete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+					throw new ServerException(ServerException.Codes.UnauthorizedRight, ErrorSeverity.Environment, AProgram.Plan.User.ID, FDeleteRight);
+				SourceNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			return Nodes[0].Execute(AProcess);
+			return Nodes[0].Execute(AProgram);
 		}
 
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) 
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
 		{
-			SourceNode.JoinApplicationTransaction(AProcess, ARow);
+			SourceNode.JoinApplicationTransaction(AProgram, ARow);
 		}
     }
     
@@ -2329,52 +2334,52 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			if (AIsDescending && PropagateDefault)
-				return SourceNode.Default(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+				return SourceNode.Default(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
 		}
 		
 		// Change
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (PropagateChange)
-				return SourceNode.Change(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalChange(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return SourceNode.Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 		}
 		
 		// Validate
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (AIsDescending && PropagateValidate)
-				return SourceNode.Validate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+				return SourceNode.Validate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 		}
 
 		// Insert
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True : 
-					SourceNode.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked); 
+					SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked); 
 				break;
 
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LSourceRow = new Row(AProcess, SourceNode.DataType.RowType))
+					using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
 					{
 						ANewRow.CopyTo(LSourceRow);
-						using (Row LCurrentRow = SourceNode.Select(AProcess, LSourceRow))
+						using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
 						{
 							if (LCurrentRow != null)
 							{
 								if (PropagateInsert == PropagateAction.Ensure)
-									SourceNode.Update(AProcess, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
+									SourceNode.Update(AProgram, LCurrentRow, ANewRow, AValueFlags, false, AUnchecked);
 							}
 							else
-								SourceNode.Insert(AProcess, AOldRow, ANewRow, AValueFlags, AUnchecked);
+								SourceNode.Insert(AProgram, AOldRow, ANewRow, AValueFlags, AUnchecked);
 						}
 					}
 				break;
@@ -2382,22 +2387,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateUpdate)
-				SourceNode.Update(AProcess, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+				SourceNode.Update(AProgram, AOldRow, ANewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateDelete)
-				SourceNode.Delete(AProcess, ARow, ACheckConcurrency, AUnchecked);
+				SourceNode.Delete(AProgram, ARow, ACheckConcurrency, AUnchecked);
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) 
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
 		{
-			SourceNode.JoinApplicationTransaction(AProcess, ARow);
+			SourceNode.JoinApplicationTransaction(AProgram, ARow);
 		}
 	}
 	
@@ -2445,7 +2450,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (LCursorDefinition == null)
 				LCursorDefinition = new CursorDefinition(FOnExpression.Expression);
 			FExpression = new D4TextEmitter().Emit(new SelectStatement(LCursorDefinition));
-			Schema.TableVar LTableVar = APlan.RemoteConnect(FServerLink).PrepareTableVar(FExpression, new DataParams());
+			Schema.TableVar LTableVar = APlan.RemoteConnect(FServerLink).PrepareTableVar(APlan, FExpression, new DataParams());
 			
 			FDataType = new Schema.TableType();
 			FTableVar = new Schema.ResultTableVar(this);
@@ -2467,9 +2472,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FOnExpression;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LTable = new LocalTable(this, AProcess, (TableValue)AProcess.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()));
+			LocalTable LTable = new LocalTable(this, AProgram, (TableValue)AProgram.RemoteConnect(FServerLink).Evaluate(FExpression, new DataParams()));
 			try
 			{
 				LTable.Open();
@@ -2647,54 +2652,54 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineRemotable(APlan);
 		}
 		
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			return false;
 		}
 		
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			return false;
 		}
 		
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			return false;
 		}
 		
-		protected override void InternalBeforeInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
+		protected override void InternalBeforeInsert(Program AProgram, Row ARow, BitArray AValueFlags)
 		{
 		}
 		
-		protected override void InternalAfterInsert(ServerProcess AProcess, Row ARow, BitArray AValueFlags)
+		protected override void InternalAfterInsert(Program AProgram, Row ARow, BitArray AValueFlags)
 		{
 		}
 		
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 		}
 		
-		protected override void InternalBeforeUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalBeforeUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 		}
 		
-		protected override void InternalAfterUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalAfterUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 		}
 		
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 		}
 		
-		protected override void InternalBeforeDelete(ServerProcess AProcess, Row ARow)
+		protected override void InternalBeforeDelete(Program AProgram, Row ARow)
 		{
 		}
 		
-		protected override void InternalAfterDelete(ServerProcess AProcess, Row ARow)
+		protected override void InternalAfterDelete(Program AProgram, Row ARow)
 		{
 		}
 		
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 		}
 	}

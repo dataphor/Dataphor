@@ -181,7 +181,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					DAE.Schema.RowType LRowType = new DAE.Schema.RowType();
 					LRowType.Columns.Add(new DAE.Schema.Column(FColumnName, (Source.DataView.TableType.Columns[FColumnName]).DataType));
-					using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.DataView.Process, LRowType))
+					using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.DataView.Process.ValueManager, LRowType))
 					{
 						((DAE.Runtime.Data.Scalar)LRow.GetValue(FColumnName)).AsString = FValue;
 						if (Mode == FindActionMode.Nearest)

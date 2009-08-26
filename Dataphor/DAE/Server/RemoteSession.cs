@@ -51,8 +51,8 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeSessionInfo LNativeSessionInfo = new NativeSessionInfo();
 			LNativeSessionInfo.DefaultIsolationLevel = NativeCLIUtility.IsolationLevelToSystemDataIsolationLevel(AProcess.DefaultIsolationLevel);
 			//LNativeSessionInfo.DefaultLibraryName = AProcess.ServerSession.CurrentLibrary.Name; // Still not sure if this makes sense...
-			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.Stack.MaxCallDepth;
-			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.Stack.MaxStackDepth;
+			LNativeSessionInfo.DefaultMaxCallDepth = AProcess.ServerSession.SessionInfo.DefaultMaxCallDepth;
+			LNativeSessionInfo.DefaultMaxStackDepth = AProcess.ServerSession.SessionInfo.DefaultMaxStackDepth;
 			LNativeSessionInfo.DefaultUseDTC = AProcess.UseDTC;
 			LNativeSessionInfo.DefaultUseImplicitTransactions = AProcess.UseImplicitTransactions;
 			LNativeSessionInfo.ShouldEmitIL = AProcess.ServerSession.SessionInfo.ShouldEmitIL;
@@ -90,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeSessionInfo LNativeSessionInfo = GetDefaultNativeSessionInfo();
 			
 			// Determine credentials
-			Schema.ServerLinkUser LLinkUser = FServerLink.GetUser(FServerProcess.Plan.User.ID);
+			Schema.ServerLinkUser LLinkUser = FServerLink.GetUser(FServerProcess.ServerSession.User.ID);
 			LNativeSessionInfo.HostName = FServerProcess.ServerSession.SessionInfo.HostName;
 			LNativeSessionInfo.UserID = LLinkUser.ServerLinkUserID;
 			LNativeSessionInfo.Password = Schema.SecurityUtility.DecryptPassword(LLinkUser.ServerLinkPassword);
@@ -144,12 +144,12 @@ namespace Alphora.Dataphor.DAE.Server
 			return NativeMarshal.NativeValueToDataValue(FServerProcess, LResult.Value);
 		}
 		
-		public Schema.TableVar PrepareTableVar(string AExpression, DataParams AParams)
+		public Schema.TableVar PrepareTableVar(Plan APlan, string AExpression, DataParams AParams)
 		{
 			NativeParam[] LParams = NativeMarshal.DataParamsToNativeParams(FServerProcess, AParams);
 			NativeResult LResult = FNativeCLISession.Execute(AExpression, LParams, NativeExecutionOptions.SchemaOnly);
 			if (LResult.Value is NativeTableValue)
-				return NativeMarshal.NativeTableToTableVar(FServerProcess, (NativeTableValue)LResult.Value);
+				return NativeMarshal.NativeTableToTableVar(APlan, (NativeTableValue)LResult.Value);
 			throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
 		}
     }

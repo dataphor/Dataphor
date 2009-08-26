@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class DifferenceTable : Table
     {
-		public DifferenceTable(DifferenceNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public DifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new DifferenceNode Node { get { return (DifferenceNode)FNode; } }
         
@@ -32,8 +32,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FLeftTable = (Table)Node.Nodes[0].Execute(Process);
-			FRightTable = (Table)Node.Nodes[1].Execute(Process);
+			FLeftTable = (Table)Node.Nodes[0].Execute(Program);
+			FRightTable = (Table)Node.Nodes[1].Execute(Program);
 			FBOF = true;
         }
         
@@ -102,14 +102,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class SearchedDifferenceTable : DifferenceTable
     {
-		public SearchedDifferenceTable(DifferenceNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SearchedDifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected Row FKeyRow;
 		
 		protected override void InternalOpen()
 		{
 			base.InternalOpen();
-			FKeyRow = new Row(Process, new Schema.RowType(Node.RightNode.Order.Columns));
+			FKeyRow = new Row(Manager, new Schema.RowType(Node.RightNode.Order.Columns));
 		}
 		
 		protected override void InternalClose()
@@ -152,7 +152,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class ScannedDifferenceTable : DifferenceTable
     {
-		public ScannedDifferenceTable(DifferenceNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public ScannedDifferenceTable(DifferenceNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		protected Row FLeftRow;
 		protected Row FRightRow;
@@ -160,8 +160,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected override void InternalOpen()
         {
 			base.InternalOpen();
-			FLeftRow = new Row(Process, FLeftTable.DataType.RowType);
-			FRightRow = new Row(Process, FRightTable.DataType.RowType);
+			FLeftRow = new Row(Manager, FLeftTable.DataType.RowType);
+			FRightRow = new Row(Manager, FRightTable.DataType.RowType);
         }
         
         protected override void InternalClose()
@@ -183,23 +183,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected bool RowsEqual()
         {
-			Process.Stack.Push(FRightRow);
+			Program.Stack.Push(FRightRow);
 			try
 			{
-				Process.Stack.Push(FLeftRow);
+				Program.Stack.Push(FLeftRow);
 				try
 				{
-					object LObject = Node.EqualNode.Execute(Process);
+					object LObject = Node.EqualNode.Execute(Program);
 					return (LObject != null) && (bool)LObject;
 				}
 				finally
 				{
-					Process.Stack.Pop();
+					Program.Stack.Pop();
 				}
 			}
 			finally
 			{
-				Process.Stack.Pop();
+				Program.Stack.Pop();
 			}
         }
         

@@ -514,7 +514,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					 ImageSource.LoadImage();
 					 if (ImageSource.Stream != null)
 					 {
-						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
+						 using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(ImageControl.Source.DataSet.Process.ValueManager, ImageControl.Source.DataSet.Process.DataTypes.SystemGraphic))
 						 {
 							 using (Stream LStream = LNewValue.OpenStream())
 							 {

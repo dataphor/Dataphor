@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.ListType)Nodes[1].DataType).ElementType, 0, true));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			ListValue LList = (ListValue)AArgument2;
 			#if NILPROPOGATION
@@ -60,17 +60,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			#endif
 			
-			AProcess.Stack.Push(AArgument1);
+			AProgram.Stack.Push(AArgument1);
 			try
 			{
-				AProcess.Stack.Push(null);
+				AProgram.Stack.Push(null);
 				try
 				{
 					object LResult = false;
 					for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 					{
-						AProcess.Stack.Poke(0, LList[LIndex]);
-						object LValue = FEqualNode.Execute(AProcess);
+						AProgram.Stack.Poke(0, LList[LIndex]);
+						object LValue = FEqualNode.Execute(AProgram);
 						#if NILPROPOGATION
 						if (LValue == null)
 						{
@@ -85,12 +85,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
 	}
@@ -140,27 +140,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				FEqualNode = Compiler.EmitBinaryNode(APlan, new StackReferenceNode(Nodes[0].DataType, 1, true), Instructions.Equal, new StackReferenceNode(((Schema.TableType)Nodes[1].DataType).RowType, 0, true));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			Table LTable = (Table)AArgument2;
 			#if NILPROPOGATION
 			if ((LTable == null) || (AArgument1 == null))
 				return null;
 			#endif
-			AProcess.Stack.Push(AArgument1);
+			AProgram.Stack.Push(AArgument1);
 			try
 			{
-				Row LRow = new Row(AProcess, LTable.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
 				try
 				{
-					AProcess.Stack.Push(LRow);
+					AProgram.Stack.Push(LRow);
 					try
 					{
 						object LResult = false;
 						while (LTable.Next())
 						{
 							LTable.Select(LRow);
-							object LValue = FEqualNode.Execute(AProcess);
+							object LValue = FEqualNode.Execute(AProgram);
 							#if NILPROPOGATION
 							if (LValue == null)
 							{
@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
 	}

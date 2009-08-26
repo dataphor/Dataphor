@@ -567,7 +567,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 			{
 				LForm.HostNode.Open();
 				Frontend.Client.ISource LSource = (Frontend.Client.ISource)LForm.FindNode("Libraries");
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(LSource.DataView.Process, LSource.DataView.TableType.RowType))
+				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(LSource.DataView.Process.ValueManager, LSource.DataView.TableType.RowType))
 				{
 					LRow["Name"] = LibraryName;
 					LSource.DataView.FindKey(LRow);

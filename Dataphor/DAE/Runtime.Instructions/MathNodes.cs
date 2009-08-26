@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Floor(AValue : Money) : Money;
 	public class DecimalFloorNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Truncate(AValue : Money) : Money;
 	public class DecimalTruncateNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Ceiling(AValue : Money) : Money;
 	public class DecimalCeilingNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -70,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	//TODO: I'm changing this from NewFangledIEEEBankersRound to YeOldElementarySchoolKidsRound (Sadly, mostly to provide continuity with other DBMSs).  We eventually need to have both.
 	public class DecimalRoundNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || ((AArguments.Length > 1) && AArguments[1] == null))
@@ -87,7 +87,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Frac(AValue : Money) : Money;	
 	public class DecimalFracNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -103,7 +103,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Abs(AValue : Money) : Money;	
 	public class DecimalAbsNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Abs(AValue : integer) : integer;
 	public class IntegerAbsNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -133,7 +133,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Log(AValue : decimal, ABase : decimal) : decimal;
 	public class DecimalLogNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -147,7 +147,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Ln(AValue : decimal) : decimal;
 	public class DecimalLnNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Log10(AValue : decimal) : decimal;
 	public class DecimalLog10Node : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -175,7 +175,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Exp(AValue : decimal) : decimal;
 	public class DecimalExpNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -189,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Factorial(AValue : integer) : integer;
 	public class IntegerFactorialNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			lock (typeof(SeedNode))
 			{
@@ -249,7 +249,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Random() : Decimal
 	public class DecimalRandomNode : NilaryInstructionNode
 	{
-		public override object NilaryInternalExecute(ServerProcess AProcess)
+		public override object NilaryInternalExecute(Program AProgram)
 		{
 			return SeedNode.NextDecimal();
 		}
@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Random(const ACount : Integer) : Integer
 	public class IntegerRandomNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -272,7 +272,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Random(const ALowerBound : Integer, const AUpperBound : Integer) : Integer;	
 	public class IntegerIntegerRandomNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)

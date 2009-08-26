@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Length(const ABinary : Binary) : Long
 	public class BinaryLengthNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return ((byte[])AArgument1).Length;
 			if (AArgument1 is StreamID)
 			{
-				Stream LStream = AProcess.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
+				Stream LStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
 				try
 				{
 					return LStream.Length;
@@ -46,7 +46,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			
-			Scalar LScalar = (Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument1);
+			Scalar LScalar = (Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument1);
 			if (LScalar.IsNative)
 				return LScalar.AsByteArray.Length;
 			else
@@ -67,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iEqual(Binary, Binary) : Boolean; </remarks>
 	public class BinaryEqualNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -94,15 +94,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Stream LRightStream = null;
 				
 				if (AArgument1 is StreamID)
-					LLeftStream = AProcess.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
+					LLeftStream = AProgram.StreamManager.Open((StreamID)AArgument1, LockMode.Exclusive);
 				else
-					LLeftStream = ((Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument1)).OpenStream();
+					LLeftStream = ((Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument1)).OpenStream();
 				try
 				{
 					if (AArgument2 is StreamID)
-						LRightStream = AProcess.StreamManager.Open((StreamID)AArgument2, LockMode.Exclusive);
+						LRightStream = AProgram.StreamManager.Open((StreamID)AArgument2, LockMode.Exclusive);
 					else
-						LRightStream = ((Scalar)DataValue.FromNative(AProcess, Nodes[0].DataType, AArgument2)).OpenStream();
+						LRightStream = ((Scalar)DataValue.FromNative(AProgram.ValueManager, Nodes[0].DataType, AArgument2)).OpenStream();
 					try
 					{
 						#if USESTREAMLENGTHWHENCOMPARINGSTREAMS

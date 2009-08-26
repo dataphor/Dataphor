@@ -19,6 +19,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Frontend = Alphora.Dataphor.Frontend;
 using Alphora.Dataphor.Frontend.Server.Derivation;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.Frontend.Server.Elaboration
 {
@@ -51,7 +52,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		// Initial constructor used to start elaboration of an expression for a given table variable
 		public ElaboratedExpression
 		(
-			ServerProcess AProcess,
+			Program AProgram,
 			string AQuery,
 			bool AElaborate,
 			Schema.TableVar ATableVar,
@@ -61,7 +62,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			string APageType
 		)
 		{
-			FProcess = AProcess;
+			FProgram = AProgram;
+			FProcess = AProgram.ServerProcess;
 			FPageType = APageType;
 			FDetailKeys = ADetailKeys;
 			FElaborate = AElaborate;
@@ -84,7 +86,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		// Subsequent constructor used to start nested derivation of a lookup expression for a given table variable
 		protected ElaboratedExpression
 		(
-			ServerProcess AProcess,
+			Program AProgram,
 			ElaboratedExpression AParentExpression,
 			bool AElaborate,
 			Schema.Catalog ACatalog,
@@ -94,7 +96,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 			string APageType
 		)
 		{
-			FProcess = AProcess;
+			FProgram = AProgram;
+			FProcess = AProgram.ServerProcess;
 			FPageType = APageType;
 			FDetailKeys = ADetailKeys;
 			FElaborate = AElaborate;
@@ -140,6 +143,9 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		
 		protected bool FElaborate;
 		public bool Elaborate { get { return FElaborate; } }
+		
+		protected Program FProgram;
+		public Program Program { get { return FProgram; } }
 		
 		protected ServerProcess FProcess;
 		public ServerProcess Process { get { return FProcess; } }
@@ -212,7 +218,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildParentReferences(ElaboratedTableVar ATable)
 		{
 			foreach (Schema.Reference LReference in ATable.TableVar.SourceReferences)
-				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProcess.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(LReference) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Parent))
+				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !ShouldTreatParentAsLookup(LReference) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Parent))
 				{
 					ElaboratedReference LElaboratedReference = 
 						new ElaboratedReference
@@ -232,7 +238,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildExtensionReferences(ElaboratedTableVar ATable)
 		{
 			foreach (Schema.Reference LReference in ATable.TableVar.TargetReferences)
-				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProcess.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Extension))
+				if (LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Extension))
 				{
 					ElaboratedReference LElaboratedReference =
 						new ElaboratedReference
@@ -251,13 +257,13 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildLookupReferences(Schema.Catalog ACatalog, ElaboratedTableVar ATable)
 		{
 			foreach (Schema.Reference LReference in ATable.TableVar.SourceReferences)
-				if ((ShouldTreatParentAsLookup(LReference) || !LReference.SourceKey.IsUnique) && !LReference.IsExcluded && FProcess.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Lookup))
+				if ((ShouldTreatParentAsLookup(LReference) || !LReference.SourceKey.IsUnique) && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.TargetTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && !IsCircularReference(ATable, LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Lookup))
 				{
 					string LElaboratedName = AddTableName(LReference.TargetTable.Name);
 					ElaboratedExpression LLookupExpression = 
 						new ElaboratedExpression
 						(
-							FProcess,
+							FProgram,
 							this, 
 							Convert.ToBoolean(DerivationUtility.GetTag(LReference.MetaData, "Elaborate", DerivationUtility.CPreview, ReferenceType.Lookup.ToString(), DerivationUtility.GetTag(LReference.TargetTable.MetaData, "Elaborate", DerivationUtility.CPreview, "False"))),
 							ACatalog, 
@@ -291,7 +297,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		protected virtual void BuildDetailReferences(ElaboratedTableVar ATable)
 		{
 			foreach (Schema.Reference LReference in ATable.TableVar.TargetReferences)
-				if (!LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProcess.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Detail))
+				if (!LReference.SourceKey.IsUnique && !LReference.IsExcluded && FProgram.Plan.HasRight(LReference.SourceTable.GetRight(Schema.RightNames.Select)) && !IsInclusionReference(LReference) && IsIncludedReference(ATable, LReference, ReferenceType.Detail))
 				{
 					ElaboratedReference LElaboratedReference =
 						new ElaboratedReference
@@ -688,7 +694,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 
 			// Ensure that key columns for the clustered key are preserved if this is not a preview page type
 			if (FPageType != DerivationUtility.CPreview)
-				foreach (Schema.TableVarColumn LColumn in FTableVar.FindClusteringKey().Columns)
+				// TODO: Refactor this, it _cannot_ access the compiler, this is way too much.
+				foreach (Schema.TableVarColumn LColumn in AExpression.Program.FindClusteringKey(FTableVar).Columns)
 					if (!FColumnNames.Contains(LColumn.Name))
 					{
 						FColumnNames.Insert(LInsertIndex, LColumn.Name);

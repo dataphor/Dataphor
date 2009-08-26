@@ -109,12 +109,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected bool IsSubset(ServerProcess AProcess, Table ALeftTable, Table ARightTable)
+		protected bool IsSubset(Program AProgram, Table ALeftTable, Table ARightTable)
 		{
-			Row LLeftRow = new Row(AProcess, LeftTableNode.DataType.RowType);
+			Row LLeftRow = new Row(AProgram.ValueManager, LeftTableNode.DataType.RowType);
 			try
 			{
-				Row LRightRow = new Row(AProcess, RightTableNode.DataType.RowType);
+				Row LRightRow = new Row(AProgram.ValueManager, RightTableNode.DataType.RowType);
 				try
 				{
 					if (ALeftTable.Supports(CursorCapability.BackwardsNavigable))
@@ -132,13 +132,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (ARightTable.Next())
 						{
 							ARightTable.Select(LRightRow);
-							AProcess.Stack.Push(LLeftRow);
+							AProgram.Stack.Push(LLeftRow);
 							try
 							{
-								AProcess.Stack.Push(LRightRow);
+								AProgram.Stack.Push(LRightRow);
 								try
 								{
-									object LResult = RowEqualNode.Execute(AProcess);
+									object LResult = RowEqualNode.Execute(AProgram);
 									if ((LResult != null) && (bool)LResult)
 									{
 										LHasRow = true;
@@ -147,12 +147,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Stack.Pop();
+									AProgram.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Stack.Pop();
+								AProgram.Stack.Pop();
 							}
 						}
 						if (!LHasRow)
@@ -171,12 +171,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected bool IsSuperset(ServerProcess AProcess, Table ALeftTable, Table ARightTable)
+		protected bool IsSuperset(Program AProgram, Table ALeftTable, Table ARightTable)
 		{
-			Row LLeftRow = new Row(AProcess, LeftTableNode.DataType.RowType);
+			Row LLeftRow = new Row(AProgram.ValueManager, LeftTableNode.DataType.RowType);
 			try
 			{
-				Row LRightRow = new Row(AProcess, RightTableNode.DataType.RowType);
+				Row LRightRow = new Row(AProgram.ValueManager, RightTableNode.DataType.RowType);
 				try
 				{
 					if (ARightTable.Supports(CursorCapability.BackwardsNavigable))
@@ -194,13 +194,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						while (ALeftTable.Next())
 						{
 							ALeftTable.Select(LLeftRow);
-							AProcess.Stack.Push(LLeftRow);
+							AProgram.Stack.Push(LLeftRow);
 							try
 							{
-								AProcess.Stack.Push(LRightRow);
+								AProgram.Stack.Push(LRightRow);
 								try
 								{
-									object LResult = RowEqualNode.Execute(AProcess);
+									object LResult = RowEqualNode.Execute(AProgram);
 									if ((LResult != null) && (bool)LResult)
 									{
 										LHasRow = true;
@@ -209,12 +209,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								}
 								finally
 								{
-									AProcess.Stack.Pop();
+									AProgram.Stack.Pop();
 								}
 							}
 							finally
 							{
-								AProcess.Stack.Pop();
+								AProgram.Stack.Pop();
 							}
 						}
 						if (!LHasRow)
@@ -236,7 +236,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected TableNode LeftTableNode { get { return (TableNode)Nodes[0]; } }
 		protected TableNode RightTableNode { get { return (TableNode)Nodes[1]; } }
 		protected PlanNode RowEqualNode { get { return FRowEqualNode; } }
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { return null; }
+		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
 	}
 	
 	// Table comparison operators
@@ -245,18 +245,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A = B iff A <= B and A >= B
 	public class TableEqualNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProcess, LLeftTable, LRightTable) && IsSuperset(AProcess, LLeftTable, LRightTable);
+					return IsSubset(AProgram, LLeftTable, LRightTable) && IsSuperset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}
@@ -267,18 +267,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A != B iff A !<= B or A !>= B
 	public class TableNotEqualNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return !IsSubset(AProcess, LLeftTable, LRightTable) || !IsSuperset(AProcess, LLeftTable, LRightTable);
+					return !IsSubset(AProgram, LLeftTable, LRightTable) || !IsSuperset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}
@@ -290,18 +290,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A < B iff A <= B and A !>= B
 	public class TableLessNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProcess, LLeftTable, LRightTable) && !IsSuperset(AProcess, LLeftTable, LRightTable);
+					return IsSubset(AProgram, LLeftTable, LRightTable) && !IsSuperset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}
@@ -313,18 +313,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A <= B iff each row in A is also in B
 	public class TableInclusiveLessNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return IsSubset(AProcess, LLeftTable, LRightTable);
+					return IsSubset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}
@@ -336,18 +336,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A > B iff A >= B and A !<= B
 	public class TableGreaterNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return IsSuperset(AProcess, LLeftTable, LRightTable) && !IsSubset(AProcess, LLeftTable, LRightTable);
+					return IsSuperset(AProgram, LLeftTable, LRightTable) && !IsSubset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}
@@ -359,18 +359,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// A >= B iff each row in B is in A
 	public class TableInclusiveGreaterNode : TableComparisonNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			using (Table LLeftTable = (Table)Nodes[0].Execute(AProcess))
+			using (Table LLeftTable = (Table)Nodes[0].Execute(AProgram))
 			{
-				using (Table LRightTable = (Table)Nodes[1].Execute(AProcess))
+				using (Table LRightTable = (Table)Nodes[1].Execute(AProgram))
 				{
 					#if NILPROPOGATION
 					if ((LLeftTable == null) || (LRightTable == null))
 						return null;
 					#endif
 
-					return IsSuperset(AProcess, LLeftTable, LRightTable);
+					return IsSuperset(AProgram, LLeftTable, LRightTable);
 				}
 			}
 		}

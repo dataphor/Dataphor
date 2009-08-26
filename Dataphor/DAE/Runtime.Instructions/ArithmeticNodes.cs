@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNegate(sbyte) : sbyte </remarks>
     public class SByteNegateNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -101,7 +101,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 */
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNegate(int) : int </remarks>
     public class IntegerNegateNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -129,7 +129,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNegate(long) : long </remarks>
     public class LongNegateNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -144,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNegate(double) : double </remarks>    
     public class DoubleNegateNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iNegate(decimal) : decimal </remarks>    
     public class DecimalNegateNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument)
+		public override object InternalExecute(Program AProgram, object AArgument)
 		{
 			#if NILPROPOGATION
 			if (AArgument == null)
@@ -173,7 +173,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(byte, byte) : byte </remarks>
     public class BytePowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -193,7 +193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(sbyte, sbyte) : sbyte </remarks>
     public class SBytePowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -213,7 +213,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(short, short) : short </remarks>
     public class ShortPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(ushort, ushort) : ushort </remarks>
     public class UShortPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -253,7 +253,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(integer, integer) : integer </remarks>
     public class IntegerPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -273,7 +273,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(uinteger, uinteger) : uinteger </remarks>
     public class UIntegerPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -293,7 +293,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(long, long) : long </remarks>
     public class LongPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -313,7 +313,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(ulong, ulong) : ulong </remarks>
     public class ULongPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -334,7 +334,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(double, double) : double </remarks> 
     public class DoublePowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -354,7 +354,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator iPower(decimal, decimal) : decimal </remarks>
     public class DecimalPowerNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -373,7 +373,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(byte, byte) : byte </remarks>    
     public class ByteMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -396,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(sbyte, sbyte) : sbyte </remarks>    
     public class SByteMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -416,7 +416,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(short, short) : short </remarks>    
     public class ShortMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -439,7 +439,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(ushort, ushort) : ushort </remarks>    
     public class UShortMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -459,7 +459,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(integer, integer) : integer </remarks>    
     public class IntegerMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -479,7 +479,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(uinteger, uinteger) : uinteger </remarks>    
     public class UIntegerMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -499,7 +499,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(long, long) : long </remarks>    
     public class LongMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -519,7 +519,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(ulong, ulong) : ulong </remarks>    
     public class ULongMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -540,7 +540,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(double, double) : double </remarks>    
     public class DoubleMultiplicationNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -559,7 +559,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(decimal, decimal) : decimal </remarks>    
 	public class DecimalMultiplicationNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -573,7 +573,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(money, decimal) : money </remarks>    
 	public class MoneyDecimalMultiplicationNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -587,7 +587,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(decimal, money) : money </remarks>    
 	public class DecimalMoneyMultiplicationNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -601,7 +601,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(money, integer) : money </remarks>    
 	public class MoneyIntegerMultiplicationNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -615,7 +615,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMultiplication(integer, money) : money </remarks>    
 	public class IntegerMoneyMultiplicationNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(byte, byte) : decimal</remarks>    
     public class ByteDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -647,7 +647,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(byte, byte) : byte</remarks>    
     public class ByteDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -670,7 +670,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(sbyte, sbyte) : decimal</remarks>    
     public class SByteDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -688,7 +688,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(sbyte, sbyte) : sbyte </remarks>    
     public class SByteDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -708,7 +708,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(short, short) : decimal</remarks>    
     public class ShortDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -726,7 +726,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(short, short) : short </remarks>    
     public class ShortDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -749,7 +749,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(ushort, ushort) : decimal</remarks>    
     public class UShortDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -769,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(ushort, ushort) : ushort </remarks>    
     public class UShortDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -789,7 +789,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(integer, integer) : decimal</remarks>    
     public class IntegerDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -803,7 +803,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(integer, integer) : integer </remarks>    
     public class IntegerDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -823,7 +823,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(uinteger, uinteger) : decimal</remarks>    
     public class UIntegerDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -841,7 +841,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(uinteger, uinteger) : uinteger </remarks>    
     public class UIntegerDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -860,7 +860,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(long, long) : decimal</remarks>    
     public class LongDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -874,7 +874,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(long, long) : long </remarks>    
     public class LongDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -894,7 +894,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(ulong, ulong) : decimal</remarks>    
     public class ULongDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -912,7 +912,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(ulong, ulong) : ulong</remarks>    
     public class ULongDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -932,7 +932,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(double, double) : double </remarks>    
     public class DoubleDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -951,7 +951,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(decimal, decimal) : decimal </remarks>    
     public class DecimalDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -965,7 +965,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDiv(decimal, decimal) : decimal </remarks>    
     public class DecimalDivNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -990,7 +990,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(Money, Money) : Decimal </remarks>    
     public class MoneyDivisionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1004,7 +1004,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(money, decimal) : money </remarks>    
 	public class MoneyDecimalDivisionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1018,7 +1018,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(decimal, money) : money </remarks>    
 	public class DecimalMoneyDivisionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1032,7 +1032,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(money, integer) : money </remarks>    
 	public class MoneyIntegerDivisionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1046,7 +1046,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iDivision(integer, money) : money </remarks>    
 	public class IntegerMoneyDivisionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1060,7 +1060,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(byte, byte) : byte </remarks>    
     public class ByteModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1080,7 +1080,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(sbyte, sbyte) : sbyte </remarks>    
     public class SByteModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1100,7 +1100,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(short, short) : short </remarks>    
     public class ShortModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1120,7 +1120,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(ushort, ushort) : ushort </remarks>    
     public class UShortModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1140,7 +1140,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(integer, integer) : integer </remarks>    
     public class IntegerModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1155,7 +1155,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(uinteger, uinteger) : uinteger </remarks>    
     public class UIntegerModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1170,7 +1170,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(long, long) : long </remarks>    
     public class LongModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1185,7 +1185,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(ulong, ulong) : ulong </remarks>    
     public class ULongModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1201,7 +1201,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(double, double) : double </remarks>    
     public class DoubleModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1216,7 +1216,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iMod(decimal, decimal) : decimal </remarks>    
     public class DecimalModNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1230,7 +1230,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(string, string) : string </remarks>    
 	public class StringAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1244,7 +1244,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(byte, byte) : byte </remarks>    
 	public class ByteAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1267,7 +1267,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(sbyte, sbyte) : sbyte </remarks>    
 	public class SByteAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1287,7 +1287,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(short, short) : short </remarks>    
 	public class ShortAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1310,7 +1310,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(ushort, ushort) : ushort </remarks>    
 	public class UShortAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1330,7 +1330,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(integer, integer) : integer </remarks>    
 	public class IntegerAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1345,7 +1345,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(uinteger, uinteger) : uinteger </remarks>    
 	public class UIntegerAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1364,7 +1364,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(long, long) : long </remarks>    
 	public class LongAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1384,7 +1384,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(ulong, ulong) : ulong </remarks>    
 	public class ULongAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1404,7 +1404,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(double, double) : double </remarks>    
 	public class DoubleAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1423,7 +1423,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(decimal, decimal) : decimal </remarks>    
 	public class DecimalAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1437,7 +1437,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iAddition(money, money) : money </remarks>    
 	public class MoneyAdditionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1451,7 +1451,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(byte, byte) : byte </remarks>
     public class ByteSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1474,7 +1474,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(sbyte, sbyte) : sbyte </remarks>
     public class SByteSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1494,7 +1494,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(short, short) : short </remarks>
     public class ShortSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1517,7 +1517,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(ushort, ushort) : ushort </remarks>
     public class UShortSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1537,7 +1537,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(integer, integer) : integer </remarks>
     public class IntegerSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1557,7 +1557,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(uinteger, uinteger) : uinteger </remarks>
     public class UIntegerSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1576,7 +1576,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(long, long) : long </remarks>
     public class LongSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1596,7 +1596,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(ulong, ulong) : ulong </remarks>
     public class ULongSubtractionNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1616,7 +1616,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(double, double) : double </remarks>
 	public class DoubleSubtractionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1635,7 +1635,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(decimal, decimal) : decimal </remarks>
 	public class DecimalSubtractionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -1649,7 +1649,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator iSubtraction(money, money) : money </remarks>    
 	public class MoneySubtractionNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)

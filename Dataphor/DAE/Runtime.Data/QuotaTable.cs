@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class QuotaTable : Table
     {
-		public QuotaTable(QuotaNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public QuotaTable(QuotaNode ANode, Program AProgram) : base(ANode, AProgram){}
 		
 		public new QuotaNode Node { get { return (QuotaNode)FNode; } }
 		
@@ -38,13 +38,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
 			try
 			{
-				FCompareRow = new Row(Process, new Schema.RowType(Node.Order.Columns));
-				FLastCompareRow = new Row(Process, FCompareRow.DataType);
+				FCompareRow = new Row(Manager, new Schema.RowType(Node.Order.Columns));
+				FLastCompareRow = new Row(Manager, FCompareRow.DataType);
 				FHasLastCompareRow = false;
-				object LObject = Node.Nodes[1].Execute(Process);
+				object LObject = Node.Nodes[1].Execute(Program);
 				#if NILPROPOGATION
 				FSourceCount = LObject == null ? 0 : (int)LObject;
 				#else
@@ -106,13 +106,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 					if (FHasLastCompareRow)
 					{		            
-						Process.Stack.Push(FCompareRow);
+						Program.Stack.Push(FCompareRow);
 						try
 						{
-							Process.Stack.Push(FLastCompareRow);
+							Program.Stack.Push(FLastCompareRow);
 							try
 							{
-								object LResult = Node.EqualNode.Execute(Process);
+								object LResult = Node.EqualNode.Execute(Program);
 								if ((LResult == null) || !(bool)LResult)
 								{
 									FSourceCounter++;
@@ -121,12 +121,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							finally
 							{
-								Process.Stack.Pop();
+								Program.Stack.Pop();
 							}
 						}
 						finally
 						{
-							Process.Stack.Pop();
+							Program.Stack.Pop();
 						}
 					}
 					else

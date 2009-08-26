@@ -160,7 +160,10 @@ namespace Alphora.Dataphor.DAE.Server
 		public void AddCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode, ServerPlan APlan)
 		{
 			if (FSessionInfo.UsePlanCache && (Server.PlanCacheSize > 0) && !HasNonGeneratedSessionObjects())
+			{
+				APlan.Program.IsCached = true;
 				Server.PlanCache.Add(AProcess, AStatement, AContextHashCode, APlan);
+			}
 		}
 		
 		public ServerPlan GetCachedPlan(ServerProcess AProcess, string AStatement, int AContextHashCode)
@@ -196,6 +199,8 @@ namespace Alphora.Dataphor.DAE.Server
 				FCurrentLibrary = value; 
 			}
 		}
+		
+		public Schema.NameResolutionPath NameResolutionPath { get { return CurrentLibrary.GetNameResolutionPath(FServer.SystemLibrary); } }
 
 		// ApplicationTransactions
 		private Hashtable FApplicationTransactions = new Hashtable();
@@ -242,8 +247,8 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < FSessionOperators.Count; LIndex++)
 				{
 					FServer.FSystemProcess.CatalogDeviceSession.ResolveOperatorName(((Schema.SessionObject)FSessionOperators[LIndex]).GlobalName);
-					Schema.OperatorMap LOperatorMap = FServer.Catalog.OperatorMaps[((Schema.SessionObject)FSessionOperators[LIndex]).GlobalName];
-					foreach (Schema.OperatorSignature LSignature in LOperatorMap.Signatures.Signatures.Values)
+					OperatorMap LOperatorMap = FServer.Catalog.OperatorMaps[((Schema.SessionObject)FSessionOperators[LIndex]).GlobalName];
+					foreach (OperatorSignature LSignature in LOperatorMap.Signatures.Signatures.Values)
 						LObjectNames.Add(LSignature.Operator.Name);
 				}
 				
@@ -263,19 +268,11 @@ namespace Alphora.Dataphor.DAE.Server
 						LPlan.Plan.EnterTimeStampSafeContext();
 						try
 						{
-							FServer.FSystemProcess.PushExecutingPlan(LPlan);
-							try
+							for (int LIndex = 0; LIndex < LBlock.Statements.Count; LIndex++)
 							{
-								for (int LIndex = 0; LIndex < LBlock.Statements.Count; LIndex++)
-								{
-									PlanNode LPlanNode = Compiler.BindNode(LPlan.Plan, Compiler.CompileStatement(LPlan.Plan, LBlock.Statements[LIndex]));
-									LPlan.Plan.CheckCompiled();
-									LPlanNode.Execute(FServer.FSystemProcess);
-								}
-							}
-							finally
-							{
-								FServer.FSystemProcess.PopExecutingPlan(LPlan);
+								LPlan.Program.Code = Compiler.BindNode(LPlan.Plan, Compiler.CompileStatement(LPlan.Plan, LBlock.Statements[LIndex]));
+								LPlan.Plan.CheckCompiled();
+								LPlan.Program.Execute(null);
 							}
 						}
 						finally

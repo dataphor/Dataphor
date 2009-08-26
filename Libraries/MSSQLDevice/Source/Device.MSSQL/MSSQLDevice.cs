@@ -309,7 +309,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             return new MSSQLDeviceSession(this, AServerProcess, ADeviceSessionInfo);
         }
 
-        protected override Statement TranslateDropIndex(TableVar ATableVar, Key AKey)
+        protected override Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
         {
             var LStatement = new DropIndexStatement();
             LStatement.TableSchema = MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
@@ -319,7 +319,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             return LStatement;
         }
 
-        protected override Statement TranslateDropIndex(TableVar ATableVar, Order AOrder)
+        protected override Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
         {
             var LStatement = new DropIndexStatement();
             LStatement.TableSchema = MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
@@ -338,7 +338,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         }
 
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(ServerProcess AProcess, string ATableName, string AColumnName,
+        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName,
                                                  string ADomainName)
         {
             switch (ADomainName.ToLower())
@@ -693,7 +693,7 @@ if not exists (select * from sysdatabases where name = '{0}')
                     );
 
             var LConnectionStringBuilder = 
-				(ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+				(ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject
 				(
 					LBuilderClass, 
 					new object[] {}
@@ -715,7 +715,7 @@ if not exists (select * from sysdatabases where name = '{0}')
             Device.GetConnectionParameters(LTags, DeviceSessionInfo);
             string LConnectionString = SQLDevice.TagsToString(LTags);
             return
-                (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject
+                (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject
                 (
 					LClassDefinition, 
 					new object[] { LConnectionString }

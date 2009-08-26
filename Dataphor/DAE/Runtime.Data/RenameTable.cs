@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class RenameTable : Table
     {
-		public RenameTable(RenameNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public RenameTable(RenameNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new RenameNode Node { get { return (RenameNode)FNode; } }
         
@@ -32,8 +32,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
-			FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
+			FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
         }
         
         protected override void InternalClose()
@@ -114,7 +114,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
 						FKeyRowType.Columns.Add(DataType.Columns[FSourceTable.DataType.Columns.IndexOfName(LKey.DataType.Columns[LIndex].Name)].Copy());
 				}
-				Row LRow = new Row(Process, FKeyRowType);
+				Row LRow = new Row(Manager, FKeyRowType);
 				for (int LIndex = 0; LIndex < LKey.DataType.Columns.Count; LIndex++)
 					if (LKey.HasValue(LIndex))
 						LRow[LIndex] = LKey[LIndex];
@@ -131,7 +131,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			Schema.RowType LRowType = new Schema.RowType();
 			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
 				LRowType.Columns.Add(FSourceTable.DataType.Columns[DataType.Columns.IndexOfName(AKey.DataType.Columns[LIndex].Name)].Copy());
-			Row LKey = new Row(Process, LRowType);
+			Row LKey = new Row(Manager, LRowType);
 			for (int LIndex = 0; LIndex < AKey.DataType.Columns.Count; LIndex++)
 				if (AKey.HasValue(LIndex))
 					LKey[LIndex] = AKey[LIndex];

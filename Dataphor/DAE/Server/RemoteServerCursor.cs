@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				Row LRow = new Row(FPlan.Process.ServerProcess, GetRowType(AHeader));
+				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, GetRowType(AHeader));
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -145,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan.Process.ProcessCallInfo(ACallInfo);
 			try
 			{
-				Row LRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -172,7 +172,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				for (int LIndex = 0; LIndex < LRows.Length; LIndex++)
 				{
-					LRows[LIndex] = new Row(FPlan.Process.ServerProcess, ARowType);
+					LRows[LIndex] = new Row(FPlan.Process.ServerProcess.ValueManager, ARowType);
 					LRows[LIndex].ValuesOwned = false;
 				}
 				
@@ -316,7 +316,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.RowType LType = new Schema.RowType();
 				foreach (string LString in ARow.Header.Columns)
 					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
-				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
+				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -344,7 +344,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.RowType LType = new Schema.RowType();
 				foreach (string LString in ARow.Header.Columns)
 					LType.Columns.Add(FServerCursor.SourceRowType.Columns[LString].Copy());
-				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
+				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -496,7 +496,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
 					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
 
-				Row LKey = new Row(FPlan.Process.ServerProcess, LType);
+				Row LKey = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
 				try
 				{
 					LKey.ValuesOwned = false;
@@ -528,7 +528,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < AKey.Header.Columns.Length; LIndex++)
 					LType.Columns.Add(FServerCursor.SourceRowType.Columns[AKey.Header.Columns[LIndex]].Copy());
 
-				Row LKey = new Row(FPlan.Process.ServerProcess, LType);
+				Row LKey = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
 				try
 				{
 					LKey.ValuesOwned = false;
@@ -560,7 +560,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < ARow.Header.Columns.Length; LIndex++)
 					LType.Columns.Add(FServerCursor.SourceRowType.Columns[ARow.Header.Columns[LIndex]].Copy());
 
-				Row LRow = new Row(FPlan.Process.ServerProcess, LType);
+				Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, LType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -597,7 +597,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private RemoteProposeData InternalDefault(RemoteRowBody ARow, string AColumn)
 		{
-			Row LRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+			Row LRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 			try
 			{
 				LRow.ValuesOwned = false;
@@ -636,13 +636,13 @@ namespace Alphora.Dataphor.DAE.Server
         
 		private RemoteProposeData InternalChange(RemoteRowBody AOldRow, RemoteRowBody ANewRow, string AColumn)
 		{
-			Row LOldRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+			Row LOldRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 			try
 			{
 				LOldRow.ValuesOwned = false;
 				LOldRow.AsPhysical = AOldRow.Data;
 				
-				Row LNewRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+				Row LNewRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 				try
 				{
 					LNewRow.ValuesOwned = false;
@@ -687,7 +687,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			Row LOldRow = null;
 			if (AOldRow.Data != null)
-				LOldRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+				LOldRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 			try
 			{
 				if (LOldRow != null)
@@ -696,7 +696,7 @@ namespace Alphora.Dataphor.DAE.Server
 					LOldRow.AsPhysical = AOldRow.Data;
 				}
 				
-				Row LNewRow = new Row(FPlan.Process.ServerProcess, FServerCursor.SourceRowType);
+				Row LNewRow = new Row(FPlan.Process.ServerProcess.ValueManager, FServerCursor.SourceRowType);
 				try
 				{
 					LNewRow.ValuesOwned = false;

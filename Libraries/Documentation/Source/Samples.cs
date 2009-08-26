@@ -41,7 +41,7 @@ namespace DocSamples
 		public const string CExpressionExpected = @"Expression expected";
 		protected string FTitle = "";
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			// AArguments[0] is template name, may be blank
 			// AArguments[1] is the title
@@ -56,18 +56,18 @@ namespace DocSamples
 			if (AArguments.Length == 4)
 				ProcessTable
 				(
-					AProcess, 
+					AProgram.ServerProcess, 
 					(string)AArguments[0], // template
 					(string)AArguments[2], // output file name
-					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
+					AProgram.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
 				);
 			else
 				ProcessTable
 				(
-					AProcess, 
+					AProgram.ServerProcess, 
 					"", 
 					(string)AArguments[2], // Output file name
-					AProcess.Plan.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
+					AProgram.CursorManager.GetCursor(((CursorValue)AArguments[3]).ID).Table
 				);
 
 			return(null);
@@ -576,7 +576,7 @@ namespace DocSamples
 		StreamWriter FTrace;
 
 
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			//if (AArguments[0].Value == null)
 			//	throw new RuntimeException(CExpressionExpected); // library name to doc
@@ -615,12 +615,12 @@ namespace DocSamples
 
 				// new dataconnection
 				FDataSession = new DAEClient.DataSession();
-				FDataSession.SessionInfo.UserID = AProcess.ServerSession.SessionInfo.UserID;
-				FDataSession.SessionInfo.Password = AProcess.ServerSession.SessionInfo.Password;
-				FDataSession.ServerConnection = new DAEClient.ServerConnection(AProcess.ServerSession.Server);
+				FDataSession.SessionInfo.UserID = AProgram.ServerProcess.ServerSession.SessionInfo.UserID;
+				FDataSession.SessionInfo.Password = AProgram.ServerProcess.ServerSession.SessionInfo.Password;
+				FDataSession.ServerConnection = new DAEClient.ServerConnection(AProgram.ServerProcess.ServerSession.Server);
 				FDataSession.Open();
 
-				ProcessTemplate(AProcess, LOutputFilename);
+				ProcessTemplate(AProgram.ServerProcess, LOutputFilename);
 
 				FDataSession.Close();
 				return(null);

@@ -24,7 +24,7 @@ namespace Alphora.Shipping
     {
 		public SQLCoordinate(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return StringToCoordinate((string)AValue);
 		}

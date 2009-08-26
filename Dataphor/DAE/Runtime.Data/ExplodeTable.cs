@@ -5,7 +5,6 @@
 */
 using System;
 using System.Collections;
-using System.Diagnostics;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
@@ -22,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	*/
     public class ExplodeTable : Table
     {
-		public ExplodeTable(ExplodeNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public ExplodeTable(ExplodeNode ANode, Program AProgram) : base(ANode, AProgram){}
 		
 		public new ExplodeNode Node { get { return (ExplodeNode)FNode; } }
 		
@@ -46,7 +45,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Row NewParentRow(Row ACurrentRow)
 		{
-			Row LRow = new Row(Process, new Schema.RowType(ACurrentRow.DataType.Columns, Keywords.Parent));
+			Row LRow = new Row(Manager, new Schema.RowType(ACurrentRow.DataType.Columns, Keywords.Parent));
 			ACurrentRow.CopyTo(LRow);
 			return LRow;
 		}
@@ -56,7 +55,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (ACurrentRow == null)
 			{
 				// Open the root expression, if it is not empty, save it on the cursor stack
-				FRootTable = (Table)Node.Nodes[1].Execute(Process);
+				FRootTable = (Table)Node.Nodes[1].Execute(Program);
 				if (!FRootTable.IsEmpty())
 					FSourceTables.Push(FRootTable);
 				else
@@ -66,10 +65,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				// Otherwise, use the given row to build a parent row and open a new cursor for the child expression with that row to parameterize it
 				Row LParentRow = NewParentRow(ACurrentRow);
-				Process.Stack.Push(LParentRow);
+				Program.Stack.Push(LParentRow);
 				try
 				{
-					Table LTable = (Table)Node.Nodes[2].Execute(Process);
+					Table LTable = (Table)Node.Nodes[2].Execute(Program);
 					
 					// If it is not empty, save it on the cursor stack, and save the parent row on the parent row stack
 					if (!LTable.IsEmpty())
@@ -85,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				}
 				finally
 				{
-					Process.Stack.Pop();
+					Program.Stack.Pop();
 				}
 			}
 		}
@@ -103,12 +102,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override void InternalOpen()
 		{
-			FSourceTables = new Stack(Process.Stack.MaxStackDepth, Process.Stack.MaxCallDepth);
-			FParentRows = new Stack(Process.Stack.MaxStackDepth, Process.Stack.MaxCallDepth);
+			FSourceTables = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
+			FSourceTables.PushWindow(0);
+			FParentRows = new Stack(Program.Stack.MaxStackDepth, Program.Stack.MaxCallDepth);
+			FParentRows.PushWindow(0);
 		 	PushSourceTable(null);
-			FSourceRow = new Row(Process, ((TableNode)Node.Nodes[0]).DataType.RowType);
+			FSourceRow = new Row(Manager, ((TableNode)Node.Nodes[0]).DataType.RowType);
 			FTableType = new Schema.TableType();
-			FTableVar = new Schema.BaseTableVar(FTableType, Process.Plan.TempDevice);
+			FTableVar = new Schema.BaseTableVar(FTableType, Program.TempDevice);
 			Schema.TableVarColumn LNewColumn;
 			foreach (Schema.TableVarColumn LColumn in Node.TableVar.Columns)
 			{
@@ -119,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 			if (Node.SequenceColumnIndex < 0)
 			{
-				LNewColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Process.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
+				LNewColumn = new Schema.TableVarColumn(new Schema.Column(Keywords.Sequence, Program.DataTypes.SystemInteger), Schema.TableVarColumnType.Stored);
 				FTableType.Columns.Add(LNewColumn.Column);
 				FTableVar.Columns.Add(LNewColumn);
 				FSequenceColumnIndex = FTableVar.Columns.Count - 1;
@@ -127,12 +128,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 				FSequenceColumnIndex = Node.SequenceColumnIndex;
 
-			FTargetRow = new Row(Process, FTableType.RowType);
+			FTargetRow = new Row(Manager, FTableType.RowType);
 			Schema.Key LKey = new Schema.Key();
 			LKey.Columns.Add(FTableVar.Columns[FSequenceColumnIndex]);
 			FTableVar.Keys.Add(LKey);
-			FBuffer = new NativeTable(Process, FTableVar);
-			FScan = new Scan(Process, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			FBuffer = new NativeTable(Manager, FTableVar);
+			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
 			FSequence = 0;
 			FEmpty = false;
@@ -166,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			
 			if (FBuffer != null)
 			{
-				FBuffer.Drop(Process);
+				FBuffer.Drop(Manager);
 				FBuffer = null;
 			}
 
@@ -182,8 +183,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			PushSourceTable(null);
 
 			FScan.Dispose();
-			FBuffer.Truncate(Process);
-			FScan = new Scan(Process, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			FBuffer.Truncate(Manager);
+			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
 			FSequence = 0;
 			FEmpty = false;
@@ -206,7 +207,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (FSourceTables.Count > 1)
 					{
 						// Push it's parent row context, if necessary
-						Process.Stack.Push(FParentRows.Peek(0));
+						Program.Stack.Push(FParentRows.Peek(0));
 						LContextPushed = true;
 					}
 					try
@@ -219,7 +220,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							if (LContextPushed)
 							{
 								LContextPopped = true;
-								Process.Stack.Pop();
+								Program.Stack.Pop();
 							}
 							
 							FTargetRow.ClearValues();
@@ -230,7 +231,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							if (FSequenceColumnIndex >= 0)
 								FTargetRow[FSequenceColumnIndex] = FSequence;
 								
-							FBuffer.Insert(Process, FTargetRow);
+							FBuffer.Insert(Manager, FTargetRow);
 							if (!FScan.FindKey(FTargetRow))
 								throw new RuntimeException(RuntimeException.Codes.NewRowNotFound);
 							
@@ -245,7 +246,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					finally
 					{
 						if (LContextPushed && !LContextPopped)
-							Process.Stack.Pop();
+							Program.Stack.Pop();
 					}
 				}
 				return false;

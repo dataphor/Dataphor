@@ -74,9 +74,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			} 
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Table LTable = Nodes[0].Execute(AProcess) as Table;
+			Table LTable = Nodes[0].Execute(AProgram) as Table;
 			#if NILPROPOGATION
 			if ((LTable == null))
 				return null;
@@ -183,9 +183,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		private bool FShouldDisposeSource = true;
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			object LObject = Nodes[0].Execute(AProcess);
+			object LObject = Nodes[0].Execute(AProgram);
 			#if NILPROPOGATION
 			if (LObject == null)
 				return null;
@@ -276,9 +276,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = APlan.DataTypes.SystemBoolean;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Table LTable = Nodes[0].Execute(AProcess) as Table;
+			Table LTable = Nodes[0].Execute(AProgram) as Table;
 			#if NILPROPOGATION
 			if (LTable == null)
 				return null;

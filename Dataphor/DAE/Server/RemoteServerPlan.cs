@@ -82,7 +82,9 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public PlanStatistics Statistics { get { return FServerPlan.Statistics; } }
+		public PlanStatistics PlanStatistics { get { return FServerPlan.PlanStatistics; } }
+		
+		public ProgramStatistics ProgramStatistics { get { return FServerPlan.ProgramStatistics; } }
 		
 		public void CheckCompiled()
 		{
@@ -107,7 +109,7 @@ namespace Alphora.Dataphor.DAE.Server
 				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
 				ServerStatementPlan.Execute(LParams);
 				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerStatementPlan.Statistics.ExecuteTime;
+				AExecuteTime = ServerStatementPlan.ProgramStatistics.ExecuteTime;
 			}
 			catch (Exception E)
 			{
@@ -143,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Server
 				DataParams LParams = FProcess.RemoteParamDataToDataParams(AParams);
 				DataValue LValue = ServerExpressionPlan.Evaluate(LParams);
 				FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-				AExecuteTime = ServerExpressionPlan.Statistics.ExecuteTime;
+				AExecuteTime = ServerExpressionPlan.ProgramStatistics.ExecuteTime;
 				if (LValue == null)
 					return null;
 				if (ServerExpressionPlan.DataType.Equivalent(LValue.DataType))
@@ -171,7 +173,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					LCursor.Open();
 					FProcess.DataParamsToRemoteParamData(LParams, ref AParams);
-					AExecuteTime = ServerExpressionPlan.Statistics.ExecuteTime;
+					AExecuteTime = ServerExpressionPlan.ProgramStatistics.ExecuteTime;
 					return LCursor;
 				}
 				catch
@@ -223,13 +225,13 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			ServerExpressionPlan.CheckCompiled();
 
-			if (ServerExpressionPlan.Code.DataType is Schema.ICursorType)
+			if (ServerExpressionPlan.DataType is Schema.ICursorType)
 			{
 				FCacheObjectName = Schema.Object.NameFromGuid(ID);
 				ACatalogObjectName = FCacheObjectName;
 			}
 			else
-				ACatalogObjectName = ServerExpressionPlan.Code.DataType.Name;
+				ACatalogObjectName = ServerExpressionPlan.DataType.Name;
 				
 			#if LOGCACHEEVENTS
 			ServerProcess.ServerSession.Server.LogMessage(String.Format("Getting catalog for expression '{0}'.", Header.Statement));
@@ -240,7 +242,7 @@ namespace Alphora.Dataphor.DAE.Server
 			string[] LRequiredObjects = FProcess.Session.Server.CatalogCaches.GetRequiredObjects(FProcess.Session, ServerExpressionPlan.Plan.PlanCatalog, ACacheTimeStamp, out AClientCacheTimeStamp);
 			if (LRequiredObjects.Length > 0)
 			{
-				if (ServerExpressionPlan.Code.DataType is Schema.ICursorType)
+				if (ServerExpressionPlan.DataType is Schema.ICursorType)
 				{
 					string[] LAllButCatalogObject = new string[LRequiredObjects.Length - 1];
 					int LTargetIndex = 0;

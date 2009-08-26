@@ -118,11 +118,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { return null; }
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
+		public override object InternalExecute(Program AProgram)
 		{
-			object LLeftValue = Nodes[0].Execute(AProcess);
-			object LRightValue = Nodes[1].Execute(AProcess);
+			object LLeftValue = Nodes[0].Execute(AProgram);
+			object LRightValue = Nodes[1].Execute(AProgram);
 			
 			#if NILPROPOGATION
 			if ((LLeftValue == null) || (LRightValue == null))
@@ -131,22 +131,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			if (FComparisonNode != null)
 			{
-				AProcess.Stack.Push(LLeftValue);
+				AProgram.Stack.Push(LLeftValue);
 				try
 				{
-					AProcess.Stack.Push(LRightValue);
+					AProgram.Stack.Push(LRightValue);
 					try
 					{
-						return FComparisonNode.Execute(AProcess);
+						return FComparisonNode.Execute(AProgram);
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			else
@@ -154,8 +154,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				RowEqualNode LNode = new RowEqualNode();
 				LNode.Nodes.Add(new ValueNode(((Row)LLeftValue).DataType, LLeftValue));
 				LNode.Nodes.Add(new ValueNode(((Row)LRightValue).DataType, LRightValue));
-				LNode.DetermineDataType(AProcess.Plan);
-				return LNode.Execute(AProcess);
+				LNode.DetermineDataType(AProgram.Plan);
+				return LNode.Execute(AProgram);
 			}
 		}
 	}
@@ -246,35 +246,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments) { return null; }
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram, object[] AArguments) { return null; }
+		public override object InternalExecute(Program AProgram)
 		{
-			object LLeftVar = Nodes[0].Execute(AProcess);
-			object LRightVar = Nodes[1].Execute(AProcess);
+			object LLeftVar = Nodes[0].Execute(AProgram);
+			object LRightVar = Nodes[1].Execute(AProgram);
 			
 			#if NILPROPOGATION
 			if ((LLeftVar == null) || (LRightVar == null))
 				return null;
 			#endif
 			
-			object LLeftValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar);
-			object LRightValue = DataValue.FromNative(AProcess, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar);
-			AProcess.Stack.Push(LLeftValue);
+			object LLeftValue = DataValue.FromNative(AProgram.ValueManager, ((Schema.ScalarType)Nodes[0].DataType).CompoundRowType, LLeftVar);
+			object LRightValue = DataValue.FromNative(AProgram.ValueManager, ((Schema.ScalarType)Nodes[1].DataType).CompoundRowType, LRightVar);
+			AProgram.Stack.Push(LLeftValue);
 			try
 			{
-				AProcess.Stack.Push(LRightValue);
+				AProgram.Stack.Push(LRightValue);
 				try
 				{
-					return FComparisonNode.Execute(AProcess);
+					return FComparisonNode.Execute(AProgram);
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
 	}

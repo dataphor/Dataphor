@@ -928,7 +928,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			XmlElement LAction;
 
 			SecureBehavior LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Process.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Insert)))
+			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Insert)))
 				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.CAdd, "Hidden"), true);
 
 			LAction = AElement.OwnerDocument.CreateElement("showformaction");
@@ -966,7 +966,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			AElement.AppendChild(LAction);
 			
 			LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Process.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Update)))
+			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Update)))
 				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", DerivationUtility.CEdit, "Hidden"), true);
 
 			LAction = AElement.OwnerDocument.CreateElement("showformaction");
@@ -1004,7 +1004,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			AElement.AppendChild(LAction);
 			
 			LSecureBehavior = SecureBehavior.Visible;
-			if (!FDerivationInfo.Process.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Delete)))
+			if (!FDerivationInfo.Program.Plan.HasRight(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.GetRight(Schema.RightNames.Delete)))
 				LSecureBehavior = (SecureBehavior)Enum.Parse(typeof(SecureBehavior), DerivationUtility.GetTag(FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar.MetaData, "Secure", "Delete", "Hidden"), true);			
 
 			LAction = AElement.OwnerDocument.CreateElement("showformaction");
@@ -1247,7 +1247,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			Schema.Order LOrderForKey;
 			foreach (Schema.Key LKey in FDerivationInfo.TableVar.Keys)
 			{
-				LOrderForKey = new Schema.Order(LKey, FDerivationInfo.Process.Plan);
+				LOrderForKey = FDerivationInfo.Program.OrderFromKey(LKey);
 				if (!LOrders.Contains(LOrderForKey))
 					LOrders.Add(LOrderForKey);
 			}

@@ -25,9 +25,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public abstract class DDLNode : PlanNode 
 	{
-		protected void DropDeviceMaps(ServerProcess AProcess, Schema.Device ADevice)
+		protected void DropDeviceMaps(Program AProgram, Schema.Device ADevice)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(ADevice.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(ADevice.ID, false);
 			StringCollection LDependents = new StringCollection();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
@@ -39,13 +39,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.BindNode(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true))).Execute(AProcess);
+				Compiler.BindNode(AProgram.Plan, Compiler.Compile(AProgram.Plan, AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true))).Execute(AProgram);
 			}
 		}
 		
-		protected void DropGeneratedObjects(ServerProcess AProcess, Schema.Object AObject)
+		protected void DropGeneratedObjects(Program AProgram, Schema.Object AObject)
 		{
-			List<Schema.CatalogObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectGeneratedObjects(AObject.ID);
+			List<Schema.CatalogObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectGeneratedObjects(AObject.ID);
 			
 			if (LHeaders.Count > 0)
 			{
@@ -53,20 +53,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 					LObjectNames[LIndex] = LHeaders[LIndex].Name;
 					
-				Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProgram.Plan, AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, LObjectNames, String.Empty, false, true, false, true)).Execute(AProgram);
 			}
 		}
 		
-		protected void DropGeneratedDependents(ServerProcess AProcess, Schema.Object AObject)
+		protected void DropGeneratedDependents(Program AProgram, Schema.Object AObject)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
 			StringCollection LDeviceMaps = new StringCollection(); // Device maps need to be dropped first, because the dependency of a device map on a generated operator will be reported as a dependency on the generator, not the operator
 			StringCollection LDependents = new StringCollection();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				if (LHeaders[LIndex].IsATObject || LHeaders[LIndex].IsSessionObject || LHeaders[LIndex].IsGenerated)
 				{
-					if (LHeaders[LIndex].ResolveObject(AProcess.CatalogDeviceSession) is Schema.DeviceObject)
+					if (LHeaders[LIndex].ResolveObject(AProgram.CatalogDeviceSession) is Schema.DeviceObject)
 						LDeviceMaps.Add(LHeaders[LIndex].Name);
 					else
 						LDependents.Add(LHeaders[LIndex].Name);
@@ -77,22 +77,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDeviceMapNames = new string[LDeviceMaps.Count];
 				LDeviceMaps.CopyTo(LDeviceMapNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDeviceMapNames, String.Empty, false, true, true, true));
-				LNode.Execute(AProcess);
+				PlanNode LNode = Compiler.Compile(AProgram.Plan, AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, LDeviceMapNames, String.Empty, false, true, true, true));
+				LNode.Execute(AProgram);
 			}
 						
 			if (LDependents.Count > 0)
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				PlanNode LNode = Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, true, true));
-				LNode.Execute(AProcess);
+				PlanNode LNode = Compiler.Compile(AProgram.Plan, AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, LDependentNames, String.Empty, false, true, true, true));
+				LNode.Execute(AProgram);
 			}
 		}
 		
-		protected void DropGeneratedSorts(ServerProcess AProcess, Schema.Object AObject)
+		protected void DropGeneratedSorts(Program AProgram, Schema.Object AObject)
 		{
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
 			StringCollection LDependents = new StringCollection();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
@@ -104,15 +104,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				string[] LDependentNames = new string[LDependents.Count];
 				LDependents.CopyTo(LDependentNames, 0);
-				Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true)).Execute(AProcess);
+				Compiler.Compile(AProgram.Plan, AProgram.Catalog.EmitDropStatement(AProgram.CatalogDeviceSession, LDependentNames, String.Empty, false, true, false, true)).Execute(AProgram);
 			}
 		}
 		
-		protected void CheckNoDependents(ServerProcess AProcess, Schema.Object AObject)
+		protected void CheckNoDependents(Program AProgram, Schema.Object AObject)
 		{
-			if (!AProcess.IsLoading())
+			if (!AProgram.ServerProcess.IsLoading())
 			{
-				List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
 				StringCollection LDependents = new StringCollection();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
@@ -126,11 +126,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void CheckNoBaseTableVarDependents(ServerProcess AProcess, Schema.Object AObject)
+		protected void CheckNoBaseTableVarDependents(Program AProgram, Schema.Object AObject)
 		{
-			if (!AProcess.IsLoading())
+			if (!AProgram.ServerProcess.IsLoading())
 			{
-				List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
 				StringCollection LBaseTableVarDependents = new StringCollection();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
@@ -148,11 +148,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected void CheckNoOperatorDependents(ServerProcess AProcess, Schema.Object AObject)
+		protected void CheckNoOperatorDependents(Program AProgram, Schema.Object AObject)
 		{
-			if (!AProcess.IsLoading())
+			if (!AProgram.ServerProcess.IsLoading())
 			{
-				List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
+				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
 				StringCollection LOperatorDependents = new StringCollection();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
@@ -219,9 +219,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.CreateTable(FTable);
+			AProgram.CatalogDeviceSession.CreateTable(FTable);
 			return null;
 		}
     }
@@ -244,12 +244,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (FView.InvocationExpression == null)
 				Error.Fail("Derived table variable invocation expression reference is null");
 				
-			AProcess.CatalogDeviceSession.CreateView(FView);
+			AProgram.CatalogDeviceSession.CreateView(FView);
 			return null;
 		}
 
@@ -291,9 +291,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		public Schema.Conversion Conversion;
 		
-		public override	object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.CreateConversion(Conversion);
+			AProgram.CatalogDeviceSession.CreateConversion(Conversion);
 			return null;
 		}
     }
@@ -303,18 +303,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public Schema.ScalarType SourceScalarType;
 		public Schema.ScalarType TargetScalarType;
 		
-		public override	object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
 				foreach (Schema.Conversion LConversion in SourceScalarType.ImplicitConversions)
 					if (LConversion.TargetScalarType.Equals(TargetScalarType))
 					{
-						CheckNotSystem(AProcess, LConversion);
-						DropGeneratedSorts(AProcess, LConversion);
-						CheckNoDependents(AProcess, LConversion);
+						CheckNotSystem(AProgram, LConversion);
+						DropGeneratedSorts(AProgram, LConversion);
+						CheckNoDependents(AProgram, LConversion);
 						
-						AProcess.CatalogDeviceSession.DropConversion(LConversion);
+						AProgram.CatalogDeviceSession.DropConversion(LConversion);
 						break;
 					}
 				
@@ -346,13 +346,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FIsUnique = value; }
 		}
 		
-		public override	object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				AProcess.CatalogDeviceSession.CreateSort(FSort);
-				AProcess.CatalogDeviceSession.AttachSort(FScalarType, FSort, FIsUnique);
-				AProcess.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
+				AProgram.CatalogDeviceSession.CreateSort(FSort);
+				AProgram.CatalogDeviceSession.AttachSort(FScalarType, FSort, FIsUnique);
+				AProgram.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
 				return null;
 			}
 		}
@@ -374,19 +374,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FSort = value; }
 		}
 
-		public override	object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
 				if (FScalarType.Sort != null)
 				{
 					Schema.Sort LSort = FScalarType.Sort;
-					AProcess.CatalogDeviceSession.DetachSort(FScalarType, LSort, false);
-					AProcess.CatalogDeviceSession.DropSort(LSort);
+					AProgram.CatalogDeviceSession.DetachSort(FScalarType, LSort, false);
+					AProgram.CatalogDeviceSession.DropSort(LSort);
 				}
-				AProcess.CatalogDeviceSession.CreateSort(FSort);
-				AProcess.CatalogDeviceSession.AttachSort(FScalarType, FSort, false);
-				AProcess.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
+				AProgram.CatalogDeviceSession.CreateSort(FSort);
+				AProgram.CatalogDeviceSession.AttachSort(FScalarType, FSort, false);
+				AProgram.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
 				return null;
 			}
 		}
@@ -408,20 +408,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FIsUnique = value; }
 		}
 		
-		public override	object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
 				Schema.Sort LSort = FIsUnique ? FScalarType.UniqueSort : FScalarType.Sort;
 				if (LSort != null)
 				{
-					CheckNotSystem(AProcess, LSort);
-					CheckNoDependents(AProcess, LSort);
+					CheckNotSystem(AProgram, LSort);
+					CheckNoDependents(AProgram, LSort);
 					
-					AProcess.CatalogDeviceSession.DetachSort(FScalarType, LSort, FIsUnique);
-					AProcess.CatalogDeviceSession.DropSort(LSort);
+					AProgram.CatalogDeviceSession.DetachSort(FScalarType, LSort, FIsUnique);
+					AProgram.CatalogDeviceSession.DropSort(LSort);
 				}
-				AProcess.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
+				AProgram.CatalogDeviceSession.UpdateCatalogObject(FScalarType);
 				return null;
 			}
 		}
@@ -436,9 +436,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRole = value; }
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.InsertRole(FRole);
+			AProgram.CatalogDeviceSession.InsertRole(FRole);
 			return null;
 		}
     }
@@ -459,10 +459,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FStatement = value; }
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.AlterMetaData(FRole, FStatement.AlterMetaData);
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(FRole);
+			AProgram.CatalogDeviceSession.AlterMetaData(FRole, FStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(FRole);
 			return null;
 		}
     }
@@ -476,9 +476,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRole = value; }
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.DeleteRole(FRole);
+			AProgram.CatalogDeviceSession.DeleteRole(FRole);
 			return null;
 		}
     }
@@ -492,9 +492,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			SystemCreateRightNode.CreateRight(AProcess, FRightName, AProcess.Plan.User.ID);
+			SystemCreateRightNode.CreateRight(AProgram, FRightName, AProgram.User.ID);
 			return null;
 		}
     }
@@ -508,9 +508,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FRightName = value; }
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			SystemDropRightNode.DropRight(AProcess, FRightName);
+			SystemDropRightNode.DropRight(AProgram, FRightName);
 			return null;
 		}
     }
@@ -535,9 +535,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.CreateScalarType(FScalarType);
+			AProgram.CatalogDeviceSession.CreateScalarType(FScalarType);
 			return null;
 		}
     }
@@ -587,9 +587,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.CreateOperator(FCreateOperator);
+			AProgram.CatalogDeviceSession.CreateOperator(FCreateOperator);
 			return null;
 		}
     }
@@ -636,15 +636,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (FConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
+			if (FConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				object LObject;
 
 				try
 				{
-					LObject = FConstraint.Node.Execute(AProcess);
+					LObject = FConstraint.Node.Execute(AProgram);
 				}
 				catch (Exception E)
 				{
@@ -655,7 +655,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, FConstraint.Name);
 			}
 			
-			AProcess.CatalogDeviceSession.CreateConstraint(FConstraint);
+			AProgram.CatalogDeviceSession.CreateConstraint(FConstraint);
 			return null;
 		}
     }
@@ -681,16 +681,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			// Validate the catalog level enforcement constraint
-			if (!AProcess.ServerSession.Server.IsRepository && FReference.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
+			if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && FReference.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				object LObject;
 
 				try
 				{
-					LObject = FReference.CatalogConstraint.Node.Execute(AProcess);
+					LObject = FReference.CatalogConstraint.Node.Execute(AProgram);
 				}
 				catch (Exception E)
 				{
@@ -701,9 +701,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw new RuntimeException(RuntimeException.Codes.ReferenceConstraintViolation, FReference.Name);
 			}
 			
-			AProcess.CatalogDeviceSession.CreateReference(FReference);
-			AProcess.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Catalog.UpdateDerivationTimeStamp();
+			AProgram.CatalogDeviceSession.CreateReference(FReference);
+			AProgram.Catalog.UpdatePlanCacheTimeStamp();
+			AProgram.Catalog.UpdateDerivationTimeStamp();
 			
 			return null;
 		}
@@ -724,10 +724,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			FServerLink.ApplyMetaData();
-			AProcess.CatalogDeviceSession.InsertCatalogObject(FServerLink);
+			AProgram.CatalogDeviceSession.InsertCatalogObject(FServerLink);
 			return null;
 		}
     }
@@ -747,9 +747,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.CatalogDeviceSession.CreateDevice(FNewDevice);
+			AProgram.CatalogDeviceSession.CreateDevice(FNewDevice);
 			return null;
 		}
     }
@@ -784,12 +784,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FBeforeOperatorNames = value; }
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
-			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, LTableVar);
-			AProcess.CatalogDeviceSession.CreateEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
+			if ((LTableVar != null) && (!AProgram.ServerProcess.InLoadingContext()))
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, LTableVar);
+			AProgram.CatalogDeviceSession.CreateEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
 			return null;
 		}
     }
@@ -832,13 +832,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FBeforeOperatorNames = value; }
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
-			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, LTableVar);
-			AProcess.CatalogDeviceSession.AlterEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(FEventHandler);
+			if ((LTableVar != null) && (!AProgram.ServerProcess.InLoadingContext()))
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, LTableVar);
+			AProgram.CatalogDeviceSession.AlterEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex, FBeforeOperatorNames);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(FEventHandler);
 			return null;
 		}
     }
@@ -874,16 +874,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FEventSourceColumnIndex = value; }
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			Schema.TableVar LTableVar = FEventSource as Schema.TableVar;
-			if ((LTableVar != null) && (!AProcess.InLoadingContext()))
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, LTableVar);
+			if ((LTableVar != null) && (!AProgram.ServerProcess.InLoadingContext()))
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, LTableVar);
 
 			if (FEventHandler.IsDeferred)
-				AProcess.ServerSession.Server.RemoveDeferredHandlers(FEventHandler);
+				AProgram.ServerProcess.ServerSession.Server.RemoveDeferredHandlers(FEventHandler);
 
-			AProcess.CatalogDeviceSession.DropEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex);
+			AProgram.CatalogDeviceSession.DropEventHandler(FEventHandler, FEventSource, FEventSourceColumnIndex);
 			return null;
 		}
     }
@@ -895,12 +895,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return Compiler.ResolveCatalogIdentifier(APlan, AObjectName, true);
 		}
 
-		public static void AlterMetaData(Plan APlan, Schema.Object AObject, AlterMetaData AAlterMetaData)
+		public static void AlterMetaData(Schema.Object AObject, AlterMetaData AAlterMetaData)
 		{
-			AlterMetaData(APlan, AObject, AAlterMetaData, false);
+			AlterMetaData(AObject, AAlterMetaData, false);
 		}
 		
-		public static void AlterMetaData(Plan APlan, Schema.Object AObject, AlterMetaData AAlterMetaData, bool AOptimistic)
+		public static void AlterMetaData(Schema.Object AObject, AlterMetaData AAlterMetaData, bool AOptimistic)
 		{
 			if (AAlterMetaData != null)
 			{
@@ -922,12 +922,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public static void AlterClassDefinition(ServerProcess AProcess, ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition)
+		public static void AlterClassDefinition(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition)
 		{
-			AlterClassDefinition(AProcess, AClassDefinition, AAlterClassDefinition, null);
+			AlterClassDefinition(AClassDefinition, AAlterClassDefinition, null);
 		}
 		
-		public static void AlterClassDefinition(ServerProcess AProcess, ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition, object AInstance)
+		public static void AlterClassDefinition(ClassDefinition AClassDefinition, AlterClassDefinition AAlterClassDefinition, object AInstance)
 		{
 			if (AAlterClassDefinition != null)
 			{
@@ -978,88 +978,88 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FShouldAffectDerivationTimeStamp = value; }
 		}
 		
-		protected void DropKeys(ServerProcess AProcess, Schema.TableVar ATableVar, DropKeyDefinitions ADropKeys)
+		protected void DropKeys(Program AProgram, Schema.TableVar ATableVar, DropKeyDefinitions ADropKeys)
 		{
 			if (ADropKeys.Count > 0)
-				CheckNoDependents(AProcess, ATableVar);
+				CheckNoDependents(AProgram, ATableVar);
 
 			foreach (DropKeyDefinition LKeyDefinition in ADropKeys)
 			{
-				Schema.Key LOldKey = ATableVar.FindKey(LKeyDefinition);
+				Schema.Key LOldKey = Compiler.FindKey(AProgram.Plan, ATableVar, LKeyDefinition);
 
 				if (LOldKey.IsInherited)
 					throw new CompilerException(CompilerException.Codes.InheritedObject, LOldKey.Name);
 				
-				AProcess.CatalogDeviceSession.DropKey(ATableVar, LOldKey);
+				AProgram.CatalogDeviceSession.DropKey(ATableVar, LOldKey);
 			}
 		}
 		
-		protected void AlterKeys(ServerProcess AProcess, Schema.TableVar ATableVar, AlterKeyDefinitions AAlterKeys)
+		protected void AlterKeys(Program AProgram, Schema.TableVar ATableVar, AlterKeyDefinitions AAlterKeys)
 		{
 			foreach (AlterKeyDefinition LKeyDefinition in AAlterKeys)
 			{
-				Schema.Key LOldKey = ATableVar.FindKey(LKeyDefinition);
+				Schema.Key LOldKey = Compiler.FindKey(AProgram.Plan, ATableVar, LKeyDefinition);
 					
-				AProcess.CatalogDeviceSession.AlterMetaData(LOldKey, LKeyDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LOldKey, LKeyDefinition.AlterMetaData);
 			}
 		}
 
-		protected void CreateKeys(ServerProcess AProcess, Schema.TableVar ATableVar, KeyDefinitions ACreateKeys)
+		protected void CreateKeys(Program AProgram, Schema.TableVar ATableVar, KeyDefinitions ACreateKeys)
 		{
 			foreach (KeyDefinition LKeyDefinition in ACreateKeys)
 			{
-				Schema.Key LNewKey = Compiler.CompileKeyDefinition(AProcess.Plan, ATableVar, LKeyDefinition);
+				Schema.Key LNewKey = Compiler.CompileKeyDefinition(AProgram.Plan, ATableVar, LKeyDefinition);
 				if (!ATableVar.Keys.Contains(LNewKey))
 				{
 					if (LNewKey.Enforced)
 					{
 						// Validate that the key can be created
-						Compiler.CompileCatalogConstraintForKey(AProcess.Plan, ATableVar, LNewKey).Validate(AProcess);
+						Compiler.CompileCatalogConstraintForKey(AProgram.Plan, ATableVar, LNewKey).Validate(AProgram);
 
-						LNewKey.Constraint = Compiler.CompileKeyConstraint(AProcess.Plan, ATableVar, LNewKey);
+						LNewKey.Constraint = Compiler.CompileKeyConstraint(AProgram.Plan, ATableVar, LNewKey);
 					}
-					AProcess.CatalogDeviceSession.CreateKey(ATableVar, LNewKey);
+					AProgram.CatalogDeviceSession.CreateKey(ATableVar, LNewKey);
 				}
 				else
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, LNewKey.Name);
 			}
 		}
 		
-		protected void DropOrders(ServerProcess AProcess, Schema.TableVar ATableVar, DropOrderDefinitions ADropOrders)
+		protected void DropOrders(Program AProgram, Schema.TableVar ATableVar, DropOrderDefinitions ADropOrders)
 		{
 			if (ADropOrders.Count > 0)
-				CheckNoDependents(AProcess, ATableVar);
+				CheckNoDependents(AProgram, ATableVar);
 
 			foreach (DropOrderDefinition LOrderDefinition in ADropOrders)
 			{
 				
-				Schema.Order LOldOrder = ATableVar.FindOrder(AProcess.Plan, LOrderDefinition);
+				Schema.Order LOldOrder = Compiler.FindOrder(AProgram.Plan, ATableVar, LOrderDefinition);
 				if (LOldOrder.IsInherited)
 					throw new CompilerException(CompilerException.Codes.InheritedObject, LOldOrder.Name);
 					
-				AProcess.CatalogDeviceSession.DropOrder(ATableVar, LOldOrder);
+				AProgram.CatalogDeviceSession.DropOrder(ATableVar, LOldOrder);
 			}
 		}
 		
-		protected void AlterOrders(ServerProcess AProcess, Schema.TableVar ATableVar, AlterOrderDefinitions AAlterOrders)
+		protected void AlterOrders(Program AProgram, Schema.TableVar ATableVar, AlterOrderDefinitions AAlterOrders)
 		{
 			foreach (AlterOrderDefinition LOrderDefinition in AAlterOrders)
-				AProcess.CatalogDeviceSession.AlterMetaData(ATableVar.FindOrder(AProcess.Plan, LOrderDefinition), LOrderDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(Compiler.FindOrder(AProgram.Plan, ATableVar, LOrderDefinition), LOrderDefinition.AlterMetaData);
 		}
 
-		protected void CreateOrders(ServerProcess AProcess, Schema.TableVar ATableVar, OrderDefinitions ACreateOrders)
+		protected void CreateOrders(Program AProgram, Schema.TableVar ATableVar, OrderDefinitions ACreateOrders)
 		{
 			foreach (OrderDefinition LOrderDefinition in ACreateOrders)
 			{
-				Schema.Order LNewOrder = Compiler.CompileOrderDefinition(AProcess.Plan, ATableVar, LOrderDefinition, false);
+				Schema.Order LNewOrder = Compiler.CompileOrderDefinition(AProgram.Plan, ATableVar, LOrderDefinition, false);
 				if (!ATableVar.Orders.Contains(LNewOrder))
-					AProcess.CatalogDeviceSession.CreateOrder(ATableVar, LNewOrder);
+					AProgram.CatalogDeviceSession.CreateOrder(ATableVar, LNewOrder);
 				else
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.DuplicateObjectName, LNewOrder.Name);
 			}
 		}
 
-		protected void DropConstraints(ServerProcess AProcess, Schema.TableVar ATableVar, DropConstraintDefinitions ADropConstraints)
+		protected void DropConstraints(Program AProgram, Schema.TableVar ATableVar, DropConstraintDefinitions ADropConstraints)
 		{
 			foreach (DropConstraintDefinition LConstraintDefinition in ADropConstraints)
 			{
@@ -1071,26 +1071,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (!LConstraintDefinition.IsTransition && !(LConstraint is Schema.RowConstraint))
 					throw new Schema.SchemaException(Schema.SchemaException.Codes.ConstraintIsTransitionConstraint, LConstraint.Name);
 					
-				AProcess.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LConstraint);
+				AProgram.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LConstraint);
 			}
 		}
 		
-		protected void ValidateConstraint(ServerProcess AProcess, Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
+		protected void ValidateConstraint(Program AProgram, Schema.TableVar ATableVar, Schema.TableVarConstraint AConstraint)
 		{
 			Schema.RowConstraint LRowConstraint = AConstraint as Schema.RowConstraint;
 			if (LRowConstraint != null)
 			{
 				// Ensure that all data in the given table var satisfies the new constraint
 				// if exists (table rename new where not (expression)) then raise
-				PlanNode LPlanNode = Compiler.EmitTableVarNode(AProcess.Plan, ATableVar);
-				LPlanNode = Compiler.EmitRestrictNode(AProcess.Plan, LPlanNode, new UnaryExpression(Instructions.Not, (Expression)LRowConstraint.Node.EmitStatement(EmitMode.ForCopy)));
-				LPlanNode = Compiler.EmitUnaryNode(AProcess.Plan, Instructions.Exists, LPlanNode);
-				LPlanNode = Compiler.BindNode(AProcess.Plan, Compiler.OptimizeNode(AProcess.Plan, LPlanNode));
+				PlanNode LPlanNode = Compiler.EmitTableVarNode(AProgram.Plan, ATableVar);
+				LPlanNode = Compiler.EmitRestrictNode(AProgram.Plan, LPlanNode, new UnaryExpression(Instructions.Not, (Expression)LRowConstraint.Node.EmitStatement(EmitMode.ForCopy)));
+				LPlanNode = Compiler.EmitUnaryNode(AProgram.Plan, Instructions.Exists, LPlanNode);
+				LPlanNode = Compiler.BindNode(AProgram.Plan, Compiler.OptimizeNode(AProgram.Plan, LPlanNode));
 				object LObject;
 
 				try
 				{
-					LObject = LPlanNode.Execute(AProcess);
+					LObject = LPlanNode.Execute(AProgram);
 				}
 				catch (Exception E)
 				{
@@ -1102,7 +1102,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void AlterConstraints(ServerProcess AProcess, Schema.TableVar ATableVar, AlterConstraintDefinitions AAlterConstraints)
+		protected void AlterConstraints(Program AProgram, Schema.TableVar ATableVar, AlterConstraintDefinitions AAlterConstraints)
 		{
 			foreach (AlterConstraintDefinitionBase LConstraintDefinition in AAlterConstraints)
 			{
@@ -1121,14 +1121,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						LNewConstraintDefinition.ConstraintName = LAlterConstraintDefinition.ConstraintName;
 						LNewConstraintDefinition.MetaData = LOldConstraint.MetaData.Copy();
 						LNewConstraintDefinition.Expression = LAlterConstraintDefinition.Expression;
-						Schema.TableVarConstraint LNewConstraint = Compiler.CompileTableVarConstraint(AProcess.Plan, ATableVar, LNewConstraintDefinition);
+						Schema.TableVarConstraint LNewConstraint = Compiler.CompileTableVarConstraint(AProgram.Plan, ATableVar, LNewConstraintDefinition);
 							
 						// Validate LNewConstraint
-						if (LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-							ValidateConstraint(AProcess, ATableVar, LNewConstraint);
+						if (LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+							ValidateConstraint(AProgram, ATableVar, LNewConstraint);
 							
-						AProcess.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LOldConstraint);
-						AProcess.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
+						AProgram.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LOldConstraint);
+						AProgram.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
 						LOldConstraint = LNewConstraint;
 					}
 				}
@@ -1203,56 +1203,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NoDeleteTransition, LOldTransitionConstraint.Name);
 						}
 						
-						Schema.TransitionConstraint LNewConstraint = (Schema.TransitionConstraint)Compiler.CompileTableVarConstraint(AProcess.Plan, ATableVar, LNewConstraintDefinition);
+						Schema.TransitionConstraint LNewConstraint = (Schema.TransitionConstraint)Compiler.CompileTableVarConstraint(AProgram.Plan, ATableVar, LNewConstraintDefinition);
 							
 						// Validate LNewConstraint
-						if ((LNewConstraint.OnInsertNode != null) && LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-							ValidateConstraint(AProcess, ATableVar, LNewConstraint);
+						if ((LNewConstraint.OnInsertNode != null) && LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+							ValidateConstraint(AProgram, ATableVar, LNewConstraint);
 							
-						AProcess.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LOldTransitionConstraint);
-						AProcess.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
+						AProgram.CatalogDeviceSession.DropTableVarConstraint(ATableVar, LOldTransitionConstraint);
+						AProgram.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
 						LOldConstraint = LNewConstraint;
 					}
 				}
 				
-				AProcess.CatalogDeviceSession.AlterMetaData(LOldConstraint, LConstraintDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LOldConstraint, LConstraintDefinition.AlterMetaData);
 			}
 		}
 		
-		protected void CreateConstraints(ServerProcess AProcess, Schema.TableVar ATableVar, CreateConstraintDefinitions ACreateConstraints)
+		protected void CreateConstraints(Program AProgram, Schema.TableVar ATableVar, CreateConstraintDefinitions ACreateConstraints)
 		{
 			foreach (CreateConstraintDefinition LConstraintDefinition in ACreateConstraints)
 			{
-				Schema.TableVarConstraint LNewConstraint = Compiler.CompileTableVarConstraint(AProcess.Plan, ATableVar, LConstraintDefinition);
+				Schema.TableVarConstraint LNewConstraint = Compiler.CompileTableVarConstraint(AProgram.Plan, ATableVar, LConstraintDefinition);
 				
-				if (((LNewConstraint is Schema.RowConstraint) || (((Schema.TransitionConstraint)LNewConstraint).OnInsertNode != null)) && LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-					ValidateConstraint(AProcess, ATableVar, LNewConstraint);
+				if (((LNewConstraint is Schema.RowConstraint) || (((Schema.TransitionConstraint)LNewConstraint).OnInsertNode != null)) && LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+					ValidateConstraint(AProgram, ATableVar, LNewConstraint);
 					
-				AProcess.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
+				AProgram.CatalogDeviceSession.CreateTableVarConstraint(ATableVar, LNewConstraint);
 			}
 		}
 
-		protected void DropReferences(ServerProcess AProcess, Schema.TableVar ATableVar, DropReferenceDefinitions ADropReferences)
+		protected void DropReferences(Program AProgram, Schema.TableVar ATableVar, DropReferenceDefinitions ADropReferences)
 		{
 			foreach (DropReferenceDefinition LReferenceDefinition in ADropReferences)
 			{
-				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProcess.Plan, LReferenceDefinition.ReferenceName);
-				AProcess.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
-				new DropReferenceNode(LReference).Execute(AProcess);
+				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProgram.Plan, LReferenceDefinition.ReferenceName);
+				AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
+				new DropReferenceNode(LReference).Execute(AProgram);
 			}
 		}
 
-		protected void AlterReferences(ServerProcess AProcess, Schema.TableVar ATableVar, AlterReferenceDefinitions AAlterReferences)
+		protected void AlterReferences(Program AProgram, Schema.TableVar ATableVar, AlterReferenceDefinitions AAlterReferences)
 		{
 			foreach (AlterReferenceDefinition LReferenceDefinition in AAlterReferences)
 			{
-				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProcess.Plan, LReferenceDefinition.ReferenceName);
-				AProcess.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
-				AProcess.CatalogDeviceSession.AlterMetaData(LReference, LReferenceDefinition.AlterMetaData);
+				Schema.Reference LReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProgram.Plan, LReferenceDefinition.ReferenceName);
+				AProgram.Plan.AcquireCatalogLock(LReference, LockMode.Exclusive);
+				AProgram.CatalogDeviceSession.AlterMetaData(LReference, LReferenceDefinition.AlterMetaData);
 			}
 		}
 
-		protected void CreateReferences(ServerProcess AProcess, Schema.TableVar ATableVar, ReferenceDefinitions ACreateReferences)
+		protected void CreateReferences(Program AProgram, Schema.TableVar ATableVar, ReferenceDefinitions ACreateReferences)
 		{
 			foreach (ReferenceDefinition LReferenceDefinition in ACreateReferences)
 			{
@@ -1262,7 +1262,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LStatement.Columns.AddRange(LReferenceDefinition.Columns);
 				LStatement.ReferencesDefinition = LReferenceDefinition.ReferencesDefinition;
 				LStatement.MetaData = LReferenceDefinition.MetaData;
-				Compiler.CompileCreateReferenceStatement(AProcess.Plan, LStatement).Execute(AProcess);
+				Compiler.CompileCreateReferenceStatement(AProgram.Plan, LStatement).Execute(AProgram);
 			}
 		}
     }
@@ -1291,10 +1291,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		private Schema.BaseTableVar FTableVar;
 		public Schema.BaseTableVar TableVar { get { return FTableVar; } }
 
-		protected void DropColumns(ServerProcess AProcess, Schema.BaseTableVar ATable, DropColumnDefinitions ADropColumns)
+		protected void DropColumns(Program AProgram, Schema.BaseTableVar ATable, DropColumnDefinitions ADropColumns)
 		{
 			if (ADropColumns.Count > 0)
-				CheckNoDependents(AProcess, ATable);
+				CheckNoDependents(AProgram, ATable);
 
 			foreach (DropColumnDefinition LColumnDefinition in ADropColumns)
 			{
@@ -1308,7 +1308,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (LOrder.Columns.Contains(LColumn.Name))
 						throw new CompilerException(CompilerException.Codes.ObjectIsReferenced, LColumn.Name, LOrder.Name);
 						
-				AProcess.CatalogDeviceSession.DropTableVarColumn(ATable, LColumn);
+				AProgram.CatalogDeviceSession.DropTableVarColumn(ATable, LColumn);
 			}
 		}
 		
@@ -1330,7 +1330,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				((StackReferenceNode)AValueNodes[LIndex]).Identifier = Schema.Object.EnsureRooted(Keywords.Value);
 		}
 		
-		protected void ValidateConstraint(ServerProcess AProcess, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, Schema.TableVarColumnConstraint AConstraint)
+		protected void ValidateConstraint(Program AProgram, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, Schema.TableVarColumnConstraint AConstraint)
 		{
 			// Ensure that all values in the given column of the given base table variable satisfy the new constraint
 			ArrayList LValueNodes = new ArrayList();
@@ -1340,23 +1340,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			PlanNode LPlanNode = 
 				Compiler.Bind
 				(
-					AProcess.Plan, 
+					AProgram.Plan, 
 					Compiler.Optimize
 					(
-						AProcess.Plan, 
+						AProgram.Plan, 
 						Compiler.EmitUnaryNode
 						(
-							AProcess.Plan, 
+							AProgram.Plan, 
 							Instructions.Exists, 
 							Compiler.EmitRestrictNode
 							(
-								AProcess.Plan, 
+								AProgram.Plan, 
 								Compiler.EmitProjectNode
 								(
-									AProcess.Plan, 
+									AProgram.Plan, 
 									Compiler.EmitBaseTableVarNode
 									(
-										AProcess.Plan, 
+										AProgram.Plan, 
 										ATable
 									), 
 									new string[]{AColumn.Name}, 
@@ -1372,7 +1372,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			try
 			{
-				LObject = LPlanNode.Execute(AProcess);
+				LObject = LPlanNode.Execute(AProgram);
 			}
 			catch (Exception E)
 			{
@@ -1383,17 +1383,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, AConstraint.Name);
 		}
 		
-		protected void DropColumnConstraints(ServerProcess AProcess, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, DropConstraintDefinitions ADropConstraints)
+		protected void DropColumnConstraints(Program AProgram, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, DropConstraintDefinitions ADropConstraints)
 		{
 			foreach (DropConstraintDefinition LConstraintDefinition in ADropConstraints)
 			{
 				Schema.Constraint LConstraint = AColumn.Constraints[LConstraintDefinition.ConstraintName];
 				
-				AProcess.CatalogDeviceSession.DropTableVarColumnConstraint(AColumn, (Schema.TableVarColumnConstraint)LConstraint);
+				AProgram.CatalogDeviceSession.DropTableVarColumnConstraint(AColumn, (Schema.TableVarColumnConstraint)LConstraint);
 			}
 		}
 		
-		protected void AlterColumnConstraints(ServerProcess AProcess, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, AlterConstraintDefinitions AAlterConstraints)
+		protected void AlterColumnConstraints(Program AProgram, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, AlterConstraintDefinitions AAlterConstraints)
 		{
 			foreach (AlterConstraintDefinition LConstraintDefinition in AAlterConstraints)
 			{
@@ -1401,31 +1401,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (LConstraintDefinition.Expression != null)
 				{
-					Schema.TableVarColumnConstraint LNewConstraint = Compiler.CompileTableVarColumnConstraint(AProcess.Plan, ATable, AColumn, new ConstraintDefinition(LConstraintDefinition.ConstraintName, LConstraintDefinition.Expression, LConstraint.MetaData == null ? null : LConstraint.MetaData.Copy()));
-					if (LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-						ValidateConstraint(AProcess, ATable, AColumn, LNewConstraint);
-					AProcess.CatalogDeviceSession.DropTableVarColumnConstraint(AColumn, LConstraint);
-					AProcess.CatalogDeviceSession.CreateTableVarColumnConstraint(AColumn, LNewConstraint);
+					Schema.TableVarColumnConstraint LNewConstraint = Compiler.CompileTableVarColumnConstraint(AProgram.Plan, ATable, AColumn, new ConstraintDefinition(LConstraintDefinition.ConstraintName, LConstraintDefinition.Expression, LConstraint.MetaData == null ? null : LConstraint.MetaData.Copy()));
+					if (LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+						ValidateConstraint(AProgram, ATable, AColumn, LNewConstraint);
+					AProgram.CatalogDeviceSession.DropTableVarColumnConstraint(AColumn, LConstraint);
+					AProgram.CatalogDeviceSession.CreateTableVarColumnConstraint(AColumn, LNewConstraint);
 					LConstraint = LNewConstraint;
 				}
 					
-				AlterMetaData(AProcess.Plan, LConstraint, LConstraintDefinition.AlterMetaData);
+				AlterMetaData(LConstraint, LConstraintDefinition.AlterMetaData);
 			}
 		}
 		
-		protected void CreateColumnConstraints(ServerProcess AProcess, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, ConstraintDefinitions ACreateConstraints)
+		protected void CreateColumnConstraints(Program AProgram, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, ConstraintDefinitions ACreateConstraints)
 		{
 			foreach (ConstraintDefinition LConstraintDefinition in ACreateConstraints)
 			{
-				Schema.TableVarColumnConstraint LNewConstraint = Compiler.CompileTableVarColumnConstraint(AProcess.Plan, ATable, AColumn, LConstraintDefinition);
-				if (LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-					ValidateConstraint(AProcess, ATable, AColumn, LNewConstraint);
-				AProcess.CatalogDeviceSession.CreateTableVarColumnConstraint(AColumn, LNewConstraint);
+				Schema.TableVarColumnConstraint LNewConstraint = Compiler.CompileTableVarColumnConstraint(AProgram.Plan, ATable, AColumn, LConstraintDefinition);
+				if (LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+					ValidateConstraint(AProgram, ATable, AColumn, LNewConstraint);
+				AProgram.CatalogDeviceSession.CreateTableVarColumnConstraint(AColumn, LNewConstraint);
 			}
 		}
 		
 		// TODO: Alter table variable column scalar type
-		protected void AlterColumns(ServerProcess AProcess, Schema.BaseTableVar ATable, AlterColumnDefinitions AAlterColumns)
+		protected void AlterColumns(Program AProgram, Schema.BaseTableVar ATable, AlterColumnDefinitions AAlterColumns)
 		{
 			Schema.TableVarColumn LColumn;
 			foreach (AlterColumnDefinition LColumnDefinition in AAlterColumns)
@@ -1443,13 +1443,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						PlanNode LNode = 
 							Compiler.Bind
 							(
-								AProcess.Plan, 
+								AProgram.Plan, 
 								Compiler.Bind
 								(
-									AProcess.Plan, 
+									AProgram.Plan, 
 									Compiler.CompileExpression
 									(
-										AProcess.Plan, 
+										AProgram.Plan, 
 										new UnaryExpression
 										(
 											Language.D4.Instructions.Exists, 
@@ -1466,7 +1466,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						object LResult;
 						try
 						{
-							LResult = LNode.Execute(AProcess);
+							LResult = LNode.Execute(AProgram);
 						}
 						catch (Exception E)
 						{
@@ -1477,7 +1477,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new RuntimeException(RuntimeException.Codes.NonNilConstraintViolation, LColumn.Name, ATable.DisplayName);
 					}
 
-					AProcess.CatalogDeviceSession.SetTableVarColumnIsNilable(LColumn, LColumnDefinition.IsNilable);
+					AProgram.CatalogDeviceSession.SetTableVarColumnIsNilable(LColumn, LColumnDefinition.IsNilable);
 				}
 					
 				if (LColumnDefinition.Default is DefaultDefinition)
@@ -1485,7 +1485,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (LColumn.Default != null)
 						throw new RuntimeException(RuntimeException.Codes.DefaultDefined, LColumn.Name, ATable.DisplayName);
 						
-					AProcess.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, Compiler.CompileTableVarColumnDefault(AProcess.Plan, ATable, LColumn, (DefaultDefinition)LColumnDefinition.Default));
+					AProgram.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, Compiler.CompileTableVarColumnDefault(AProgram.Plan, ATable, LColumn, (DefaultDefinition)LColumnDefinition.Default));
 				}
 				else if (LColumnDefinition.Default is AlterDefaultDefinition)
 				{
@@ -1495,46 +1495,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AlterDefaultDefinition LDefaultDefinition = (AlterDefaultDefinition)LColumnDefinition.Default;
 					if (LDefaultDefinition.Expression != null)
 					{
-						Schema.TableVarColumnDefault LNewDefault = Compiler.CompileTableVarColumnDefault(AProcess.Plan, ATable, LColumn, new DefaultDefinition(LDefaultDefinition.Expression, LColumn.Default.MetaData == null ? null : LColumn.Default.MetaData.Copy()));
-						AProcess.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, LNewDefault);
+						Schema.TableVarColumnDefault LNewDefault = Compiler.CompileTableVarColumnDefault(AProgram.Plan, ATable, LColumn, new DefaultDefinition(LDefaultDefinition.Expression, LColumn.Default.MetaData == null ? null : LColumn.Default.MetaData.Copy()));
+						AProgram.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, LNewDefault);
 					}
 
-					AProcess.CatalogDeviceSession.AlterMetaData(LColumn.Default, LDefaultDefinition.AlterMetaData);
+					AProgram.CatalogDeviceSession.AlterMetaData(LColumn.Default, LDefaultDefinition.AlterMetaData);
 				}
 				else if (LColumnDefinition.Default is DropDefaultDefinition)
 				{
 					if (LColumn.Default == null)
 						throw new RuntimeException(RuntimeException.Codes.DefaultNotDefined, LColumn.Name, ATable.DisplayName);
-					AProcess.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, null);
+					AProgram.CatalogDeviceSession.SetTableVarColumnDefault(LColumn, null);
 				}
 				
-				DropColumnConstraints(AProcess, ATable, LColumn, LColumnDefinition.DropConstraints);
-				AlterColumnConstraints(AProcess, ATable, LColumn, LColumnDefinition.AlterConstraints);
-				CreateColumnConstraints(AProcess, ATable, LColumn, LColumnDefinition.CreateConstraints);
+				DropColumnConstraints(AProgram, ATable, LColumn, LColumnDefinition.DropConstraints);
+				AlterColumnConstraints(AProgram, ATable, LColumn, LColumnDefinition.AlterConstraints);
+				CreateColumnConstraints(AProgram, ATable, LColumn, LColumnDefinition.CreateConstraints);
 				
-				AProcess.CatalogDeviceSession.AlterMetaData(LColumn, LColumnDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LColumn, LColumnDefinition.AlterMetaData);
 			}
 		}
 		
 		protected Schema.Objects FNonNilableColumns;
 		protected Schema.Objects FDefaultColumns;
 
-		protected void CreateColumns(ServerProcess AProcess, Schema.BaseTableVar ATable, ColumnDefinitions ACreateColumns)
+		protected void CreateColumns(Program AProgram, Schema.BaseTableVar ATable, ColumnDefinitions ACreateColumns)
 		{
 			FNonNilableColumns = new Schema.Objects();
 			FDefaultColumns = new Schema.Objects();
 			Schema.BaseTableVar LDummy = new Schema.BaseTableVar(ATable.Name);
 			LDummy.Library = ATable.Library;
 			LDummy.IsGenerated = ATable.IsGenerated;
-			AProcess.Plan.PushCreationObject(LDummy);
+			AProgram.Plan.PushCreationObject(LDummy);
 			try
 			{
 				if (ACreateColumns.Count > 0)
-					CheckNoOperatorDependents(AProcess, ATable);
+					CheckNoOperatorDependents(AProgram, ATable);
 				
 				foreach (ColumnDefinition LColumnDefinition in ACreateColumns)
 				{
-					Schema.TableVarColumn LTableVarColumn = Compiler.CompileTableVarColumnDefinition(AProcess.Plan, ATable, LColumnDefinition);
+					Schema.TableVarColumn LTableVarColumn = Compiler.CompileTableVarColumnDefinition(AProgram.Plan, ATable, LColumnDefinition);
 					if (LTableVarColumn.Default != null)
 						FDefaultColumns.Add(LTableVarColumn);
 					if (!LTableVarColumn.IsNilable)
@@ -1545,13 +1545,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						FNonNilableColumns.Add(LTableVarColumn);
 					}
 					
-					AProcess.CatalogDeviceSession.CreateTableVarColumn(ATable, LTableVarColumn);
+					AProgram.CatalogDeviceSession.CreateTableVarColumn(ATable, LTableVarColumn);
 				}
-				ATable.DetermineRemotable(AProcess.CatalogDeviceSession);
+				ATable.DetermineRemotable(AProgram.CatalogDeviceSession);
 			}
 			finally
 			{
-				AProcess.Plan.PopCreationObject();
+				AProgram.Plan.PopCreationObject();
 			}
 			if (LDummy.HasDependencies())
 				ATable.AddDependencies(LDummy.Dependencies);
@@ -1572,7 +1572,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		private void UpdateDefaultColumns(ServerProcess AProcess)
+		private void UpdateDefaultColumns(Program AProgram)
 		{
 			if (FDefaultColumns.Count != 0)
 			{
@@ -1582,7 +1582,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				foreach (Schema.TableVarColumn LColumn in FDefaultColumns)
 					LUpdateStatement.Columns.Add(new UpdateColumnExpression(new IdentifierExpression(LColumn.Name), (Expression)LColumn.Default.Node.EmitStatement(EmitMode.ForCopy)));
 					
-				Compiler.BindNode(AProcess.Plan, Compiler.CompileUpdateStatement(AProcess.Plan, LUpdateStatement)).Execute(AProcess);
+				Compiler.BindNode(AProgram.Plan, Compiler.CompileUpdateStatement(AProgram.Plan, LUpdateStatement)).Execute(AProgram);
 				
 				// Set the nilable for each column that is not nil
 				// alter table <table name> { alter column <column name> { not nil } };
@@ -1597,19 +1597,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LAlterStatement.AlterColumns.Add(LAlterColumn);
 				}
 				
-				Compiler.BindNode(AProcess.Plan, Compiler.CompileAlterTableStatement(AProcess.Plan, LAlterStatement)).Execute(AProcess);
+				Compiler.BindNode(AProgram.Plan, Compiler.CompileAlterTableStatement(AProgram.Plan, LAlterStatement)).Execute(AProgram);
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			FTableVar = (Schema.BaseTableVar)FindObject(AProcess.Plan, FAlterTableVarStatement.TableVarName);
-			if (!AProcess.InLoadingContext())
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, FTableVar);
+			FTableVar = (Schema.BaseTableVar)FindObject(AProgram.Plan, FAlterTableVarStatement.TableVarName);
+			if (!AProgram.ServerProcess.InLoadingContext())
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, FTableVar);
 
-			DropColumns(AProcess, FTableVar, AlterTableStatement.DropColumns);
-			AlterColumns(AProcess, FTableVar, AlterTableStatement.AlterColumns);
-			CreateColumns(AProcess, FTableVar, AlterTableStatement.CreateColumns);
+			DropColumns(AProgram, FTableVar, AlterTableStatement.DropColumns);
+			AlterColumns(AProgram, FTableVar, AlterTableStatement.AlterColumns);
+			CreateColumns(AProgram, FTableVar, AlterTableStatement.CreateColumns);
 
 			// Change columns in the device			
 			AlterTableStatement LStatement = new AlterTableStatement();
@@ -1619,9 +1619,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LStatement.CreateColumns.AddRange(AlterTableStatement.CreateColumns);
 			AlterTableNode LNode = new AlterTableNode();
 			LNode.AlterTableStatement = LStatement;
-			LNode.DetermineDevice(AProcess.Plan);
-			AProcess.DeviceExecute(FTableVar.Device, LNode);
-			UpdateDefaultColumns(AProcess);
+			LNode.DetermineDevice(AProgram.Plan);
+			AProgram.DeviceExecute(FTableVar.Device, LNode);
+			UpdateDefaultColumns(AProgram);
 
 			// Drop keys and orders
 			LStatement = new AlterTableStatement();
@@ -1630,15 +1630,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LStatement.DropOrders.AddRange(AlterTableStatement.DropOrders);
 			LNode = new AlterTableNode();
 			LNode.AlterTableStatement = LStatement;
-			LNode.DetermineDevice(AProcess.Plan);
-			AProcess.DeviceExecute(FTableVar.Device, LNode);
-			DropKeys(AProcess, FTableVar, FAlterTableVarStatement.DropKeys);
-			DropOrders(AProcess, FTableVar, FAlterTableVarStatement.DropOrders);
+			LNode.DetermineDevice(AProgram.Plan);
+			AProgram.DeviceExecute(FTableVar.Device, LNode);
+			DropKeys(AProgram, FTableVar, FAlterTableVarStatement.DropKeys);
+			DropOrders(AProgram, FTableVar, FAlterTableVarStatement.DropOrders);
 
-			AlterKeys(AProcess, FTableVar, FAlterTableVarStatement.AlterKeys);
-			AlterOrders(AProcess, FTableVar, FAlterTableVarStatement.AlterOrders);
-			CreateKeys(AProcess, FTableVar, FAlterTableVarStatement.CreateKeys);
-			CreateOrders(AProcess, FTableVar, FAlterTableVarStatement.CreateOrders);
+			AlterKeys(AProgram, FTableVar, FAlterTableVarStatement.AlterKeys);
+			AlterOrders(AProgram, FTableVar, FAlterTableVarStatement.AlterOrders);
+			CreateKeys(AProgram, FTableVar, FAlterTableVarStatement.CreateKeys);
+			CreateOrders(AProgram, FTableVar, FAlterTableVarStatement.CreateOrders);
 
 			LStatement = new AlterTableStatement();
 			LStatement.TableVarName = AlterTableStatement.TableVarName;
@@ -1646,24 +1646,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			LStatement.CreateOrders.AddRange(AlterTableStatement.CreateOrders);
 			LNode = new AlterTableNode();
 			LNode.AlterTableStatement = LStatement;
-			LNode.DetermineDevice(AProcess.Plan);
-			AProcess.DeviceExecute(FTableVar.Device, LNode);
+			LNode.DetermineDevice(AProgram.Plan);
+			AProgram.DeviceExecute(FTableVar.Device, LNode);
 
-			DropReferences(AProcess, FTableVar, FAlterTableVarStatement.DropReferences);
-			AlterReferences(AProcess, FTableVar, FAlterTableVarStatement.AlterReferences);
-			CreateReferences(AProcess, FTableVar, FAlterTableVarStatement.CreateReferences);
-			DropConstraints(AProcess, FTableVar, FAlterTableVarStatement.DropConstraints);
-			AlterConstraints(AProcess, FTableVar, FAlterTableVarStatement.AlterConstraints);
-			CreateConstraints(AProcess, FTableVar, FAlterTableVarStatement.CreateConstraints);
-			AProcess.CatalogDeviceSession.AlterMetaData(FTableVar, FAlterTableVarStatement.AlterMetaData);
+			DropReferences(AProgram, FTableVar, FAlterTableVarStatement.DropReferences);
+			AlterReferences(AProgram, FTableVar, FAlterTableVarStatement.AlterReferences);
+			CreateReferences(AProgram, FTableVar, FAlterTableVarStatement.CreateReferences);
+			DropConstraints(AProgram, FTableVar, FAlterTableVarStatement.DropConstraints);
+			AlterConstraints(AProgram, FTableVar, FAlterTableVarStatement.AlterConstraints);
+			CreateConstraints(AProgram, FTableVar, FAlterTableVarStatement.CreateConstraints);
+			AProgram.CatalogDeviceSession.AlterMetaData(FTableVar, FAlterTableVarStatement.AlterMetaData);
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Catalog.UpdateCacheTimeStamp();
-				AProcess.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Catalog.UpdateDerivationTimeStamp();
+				AProgram.Catalog.UpdateCacheTimeStamp();
+				AProgram.Catalog.UpdatePlanCacheTimeStamp();
+				AProgram.Catalog.UpdateDerivationTimeStamp();
 			}
 
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(FTableVar);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(FTableVar);
 			
 			return null;
 		}
@@ -1705,34 +1705,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.DerivedTableVar LView = (Schema.DerivedTableVar)FindObject(AProcess.Plan, FAlterTableVarStatement.TableVarName);
-			if (!AProcess.InLoadingContext())
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, LView);
+			Schema.DerivedTableVar LView = (Schema.DerivedTableVar)FindObject(AProgram.Plan, FAlterTableVarStatement.TableVarName);
+			if (!AProgram.ServerProcess.InLoadingContext())
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, LView);
 
-			DropKeys(AProcess, LView, FAlterTableVarStatement.DropKeys);
-			AlterKeys(AProcess, LView, FAlterTableVarStatement.AlterKeys);
-			CreateKeys(AProcess, LView, FAlterTableVarStatement.CreateKeys);
-			DropOrders(AProcess, LView, FAlterTableVarStatement.DropOrders);
-			AlterOrders(AProcess, LView, FAlterTableVarStatement.AlterOrders);
-			CreateOrders(AProcess, LView, FAlterTableVarStatement.CreateOrders);
-			DropReferences(AProcess, LView, FAlterTableVarStatement.DropReferences);
-			AlterReferences(AProcess, LView, FAlterTableVarStatement.AlterReferences);
-			CreateReferences(AProcess, LView, FAlterTableVarStatement.CreateReferences);
-			DropConstraints(AProcess, LView, FAlterTableVarStatement.DropConstraints);
-			AlterConstraints(AProcess, LView, FAlterTableVarStatement.AlterConstraints);
-			CreateConstraints(AProcess, LView, FAlterTableVarStatement.CreateConstraints);
-			AProcess.CatalogDeviceSession.AlterMetaData(LView, FAlterTableVarStatement.AlterMetaData);
+			DropKeys(AProgram, LView, FAlterTableVarStatement.DropKeys);
+			AlterKeys(AProgram, LView, FAlterTableVarStatement.AlterKeys);
+			CreateKeys(AProgram, LView, FAlterTableVarStatement.CreateKeys);
+			DropOrders(AProgram, LView, FAlterTableVarStatement.DropOrders);
+			AlterOrders(AProgram, LView, FAlterTableVarStatement.AlterOrders);
+			CreateOrders(AProgram, LView, FAlterTableVarStatement.CreateOrders);
+			DropReferences(AProgram, LView, FAlterTableVarStatement.DropReferences);
+			AlterReferences(AProgram, LView, FAlterTableVarStatement.AlterReferences);
+			CreateReferences(AProgram, LView, FAlterTableVarStatement.CreateReferences);
+			DropConstraints(AProgram, LView, FAlterTableVarStatement.DropConstraints);
+			AlterConstraints(AProgram, LView, FAlterTableVarStatement.AlterConstraints);
+			CreateConstraints(AProgram, LView, FAlterTableVarStatement.CreateConstraints);
+			AProgram.CatalogDeviceSession.AlterMetaData(LView, FAlterTableVarStatement.AlterMetaData);
 
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Catalog.UpdateCacheTimeStamp();
-				AProcess.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Catalog.UpdateDerivationTimeStamp();
+				AProgram.Catalog.UpdateCacheTimeStamp();
+				AProgram.Catalog.UpdatePlanCacheTimeStamp();
+				AProgram.Catalog.UpdateDerivationTimeStamp();
 			}
 			
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LView);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LView);
 			
 			return null;
 		}
@@ -1756,31 +1756,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LObject;
 		}
 		
-		protected void DropConstraints(ServerProcess AProcess, Schema.ScalarType AScalarType, DropConstraintDefinitions ADropConstraints)
+		protected void DropConstraints(Program AProgram, Schema.ScalarType AScalarType, DropConstraintDefinitions ADropConstraints)
 		{
 			foreach (DropConstraintDefinition LConstraintDefinition in ADropConstraints)
 			{
 				Schema.Constraint LConstraint = AScalarType.Constraints[LConstraintDefinition.ConstraintName];
-				AProcess.CatalogDeviceSession.DropScalarTypeConstraint(AScalarType, (Schema.ScalarTypeConstraint)LConstraint);
+				AProgram.CatalogDeviceSession.DropScalarTypeConstraint(AScalarType, (Schema.ScalarTypeConstraint)LConstraint);
 			}
 		}
 		
-		protected void ValidateConstraint(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
+		protected void ValidateConstraint(Program AProgram, Schema.ScalarType AScalarType, Schema.ScalarTypeConstraint AConstraint)
 		{
 			// Ensure that all base table vars in the catalog with columns defined on this scalar type, or descendents of this scalar type, satisfy the new constraint
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(AScalarType.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AScalarType.ID, false);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				if (LHeaders[LIndex].ObjectType == "ScalarType")
 				{
 					// This is a descendent scalar type
-					ValidateConstraint(AProcess, (Schema.ScalarType)AProcess.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID), AConstraint);
+					ValidateConstraint(AProgram, (Schema.ScalarType)AProgram.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID), AConstraint);
 				}
 				else if ((LHeaders[LIndex].ObjectType == "BaseTableVar") && !LHeaders[LIndex].IsATObject)
 				{
 					// This is a tablevar with columns defined on this scalar type
 					// Open a cursor on the expression <tablevar> over { <columns defined on this scalar type> }
-					Schema.BaseTableVar LBaseTableVar = (Schema.BaseTableVar)AProcess.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID);
+					Schema.BaseTableVar LBaseTableVar = (Schema.BaseTableVar)AProgram.CatalogDeviceSession.ResolveObject(LHeaders[LIndex].ID);
 					foreach (Schema.Column LColumn in LBaseTableVar.DataType.Columns)
 						if (LColumn.DataType.Equals(AScalarType))
 						{
@@ -1789,16 +1789,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							AlterTableNode.ReplaceValueNodes(AConstraint.Node, LValueNodes, LColumn.Name);
 							Expression LConstraintExpression = new UnaryExpression(Instructions.Not, (Expression)AConstraint.Node.EmitStatement(EmitMode.ForCopy));
 							AlterTableNode.RestoreValueNodes(LValueNodes);
-							PlanNode LPlanNode = Compiler.EmitBaseTableVarNode(AProcess.Plan, LBaseTableVar);
-							LPlanNode = Compiler.EmitProjectNode(AProcess.Plan, LPlanNode, new string[]{LColumn.Name}, true);
-							LPlanNode = Compiler.EmitRestrictNode(AProcess.Plan, LPlanNode, LConstraintExpression);
-							LPlanNode = Compiler.EmitUnaryNode(AProcess.Plan, Instructions.Exists, LPlanNode);
-							LPlanNode = Compiler.BindNode(AProcess.Plan, LPlanNode);
+							PlanNode LPlanNode = Compiler.EmitBaseTableVarNode(AProgram.Plan, LBaseTableVar);
+							LPlanNode = Compiler.EmitProjectNode(AProgram.Plan, LPlanNode, new string[]{LColumn.Name}, true);
+							LPlanNode = Compiler.EmitRestrictNode(AProgram.Plan, LPlanNode, LConstraintExpression);
+							LPlanNode = Compiler.EmitUnaryNode(AProgram.Plan, Instructions.Exists, LPlanNode);
+							LPlanNode = Compiler.BindNode(AProgram.Plan, LPlanNode);
 							object LResult;
 
 							try
 							{
-								LResult = LPlanNode.Execute(AProcess);
+								LResult = LPlanNode.Execute(AProgram);
 							}
 							catch (Exception E)
 							{
@@ -1812,7 +1812,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void AlterConstraints(ServerProcess AProcess, Schema.ScalarType AScalarType, AlterConstraintDefinitions AAlterConstraints)
+		protected void AlterConstraints(Program AProgram, Schema.ScalarType AScalarType, AlterConstraintDefinitions AAlterConstraints)
 		{
 			Schema.ScalarTypeConstraint LConstraint;
 			foreach (AlterConstraintDefinition LConstraintDefinition in AAlterConstraints)
@@ -1821,55 +1821,55 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (LConstraintDefinition.Expression != null)
 				{
-					Schema.ScalarTypeConstraint LNewConstraint = Compiler.CompileScalarTypeConstraint(AProcess.Plan, AScalarType, new ConstraintDefinition(LConstraintDefinition.ConstraintName, LConstraintDefinition.Expression, LConstraint.MetaData == null ? null : LConstraint.MetaData.Copy()));
-					if (LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-						ValidateConstraint(AProcess, AScalarType, LNewConstraint);
+					Schema.ScalarTypeConstraint LNewConstraint = Compiler.CompileScalarTypeConstraint(AProgram.Plan, AScalarType, new ConstraintDefinition(LConstraintDefinition.ConstraintName, LConstraintDefinition.Expression, LConstraint.MetaData == null ? null : LConstraint.MetaData.Copy()));
+					if (LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+						ValidateConstraint(AProgram, AScalarType, LNewConstraint);
 					
-					AProcess.CatalogDeviceSession.DropScalarTypeConstraint(AScalarType, LConstraint);
-					AProcess.CatalogDeviceSession.CreateScalarTypeConstraint(AScalarType, LNewConstraint);
+					AProgram.CatalogDeviceSession.DropScalarTypeConstraint(AScalarType, LConstraint);
+					AProgram.CatalogDeviceSession.CreateScalarTypeConstraint(AScalarType, LNewConstraint);
 					LConstraint = LNewConstraint;
 				}
 					
-				AProcess.CatalogDeviceSession.AlterMetaData(LConstraint, LConstraintDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LConstraint, LConstraintDefinition.AlterMetaData);
 			}
 		}
 		
-		protected void CreateConstraints(ServerProcess AProcess, Schema.ScalarType AScalarType, ConstraintDefinitions ACreateConstraints)
+		protected void CreateConstraints(Program AProgram, Schema.ScalarType AScalarType, ConstraintDefinitions ACreateConstraints)
 		{
 			foreach (ConstraintDefinition LConstraintDefinition in ACreateConstraints)
 			{
-				Schema.ScalarTypeConstraint LNewConstraint = Compiler.CompileScalarTypeConstraint(AProcess.Plan, AScalarType, LConstraintDefinition);
+				Schema.ScalarTypeConstraint LNewConstraint = Compiler.CompileScalarTypeConstraint(AProgram.Plan, AScalarType, LConstraintDefinition);
 
-				if (LNewConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
-					ValidateConstraint(AProcess, AScalarType, LNewConstraint);
+				if (LNewConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+					ValidateConstraint(AProgram, AScalarType, LNewConstraint);
 
-				AProcess.CatalogDeviceSession.CreateScalarTypeConstraint(AScalarType, LNewConstraint);
+				AProgram.CatalogDeviceSession.CreateScalarTypeConstraint(AScalarType, LNewConstraint);
 			}
 		}
 		
-		protected void DropSpecials(ServerProcess AProcess, Schema.ScalarType AScalarType, DropSpecialDefinitions ADropSpecials)
+		protected void DropSpecials(Program AProgram, Schema.ScalarType AScalarType, DropSpecialDefinitions ADropSpecials)
 		{
 			foreach (DropSpecialDefinition LSpecialDefinition in ADropSpecials)
 			{
 				if (AScalarType.IsSpecialOperator != null)
 				{
-					new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProcess);
-					AProcess.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
+					new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProgram);
+					AProgram.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
 				}
 				
 				// Dropping a special
 				Schema.Special LSpecial = AScalarType.Specials[LSpecialDefinition.Name];
 
 				// drop operator ScalarTypeNameSpecialName()
-				new DropOperatorNode(LSpecial.Comparer).Execute(AProcess);
+				new DropOperatorNode(LSpecial.Comparer).Execute(AProgram);
 				// drop operator IsSpecialName(ScalarType)
-				new DropOperatorNode(LSpecial.Selector).Execute(AProcess);
+				new DropOperatorNode(LSpecial.Selector).Execute(AProgram);
 
-				AProcess.CatalogDeviceSession.DropSpecial(AScalarType, LSpecial);
+				AProgram.CatalogDeviceSession.DropSpecial(AScalarType, LSpecial);
 			}
 		}
 		
-		protected void AlterSpecials(ServerProcess AProcess, Schema.ScalarType AScalarType, AlterSpecialDefinitions AAlterSpecials)
+		protected void AlterSpecials(Program AProgram, Schema.ScalarType AScalarType, AlterSpecialDefinitions AAlterSpecials)
 		{
 			Schema.Special LSpecial;
 			foreach (AlterSpecialDefinition LSpecialDefinition in AAlterSpecials)
@@ -1880,89 +1880,89 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (AScalarType.IsSpecialOperator != null)
 					{
-						new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProcess);
-						AProcess.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
+						new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProgram);
+						AProgram.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
 					}
 					
 					Schema.Special LNewSpecial = new Schema.Special(Schema.Object.GetNextObjectID(), LSpecial.Name);
-					LNewSpecial.Library = AScalarType.Library == null ? null : AProcess.Plan.CurrentLibrary;
-					AProcess.Plan.PushCreationObject(LNewSpecial);
+					LNewSpecial.Library = AScalarType.Library == null ? null : AProgram.Plan.CurrentLibrary;
+					AProgram.Plan.PushCreationObject(LNewSpecial);
 					try
 					{
-						LNewSpecial.ValueNode = Compiler.CompileTypedExpression(AProcess.Plan, LSpecialDefinition.Value, AScalarType);
+						LNewSpecial.ValueNode = Compiler.CompileTypedExpression(AProgram.Plan, LSpecialDefinition.Value, AScalarType);
 
 						// Recompilation of the comparer and selector for the special
-						Schema.Operator LNewSelector = Compiler.CompileSpecialSelector(AProcess.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
+						Schema.Operator LNewSelector = Compiler.CompileSpecialSelector(AProgram.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
 						if (LNewSpecial.HasDependencies())
 							LNewSelector.AddDependencies(LNewSpecial.Dependencies);
-						LNewSelector.DetermineRemotable(AProcess.CatalogDeviceSession);
+						LNewSelector.DetermineRemotable(AProgram.CatalogDeviceSession);
 
-						Schema.Operator LNewComparer = Compiler.CompileSpecialComparer(AProcess.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
+						Schema.Operator LNewComparer = Compiler.CompileSpecialComparer(AProgram.Plan, AScalarType, LNewSpecial, LSpecialDefinition.Name, LNewSpecial.ValueNode);
 						if (LNewSpecial.HasDependencies())
 							LNewComparer.AddDependencies(LNewSpecial.Dependencies);
-						LNewComparer.DetermineRemotable(AProcess.CatalogDeviceSession);
+						LNewComparer.DetermineRemotable(AProgram.CatalogDeviceSession);
 
-						new DropOperatorNode(LSpecial.Selector).Execute(AProcess);
-						new CreateOperatorNode(LNewSelector).Execute(AProcess);
+						new DropOperatorNode(LSpecial.Selector).Execute(AProgram);
+						new CreateOperatorNode(LNewSelector).Execute(AProgram);
 						LNewSpecial.Selector = LNewSelector;
 
-						new DropOperatorNode(LSpecial.Comparer).Execute(AProcess);
-						new CreateOperatorNode(LNewComparer).Execute(AProcess);
+						new DropOperatorNode(LSpecial.Comparer).Execute(AProgram);
+						new CreateOperatorNode(LNewComparer).Execute(AProgram);
 						LNewSpecial.Comparer = LNewComparer;
 						
-						AProcess.CatalogDeviceSession.DropSpecial(AScalarType, LSpecial);
-						AProcess.CatalogDeviceSession.CreateSpecial(AScalarType, LNewSpecial);
+						AProgram.CatalogDeviceSession.DropSpecial(AScalarType, LSpecial);
+						AProgram.CatalogDeviceSession.CreateSpecial(AScalarType, LNewSpecial);
 						LSpecial = LNewSpecial;
 					}
 					finally
 					{
-						AProcess.Plan.PopCreationObject();
+						AProgram.Plan.PopCreationObject();
 					}
 				}
 
-				AProcess.CatalogDeviceSession.AlterMetaData(LSpecial, LSpecialDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LSpecial, LSpecialDefinition.AlterMetaData);
 			}
 		}
 		
-		protected void EnsureIsSpecialOperator(ServerProcess AProcess, Schema.ScalarType AScalarType)
+		protected void EnsureIsSpecialOperator(Program AProgram, Schema.ScalarType AScalarType)
 		{
 			if (AScalarType.IsSpecialOperator == null)
 			{
-				OperatorBindingContext LContext = new OperatorBindingContext(null, "IsSpecial", AProcess.Plan.NameResolutionPath, new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(AScalarType)}), true);
-				Compiler.ResolveOperator(AProcess.Plan, LContext);
+				OperatorBindingContext LContext = new OperatorBindingContext(null, "IsSpecial", AProgram.Plan.NameResolutionPath, new Schema.Signature(new Schema.SignatureElement[]{new Schema.SignatureElement(AScalarType)}), true);
+				Compiler.ResolveOperator(AProgram.Plan, LContext);
 				if (LContext.Operator == null)
 				{
-					AProcess.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, Compiler.CompileSpecialOperator(AProcess.Plan, AScalarType));
-					new CreateOperatorNode(AScalarType.IsSpecialOperator).Execute(AProcess);
+					AProgram.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, Compiler.CompileSpecialOperator(AProgram.Plan, AScalarType));
+					new CreateOperatorNode(AScalarType.IsSpecialOperator).Execute(AProgram);
 				}
 			}
 		}
 		
-		protected void CreateSpecials(ServerProcess AProcess, Schema.ScalarType AScalarType, SpecialDefinitions ACreateSpecials)
+		protected void CreateSpecials(Program AProgram, Schema.ScalarType AScalarType, SpecialDefinitions ACreateSpecials)
 		{
 			foreach (SpecialDefinition LSpecialDefinition in ACreateSpecials)
 			{
 				// If we are deserializing, then there is no need to recreate the IsSpecial operator
-				if ((!AProcess.InLoadingContext()) && (AScalarType.IsSpecialOperator != null))
+				if ((!AProgram.ServerProcess.InLoadingContext()) && (AScalarType.IsSpecialOperator != null))
 				{
-					new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProcess);
-					AProcess.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
+					new DropOperatorNode(AScalarType.IsSpecialOperator).Execute(AProgram);
+					AProgram.CatalogDeviceSession.SetScalarTypeIsSpecialOperator(AScalarType, null);
 				}
 				
-				Schema.Special LSpecial = Compiler.CompileSpecial(AProcess.Plan, AScalarType, LSpecialDefinition); 
-				AProcess.CatalogDeviceSession.CreateSpecial(AScalarType, LSpecial);
-				if (!AProcess.InLoadingContext())
+				Schema.Special LSpecial = Compiler.CompileSpecial(AProgram.Plan, AScalarType, LSpecialDefinition); 
+				AProgram.CatalogDeviceSession.CreateSpecial(AScalarType, LSpecial);
+				if (!AProgram.ServerProcess.InLoadingContext())
 				{
-					new CreateOperatorNode(LSpecial.Selector).Execute(AProcess);
-					new CreateOperatorNode(LSpecial.Comparer).Execute(AProcess);
+					new CreateOperatorNode(LSpecial.Selector).Execute(AProgram);
+					new CreateOperatorNode(LSpecial.Comparer).Execute(AProgram);
 				}
 			}
 			
-			if (!AProcess.InLoadingContext())
-				EnsureIsSpecialOperator(AProcess, AScalarType);
+			if (!AProgram.ServerProcess.InLoadingContext())
+				EnsureIsSpecialOperator(AProgram, AScalarType);
 		}
 
-		protected void DropRepresentations(ServerProcess AProcess, Schema.ScalarType AScalarType, DropRepresentationDefinitions ADropRepresentations)
+		protected void DropRepresentations(Program AProgram, Schema.ScalarType AScalarType, DropRepresentationDefinitions ADropRepresentations)
 		{
 			Schema.Representation LRepresentation;
 			foreach (DropRepresentationDefinition LRepresentationDefinition in ADropRepresentations)
@@ -1970,56 +1970,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LRepresentation = AScalarType.Representations[LRepresentationDefinition.RepresentationName];
 				foreach (Schema.Property LProperty in LRepresentation.Properties)
 				{
-					new DropOperatorNode(LProperty.ReadAccessor).Execute(AProcess);
-					new DropOperatorNode(LProperty.WriteAccessor).Execute(AProcess);
+					new DropOperatorNode(LProperty.ReadAccessor).Execute(AProgram);
+					new DropOperatorNode(LProperty.WriteAccessor).Execute(AProgram);
 				}
 				
-				new DropOperatorNode(LRepresentation.Selector).Execute(AProcess);
-				AProcess.CatalogDeviceSession.DropRepresentation(AScalarType, LRepresentation);
+				new DropOperatorNode(LRepresentation.Selector).Execute(AProgram);
+				AProgram.CatalogDeviceSession.DropRepresentation(AScalarType, LRepresentation);
 				AScalarType.ResetNativeRepresentationCache();
 			}
 		}
 		
-		protected void AlterRepresentations(ServerProcess AProcess, Schema.ScalarType AScalarType, AlterRepresentationDefinitions AAlterRepresentations)
+		protected void AlterRepresentations(Program AProgram, Schema.ScalarType AScalarType, AlterRepresentationDefinitions AAlterRepresentations)
 		{
 			Schema.Representation LRepresentation;
 			foreach (AlterRepresentationDefinition LRepresentationDefinition in AAlterRepresentations)
 			{
 				LRepresentation = AScalarType.Representations[LRepresentationDefinition.RepresentationName];
 				
-				DropProperties(AProcess, AScalarType, LRepresentation, LRepresentationDefinition.DropProperties);
-				AlterProperties(AProcess, AScalarType, LRepresentation, LRepresentationDefinition.AlterProperties);
-				CreateProperties(AProcess, AScalarType, LRepresentation, LRepresentationDefinition.CreateProperties);
+				DropProperties(AProgram, AScalarType, LRepresentation, LRepresentationDefinition.DropProperties);
+				AlterProperties(AProgram, AScalarType, LRepresentation, LRepresentationDefinition.AlterProperties);
+				CreateProperties(AProgram, AScalarType, LRepresentation, LRepresentationDefinition.CreateProperties);
 				
 				if (LRepresentationDefinition.SelectorAccessorBlock != null)
 				{
 					Error.Fail("Altering the selector for a representation is not implemented");
 					/*
-					AlterClassDefinition(AProcess, LRepresentation.Selector, LRepresentationDefinition.AlterClassDefinition);
+					AlterClassDefinition(AProgram, LRepresentation.Selector, LRepresentationDefinition.AlterClassDefinition);
 					
-					Schema.Operator LOperator = Compiler.CompileRepresentationSelector(AProcess.Plan, AScalarType, LRepresentation);
+					Schema.Operator LOperator = Compiler.CompileRepresentationSelector(AProgram.Plan, AScalarType, LRepresentation);
 					Schema.Operator LOldOperator = LRepresentation.Operator;
-					new DropOperatorNode(LOldOperator).Execute(AProcess);
+					new DropOperatorNode(LOldOperator).Execute(AProgram);
 					try
 					{
 						LRepresentation.Operator = LOperator;
-						new CreateOperatorNode(LOperator).Execute(AProcess);
+						new CreateOperatorNode(LOperator).Execute(AProgram);
 					}
 					catch
 					{
-						new CreateOperatorNode(LOldOperator).Execute(AProcess);
+						new CreateOperatorNode(LOldOperator).Execute(AProgram);
 						LRepresentation.Operator = LOldOperator;
 						throw;
 					}
 					*/
 				}
 
-				AProcess.CatalogDeviceSession.AlterMetaData(LRepresentation, LRepresentationDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LRepresentation, LRepresentationDefinition.AlterMetaData);
 				AScalarType.ResetNativeRepresentationCache();
 			}
 		}
 		
-		protected void CreateRepresentations(ServerProcess AProcess, Schema.ScalarType AScalarType, RepresentationDefinitions ACreateRepresentations)
+		protected void CreateRepresentations(Program AProgram, Schema.ScalarType AScalarType, RepresentationDefinitions ACreateRepresentations)
 		{
 			Schema.Objects LOperators = new Schema.Objects();
 			foreach (RepresentationDefinition LRepresentationDefinition in ACreateRepresentations)
@@ -2030,32 +2030,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					DropRepresentationDefinitions LDropRepresentationDefinitions = new DropRepresentationDefinitions();
 					LDropRepresentationDefinitions.Add(new DropRepresentationDefinition(LRepresentationDefinition.RepresentationName));
-					DropRepresentations(AProcess, AScalarType, LDropRepresentationDefinitions);
+					DropRepresentations(AProgram, AScalarType, LDropRepresentationDefinitions);
 				}
 
-				Schema.Representation LRepresentation = Compiler.CompileRepresentation(AProcess.Plan, AScalarType, LOperators, LRepresentationDefinition);
-				AProcess.CatalogDeviceSession.CreateRepresentation(AScalarType, LRepresentation);
-				AProcess.Plan.CheckCompiled(); // Throw the error after the call to the catalog device session so the error occurs after the create is logged.
+				Schema.Representation LRepresentation = Compiler.CompileRepresentation(AProgram.Plan, AScalarType, LOperators, LRepresentationDefinition);
+				AProgram.CatalogDeviceSession.CreateRepresentation(AScalarType, LRepresentation);
+				AProgram.Plan.CheckCompiled(); // Throw the error after the call to the catalog device session so the error occurs after the create is logged.
 				AScalarType.ResetNativeRepresentationCache();
 			}
 
-			if (!AProcess.InLoadingContext())
+			if (!AProgram.ServerProcess.InLoadingContext())
 				foreach (Schema.Operator LOperator in LOperators)
-					new CreateOperatorNode(LOperator).Execute(AProcess);
+					new CreateOperatorNode(LOperator).Execute(AProgram);
 		}
 
-		protected void DropProperties(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, DropPropertyDefinitions ADropProperties)
+		protected void DropProperties(Program AProgram, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, DropPropertyDefinitions ADropProperties)
 		{
 			foreach (DropPropertyDefinition LPropertyDefinition in ADropProperties)
 			{
 				Schema.Property LProperty = ARepresentation.Properties[LPropertyDefinition.PropertyName];
-				new DropOperatorNode(LProperty.ReadAccessor).Execute(AProcess);
-				new DropOperatorNode(LProperty.WriteAccessor).Execute(AProcess);
-				AProcess.CatalogDeviceSession.DropProperty(ARepresentation, LProperty);
+				new DropOperatorNode(LProperty.ReadAccessor).Execute(AProgram);
+				new DropOperatorNode(LProperty.WriteAccessor).Execute(AProgram);
+				AProgram.CatalogDeviceSession.DropProperty(ARepresentation, LProperty);
 			}
 		}
 		
-		protected void AlterProperties(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, AlterPropertyDefinitions AAlterProperties)
+		protected void AlterProperties(Program AProgram, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, AlterPropertyDefinitions AAlterProperties)
 		{
 			Schema.Property LProperty;
 			foreach (AlterPropertyDefinition LPropertyDefinition in AAlterProperties)
@@ -2067,15 +2067,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Error.Fail("Altering the type of a property is not implemented");
 					/*
 					LProperty.DetachDependencies();
-					AProcess.Plan.PushCreationObject(LProperty);
+					AProgram.Plan.PushCreationObject(LProperty);
 					try
 					{
-						LProperty.DataType = (Schema.ScalarType)Compiler.CompileTypeSpecifier(AProcess.Plan, LPropertyDefinition.PropertyType);
+						LProperty.DataType = (Schema.ScalarType)Compiler.CompileTypeSpecifier(AProgram.Plan, LPropertyDefinition.PropertyType);
 						LProperty.AttachDependencies();
 					}
 					finally
 					{
-						AProcess.Plan.PopCreationObject();
+						AProgram.Plan.PopCreationObject();
 					}
 					*/
 				}
@@ -2084,18 +2084,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					Error.Fail("Altering the read accessor for a property is not implemented");
 					/*
-					AlterClassDefinition(AProcess, LProperty.ReadAccessor, LPropertyDefinition.ReadClassDefinition);
+					AlterClassDefinition(AProgram, LProperty.ReadAccessor, LPropertyDefinition.ReadClassDefinition);
 					Schema.Operator LOldOperator = LProperty.ReadOperator;
-					Schema.Operator LOperator = Compiler.CompilePropertyReadAccessor(AProcess.Plan, AScalarType, ARepresentation, LProperty);
-					new DropOperatorNode(LOldOperator).Execute(AProcess);
+					Schema.Operator LOperator = Compiler.CompilePropertyReadAccessor(AProgram.Plan, AScalarType, ARepresentation, LProperty);
+					new DropOperatorNode(LOldOperator).Execute(AProgram);
 					try
 					{
-						new CreateOperatorNode(LOperator).Execute(AProcess);
+						new CreateOperatorNode(LOperator).Execute(AProgram);
 						LProperty.ReadOperator = LOperator;
 					}
 					catch
 					{
-						new CreateOperatorNode(LOldOperator).Execute(AProcess);
+						new CreateOperatorNode(LOldOperator).Execute(AProgram);
 						throw;
 					}
 					*/
@@ -2105,39 +2105,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					Error.Fail("Altering the write accessor for a property is not implemented");
 					/*
-					AlterClassDefinition(AProcess, LProperty.WriteAccessor, LPropertyDefinition.WriteClassDefinition);
+					AlterClassDefinition(AProgram, LProperty.WriteAccessor, LPropertyDefinition.WriteClassDefinition);
 					Schema.Operator LOldOperator = LProperty.WriteOperator;
-					Schema.Operator LOperator = Compiler.CompilePropertyWriteAccessor(AProcess.Plan, AScalarType, ARepresentation, LProperty);
-					new DropOperatorNode(LOldOperator).Execute(AProcess);
+					Schema.Operator LOperator = Compiler.CompilePropertyWriteAccessor(AProgram.Plan, AScalarType, ARepresentation, LProperty);
+					new DropOperatorNode(LOldOperator).Execute(AProgram);
 					try
 					{
-						new CreateOperatorNode(LOperator).Execute(AProcess);
+						new CreateOperatorNode(LOperator).Execute(AProgram);
 						LProperty.WriteOperator = LOperator;
 					}
 					catch
 					{
-						new CreateOperatorNode(LOldOperator).Execute(AProcess);
+						new CreateOperatorNode(LOldOperator).Execute(AProgram);
 						throw;
 					}
 					*/
 				}
 
-				AProcess.CatalogDeviceSession.AlterMetaData(LProperty, LPropertyDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LProperty, LPropertyDefinition.AlterMetaData);
 			}
 		}
 		
-		protected void CreateProperties(ServerProcess AProcess, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, PropertyDefinitions ACreateProperties)
+		protected void CreateProperties(Program AProgram, Schema.ScalarType AScalarType, Schema.Representation ARepresentation, PropertyDefinitions ACreateProperties)
 		{
 			Schema.Objects LOperators = new Schema.Objects();
 			foreach (PropertyDefinition LPropertyDefinition in ACreateProperties)
 			{
-				Schema.Property LProperty = Compiler.CompileProperty(AProcess.Plan, AScalarType, ARepresentation, LPropertyDefinition);
-				AProcess.CatalogDeviceSession.CreateProperty(ARepresentation, LProperty);
-				AProcess.Plan.CheckCompiled(); // Throw the error after the CreateProperty call so that the operation is logged in the catalog device
+				Schema.Property LProperty = Compiler.CompileProperty(AProgram.Plan, AScalarType, ARepresentation, LPropertyDefinition);
+				AProgram.CatalogDeviceSession.CreateProperty(ARepresentation, LProperty);
+				AProgram.Plan.CheckCompiled(); // Throw the error after the CreateProperty call so that the operation is logged in the catalog device
 			}
 			
 			foreach (Schema.Operator LOperator in LOperators)
-				new CreateOperatorNode(LOperator).Execute(AProcess);
+				new CreateOperatorNode(LOperator).Execute(AProgram);
 		}
 		
 		public override void BindToProcess(Plan APlan)
@@ -2147,14 +2147,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.ScalarType LScalarType = (Schema.ScalarType)FindObject(AProcess.Plan, FAlterScalarTypeStatement.ScalarTypeName);
+			Schema.ScalarType LScalarType = (Schema.ScalarType)FindObject(AProgram.Plan, FAlterScalarTypeStatement.ScalarTypeName);
 			
 			// Constraints			
-			DropConstraints(AProcess, LScalarType, FAlterScalarTypeStatement.DropConstraints);
-			AlterConstraints(AProcess, LScalarType, FAlterScalarTypeStatement.AlterConstraints);
-			CreateConstraints(AProcess, LScalarType, FAlterScalarTypeStatement.CreateConstraints);
+			DropConstraints(AProgram, LScalarType, FAlterScalarTypeStatement.DropConstraints);
+			AlterConstraints(AProgram, LScalarType, FAlterScalarTypeStatement.AlterConstraints);
+			CreateConstraints(AProgram, LScalarType, FAlterScalarTypeStatement.CreateConstraints);
 
 			// Default
 			if (FAlterScalarTypeStatement.Default is DefaultDefinition)
@@ -2162,7 +2162,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (LScalarType.Default != null)
 					throw new RuntimeException(RuntimeException.Codes.ScalarTypeDefaultDefined, LScalarType.Name);
 					
-				AProcess.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, Compiler.CompileScalarTypeDefault(AProcess.Plan, LScalarType, (DefaultDefinition)FAlterScalarTypeStatement.Default));
+				AProgram.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, Compiler.CompileScalarTypeDefault(AProgram.Plan, LScalarType, (DefaultDefinition)FAlterScalarTypeStatement.Default));
 			}
 			else if (FAlterScalarTypeStatement.Default is AlterDefaultDefinition)
 			{
@@ -2172,44 +2172,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				AlterDefaultDefinition LDefaultDefinition = (AlterDefaultDefinition)FAlterScalarTypeStatement.Default;
 				if (LDefaultDefinition.Expression != null)
 				{
-					Schema.ScalarTypeDefault LNewDefault = Compiler.CompileScalarTypeDefault(AProcess.Plan, LScalarType, new DefaultDefinition(LDefaultDefinition.Expression, LScalarType.Default.MetaData == null ? null : LScalarType.Default.MetaData.Copy()));
+					Schema.ScalarTypeDefault LNewDefault = Compiler.CompileScalarTypeDefault(AProgram.Plan, LScalarType, new DefaultDefinition(LDefaultDefinition.Expression, LScalarType.Default.MetaData == null ? null : LScalarType.Default.MetaData.Copy()));
 					
-					AProcess.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, LNewDefault);
+					AProgram.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, LNewDefault);
 				}
 
-				AProcess.CatalogDeviceSession.AlterMetaData(LScalarType.Default, LDefaultDefinition.AlterMetaData);
+				AProgram.CatalogDeviceSession.AlterMetaData(LScalarType.Default, LDefaultDefinition.AlterMetaData);
 			}
 			else if (FAlterScalarTypeStatement.Default is DropDefaultDefinition)
 			{
 				if (LScalarType.Default == null)
 					throw new RuntimeException(RuntimeException.Codes.ScalarTypeDefaultNotDefined, LScalarType.Name);
 					
-				AProcess.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, null);
+				AProgram.CatalogDeviceSession.SetScalarTypeDefault(LScalarType, null);
 			}
 			
 			// Specials
-			DropSpecials(AProcess, LScalarType, FAlterScalarTypeStatement.DropSpecials);
-			AlterSpecials(AProcess, LScalarType, FAlterScalarTypeStatement.AlterSpecials);
-			CreateSpecials(AProcess, LScalarType, FAlterScalarTypeStatement.CreateSpecials);
+			DropSpecials(AProgram, LScalarType, FAlterScalarTypeStatement.DropSpecials);
+			AlterSpecials(AProgram, LScalarType, FAlterScalarTypeStatement.AlterSpecials);
+			CreateSpecials(AProgram, LScalarType, FAlterScalarTypeStatement.CreateSpecials);
 			
 			// Representations
-			DropRepresentations(AProcess, LScalarType, FAlterScalarTypeStatement.DropRepresentations);
-			AlterRepresentations(AProcess, LScalarType, FAlterScalarTypeStatement.AlterRepresentations);
-			CreateRepresentations(AProcess, LScalarType, FAlterScalarTypeStatement.CreateRepresentations);
+			DropRepresentations(AProgram, LScalarType, FAlterScalarTypeStatement.DropRepresentations);
+			AlterRepresentations(AProgram, LScalarType, FAlterScalarTypeStatement.AlterRepresentations);
+			CreateRepresentations(AProgram, LScalarType, FAlterScalarTypeStatement.CreateRepresentations);
 			
 			// If this scalar type has no representations defined, but it is based on a single branch inheritance hierarchy leading to a system type, build a default representation
 			#if USETYPEINHERITANCE
 			Schema.Objects LOperators = new Schema.Objects();
 			if ((FAlterScalarTypeStatement.DropRepresentations.Count > 0) && (LScalarType.Representations.Count == 0))
-				Compiler.CompileDefaultRepresentation(AProcess.Plan, LScalarType, LOperators);
+				Compiler.CompileDefaultRepresentation(AProgram.Plan, LScalarType, LOperators);
 			foreach (Schema.Operator LOperator in LOperators)
-				new CreateOperatorNode(LOperator).Execute(AProcess);
+				new CreateOperatorNode(LOperator).Execute(AProgram);
 			#endif
 			
 			// TODO: Alter semantics for types and representations
 
-			AProcess.CatalogDeviceSession.AlterClassDefinition(LScalarType.ClassDefinition, FAlterScalarTypeStatement.AlterClassDefinition);
-			AProcess.CatalogDeviceSession.AlterMetaData(LScalarType, FAlterScalarTypeStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.AlterClassDefinition(LScalarType.ClassDefinition, FAlterScalarTypeStatement.AlterClassDefinition);
+			AProgram.CatalogDeviceSession.AlterMetaData(LScalarType, FAlterScalarTypeStatement.AlterMetaData);
 			
 			if 
 			(
@@ -2218,11 +2218,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			)
 				LScalarType.ResetNativeRepresentationCache();
 			
-			AProcess.Catalog.UpdateCacheTimeStamp();
-			AProcess.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Catalog.UpdateDerivationTimeStamp();
+			AProgram.Catalog.UpdateCacheTimeStamp();
+			AProgram.Catalog.UpdatePlanCacheTimeStamp();
+			AProgram.Catalog.UpdateDerivationTimeStamp();
 			
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LScalarType);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LScalarType);
 			
 			return null;
 		}
@@ -2253,40 +2253,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.Operator LOperator = FindOperator(AProcess.Plan, FAlterOperatorStatement.OperatorSpecifier);
-			AProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProcess, LOperator);
+			Schema.Operator LOperator = FindOperator(AProgram.Plan, FAlterOperatorStatement.OperatorSpecifier);
+			AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProgram.ServerProcess, LOperator);
 				
 			if (FAlterOperatorStatement.Block.AlterClassDefinition != null)
 			{
-				CheckNoDependents(AProcess, LOperator);
+				CheckNoDependents(AProgram, LOperator);
 				
-				AProcess.CatalogDeviceSession.AlterClassDefinition(LOperator.Block.ClassDefinition, FAlterOperatorStatement.Block.AlterClassDefinition);
+				AProgram.CatalogDeviceSession.AlterClassDefinition(LOperator.Block.ClassDefinition, FAlterOperatorStatement.Block.AlterClassDefinition);
 			}
 
 			if (FAlterOperatorStatement.Block.Block != null)
 			{
-				CheckNoDependents(AProcess, LOperator);
+				CheckNoDependents(AProgram, LOperator);
 					
 				Schema.Operator LTempOperator = new Schema.Operator(LOperator.Name);
-				AProcess.Plan.PushCreationObject(LTempOperator);
+				AProgram.Plan.PushCreationObject(LTempOperator);
 				try
 				{
-					LTempOperator.Block.BlockNode = Compiler.CompileOperatorBlock(AProcess.Plan, LOperator, FAlterOperatorStatement.Block.Block);
+					LTempOperator.Block.BlockNode = Compiler.CompileOperatorBlock(AProgram.Plan, LOperator, FAlterOperatorStatement.Block.Block);
 					
-					AProcess.CatalogDeviceSession.AlterOperator(LOperator, LTempOperator);
+					AProgram.CatalogDeviceSession.AlterOperator(LOperator, LTempOperator);
 				}
 				finally
 				{
-					AProcess.Plan.PopCreationObject();
+					AProgram.Plan.PopCreationObject();
 				}
 			}
 				
-			AProcess.CatalogDeviceSession.AlterMetaData(LOperator, FAlterOperatorStatement.AlterMetaData);
-			AProcess.Catalog.UpdateCacheTimeStamp();
-			AProcess.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LOperator);
+			AProgram.CatalogDeviceSession.AlterMetaData(LOperator, FAlterOperatorStatement.AlterMetaData);
+			AProgram.Catalog.UpdateCacheTimeStamp();
+			AProgram.Catalog.UpdatePlanCacheTimeStamp();
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LOperator);
 			
 			return null;
 		}
@@ -2309,13 +2309,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.Operator LOperator = FindOperator(AProcess.Plan, FAlterAggregateOperatorStatement.OperatorSpecifier);
+			Schema.Operator LOperator = FindOperator(AProgram.Plan, FAlterAggregateOperatorStatement.OperatorSpecifier);
 			if (!(LOperator is Schema.AggregateOperator))
 				throw new RuntimeException(RuntimeException.Codes.ObjectNotAggregateOperator, FAlterAggregateOperatorStatement.OperatorSpecifier.OperatorName);
 				
-			AProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProcess, LOperator);
+			AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProgram.ServerProcess, LOperator);
 
 			Schema.AggregateOperator LAggregateOperator = (Schema.AggregateOperator)LOperator;
 
@@ -2329,63 +2329,63 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				(FAlterAggregateOperatorStatement.Finalization.AlterClassDefinition != null)
 			)
 			{
-				CheckNoDependents(AProcess, LAggregateOperator);
+				CheckNoDependents(AProgram, LAggregateOperator);
 				
-				AProcess.Plan.PushCreationObject(LAggregateOperator);
+				AProgram.Plan.PushCreationObject(LAggregateOperator);
 				try
 				{
-					AProcess.Plan.Symbols.PushWindow(0);
+					AProgram.Plan.Symbols.PushWindow(0);
 					try
 					{
 						Symbol LResultVar = new Symbol(Keywords.Result, LAggregateOperator.ReturnDataType);
-						AProcess.Plan.Symbols.Push(LResultVar);
+						AProgram.Plan.Symbols.Push(LResultVar);
 						
 						if (FAlterAggregateOperatorStatement.Initialization.AlterClassDefinition != null)
-							AProcess.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Initialization.ClassDefinition, FAlterAggregateOperatorStatement.Initialization.AlterClassDefinition);
+							AProgram.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Initialization.ClassDefinition, FAlterAggregateOperatorStatement.Initialization.AlterClassDefinition);
 							
 						if (FAlterAggregateOperatorStatement.Initialization.Block != null)
-							AProcess.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Initialization, Compiler.CompileStatement(AProcess.Plan, FAlterAggregateOperatorStatement.Initialization.Block));
+							AProgram.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Initialization, Compiler.CompileStatement(AProgram.Plan, FAlterAggregateOperatorStatement.Initialization.Block));
 						
-						AProcess.Plan.Symbols.PushFrame();
+						AProgram.Plan.Symbols.PushFrame();
 						try
 						{
 							foreach (Schema.Operand LOperand in LAggregateOperator.Operands)
-								AProcess.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
+								AProgram.Plan.Symbols.Push(new Symbol(LOperand.Name, LOperand.DataType, LOperand.Modifier == Modifier.Const));
 								
 							if (FAlterAggregateOperatorStatement.Aggregation.AlterClassDefinition != null)
-								AProcess.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Aggregation.ClassDefinition, FAlterAggregateOperatorStatement.Aggregation.AlterClassDefinition);
+								AProgram.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Aggregation.ClassDefinition, FAlterAggregateOperatorStatement.Aggregation.AlterClassDefinition);
 								
 							if (FAlterAggregateOperatorStatement.Aggregation.Block != null)
-								AProcess.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Aggregation, Compiler.CompileDeallocateFrameVariablesNode(AProcess.Plan, Compiler.CompileStatement(AProcess.Plan, FAlterAggregateOperatorStatement.Aggregation.Block)));
+								AProgram.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Aggregation, Compiler.CompileDeallocateFrameVariablesNode(AProgram.Plan, Compiler.CompileStatement(AProgram.Plan, FAlterAggregateOperatorStatement.Aggregation.Block)));
 						}
 						finally
 						{
-							AProcess.Plan.Symbols.PopFrame();
+							AProgram.Plan.Symbols.PopFrame();
 						}
 						
 						if (FAlterAggregateOperatorStatement.Finalization.AlterClassDefinition != null)
-							AProcess.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Finalization.ClassDefinition, FAlterAggregateOperatorStatement.Finalization.AlterClassDefinition);
+							AProgram.CatalogDeviceSession.AlterClassDefinition(LAggregateOperator.Finalization.ClassDefinition, FAlterAggregateOperatorStatement.Finalization.AlterClassDefinition);
 							
 						if (FAlterAggregateOperatorStatement.Finalization.Block != null)
-							AProcess.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Finalization, Compiler.CompileDeallocateVariablesNode(AProcess.Plan, Compiler.CompileStatement(AProcess.Plan, FAlterAggregateOperatorStatement.Finalization.Block), LResultVar));
+							AProgram.CatalogDeviceSession.AlterOperatorBlockNode(LAggregateOperator.Finalization, Compiler.CompileDeallocateVariablesNode(AProgram.Plan, Compiler.CompileStatement(AProgram.Plan, FAlterAggregateOperatorStatement.Finalization.Block), LResultVar));
 					}
 					finally
 					{
-						AProcess.Plan.Symbols.PopWindow();
+						AProgram.Plan.Symbols.PopWindow();
 					}
 				}
 				finally
 				{
-					AProcess.Plan.PopCreationObject();
+					AProgram.Plan.PopCreationObject();
 				}
 
-				LAggregateOperator.DetermineRemotable(AProcess.CatalogDeviceSession);
+				LAggregateOperator.DetermineRemotable(AProgram.CatalogDeviceSession);
 			}
 
-			AProcess.CatalogDeviceSession.AlterMetaData(LAggregateOperator, FAlterAggregateOperatorStatement.AlterMetaData);
-			AProcess.Catalog.UpdateCacheTimeStamp();
-			AProcess.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LAggregateOperator);
+			AProgram.CatalogDeviceSession.AlterMetaData(LAggregateOperator, FAlterAggregateOperatorStatement.AlterMetaData);
+			AProgram.Catalog.UpdateCacheTimeStamp();
+			AProgram.Catalog.UpdatePlanCacheTimeStamp();
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LAggregateOperator);
 
 			return null;
 		}
@@ -2416,26 +2416,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess (APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.CatalogConstraint LConstraint = (Schema.CatalogConstraint)FindObject(AProcess.Plan, FAlterConstraintStatement.ConstraintName);
+			Schema.CatalogConstraint LConstraint = (Schema.CatalogConstraint)FindObject(AProgram.Plan, FAlterConstraintStatement.ConstraintName);
 			
 			if (FAlterConstraintStatement.Expression != null)
 			{
 				Schema.CatalogConstraint LTempConstraint = new Schema.CatalogConstraint(LConstraint.Name);
 				LTempConstraint.ConstraintType = LConstraint.ConstraintType;
-				AProcess.Plan.PushCreationObject(LTempConstraint);
+				AProgram.Plan.PushCreationObject(LTempConstraint);
 				try
 				{
-					LTempConstraint.Node = Compiler.OptimizeNode(AProcess.Plan, Compiler.BindNode(AProcess.Plan, Compiler.CompileBooleanExpression(AProcess.Plan, FAlterConstraintStatement.Expression)));
+					LTempConstraint.Node = Compiler.OptimizeNode(AProgram.Plan, Compiler.BindNode(AProgram.Plan, Compiler.CompileBooleanExpression(AProgram.Plan, FAlterConstraintStatement.Expression)));
 					
 					// Validate the new constraint
-					if (LTempConstraint.Enforced && !AProcess.IsLoading() && AProcess.IsReconciliationEnabled())
+					if (LTempConstraint.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
 					{
 						object LObject;
 						try
 						{
-							LObject = LTempConstraint.Node.Execute(AProcess);
+							LObject = LTempConstraint.Node.Execute(AProgram);
 						}
 						catch (Exception E)
 						{
@@ -2446,18 +2446,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							throw new RuntimeException(RuntimeException.Codes.ConstraintViolation, LTempConstraint.Name);
 					}
 					
-					AProcess.ServerSession.Server.RemoveCatalogConstraintCheck(LConstraint);
+					AProgram.ServerProcess.ServerSession.Server.RemoveCatalogConstraintCheck(LConstraint);
 					
-					AProcess.CatalogDeviceSession.AlterConstraint(LConstraint, LTempConstraint);
+					AProgram.CatalogDeviceSession.AlterConstraint(LConstraint, LTempConstraint);
 				}
 				finally
 				{
-					AProcess.Plan.PopCreationObject();
+					AProgram.Plan.PopCreationObject();
 				}
 			}
 			
-			AProcess.CatalogDeviceSession.AlterMetaData(LConstraint, FAlterConstraintStatement.AlterMetaData);
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LConstraint);
+			AProgram.CatalogDeviceSession.AlterMetaData(LConstraint, FAlterConstraintStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LConstraint);
 			return null;
 		}
     }
@@ -2495,20 +2495,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess (APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (FReference == null)
-				FReference = (Schema.Reference)FindObject(AProcess.Plan, FAlterReferenceStatement.ReferenceName);
+				FReference = (Schema.Reference)FindObject(AProgram.Plan, FAlterReferenceStatement.ReferenceName);
 			
-			AProcess.CatalogDeviceSession.AlterMetaData(FReference, FAlterReferenceStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.AlterMetaData(FReference, FAlterReferenceStatement.AlterMetaData);
 
-			FReference.SourceTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
-			FReference.TargetTable.SetShouldReinferReferences(AProcess.CatalogDeviceSession);
+			FReference.SourceTable.SetShouldReinferReferences(AProgram.CatalogDeviceSession);
+			FReference.TargetTable.SetShouldReinferReferences(AProgram.CatalogDeviceSession);
 
-			AProcess.Catalog.UpdatePlanCacheTimeStamp();
-			AProcess.Catalog.UpdateDerivationTimeStamp();
+			AProgram.Catalog.UpdatePlanCacheTimeStamp();
+			AProgram.Catalog.UpdateDerivationTimeStamp();
 			
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(FReference);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(FReference);
 			
 			return null;
 		}
@@ -2539,15 +2539,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.ServerLink LServer = (Schema.ServerLink)FindObject(AProcess.Plan, FAlterServerStatement.ServerName);
+			Schema.ServerLink LServer = (Schema.ServerLink)FindObject(AProgram.Plan, FAlterServerStatement.ServerName);
 			
 			// TODO: Prevent altering the server link with active sessions? (May not be necessary, the active sessions would just continue to use the current settings)
-			AProcess.CatalogDeviceSession.AlterMetaData(LServer, FAlterServerStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.AlterMetaData(LServer, FAlterServerStatement.AlterMetaData);
 			LServer.ResetServerLink();
 			LServer.ApplyMetaData();
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LServer);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LServer);
 
 			return null;
 		}
@@ -2571,9 +2571,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LObject;
 		}
 		
-		private Schema.ScalarType FindScalarType(ServerProcess AProcess, string AScalarTypeName)
+		private Schema.ScalarType FindScalarType(Program AProgram, string AScalarTypeName)
 		{
-			Schema.IDataType LDataType = Compiler.CompileTypeSpecifier(AProcess.Plan, new ScalarTypeSpecifier(AScalarTypeName));
+			Schema.IDataType LDataType = Compiler.CompileTypeSpecifier(AProgram.Plan, new ScalarTypeSpecifier(AScalarTypeName));
 			if (!(LDataType is Schema.ScalarType))
 				throw new CompilerException(CompilerException.Codes.ScalarTypeExpected);
 			return (Schema.ScalarType)LDataType;
@@ -2586,109 +2586,109 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Schema.Device LDevice = (Schema.Device)FindObject(AProcess.Plan, FAlterDeviceStatement.DeviceName);
-			AProcess.EnsureDeviceStarted(LDevice);
+			Schema.Device LDevice = (Schema.Device)FindObject(AProgram.Plan, FAlterDeviceStatement.DeviceName);
+			AProgram.ServerProcess.EnsureDeviceStarted(LDevice);
 			
 			if (FAlterDeviceStatement.AlterClassDefinition != null)
-				AProcess.CatalogDeviceSession.AlterClassDefinition(LDevice.ClassDefinition, FAlterDeviceStatement.AlterClassDefinition, LDevice);
+				AProgram.CatalogDeviceSession.AlterClassDefinition(LDevice.ClassDefinition, FAlterDeviceStatement.AlterClassDefinition, LDevice);
 
 			foreach (DropDeviceScalarTypeMap LDeviceScalarTypeMap in FAlterDeviceStatement.DropDeviceScalarTypeMaps)
 			{
-				Schema.ScalarType LScalarType = FindScalarType(AProcess, LDeviceScalarTypeMap.ScalarTypeName);
-				Schema.DeviceScalarType LDeviceScalarType = LDevice.ResolveDeviceScalarType(AProcess.Plan, LScalarType);
+				Schema.ScalarType LScalarType = FindScalarType(AProgram, LDeviceScalarTypeMap.ScalarTypeName);
+				Schema.DeviceScalarType LDeviceScalarType = LDevice.ResolveDeviceScalarType(AProgram.Plan, LScalarType);
 				if (LDeviceScalarType != null)
 				{
-					Schema.CatalogObjectHeaders LHeaders = AProcess.CatalogDeviceSession.SelectGeneratedObjects(LDeviceScalarType.ID);
+					Schema.CatalogObjectHeaders LHeaders = AProgram.CatalogDeviceSession.SelectGeneratedObjects(LDeviceScalarType.ID);
 					for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 					{
-						Schema.DeviceOperator LOperator = AProcess.CatalogDeviceSession.ResolveCatalogObject(LHeaders[LIndex].ID) as Schema.DeviceOperator;
-						CheckNoDependents(AProcess, LOperator);
-						AProcess.CatalogDeviceSession.DropDeviceOperator(LOperator);
+						Schema.DeviceOperator LOperator = AProgram.CatalogDeviceSession.ResolveCatalogObject(LHeaders[LIndex].ID) as Schema.DeviceOperator;
+						CheckNoDependents(AProgram, LOperator);
+						AProgram.CatalogDeviceSession.DropDeviceOperator(LOperator);
 					}
 					
-					CheckNoDependents(AProcess, LDeviceScalarType);
-					AProcess.CatalogDeviceSession.DropDeviceScalarType(LDeviceScalarType);
+					CheckNoDependents(AProgram, LDeviceScalarType);
+					AProgram.CatalogDeviceSession.DropDeviceScalarType(LDeviceScalarType);
 				}
 			}
 				
 			foreach (DropDeviceOperatorMap LDeviceOperatorMap in FAlterDeviceStatement.DropDeviceOperatorMaps)
 			{
-				Schema.Operator LOperator = Compiler.ResolveOperatorSpecifier(AProcess.Plan, LDeviceOperatorMap.OperatorSpecifier);
-				Schema.DeviceOperator LDeviceOperator = LDevice.ResolveDeviceOperator(AProcess.Plan, LOperator);
+				Schema.Operator LOperator = Compiler.ResolveOperatorSpecifier(AProgram.Plan, LDeviceOperatorMap.OperatorSpecifier);
+				Schema.DeviceOperator LDeviceOperator = LDevice.ResolveDeviceOperator(AProgram.Plan, LOperator);
 				if (LDeviceOperator != null)
 				{
-					CheckNoDependents(AProcess, LDeviceOperator);
-					AProcess.CatalogDeviceSession.DropDeviceOperator(LDeviceOperator);
+					CheckNoDependents(AProgram, LDeviceOperator);
+					AProgram.CatalogDeviceSession.DropDeviceOperator(LDeviceOperator);
 				}
 			}
 			
 			foreach (AlterDeviceScalarTypeMap LDeviceScalarTypeMap in FAlterDeviceStatement.AlterDeviceScalarTypeMaps)
 			{
-				Schema.ScalarType LScalarType = FindScalarType(AProcess, LDeviceScalarTypeMap.ScalarTypeName);
-				Schema.DeviceScalarType LDeviceScalarType = LDevice.ResolveDeviceScalarType(AProcess.Plan, LScalarType);
+				Schema.ScalarType LScalarType = FindScalarType(AProgram, LDeviceScalarTypeMap.ScalarTypeName);
+				Schema.DeviceScalarType LDeviceScalarType = LDevice.ResolveDeviceScalarType(AProgram.Plan, LScalarType);
 				if (LDeviceScalarTypeMap.AlterClassDefinition != null)
-					AProcess.CatalogDeviceSession.AlterClassDefinition(LDeviceScalarType.ClassDefinition, LDeviceScalarTypeMap.AlterClassDefinition, LDeviceScalarType);
-				AProcess.CatalogDeviceSession.AlterMetaData(LDeviceScalarType, LDeviceScalarTypeMap.AlterMetaData);
-				AProcess.CatalogDeviceSession.UpdateCatalogObject(LDeviceScalarType);
+					AProgram.CatalogDeviceSession.AlterClassDefinition(LDeviceScalarType.ClassDefinition, LDeviceScalarTypeMap.AlterClassDefinition, LDeviceScalarType);
+				AProgram.CatalogDeviceSession.AlterMetaData(LDeviceScalarType, LDeviceScalarTypeMap.AlterMetaData);
+				AProgram.CatalogDeviceSession.UpdateCatalogObject(LDeviceScalarType);
 			}
 				
 			foreach (AlterDeviceOperatorMap LDeviceOperatorMap in FAlterDeviceStatement.AlterDeviceOperatorMaps)
 			{
-				Schema.Operator LOperator = Compiler.ResolveOperatorSpecifier(AProcess.Plan, LDeviceOperatorMap.OperatorSpecifier);
-				Schema.DeviceOperator LDeviceOperator = LDevice.ResolveDeviceOperator(AProcess.Plan, LOperator);
+				Schema.Operator LOperator = Compiler.ResolveOperatorSpecifier(AProgram.Plan, LDeviceOperatorMap.OperatorSpecifier);
+				Schema.DeviceOperator LDeviceOperator = LDevice.ResolveDeviceOperator(AProgram.Plan, LOperator);
 				if (LDeviceOperatorMap.AlterClassDefinition != null)
-					AProcess.CatalogDeviceSession.AlterClassDefinition(LDeviceOperator.ClassDefinition, LDeviceOperatorMap.AlterClassDefinition, LDeviceOperator);
-				AProcess.CatalogDeviceSession.AlterMetaData(LDeviceOperator, LDeviceOperatorMap.AlterMetaData);
-				AProcess.CatalogDeviceSession.UpdateCatalogObject(LDeviceOperator);
+					AProgram.CatalogDeviceSession.AlterClassDefinition(LDeviceOperator.ClassDefinition, LDeviceOperatorMap.AlterClassDefinition, LDeviceOperator);
+				AProgram.CatalogDeviceSession.AlterMetaData(LDeviceOperator, LDeviceOperatorMap.AlterMetaData);
+				AProgram.CatalogDeviceSession.UpdateCatalogObject(LDeviceOperator);
 			}
 				
 			foreach (DeviceScalarTypeMap LDeviceScalarTypeMap in FAlterDeviceStatement.CreateDeviceScalarTypeMaps)
 			{
-				Schema.DeviceScalarType LScalarType = Compiler.CompileDeviceScalarTypeMap(AProcess.Plan, LDevice, LDeviceScalarTypeMap);
-				if (!AProcess.InLoadingContext())
+				Schema.DeviceScalarType LScalarType = Compiler.CompileDeviceScalarTypeMap(AProgram.Plan, LDevice, LDeviceScalarTypeMap);
+				if (!AProgram.ServerProcess.InLoadingContext())
 				{
-					Schema.DeviceScalarType LExistingScalarType = LDevice.ResolveDeviceScalarType(AProcess.Plan, LScalarType.ScalarType);
+					Schema.DeviceScalarType LExistingScalarType = LDevice.ResolveDeviceScalarType(AProgram.Plan, LScalarType.ScalarType);
 					if ((LExistingScalarType != null) && LExistingScalarType.IsGenerated)
 					{
-						CheckNoDependents(AProcess, LExistingScalarType); // TODO: These could be updated to point to the new scalar type
-						AProcess.CatalogDeviceSession.DropDeviceScalarType(LExistingScalarType);
+						CheckNoDependents(AProgram, LExistingScalarType); // TODO: These could be updated to point to the new scalar type
+						AProgram.CatalogDeviceSession.DropDeviceScalarType(LExistingScalarType);
 					}
 				}
-				AProcess.CatalogDeviceSession.CreateDeviceScalarType(LScalarType);
+				AProgram.CatalogDeviceSession.CreateDeviceScalarType(LScalarType);
 				
-				if (!AProcess.InLoadingContext())
-					Compiler.CompileDeviceScalarTypeMapOperatorMaps(AProcess.Plan, LDevice, LScalarType);
+				if (!AProgram.ServerProcess.InLoadingContext())
+					Compiler.CompileDeviceScalarTypeMapOperatorMaps(AProgram.Plan, LDevice, LScalarType);
 			}
 				
 			foreach (DeviceOperatorMap LDeviceOperatorMap in FAlterDeviceStatement.CreateDeviceOperatorMaps)
 			{
-				Schema.DeviceOperator LDeviceOperator = Compiler.CompileDeviceOperatorMap(AProcess.Plan, LDevice, LDeviceOperatorMap);
-				if (!AProcess.InLoadingContext())
+				Schema.DeviceOperator LDeviceOperator = Compiler.CompileDeviceOperatorMap(AProgram.Plan, LDevice, LDeviceOperatorMap);
+				if (!AProgram.ServerProcess.InLoadingContext())
 				{
-					Schema.DeviceOperator LExistingDeviceOperator = LDevice.ResolveDeviceOperator(AProcess.Plan, LDeviceOperator.Operator);
+					Schema.DeviceOperator LExistingDeviceOperator = LDevice.ResolveDeviceOperator(AProgram.Plan, LDeviceOperator.Operator);
 					if ((LExistingDeviceOperator != null) && LExistingDeviceOperator.IsGenerated)
 					{
-						CheckNoDependents(AProcess, LExistingDeviceOperator); // TODO: These could be updated to point to the new operator
-						AProcess.CatalogDeviceSession.DropDeviceOperator(LExistingDeviceOperator);
+						CheckNoDependents(AProgram, LExistingDeviceOperator); // TODO: These could be updated to point to the new operator
+						AProgram.CatalogDeviceSession.DropDeviceOperator(LExistingDeviceOperator);
 					}
 				}
 				
-				AProcess.CatalogDeviceSession.CreateDeviceOperator(LDeviceOperator);
+				AProgram.CatalogDeviceSession.CreateDeviceOperator(LDeviceOperator);
 			}
 				
 			if (FAlterDeviceStatement.ReconciliationSettings != null)
 			{
 				if (FAlterDeviceStatement.ReconciliationSettings.ReconcileModeSet)
-					AProcess.CatalogDeviceSession.SetDeviceReconcileMode(LDevice, FAlterDeviceStatement.ReconciliationSettings.ReconcileMode);
+					AProgram.CatalogDeviceSession.SetDeviceReconcileMode(LDevice, FAlterDeviceStatement.ReconciliationSettings.ReconcileMode);
 				
 				if (FAlterDeviceStatement.ReconciliationSettings.ReconcileMasterSet)
-					AProcess.CatalogDeviceSession.SetDeviceReconcileMaster(LDevice, FAlterDeviceStatement.ReconciliationSettings.ReconcileMaster);
+					AProgram.CatalogDeviceSession.SetDeviceReconcileMaster(LDevice, FAlterDeviceStatement.ReconciliationSettings.ReconcileMaster);
 			}
 				
-			AProcess.CatalogDeviceSession.AlterMetaData(LDevice, FAlterDeviceStatement.AlterMetaData);
-			AProcess.CatalogDeviceSession.UpdateCatalogObject(LDevice);
+			AProgram.CatalogDeviceSession.AlterMetaData(LDevice, FAlterDeviceStatement.AlterMetaData);
+			AProgram.CatalogDeviceSession.UpdateCatalogObject(LDevice);
 
 			return null;
 		}
@@ -2696,9 +2696,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public abstract class DropObjectNode : DDLNode
 	{
-		protected void CheckNotSystem(ServerProcess AProcess, Schema.Object AObject)
+		protected void CheckNotSystem(Program AProgram, Schema.Object AObject)
 		{
-			if (AObject.IsSystem && !AProcess.Plan.User.IsSystemUser())
+			if (AObject.IsSystem && !AProgram.Plan.User.IsSystemUser())
 				throw new RuntimeException(RuntimeException.Codes.ObjectIsSystem, AObject.Name);
 		}
 	}
@@ -2712,33 +2712,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FShouldAffectDerivationTimeStamp = value; }
 		}
 		
-		protected void DropSourceReferences(ServerProcess AProcess, Schema.TableVar ATableVar)
+		protected void DropSourceReferences(Program AProgram, Schema.TableVar ATableVar)
 		{
 			BlockNode LBlockNode = new BlockNode();
 			foreach (Schema.Reference LReference in ATableVar.SourceReferences)
 				if (LReference.ParentReference == null)
-					LBlockNode.Nodes.Add(Compiler.Compile(AProcess.Plan, LReference.EmitDropStatement(EmitMode.ForCopy)));
+					LBlockNode.Nodes.Add(Compiler.Compile(AProgram.Plan, LReference.EmitDropStatement(EmitMode.ForCopy)));
 				
-			LBlockNode.Execute(AProcess);
+			LBlockNode.Execute(AProgram);
 		}
 		
-		protected void DropEventHandlers(ServerProcess AProcess, Schema.TableVar ATableVar)
+		protected void DropEventHandlers(Program AProgram, Schema.TableVar ATableVar)
 		{
 			BlockNode LBlockNode = new BlockNode();
-			List<Schema.DependentObjectHeader> LHeaders = AProcess.CatalogDeviceSession.SelectObjectDependents(ATableVar.ID, false);
+			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(ATableVar.ID, false);
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				Schema.DependentObjectHeader LHeader = LHeaders[LIndex];
 				if ((LHeader.ObjectType == "TableVarEventHandler") || (LHeader.ObjectType == "TableVarColumnEventHandler"))
-					LBlockNode.Nodes.Add(Compiler.Compile(AProcess.Plan, ((Schema.EventHandler)AProcess.CatalogDeviceSession.ResolveObject(LHeader.ID)).EmitDropStatement(EmitMode.ForCopy)));
+					LBlockNode.Nodes.Add(Compiler.Compile(AProgram.Plan, ((Schema.EventHandler)AProgram.CatalogDeviceSession.ResolveObject(LHeader.ID)).EmitDropStatement(EmitMode.ForCopy)));
 			}
 			
-			LBlockNode.Execute(AProcess);
+			LBlockNode.Execute(AProgram);
 		}
 		
-		public static void RemoveDeferredConstraintChecks(ServerProcess AProcess, Schema.TableVar ATableVar)
+		public static void RemoveDeferredConstraintChecks(Program AProgram, Schema.TableVar ATableVar)
 		{
-			AProcess.ServerSession.Server.RemoveDeferredConstraintChecks(ATableVar);
+			AProgram.ServerProcess.ServerSession.Server.RemoveDeferredConstraintChecks(ATableVar);
 		}
 	}
     
@@ -2782,25 +2782,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				CheckNotSystem(AProcess, FTable);
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, FTable);
-				DropSourceReferences(AProcess, FTable);
-				DropEventHandlers(AProcess, FTable);
-				CheckNoDependents(AProcess, FTable);
+				CheckNotSystem(AProgram, FTable);
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, FTable);
+				DropSourceReferences(AProgram, FTable);
+				DropEventHandlers(AProgram, FTable);
+				CheckNoDependents(AProgram, FTable);
 
-				RemoveDeferredConstraintChecks(AProcess, FTable);
+				RemoveDeferredConstraintChecks(AProgram, FTable);
 
-				AProcess.CatalogDeviceSession.DropTable(FTable);
+				AProgram.CatalogDeviceSession.DropTable(FTable);
 
 				if (ShouldAffectDerivationTimeStamp)
 				{
-					AProcess.Catalog.UpdateCacheTimeStamp();
-					AProcess.Catalog.UpdatePlanCacheTimeStamp();
-					AProcess.Catalog.UpdateDerivationTimeStamp();
+					AProgram.Catalog.UpdateCacheTimeStamp();
+					AProgram.Catalog.UpdatePlanCacheTimeStamp();
+					AProgram.Catalog.UpdateDerivationTimeStamp();
 				}
 				return null;
 			}
@@ -2834,25 +2834,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				CheckNotSystem(AProcess, FDerivedTableVar);
-				AProcess.ServerSession.Server.ATDevice.ReportTableChange(AProcess, FDerivedTableVar);
-				DropSourceReferences(AProcess, FDerivedTableVar);
-				DropEventHandlers(AProcess, FDerivedTableVar);
-				CheckNoDependents(AProcess, FDerivedTableVar);
+				CheckNotSystem(AProgram, FDerivedTableVar);
+				AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportTableChange(AProgram.ServerProcess, FDerivedTableVar);
+				DropSourceReferences(AProgram, FDerivedTableVar);
+				DropEventHandlers(AProgram, FDerivedTableVar);
+				CheckNoDependents(AProgram, FDerivedTableVar);
 
-				RemoveDeferredConstraintChecks(AProcess, FDerivedTableVar);
+				RemoveDeferredConstraintChecks(AProgram, FDerivedTableVar);
 
-				AProcess.CatalogDeviceSession.DropView(FDerivedTableVar);
+				AProgram.CatalogDeviceSession.DropView(FDerivedTableVar);
 
 				if (ShouldAffectDerivationTimeStamp)
 				{
-					AProcess.Catalog.UpdateCacheTimeStamp();
-					AProcess.Catalog.UpdatePlanCacheTimeStamp();
-					AProcess.Catalog.UpdateDerivationTimeStamp();
+					AProgram.Catalog.UpdateCacheTimeStamp();
+					AProgram.Catalog.UpdatePlanCacheTimeStamp();
+					AProgram.Catalog.UpdateDerivationTimeStamp();
 				}
 
 				return null;
@@ -2875,7 +2875,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		private void DropChildObjects(ServerProcess AProcess, Schema.ScalarType AScalarType)
+		private void DropChildObjects(Program AProgram, Schema.ScalarType AScalarType)
 		{
 			AlterScalarTypeStatement LStatement = new AlterScalarTypeStatement();
 			LStatement.ScalarTypeName = AScalarType.Name;
@@ -2892,27 +2892,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Special LSpecial in AScalarType.Specials)
 				LStatement.DropSpecials.Add(new DropSpecialDefinition(LSpecial.Name));
 				
-			Compiler.Compile(AProcess.Plan, LStatement).Execute(AProcess);
+			Compiler.Compile(AProgram.Plan, LStatement).Execute(AProgram);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				CheckNotSystem(AProcess, FScalarType);
+				CheckNotSystem(AProgram, FScalarType);
 				
-				DropChildObjects(AProcess, FScalarType);
+				DropChildObjects(AProgram, FScalarType);
 
 				// If the ScalarType has dependents, prevent its destruction
-				DropGeneratedDependents(AProcess, FScalarType);
-				CheckNoDependents(AProcess, FScalarType);
+				DropGeneratedDependents(AProgram, FScalarType);
+				CheckNoDependents(AProgram, FScalarType);
 				
-				AProcess.CatalogDeviceSession.DropScalarType(FScalarType);
-				AProcess.Catalog.OperatorResolutionCache.Clear(FScalarType, FScalarType);					
+				AProgram.CatalogDeviceSession.DropScalarType(FScalarType);
+				AProgram.Catalog.OperatorResolutionCache.Clear(FScalarType, FScalarType);					
 				
-				AProcess.Catalog.UpdateCacheTimeStamp();
-				AProcess.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Catalog.UpdateDerivationTimeStamp();
+				AProgram.Catalog.UpdateCacheTimeStamp();
+				AProgram.Catalog.UpdatePlanCacheTimeStamp();
+				AProgram.Catalog.UpdateDerivationTimeStamp();
 				return null;
 			}
 		}
@@ -2957,23 +2957,23 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (FDropOperator == null)
-				FDropOperator = Compiler.ResolveOperatorSpecifier(AProcess.Plan, FOperatorSpecifier);
+				FDropOperator = Compiler.ResolveOperatorSpecifier(AProgram.Plan, FOperatorSpecifier);
 				
-			CheckNotSystem(AProcess, FDropOperator);
-			AProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProcess, FDropOperator);
+			CheckNotSystem(AProgram, FDropOperator);
+			AProgram.ServerProcess.ServerSession.Server.ATDevice.ReportOperatorChange(AProgram.ServerProcess, FDropOperator);
 
-			DropGeneratedSorts(AProcess, FDropOperator);
-			CheckNoDependents(AProcess, FDropOperator);
+			DropGeneratedSorts(AProgram, FDropOperator);
+			CheckNoDependents(AProgram, FDropOperator);
 			
-			AProcess.CatalogDeviceSession.DropOperator(FDropOperator);
+			AProgram.CatalogDeviceSession.DropOperator(FDropOperator);
 			
 			if (ShouldAffectDerivationTimeStamp)
 			{
-				AProcess.Catalog.UpdateCacheTimeStamp();
-				AProcess.Catalog.UpdatePlanCacheTimeStamp();
+				AProgram.Catalog.UpdateCacheTimeStamp();
+				AProgram.Catalog.UpdatePlanCacheTimeStamp();
 			}
 			return null;
 		}
@@ -2994,16 +2994,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				CheckNotSystem(AProcess, FConstraint);
-				CheckNoDependents(AProcess, FConstraint);
+				CheckNotSystem(AProgram, FConstraint);
+				CheckNoDependents(AProgram, FConstraint);
 					
-				AProcess.ServerSession.Server.RemoveCatalogConstraintCheck(FConstraint);
+				AProgram.ServerProcess.ServerSession.Server.RemoveCatalogConstraintCheck(FConstraint);
 				
-				AProcess.CatalogDeviceSession.DropConstraint(FConstraint);
+				AProgram.CatalogDeviceSession.DropConstraint(FConstraint);
 
 				return null;
 			}
@@ -3035,21 +3035,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (FReference == null)
-				FReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProcess.Plan, FReferenceName);
+				FReference = (Schema.Reference)Compiler.ResolveCatalogIdentifier(AProgram.Plan, FReferenceName);
 
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				CheckNotSystem(AProcess, FReference);
-				CheckNoDependents(AProcess, FReference);
+				CheckNotSystem(AProgram, FReference);
+				CheckNoDependents(AProgram, FReference);
 				
-				AProcess.CatalogDeviceSession.DropReference(FReference);
+				AProgram.CatalogDeviceSession.DropReference(FReference);
 
-				AProcess.Catalog.UpdateCacheTimeStamp();
-				AProcess.Catalog.UpdatePlanCacheTimeStamp();
-				AProcess.Catalog.UpdateDerivationTimeStamp();
+				AProgram.Catalog.UpdateCacheTimeStamp();
+				AProgram.Catalog.UpdatePlanCacheTimeStamp();
+				AProgram.Catalog.UpdateDerivationTimeStamp();
 				return null;
 			}
 		}
@@ -3070,17 +3070,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
 				// TODO: Prevent dropping when server sessions are active
 				// TODO: Drop server link users
 				
-				CheckNotSystem(AProcess, FServerLink);
-				CheckNoDependents(AProcess, FServerLink);
+				CheckNotSystem(AProgram, FServerLink);
+				CheckNoDependents(AProgram, FServerLink);
 				
-				AProcess.CatalogDeviceSession.DeleteCatalogObject(FServerLink);
+				AProgram.CatalogDeviceSession.DeleteCatalogObject(FServerLink);
 			}
 			
 			return null;
@@ -3102,19 +3102,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			lock (AProcess.Catalog)
+			lock (AProgram.Catalog)
 			{
-				AProcess.CatalogDeviceSession.StopDevice(FDropDevice);
+				AProgram.CatalogDeviceSession.StopDevice(FDropDevice);
 				
-				CheckNotSystem(AProcess, FDropDevice);
-				CheckNoBaseTableVarDependents(AProcess, FDropDevice);
+				CheckNotSystem(AProgram, FDropDevice);
+				CheckNoBaseTableVarDependents(AProgram, FDropDevice);
 
-				DropDeviceMaps(AProcess, FDropDevice);				
-				CheckNoDependents(AProcess, FDropDevice);
+				DropDeviceMaps(AProgram, FDropDevice);				
+				CheckNoDependents(AProgram, FDropDevice);
 				
-				AProcess.CatalogDeviceSession.DropDevice(FDropDevice);
+				AProgram.CatalogDeviceSession.DropDevice(FDropDevice);
 
 				return null;
 			}

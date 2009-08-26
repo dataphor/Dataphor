@@ -245,18 +245,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		
 		// TODO: This should be compiled and added as cleanup nodes
 		// TODO: Handle var arguments for more than just stack references
-		protected void CleanupOperand(ServerProcess AProcess, Schema.SignatureElement ASignatureElement, PlanNode AArgumentNode, object AArgumentValue)
+		protected void CleanupOperand(Program AProgram, Schema.SignatureElement ASignatureElement, PlanNode AArgumentNode, object AArgumentValue)
 		{
 			switch (ASignatureElement.Modifier)
 			{
 				case Modifier.In :
-					DataValue.DisposeValue(AProcess, AArgumentValue);
+					DataValue.DisposeValue(AProgram.ValueManager, AArgumentValue);
 				break;
 					
 				case Modifier.Var :
 					if (AArgumentNode.DataType is Schema.ScalarType)
-						AArgumentValue = ((Schema.ScalarType)AArgumentNode.DataType).ValidateValue(AProcess, AArgumentValue, FOperator);
-					AProcess.Stack.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
+						AArgumentValue = ValueUtility.ValidateValue(AProgram, (Schema.ScalarType)AArgumentNode.DataType, AArgumentValue, FOperator);
+					AProgram.Stack.Poke(((StackReferenceNode)AArgumentNode).Location, AArgumentValue);
 				break;
 			}
 		}
@@ -269,9 +269,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class NilaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object NilaryInternalExecute(ServerProcess AProcess);
+		public abstract object NilaryInternalExecute(Program AProgram);
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			#if USECLEANUPNODES
 			try
@@ -280,19 +280,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 				if (IsBreakable)
 				{
-				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return NilaryInternalExecute(AProcess);
+				        return NilaryInternalExecute(AProgram);
 				    }
 				    finally
 				    {
-				        AProcess.Stack.PopWindow();
+				        AProgram.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return NilaryInternalExecute(AProcess);
+					return NilaryInternalExecute(AProgram);
 				}
 
 			#if USECLEANUPNODES
@@ -301,7 +301,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProcess);
+						FCleanupNodes[LIndex].Execute(AProgram);
 			}
 			#endif
 		}
@@ -309,39 +309,39 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class UnaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1);
+		public abstract object InternalExecute(Program AProgram, object AArgument1);
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			object LArgument = Nodes[0].Execute(AProcess);
+			object LArgument = Nodes[0].Execute(AProgram);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProcess, LArgument);
+				        return InternalExecute(AProgram, LArgument);
 				    }
 				    finally
 				    {
-				        AProcess.Stack.PopWindow();
+				        AProgram.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProcess, LArgument);
+					return InternalExecute(AProgram, LArgument);
 				}
 			}
 			finally
 			{
 				if (Operator != null)
-					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument);
+					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument);
 				
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProcess);
+						FCleanupNodes[LIndex].Execute(AProgram);
 				#endif
 			}
 		}
@@ -349,43 +349,43 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class BinaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2);
+		public abstract object InternalExecute(Program AProgram, object AArgument1, object AArgument2);
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			object LArgument1 = Nodes[0].Execute(AProcess);
-			object LArgument2 = Nodes[1].Execute(AProcess);
+			object LArgument1 = Nodes[0].Execute(AProgram);
+			object LArgument2 = Nodes[1].Execute(AProgram);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProcess, LArgument1, LArgument2);
+				        return InternalExecute(AProgram, LArgument1, LArgument2);
 				    }
 				    finally
 				    {
-				        AProcess.Stack.PopWindow();
+				        AProgram.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProcess, LArgument1, LArgument2);
+					return InternalExecute(AProgram, LArgument1, LArgument2);
 				}
 			}
 			finally
 			{
 				if (Operator != null) 
 				{
-					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument1);
-					CleanupOperand(AProcess, Operator.Signature[1], Nodes[1], LArgument2);
+					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument1);
+					CleanupOperand(AProgram, Operator.Signature[1], Nodes[1], LArgument2);
 				}
 					
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProcess);
+						FCleanupNodes[LIndex].Execute(AProgram);
 				#endif
 			}
 		}
@@ -393,45 +393,45 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class TernaryInstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3);
+		public abstract object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3);
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			object LArgument1 = Nodes[0].Execute(AProcess);
-			object LArgument2 = Nodes[1].Execute(AProcess);
-			object LArgument3 = Nodes[2].Execute(AProcess);
+			object LArgument1 = Nodes[0].Execute(AProgram);
+			object LArgument2 = Nodes[1].Execute(AProgram);
+			object LArgument3 = Nodes[2].Execute(AProgram);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+				        return InternalExecute(AProgram, LArgument1, LArgument2, LArgument3);
 				    }
 				    finally
 				    {
-				        AProcess.Stack.PopWindow();
+				        AProgram.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProcess, LArgument1, LArgument2, LArgument3);
+					return InternalExecute(AProgram, LArgument1, LArgument2, LArgument3);
 				}
 			}
 			finally
 			{
 				if (Operator != null) 
 				{
-					CleanupOperand(AProcess, Operator.Signature[0], Nodes[0], LArgument1);
-					CleanupOperand(AProcess, Operator.Signature[1], Nodes[1], LArgument2);
-					CleanupOperand(AProcess, Operator.Signature[2], Nodes[2], LArgument3);
+					CleanupOperand(AProgram, Operator.Signature[0], Nodes[0], LArgument1);
+					CleanupOperand(AProgram, Operator.Signature[1], Nodes[1], LArgument2);
+					CleanupOperand(AProgram, Operator.Signature[2], Nodes[2], LArgument3);
 				}
 					
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProcess);
+						FCleanupNodes[LIndex].Execute(AProgram);
 				#endif
 			}
 		}
@@ -439,30 +439,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public abstract class InstructionNode : InstructionNodeBase
 	{
-		public abstract object InternalExecute(ServerProcess AProcess, object[] AArguments);
+		public abstract object InternalExecute(Program AProgram, object[] AArguments);
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			object[] LArguments = new object[NodeCount];
 			for (int LIndex = 0; LIndex < LArguments.Length; LIndex++)
-				LArguments[LIndex] = Nodes[LIndex].Execute(AProcess);
+				LArguments[LIndex] = Nodes[LIndex].Execute(AProgram);
 			try
 			{
 				if (IsBreakable)
 				{
-				    AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+				    AProgram.Stack.PushWindow(0, this, Operator.Locator);
 				    try
 				    {
-				        return InternalExecute(AProcess, LArguments);
+				        return InternalExecute(AProgram, LArguments);
 				    }
 				    finally
 				    {
-				        AProcess.Stack.PopWindow();
+				        AProgram.Stack.PopWindow();
 				    }
 				}
 				else
 				{
-					return InternalExecute(AProcess, LArguments);
+					return InternalExecute(AProgram, LArguments);
 				}
 			}
 			finally
@@ -470,12 +470,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				// TODO: Compile the dispose calls and var argument assignment calls
 				if (Operator != null)
 					for (int LIndex = 0; LIndex < Operator.Operands.Count; LIndex++)
-						CleanupOperand(AProcess, Operator.Signature[LIndex], Nodes[LIndex], LArguments[LIndex]);
+						CleanupOperand(AProgram, Operator.Signature[LIndex], Nodes[LIndex], LArguments[LIndex]);
 
 				#if USECLEANUPNODES
 				if (FCleanupNodes != null)
 					for (int LIndex = 0; LIndex < FCleanupNodes.Count; LIndex++)
-						FCleanupNodes[LIndex].Execute(AProcess);
+						FCleanupNodes[LIndex].Execute(AProgram);
 				#endif
 			}
 		}

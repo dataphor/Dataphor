@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			bool LQuotaOrderIncludesKey = false;			
 			foreach (Schema.Key LKey in SourceNode.TableVar.Keys)
-				if (FQuotaOrder.Includes(APlan, LKey))
+				if (Compiler.OrderIncludesKey(APlan, FQuotaOrder, LKey))
 				{
 					LQuotaOrderIncludesKey = true;
 					break;
@@ -185,9 +185,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			QuotaTable LTable = new QuotaTable(this, AProcess);
+			QuotaTable LTable = new QuotaTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -200,17 +200,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}								  
 		}
 		
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+				return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalChange(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
@@ -242,27 +242,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar.ShouldValidate = FTableVar.ShouldValidate || FEnforcePredicate;
 		}
 
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (FEnforcePredicate && (AColumnName == String.Empty))
 			{
 				// ARow in (((table { ARow }) union <source expression>)) <quota clause>
-				EnsureValidateNode(AProcess.Plan);
-				PushRow(AProcess, ANewRow);
+				EnsureValidateNode(AProgram.Plan);
+				PushRow(AProgram, ANewRow);
 				try
 				{
-					object LObject = FValidateNode.Execute(AProcess);
+					object LObject = FValidateNode.Execute(AProgram);
 					if ((LObject != null) && !(bool)LObject)
 						throw new RuntimeException(RuntimeException.Codes.RowViolatesQuotaPredicate, ErrorSeverity.User);
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 			return false;
 		}
     }

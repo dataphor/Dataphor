@@ -12,7 +12,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Schema = Alphora.Dataphor.DAE.Schema;
@@ -41,11 +40,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Evaluate
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			ListValue LList = new ListValue(AProcess, ListType);
+			ListValue LList = new ListValue(AProgram.ValueManager, ListType);
 			for (int LIndex = 0; LIndex < NodeCount; LIndex++)
-				LList.Add(Nodes[LIndex].Execute(AProcess));
+				LList.Add(Nodes[LIndex].Execute(AProgram));
 			return LList;
 		}
 		
@@ -71,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = ((Schema.ListType)Nodes[0].DataType).ElementType;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null || AArgument2 == null)
@@ -81,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (ByReference)
 				return ((ListValue)AArgument1)[(int)AArgument2];
 
-			return DataValue.CopyValue(AProcess, ((ListValue)AArgument1)[(int)AArgument2]);
+			return DataValue.CopyValue(AProgram.ValueManager, ((ListValue)AArgument1)[(int)AArgument2]);
 		}
 
 		public override Statement EmitStatement(EmitMode AMode)
@@ -97,7 +96,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Count(const AList : list) : integer;	
 	public class ListCountNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -111,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator Clear(var AList : list);
 	public class ListClearNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			((ListValue)AArgument1).Clear();
 			return null;
@@ -134,7 +133,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineDataType(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			return ((ListValue)AArgument1).Add(AArgument2);
 		}
@@ -156,7 +155,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.DetermineDataType(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2, object AArgument3)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2, object AArgument3)
 		{
 			((ListValue)AArgument1).Insert((int)AArgument3, AArgument2);
 			return null;
@@ -166,7 +165,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator RemoveAt(var AList : list, const AIndex : integer);
 	public class ListRemoveAtNode : BinaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			((ListValue)AArgument1).RemoveAt((int)AArgument2);
 			return null;
@@ -221,7 +220,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 
-		protected object InternalSearch(ServerProcess AProcess, ListValue AList, object AValue, int AStartIndex, int ALength, int AIncrementor)
+		protected object InternalSearch(Program AProgram, ListValue AList, object AValue, int AStartIndex, int ALength, int AIncrementor)
 		{
 			if (ALength < 0)
 				throw new RuntimeException(RuntimeException.Codes.InvalidLength, ErrorSeverity.Application);
@@ -231,29 +230,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			int LStartIndex = Math.Max(Math.Min(AStartIndex, AList.Count() - 1), 0);
 			int LEndIndex = Math.Max(Math.Min(AStartIndex + ((ALength - 1) * AIncrementor), AList.Count() - 1), 0);
 			
-			AProcess.Stack.Push(AValue);
+			AProgram.Stack.Push(AValue);
 			try
 			{
 				int LIndex = LStartIndex;
 				while (((AIncrementor > 0) && (LIndex <= LEndIndex)) || ((AIncrementor < 0) && (LIndex >= LEndIndex)))
 				{
-					AProcess.Stack.Push(AList[LIndex]);
+					AProgram.Stack.Push(AList[LIndex]);
 					try
 					{
-						object LValue = FEqualNode.Execute(AProcess);
+						object LValue = FEqualNode.Execute(AProgram);
 						if ((LValue != null) && (bool)LValue)
 							return LIndex;
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 					LIndex += AIncrementor;
 				}
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 
 			return -1;
@@ -263,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	// operator IndexOf(const AList : list, const AValue : generic);
 	public class ListIndexOfNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -271,14 +270,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			ListValue LList = (ListValue)AArguments[0];
-			return InternalSearch(AProcess, LList, AArguments[1], 0, LList.Count(), 1);
+			return InternalSearch(AProgram, LList, AArguments[1], 0, LList.Count(), 1);
 		}
 	}
 
 	// operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer);
 	public class ListIndexOfStartNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
@@ -286,28 +285,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			ListValue LList = (ListValue)AArguments[0];
-			return InternalSearch(AProcess, LList, AArguments[1], (int)AArguments[2], LList.Count(), 1);
+			return InternalSearch(AProgram, LList, AArguments[1], (int)AArguments[2], LList.Count(), 1);
 		}
 	}
 
 	// operator IndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer, const ALength : Integer);
 	public class ListIndexOfStartLengthNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
 				return null;
 			#endif
 			
-			return InternalSearch(AProcess, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], 1);
+			return InternalSearch(AProgram, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], 1);
 		}
 	}
 
 	// operator LastIndexOf(const AList : list, const AValue : generic);
 	public class ListLastIndexOfNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -315,14 +314,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			ListValue LList = (ListValue)AArguments[0];
-			return InternalSearch(AProcess, LList, AArguments[1], LList.Count() - 1, LList.Count(), -1);
+			return InternalSearch(AProgram, LList, AArguments[1], LList.Count() - 1, LList.Count(), -1);
 		}
 	}
 
 	// operator LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer);
 	public class ListLastIndexOfStartNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null)
@@ -330,21 +329,21 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 			
 			ListValue LList = (ListValue)AArguments[0];
-			return InternalSearch(AProcess, LList, AArguments[1], (int)AArguments[2], LList.Count(), -1);
+			return InternalSearch(AProgram, LList, AArguments[1], (int)AArguments[2], LList.Count(), -1);
 		}
 	}
 
 	// operator LastIndexOf(const AList : list, const AValue : generic, const AStartIndex : Integer, const ALength : Integer);
 	public class ListLastIndexOfStartLengthNode : BaseListIndexOfNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null || AArguments[2] == null || AArguments[3] == null)
 				return null;
 			#endif
 			
-			return InternalSearch(AProcess, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], -1);
+			return InternalSearch(AProgram, (ListValue)AArguments[0], AArguments[1], (int)AArguments[2], (int)AArguments[3], -1);
 		}
 	}
 
@@ -397,19 +396,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			ListValue LList = (ListValue)AArgument1;
 			int LListIndex = -1;
-			AProcess.Stack.Push(AArgument2);
+			AProgram.Stack.Push(AArgument2);
 			try
 			{
 				for (int LIndex = 0; LIndex < LList.Count(); LIndex++)
 				{
-					AProcess.Stack.Push(LList[LIndex]);
+					AProgram.Stack.Push(LList[LIndex]);
 					try
 					{
-						object LValue = FEqualNode.Execute(AProcess);
+						object LValue = FEqualNode.Execute(AProgram);
 						if ((LValue != null) && (bool)LValue)
 						{
 							LListIndex = LIndex;
@@ -418,13 +417,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 
 			((ListValue)AArgument1).RemoveAt(LListIndex);
@@ -481,7 +480,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			ListValue LLeftList = (ListValue)AArgument1;
 			ListValue LRightList = (ListValue)AArgument2;
@@ -495,13 +494,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			{
 				for (int LIndex = 0; LIndex < LLeftList.Count(); LIndex++)
 				{
-					AProcess.Stack.Push(LLeftList[LIndex]);
+					AProgram.Stack.Push(LLeftList[LIndex]);
 					try
 					{
-						AProcess.Stack.Push(LRightList[LIndex]);
+						AProgram.Stack.Push(LRightList[LIndex]);
 						try
 						{
-							object LValue = FEqualNode.Execute(AProcess);
+							object LValue = FEqualNode.Execute(AProgram);
 							#if NILPROPOGATION
 							if ((LValue == null))
 								return null;
@@ -513,12 +512,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 			}
@@ -580,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { FTableVar.Columns[LSequenceColumn.Name] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
@@ -592,20 +591,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return ASequenceName + (ASequencePrefix == 0 ? "" : ASequencePrefix.ToString());
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 				
-				using (ListValue LListValue = Nodes[0].Execute(AProcess) as ListValue)
+				using (ListValue LListValue = Nodes[0].Execute(AProgram) as ListValue)
 				{
 					if (LListValue.DataType.ElementType is Schema.RowType)
 					{
 						for (int LIndex = 0; LIndex < LListValue.Count(); LIndex++)
 						{
-							Row LRow = new Row(AProcess, DataType.RowType);
+							Row LRow = new Row(AProgram.ValueManager, DataType.RowType);
 							(LListValue[LIndex] as Row).CopyTo(LRow);
 							LRow[DataType.RowType.Columns.Count - 1] = LIndex;
 							LResult.Insert(LRow);
@@ -615,7 +614,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					{
 						for (int LIndex = 0; LIndex < LListValue.Count(); LIndex++)
 						{
-							Row LRow = new Row(AProcess, DataType.RowType);
+							Row LRow = new Row(AProgram.ValueManager, DataType.RowType);
 							LRow[0] = LListValue[LIndex];
 							LRow[1] = LIndex;
 							LResult.Insert(LRow);
@@ -643,46 +642,46 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FDataType = new Schema.ListType(((Schema.CursorType)Nodes[0].DataType).TableType.RowType);
 		}
 		
-		protected bool CursorNext(ServerProcess AProcess, Cursor ACursor)
+		protected bool CursorNext(Program AProgram, Cursor ACursor)
 		{
-			ACursor.SwitchContext(AProcess);
+			ACursor.SwitchContext(AProgram);
 			try
 			{
 				return ACursor.Table.Next();
 			}
 			finally
 			{
-				ACursor.SwitchContext(AProcess);
+				ACursor.SwitchContext(AProgram);
 			}
 		}
 		
-		protected Row CursorSelect(ServerProcess AProcess, Cursor ACursor)
+		protected Row CursorSelect(Program AProgram, Cursor ACursor)
 		{
-			ACursor.SwitchContext(AProcess);
+			ACursor.SwitchContext(AProgram);
 			try
 			{
 				return ACursor.Table.Select();
 			}
 			finally
 			{
-				ACursor.SwitchContext(AProcess);
+				ACursor.SwitchContext(AProgram);
 			}
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			Cursor LCursor = AProcess.Plan.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(AProcess)).ID);
+			Cursor LCursor = AProgram.CursorManager.GetCursor(((CursorValue)Nodes[0].Execute(AProgram)).ID);
 			try
 			{
-				ListValue LListValue = new ListValue(AProcess, (Schema.IListType)FDataType);
-				while (CursorNext(AProcess, LCursor))
-					LListValue.Add(CursorSelect(AProcess, LCursor));
+				ListValue LListValue = new ListValue(AProgram.ValueManager, (Schema.IListType)FDataType);
+				while (CursorNext(AProgram, LCursor))
+					LListValue.Add(CursorSelect(AProgram, LCursor));
 
 				return LListValue;
 			}
 			finally
 			{
-				AProcess.Plan.CursorManager.CloseCursor(LCursor.ID);
+				AProgram.CursorManager.CloseCursor(LCursor.ID);
 			}
 		}
 	}

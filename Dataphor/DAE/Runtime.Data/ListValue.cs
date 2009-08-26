@@ -8,14 +8,11 @@ using System.IO;
 using System.Text;
 using System.Collections;
 
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Streams;
+
 	public class DataTypeList : System.Object
 	{
 		public DataTypeList() : base() {}
@@ -59,12 +56,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class ListValue : DataValue
 	{
-		public ListValue(IServerProcess AProcess, Schema.IListType ADataType) : base(AProcess, ADataType) 
+		public ListValue(IValueManager AManager, Schema.IListType ADataType) : base(AManager, ADataType) 
 		{
 			FList = new NativeList();
 		}
 
-		public ListValue(IServerProcess AProcess, Schema.IListType ADataType, NativeList AList) : base(AProcess, ADataType)
+		public ListValue(IValueManager AManager, Schema.IListType ADataType, NativeList AList) : base(AManager, ADataType)
 		{
 			FList = AList;
 		}
@@ -147,7 +144,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (FList.Values[LIndex] != null)
 					{
 						if (!DataType.ElementType.Equals(FList.DataTypes[LIndex]))
-							LSize += Process.DataTypes.SystemString.GetConveyor(Process).GetSize(FList.DataTypes[LIndex].Name); // write the name of the data type of the value
+							LSize += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(FList.DataTypes[LIndex].Name); // write the name of the data type of the value
 							
 						LScalarType = FList.DataTypes[LIndex] as Schema.ScalarType;
 						if ((LScalarType != null) && !LScalarType.IsCompound)
@@ -160,7 +157,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									if (LStreamID != StreamID.Null)
 									{
-										LStream = Process.Open((StreamID)FList.Values[LIndex], LockMode.Exclusive);
+										LStream = Manager.StreamManager.Open((StreamID)FList.Values[LIndex], LockMode.Exclusive);
 										FWriteList[LIndex] = LStream;
 										LSize += sizeof(int) + (int)LStream.Length;
 									}
@@ -177,7 +174,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else
 							{
-								Streams.Conveyor LConveyor = LScalarType.GetConveyor(Process);
+								Streams.Conveyor LConveyor = Manager.GetConveyor(LScalarType);
 								if (LConveyor.IsStreaming)
 								{
 									LStream = new MemoryStream(64);
@@ -196,7 +193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						else
 						{
-							LElement = DataValue.FromNativeList(Process, DataType, FList, LIndex);
+							LElement = DataValue.FromNativeList(Manager, DataType, FList, LIndex);
 							FElementWriteList[LIndex] = LElement;
 							LElementSize = LElement.GetPhysicalSize(AExpandStreams);
 							FWriteList[LIndex] = LElementSize;
@@ -220,8 +217,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			AOffset++;
 				
 			Streams.Conveyor LStringConveyor = null;
-			Streams.Conveyor LInt64Conveyor = Process.DataTypes.SystemLong.GetConveyor(Process);
-			Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+			Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+			Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 			LInt32Conveyor.Write(Count(), ABuffer, AOffset); // Write the number of elements in the list
 			AOffset += sizeof(int);
 
@@ -264,7 +261,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									ABuffer[AOffset] = (byte)5; // Write the native specialized value indicator
 									AOffset++;
 									if (LStringConveyor == null)
-										LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+										LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 									LElementSize = LStringConveyor.GetSize(FList.DataTypes[LIndex].Name);
 									LStringConveyor.Write(FList.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 									AOffset += LElementSize;
@@ -297,13 +294,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
 								AOffset++;
 								if (LStringConveyor == null)
-									LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+									LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 								LElementSize = LStringConveyor.GetSize(FList.DataTypes[LIndex].Name);
 								LStringConveyor.Write(FList.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 								AOffset += LElementSize;
 							}
 
-							LConveyor = LScalarType.GetConveyor(Process);
+							LConveyor = Manager.GetConveyor(LScalarType);
 							if (LConveyor.IsStreaming)
 							{
 								LStream = (Stream)FWriteList[LIndex];
@@ -334,7 +331,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
 							AOffset++;
 							if (LStringConveyor == null)
-								LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+								LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 							LElementSize = LStringConveyor.GetSize(FList.DataTypes[LIndex].Name);
 							LStringConveyor.Write(FList.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 							AOffset += LElementSize;
@@ -371,8 +368,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					AOffset++;
 						
 					Streams.Conveyor LStringConveyor = null;
-					Streams.Conveyor LInt64Conveyor = Process.DataTypes.SystemLong.GetConveyor(Process);
-					Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+					Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+					Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 					int LCount = (int)LInt32Conveyor.Read(ABuffer, AOffset); // Read the number of elements in the list
 					AOffset += sizeof(int);
 
@@ -404,7 +401,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								LScalarType = DataType.ElementType as Schema.ScalarType;
 								if ((LScalarType != null) && !LScalarType.IsCompound)
 								{
-									LConveyor = LScalarType.GetConveyor(Process);
+									LConveyor = Manager.GetConveyor(LScalarType);
 									if (LConveyor.IsStreaming)
 									{
 										LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
@@ -428,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
 									FList.DataTypes.Add(DataType.ElementType);
-									using (DataValue LValue = DataValue.FromPhysical(Process, DataType.ElementType, ABuffer, AOffset))
+									using (DataValue LValue = DataValue.FromPhysical(Manager, DataType.ElementType, ABuffer, AOffset))
 									{
 										FList.Values.Add(LValue.AsNative);
 										LValue.ValuesOwned = false;
@@ -445,8 +442,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									{
 										LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 										AOffset += sizeof(int);
-										LStreamID = Process.Allocate();
-										LStream = Process.Open(LStreamID, LockMode.Exclusive);
+										LStreamID = Manager.StreamManager.Allocate();
+										LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
 										LStream.Write(ABuffer, AOffset, LElementSize);
 										LStream.Close();
 										FList.DataTypes.Add(LScalarType);
@@ -468,12 +465,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							
 							case 4 : // native specialized value
 								LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-								LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
+								LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
 								AOffset += LStringConveyor.GetSize(LDataTypeName);
 								LScalarType = LDataType as Schema.ScalarType;
 								if ((LScalarType != null) && !LScalarType.IsCompound)
 								{
-									LConveyor = LScalarType.GetConveyor(Process);
+									LConveyor = Manager.GetConveyor(LScalarType);
 									if (LConveyor.IsStreaming)
 									{
 										LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
@@ -497,7 +494,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
 									FList.DataTypes.Add(LDataType);
-									using (DataValue LValue = DataValue.FromPhysical(Process, LDataType, ABuffer, AOffset))
+									using (DataValue LValue = DataValue.FromPhysical(Manager, LDataType, ABuffer, AOffset))
 									{
 										FList.Values.Add(LValue.AsNative);
 										LValue.ValuesOwned = false;
@@ -508,7 +505,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							
 							case 5 : // non-native specialized value
 								LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-								LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
+								LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
 								AOffset += LStringConveyor.GetSize(LDataTypeName);
 								LScalarType = LDataType as Schema.ScalarType;
 								if (LScalarType != null)
@@ -517,8 +514,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									{
 										LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 										AOffset += sizeof(int);
-										LStreamID = Process.Allocate();
-										LStream = Process.Open(LStreamID, LockMode.Exclusive);
+										LStreamID = Manager.StreamManager.Allocate();
+										LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
 										LStream.Write(ABuffer, AOffset, LElementSize);
 										LStream.Close();
 										FList.DataTypes.Add(LScalarType);
@@ -545,7 +542,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public DataValue GetValue(int AIndex)
 		{
-			return FromNativeList(Process, DataType, FList, AIndex);
+			return FromNativeList(Manager, DataType, FList, AIndex);
 		}
 		
 		public void SetValue(int AIndex, DataValue AValue)
@@ -559,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{ 
 				if (FList.DataTypes[AIndex] is Schema.IScalarType)
 					return FList.Values[AIndex];
-				return FromNativeList(Process, DataType, FList, AIndex); 
+				return FromNativeList(Manager, DataType, FList, AIndex); 
 			}
 			set
 			{
@@ -583,7 +580,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			if (FList.Values[AIndex] != null)
 			{
-				DataValue.DisposeNative(Process, FList.DataTypes[AIndex], FList.Values[AIndex]);
+				DataValue.DisposeNative(Manager, FList.DataTypes[AIndex], FList.Values[AIndex]);
 			}
 		}
 		
@@ -643,7 +640,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			for (int LIndex = 0; LIndex < FList.DataTypes.Count; LIndex++)
 			{
 				LNewList.DataTypes.Add(FList.DataTypes[LIndex]);
-				LNewList.Values.Add(DataValue.CopyNative(Process, FList.DataTypes[LIndex], FList.Values[LIndex]));
+				LNewList.Values.Add(DataValue.CopyNative(Manager, FList.DataTypes[LIndex], FList.Values[LIndex]));
 			}
 			return LNewList;
 		}

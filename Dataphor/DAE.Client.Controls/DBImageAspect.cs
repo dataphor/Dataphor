@@ -212,7 +212,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			{
 				if (value != null)
 				{
-					using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(Link.DataSet.Process, Link.DataSet.Process.DataTypes.SystemGraphic))
+					using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(Link.DataSet.Process.ValueManager, Link.DataSet.Process.DataTypes.SystemGraphic))
 					{
 						using (Stream LStream = LNewValue.OpenStream())
 						{

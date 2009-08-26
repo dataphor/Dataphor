@@ -120,7 +120,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					APlan.ExitRowContext();
 				}
 				
-				Order = new Schema.Order(TableVar.FindClusteringKey(), APlan);
+				Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
 			}
 			else
 			{
@@ -190,9 +190,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			ProjectTable LTable = new ProjectTable(this, AProcess);
+			ProjectTable LTable = new ProjectTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -206,22 +206,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Change
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (PropagateChange)
 			{
 				// select the current row from the base node using the given row
-				Row LSourceRow = new Row(AProcess, SourceNode.DataType.RowType);
+				Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
 				try
 				{
 					ANewRow.CopyTo(LSourceRow);
 					Row LCurrentRow = null;
-					if (!AProcess.ServerSession.Server.IsRepository)
-						LCurrentRow = SourceNode.Select(AProcess, LSourceRow);
+					if (!AProgram.ServerProcess.ServerSession.Server.IsRepository)
+						LCurrentRow = SourceNode.Select(AProgram, LSourceRow);
 					try
 					{
 						if (LCurrentRow == null)
-							LCurrentRow = new Row(AProcess, SourceNode.DataType.RowType);
+							LCurrentRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
 						ANewRow.CopyTo(LCurrentRow);
 						BitArray LValueFlags = AValueFlags != null ? new BitArray(LCurrentRow.DataType.Columns.Count) : null;
 						if (LValueFlags != null)
@@ -230,7 +230,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								int LRowIndex = ANewRow.DataType.Columns.IndexOfName(LCurrentRow.DataType.Columns[LIndex].Name);
 								LValueFlags[LIndex] = LRowIndex >= 0 ? AValueFlags[LRowIndex] : false;
 							}
-						bool LChanged = SourceNode.Change(AProcess, AOldRow, LCurrentRow, LValueFlags, AColumnName);
+						bool LChanged = SourceNode.Change(AProgram, AOldRow, LCurrentRow, LValueFlags, AColumnName);
 						if (LChanged)
 							LCurrentRow.CopyTo(ANewRow);
 						return LChanged;
@@ -248,7 +248,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow) 
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow) 
 		{
 			Schema.RowType LRowType = new Schema.RowType();
 			
@@ -257,11 +257,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			foreach (Schema.Column LColumn in SourceNode.DataType.Columns)
 				if (!DataType.Columns.ContainsName(LColumn.Name))	
 					LRowType.Columns.Add(LColumn.Copy());
-			Row LRow = new Row(AProcess, LRowType);
+			Row LRow = new Row(AProgram.ValueManager, LRowType);
 			try
 			{
 				ARow.CopyTo(LRow);
-				base.JoinApplicationTransaction(AProcess, LRow);
+				base.JoinApplicationTransaction(AProgram, LRow);
 			}
 			finally
 			{

@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class AdornTable : Table
     {
-        public AdornTable(AdornNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+        public AdornTable(AdornNode ANode, Program AProgram) : base(ANode, AProgram){}
         
         public new AdornNode Node { get { return (AdornNode)FNode; } }
         
@@ -32,10 +32,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
 			try
 			{
-				FSourceRow = new Row(Process, FSourceTable.DataType.RowType);
+				FSourceRow = new Row(Manager, FSourceTable.DataType.RowType);
 			}
 			catch
 			{

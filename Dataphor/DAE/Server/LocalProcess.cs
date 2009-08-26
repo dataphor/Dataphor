@@ -37,6 +37,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FSession.FServer.OnCacheCleared += new CacheClearedEvent(CacheCleared);
 			FSession.FServer.OnCacheClearing += new CacheClearedEvent(CacheClearing);
 			CacheCleared(FSession.FServer);
+			FValueManager = new ValueManager(FInternalProcess, this);
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -62,6 +63,7 @@ namespace Alphora.Dataphor.DAE.Server
 				FInternalProcess = null;
 			}
 			
+			FValueManager = null;
 			FProcess = null;
 			FProcessID = -1;
 			FSession = null;
@@ -174,6 +176,9 @@ namespace Alphora.Dataphor.DAE.Server
 		protected internal ServerProcess FInternalProcess;
 
 		protected internal LocalStreamManager FStreamManager;
+		
+		private IValueManager FValueManager;
+		public IValueManager ValueManager { get { return FValueManager; } }
 
 		protected internal LocalSession FSession;		
 		public IServerSession Session { get { return FSession; } }
@@ -239,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)
 						LRowType.Columns.Add(new Schema.Column(LParam.Name, LParam.DataType));
-				using (Row LRow = new Row(this, LRowType))
+				using (Row LRow = new Row(this.ValueManager, LRowType))
 				{
 					LRow.ValuesOwned = false;
 					RemoteParamData LParams = new RemoteParamData();
@@ -270,7 +275,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.RowType LRowType = new Schema.RowType();
 				foreach (DataParam LParam in AParams)
 					LRowType.Columns.Add(new Schema.Column(LParam.Name, LParam.DataType));
-				using (Row LRow = new Row(this, LRowType))
+				using (Row LRow = new Row(this.ValueManager, LRowType))
 				{
 					LRow.ValuesOwned = false;
 					LRow.AsPhysical = ARemoteParams.Data.Data;
@@ -278,7 +283,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if (AParams[LIndex].Modifier != Modifier.In)
 						{
 							if (LRow.HasValue(LIndex))
-								AParams[LIndex].Value = DataValue.CopyValue(FInternalProcess, LRow[LIndex]);
+								AParams[LIndex].Value = DataValue.CopyValue(FInternalProcess.ValueManager, LRow[LIndex]);
 							else
 								AParams[LIndex].Value = null;
 						}
@@ -450,7 +455,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LocalExpressionPlan LLocalPlan = new LocalExpressionPlan(this, LPlan, LPlanDescriptor, AParams);
 			try
 			{
-				return LResult == null ? null : DataValue.FromPhysical(this, LLocalPlan.DataType, LResult, 0);
+				return LResult == null ? null : DataValue.FromPhysical(this.ValueManager, LLocalPlan.DataType, LResult, 0);
 			}
 			finally
 			{

@@ -8,19 +8,18 @@ using System;
 using System.IO;
 using System.Collections;
 	
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Schema = Alphora.Dataphor.DAE.Schema;
-
 namespace Alphora.Dataphor.DAE.Device.Memory
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	/// <summary> In-memory storage device. </summary>
 	public class MemoryDevice : Schema.Device
 	{
@@ -69,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 					CursorCapability.Searchable |
 					(APlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
 				LNode.CursorIsolation = APlan.Plan.CursorContext.CursorIsolation;
-				LNode.Order = new Schema.Order(LNode.TableVar.FindClusteringKey(), APlan.Plan);
+				LNode.Order = Compiler.OrderFromKey(APlan.Plan, Compiler.FindClusteringKey(APlan.Plan, LNode.TableVar));
 				return new DevicePlanNode(LNode);
 			}
 			else if ((APlanNode is OrderNode) && (APlanNode.Nodes[0] is BaseTableVarNode) && (APlan.Plan.CursorContext.CursorType != CursorType.Static))
@@ -81,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 				bool LIsSupported = false;
 				foreach (Schema.Key LKey in LTableVarNode.TableVar.Keys)
 				{
-					LTableOrder = new Schema.Order(LKey, APlan.Plan);
+					LTableOrder = Compiler.OrderFromKey(APlan.Plan, LKey);
 					if (LNode.RequestedOrder.Equivalent(LTableOrder))
 					{
 						LNode.PhysicalOrder = LTableOrder;
@@ -190,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			{
 				while (FTables.Count > 0)
 				{
-					FTables[0].Drop(AProcess);
+					FTables[0].Drop(AProcess.ValueManager);
 					FTables.RemoveAt(0);
 				}
 
@@ -422,17 +421,17 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			{
 				int LIndex = LTables.IndexOf(ATableVar);
 				if (LIndex < 0)
-					LIndex = LTables.Add(new NativeTable(ServerProcess, ATableVar));
+					LIndex = LTables.Add(new NativeTable(ServerProcess.ValueManager, ATableVar));
 				return LTables[LIndex];
 			}
 		}
 
-		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
 		{
 			PlanNode LPlanNode = ADevicePlan.Node;
 			if (LPlanNode is BaseTableVarNode)
 			{
-				MemoryScan LScan = new MemoryScan((BaseTableVarNode)LPlanNode, ServerProcess, this);
+				MemoryScan LScan = new MemoryScan(AProgram, this, (BaseTableVarNode)LPlanNode);
 				try
 				{
 					LScan.NativeTable = EnsureNativeTable(((BaseTableVarNode)LPlanNode).TableVar);
@@ -448,7 +447,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			}
 			else if (LPlanNode is OrderNode)
 			{
-				MemoryScan LScan = new MemoryScan((BaseTableVarNode)LPlanNode.Nodes[0], ServerProcess, this);
+				MemoryScan LScan = new MemoryScan(AProgram, this, (BaseTableVarNode)LPlanNode.Nodes[0]);
 				try
 				{
 					LScan.NativeTable = EnsureNativeTable(((BaseTableVarNode)LPlanNode.Nodes[0]).TableVar);
@@ -487,7 +486,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 						#if USEMEMORYDEVICETRANSACTIONS
 						RemoveTransactionReferences(LNativeTable.TableVar);
 						#endif
-						LNativeTable.Drop(ServerProcess);
+						LNativeTable.Drop(AProgram.ValueManager);
 						LTables.RemoveAt(LTableIndex);
 					}
 				}
@@ -497,14 +496,14 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 				throw new DeviceException(DeviceException.Codes.InvalidExecuteRequest, Device.Name, LPlanNode.ToString());
 		}
 		
-		protected override void InternalInsertRow(Schema.TableVar ATable, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATable, Row ARow, BitArray AValueFlags)
 		{
 			NativeTable LTable = GetTables(ATable.Scope)[ATable];
 			
 			if ((Device.MaxRowCount >= 0) && (LTable.RowCount >= Device.MaxRowCount) && (!InTransaction || !ServerProcess.CurrentTransaction.InRollback))
 				throw new DeviceException(DeviceException.Codes.MaxRowCountExceeded, Device.MaxRowCount.ToString(), ATable.DisplayName, Device.DisplayName);
 
-			LTable.Insert(ServerProcess, ARow);
+			LTable.Insert(ServerProcess.ValueManager, ARow);
 
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
@@ -512,18 +511,18 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 			#endif
 		}
 		
-		protected override void InternalUpdateRow(Schema.TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
-			GetTables(ATable.Scope)[ATable].Update(ServerProcess, AOldRow, ANewRow);
+			GetTables(ATable.Scope)[ATable].Update(ServerProcess.ValueManager, AOldRow, ANewRow);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
 				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (Row)ANewRow.Copy(), (Row)AOldRow.Copy()));
 			#endif
 		}
 		
-		protected override void InternalDeleteRow(Schema.TableVar ATable, Row ARow)
+		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATable, Row ARow)
 		{
-			GetTables(ATable.Scope)[ATable].Delete(ServerProcess, ARow);
+			GetTables(ATable.Scope)[ATable].Delete(ServerProcess.ValueManager, ARow);
 			#if USEMEMORYDEVICETRANSACTIONS
 			if (InTransaction && !ServerProcess.NonLogged && !ServerProcess.CurrentTransaction.InRollback)
 				Transactions.CurrentTransaction().Operations.Add(new InsertOperation(ATable, (Row)ARow.Copy()));
@@ -533,7 +532,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 	
 	public class MemoryScan : TableScan
 	{
-		public MemoryScan(TableNode ANode, ServerProcess AProcess, MemoryDeviceSession ASession) : base(ANode, AProcess)
+		public MemoryScan(Program AProgram, MemoryDeviceSession ASession, TableNode ANode) : base(ANode, AProgram)
 		{
 			FSession = ASession;
 		}

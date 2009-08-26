@@ -11,19 +11,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Schema;
-using Alphora.Dataphor.DAE.Device.Memory;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-
 namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Device.Memory;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	public sealed class ApplicationTransactionUtility : System.Object
 	{
 		public static string NameFromID(Guid AID)
@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			foreach (Operation LOperation in ATransaction.Operations)
 				try
 				{
-					LOperation.Dispose(AProcess);
+					LOperation.Dispose(AProcess.ValueManager);
 				}
 				catch (Exception E)
 				{
@@ -60,7 +60,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				try
 				{
 					if (LTableMap.TableVar is Schema.BaseTableVar)
-						ATransaction.Tables[LTableMap.TableVar].Drop(AProcess);
+						ATransaction.Tables[LTableMap.TableVar].Drop(AProcess.ValueManager);
 				}
 				catch (Exception E)
 				{
@@ -69,7 +69,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				try
 				{
 					if (LTableMap.DeletedTableVar is Schema.BaseTableVar)
-						ATransaction.Tables[LTableMap.DeletedTableVar].Drop(AProcess);
+						ATransaction.Tables[LTableMap.DeletedTableVar].Drop(AProcess.ValueManager);
 				}
 				catch (Exception E)
 				{
@@ -209,23 +209,23 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public static void JoinExpression(ServerProcess AProcess, TableNode APopulateNode, TableNode ATranslatedNode)
+		public static void JoinExpression(Program AProgram, TableNode APopulateNode, TableNode ATranslatedNode)
 		{
-			ApplicationTransaction LTransaction = AProcess.GetApplicationTransaction();
+			ApplicationTransaction LTransaction = AProgram.ServerProcess.GetApplicationTransaction();
 			try
 			{
-				LTransaction.BeginPopulateSource(AProcess);
+				LTransaction.BeginPopulateSource(AProgram.ServerProcess);
 				try
 				{
-					using (Table LTable = (Table)APopulateNode.Execute(AProcess))
+					using (Table LTable = (Table)APopulateNode.Execute(AProgram))
 					{
-						Row LRow = new Row(AProcess, LTable.DataType.RowType);
+						Row LRow = new Row(AProgram.ValueManager, LTable.DataType.RowType);
 						try
 						{
 							while (LTable.Next())
 							{
 								LTable.Select(LRow);
-								ATranslatedNode.JoinApplicationTransaction(AProcess, LRow);
+								ATranslatedNode.JoinApplicationTransaction(AProgram, LRow);
 							}
 						}
 						finally
@@ -247,18 +247,32 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public static void PrepareApplicationTransaction(ServerProcess AProcess, Guid AID)
 		{
-			Guid LSaveATID = AProcess.ApplicationTransactionID;
-			if (AProcess.ApplicationTransactionID != AID)
-				AProcess.JoinApplicationTransaction(AID, true);
+			Program LProgram = new Program(AProcess);
+			LProgram.Start(null);
 			try
 			{
-				ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+				PrepareApplicationTransaction(LProgram, AID);
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+		
+		public static void PrepareApplicationTransaction(Program AProgram, Guid AID)
+		{
+			Guid LSaveATID = AProgram.ServerProcess.ApplicationTransactionID;
+			if (AProgram.ServerProcess.ApplicationTransactionID != AID)
+				AProgram.ServerProcess.JoinApplicationTransaction(AID, true);
+			try
+			{
+				ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
 				try
 				{
 					LTransaction.PushGlobalContext();
 					try
 					{
-						ApplicationTransactionDeviceSession LSession = (ApplicationTransactionDeviceSession)AProcess.DeviceConnect(LTransaction.Device);
+						ApplicationTransactionDeviceSession LSession = (ApplicationTransactionDeviceSession)AProgram.DeviceConnect(LTransaction.Device);
 						ApplicationTransactionDeviceTransaction LDeviceTransaction = null;
 						if (LSession.InTransaction)
 							LDeviceTransaction = LSession.Transactions.CurrentTransaction();
@@ -272,7 +286,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								for (int LIndex = 0; LIndex < LTransaction.Operations.Count; LIndex++)
 								{
 									LOperation = LTransaction.Operations[LIndex];
-									LOperation.Apply(AProcess);
+									LOperation.Apply(AProgram);
 									LDeviceTransaction.AppliedOperations.Add(LOperation);
 								}
 								LTransaction.Prepared = true;
@@ -295,22 +309,36 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 			finally
 			{
-				if (AProcess.ApplicationTransactionID != LSaveATID)
-					AProcess.LeaveApplicationTransaction();
+				if (AProgram.ServerProcess.ApplicationTransactionID != LSaveATID)
+					AProgram.ServerProcess.LeaveApplicationTransaction();
 			}
 		}
 		
 		public static void CommitApplicationTransaction(ServerProcess AProcess, Guid AID)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+			Program LProgram = new Program(AProcess);
+			LProgram.Start(null);
+			try
+			{
+				CommitApplicationTransaction(LProgram, AID);
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+		
+		public static void CommitApplicationTransaction(Program AProgram, Guid AID)
+		{
+			ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
 			try
 			{
 				if (!LTransaction.Prepared)
-					PrepareApplicationTransaction(AProcess, AID);
+					PrepareApplicationTransaction(AProgram, AID);
 					
 				LTransaction.Closed = true;
 				
-				EndApplicationTransaction(AProcess, AID);
+				EndApplicationTransaction(AProgram.ServerProcess, AID);
 			}
 			finally
 			{
@@ -320,7 +348,21 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public static void RollbackApplicationTransaction(ServerProcess AProcess, Guid AID)
 		{
-			ApplicationTransaction LTransaction = GetTransaction(AProcess, AID);
+			Program LProgram = new Program(AProcess);
+			LProgram.Start(null);
+			try
+			{
+				RollbackApplicationTransaction(LProgram, AID);
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
+		}
+		
+		public static void RollbackApplicationTransaction(Program AProgram, Guid AID)
+		{
+			ApplicationTransaction LTransaction = GetTransaction(AProgram.ServerProcess, AID);
 			try
 			{
 				Exception LException = null;
@@ -334,12 +376,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						{
 							try
 							{
-								LTransaction.Operations[LIndex].Undo(AProcess);
+								LTransaction.Operations[LIndex].Undo(AProgram);
 							}
 							catch (Exception E)
 							{
 								LException = E;
-								AProcess.ServerSession.Server.LogError(E);
+								AProgram.ServerProcess.ServerSession.Server.LogError(E);
 							}
 						}
 						
@@ -354,7 +396,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				
 				LTransaction.Closed = true;
 
-				EndApplicationTransaction(AProcess, AID);
+				EndApplicationTransaction(AProgram.ServerProcess, AID);
 
 				if (LException != null)
 					throw LException;
@@ -376,12 +418,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class BeginApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments.Length > 0)
-				return AProcess.BeginApplicationTransaction((bool)AArguments[0], (bool)AArguments[1]);
+				return AProgram.ServerProcess.BeginApplicationTransaction((bool)AArguments[0], (bool)AArguments[1]);
 			else
-				return AProcess.BeginApplicationTransaction(false, false);
+				return AProgram.ServerProcess.BeginApplicationTransaction(false, false);
 		}
 	}
 	
@@ -391,11 +433,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class JoinApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Guid LApplicationTransactionID = (Guid)AArguments[0];
 			bool LIsInsert = (bool)AArguments[1];
-			AProcess.JoinApplicationTransaction(LApplicationTransactionID, LIsInsert);
+			AProgram.ServerProcess.JoinApplicationTransaction(LApplicationTransactionID, LIsInsert);
 			return null;
 		}
 	}
@@ -406,18 +448,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class LeaveApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			AProcess.LeaveApplicationTransaction();
+			AProgram.ServerProcess.LeaveApplicationTransaction();
 			return null;
 		}
 	}
 
 	public class PrepareApplicationTransactionNode : ApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			AProcess.PrepareApplicationTransaction((Guid)AArguments[0]);
+			AProgram.ServerProcess.PrepareApplicationTransaction((Guid)AArguments[0]);
 			return null;
 		}
 	}
@@ -431,10 +473,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	/// </remarks>
 	public class CommitApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Guid LApplicationTransactionID = (Guid)AArguments[0];
-			AProcess.CommitApplicationTransaction(LApplicationTransactionID);
+			AProgram.ServerProcess.CommitApplicationTransaction(LApplicationTransactionID);
 			return null;
 		}
 	}
@@ -446,10 +488,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	///	</remarks>
 	public class RollbackApplicationTransactionNode : CompleteApplicationTransactionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Guid LApplicationTransactionID = (Guid)AArguments[0];
-			AProcess.RollbackApplicationTransaction(LApplicationTransactionID);
+			AProgram.ServerProcess.RollbackApplicationTransaction(LApplicationTransactionID);
 			return null;
 		}
 	}
@@ -792,10 +834,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (ATableMap.SourceTableVar is Schema.BaseTableVar)
 				{
 					if (!Tables.Contains(ATableMap.TableVar))
-						Tables.Add(new NativeTable(AProcess, ATableMap.TableVar));
+						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.TableVar));
 						
 					if ((ATableMap.DeletedTableVar != null) && !Tables.Contains(ATableMap.DeletedTableVar))
-						Tables.Add(new NativeTable(AProcess, ATableMap.DeletedTableVar));
+						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.DeletedTableVar));
 				}
 			}
 			else
@@ -803,9 +845,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				FTableMaps.Add(ATableMap);
 				if (ATableMap.SourceTableVar is Schema.BaseTableVar)
 				{
-					Tables.Add(new NativeTable(AProcess, ATableMap.TableVar));
+					Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.TableVar));
 					if (ATableMap.DeletedTableVar != null)
-						Tables.Add(new NativeTable(AProcess, ATableMap.DeletedTableVar));
+						Tables.Add(new NativeTable(AProcess.ValueManager, ATableMap.DeletedTableVar));
 				}
 			}
 		}
@@ -876,7 +918,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 					else
 					{
-						Device.AddTableVar(AProcess, (Schema.TableVar)AProcess.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(AATTableVar.SourceTableName), AProcess.Plan.NameResolutionPath, new StringCollection()));
+						Device.AddTableVar(AProcess, (Schema.TableVar)AProcess.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(AATTableVar.SourceTableName), AProcess.ServerSession.NameResolutionPath, new StringCollection()));
 						AddTableMap(AProcess, Device.TableMaps[AATTableVar.SourceTableName]);
 					}
 				}
@@ -1044,49 +1086,33 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 			LBlock.Statements.Add(LStatement);
 
-			Plan LCurrentPlan = AProcess.ExecutingPlan.Plan;			
-			ServerStatementPlan LServerPlan = new ServerStatementPlan(AProcess);
+			Plan LPlan = new Plan(AProcess);
 			try
 			{
-				AProcess.PushExecutingPlan(LServerPlan);
+				LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
 				try
 				{
-					LServerPlan.Plan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+					LPlan.PushATCreationContext();
 					try
 					{
-						LServerPlan.Plan.PushATCreationContext();
-						try
-						{
-							PlanNode LPlanNode;
-							try
-							{
-								LPlanNode = Compiler.Bind(LServerPlan.Plan, Compiler.CompileStatement(LServerPlan.Plan, LBlock));
-							}
-							finally
-							{
-								LCurrentPlan.Messages.AddRange(LServerPlan.Plan.Messages); // Propagate compiler exceptions to the outer plan
-							}
-							LServerPlan.Plan.CheckCompiled();
-							LPlanNode.Execute(AProcess);
-						}
-						finally
-						{
-							LServerPlan.Plan.PopATCreationContext();
-						}
+						Program LProgram = new Program(AProcess);
+						LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LBlock));
+						LPlan.CheckCompiled();
+						LProgram.Execute(null);
 					}
 					finally
 					{
-						LServerPlan.Plan.PopSecurityContext();
+						LPlan.PopATCreationContext();
 					}
 				}
 				finally
 				{
-					AProcess.PopExecutingPlan(LServerPlan);
+					LPlan.PopSecurityContext();
 				}
 			}
 			finally
 			{
-				LServerPlan.Dispose();
+				LPlan.Dispose();
 			}
 
 			if (AIsMainTableVar)
@@ -1143,40 +1169,33 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								LBlock.Statements.Add(LAttachStatement);
 							}
 
-				LServerPlan = new ServerStatementPlan(AProcess);
+				LPlan = new Plan(AProcess);
 				try
 				{
-					AProcess.PushExecutingPlan(LServerPlan);
+					LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
 					try
 					{
-						LServerPlan.Plan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+						LPlan.EnterTimeStampSafeContext();
 						try
 						{
-							LServerPlan.Plan.EnterTimeStampSafeContext();
-							try
-							{
-								PlanNode LPlanNode = Compiler.Bind(LServerPlan.Plan, Compiler.CompileStatement(LServerPlan.Plan, LBlock));
-								LServerPlan.Plan.CheckCompiled();
-								LPlanNode.Execute(AProcess);
-							}
-							finally
-							{
-								LServerPlan.Plan.ExitTimeStampSafeContext();
-							}
+							Program LProgram = new Program(AProcess);
+							LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LBlock));
+							LPlan.CheckCompiled();
+							LProgram.Execute(null);
 						}
 						finally
 						{
-							LServerPlan.Plan.PopSecurityContext();
+							LPlan.ExitTimeStampSafeContext();
 						}
 					}
 					finally
 					{
-						AProcess.PopExecutingPlan(LServerPlan);
+						LPlan.PopSecurityContext();
 					}
 				}
 				finally
 				{
-					LServerPlan.Dispose();
+					LPlan.Dispose();
 				}
 			}
 		}
@@ -1253,31 +1272,43 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 						{
 							string[] LObjectNameArray = new string[LObjectNames.Count];
 							LObjectNames.CopyTo(LObjectNameArray, 0);
-							AProcess.Plan.EnterTimeStampSafeContext();
+							Plan LPlan = new Plan(AProcess);
 							try
 							{
-								Compiler.Bind
-								(
-									AProcess.Plan, 
-									Compiler.Compile
-									(
-										AProcess.Plan, 
-										AProcess.Catalog.EmitDropStatement
+								LPlan.EnterTimeStampSafeContext();
+								try
+								{
+									Program LProgram = new Program(AProcess);
+									LProgram.Code = 
+										Compiler.Bind
 										(
-											AProcess.CatalogDeviceSession, 
-											LObjectNameArray, 
-											String.Empty, 
-											true, 
-											false, 
-											true, 
-											true
-										)
-									)
-								).Execute(AProcess);
+											LPlan, 
+											Compiler.Compile
+											(
+												LPlan, 
+												AProcess.Catalog.EmitDropStatement
+												(
+													AProcess.CatalogDeviceSession, 
+													LObjectNameArray, 
+													String.Empty, 
+													true, 
+													false, 
+													true, 
+													true
+												)
+											)
+										);
+									LPlan.CheckCompiled();
+									LProgram.Execute(null);
+								}
+								finally
+								{
+									LPlan.ExitTimeStampSafeContext();
+								}
 							}
 							finally
 							{
-								AProcess.Plan.ExitTimeStampSafeContext();
+								LPlan.Dispose();
 							}
 						}
 					}
@@ -1285,9 +1316,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public Schema.Operator ResolveSourceOperator(ServerProcess AProcess, Schema.Operator ATranslatedOperator)
+		public Schema.Operator ResolveSourceOperator(Plan APlan, Schema.Operator ATranslatedOperator)
 		{
-			return Compiler.ResolveOperator(AProcess.Plan, ATranslatedOperator.SourceOperatorName, ATranslatedOperator.Signature, false, false);
+			return Compiler.ResolveOperator(APlan, ATranslatedOperator.SourceOperatorName, ATranslatedOperator.Signature, false, false);
 		}
 		
 		public void ReportOperatorChange(ServerProcess AProcess, Schema.Operator AOperator)
@@ -1378,14 +1409,25 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 							LObjectNames.Add(LATOperator.Name);
 							string[] LObjectNameArray = new string[LObjectNames.Count];
 							LObjectNames.CopyTo(LObjectNameArray, 0);
-							AProcess.Plan.EnterTimeStampSafeContext();
+							Plan LPlan = new Plan(AProcess);
 							try
 							{
-								Compiler.Bind(AProcess.Plan, Compiler.Compile(AProcess.Plan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNameArray, String.Empty))).Execute(AProcess);
+								LPlan.EnterTimeStampSafeContext();
+								try
+								{
+									Program LProgram = new Program(AProcess);
+									LProgram.Code = Compiler.Bind(LPlan, Compiler.Compile(LPlan, AProcess.Catalog.EmitDropStatement(AProcess.CatalogDeviceSession, LObjectNameArray, String.Empty)));
+									LPlan.CheckCompiled();
+									LProgram.Execute(null);
+								}
+								finally
+								{
+									LPlan.ExitTimeStampSafeContext();
+								}
 							}
 							finally
 							{
-								AProcess.Plan.ExitTimeStampSafeContext();
+								LPlan.Dispose();
 							}
 						}
 					}
@@ -1430,13 +1472,33 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 								}
 								catch
 								{
-									Compiler.Bind(AProcess.Plan, new DropTableNode(LDeletedTableVar, false)).Execute(AProcess);
+									Plan LPlan = new Plan(AProcess);
+									try							 
+									{
+										Program LProgram = new Program(AProcess);
+										LProgram.Code = Compiler.Bind(LPlan, new DropTableNode(LDeletedTableVar, false));
+										LProgram.Execute(null);
+									}
+									finally
+									{
+										LPlan.Dispose();
+									}
 									throw;
 								}
 							}
 							catch
 							{
-								Compiler.Bind(AProcess.Plan, new DropTableNode(LTargetTableVar, false)).Execute(AProcess);
+								Plan LPlan = new Plan(AProcess);
+								try							 
+								{
+									Program LProgram = new Program(AProcess);
+									LProgram.Code = Compiler.Bind(LPlan, new DropTableNode(LTargetTableVar, false));
+									LProgram.Execute(null);
+								}
+								finally
+								{
+									LPlan.Dispose();
+								}
 								throw;
 							}
 						}
@@ -1460,83 +1522,91 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			ApplicationTransactions[AProcess.ApplicationTransactionID].PushGlobalContext();
 			try
 			{
-				AProcess.Plan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
+				Plan LPlan = new Plan(AProcess);
 				try
 				{
-					AProcess.Plan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+					LPlan.PushCursorContext(new CursorContext(DAE.CursorType.Static, CursorCapability.Navigable | CursorCapability.Updateable, CursorIsolation.Isolated));
 					try
 					{
-						ATableMap.RetrieveNode = (BaseTableVarNode)Compiler.Bind(AProcess.Plan, Compiler.EmitBaseTableVarNode(AProcess.Plan, ASourceTableVar));
-						ATableMap.DeletedRetrieveNode = (BaseTableVarNode)Compiler.Bind(AProcess.Plan, Compiler.EmitBaseTableVarNode(AProcess.Plan, ATableMap.DeletedTableVar));
+						LPlan.PushSecurityContext(new SecurityContext(ASourceTableVar.Owner));
+						try
+						{
+							ATableMap.RetrieveNode = (BaseTableVarNode)Compiler.Bind(LPlan, Compiler.EmitBaseTableVarNode(LPlan, ASourceTableVar));
+							ATableMap.DeletedRetrieveNode = (BaseTableVarNode)Compiler.Bind(LPlan, Compiler.EmitBaseTableVarNode(LPlan, ATableMap.DeletedTableVar));
+						}
+						finally
+						{
+							LPlan.PopSecurityContext();
+						}
 					}
 					finally
 					{
-						AProcess.Plan.PopSecurityContext();
+						LPlan.PopCursorContext();
 					}
-				}
-				finally
-				{
-					AProcess.Plan.PopCursorContext();
-				}
 
-				Schema.Key LClusteringKey = ATableMap.TableVar.FindClusteringKey();
-				Schema.RowType LOldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
-				Schema.RowType LOldKeyType = new Schema.RowType(LClusteringKey.Columns, Keywords.Old);
-				Schema.RowType LKeyType = new Schema.RowType(LClusteringKey.Columns);
-				AProcess.Plan.EnterRowContext();
-				try
-				{
-					AProcess.Plan.Symbols.Push(new Symbol(LOldRowType));
+					Schema.Key LClusteringKey = Compiler.FindClusteringKey(LPlan, ATableMap.TableVar);
+					Schema.RowType LOldRowType = new Schema.RowType(ATableMap.TableVar.DataType.Columns, Keywords.Old);
+					Schema.RowType LOldKeyType = new Schema.RowType(LClusteringKey.Columns, Keywords.Old);
+					Schema.RowType LKeyType = new Schema.RowType(LClusteringKey.Columns);
+					LPlan.EnterRowContext();
 					try
 					{
-						ATableMap.HasDeletedRowNode =
-							Compiler.Bind
-							(
-								AProcess.Plan,
-								Compiler.EmitUnaryNode
+						LPlan.Symbols.Push(new Symbol(LOldRowType));
+						try
+						{
+							ATableMap.HasDeletedRowNode =
+								Compiler.Bind
 								(
-									AProcess.Plan,
-									Instructions.Exists,
-									Compiler.EmitRestrictNode
-									(
-										AProcess.Plan,
-										Compiler.EmitBaseTableVarNode(AProcess.Plan, ATableMap.DeletedTableVar),
-										Compiler.BuildKeyEqualExpression(AProcess.Plan, LOldKeyType.Columns, LKeyType.Columns)
-									)
-								)
-							);
-
-						ATableMap.HasRowNode =
-							Compiler.Bind
-							(
-								AProcess.Plan,
-								Compiler.EmitBinaryNode
-								(
-									AProcess.Plan,
+									LPlan,
 									Compiler.EmitUnaryNode
 									(
-										AProcess.Plan,
+										LPlan,
 										Instructions.Exists,
 										Compiler.EmitRestrictNode
 										(
-											AProcess.Plan,
-											Compiler.EmitBaseTableVarNode(AProcess.Plan, ATableMap.TableVar),
-											Compiler.BuildKeyEqualExpression(AProcess.Plan, LOldKeyType.Columns, LKeyType.Columns)
+											LPlan,
+											Compiler.EmitBaseTableVarNode(LPlan, ATableMap.DeletedTableVar),
+											Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
 										)
-									),
-									Instructions.Or,
-									ATableMap.HasDeletedRowNode
-								)
-							);
+									)
+								);
+
+							ATableMap.HasRowNode =
+								Compiler.Bind
+								(
+									LPlan,
+									Compiler.EmitBinaryNode
+									(
+										LPlan,
+										Compiler.EmitUnaryNode
+										(
+											LPlan,
+											Instructions.Exists,
+											Compiler.EmitRestrictNode
+											(
+												LPlan,
+												Compiler.EmitBaseTableVarNode(LPlan, ATableMap.TableVar),
+												Compiler.BuildKeyEqualExpression(LPlan, LOldKeyType.Columns, LKeyType.Columns)
+											)
+										),
+										Instructions.Or,
+										ATableMap.HasDeletedRowNode
+									)
+								);
+						}
+						finally
+						{
+							LPlan.Symbols.Pop();
+						}
 					}
 					finally
 					{
-						AProcess.Plan.Symbols.Pop();
+						LPlan.ExitRowContext();
 					}
 				}
 				finally
 				{
-					AProcess.Plan.ExitRowContext();
+					LPlan.Dispose();
 				}
 			}
 			finally
@@ -1573,50 +1643,36 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				LStatement.MetaData = new MetaData();
 			LStatement.MetaData.Tags.SafeRemove("DAE.GlobalObjectName");
 			LStatement.MetaData.Tags.AddOrUpdate("DAE.SourceOperatorName", LOperatorMap.Name, true);
-			Plan LCurrentPlan = AProcess.ExecutingPlan.Plan;
-			ServerStatementPlan LPlan = new ServerStatementPlan(AProcess);
+
+			Plan LPlan = new Plan(AProcess);
 			try
 			{
 				bool LSaveIsInsert = AProcess.IsInsert;
 				AProcess.IsInsert = false;
 				try
 				{
-					AProcess.PushExecutingPlan(LPlan);
+					LPlan.PushSecurityContext(new SecurityContext(AOperator.Owner));
 					try
-					{	
-						LPlan.Plan.PushSecurityContext(new SecurityContext(AOperator.Owner));
+					{
+						LPlan.PushATCreationContext();
 						try
 						{
-							LPlan.Plan.PushATCreationContext();
-							try
-							{
-								CreateOperatorNode LNode;
-								try
-								{
-									LNode = Compiler.Bind(LPlan.Plan, Compiler.CompileStatement(LPlan.Plan, LStatement)) as CreateOperatorNode;
-								}
-								finally
-								{
-									LCurrentPlan.Messages.AddRange(LPlan.Plan.Messages); // Propagate compiler exceptions to the outer plan
-								}
-								LPlan.CheckCompiled();
-								LNode.Execute(AProcess);
-								AProcess.CatalogDeviceSession.AddOperatorMap(LOperatorMap, LNode.CreateOperator);
-								return LNode.CreateOperator;
-							}
-							finally
-							{
-								LPlan.Plan.PopATCreationContext();
-							}
+							Program LProgram = new Program(AProcess);
+							LProgram.Code = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
+							LPlan.CheckCompiled();
+							LProgram.Execute(null);
+							Schema.Operator LOperator = ((CreateOperatorNode)LProgram.Code).CreateOperator;
+							AProcess.CatalogDeviceSession.AddOperatorMap(LOperatorMap, LOperator);
+							return LOperator;
 						}
 						finally
 						{
-							LPlan.Plan.PopSecurityContext();
+							LPlan.PopATCreationContext();
 						}
 					}
 					finally
 					{
-						AProcess.PopExecutingPlan(LPlan);
+						LPlan.PopSecurityContext();
 					}
 				}
 				finally
@@ -1632,10 +1688,13 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public Schema.Operator EnsureOperator(ServerProcess AProcess, Schema.Operator AOperator)
 		{
-			OperatorBindingContext LContext = new OperatorBindingContext(null, AOperator.OperatorName, AProcess.Plan.NameResolutionPath, AOperator.Signature, false);
-			Compiler.ResolveOperator(AProcess.Plan, LContext);
-			Error.AssertFail(LContext.Operator != null, @"Operator ""{0}"" was not translated into the application transaction as expected");
-			return LContext.Operator;
+			using (Plan LPlan = new Plan(AProcess))
+			{
+				OperatorBindingContext LContext = new OperatorBindingContext(null, AOperator.OperatorName, LPlan.NameResolutionPath, AOperator.Signature, false);
+				Compiler.ResolveOperator(LPlan, LContext);
+				Error.AssertFail(LContext.Operator != null, @"Operator ""{0}"" was not translated into the application transaction as expected");
+				return LContext.Operator;
+			}
 		}
 	}
 
@@ -1675,11 +1734,11 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			FApplied = false;
 		}
 		
-		public abstract void Apply(ServerProcess AProcess);
+		public abstract void Apply(Program AProgram);
 		
-		public abstract void Undo(ServerProcess AProcess);
+		public abstract void Undo(Program AProgram);
 		
-		public abstract void Dispose(ServerProcess AProcess);
+		public abstract void Dispose(IValueManager AManager);
 	}
 	
 	#if USETYPEDLIST
@@ -1708,14 +1767,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		private NativeRow FRow;
 		public NativeRow Row { get { return FRow; } }
 		
-		public override void Apply(ServerProcess AProcess)
+		public override void Apply(Program AProgram)
 		{
 			if (!FApplied)
 			{
-				Row LRow = new Row(AProcess, TableMap.RowType, FRow);
+				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
 				try
 				{
-					TableMap.RetrieveNode.Insert(AProcess, null, LRow, TableMap.ValueFlags, false);
+					TableMap.RetrieveNode.Insert(AProgram, null, LRow, TableMap.ValueFlags, false);
 				}
 				finally
 				{
@@ -1725,14 +1784,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public override void Undo(ServerProcess AProcess)
+		public override void Undo(Program AProgram)
 		{
 			if (FApplied)
 			{
-				Row LRow = new Row(AProcess, TableMap.RowType, FRow);
+				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
 				try
 				{
-					TableMap.RetrieveNode.Delete(AProcess, LRow, false, false);
+					TableMap.RetrieveNode.Delete(AProgram, LRow, false, false);
 				}
 				finally
 				{
@@ -1742,9 +1801,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 
-		public override void Dispose(ServerProcess AProcess)
+		public override void Dispose(IValueManager AManager)
 		{
-			DataValue.DisposeNative(AProcess, TableMap.RowType, FRow);
+			DataValue.DisposeNative(AManager, TableMap.RowType, FRow);
 		}
 	}
 	
@@ -1762,17 +1821,17 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		private NativeRow FNewRow; 
 		public NativeRow NewRow { get { return FNewRow; } }
 
-		public override void Apply(ServerProcess AProcess)
+		public override void Apply(Program AProgram)
 		{
 			if (!FApplied)
 			{
-				Row LOldRow = new Row(AProcess, TableMap.RowType, FOldRow);
+				Row LOldRow = new Row(AProgram.ValueManager, TableMap.RowType, FOldRow);
 				try
 				{
-					Row LNewRow = new Row(AProcess, TableMap.RowType, FNewRow);
+					Row LNewRow = new Row(AProgram.ValueManager, TableMap.RowType, FNewRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(AProcess, LOldRow, LNewRow, null, true, false);
+						TableMap.RetrieveNode.Update(AProgram, LOldRow, LNewRow, null, true, false);
 					}
 					finally
 					{
@@ -1787,17 +1846,17 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public override void Undo(ServerProcess AProcess)
+		public override void Undo(Program AProgram)
 		{
 			if (FApplied)
 			{
-				Row LOldRow = new Row(AProcess, TableMap.RowType, FOldRow);
+				Row LOldRow = new Row(AProgram.ValueManager, TableMap.RowType, FOldRow);
 				try
 				{
-					Row LNewRow = new Row(AProcess, TableMap.RowType, FNewRow);
+					Row LNewRow = new Row(AProgram.ValueManager, TableMap.RowType, FNewRow);
 					try
 					{
-						TableMap.RetrieveNode.Update(AProcess, LNewRow, LOldRow, null, false, true);
+						TableMap.RetrieveNode.Update(AProgram, LNewRow, LOldRow, null, false, true);
 					}
 					finally
 					{
@@ -1812,10 +1871,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 
-		public override void Dispose(ServerProcess AProcess)
+		public override void Dispose(IValueManager AManager)
 		{
-			DataValue.DisposeNative(AProcess, TableMap.RowType, FOldRow);
-			DataValue.DisposeNative(AProcess, TableMap.RowType, FNewRow);
+			DataValue.DisposeNative(AManager, TableMap.RowType, FOldRow);
+			DataValue.DisposeNative(AManager, TableMap.RowType, FNewRow);
 		}
 	}
 	
@@ -1829,14 +1888,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		private NativeRow FRow;
 		public NativeRow Row { get { return FRow; } }
 		
-		public override void Apply(ServerProcess AProcess)
+		public override void Apply(Program AProgram)
 		{
 			if (!FApplied)
 			{
-				Row LRow = new Row(AProcess, TableMap.RowType, FRow);
+				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
 				try
 				{
-					TableMap.RetrieveNode.Delete(AProcess, LRow, true, false);
+					TableMap.RetrieveNode.Delete(AProgram, LRow, true, false);
 				}
 				finally
 				{
@@ -1846,14 +1905,14 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		public override void Undo(ServerProcess AProcess)
+		public override void Undo(Program AProgram)
 		{
 			if (FApplied)
 			{
-				Row LRow = new Row(AProcess, TableMap.RowType, FRow);
+				Row LRow = new Row(AProgram.ValueManager, TableMap.RowType, FRow);
 				try
 				{
-					TableMap.RetrieveNode.Insert(AProcess, null, LRow, TableMap.ValueFlags, true);
+					TableMap.RetrieveNode.Insert(AProgram, null, LRow, TableMap.ValueFlags, true);
 				}
 				finally
 				{
@@ -1863,9 +1922,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 
-		public override void Dispose(ServerProcess AProcess)
+		public override void Dispose(IValueManager AManager)
 		{
-			DataValue.DisposeNative(AProcess, TableMap.RowType, FRow);
+			DataValue.DisposeNative(AManager, TableMap.RowType, FRow);
 		}
 	}
 
@@ -2001,7 +2060,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					LOperationIndex = Transaction.Operations.IndexOf(LOperation);
 					if (LOperationIndex >= 0)
 						Transaction.Operations.RemoveAt(LOperationIndex);
-					LOperation.Dispose(ServerProcess);
+					LOperation.Dispose(ServerProcess.ValueManager);
 				}
 				catch (Exception E)
 				{
@@ -2046,7 +2105,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		
 		public override NativeTables GetTables(Schema.TableVarScope AScope) { return Transaction.Tables; }
 		
-		protected override object InternalExecute(DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program AProgram, DevicePlan ADevicePlan)
 		{
 			if (ADevicePlan.Node is CreateTableVarBaseNode)
 			{
@@ -2057,10 +2116,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				return null; // Actual storage will be deallocated by the application transaction
 			}
 			else
-				return base.InternalExecute(ADevicePlan);
+				return base.InternalExecute(AProgram, ADevicePlan);
 		}
 
-		protected override void InternalInsertRow(TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program AProgram, TableVar ATableVar, Row ARow, BitArray AValueFlags)
 		{
 			InsertOperation LOperation = null;
 			if (Transaction.IsPopulatingSource)
@@ -2069,18 +2128,18 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 				// Don't insert a row if it is in the DeletedTableVar or the TableVar of the TableMap for this TableVar
 				// if not(exists(DeletedTableVar where ARow) or exists(TableVar where ARow))
-				Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+				Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 				try
 				{
-					ServerProcess.Stack.Push(LRow);
+					AProgram.Stack.Push(LRow);
 					try
 					{
-						if (!(bool)LTableMap.HasRowNode.Execute(ServerProcess))
-							base.InternalInsertRow(ATableVar, ARow, AValueFlags);
+						if (!(bool)LTableMap.HasRowNode.Execute(AProgram))
+							base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
 					}
 					finally
 					{
-						ServerProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
@@ -2093,7 +2152,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (Transaction.Closed)
 					throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed, Transaction.ID.ToString());
 
-				base.InternalInsertRow(ATableVar, ARow, AValueFlags);
+				base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
 				Transaction.Prepared = false;
 
 				if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
@@ -2111,12 +2170,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				FTransactions.CurrentTransaction().Operations.Add(LOperation);
 		}
 		
-		protected override void InternalUpdateRow(TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program AProgram, TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			if (Transaction.Closed)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
 
-			base.InternalUpdateRow(ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
 			Transaction.Prepared = false;
 
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
@@ -2126,25 +2185,25 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (InTransaction && !ServerProcess.NonLogged)
 					FTransactions.CurrentTransaction().Operations.Add(LOperation);
 
-				LogDeletedRow(ATableVar, AOldRow);
+				LogDeletedRow(AProgram, ATableVar, AOldRow);
 			}
 		}
 		
-		protected void LogDeletedRow(TableVar ATableVar, Row ARow)
+		protected void LogDeletedRow(Program AProgram, TableVar ATableVar, Row ARow)
 		{
 			TableMap LTableMap = GetTableMap(ATableVar);
-			Row LRow = new Row(ServerProcess, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
+			Row LRow = new Row(AProgram.ValueManager, ATableVar.DataType.OldRowType, (NativeRow)ARow.AsNative);
 			try
 			{
-				ServerProcess.Stack.Push(LRow);
+				AProgram.Stack.Push(LRow);
 				try
 				{
-					if (!(bool)LTableMap.HasDeletedRowNode.Execute(ServerProcess))
-						LTableMap.DeletedRetrieveNode.Insert(ServerProcess, null, ARow, null, true);
+					if (!(bool)LTableMap.HasDeletedRowNode.Execute(AProgram))
+						LTableMap.DeletedRetrieveNode.Insert(AProgram, null, ARow, null, true);
 				}
 				finally
 				{
-					ServerProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
@@ -2153,12 +2212,12 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 			}
 		}
 		
-		protected override void InternalDeleteRow(TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program AProgram, TableVar ATableVar, Row ARow)
 		{
 			if (Transaction.Closed)
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.ApplicationTransactionClosed);
 
-			base.InternalDeleteRow(ATableVar, ARow);
+			base.InternalDeleteRow(AProgram, ATableVar, ARow);
 			Transaction.Prepared = false;
 			
 			if (!InTransaction || !ServerProcess.CurrentTransaction.InRollback)
@@ -2168,7 +2227,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				if (InTransaction && !ServerProcess.NonLogged)
 					FTransactions.CurrentTransaction().Operations.Add(LOperation);
 
-				LogDeletedRow(ATableVar, ARow);
+				LogDeletedRow(AProgram, ATableVar, ARow);
 			}
 		}
 	}

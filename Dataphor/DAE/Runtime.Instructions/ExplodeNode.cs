@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				TableVar.Keys.Add(LSequenceKey);
 			}
 			CopyOrders(SourceTableVar.Orders);
-			Order = new Schema.Order(TableVar.FindClusteringKey(), APlan);
+			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
 
 			#if UseReferenceDerivation
 			CopySourceReferences(APlan, SourceTableVar.SourceReferences);
@@ -158,12 +158,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				);
 			FCursorIsolation = APlan.CursorContext.CursorIsolation;
 
-			Order = new Schema.Order(TableVar.FindClusteringKey(), APlan);
+			Order = Compiler.OrderFromKey(APlan, Compiler.FindClusteringKey(APlan, TableVar));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			ExplodeTable LTable = new ExplodeTable(this, AProcess);
+			ExplodeTable LTable = new ExplodeTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -213,28 +213,28 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+				return base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
 			return false;
 		}
 		
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalChange(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+				return base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 			return false;
 		}
 		
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
 			// Exclude any columns from AKey which were included by this node
 			Schema.RowType LRowType = new Schema.RowType();
@@ -242,11 +242,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
 					LRowType.Columns.Add(LColumn.Copy());
 
-			Row LRow = new Row(AProcess, LRowType);
+			Row LRow = new Row(AProgram.ValueManager, LRowType);
 			try
 			{
 				ARow.CopyTo(LRow);
-				SourceNode.JoinApplicationTransaction(AProcess, LRow);
+				SourceNode.JoinApplicationTransaction(AProgram, LRow);
 			}
 			finally
 			{

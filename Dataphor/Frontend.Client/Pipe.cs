@@ -150,7 +150,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				LData = new byte[LLength];
 				LStream.Read(LData, 0, LLength);
 			}
-			using (DAE.Runtime.Data.Row LRow = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(AProcess.GetServerProcess(), GetCacheRowType(AProcess), LData, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
+			using (DAE.Runtime.Data.Row LRow = ((DAE.Runtime.Data.Row)DataValue.FromPhysical(AProcess.GetServerProcess().ValueManager, GetCacheRowType(AProcess), LData, 0)))	// Uses GetServerProcess() as an optimization because this row is to remain local
 			{
 				return (Scalar)LRow.GetValue("Value").Copy();
 			}
@@ -161,7 +161,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			using (Stream LTargetStream = Cache.Freshen(ADocument, ACRC32))
 			{
 				byte[] LBytes;
-				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(AProcess, GetCacheRowType(AProcess)))
+				using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(AProcess.ValueManager, GetCacheRowType(AProcess)))
 				{
 					LRow["Value"] = AValue;
 					LBytes = new byte[LRow.GetPhysicalSize(true)];
@@ -265,7 +265,7 @@ namespace Alphora.Dataphor.Frontend.Client
 					{
 						byte[] LData;
 						if (ImageCache.TryGetValue(ADocument, out LData))
-							return new Scalar(AProcess, AProcess.DataTypes.SystemGraphic, LData);
+							return new Scalar(AProcess.ValueManager, AProcess.DataTypes.SystemGraphic, LData);
 					}
 			}
 

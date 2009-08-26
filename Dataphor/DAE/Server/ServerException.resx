@@ -401,4 +401,13 @@
   <data name="106198" xml:space="preserve">
     <value>Could not determine the current location for process ({0}).</value>
   </data>
+  <data name="106199" xml:space="preserve">
+    <value>Process is not currently executing a program. Run-time state is not available.</value>
+  </data>
+  <data name="106200" xml:space="preserve">
+    <value>Program "{0}" is not executing on this process.</value>
+  </data>
+  <data name="106201" xml:space="preserve">
+    <value>Could not determine the current location for program {0}.</value>
+  </data>
 </root>

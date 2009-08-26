@@ -296,6 +296,15 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106198: "Could not determine the current location for process ({0})."</summary>
 			CouldNotDetermineProcessLocation = 106198,
+			
+			/// <summary>Error code 106199: "Process is not currently executing a program. Run-time state is not available."</summary>
+			NoExecutingProgram = 106199,
+			
+			/// <summary>Error code 106200: "Program "{0}" is not executing on this process."</summary>
+			ProgramNotExecuting = 106200,
+			
+			/// <summary>Error code 106201: "Could not determine the current location for program {0}."</summary>
+			CouldNotDetermineProgramLocation = 106201,
 		}
 		
 		// Resource manager for this exception class

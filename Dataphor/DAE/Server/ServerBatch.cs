@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.DAE.Server
 						if (LPlan.DataType is Schema.TableType)
 							LPlan.Close(LPlan.Open(AParams));
 						else
-							DataValue.DisposeValue(this.Script.Process, LPlan.Evaluate(AParams));
+							DataValue.DisposeValue(this.Script.Process.ValueManager, LPlan.Evaluate(AParams));
 					}
 					finally
 					{

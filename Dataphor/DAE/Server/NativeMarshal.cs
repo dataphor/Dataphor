@@ -2,66 +2,67 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Alphora.Dataphor.DAE.Schema;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.NativeCLI;
-using Alphora.Dataphor.DAE.Language;
-
 namespace Alphora.Dataphor.DAE.Server
 {
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.NativeCLI;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Compiling;
+
 	/// <summary>
 	/// Provides a utility class for translating values to and from 
 	/// their Native representations for use in Native CLI calls.
 	/// </summary>
 	public static class NativeMarshal
 	{
-		public static ScalarType DataTypeNameToScalarType(IServerProcess AProcess, string ANativeDataTypeName)
+		public static ScalarType DataTypeNameToScalarType(Schema.DataTypes ADataTypes, string ANativeDataTypeName)
 		{
 			switch (ANativeDataTypeName.ToLower())
 			{
-				case "byte[]" : return AProcess.DataTypes.SystemBinary;
+				case "byte[]" : return ADataTypes.SystemBinary;
 				case "bool" :
-				case "boolean" : return AProcess.DataTypes.SystemBoolean;
-				case "byte" : return AProcess.DataTypes.SystemByte;
-				case "date" : return AProcess.DataTypes.SystemDate;
-				case "datetime" : return AProcess.DataTypes.SystemDateTime;
-				case "decimal" : return AProcess.DataTypes.SystemDecimal;
-				case "exception" : return AProcess.DataTypes.SystemError;
-				case "guid" : return AProcess.DataTypes.SystemGuid;
+				case "boolean" : return ADataTypes.SystemBoolean;
+				case "byte" : return ADataTypes.SystemByte;
+				case "date" : return ADataTypes.SystemDate;
+				case "datetime" : return ADataTypes.SystemDateTime;
+				case "decimal" : return ADataTypes.SystemDecimal;
+				case "exception" : return ADataTypes.SystemError;
+				case "guid" : return ADataTypes.SystemGuid;
 				case "int32" :
-				case "integer" : return AProcess.DataTypes.SystemInteger;
+				case "integer" : return ADataTypes.SystemInteger;
 				case "int64" :
-				case "long" : return AProcess.DataTypes.SystemLong;
-				case "money" : return AProcess.DataTypes.SystemMoney;
+				case "long" : return ADataTypes.SystemLong;
+				case "money" : return ADataTypes.SystemMoney;
 				case "int16" :
-				case "short" : return AProcess.DataTypes.SystemShort;
-				case "string" : return AProcess.DataTypes.SystemString;
-				case "time" : return AProcess.DataTypes.SystemTime;
-				case "timespan" : return AProcess.DataTypes.SystemTimeSpan;
+				case "short" : return ADataTypes.SystemShort;
+				case "string" : return ADataTypes.SystemString;
+				case "time" : return ADataTypes.SystemTime;
+				case "timespan" : return ADataTypes.SystemTimeSpan;
 				default: throw new ArgumentException(String.Format("Invalid native data type name: \"{0}\".", ANativeDataTypeName));
 			}
 		}
 		
-		public static string DataTypeToDataTypeName(IServerProcess AProcess, IDataType ADataType)
+		public static string DataTypeToDataTypeName(Schema.DataTypes ADataTypes, IDataType ADataType)
 		{
 			ScalarType LScalarType = ADataType as ScalarType;
 			if (LScalarType != null)
-				return ScalarTypeToDataTypeName(AProcess, LScalarType);
+				return ScalarTypeToDataTypeName(ADataTypes, LScalarType);
 			
 			throw new NotSupportedException("Non-scalar-valued attributes are not supported.");
 		}
 		
-		public static string ScalarTypeToDataTypeName(IServerProcess AProcess, ScalarType AScalarType)
+		public static string ScalarTypeToDataTypeName(Schema.DataTypes ADataTypes, ScalarType AScalarType)
 		{
 			if (AScalarType.NativeType == NativeAccessors.AsBoolean.NativeType) return "Boolean";
 			if (AScalarType.NativeType == NativeAccessors.AsByte.NativeType) return "Byte";
 			if (AScalarType.NativeType == NativeAccessors.AsByteArray.NativeType) return "Byte[]";
 			if (AScalarType.NativeType == NativeAccessors.AsDateTime.NativeType)
 			{
-				if (AScalarType.Is(AProcess.DataTypes.SystemDateTime)) return "DateTime";
-				if (AScalarType.Is(AProcess.DataTypes.SystemDate)) return "Date";
-				if (AScalarType.Is(AProcess.DataTypes.SystemTime)) return "Time";
+				if (AScalarType.Is(ADataTypes.SystemDateTime)) return "DateTime";
+				if (AScalarType.Is(ADataTypes.SystemDate)) return "Date";
+				if (AScalarType.Is(ADataTypes.SystemTime)) return "Time";
 			}
 			if (AScalarType.NativeType == NativeAccessors.AsDecimal.NativeType) return "Decimal";
 			if (AScalarType.NativeType == NativeAccessors.AsException.NativeType) return "Exception";
@@ -74,7 +75,7 @@ namespace Alphora.Dataphor.DAE.Server
 			throw new ArgumentException(String.Format("Scalar type \"{0}\" has no native type.", AScalarType.Name));
 		}
 		
-		public static NativeColumn[] ColumnsToNativeColumns(IServerProcess AProcess, Columns AColumns)
+		public static NativeColumn[] ColumnsToNativeColumns(Schema.DataTypes ADataTypes, Columns AColumns)
 		{
 			NativeColumn[] LColumns = new NativeColumn[AColumns.Count];
 			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
@@ -82,24 +83,32 @@ namespace Alphora.Dataphor.DAE.Server
 					new NativeColumn 
 					{ 
 						Name = AColumns[LIndex].Name, 
-						DataTypeName = DataTypeToDataTypeName(AProcess, AColumns[LIndex].DataType) 
+						DataTypeName = DataTypeToDataTypeName(ADataTypes, AColumns[LIndex].DataType) 
 					};
 			
 			return LColumns;
 		}
 		
-		public static Columns NativeColumnsToColumns(IServerProcess AProcess, NativeColumn[] ANativeColumns)
+		public static Columns NativeColumnsToColumns(Schema.DataTypes ADataTypes, NativeColumn[] ANativeColumns)
 		{
 			Columns LColumns = new Columns();
 			for (int LIndex = 0; LIndex < ANativeColumns.Length; LIndex++)
-				LColumns.Add(new Column(ANativeColumns[LIndex].Name, DataTypeNameToScalarType(AProcess, ANativeColumns[LIndex].DataTypeName)));
+				LColumns.Add(new Column(ANativeColumns[LIndex].Name, DataTypeNameToScalarType(ADataTypes, ANativeColumns[LIndex].DataTypeName)));
 			return LColumns;
 		}
 		
 		public static TableVar NativeTableToTableVar(ServerProcess AProcess, NativeTableValue ANativeTable)
 		{
+			using (Plan LPlan = new Plan(AProcess))
+			{
+				return NativeTableToTableVar(LPlan, ANativeTable);
+			}
+		}
+		
+		public static TableVar NativeTableToTableVar(Plan APlan, NativeTableValue ANativeTable)
+		{
 			TableType LTableType = new TableType();
-			foreach (Column LColumn in NativeColumnsToColumns(AProcess, ANativeTable.Columns))
+			foreach (Column LColumn in NativeColumnsToColumns(APlan.DataTypes, ANativeTable.Columns))
 				LTableType.Columns.Add(LColumn);
 
 			BaseTableVar LTableVar = new BaseTableVar(LTableType);
@@ -114,7 +123,7 @@ namespace Alphora.Dataphor.DAE.Server
 					LTableVar.Keys.Add(LKey);
 				}
 			}
-			LTableVar.EnsureKey(AProcess.Plan);
+			Compiler.EnsureKey(APlan, LTableVar);
 			return LTableVar;
 		}
 		
@@ -122,12 +131,12 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			NativeScalarValue LNativeScalar = ANativeValue as NativeScalarValue;
 			if (LNativeScalar != null)
-				return new Scalar(AProcess, DataTypeNameToScalarType(AProcess, LNativeScalar.DataTypeName), LNativeScalar.Value);
+				return new Scalar(AProcess.ValueManager, DataTypeNameToScalarType(AProcess.DataTypes, LNativeScalar.DataTypeName), LNativeScalar.Value);
 			
 			NativeListValue LNativeList = ANativeValue as NativeListValue;
 			if (LNativeList != null)
 			{
-				ListValue LList = new ListValue(AProcess, AProcess.DataTypes.SystemList, LNativeList.Elements == null ? null : new NativeList());
+				ListValue LList = new ListValue(AProcess.ValueManager, AProcess.DataTypes.SystemList, LNativeList.Elements == null ? null : new NativeList());
 				if (LNativeList.Elements != null)
 					for (int LIndex = 0; LIndex < LNativeList.Elements.Length; LIndex++)
 						LList.Add(NativeValueToDataValue(AProcess, LNativeList.Elements[LIndex]));
@@ -137,7 +146,7 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeRowValue LNativeRow = ANativeValue as NativeRowValue;
 			if (LNativeRow != null)
 			{
-				Row LRow = new Row(AProcess, new Schema.RowType(NativeColumnsToColumns(AProcess, LNativeRow.Columns)));
+				Row LRow = new Row(AProcess.ValueManager, new Schema.RowType(NativeColumnsToColumns(AProcess.DataTypes, LNativeRow.Columns)));
 				if (LNativeRow.Values == null)
 					LRow.AsNative = null;
 				else
@@ -151,20 +160,20 @@ namespace Alphora.Dataphor.DAE.Server
 			NativeTableValue LNativeTable = ANativeValue as NativeTableValue;
 			if (LNativeTable != null)
 			{
-				NativeTable LInternalTable = new NativeTable(AProcess, NativeTableToTableVar(AProcess, LNativeTable));
-				TableValue LTable = new TableValue(AProcess, LInternalTable); 
+				NativeTable LInternalTable = new NativeTable(AProcess.ValueManager, NativeTableToTableVar(AProcess, LNativeTable));
+				TableValue LTable = new TableValue(AProcess.ValueManager, LInternalTable); 
 				if (LNativeTable.Rows == null)
 					LTable.AsNative = null;
 				else
 				{
 					for (int LIndex = 0; LIndex < LNativeTable.Rows.Length; LIndex++)
 					{
-						Row LRow = new Row(AProcess, LInternalTable.RowType);
+						Row LRow = new Row(AProcess.ValueManager, LInternalTable.RowType);
 						try
 						{
 							for (int LColumnIndex = 0; LColumnIndex < LNativeTable.Rows[LIndex].Length; LColumnIndex++)
 								LRow[LColumnIndex] = LNativeTable.Rows[LIndex][LColumnIndex];
-							LInternalTable.Insert(AProcess, LRow);
+							LInternalTable.Insert(AProcess.ValueManager, LRow);
 						}
 						catch (Exception)
 						{
@@ -185,7 +194,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LScalarType != null)
 			{
 				NativeScalarValue LNativeScalar = new NativeScalarValue();
-				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess, LScalarType);
+				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess.DataTypes, LScalarType);
 				return LNativeScalar;
 			}
 			
@@ -200,7 +209,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LRowType != null)
 			{
 				NativeRowValue LNativeRow = new NativeRowValue();
-				LNativeRow.Columns = ColumnsToNativeColumns(AProcess, LRowType.Columns);
+				LNativeRow.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LRowType.Columns);
 				return LNativeRow;
 			}
 			
@@ -208,7 +217,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LTableType != null)
 			{
 				NativeTableValue LNativeTable = new NativeTableValue();
-				LNativeTable.Columns = ColumnsToNativeColumns(AProcess, LTableType.Columns);
+				LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LTableType.Columns);
 				return LNativeTable;
 			}
 				
@@ -221,7 +230,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LScalar != null)
 			{
 				NativeScalarValue LNativeScalar = new NativeScalarValue();
-				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess, LScalar.DataType);
+				LNativeScalar.DataTypeName = ScalarTypeToDataTypeName(AProcess.DataTypes, LScalar.DataType);
 				LNativeScalar.Value = ADataValue.IsNil ? null : LScalar.AsNative;
 				return LNativeScalar;
 			}
@@ -243,7 +252,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LRow != null)
 			{
 				NativeRowValue LNativeRow = new NativeRowValue();
-				LNativeRow.Columns = ColumnsToNativeColumns(AProcess, LRow.DataType.Columns);
+				LNativeRow.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LRow.DataType.Columns);
 					
 				if (!LRow.IsNil)
 				{
@@ -258,7 +267,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (LTable != null)
 			{
 				NativeTableValue LNativeTable = new NativeTableValue();
-				LNativeTable.Columns = ColumnsToNativeColumns(AProcess, LTable.DataType.Columns);
+				LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, LTable.DataType.Columns);
 					
 				List<object[]> LNativeRows = new List<object[]>();
 
@@ -286,7 +295,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public static NativeTableValue TableVarToNativeTableValue(IServerProcess AProcess, TableVar ATableVar)
 		{
 			NativeTableValue LNativeTable = new NativeTableValue();
-			LNativeTable.Columns = ColumnsToNativeColumns(AProcess, ATableVar.DataType.Columns);
+			LNativeTable.Columns = ColumnsToNativeColumns(AProcess.DataTypes, ATableVar.DataType.Columns);
 			LNativeTable.Keys = new NativeKey[ATableVar.Keys.Count];
 			for (int LIndex = 0; LIndex < ATableVar.Keys.Count; LIndex++)
 			{
@@ -331,7 +340,14 @@ namespace Alphora.Dataphor.DAE.Server
 			for (int LIndex = 0; LIndex < ANativeParams.Length; LIndex++)
 			{
 				NativeParam LNativeParam = ANativeParams[LIndex];
-				DataParam LDataParam = new DataParam(LNativeParam.Name, DataTypeNameToScalarType(AProcess, LNativeParam.DataTypeName), NativeCLIUtility.NativeModifierToModifier(LNativeParam.Modifier), LNativeParam.Value);
+				DataParam LDataParam = 
+					new DataParam
+					(
+						LNativeParam.Name, 
+						DataTypeNameToScalarType(AProcess.DataTypes, LNativeParam.DataTypeName), 
+						NativeCLIUtility.NativeModifierToModifier(LNativeParam.Modifier), 
+						LNativeParam.Value
+					);
 				LDataParams.Add(LDataParam);
 			}
 			return LDataParams;
@@ -360,7 +376,7 @@ namespace Alphora.Dataphor.DAE.Server
 					new NativeParam() 
 					{
 						Name = LDataParam.Name, 
-						DataTypeName = DataTypeToDataTypeName(AProcess, LDataParam.DataType),
+						DataTypeName = DataTypeToDataTypeName(AProcess.DataTypes, LDataParam.DataType),
 						Modifier = NativeCLIUtility.ModifierToNativeModifier(LDataParam.Modifier),
 						Value = LDataParam.Value
 					};

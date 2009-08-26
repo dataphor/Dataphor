@@ -715,7 +715,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				foreach (ClassAttributeDefinition LAttributeDefinition in FAlterClassDefinition.CreateAttributes)
 					LUndoClassDefinition.DropAttributes.Add(new ClassAttributeDefinition(LAttributeDefinition.AttributeName, String.Empty));
 				
-				AlterNode.AlterClassDefinition(ASession.ServerProcess, FClassDefinition, LUndoClassDefinition, FInstance);
+				AlterNode.AlterClassDefinition(FClassDefinition, LUndoClassDefinition, FInstance);
 			}
 		}
 		
@@ -1589,12 +1589,12 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
 		{
 			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
 			if (LDevicePlan.IsStorePlan)
 			{
-				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, ServerProcess, this);
+				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, AProgram, this);
 				try
 				{
 					LTable.Open();
@@ -1622,14 +1622,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 							CatalogHeader LHeader = Device.Headers[LTableVar];
 							if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
 							{
-								Device.PopulateTableVar(ServerProcess, LHeader);
+								Device.PopulateTableVar(AProgram, LHeader);
 								if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
 									LHeader.Cached = true;
 							}
 						}
 					}
 				}
-				object LResult = base.InternalExecute(ADevicePlan);
+				object LResult = base.InternalExecute(AProgram, ADevicePlan);
 				if (ADevicePlan.Node is CreateTableNode)
 				{
 					Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
@@ -1647,65 +1647,65 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected override void InternalInsertRow(Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
+		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
 			{
 				case "System.TableDum" : break;
 				case "System.TableDee" : break;
-				case "System.LibraryVersions" : InsertLibraryVersion(ATableVar, ARow); break;
-				case "System.LibraryOwners" : InsertLibraryOwner(ATableVar, ARow); break;
-				case "System.Libraries" : InsertLibrary(ATableVar, ARow); break;
-				case "System.LibraryRequisites" : InsertLibraryRequisite(ATableVar, ARow); break;
-				case "System.LibrarySettings" : InsertLibrarySetting(ATableVar, ARow); break;
-				case "System.LibraryFiles" : InsertLibraryFile(ATableVar, ARow); break;
+				case "System.LibraryVersions" : InsertLibraryVersion(AProgram, ATableVar, ARow); break;
+				case "System.LibraryOwners" : InsertLibraryOwner(AProgram, ATableVar, ARow); break;
+				case "System.Libraries" : InsertLibrary(AProgram, ATableVar, ARow); break;
+				case "System.LibraryRequisites" : InsertLibraryRequisite(AProgram, ATableVar, ARow); break;
+				case "System.LibrarySettings" : InsertLibrarySetting(AProgram, ATableVar, ARow); break;
+				case "System.LibraryFiles" : InsertLibraryFile(AProgram, ATableVar, ARow); break;
 				default : throw new CatalogException(CatalogException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
 			// TODO: This hack enables A/T style editing of a library (the requisites and files adds will automatically create a library)
 			// Basically it's a deferred constraint check
-			if ((ATableVar.Name == "System.Libraries") && GetTables(ATableVar.Scope)[ATableVar].HasRow(ServerProcess, ARow))
+			if ((ATableVar.Name == "System.Libraries") && GetTables(ATableVar.Scope)[ATableVar].HasRow(ServerProcess.ValueManager, ARow))
 				return;
-			base.InternalInsertRow(ATableVar, ARow, AValueFlags);
+			base.InternalInsertRow(AProgram, ATableVar, ARow, AValueFlags);
 		}
 		
-		protected override void InternalUpdateRow(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+		protected override void InternalUpdateRow(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow, BitArray AValueFlags)
 		{
 			switch (ATableVar.Name)
 			{
 				case "System.TableDee" : break;
 				case "System.TableDum" : break;
-				case "System.ServerSettings" : UpdateServerSettings(ATableVar, AOldRow, ANewRow); return;
-				case "System.Sessions" : UpdateSessions(ATableVar, AOldRow, ANewRow); return;
-				case "System.Processes" : UpdateProcesses(ATableVar, AOldRow, ANewRow); return;
-				case "System.LibraryVersions" : UpdateLibraryVersion(ATableVar, AOldRow, ANewRow); break;
-				case "System.LibraryOwners" : UpdateLibraryOwner(ATableVar, AOldRow, ANewRow); break;
-				case "System.Libraries" : UpdateLibrary(ATableVar, AOldRow, ANewRow); break;
-				case "System.LibraryRequisites" : UpdateLibraryRequisite(ATableVar, AOldRow, ANewRow); break;
-				case "System.LibrarySettings" : UpdateLibrarySetting(ATableVar, AOldRow, ANewRow); break;
-				case "System.LibraryFiles" : UpdateLibraryFile(ATableVar, AOldRow, ANewRow); break;
+				case "System.ServerSettings" : UpdateServerSettings(AProgram, ATableVar, AOldRow, ANewRow); return;
+				case "System.Sessions" : UpdateSessions(AProgram, ATableVar, AOldRow, ANewRow); return;
+				case "System.Processes" : UpdateProcesses(AProgram, ATableVar, AOldRow, ANewRow); return;
+				case "System.LibraryVersions" : UpdateLibraryVersion(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibraryOwners" : UpdateLibraryOwner(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.Libraries" : UpdateLibrary(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibraryRequisites" : UpdateLibraryRequisite(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibrarySettings" : UpdateLibrarySetting(AProgram, ATableVar, AOldRow, ANewRow); break;
+				case "System.LibraryFiles" : UpdateLibraryFile(AProgram, ATableVar, AOldRow, ANewRow); break;
 				default : throw new CatalogException(CatalogException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
-			base.InternalUpdateRow(ATableVar, AOldRow, ANewRow, AValueFlags);
+			base.InternalUpdateRow(AProgram, ATableVar, AOldRow, ANewRow, AValueFlags);
 		}
 		
-		protected override void InternalDeleteRow(Schema.TableVar ATableVar, Row ARow)
+		protected override void InternalDeleteRow(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			switch (ATableVar.Name)
 			{
 				case "System.TableDee" : break;
 				case "System.TableDum" : break;
-				case "System.LibraryVersions" : DeleteLibraryVersion(ATableVar, ARow); break;
-				case "System.LibraryOwners" : DeleteLibraryOwner(ATableVar, ARow); break;
-				case "System.Libraries" : DeleteLibrary(ATableVar, ARow); break;
-				case "System.LibraryRequisites" : DeleteLibraryRequisite(ATableVar, ARow); break;
-				case "System.LibrarySettings" : DeleteLibrarySetting(ATableVar, ARow); break;
-				case "System.LibraryFiles" : DeleteLibraryFile(ATableVar, ARow); break;
+				case "System.LibraryVersions" : DeleteLibraryVersion(AProgram, ATableVar, ARow); break;
+				case "System.LibraryOwners" : DeleteLibraryOwner(AProgram, ATableVar, ARow); break;
+				case "System.Libraries" : DeleteLibrary(AProgram, ATableVar, ARow); break;
+				case "System.LibraryRequisites" : DeleteLibraryRequisite(AProgram, ATableVar, ARow); break;
+				case "System.LibrarySettings" : DeleteLibrarySetting(AProgram, ATableVar, ARow); break;
+				case "System.LibraryFiles" : DeleteLibraryFile(AProgram, ATableVar, ARow); break;
 				default : throw new CatalogException(CatalogException.Codes.UnsupportedUpdate, ATableVar.Name);
 			}
-			base.InternalDeleteRow(ATableVar, ARow);
+			base.InternalDeleteRow(AProgram, ATableVar, ARow);
 		}
 		
-		protected void UpdateServerSettings(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateServerSettings(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			if ((bool)AOldRow["TracingEnabled"] ^ (bool)ANewRow["TracingEnabled"])
 				ServerProcess.ServerSession.Server.TracingEnabled = (bool)ANewRow["TracingEnabled"];
@@ -1728,7 +1728,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SaveServerSettings(ServerProcess.ServerSession.Server);
 		}
 		
-		protected void UpdateSessions(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateSessions(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["ID"]);
 			
@@ -1768,7 +1768,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				LSession.SessionInfo.ShouldEmitIL = (bool)ANewRow["ShouldEmitIL"];
 		}
 		
-		protected void UpdateProcesses(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateProcesses(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			ServerSession LSession = ServerProcess.ServerSession.Server.Sessions.GetSession((int)ANewRow["Session_ID"]);
 			
@@ -1787,17 +1787,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				LProcess.UseImplicitTransactions = (bool)ANewRow["UseImplicitTransactions"];
 				
 			if ((int)AOldRow["MaxStackDepth"] != (int)ANewRow["MaxStackDepth"])
-				LProcess.Stack.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
+				LProcess.MaxStackDepth = (int)ANewRow["MaxStackDepth"];
 				
 			if ((int)AOldRow["MaxCallDepth"] != (int)ANewRow["MaxCallDepth"])
-				LProcess.Stack.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
+				LProcess.MaxCallDepth = (int)ANewRow["MaxCallDepth"];
 		}
 		
-		protected void InsertLibrary(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibrary(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			SystemCreateLibraryNode.CreateLibrary
 			(
-				ServerProcess, 
+				AProgram, 
 				new Schema.Library
 				(
 					(string)ARow[0],
@@ -1810,22 +1810,22 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			);
 		}
 		
-		protected void UpdateLibrary(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibrary(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			string AOldName = (string)AOldRow[0];
 			string ANewName = (string)ANewRow[0];
 			VersionNumber ANewVersion = (VersionNumber)ANewRow[2];
-			SystemRenameLibraryNode.RenameLibrary(ServerProcess, Schema.Object.EnsureRooted(AOldName), ANewName, true);
-			SystemSetLibraryDescriptorNode.ChangeLibraryVersion(ServerProcess, Schema.Object.EnsureRooted(ANewName), ANewVersion, false);
-			SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(ServerProcess, Schema.Object.EnsureRooted(ANewName), (string)ANewRow[3], false);
+			SystemRenameLibraryNode.RenameLibrary(AProgram, Schema.Object.EnsureRooted(AOldName), ANewName, true);
+			SystemSetLibraryDescriptorNode.ChangeLibraryVersion(AProgram, Schema.Object.EnsureRooted(ANewName), ANewVersion, false);
+			SystemSetLibraryDescriptorNode.SetLibraryDefaultDeviceName(AProgram, Schema.Object.EnsureRooted(ANewName), (string)ANewRow[3], false);
 		}
 		
-		protected void DeleteLibrary(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibrary(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemDropLibraryNode.DropLibrary(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), true);
+			SystemDropLibraryNode.DropLibrary(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), true);
 		}
 		
-		protected internal void SelectLibraryVersions(NativeTable ANativeTable, Row ARow)
+		protected internal void SelectLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1836,7 +1836,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					{
 						ARow[0] = (string)LCursor[0];
 						ARow[1] = VersionNumber.Parse((string)LCursor[1]);
-						ANativeTable.Insert(ServerProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 			}
@@ -1846,7 +1846,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void InsertLibraryVersion(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibraryVersion(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1859,7 +1859,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected void UpdateLibraryVersion(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibraryVersion(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1878,7 +1878,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected void DeleteLibraryVersion(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibraryVersion(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1891,7 +1891,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected internal void SelectLibraryOwners(NativeTable ANativeTable, Row ARow)
+		protected internal void SelectLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -1902,7 +1902,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					{
 						ARow[0] = (string)LCursor[0];
 						ARow[1] = (string)LCursor[1];
-						ANativeTable.Insert(ServerProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 			}
@@ -1912,7 +1912,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		protected void InsertLibraryOwner(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibraryOwner(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1925,7 +1925,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected void UpdateLibraryOwner(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibraryOwner(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1944,7 +1944,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected void DeleteLibraryOwner(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibraryOwner(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -1957,74 +1957,74 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		protected void InsertLibraryRequisite(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibraryRequisite(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
+			SystemSetLibraryDescriptorNode.AddLibraryRequisite(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
 		}
 		
-		protected void UpdateLibraryRequisite(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibraryRequisite(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			if (String.Compare((string)AOldRow[0], (string)ANewRow[0]) != 0)
 			{
-				SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new LibraryReference((string)AOldRow[1], (VersionNumber)AOldRow[2]));
-				SystemSetLibraryDescriptorNode.AddLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new LibraryReference((string)ANewRow[1], (VersionNumber)ANewRow[2]));
+				SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new LibraryReference((string)AOldRow[1], (VersionNumber)AOldRow[2]));
+				SystemSetLibraryDescriptorNode.AddLibraryRequisite(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), new LibraryReference((string)ANewRow[1], (VersionNumber)ANewRow[2]));
 			}
 			else
 				SystemSetLibraryDescriptorNode.UpdateLibraryRequisite
 				(
-					ServerProcess, 
+					AProgram, 
 					Schema.Object.EnsureRooted((string)AOldRow[0]), 
 					new LibraryReference((string)AOldRow[1], (VersionNumber)AOldRow[2]), 
 					new LibraryReference((string)ANewRow[1], (VersionNumber)ANewRow[2])
 				);
 		}
 		
-		protected void DeleteLibraryRequisite(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibraryRequisite(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
+			SystemSetLibraryDescriptorNode.RemoveLibraryRequisite(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new LibraryReference((string)ARow[1], (VersionNumber)ARow[2]));
 		}
 		
-		protected void InsertLibrarySetting(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibrarySetting(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
+			SystemSetLibraryDescriptorNode.AddLibrarySetting(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
 		}
 		
-		protected void UpdateLibrarySetting(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibrarySetting(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
 			if (String.Compare((string)AOldRow[0], (string)ANewRow[0]) != 0)
 			{
-				SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new Tag((string)AOldRow[1], (string)AOldRow[2]));
-				SystemSetLibraryDescriptorNode.AddLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new Tag((string)ANewRow[1], (string)ANewRow[2]));
+				SystemSetLibraryDescriptorNode.RemoveLibrarySetting(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new Tag((string)AOldRow[1], (string)AOldRow[2]));
+				SystemSetLibraryDescriptorNode.AddLibrarySetting(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), new Tag((string)ANewRow[1], (string)ANewRow[2]));
 			}
 			else
 				SystemSetLibraryDescriptorNode.UpdateLibrarySetting
 				(
-					ServerProcess, 
+					AProgram, 
 					Schema.Object.EnsureRooted((string)AOldRow[0]), 
 					new Tag((string)AOldRow[1], (string)AOldRow[2]), 
 					new Tag((string)ANewRow[1], (string)ANewRow[2])
 				);
 		}
 		
-		protected void DeleteLibrarySetting(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibrarySetting(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibrarySetting(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
+			SystemSetLibraryDescriptorNode.RemoveLibrarySetting(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new Tag((string)ARow[1], (string)ARow[2]));
 		}
 		
-		protected void InsertLibraryFile(Schema.TableVar ATableVar, Row ARow)
+		protected void InsertLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
+			SystemSetLibraryDescriptorNode.AddLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 		
-		protected void UpdateLibraryFile(Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
+		protected void UpdateLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
-			SystemSetLibraryDescriptorNode.AddLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ANewRow[0]), new FileReference((string)ANewRow[1], (bool)ANewRow[2]));
+			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)AOldRow[0]), new FileReference((string)AOldRow[1], (bool)AOldRow[2]));
+			SystemSetLibraryDescriptorNode.AddLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ANewRow[0]), new FileReference((string)ANewRow[1], (bool)ANewRow[2]));
 		}
 		
-		protected void DeleteLibraryFile(Schema.TableVar ATableVar, Row ARow)
+		protected void DeleteLibraryFile(Program AProgram, Schema.TableVar ATableVar, Row ARow)
 		{
-			SystemSetLibraryDescriptorNode.RemoveLibraryFile(ServerProcess, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
+			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 		
 		public void SaveServerSettings(Server.Server AServer)
@@ -2059,10 +2059,19 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryDirectories())
+				Program LProgram = new Program(ServerProcess);
+				LProgram.Start(null);
+				try
 				{
-					while (LCursor.Next())
-						SystemAttachLibraryNode.AttachLibrary(ServerProcess, (string)LCursor[0], (string)LCursor[1], true);
+					using (SQLStoreCursor LCursor = CatalogStoreConnection.SelectLibraryDirectories())
+					{
+						while (LCursor.Next())
+							SystemAttachLibraryNode.AttachLibrary(LProgram, (string)LCursor[0], (string)LCursor[1], true);
+					}
+				}
+				finally
+				{
+					LProgram.Stop(null);
 				}
 			}
 			finally
@@ -2532,37 +2541,46 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			AcquireCatalogStoreConnection(false);
 			try
 			{
-				Schema.CatalogObject LResult = null;
-				Schema.Objects LScalarTypes = new Schema.Objects();
-				Schema.FullObjectHeaders LLoadOrder = new Schema.FullObjectHeaders();
-				ComputeLoadOrder(LLoadOrder, AObjectID, -1);
-				
-				Schema.FullObjectHeader LObjectHeader;
-				Schema.FullCatalogObjectHeader LCatalogObjectHeader;
-				for (int LIndex = 0; LIndex < LLoadOrder.Count; LIndex++)
+				Program LProgram = new Program(ServerProcess);
+				LProgram.Start(null);
+				try
 				{
-					LObjectHeader = LLoadOrder[LIndex];
-					LCatalogObjectHeader = LObjectHeader as Schema.FullCatalogObjectHeader;
-					if (LCatalogObjectHeader != null)
-					{
-						Schema.CatalogObject LObject = LoadCatalogObject(LObjectHeader.ID, ResolveUser(LCatalogObjectHeader.OwnerID), LObjectHeader.LibraryName, LObjectHeader.Script, LObjectHeader.IsGenerated, LObjectHeader.IsATObject);
-						if (LObject is Schema.ScalarType)
-							LScalarTypes.Add(LObject);
-						if (LCatalogObjectHeader.ID == AObjectID)
-							LResult = LObject;
-					}
-					else
-						LoadPersistentObject(LObjectHeader.ID, ResolveCachedCatalogObject(LObjectHeader.CatalogObjectID, true).Owner, LObjectHeader.LibraryName, LObjectHeader.Script, LObjectHeader.IsATObject);
-				}
-				
-				// Once all the objects have loaded, fixup pointers to generated objects
-				for (int LIndex = 0; LIndex < LScalarTypes.Count; LIndex++)
-					((Schema.ScalarType)LScalarTypes[LIndex]).ResolveGeneratedDependents(this);
-				
-				if (LResult != null)
-					return LResult;
+					Schema.CatalogObject LResult = null;
+					Schema.Objects LScalarTypes = new Schema.Objects();
+					Schema.FullObjectHeaders LLoadOrder = new Schema.FullObjectHeaders();
+					ComputeLoadOrder(LLoadOrder, AObjectID, -1);
 					
-				throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectLoadFailed, ErrorSeverity.System, AObjectID);
+					Schema.FullObjectHeader LObjectHeader;
+					Schema.FullCatalogObjectHeader LCatalogObjectHeader;
+					for (int LIndex = 0; LIndex < LLoadOrder.Count; LIndex++)
+					{
+						LObjectHeader = LLoadOrder[LIndex];
+						LCatalogObjectHeader = LObjectHeader as Schema.FullCatalogObjectHeader;
+						if (LCatalogObjectHeader != null)
+						{
+							Schema.CatalogObject LObject = LoadCatalogObject(LProgram, LObjectHeader.ID, ResolveUser(LCatalogObjectHeader.OwnerID), LObjectHeader.LibraryName, LObjectHeader.Script, LObjectHeader.IsGenerated, LObjectHeader.IsATObject);
+							if (LObject is Schema.ScalarType)
+								LScalarTypes.Add(LObject);
+							if (LCatalogObjectHeader.ID == AObjectID)
+								LResult = LObject;
+						}
+						else
+							LoadPersistentObject(LProgram, LObjectHeader.ID, ResolveCachedCatalogObject(LObjectHeader.CatalogObjectID, true).Owner, LObjectHeader.LibraryName, LObjectHeader.Script, LObjectHeader.IsATObject);
+					}
+
+					// Once all the objects have loaded, fixup pointers to generated objects
+					for (int LIndex = 0; LIndex < LScalarTypes.Count; LIndex++)
+						((Schema.ScalarType)LScalarTypes[LIndex]).ResolveGeneratedDependents(this);
+					
+					if (LResult != null)
+						return LResult;
+						
+					throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectLoadFailed, ErrorSeverity.System, AObjectID);
+				}
+				finally
+				{
+					LProgram.Stop(null);
+				}
 			}
 			finally
 			{
@@ -2570,10 +2588,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		private Schema.CatalogObject LoadCatalogObject(int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsGenerated, bool AIsATObject)
+		private Schema.CatalogObject LoadCatalogObject(Program AProgram, int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsGenerated, bool AIsATObject)
 		{
 			// Load the object itself
-			LoadPersistentObject(AObjectID, AUser, ALibraryName, AScript, AIsATObject);
+			LoadPersistentObject(AProgram, AObjectID, AUser, ALibraryName, AScript, AIsATObject);
 			
 			string LObjectName;
 			if (Device.FCatalogIndex.TryGetValue(AObjectID, out LObjectName))
@@ -2616,7 +2634,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogObjectLoadFailed, ErrorSeverity.System, AObjectID);
 		}
 		
-		private void LoadPersistentObject(int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsATObject)
+		private void LoadPersistentObject(Program AProgram, int AObjectID, Schema.User AUser, string ALibraryName, string AScript, bool AIsATObject)
 		{
 			// Ensure that the required library is loaded
 			if ((ALibraryName != String.Empty) && !Catalog.LoadedLibraries.Contains(ALibraryName))
@@ -2624,7 +2642,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ServerProcess.PushLoadingContext(new LoadingContext(AUser, String.Empty));
 				try
 				{
-					SystemLoadLibraryNode.LoadLibrary(ServerProcess, ALibraryName);
+					SystemLoadLibraryNode.LoadLibrary(AProgram, ALibraryName);
 				}
 				finally
 				{
@@ -2633,7 +2651,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			
 			// Compile and execute the object creation script
-			Plan LCurrentPlan = ServerProcess.ExecutingPlan.Plan;
 			ServerProcess.PushLoadingContext(new LoadingContext(AUser, ALibraryName));
 			try
 			{
@@ -2647,49 +2664,41 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					ParserMessages LParserMessages = new ParserMessages();
 					Statement LStatement = new Parser().ParseScript(AScript, LParserMessages);
-					ServerStatementPlan LStatementPlan = new ServerStatementPlan(ServerProcess);
+					Plan LPlan = new Plan(ServerProcess);
 					try
 					{
-						LStatementPlan.Plan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
-						LStatementPlan.Plan.Messages.AddRange(LParserMessages);
-						ServerProcess.PushExecutingPlan(LStatementPlan);
+						//LPlan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
+						LPlan.Messages.AddRange(LParserMessages);
+						LPlan.PushSecurityContext(new SecurityContext(AUser));
 						try
 						{
-							LStatementPlan.Plan.PushSecurityContext(new SecurityContext(AUser));
+							PlanNode LPlanNode = null;
 							try
 							{
-								PlanNode LPlanNode = null;
-								try
-								{
-									LPlanNode = Compiler.Bind(LStatementPlan.Plan, Compiler.CompileStatement(LStatementPlan.Plan, LStatement));
-								}
-								finally
-								{
-									LCurrentPlan.Messages.AddRange(LStatementPlan.Plan.Messages); // Propagate compiler exceptions to the outer plan
-								}
-								try
-								{
-									LStatementPlan.Plan.CheckCompiled();
-									LPlanNode.Execute(ServerProcess);
-								}
-								catch (Exception E)
-								{
-									throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, AObjectID);
-								}
+								LPlanNode = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
 							}
 							finally
 							{
-								LStatementPlan.Plan.PopSecurityContext();
+								//LCurrentPlan.Messages.AddRange(LPlan.Messages); // Propagate compiler exceptions to the outer plan
+							}
+							try
+							{
+								LPlan.CheckCompiled();
+								LPlanNode.Execute(AProgram);
+							}
+							catch (Exception E)
+							{
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, AObjectID);
 							}
 						}
 						finally
 						{
-							ServerProcess.PopExecutingPlan(LStatementPlan);
+							LPlan.PopSecurityContext();
 						}
 					}
 					finally
 					{
-						LStatementPlan.Dispose();
+						LPlan.Dispose();
 					}
 				}
 				finally
@@ -2961,16 +2970,28 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ServerProcess.PushLoadingContext(new LoadingContext(ServerProcess.ServerSession.Server.SystemUser, String.Empty));
 			try
 			{
-				ServerProcess.Plan.PushSecurityContext(new SecurityContext(ServerProcess.ServerSession.Server.SystemUser));
+				Plan LPlan = new Plan(ServerProcess);
 				try
 				{
-					Block LBlock = (Block)ServerProcess.Plan.Catalog.EmitDropStatement(this, LObjects, String.Empty, true, true, true, true);
-					foreach (Statement LStatement in LBlock.Statements)
-						Compiler.Bind(ServerProcess.Plan, Compiler.Compile(ServerProcess.Plan, LStatement)).Execute(ServerProcess);
+					LPlan.PushSecurityContext(new SecurityContext(ServerProcess.ServerSession.Server.SystemUser));
+					try
+					{
+						Block LBlock = (Block)LPlan.Catalog.EmitDropStatement(this, LObjects, String.Empty, true, true, true, true);
+						Program LProgram = new Program(ServerProcess);
+						foreach (Statement LStatement in LBlock.Statements)
+						{
+							LProgram.Code = Compiler.Bind(LPlan, Compiler.Compile(LPlan, LStatement));
+							LProgram.Execute(null);
+						}
+					}
+					finally
+					{
+						LPlan.PopSecurityContext();
+					}
 				}
 				finally
 				{
-					ServerProcess.Plan.PopSecurityContext();
+					LPlan.Dispose();
 				}
 			}
 /*
@@ -4137,8 +4158,17 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						ServerProcess.PushLoadingContext(new LoadingContext(ServerProcess.ServerSession.User, String.Empty));
 						try
 						{
-							SystemLoadLibraryNode.LoadLibrary(ServerProcess, LLibrary.Name);
-							return Catalog.LoadedLibraries[LLibrary.Name];
+							Program LProgram = new Program(ServerProcess);
+							LProgram.Start(null);
+							try
+							{
+								SystemLoadLibraryNode.LoadLibrary(LProgram, LLibrary.Name);
+								return Catalog.LoadedLibraries[LLibrary.Name];
+							}
+							finally
+							{
+								LProgram.Stop(null);
+							}
 						}
 						finally
 						{
@@ -4342,12 +4372,30 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void CreateDeviceTable(Schema.BaseTableVar ATable)
 		{
-			ServerProcess.DeviceExecute(ATable.Device, new CreateTableNode(ATable));
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
+			{
+				LProgram.DeviceExecute(ATable.Device, new CreateTableNode(ATable));
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
 		}
 		
 		private void DropDeviceTable(Schema.BaseTableVar ATable)
 		{
-			ServerProcess.DeviceExecute(ATable.Device, new DropTableNode(ATable));
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
+			{
+				LProgram.DeviceExecute(ATable.Device, new DropTableNode(ATable));
+			}
+			finally
+			{
+				LProgram.Stop(null);
+			}
 		}
 		
 		public void CreateTable(Schema.BaseTableVar ATable)
@@ -4519,7 +4567,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 				#endif
 				
-				AlterNode.AlterMetaData(ServerProcess.Plan, AObject, AAlterMetaData);
+				AlterNode.AlterMetaData(AObject, AAlterMetaData);
 			}
 		}
 		
@@ -5055,7 +5103,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (AAlterClassDefinition != null)
 			{
 				ClassDefinition LOriginalClassDefinition = AClassDefinition.Clone() as ClassDefinition;
-				AlterNode.AlterClassDefinition(ServerProcess, AClassDefinition, AAlterClassDefinition, AInstance);
+				AlterNode.AlterClassDefinition(AClassDefinition, AAlterClassDefinition, AInstance);
 				#if LOGDDLINSTRUCTIONS
 				if ((!ServerProcess.InLoadingContext()) && ServerProcess.InTransaction)
 					FInstructions.Add(new AlterClassDefinitionInstruction(AClassDefinition, AAlterClassDefinition, LOriginalClassDefinition, AInstance));

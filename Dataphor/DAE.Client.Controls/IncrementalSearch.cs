@@ -556,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 
 			TableDataSet LDataSet = (TableDataSet)FLink.DataSet;
 			
-			Row LRow = new Row(FLink.DataSet.Process, LRowType);
+			Row LRow = new Row(FLink.DataSet.Process.ValueManager, LRowType);
 			try
 			{
 				LDataSet.InitializeFromMaster(LRow);

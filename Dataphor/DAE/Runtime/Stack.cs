@@ -10,10 +10,23 @@ using System.Collections.Specialized;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
+	using Alphora.Dataphor.DAE.Debug;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	public class Stack : Stack<object>
 	{
 		public Stack() : base() { }
 		public Stack(int AMaxStackDepth, int AMaxCallDepth) : base(AMaxStackDepth, AMaxCallDepth) { }
+
+		public override void PushWindow(int ACount)
+		{
+			FWindows.Push(new RuntimeStackWindow(FCount - ACount));
+		}
+		
+		public void PushWindow(int ACount, PlanNode AOriginator, DebugLocator ALocator)
+		{
+			FWindows.Push(new RuntimeStackWindow(FCount - ACount, AOriginator, ALocator));
+		}
 		
 		protected object FErrorVar;
 		public object ErrorVar

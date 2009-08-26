@@ -195,11 +195,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return (SourceNode.Order == null) || !Order.Equivalent(SourceNode.Order) || ((SourceNode.CursorCapabilities & RequestedCapabilities) != RequestedCapabilities);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if (ShouldExecute())
 			{
-				OrderTable LTable = new OrderTable(this, AProcess);
+				OrderTable LTable = new OrderTable(this, AProgram);
 				try
 				{
 					LTable.Open();
@@ -212,10 +212,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			
-			return SourceNode.Execute(AProcess);
+			return SourceNode.Execute(AProgram);
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
 			if (FSequenceColumnIndex >= 0)
 			{
@@ -225,11 +225,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
 						LRowType.Columns.Add(LColumn.Copy());
 
-				Row LRow = new Row(AProcess, LRowType);
+				Row LRow = new Row(AProgram.ValueManager, LRowType);
 				try
 				{
 					ARow.CopyTo(LRow);
-					SourceNode.JoinApplicationTransaction(AProcess, LRow);
+					SourceNode.JoinApplicationTransaction(AProgram, LRow);
 				}
 				finally
 				{
@@ -237,7 +237,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				}
 			}
 			else
-				base.JoinApplicationTransaction(AProcess, ARow);
+				base.JoinApplicationTransaction(AProgram, ARow);
 		}
 
 		public override Statement EmitStatement(EmitMode AMode)
@@ -276,9 +276,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FCursorIsolation = APlan.CursorContext.CursorIsolation;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			CopyTable LTable = new CopyTable(this, AProcess);
+			CopyTable LTable = new CopyTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -749,56 +749,48 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FBrowseVariants.IndexOf(AOriginIndex, AForward, AInclusive) >= 0;
 		}
 		
-		public void CompileBrowseVariant(ServerProcess AProcess, int AOriginIndex, bool AForward, bool AInclusive)
+		public void CompileBrowseVariant(Program AProgram, int AOriginIndex, bool AForward, bool AInclusive)
 		{
-			ServerStatementPlan LServerPlan = new ServerStatementPlan(AProcess);
+			Plan LPlan = new Plan(AProgram.ServerProcess);
 			try
 			{
-				AProcess.PushExecutingPlan(LServerPlan);
+				LPlan.PushATCreationContext();
 				try
 				{
-					LServerPlan.Plan.PushATCreationContext();
+					PushSymbols(LPlan, FSymbols);
 					try
 					{
-						PushSymbols(LServerPlan.Plan, FSymbols);
-						try
-						{
-							EnsureSourceExpression();
-							FBrowseVariants.Add
+						EnsureSourceExpression();
+						FBrowseVariants.Add
+						(
+							new BrowseVariant
 							(
-								new BrowseVariant
+								EmitBrowseVariantNode
 								(
-									EmitBrowseVariantNode
-									(
-										LServerPlan.Plan, 
-										AOriginIndex, 
-										AForward, 
-										AInclusive
-									), 
+									LPlan, 
 									AOriginIndex, 
 									AForward, 
 									AInclusive
-								)
-							);
-						}
-						finally
-						{
-							PopSymbols(LServerPlan.Plan, FSymbols);
-						}
+								), 
+								AOriginIndex, 
+								AForward, 
+								AInclusive
+							)
+						);
 					}
 					finally
 					{
-						LServerPlan.Plan.PopATCreationContext();
+						PopSymbols(LPlan, FSymbols);
 					}
 				}
 				finally
 				{
-					AProcess.PopExecutingPlan(LServerPlan);
+					LPlan.PopATCreationContext();
 				}
 			}
 			finally
 			{
-				LServerPlan.Dispose();
+				LPlan.Dispose();
 			}
 		}
 		
@@ -807,9 +799,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return FBrowseVariants[AOriginIndex, AForward, AInclusive].Node;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			BrowseTable LTable = new BrowseTable(this, AProcess);
+			BrowseTable LTable = new BrowseTable(this, AProgram);
 			try
 			{
 				LTable.Open();

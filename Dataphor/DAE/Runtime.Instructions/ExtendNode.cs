@@ -275,9 +275,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			ExtendTable LTable = new ExtendTable(this, AProcess);
+			ExtendTable LTable = new ExtendTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -303,18 +303,18 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			bool LChanged = false;
 			if ((AColumnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(AColumnName)))
-				LChanged = base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
-			return InternalInternalChange(ANewRow, AColumnName, AProcess, true) || LChanged;
+				LChanged = base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending);
+			return InternalInternalChange(ANewRow, AColumnName, AProgram, true) || LChanged;
 		}
 		
-		protected bool InternalInternalChange(Row ARow, string AColumnName, ServerProcess AProcess, bool AIsDefault)
+		protected bool InternalInternalChange(Row ARow, string AColumnName, Program AProgram, bool AIsDefault)
 		{
 			bool LChanged = false;
-			PushRow(AProcess, ARow);
+			PushRow(AProgram, ARow);
 			try
 			{
 				// Evaluate the Extended columns
@@ -323,14 +323,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 1; LIndex < Nodes.Count; LIndex++)
 				{
 					Schema.TableVarColumn LColumn = TableVar.Columns[FExtendColumnOffset + LIndex - 1];
-					if ((AIsDefault || LColumn.IsComputed) && (!AProcess.ServerSession.Server.IsRepository || LColumn.IsChangeRemotable))
+					if ((AIsDefault || LColumn.IsComputed) && (!AProgram.ServerProcess.ServerSession.Server.IsRepository || LColumn.IsChangeRemotable))
 					{
 						LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Column.Name);
 						if (LColumnIndex >= 0)
 						{
 							if (!AIsDefault || !ARow.HasValue(LColumnIndex))
 							{
-								ARow[LColumnIndex] = Nodes[LIndex].Execute(AProcess);
+								ARow[LColumnIndex] = Nodes[LIndex].Execute(AProgram);
 								LChanged = true;
 							}
 						}
@@ -340,26 +340,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				PopRow(AProcess);
+				PopRow(AProgram);
 			}
 		}
 		
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			bool LChanged = false;
 			if ((AColumnName == String.Empty) || (SourceNode.DataType.Columns.ContainsName(AColumnName)))
-				LChanged = base.InternalChange(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
-			return InternalInternalChange(ANewRow, AColumnName, AProcess, false) || LChanged;
+				LChanged = base.InternalChange(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
+			return InternalInternalChange(ANewRow, AColumnName, AProgram, false) || LChanged;
 		}
 		
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if ((AColumnName == String.Empty) || SourceNode.DataType.Columns.ContainsName(AColumnName))
-				return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+				return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
 			// Exclude any columns from AKey which were included by this node
 			Schema.RowType LRowType = new Schema.RowType();
@@ -367,11 +367,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (SourceNode.DataType.Columns.ContainsName(LColumn.Name))
 					LRowType.Columns.Add(LColumn.Copy());
 
-			Row LRow = new Row(AProcess, LRowType);
+			Row LRow = new Row(AProgram.ValueManager, LRowType);
 			try
 			{
 				ARow.CopyTo(LRow);
-				SourceNode.JoinApplicationTransaction(AProcess, LRow);
+				SourceNode.JoinApplicationTransaction(AProgram, LRow);
 			}
 			finally
 			{

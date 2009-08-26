@@ -609,8 +609,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public delegate void LibraryNotifyEvent(ServerProcess AProcess, string ALibraryName);
-	public delegate void LibraryRenameEvent(ServerProcess AProcess, string AOldLibraryName, string ANewLibraryName);
+	public delegate void LibraryNotifyEvent(Program AProgram, string ALibraryName);
+	public delegate void LibraryRenameEvent(Program AProgram, string AOldLibraryName, string ANewLibraryName);
 	
     /// <remarks> Libraries </remarks>
 	public class Libraries : Objects
@@ -638,58 +638,58 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		/// <summary>Occurs whenever a library is created in the DAE.</summary>		
 		public event LibraryNotifyEvent OnLibraryCreated;
-		public void DoLibraryCreated(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryCreated(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryCreated != null)
-				OnLibraryCreated(AProcess, ALibraryName);
+				OnLibraryCreated(AProgram, ALibraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is added to the list of available libraries in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryAdded;
-		public void DoLibraryAdded(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryAdded(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryAdded != null)
-				OnLibraryAdded(AProcess, ALibraryName);
+				OnLibraryAdded(AProgram, ALibraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is removed from the list of available libraries in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryRemoved;
-		public void DoLibraryRemoved(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryRemoved(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryRemoved != null)
-				OnLibraryRemoved(AProcess, ALibraryName);
+				OnLibraryRemoved(AProgram, ALibraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is renamed in the DAE.</summary>
 		public event LibraryRenameEvent OnLibraryRenamed;
-		public void DoLibraryRenamed(ServerProcess AProcess, string AOldLibraryName, string ANewLibraryName)
+		public void DoLibraryRenamed(Program AProgram, string AOldLibraryName, string ANewLibraryName)
 		{
 			if (OnLibraryRenamed != null)
-				OnLibraryRenamed(AProcess, AOldLibraryName, ANewLibraryName);
+				OnLibraryRenamed(AProgram, AOldLibraryName, ANewLibraryName);
 		}
 		
 		/// <summary>Occurs whenever a library is deleted in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryDeleted;
-		public void DoLibraryDeleted(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryDeleted(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryDeleted != null)
-				OnLibraryDeleted(AProcess, ALibraryName);
+				OnLibraryDeleted(AProgram, ALibraryName);
 		}
 
 		/// <summary>Occurs whenever a library is registered or loaded in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryLoaded;
-		public void DoLibraryLoaded(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryLoaded(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryLoaded != null)
-				OnLibraryLoaded(AProcess, ALibraryName);
+				OnLibraryLoaded(AProgram, ALibraryName);
 		}
 
 		/// <summary>Occurs whenever a library is unregistered or unloaded in the DAE.</summary>
 		public event LibraryNotifyEvent OnLibraryUnloaded;
-		public void DoLibraryUnloaded(ServerProcess AProcess, string ALibraryName)
+		public void DoLibraryUnloaded(Program AProgram, string ALibraryName)
 		{
 			if (OnLibraryUnloaded != null)
-				OnLibraryUnloaded(AProcess, ALibraryName);
+				OnLibraryUnloaded(AProgram, ALibraryName);
 		}
     }
 

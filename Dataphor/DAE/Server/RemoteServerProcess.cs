@@ -181,7 +181,7 @@ namespace Alphora.Dataphor.DAE.Server
 			PlanDescriptor LDescriptor = new PlanDescriptor();
 			LDescriptor.ID = APlan.ID;
 			LDescriptor.CacheTimeStamp = APlan.Process.Session.Server.CacheTimeStamp;
-			LDescriptor.Statistics = APlan.Statistics;
+			LDescriptor.Statistics = APlan.PlanStatistics;
 			LDescriptor.Messages = APlan.Messages;
 			return LDescriptor;
 		}
@@ -243,15 +243,15 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			PlanDescriptor LDescriptor = new PlanDescriptor();
 			LDescriptor.ID = APlan.ID;
-			LDescriptor.Statistics = APlan.Statistics;
+			LDescriptor.Statistics = APlan.PlanStatistics;
 			LDescriptor.Messages = APlan.Messages;
 			if (APlan.ServerExpressionPlan.DataType is Schema.ITableType)
 			{
 				LDescriptor.Capabilities = APlan.Capabilities;
 				LDescriptor.CursorIsolation = APlan.Isolation;
 				LDescriptor.CursorType = APlan.CursorType;
-				if (((TableNode)APlan.ServerExpressionPlan.Code.Nodes[0]).Order != null)
-					LDescriptor.Order = ((TableNode)APlan.ServerExpressionPlan.Code.Nodes[0]).Order.Name;
+				if (((TableNode)APlan.ServerExpressionPlan.Program.Code.Nodes[0]).Order != null)
+					LDescriptor.Order = ((TableNode)APlan.ServerExpressionPlan.Program.Code.Nodes[0]).Order.Name;
 				else
 					LDescriptor.Order = String.Empty;
 			}
@@ -577,7 +577,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
 					LRowType.Columns.Add(new Schema.Column(AParams.Params[LIndex].Name, (Schema.ScalarType)FServerProcess.ServerSession.Server.Catalog[AParams.Params[LIndex].TypeName]));
 					
-				Row LRow = new Row(FServerProcess, LRowType);
+				Row LRow = new Row(FServerProcess.ValueManager, LRowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -585,7 +585,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 					for (int LIndex = 0; LIndex < AParams.Params.Length; LIndex++)
 						if (LRow.HasValue(LIndex))
-							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, DataValue.CopyValue(FServerProcess, LRow[LIndex])));//Hack: cast to fix fixup error
+							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, DataValue.CopyValue(FServerProcess.ValueManager, LRow[LIndex])));//Hack: cast to fix fixup error
 						else
 							LParams.Add(new DataParam(LRow.DataType.Columns[LIndex].Name, LRow.DataType.Columns[LIndex].DataType, (Modifier)AParams.Params[LIndex].Modifier, null));//Hack: cast to fix fixup error
 
@@ -608,7 +608,7 @@ namespace Alphora.Dataphor.DAE.Server
 				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
 					LRowType.Columns.Add(new Schema.Column(AParams[LIndex].Name, AParams[LIndex].DataType));
 					
-				Row LRow = new Row(FServerProcess, LRowType);
+				Row LRow = new Row(FServerProcess.ValueManager, LRowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -629,7 +629,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ACacheTimeStamp = FServerProcess.ServerSession.Server.CacheTimeStamp;
 
 			Schema.Catalog LCatalog = new Schema.Catalog();
-			LCatalog.IncludeDependencies(FServerProcess.CatalogDeviceSession, FServerProcess.Plan.Catalog, FServerProcess.Plan.Catalog[AName], EmitMode.ForRemote);
+			LCatalog.IncludeDependencies(FServerProcess.CatalogDeviceSession, FServerProcess.Catalog, FServerProcess.Catalog[AName], EmitMode.ForRemote);
 			
 			#if LOGCACHEEVENTS
 			FServerProcess.ServerSession.Server.LogMessage(String.Format("Getting catalog for data type '{0}'.", AName));

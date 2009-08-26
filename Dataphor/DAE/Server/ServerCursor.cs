@@ -19,9 +19,10 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerCursor    
 	public class ServerCursor : ServerChildObject, IServerCursor
 	{
-		public ServerCursor(ServerExpressionPlan APlan, DataParams AParams) : base() 
+		public ServerCursor(ServerExpressionPlan APlan, Program AProgram, DataParams AParams) : base() 
 		{
 			FPlan = APlan;
+			FProgram = AProgram;
 			FParams = AParams;
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
@@ -63,6 +64,8 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private ServerExpressionPlan FPlan;
 		public ServerExpressionPlan Plan { get { return FPlan; } }
+		
+		private Program FProgram;
 		
 		IServerExpressionPlan IServerCursor.Plan { get { return FPlan; } }
 
@@ -126,7 +129,7 @@ namespace Alphora.Dataphor.DAE.Server
 				throw new ServerException(ServerException.Codes.CursorActive);
 		}
         
-		protected PlanNode SourceNode { get { return FPlan.Code.Nodes[0]; } }
+		protected PlanNode SourceNode { get { return FPlan.SourceNode; } }
 		
 		protected DataParams FParams;
 		protected Table FSourceTable;
@@ -139,18 +142,18 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			// get a table object to supply the data
 			FPlan.SetActiveCursor(this);
-			FPlan.ServerProcess.Start(FPlan, FParams);
+			FProgram.Start(FParams);
 			try
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 
-				CursorNode LCursorNode = (CursorNode)FPlan.Code;
+				CursorNode LCursorNode = FPlan.CursorNode;
 				//LCursorNode.EnsureApplicationTransactionJoined(FPlan.ServerProcess);
-				FSourceTable = (Table)LCursorNode.SourceNode.Execute(FPlan.ServerProcess);
+				FSourceTable = (Table)FPlan.CursorNode.SourceNode.Execute(FProgram);
 				FSourceTable.Open();
 				FSourceRowType = FSourceTable.DataType.RowType;
 				
-				FPlan.Statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch
 			{
@@ -185,7 +188,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.ServerProcess.Stop(FPlan, FParams);
+					FProgram.Stop(FParams);
 				}
 			}
 			finally
@@ -298,7 +301,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				FSourceTable.Reset();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -320,7 +323,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				LResult = FSourceTable.Next();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -342,7 +345,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				FSourceTable.Last();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -368,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -395,7 +398,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -422,7 +425,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -449,7 +452,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -471,7 +474,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				FSourceTable.Select(ARow);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -492,7 +495,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				FSourceTable.First();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -518,7 +521,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -545,7 +548,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -572,7 +575,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -599,7 +602,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -623,7 +626,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				InternalDisposeBookmark(ABookmark);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -646,7 +649,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				InternalDisposeBookmarks(ABookmarks);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -659,7 +662,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public Schema.Order Order { get { return FSourceTable.Node.Order; } }
+		public Schema.Order Order { get { return FSourceTable.Order; } }
 		
 		public Row GetKey()
 		{
@@ -674,7 +677,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -701,7 +704,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -723,7 +726,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				long LStartTicks = TimingUtility.CurrentTicks;
 				FSourceTable.FindNearest(AKey);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -749,7 +752,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -777,7 +780,7 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
 				FSourceTable.Insert(null, ARow, AValueFlags, false);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -804,7 +807,7 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
 				FSourceTable.Update(ARow, AValueFlags, false);
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -826,7 +829,7 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Updateable);
 				FSourceTable.Delete();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -848,7 +851,7 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				CheckCapability(CursorCapability.Truncateable);
 				FSourceTable.Truncate();
-				FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 			catch (Exception E)
 			{
@@ -874,7 +877,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -897,11 +900,11 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Default(FPlan.ServerProcess, null, ARow, null, AColumnName);
+					return ((TableNode)SourceNode).Default(FPlan.Program, null, ARow, null, AColumnName);
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -924,11 +927,11 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Change(FPlan.ServerProcess, AOldRow, ANewRow, null, AColumnName);
+					return ((TableNode)SourceNode).Change(FPlan.Program, AOldRow, ANewRow, null, AColumnName);
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -951,11 +954,11 @@ namespace Alphora.Dataphor.DAE.Server
 				long LStartTicks = TimingUtility.CurrentTicks;
 				try
 				{
-					return ((TableNode)SourceNode).Validate(FPlan.ServerProcess, AOldRow, ANewRow, null, AColumnName);
+					return ((TableNode)SourceNode).Validate(FPlan.Program, AOldRow, ANewRow, null, AColumnName);
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -992,7 +995,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1048,7 +1051,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1094,7 +1097,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1126,7 +1129,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1154,7 +1157,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1183,7 +1186,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1212,7 +1215,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1240,7 +1243,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)
@@ -1269,7 +1272,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FPlan.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+					FProgram.Statistics.ExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 				}
 			}
 			catch (Exception E)

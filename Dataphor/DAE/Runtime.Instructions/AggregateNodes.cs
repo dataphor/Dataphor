@@ -157,34 +157,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			base.BindToProcess(APlan);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack.PushWindow(0); //, AProcess.ExecutingPlan, this);
+			AProgram.Stack.PushWindow(0, this, Operator.Locator);
 			try
 			{
 				Table LTable = null;
 				try
 				{
-					AProcess.Stack.Push(null); // result
-					int LStackDepth = AProcess.Stack.Count;
+					AProgram.Stack.Push(null); // result
+					int LStackDepth = AProgram.Stack.Count;
 
 					// Initialization
 					try
 					{
-						Nodes[1].Execute(AProcess);
+						Nodes[1].Execute(AProgram);
 					}
 					catch (ExitError){}
 					
 					// Aggregation
 					Row LRow = null;
 					if (FAggregateColumnIndexes.Length > 0)
-						LRow = new Row(AProcess, SourceNode.DataType.RowType);
+						LRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType);
 					//object[] LValues = new object[FAggregateColumnIndexes.Length];
 					for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
 					{
 						Schema.IDataType LType = SourceNode.TableVar.Columns[FAggregateColumnIndexes[LIndex]].DataType;
 						//LValues[LIndex] = new DataVar(FValueNames[LIndex], LType, null);
-						AProcess.Stack.Push(null);
+						AProgram.Stack.Push(null);
 					}
 					try
 					{
@@ -193,13 +193,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							#if DEBUG
 							// This AllowExtraWindowAccess call is only necessary debug because the check is not
 							// made in release executables
-							AProcess.Stack.AllowExtraWindowAccess = true;
+							AProgram.Stack.AllowExtraWindowAccess = true;
 							try
 							{
 							#endif
 								if (LTable == null)
 								{
-									LTable = (Table)Nodes[0].Execute(AProcess);
+									LTable = (Table)Nodes[0].Execute(AProgram);
 									LTable.Open();
 								}
 
@@ -212,32 +212,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							}
 							finally
 							{
-								AProcess.Stack.AllowExtraWindowAccess = false;
+								AProgram.Stack.AllowExtraWindowAccess = false;
 							}
 							#endif
 							
 							for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
 								if (LRow.HasValue(FAggregateColumnIndexes[LIndex]))
-									AProcess.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
+									AProgram.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, LRow[FAggregateColumnIndexes[LIndex]]);
 								else
-									AProcess.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
+									AProgram.Stack.Poke(FAggregateColumnIndexes.Length - 1 - LIndex, null);
 							
-							AProcess.Stack.PushFrame();
+							AProgram.Stack.PushFrame();
 							try
 							{
-								Nodes[2].Execute(AProcess);
+								Nodes[2].Execute(AProgram);
 							}
 							catch (ExitError){}
 							finally
 							{
-								AProcess.Stack.PopFrame();
+								AProgram.Stack.PopFrame();
 							}
 						}
 					}
 					finally
 					{
 						for (int LIndex = 0; LIndex < FAggregateColumnIndexes.Length; LIndex++)
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 
 						if (FAggregateColumnIndexes.Length > 0)
 							LRow.Dispose();
@@ -246,11 +246,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					// Finalization
 					try
 					{
-						Nodes[3].Execute(AProcess);
+						Nodes[3].Execute(AProgram);
 					}
 					catch (ExitError){}
 					
-					return AProcess.Stack.Peek(AProcess.Stack.Count - LStackDepth);
+					return AProgram.Stack.Peek(AProgram.Stack.Count - LStackDepth);
 				}
 				finally
 				{
@@ -260,7 +260,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			finally
 			{
-				AProcess.Stack.PopWindow();
+				AProgram.Stack.PopWindow();
 			}
 		}
 		
@@ -291,25 +291,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class CountInitializationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = 0;
+			AProgram.Stack[0] = 0;
 			return null;
 		}
 	}
 
     public class IntegerInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = null;
+			AProgram.Stack[0] = null;
 			return null;
 		}
     }
     
     public class EmptyFinalizationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			return null;
 		}
@@ -317,33 +317,33 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
     public class CountAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = checked((int)AProcess.Stack[0] + 1);
+			AProgram.Stack[0] = checked((int)AProgram.Stack[0] + 1);
 			return null;
 		}
     }
     
     public class ObjectCountAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
 			return null;
 		}
     }
     
     public class IntegerSumAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] =
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] =
 					checked
 					(
-						(int)AProcess.Stack[0] +
-						(AProcess.Stack[1] == null ? 0 : (int)AProcess.Stack[1])
+						(int)AProgram.Stack[0] +
+						(AProgram.Stack[1] == null ? 0 : (int)AProgram.Stack[1])
 					);
 			return null;
 		}
@@ -351,34 +351,34 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if 
 			(
-				AProcess.Stack[0] != null && 
+				AProgram.Stack[0] != null && 
 				(
-					AProcess.Stack[1] == null || 
-					((int)AProcess.Stack[0] < (int)AProcess.Stack[1])
+					AProgram.Stack[1] == null || 
+					((int)AProgram.Stack[0] < (int)AProgram.Stack[1])
 				)
 			)
-				AProcess.Stack[1] = AProcess.Stack[0];
+				AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
     
     public class IntegerMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			if 
 			(
-				AProcess.Stack[0] != null && 
+				AProgram.Stack[0] != null && 
 				(
-					AProcess.Stack[1] == null || 
-					((int)AProcess.Stack[0] > (int)AProcess.Stack[1])
+					AProgram.Stack[1] == null || 
+					((int)AProgram.Stack[0] > (int)AProgram.Stack[1])
 				)
 			)
-				AProcess.Stack[1] = AProcess.Stack[0];
+				AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
@@ -390,22 +390,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack.Push(0);
-			AProcess.Stack[1] = 0;
+			AProgram.Stack.Push(0);
+			AProgram.Stack[1] = 0;
 			return null;
 		}
     }
     
     public class IntegerAvgAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
+			if (AProgram.Stack[0] != null)
 			{
-				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
-				AProcess.Stack[2] = checked((int)AProcess.Stack[2] + (int)AProcess.Stack[0]);
+				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
+				AProgram.Stack[2] = checked((int)AProgram.Stack[2] + (int)AProgram.Stack[0]);
 			}
 			return null;
 		}
@@ -413,12 +413,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class IntegerAvgFinalizationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if ((int)AProcess.Stack[0] == 0)
-				AProcess.Stack[1] = null;
+			if ((int)AProgram.Stack[0] == 0)
+				AProgram.Stack[1] = null;
 			else
-				AProcess.Stack[1] = (decimal)(int)AProcess.Stack[1] / (decimal)(int)AProcess.Stack[0];
+				AProgram.Stack[1] = (decimal)(int)AProgram.Stack[1] / (decimal)(int)AProgram.Stack[0];
 			return null;
 		}
     }
@@ -426,56 +426,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	#if USEDOUBLE    
     public class DoubleInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[0].Value = Scalar.FromDouble((double)0.0);
+			AProgram.Stack[0].Value = Scalar.FromDouble((double)0.0);
 			return null;
 		}
     }
     
     public class DoubleMinInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[0].Value = Scalar.FromDouble(double.MaxValue);
+			AProgram.Stack[0].Value = Scalar.FromDouble(double.MaxValue);
 			return null;
 		}
     }
     
     public class DoubleMaxInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[0].Value = Scalar.FromDouble(double.MinValue);
+			AProgram.Stack[0].Value = Scalar.FromDouble(double.MinValue);
 			return null;
 		}
     }
     
     public class DoubleSumAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[1] = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() + AProcess.Context[0].Value.AsDouble());
+			AProgram.Stack[1] = Scalar.FromDouble(AProgram.Stack[1].Value.AsDouble() + AProgram.Stack[0].Value.AsDouble());
 			return null;
 		}
     }
     
     public class DoubleMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Context[0].Value.AsDouble() < AProcess.Context[1].Value.AsDouble())
-				AProcess.Context[1] = AProcess.Context[0].Value.Copy();
+			if (AProgram.Stack[0].Value.AsDouble() < AProgram.Stack[1].Value.AsDouble())
+				AProgram.Stack[1] = AProgram.Stack[0].Value.Copy();
 			return null;
 		}
     }
     
     public class DoubleMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Context[0].Value.AsDouble() > AProcess.Context[1].Value.AsDouble())
-				AProcess.Context[1] = AProcess.Context[0].Value.Copy();
+			if (AProgram.Stack[0].Value.AsDouble() > AProgram.Stack[1].Value.AsDouble())
+				AProgram.Stack[1] = AProgram.Stack[0].Value.Copy();
 			return null;
 		}
     }
@@ -487,29 +487,29 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.Push(new Symbol("LCounter", Schema.DataType.SystemInteger));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context.Push(0);
-			AProcess.Context[1] = Scalar.FromDouble((double)0.0);
+			AProgram.Stack.Push(0);
+			AProgram.Stack[1] = Scalar.FromDouble((double)0.0);
 			return null;
 		}
     }
     
     public class DoubleAvgAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[1] = Scalar.FromInt32(AProcess, (int)AProcess.Context[1] + 1);
-			AProcess.Context[2].Value = Scalar.FromDouble(AProcess.Context[2].Value.AsDouble() + AProcess.Context[0].Value.AsDouble());
+			AProgram.Stack[1] = Scalar.FromInt32(AProcess, (int)AProgram.Stack[1] + 1);
+			AProgram.Stack[2].Value = Scalar.FromDouble(AProgram.Stack[2].Value.AsDouble() + AProgram.Stack[0].Value.AsDouble());
 			return null;
 		}
     }
     
     public class DoubleAvgFinalizationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[1] = Scalar.FromDouble(AProcess.Context[1].Value.AsDouble() / (int)AProcess.Context[0]);
+			AProgram.Stack[1] = Scalar.FromDouble(AProgram.Stack[1].Value.AsDouble() / (int)AProgram.Stack[0]);
 			return null;
 		}
     }
@@ -517,44 +517,44 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = null;
+			AProgram.Stack[0] = null;
 			return null;
 		}
     }
     
     public class DecimalSumAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] = 
-					AProcess.Stack[1] == null ? 
-						(decimal)AProcess.Stack[0] : 
-						((decimal)AProcess.Stack[1] + (decimal)AProcess.Stack[0]);
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] = 
+					AProgram.Stack[1] == null ? 
+						(decimal)AProgram.Stack[0] : 
+						((decimal)AProgram.Stack[1] + (decimal)AProgram.Stack[0]);
 			return null;
 		}
     }
     
     public class DecimalMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] < (decimal)AProcess.Stack[1]))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] < (decimal)AProgram.Stack[1]))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
     
     public class DecimalMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] > (decimal)AProcess.Stack[1]))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] > (decimal)AProgram.Stack[1]))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
@@ -566,22 +566,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack.Push(0);
-			AProcess.Stack[1] = 0.0m;
+			AProgram.Stack.Push(0);
+			AProgram.Stack[1] = 0.0m;
 			return null;
 		}
     }
     
     public class DecimalAvgAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
+			if (AProgram.Stack[0] != null)
 			{
-				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
-				AProcess.Stack[2] = (decimal)AProcess.Stack[2] + (decimal)AProcess.Stack[0];
+				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
+				AProgram.Stack[2] = (decimal)AProgram.Stack[2] + (decimal)AProgram.Stack[0];
 			}
 			return null;
 		}
@@ -589,56 +589,56 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
     public class DecimalAvgFinalizationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if ((int)AProcess.Stack[0] == 0)
-				AProcess.Stack[1] = null;
+			if ((int)AProgram.Stack[0] == 0)
+				AProgram.Stack[1] = null;
 			else
-				AProcess.Stack[1] = (decimal)AProcess.Stack[1] / (int)AProcess.Stack[0];
+				AProgram.Stack[1] = (decimal)AProgram.Stack[1] / (int)AProgram.Stack[0];
 			return null;
 		}
     }
     
 	public class MoneyInitializationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = null;
+			AProgram.Stack[0] = null;
 			return null;
 		}
 	}
     
 	public class MoneySumAggregationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] = 
-					AProcess.Stack[1] == null ? 
-						(decimal)AProcess.Stack[0] :
-						((decimal)AProcess.Stack[1] + (decimal)AProcess.Stack[0]);
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] = 
+					AProgram.Stack[1] == null ? 
+						(decimal)AProgram.Stack[0] :
+						((decimal)AProgram.Stack[1] + (decimal)AProgram.Stack[0]);
 			return null;
 		}
 	}
 	
 	public class MoneyMinAggregationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] < (decimal)AProcess.Stack[1]))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] < (decimal)AProgram.Stack[1]))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
 	}
     
 	public class MoneyMaxAggregationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || ((decimal)AProcess.Stack[0] > (decimal)AProcess.Stack[1]))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || ((decimal)AProgram.Stack[0] > (decimal)AProgram.Stack[1]))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
 	}
@@ -650,22 +650,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			APlan.Symbols.Push(new Symbol("LCounter", APlan.DataTypes.SystemInteger));
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack.Push(0);
-			AProcess.Stack[1] = 0.0m;
+			AProgram.Stack.Push(0);
+			AProgram.Stack[1] = 0.0m;
 			return null;
 		}
 	}
     
 	public class MoneyAvgAggregationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
+			if (AProgram.Stack[0] != null)
 			{
-				AProcess.Stack[1] = checked((int)AProcess.Stack[1] + 1);
-				AProcess.Stack[2] = (decimal)AProcess.Stack[2] + (decimal)AProcess.Stack[0];
+				AProgram.Stack[1] = checked((int)AProgram.Stack[1] + 1);
+				AProgram.Stack[2] = (decimal)AProgram.Stack[2] + (decimal)AProgram.Stack[0];
 			}
 			return null;
 		}
@@ -673,65 +673,65 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	
 	public class MoneyAvgFinalizationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if ((int)AProcess.Stack[0] == 0)
-				AProcess.Stack[1] = null;
+			if ((int)AProgram.Stack[0] == 0)
+				AProgram.Stack[1] = null;
 			else
-				AProcess.Stack[1] = (decimal)AProcess.Stack[1] / (int)AProcess.Stack[0];
+				AProgram.Stack[1] = (decimal)AProgram.Stack[1] / (int)AProgram.Stack[0];
 			return null;
 		}
 	}
 	
 	public class StringInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = null;
+			AProgram.Stack[0] = null;
 			return null;
 		}
     }
     
     public class StringMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || (String.Compare((string)AProcess.Stack[0], (string)AProcess.Stack[1], false) < 0))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], false) < 0))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
     
     public class StringMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if (AProcess.Stack[1] == null || (String.Compare((string)AProcess.Stack[0], (string)AProcess.Stack[1], false) > 0))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], false) > 0))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
 
     public class VersionNumberMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if ((AProcess.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Stack[0], (VersionNumber)AProcess.Stack[1]) < 0))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if ((AProgram.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProgram.Stack[0], (VersionNumber)AProgram.Stack[1]) < 0))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
     
     public class VersionNumberMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				if ((AProcess.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProcess.Stack[0], (VersionNumber)AProcess.Stack[1]) > 0))
-					AProcess.Stack[1] = AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				if ((AProgram.Stack[1] == null) || (VersionNumber.Compare((VersionNumber)AProgram.Stack[0], (VersionNumber)AProgram.Stack[1]) > 0))
+					AProgram.Stack[1] = AProgram.Stack[0];
 			return null;
 		}
     }
@@ -739,31 +739,31 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	#if USEISTRING    
     public class IStringInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Context[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemIString, null);
+			AProgram.Stack[0].Value = new Scalar(AProcess, AProcess.DataTypes.SystemIString, null);
 			return null;
 		}
     }
     
     public class IStringMinAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], (string)AProcess.Context[1], true) < 0))
-					AProcess.Context[1] = AProcess.Context[0].Value.Copy();
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], (string)AProgram.Stack[1], true) < 0))
+					AProgram.Stack[1] = AProgram.Stack[0].Value.Copy();
 			return null;
 		}
     }
     
     public class IStringMaxAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Context[0] != null)
-				if (AProcess.Context[1] == null || (String.Compare((string)AProcess.Context[0], AProcess.Context[2].Value.AsString, true) > 0))
-					AProcess.Context[1] = AProcess.Context[0].Value.Copy();
+			if (AProgram.Stack[0] != null)
+				if (AProgram.Stack[1] == null || (String.Compare((string)AProgram.Stack[0], AProgram.Stack[2].Value.AsString, true) > 0))
+					AProgram.Stack[1] = AProgram.Stack[0].Value.Copy();
 			return null;
 		}
     }
@@ -771,38 +771,38 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     
 	public class BooleanAllInitializationNode : PlanNode
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = true;
+			AProgram.Stack[0] = true;
 			return null;
 		}
 	}
 	    
     public class BooleanAllAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] = (bool)AProcess.Stack[1] && (bool)AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] = (bool)AProgram.Stack[1] && (bool)AProgram.Stack[0];
 			return null;
 		}
     }
     
     public class BooleanAnyInitializationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AProcess.Stack[0] = false;
+			AProgram.Stack[0] = false;
 			return null;
 		}
     }
     
     public class BooleanAnyAggregationNode : PlanNode
     {
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			if (AProcess.Stack[0] != null)
-				AProcess.Stack[1] = (bool)AProcess.Stack[1] || (bool)AProcess.Stack[0];
+			if (AProgram.Stack[0] != null)
+				AProgram.Stack[1] = (bool)AProgram.Stack[1] || (bool)AProgram.Stack[0];
 			return null;
 		}
     }

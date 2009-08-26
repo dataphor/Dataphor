@@ -26,7 +26,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     /// </remarks>    
     public class ProjectTable : Table
     {
-        public ProjectTable(ProjectNodeBase ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+        public ProjectTable(ProjectNodeBase ANode, Program AProgram) : base(ANode, AProgram){}
         
         public new ProjectNodeBase Node
         {
@@ -47,12 +47,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         // Table Support
         protected override void InternalOpen()
         {
-			FSourceTable = (Table)Node.Nodes[0].Execute(Process);
-			FSourceRow = new Row(Process, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
+			FSourceTable = (Table)Node.Nodes[0].Execute(Program);
+			FSourceRow = new Row(Manager, ((Schema.TableType)Node.DataType).RowType); // Prepare the row on the projected nodes, the select will only fill in what it can
 			if (Node.DistinctRequired)
 			{
-				FCurrentRow = new Row(Process, Node.DataType.RowType);
-				FLastRow = new Row(Process, Node.DataType.RowType);
+				FCurrentRow = new Row(Manager, Node.DataType.RowType);
+				FLastRow = new Row(Manager, Node.DataType.RowType);
 				FCrack = true;
 			}
         }
@@ -115,24 +115,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							break;
 						}
 						
-						Process.Stack.Push(FCurrentRow);
+						Program.Stack.Push(FCurrentRow);
 						try
 						{
-							Process.Stack.Push(FLastRow);
+							Program.Stack.Push(FLastRow);
 							try
 							{
-								object LEqual = Node.EqualNode.Execute(Process);
+								object LEqual = Node.EqualNode.Execute(Program);
 								if ((LEqual == null) || !(bool)LEqual)
 									break;
 							}
 							finally
 							{
-								Process.Stack.Pop();
+								Program.Stack.Pop();
 							}
 						}
 						finally
 						{
-							Process.Stack.Pop();
+							Program.Stack.Pop();
 						}
 					}
 					else

@@ -149,7 +149,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FTableVar.Owner = APlan.User;
 			FTableVar.InheritMetaData(SourceTableVar.MetaData);
 			FTableVar.MergeMetaData(MetaData);
-			AlterNode.AlterMetaData(APlan, FTableVar, AlterMetaData, true);
+			AlterNode.AlterMetaData(FTableVar, AlterMetaData, true);
 			CopyTableVarColumns(SourceTableVar.Columns);
 			int LSourceColumnIndex;
 			Schema.TableVarColumn LSourceColumn;
@@ -166,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				if (LExpression.ChangeNilable)
 					LNewColumn.IsNilable = LExpression.IsNilable;
 				LNewColumn.MergeMetaData(LExpression.MetaData);
-				AlterNode.AlterMetaData(APlan, LNewColumn, LExpression.AlterMetaData, true);
+				AlterNode.AlterMetaData(LNewColumn, LExpression.AlterMetaData, true);
 				LNewColumn.ReadOnly = Convert.ToBoolean(MetaData.GetTag(LNewColumn.MetaData, "Frontend.ReadOnly", LNewColumn.ReadOnly.ToString()));
 
 				APlan.Symbols.Push(new Symbol(Keywords.Value, LNewColumn.DataType));
@@ -262,7 +262,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			CopyKeys(SourceTableVar.Keys);
 			foreach (DropKeyDefinition LKeyDefinition in FDropKeys)
 			{
-				Schema.Key LOldKey = TableVar.FindKey(LKeyDefinition);
+				Schema.Key LOldKey = Compiler.FindKey(APlan, TableVar, LKeyDefinition);
 
 				TableVar.Keys.SafeRemove(LOldKey);
 				TableVar.Constraints.SafeRemove(LOldKey.Constraint);
@@ -272,8 +272,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			foreach (AlterKeyDefinition LKeyDefinition in FAlterKeys)
 			{
-				Schema.Key LOldKey = TableVar.FindKey(LKeyDefinition);
-				AlterNode.AlterMetaData(APlan, LOldKey, LKeyDefinition.AlterMetaData);
+				Schema.Key LOldKey = Compiler.FindKey(APlan, TableVar, LKeyDefinition);
+				AlterNode.AlterMetaData(LOldKey, LKeyDefinition.AlterMetaData);
 			}
 
 			Compiler.CompileTableVarKeys(APlan, FTableVar, FKeys, false);
@@ -283,13 +283,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			foreach (DropOrderDefinition LOrderDefinition in FDropOrders)
 			{
-				Schema.Order LOldOrder = TableVar.FindOrder(APlan, LOrderDefinition);
+				Schema.Order LOldOrder = Compiler.FindOrder(APlan, TableVar, LOrderDefinition);
 
 				TableVar.Orders.SafeRemove(LOldOrder);
 			}
 
 			foreach (AlterOrderDefinition LOrderDefinition in FAlterOrders)
-				AlterNode.AlterMetaData(APlan, TableVar.FindOrder(APlan, LOrderDefinition), LOrderDefinition.AlterMetaData);
+				AlterNode.AlterMetaData(Compiler.FindOrder(APlan, TableVar, LOrderDefinition), LOrderDefinition.AlterMetaData);
 
 			Compiler.CompileTableVarOrders(APlan, FTableVar, FOrders);
 
@@ -442,7 +442,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LReferenceToAlter = TableVar.DerivedReferences[LAlterReference.ReferenceName]; // This is just to throw the object not found error
 						else
 							LReferenceToAlter = TableVar.DerivedReferences[LReferenceIndex];
-						AlterNode.AlterMetaData(APlan, LReferenceToAlter, LAlterReference.AlterMetaData);
+						AlterNode.AlterMetaData(LReferenceToAlter, LAlterReference.AlterMetaData);
 						Schema.Object LOriginatingReference = Compiler.ResolveCatalogIdentifier(APlan, LReferenceToAlter.OriginatingReferenceName(), false);
 						if (LOriginatingReference != null)
 							APlan.AttachDependency(LOriginatingReference);
@@ -515,9 +515,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LExpression;
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			AdornTable LTable = new AdornTable(this, AProcess);
+			AdornTable LTable = new AdornTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -530,59 +530,59 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		protected void InternalValidateColumnConstraints(Row ARow, Schema.TableVarColumn AColumn, ServerProcess AProcess)
+		protected void InternalValidateColumnConstraints(Row ARow, Schema.TableVarColumn AColumn, Program AProgram)
 		{
-			AProcess.Stack.Push(ARow[AColumn.Name]);
+			AProgram.Stack.Push(ARow[AColumn.Name]);
 			try
 			{
 				foreach (Schema.TableVarColumnConstraint LConstraint in AColumn.Constraints)
-					LConstraint.Validate(AProcess, Schema.Transition.Insert);
+					LConstraint.Validate(AProgram, Schema.Transition.Insert);
 			}
 			finally
 			{
-				AProcess.Stack.Pop();
+				AProgram.Stack.Pop();
 			}
 		}
 		
 		// Validate
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (AColumnName == String.Empty)
 			{
-				PushNewRow(AProcess, ANewRow);
+				PushNewRow(AProgram, ANewRow);
 				try
 				{
 					foreach (Schema.TableVarColumn LColumn in TableVar.Columns)
 					{
 						if (LColumn.Constraints.Count > 0)
-							InternalValidateColumnConstraints(ANewRow, LColumn, AProcess);
+							InternalValidateColumnConstraints(ANewRow, LColumn, AProgram);
 					}
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 			else
 			{
 				Schema.TableVarColumn LColumn = TableVar.Columns[TableVar.Columns.IndexOfName(AColumnName)];
 				if ((LColumn.Constraints.Count > 0) && ANewRow.HasValue(LColumn.Name))
-					InternalValidateColumnConstraints(ANewRow, LColumn, AProcess);
+					InternalValidateColumnConstraints(ANewRow, LColumn, AProgram);
 			}
 
-			return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 		}
 		
-		protected bool InternalDefaultColumn(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected bool InternalDefaultColumn(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			int LColumnIndex = TableVar.Columns.IndexOfName(AColumnName);
 			for (int LIndex = 0; LIndex < FExpressions.Count; LIndex++)
 				if (TableVar.Columns.IndexOf(FExpressions[LIndex].ColumnName) == LColumnIndex)
 					if (FExpressions[LIndex].Default != null)
 					{
-						bool LChanged = DefaultColumn(AProcess, TableVar, ANewRow, AValueFlags, AColumnName);
+						bool LChanged = DefaultColumn(AProgram, TableVar, ANewRow, AValueFlags, AColumnName);
 						if (AIsDescending && LChanged)
-							Change(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName);
+							Change(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName);
 						return LChanged;
 					}
 					else
@@ -591,27 +591,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			bool LChanged = false;
 
 			if (AColumnName != String.Empty)
-				LChanged = InternalDefaultColumn(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+				LChanged = InternalDefaultColumn(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
 			else
 				for (int LIndex = 0; LIndex < ANewRow.DataType.Columns.Count; LIndex++)
-					LChanged = InternalDefaultColumn(AProcess, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name, AIsDescending) || LChanged;
+					LChanged = InternalDefaultColumn(AProgram, AOldRow, ANewRow, AValueFlags, ANewRow.DataType.Columns[LIndex].Name, AIsDescending) || LChanged;
 
 			if (AIsDescending && PropagateDefault)
-				LChanged = base.InternalDefault(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
+				LChanged = base.InternalDefault(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending) || LChanged;
 
 			return LChanged;
 		}
 
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
 			// Safe to pass null for AOldRow only if AIsDescending is false
-			InternalDefault(AProcess, null, ARow, null, String.Empty, false);
-			base.JoinApplicationTransaction(AProcess, ARow);
+			InternalDefault(AProgram, null, ARow, null, String.Empty, false);
+			base.JoinApplicationTransaction(AProgram, ARow);
 		}
 	}
 }

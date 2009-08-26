@@ -365,7 +365,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					string LText;
 					while (LCursor.Next())
 					{
-						LKey = new DAE.Runtime.Data.Row(FProcess, new DAE.Schema.RowType(Source.DataView.Order.Columns));
+						LKey = new DAE.Runtime.Data.Row(FProcess.ValueManager, new DAE.Schema.RowType(Source.DataView.Order.Columns));
 						try
 						{
 							using (DAE.Runtime.Data.Row LRow = LCursor.Select())
@@ -457,7 +457,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 			{
 				if (LCursor.Next())
 				{
-					AKey = new DAE.Runtime.Data.Row(FProcess, new RowType(Source.DataView.Order.Columns));
+					AKey = new DAE.Runtime.Data.Row(FProcess.ValueManager, new RowType(Source.DataView.Order.Columns));
 					using (DAE.Runtime.Data.Row LSelected = LCursor.Select())
 						LSelected.CopyTo(AKey);
 				}
@@ -746,7 +746,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 				int LColumnIndex;
 				while (LCursor.Next())
 				{
-					LKey = new DAE.Runtime.Data.Row(Tree.Process, new RowType(Tree.Source.DataView.Order.Columns));
+					LKey = new DAE.Runtime.Data.Row(Tree.Process.ValueManager, new RowType(Tree.Source.DataView.Order.Columns));
 					try
 					{
 						using (DAE.Runtime.Data.Row LRow = LCursor.Select())

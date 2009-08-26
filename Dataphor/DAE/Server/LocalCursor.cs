@@ -26,6 +26,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FPlan = APlan;
 			FCursor = ACursor;
 			FInternalProcess = FPlan.FProcess.FInternalProcess;
+			FInternalProgram = new Program(FInternalProcess);
+			FInternalProgram.Start(null);
 			FBuffer = new LocalRows();
 			FBookmarks = new LocalBookmarks();
 			FFetchCount = FPlan.FProcess.ProcessInfo.FetchCount;
@@ -39,6 +41,12 @@ namespace Alphora.Dataphor.DAE.Server
 				FBuffer = null;
 			}
 			
+			if (FInternalProgram != null)
+			{
+				FInternalProgram.Stop(null);
+				FInternalProgram = null;
+			}
+			
 			FInternalProcess = null;
 			FCursor = null;
 			FPlan = null;
@@ -46,6 +54,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		private ServerProcess FInternalProcess;
+		private Program FInternalProgram;
 
 		protected LocalExpressionPlan FPlan;
         /// <value>Returns the <see cref="IServerExpressionPlan"/> instance for this cursor.</value>
@@ -278,7 +287,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (!FFlagsCached)
 			{
 				SetFlags(FCursor.GetFlags(FPlan.FProcess.GetProcessCallInfo()));
-				FPlan.FStatisticsCached = false;
+				FPlan.FProgramStatisticsCached = false;
 			}
 			return FFlags;
 		}
@@ -289,12 +298,12 @@ namespace Alphora.Dataphor.DAE.Server
 				ClearBuffer();
 			SetFlags(FCursor.Reset(FPlan.FProcess.GetProcessCallInfo()));
 			SetBufferDirection(BufferDirection.Forward);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 
         public Row Select()
         {
-			Row LRow = new Row(FPlan.FProcess, ((Schema.TableType)FPlan.DataType).RowType);
+			Row LRow = new Row(FPlan.FProcess.ValueManager, ((Schema.TableType)FPlan.DataType).RowType);
 			try
 			{
 				Select(LRow);
@@ -316,7 +325,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ARow.ValuesOwned = false;
 			byte[] AData = FCursor.Select(LHeader, FPlan.FProcess.GetProcessCallInfo()).Data;
 			ARow.AsPhysical = AData;
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
 		private void BufferSelect(Row ARow)
@@ -348,7 +357,7 @@ namespace Alphora.Dataphor.DAE.Server
 			Guid[] LBookmarks;
 			RemoteFetchData LFetchData = FCursor.Fetch(out LBookmarks, FFetchCount * (int)FBufferDirection, FPlan.FProcess.GetProcessCallInfo());
 			ProcessFetchData(LFetchData, LBookmarks, AIsFirst);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
 		public void ProcessFetchData(RemoteFetchData AFetchData, Guid[] ABookmarks, bool AIsFirst)
@@ -359,7 +368,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				for (int LIndex = 0; LIndex < AFetchData.Body.Length; LIndex++)
 				{
-					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess, LRowType), ABookmarks[LIndex]);
+					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
 					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
 					FBuffer.Add(LRow);
 					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
@@ -374,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				for (int LIndex = 0; LIndex < AFetchData.Body.Length; LIndex++)
 				{
-					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess, LRowType), ABookmarks[LIndex]);
+					LocalRow LRow = new LocalRow(new Row(FPlan.FProcess.ValueManager, LRowType), ABookmarks[LIndex]);
 					LRow.Row.AsPhysical = AFetchData.Body[LIndex].Data;
 					FBuffer.Insert(0, LRow);
 					FBookmarks.Add(new LocalBookmark(ABookmarks[LIndex]));
@@ -393,7 +402,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected bool SourceNext()
 		{
 			RemoteMoveData LMoveData = FCursor.MoveBy(1, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			SetFlags(LMoveData.Flags);
 			return LMoveData.Flags == RemoteCursorGetFlags.None;
 		}
@@ -436,7 +445,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected void SourceLast()
 		{
 			SetFlags(FCursor.Last(FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
         public void Last()
@@ -495,7 +504,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LRow.Body.Data = ARow.AsPhysical;
 			FCursor.Insert(LRow, AValueFlags, FPlan.FProcess.GetProcessCallInfo());
 			FFlagsCached = false;
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -520,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Server
 				SyncSource(true);
 			FCursor.Update(LRow, AValueFlags, FPlan.FProcess.GetProcessCallInfo());
 			FFlagsCached = false;
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -532,7 +541,7 @@ namespace Alphora.Dataphor.DAE.Server
 				SyncSource(true);
 			FCursor.Delete(FPlan.FProcess.GetProcessCallInfo());
 			FFlagsCached = false;
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			if (BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -541,7 +550,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected void SourceFirst()
 		{
 			SetFlags(FCursor.First(FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 
         public void First()
@@ -556,7 +565,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			RemoteMoveData LMoveData = FCursor.MoveBy(-1, FPlan.FProcess.GetProcessCallInfo());
 			SetFlags(LMoveData.Flags);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return LMoveData.Flags == RemoteCursorGetFlags.None;
 		}
 		
@@ -587,7 +596,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected Guid SourceGetBookmark()
 		{
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return FCursor.GetBookmark(FPlan.FProcess.GetProcessCallInfo());
 		}
 
@@ -613,7 +622,7 @@ namespace Alphora.Dataphor.DAE.Server
         {
 			RemoteGotoData LGotoData = FCursor.GotoBookmark(ABookmark, AForward, FPlan.FProcess.GetProcessCallInfo());
 			SetFlags(LGotoData.Flags);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return LGotoData.Success;
         }
 
@@ -637,14 +646,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
         public int CompareBookmarks(Guid ABookmark1, Guid ABookmark2)
         {
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return FCursor.CompareBookmarks(ABookmark1, ABookmark2, FPlan.FProcess.GetProcessCallInfo());
 		}
 		
 		protected void SourceDisposeBookmark(Guid ABookmark)
 		{
 			FCursor.DisposeBookmark(ABookmark, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
 		protected void BufferDisposeBookmark(Guid ABookmark)
@@ -676,7 +685,7 @@ namespace Alphora.Dataphor.DAE.Server
 		protected void SourceDisposeBookmarks(Guid[] ABookmarks)
 		{
 			FCursor.DisposeBookmarks(ABookmarks, FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
 		protected void BufferDisposeBookmarks(Guid[] ABookmarks)
@@ -700,12 +709,12 @@ namespace Alphora.Dataphor.DAE.Server
 			if (BufferActive())
 				SyncSource(true);
 			RemoteRow LKey = FCursor.GetKey(FPlan.FProcess.GetProcessCallInfo());
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			Row LRow;
 			Schema.RowType LType = new Schema.RowType();
 			foreach (string LString in LKey.Header.Columns)
 				LType.Columns.Add(((Schema.TableType)FPlan.DataType).Columns[LString].Copy());
-			LRow = new Row(FPlan.FProcess, LType);
+			LRow = new Row(FPlan.FProcess.ValueManager, LType);
 			LRow.ValuesOwned = false;
 			LRow.AsPhysical = LKey.Body.Data;
 			return LRow;
@@ -723,7 +732,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LKey.Body.Data = AKey.AsPhysical;
 			RemoteGotoData LGotoData = FCursor.FindKey(LKey, FPlan.FProcess.GetProcessCallInfo());
 			SetFlags(LGotoData.Flags);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			if (LGotoData.Success && BufferActive())
 				ClearBuffer();
 			SetBufferDirection(BufferDirection.Backward);
@@ -744,7 +753,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LKey.Body = new RemoteRowBody();
 			LKey.Body.Data = AKey.AsPhysical;
 			SetFlags(FCursor.FindNearest(LKey, FPlan.FProcess.GetProcessCallInfo()));
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 		}
 		
         public bool Refresh(Row ARow)
@@ -762,13 +771,13 @@ namespace Alphora.Dataphor.DAE.Server
 			LRow.Body.Data = ARow.AsPhysical;
 			RemoteGotoData LGotoData = FCursor.Refresh(LRow, FPlan.FProcess.GetProcessCallInfo());
 			SetFlags(LGotoData.Flags);
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return LGotoData.Success;
 		}
 		
         public int RowCount()
         {
-			FPlan.FStatisticsCached = false;
+			FPlan.FProgramStatisticsCached = false;
 			return FCursor.RowCount(FPlan.FProcess.GetProcessCallInfo());
 		}
 		
@@ -785,7 +794,7 @@ namespace Alphora.Dataphor.DAE.Server
 				{
 					if (ASourceRow.HasNonNativeValue(LIndex))
 					{
-						Scalar LScalar = new Scalar(ATargetRow.Process, (Schema.ScalarType)ASourceRow.DataType.Columns[LIndex].DataType);
+						Scalar LScalar = new Scalar(ATargetRow.Manager, (Schema.ScalarType)ASourceRow.DataType.Columns[LIndex].DataType);
 						Stream LSourceStream = ASourceRow.GetValue(LIndex).OpenStream();
 						try
 						{
@@ -823,14 +832,14 @@ namespace Alphora.Dataphor.DAE.Server
 				Row LRow = ARow;
 				if (ARow.HasNonNativeValues())
 				{
-					LRow = new Row(FInternalProcess, ARow.DataType);
+					LRow = new Row(FInternalProcess.ValueManager, ARow.DataType);
 					MarshalRow(ARow, LRow);
 				}
 
 				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Default(FInternalProcess, null, LRow, null, AColumnName);
+					bool LChanged = TableNode.Default(FInternalProgram, null, LRow, null, AColumnName);
 					if (LChanged && !Object.ReferenceEquals(LRow, ARow))
 						MarshalRow(LRow, ARow);
 					return LChanged;
@@ -847,7 +856,7 @@ namespace Alphora.Dataphor.DAE.Server
 				LBody.Data = ARow.AsPhysical;
 
 				RemoteProposeData LProposeData = FCursor.Default(LBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FStatisticsCached = false;
+				FPlan.FProgramStatisticsCached = false;
 
 				if (LProposeData.Success)
 				{
@@ -873,21 +882,21 @@ namespace Alphora.Dataphor.DAE.Server
 				Row LOldRow = AOldRow;
 				if (AOldRow.HasNonNativeValues())
 				{
-					LOldRow = new Row(FInternalProcess, AOldRow.DataType);
+					LOldRow = new Row(FInternalProcess.ValueManager, AOldRow.DataType);
 					MarshalRow(AOldRow, LOldRow);
 				}
 				
 				Row LNewRow = ANewRow;
 				if (ANewRow.HasNonNativeValues())
 				{
-					LNewRow = new Row(FInternalProcess, ANewRow.DataType);
+					LNewRow = new Row(FInternalProcess.ValueManager, ANewRow.DataType);
 					MarshalRow(ANewRow, LNewRow);
 				}
 
 				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Change(FInternalProcess, LOldRow, LNewRow, null, AColumnName);
+					bool LChanged = TableNode.Change(FInternalProgram, LOldRow, LNewRow, null, AColumnName);
 					if (LChanged && !Object.ReferenceEquals(LNewRow, ANewRow))
 						MarshalRow(LNewRow, ANewRow);
 					return LChanged;
@@ -908,7 +917,7 @@ namespace Alphora.Dataphor.DAE.Server
 				LNewBody.Data = ANewRow.AsPhysical;
 
 				RemoteProposeData LProposeData = FCursor.Change(LOldBody, LNewBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FStatisticsCached = false;
+				FPlan.FProgramStatisticsCached = false;
 
 				if (LProposeData.Success)
 				{
@@ -933,21 +942,21 @@ namespace Alphora.Dataphor.DAE.Server
 				Row LOldRow = AOldRow;
 				if ((AOldRow != null) && AOldRow.HasNonNativeValues())
 				{
-					LOldRow = new Row(FInternalProcess, AOldRow.DataType);
+					LOldRow = new Row(FInternalProcess.ValueManager, AOldRow.DataType);
 					MarshalRow(AOldRow, LOldRow);
 				}
 				
 				Row LNewRow = ANewRow;
 				if (ANewRow.HasNonNativeValues())
 				{
-					LNewRow = new Row(FInternalProcess, ANewRow.DataType);
+					LNewRow = new Row(FInternalProcess.ValueManager, ANewRow.DataType);
 					MarshalRow(ANewRow, LNewRow);
 				}
 
 				FPlan.FProcess.FSession.FServer.AcquireCacheLock(FPlan.FProcess, LockMode.Shared);
 				try
 				{
-					bool LChanged = TableNode.Validate(FInternalProcess, LOldRow, LNewRow, null, AColumnName);
+					bool LChanged = TableNode.Validate(FInternalProgram, LOldRow, LNewRow, null, AColumnName);
 					if (LChanged && !Object.ReferenceEquals(ANewRow, LNewRow))
 						MarshalRow(LNewRow, ANewRow);
 					return LChanged;
@@ -971,7 +980,7 @@ namespace Alphora.Dataphor.DAE.Server
 				LNewBody.Data = ANewRow.AsPhysical;
 				
 				RemoteProposeData LProposeData = FCursor.Validate(LOldBody, LNewBody, AColumnName, FPlan.FProcess.GetProcessCallInfo());
-				FPlan.FStatisticsCached = false;
+				FPlan.FProgramStatisticsCached = false;
 
 				if (LProposeData.Success)
 				{

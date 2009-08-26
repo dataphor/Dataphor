@@ -15,6 +15,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	using Alphora.Dataphor.DAE.Connection;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Runtime;
 	
     public abstract class SQLScalarType : DeviceScalarType
     {
@@ -34,9 +35,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", LValue.ToString(), DomainName());
 		}
 		
-		public virtual object ParameterToScalar(IServerProcess AProcess, object AValue)
+		public virtual object ParameterToScalar(IValueManager AManager, object AValue)
 		{
-			return ToScalar(AProcess, AValue);
+			return ToScalar(AManager, AValue);
 		}
 		
 		public virtual object ParameterFromScalar(object AValue)
@@ -44,9 +45,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return FromScalar(AValue);
 		}
 		
-		public virtual Stream GetParameterStreamAdapter(IServerProcess AProcess, Stream AStream)
+		public virtual Stream GetParameterStreamAdapter(IValueManager AManager, Stream AStream)
 		{
-			return GetStreamAdapter(AProcess, AStream);
+			return GetStreamAdapter(AManager, AStream);
 		}
 		
 		public abstract SQLType GetSQLType(D4.MetaData AMetaData);
@@ -190,7 +191,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast({0} as {1})", (bool)AValue ? "1" : "0", DomainName());
 		}
 		
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if (AValue is bool)
 				return AValue;
@@ -221,7 +222,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLByte(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToByte(AValue);
 		}
@@ -259,7 +260,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLSByte() : base(){}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (sbyte)(short)AValue;
 		}
@@ -289,7 +290,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLShort(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			//AS400 is returning AValue as Int32. Cannot cast as short so it is necessary to explicitly convert AValue to an Int16.
 			return Convert.ToInt16(AValue);
@@ -328,7 +329,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLUShort() : base(){}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (ushort)((int)AValue));
 		}
@@ -358,7 +359,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLInteger(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt32(AValue);
 		}
@@ -396,7 +397,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLUInteger() : base(){}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// According to the documentation, as well as the type parameter of the ADO field, this
 			// value should be being returned as a uint, however it is coming back as a decimal.
@@ -431,7 +432,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLLong(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// translation problem from ADO, documentation says this will be a long, but it is in fact a decimal
 			return Convert.ToInt64(AValue);
@@ -470,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLULong() : base(){}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToUInt64((decimal)AValue);
 		}
@@ -500,7 +501,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLDecimal(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// TODO: This should be a decimal cast but the ADOConnection is returning an integer value as the result of evaluating Avg(Integer) when the result is a whole number
 			return Convert.ToDecimal(AValue); 
@@ -571,7 +572,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -600,7 +601,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLTimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// ADO translation error: docs say this should be a long, in fact it is a decimal
 			return new TimeSpan(Convert.ToInt64(AValue));
@@ -655,7 +656,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -701,7 +702,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LDateTime = (DateTime)AValue;
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
@@ -731,7 +732,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLMoney(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToDecimal(AValue);
 		}
@@ -768,7 +769,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLGuid(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new Guid((string)AValue);
 		}
@@ -797,7 +798,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLString(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (string)AValue;
 		}
@@ -827,7 +828,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLText(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (string)AValue;
 		}
@@ -837,12 +838,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return (string)AValue;
 		}
 		
-		public override Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
+		public override Stream GetStreamAdapter(IValueManager AManager, Stream AStream)
 		{
 			using (StreamReader LReader = new StreamReader(AStream))
 			{
 				string LValue = LReader.ReadToEnd();
-				Streams.Conveyor LConveyor = ScalarType.GetConveyor(AProcess);
+				Streams.Conveyor LConveyor = AManager.GetConveyor(ScalarType);
 				MemoryStream LStream = new MemoryStream(LConveyor.GetSize(LValue));
 				LStream.SetLength(LStream.GetBuffer().Length);
 				LConveyor.Write(LValue, LStream.GetBuffer(), 0);
@@ -877,7 +878,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (byte[])AValue;
 		}
@@ -914,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (byte[])AValue;
 		}
@@ -943,7 +944,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLVersionNumber(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return StringToVersionNumber((string)AValue);
 		}

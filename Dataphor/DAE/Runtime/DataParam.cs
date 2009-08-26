@@ -6,15 +6,14 @@
 
 using System;
 using System.Collections;
-
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
 using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
     public class DataParam : object
     {
 		public DataParam(string AName, Schema.IDataType ADataType, Modifier AModifier, object AValue)

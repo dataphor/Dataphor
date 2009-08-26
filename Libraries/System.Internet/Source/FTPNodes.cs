@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadBinary(AURL : String, AUser : String, APassword : String) : Binary
 	public class FTPDownloadBinaryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 1)
@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDownloadText(AURL : String, AUser : String, APassword : String) : String
 	public class FTPDownloadTextNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 1)
@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPUploadText(AURL : String, AData : String, AUser : String, APassword : String)
 	public class FTPUploadNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 2)
@@ -92,12 +92,12 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			Stream LRequestStream = LRequest.GetRequestStream();
 			try
 			{
-				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
 					using (StreamWriter LWriter = new StreamWriter(LRequestStream))
 						LWriter.Write((string)AArguments[1]);
 				else
 				{
-					byte[] LValue = AArguments[1] is byte[] ? (byte[])AArguments[1] : new Scalar(AProcess, (Schema.IScalarType)Operator.Operands[1].DataType, AArguments[1]).AsByteArray;
+					byte[] LValue = AArguments[1] is byte[] ? (byte[])AArguments[1] : new Scalar(AProgram.ValueManager, (Schema.IScalarType)Operator.Operands[1].DataType, AArguments[1]).AsByteArray;
 					LRequestStream.Write(LValue, 0, LValue.Length);
 				}
 				((FtpWebResponse)LRequest.GetResponse()).Close();
@@ -130,31 +130,31 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Name"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			string LUser = "";
 			string LPassword = "";
 			if (Nodes.Count > 1)
 			{
-				LUser = (string)Nodes[1].Execute(AProcess);
-				LPassword = (string)Nodes[2].Execute(AProcess);
+				LUser = (string)Nodes[1].Execute(AProgram);
+				LPassword = (string)Nodes[2].Execute(AProgram);
 			}
-			string LListing = GetDirectoryListing((string)Nodes[0].Execute(AProcess), LUser, LPassword);
+			string LListing = GetDirectoryListing((string)Nodes[0].Execute(AProgram), LUser, LPassword);
 
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -221,7 +221,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRename(AURL : String, ANewName : String, AUser : String, APassword : String)
 	public class FTPRenameNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			FtpWebRequest LRequest = (FtpWebRequest)WebRequest.Create((string)AArguments[0]);
 			if (AArguments.Length > 2)
@@ -239,7 +239,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPDeleteFile(AURL : String, AUser : String, APassword : String)
 	public class FTPDeleteFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
 				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.DeleteFile, (string)AArguments[1], (string)AArguments[2]);
@@ -253,7 +253,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPMakeDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPMakeDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
 				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.MakeDirectory, (string)AArguments[1], (string)AArguments[2]);
@@ -267,7 +267,7 @@ namespace Alphora.Dataphor.Libraries.System.Internet
 	// operator FTPRemoveDirectory(AURL : String, AUser : String, APassword : String)
 	public class FTPRemoveDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments.Length > 1)
 				FTPHelper.CallSimpleFTP((string)AArguments[0], WebRequestMethods.Ftp.RemoveDirectory, (string)AArguments[1], (string)AArguments[2]);

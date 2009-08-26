@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Device.Oracle
 {
@@ -55,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleTimeSpan(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
@@ -80,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleBoolean(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToBoolean(AValue);
 		}
@@ -108,7 +109,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 		{
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt32(AValue);
 		}
@@ -134,7 +135,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleUInteger() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromUInt32(AProcess, Convert.ToUInt32((decimal)AValue));
 		}
@@ -160,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleShort(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt16((decimal)AValue);
 		}
@@ -186,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleUShort() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromUInt16(AProcess, Convert.ToUInt16((decimal)AValue));
 		}
@@ -212,7 +213,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleByte(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToByte((decimal)AValue);
 		}
@@ -238,7 +239,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleSByte() : base(){}
 
-		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+		public override Scalar ToScalar(IValueManager AManager, object AValue)
 		{
 			return Scalar.FromSByte(AProcess, Convert.ToSByte((decimal)AValue));
 		}
@@ -264,7 +265,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleLong(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt64((decimal)AValue);
 		}
@@ -294,7 +295,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 			To get around this problem, we translate all empty strings to blank strings of length 1.
 		*/
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if ((AValue is string) && ((string)AValue == " "))
 				return "";
@@ -321,7 +322,7 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 	{
 		public OracleSQLText(int AID, string AName) : base(AID, AName) { }
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if ((AValue is string) && ((string)AValue == " "))
 				return "";
@@ -338,14 +339,14 @@ namespace Alphora.Dataphor.DAE.Device.Oracle
 				return LValue;
 		}
 
-		public override Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
+		public override Stream GetStreamAdapter(IValueManager AManager, Stream AStream)
 		{
 			using (var LReader = new StreamReader(AStream))
 			{
 				string LValue = LReader.ReadToEnd();
 				if (LValue == " ")
 					LValue = String.Empty;
-				Conveyor LConveyor = ScalarType.GetConveyor(AProcess);
+				Conveyor LConveyor = AManager.GetConveyor(ScalarType);
 				var LStream = new MemoryStream(LConveyor.GetSize(LValue));
 				LStream.SetLength(LStream.GetBuffer().Length);
 				LConveyor.Write(LValue, LStream.GetBuffer(), 0);

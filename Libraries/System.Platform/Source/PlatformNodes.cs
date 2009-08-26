@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator FileExists(const AFileName : FileName) : Boolean
 	public class FileExistsNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return File.Exists((string)AArguments[0]);
 		}
@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DeleteFile(const AFileName : FileName)
 	public class DeleteFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.Delete((string)AArguments[0]);
 			return null;
@@ -44,7 +44,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CopyFile(const ASourceFileName : FileName, const ATargetFileName : FileName, const AOverwrite : Boolean)
 	public class CopyFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.Copy((string)AArguments[0], (string)AArguments[1], AArguments.Length == 3 ? (bool)AArguments[2] : false);
 			return null;
@@ -56,12 +56,12 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CreateBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class CreateFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (FileStream LFile = File.Create((string)AArguments[0]))
 			{	
 				if (AArguments.Length == 2)
-					if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
+					if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
 					{
 						using (StreamWriter LWriter = new StreamWriter(LFile))
 						{
@@ -72,7 +72,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 					{
 						if (AArguments[1] is StreamID)
 						{
-							using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+							using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
 							{
 								StreamUtility.CopyStream(LSourceStream, LFile);
 							}
@@ -92,11 +92,11 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator AppendBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class AppendFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Append, FileAccess.Write, FileShare.Read))
 			{
-				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
 				{
 					using (StreamWriter LWriter = new StreamWriter(LFile))
 					{
@@ -107,7 +107,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				{
 					if (AArguments[1] is StreamID)
 					{
-						using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
 						{
 							StreamUtility.CopyStream(LSourceStream, LFile);
 						}
@@ -126,7 +126,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadTextFile(const AFileName : FileName) : String
 	public class LoadTextFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (StreamReader LReader = File.OpenText((string)AArguments[0]))
 			{
@@ -138,7 +138,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator LoadBinaryFile(const AFileName : FileName) : Binary
 	public class LoadBinaryFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (FileStream LFile = File.OpenRead((string)AArguments[0]))
 			{
@@ -153,11 +153,11 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SaveBinaryFile(const AFileName : FileName, const AData : Binary)
 	public class SaveFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (FileStream LFile = File.Open((string)AArguments[0], FileMode.Truncate, FileAccess.Write, FileShare.Read))
 			{
-				if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemString))
+				if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemString))
 				{
 					using (StreamWriter LWriter = new StreamWriter(LFile))
 					{
@@ -168,7 +168,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 				{
 					if (AArguments[1] is StreamID)
 					{
-						using (Stream LSourceStream = AProcess.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
+						using (Stream LSourceStream = AProgram.StreamManager.Open((StreamID)AArguments[1], LockMode.Exclusive))
 						{
 							StreamUtility.CopyStream(LSourceStream, LFile);
 						}
@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveFile(const ASourceFileName : FileName, const ATargetFileName : FileName)
 	public class MoveFileNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.Move((string)AArguments[0], (string)AArguments[1]);
 			return null;
@@ -197,7 +197,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DirectoryExists(const ADirectoryName : FileName) : Boolean
 	public class DirectoryExistsNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Directory.Exists((string)AArguments[0]);
 		}
@@ -206,7 +206,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetFileName(const AFileName : FileName) : FileName
 	public class GetFileNameNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.GetFileName((string)AArguments[0]);
 		}
@@ -215,7 +215,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetDirectoryName(const AFileName : FileName) : FileName
 	public class GetDirectoryNameNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.GetDirectoryName((string)AArguments[0]);
 		}
@@ -224,7 +224,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetFileExtension(const AFileName : FileName) : FileName
 	public class GetFileExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.GetExtension((string)AArguments[0]);
 		}
@@ -233,7 +233,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator ChangeFileExtension(const AFileName : FileName, const AExtension : FileName) : FileName
 	public class ChangeFileExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.ChangeExtension((string)AArguments[0], (string)AArguments[1]);
 		}
@@ -242,7 +242,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator FileNameHasExtension(const AFileName : FileName) : Boolean
 	public class FileNameHasExtensionNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.HasExtension((string)AArguments[0]);
 		}
@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CombinePath(const APath : FileName, const ASubPath : FileName) : FileName
 	public class CombinePathNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Path.Combine((string)AArguments[0], (string)AArguments[1]);
 		}
@@ -260,7 +260,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator CreateDirectory(const ADirectoryName : FileName)
 	public class CreateDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Directory.CreateDirectory((string)AArguments[0]);
 			return null;
@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator DeleteDirectory(const ADirectoryName : FileName)
 	public class DeleteDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Directory.Delete((string)AArguments[0]);
 			return null;
@@ -280,7 +280,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator MoveDirectory(const ASourceDirectoryName : FileName, const ATargetDirectoryName : FileName)
 	public class MoveDirectoryNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Directory.Move((string)AArguments[0], (string)AArguments[1]);
 			return null;
@@ -290,7 +290,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetAttributes(const APath : FileName) : Integer
 	public class GetAttributesNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return File.GetAttributes((string)AArguments[0]);
 		}
@@ -299,7 +299,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetAttributes(const APath : FileName, const AAttributes : Integer);
 	public class SetAttributesNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.SetAttributes((string)AArguments[0], (FileAttributes)(int)AArguments[1]);
 			return null;
@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCreationTime(const APath : FileName) : DateTime;
 	public class GetCreationTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return File.GetCreationTime((string)AArguments[0]);
 		}
@@ -318,7 +318,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetCreationTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetCreationTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.SetCreationTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
@@ -328,7 +328,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastWriteTime(const APath : FileName) : DateTime;
 	public class GetLastWriteTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return File.GetLastWriteTime((string)AArguments[0]);
 		}
@@ -337,7 +337,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetLastWriteTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastWriteTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.SetLastWriteTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
@@ -347,7 +347,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetLastAccessTime(const APath : FileName) : DateTime;
 	public class GetLastAccessTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return File.GetLastAccessTime((string)AArguments[0]);
 		}
@@ -356,7 +356,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetLastAccessTime(const APath : FileName, const ADateTime : DateTime);
 	public class SetLastAccessTimeNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			File.SetLastAccessTime((string)AArguments[0], ((DateTime)AArguments[1]));
 			return null;
@@ -380,22 +380,22 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
@@ -441,26 +441,26 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
-					string[] LDirectories = Directory.GetDirectories((string)Nodes[0].Execute(AProcess), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProcess) : "*");
+					string[] LDirectories = Directory.GetDirectories((string)Nodes[0].Execute(AProgram), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProgram) : "*");
 					for (int LIndex = 0; LIndex < LDirectories.Length; LIndex++)
 					{
 						LRow[0] = LDirectories[LIndex];
@@ -502,26 +502,26 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Path"]}));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			LocalTable LResult = new LocalTable(this, AProcess);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
-					string[] LFiles = Directory.GetFiles((string)Nodes[0].Execute(AProcess), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProcess) : "*");
+					string[] LFiles = Directory.GetFiles((string)Nodes[0].Execute(AProgram), Nodes.Count == 2 ? (string)Nodes[1].Execute(AProgram) : "*");
 					for (int LIndex = 0; LIndex < LFiles.Length; LIndex++)
 					{
 						LRow[0] = LFiles[LIndex];
@@ -551,7 +551,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator PlatformExecute(const AFileName : String, const AArguments : String, const ASettings : row { WorkingDirectory : String, NoWindow : Boolean, WindowStyle : Integer, RedirectOutput : Boolean, RedirectErrors : Boolean }, const AStartAs : row { UserName : String, Password : String, Domain : String, LoadUserProfile : Boolean }) : row { ExitCode : Integer, Output : String, Errors : String };
     public class PlatformExecuteNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			using (Process LProcess = new Process())
 			{
@@ -617,7 +617,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 					LProcess.BeginErrorReadLine();
 				LProcess.WaitForExit();
 
-				Row LRow = new Row(AProcess, (Schema.IRowType)FDataType);
+				Row LRow = new Row(AProgram.ValueManager, (Schema.IRowType)FDataType);
 				if (LRedirectOutput)
 					LRow["Output"] = FOutput.ToString();
 				else
@@ -655,7 +655,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator SetCurrentDirectory(const APath : String)
     public class SetCurrentDirectoryNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			Environment.CurrentDirectory = (string)AArguments[0];
 			return null;
@@ -665,7 +665,7 @@ namespace Alphora.Dataphor.Libraries.System.Platform
 	// operator GetCurrentDirectory() : String
     public class GetCurrentDirectoryNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return Environment.CurrentDirectory;
 		}

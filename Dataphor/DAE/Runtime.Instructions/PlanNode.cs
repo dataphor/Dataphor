@@ -40,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				
 			InstructionNode is the base class for all instructions in the processor, and performs argument evaluation and virtual resolution.
 			
-				override object InternalExecute(ServerProcess AProcess)
+				override object InternalExecute(Program AProgram)
 					Builds the arguments array based on the parameters in Operator, and the child nodes of the node.
 					Performs virtual resolution, if necessary
 					Calls InternalExecute(ServerProcess, object[])
@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 			CallNode is the class used to invoke D4 compiled operators, and prepares the stack prior to the call, and cleans it up afterwards.
 			
-				override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+				override object InternalExecute(Program AProgram, object[] AArguments)
 					Pushes the arguments onto the stack, and performs a Call on the stack
 					Calls Execute on the compiled BlockNode for Operator
 					Pops the arguments off the stack and performs a return, pushing the result if necessary
@@ -59,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 	*/
 	
-	public delegate object ExecuteDelegate(ServerProcess AProcess);
+	public delegate object ExecuteDelegate(Program AProgram);
         
 	/// <summary> PlanNode </summary>	
 	public abstract class PlanNode : System.Object
@@ -427,9 +427,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			ILExecute = (ExecuteDelegate)AExecute.CreateDelegate(typeof(ExecuteDelegate), this);
 		}
 		
-		public object TestExecute(ServerProcess AProcess)
+		public object TestExecute(Program AProgram)
 		{
-			return Nodes[0].Execute(AProcess);
+			return Nodes[0].Execute(AProgram);
 		}
 		
 		public LocalBuilder EmitThis(Plan APlan, ILGenerator AGenerator, int[] AExecutePath)
@@ -629,36 +629,27 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
         protected ExecuteDelegate ILExecute;
 
 		// BeforeExecute        
-        protected virtual void InternalBeforeExecute(ServerProcess AProcess) { }
+        protected virtual void InternalBeforeExecute(Program AProgram) { }
         
-		public object Execute(ServerProcess AProcess)
+		public object Execute(Program AProgram)
 		{
 			#if WRAPRUNTIMEEXCEPTIONS
 			try
 			{
 			#endif
+
 				if (IsBreakable)
-					AProcess.Yield(this);
+					AProgram.Yield(this);
 				else
-					AProcess.CheckAborted();
-				#if TRACKCALLDEPTH
-				AProcess.Context.IncCallDepth();
-				try
-				{
-				#endif
-					if (ILExecute != null)
-						return ILExecute(AProcess);
-					InternalBeforeExecute(AProcess);
-					if (FDeviceSupported)
-						return AProcess.DeviceExecute(FDevice, this);
-					return InternalExecute(AProcess);
-				#if TRACKCALLDEPTH
-				}
-				finally
-				{
-					AProcess.Context.DecCallDepth();
-				}
-				#endif
+					AProgram.CheckAborted();
+
+				if (ILExecute != null)
+					return ILExecute(AProgram);
+				InternalBeforeExecute(AProgram);
+				if (FDeviceSupported)
+					return AProgram.DeviceExecute(FDevice, this);
+				return InternalExecute(AProgram);
+
 			#if WRAPRUNTIMEEXCEPTIONS
 			}
 			catch (Exception LException)
@@ -698,14 +689,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
 					
 				if (IsBreakable)
-					AProcess.Yield(this, LToThrow);
+					AProgram.Yield(this, LToThrow);
 					
 				throw LToThrow;
 			}
 			#endif
 		}
 		
-        public abstract object InternalExecute(ServerProcess AProcess);
+        public abstract object InternalExecute(Program AProgram);
         
 		#region ShowPlan
 

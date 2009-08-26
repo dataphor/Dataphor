@@ -13,20 +13,21 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
-
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+
+	// TODO: Refactor these dependencies
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
     /// <summary> Catalog </summary>
 	public class Catalog : Objects
     {
@@ -474,7 +475,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				foreach (LoadedLibrary LLibrary in ALibrary.RequiredLibraries)
 					EmitLibrary(AContext, LLibrary);
 
-				if (ALibrary.Name != Server.Server.CSystemLibraryName)
+				if (ALibrary.Name != Server.CSystemLibraryName)
 				{
 					ExpressionStatement LStatement = new ExpressionStatement();
 					LStatement.Expression = new CallExpression("LoadLibrary", new Expression[]{new ValueExpression(ALibrary.Name)});
@@ -761,8 +762,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					LRequestedObjects.Add(this[LObjectIndex].ID, this[LObjectIndex]);
 				else
 				{
-					// TODO: Refactor NameResolutionPath access here
-					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.Plan.NameResolutionPath, new StringCollection());
+					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.ServerSession.NameResolutionPath, new StringCollection());
 					if (LObject != null)
 						LRequestedObjects.Add(LObject.ID, LObject);
 				}
@@ -1409,8 +1409,8 @@ namespace Alphora.Dataphor.DAE.Schema
 						(AObject is CatalogObject) && 
 						(
 							IncludeSystem || 
-							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Server.Server.CSystemLibraryName))) ||
-							(LibraryName != Server.Server.CSystemLibraryName)
+							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Server.CSystemLibraryName))) ||
+							(LibraryName != Server.CSystemLibraryName)
 						) ||
 						(
 							!(AObject is CatalogObject) &&

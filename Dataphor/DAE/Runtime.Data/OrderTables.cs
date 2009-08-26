@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public abstract class SortTableBase : Table
     {
-		public SortTableBase(BaseOrderNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public SortTableBase(BaseOrderNode ANode, Program AProgram) : base(ANode, AProgram) {}
 		
 		public new BaseOrderNode Node { get { return (BaseOrderNode)FNode; } }
 		
@@ -60,9 +60,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			LTableVar.Orders.Add(LOrder);
 
-			FTable = new NativeTable(Process, LTableVar);
+			FTable = new NativeTable(Manager, LTableVar);
 			PopulateTable();
-			FScan = new Scan(Process, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
+			FScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
 		}
 
@@ -73,7 +73,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FScan = null;
 			if (FTable != null)
 			{
-				FTable.Drop(Process);
+				FTable.Drop(Manager);
 				FTable = null;
 			}
 		}
@@ -81,9 +81,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected override void InternalReset()
 		{
 			FScan.Dispose();
-			FTable.Truncate(Process);
+			FTable.Truncate(Manager);
 			PopulateTable();
-			FScan = new Scan(Process, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
+			FScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
 		}
 		
@@ -169,15 +169,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class CopyTable : SortTableBase
     {
-		public CopyTable(CopyNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public CopyTable(CopyNode ANode, Program AProgram) : base(ANode, AProgram){}
 		
 		public new CopyNode Node { get { return (CopyNode)FNode; } }
 
 		protected override void PopulateTable()
 		{
-			using (Table LTable = (Table)Node.Nodes[0].Execute(Process))
+			using (Table LTable = (Table)Node.Nodes[0].Execute(Program))
 			{
-				Row LRow = new Row(Process, DataType.RowType);
+				Row LRow = new Row(Manager, DataType.RowType);
 				try
 				{
 					FRowCount = 0;
@@ -185,9 +185,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					{
 						LTable.Select(LRow);
 						FRowCount++;
-						FTable.Insert(Process, LRow); // no validation is required because FTable will never be changed
+						FTable.Insert(Manager, LRow); // no validation is required because FTable will never be changed
 						LRow.ClearValues();
-						Process.CheckAborted(); // Yield
+						Program.CheckAborted(); // Yield
 					}
 				}
 				finally
@@ -200,15 +200,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class OrderTable : SortTableBase
     {
-		public OrderTable(OrderNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public OrderTable(OrderNode ANode, Program AProgram) : base(ANode, AProgram){}
 		
 		public new OrderNode Node { get { return (OrderNode)FNode; } }
 
 		protected override void PopulateTable()
 		{
-			using (Table LTable = (Table)Node.Nodes[0].Execute(Process))
+			using (Table LTable = (Table)Node.Nodes[0].Execute(Program))
 			{
-				Row LRow = new Row(Process, DataType.RowType);
+				Row LRow = new Row(Manager, DataType.RowType);
 				try
 				{
 					FRowCount = 0;
@@ -218,9 +218,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						FRowCount++;
 						if (Node.SequenceColumnIndex >= 0)
 							LRow[Node.SequenceColumnIndex] = FRowCount;
-						FTable.Insert(Process, LRow); // no validation is required because FTable will never be changed
+						FTable.Insert(Manager, LRow); // no validation is required because FTable will never be changed
 						LRow.ClearValues();
-						Process.CheckAborted();	// Yield
+						Program.CheckAborted();	// Yield
 					}
 				}
 				finally
@@ -239,7 +239,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FBrowseTable = ABrowseTable;
             FTable = ATable;
 			FContextVar = AContextVar;
-            FRow = new Row(FBrowseTable.Process, FTable.DataType.RowType);
+            FRow = new Row(FBrowseTable.Manager, FTable.DataType.RowType);
             FOrigin = AOrigin;
             FForward = AForward;
             FInclusive = AInclusive;
@@ -357,13 +357,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected Row BuildOrderKeyRow()
         {
-			return new Row(FBrowseTable.Process, new Schema.RowType(FBrowseTable.Node.Order.Columns));
+			return new Row(FBrowseTable.Manager, new Schema.RowType(FBrowseTable.Order.Columns));
         }
         
         protected Row BuildUniqueKeyRow()
         {
-			Schema.RowType LRowType = new Schema.RowType(FBrowseTable.Node.Order.Columns);
-			return new Row(FBrowseTable.Process, LRowType);
+			Schema.RowType LRowType = new Schema.RowType(FBrowseTable.Order.Columns);
+			return new Row(FBrowseTable.Manager, LRowType);
         }
         
         // Forward
@@ -478,7 +478,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
     public class BrowseTable : Table
     {
-		public BrowseTable(BrowseNode ANode, ServerProcess AProcess) : base(ANode, AProcess)
+		public BrowseTable(BrowseNode ANode, Program AProgram) : base(ANode, AProgram)
         {
             FTables = new BrowseTableList(this);
         }
@@ -530,12 +530,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected void EnterTableContext(BrowseTableItem ATableItem)
         {
-			Process.Stack.Push(ATableItem.ContextVar);
+			Program.Stack.Push(ATableItem.ContextVar);
         }
         
         protected void ExitTableContext(BrowseTableItem ATableItem)
         {
-			Process.Stack.Pop();
+			Program.Stack.Pop();
         }
         
         // Must be called with the original stack
@@ -552,9 +552,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 			{
 				if ((AOrigin.DataType.Columns.Count > 0) && (Schema.Object.Qualifier(AOrigin.DataType.Columns[0].Name) != Keywords.Origin))
-					LOrigin = new Row(Process, new Schema.RowType(AOrigin.DataType.Columns, Keywords.Origin));
+					LOrigin = new Row(Manager, new Schema.RowType(AOrigin.DataType.Columns, Keywords.Origin));
 				else
-					LOrigin = new Row(Process, new Schema.RowType(AOrigin.DataType.Columns));
+					LOrigin = new Row(Manager, new Schema.RowType(AOrigin.DataType.Columns));
 				AOrigin.CopyTo(LOrigin);
 				LContextVar = LOrigin;
 			}
@@ -567,15 +567,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (!Node.HasBrowseVariant(LOriginIndex, AForward, LInclusive))
 				{
-					if (Process.ApplicationTransactionID != Guid.Empty)
+					if (Program.ServerProcess.ApplicationTransactionID != Guid.Empty)
 					{
-						ApplicationTransaction LTransaction = Process.GetApplicationTransaction();
+						ApplicationTransaction LTransaction = Program.ServerProcess.GetApplicationTransaction();
 						try
 						{
 							LTransaction.PushGlobalContext();
 							try
 							{
-								Node.CompileBrowseVariant(Process, LOriginIndex, AForward, LInclusive);
+								Node.CompileBrowseVariant(Program, LOriginIndex, AForward, LInclusive);
 							}
 							finally
 							{
@@ -588,15 +588,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 					}
 					else
-						Node.CompileBrowseVariant(Process, LOriginIndex, AForward, LInclusive);
+						Node.CompileBrowseVariant(Program, LOriginIndex, AForward, LInclusive);
 				}
 			}
 		
 			// Execute the variant with the current context variable
-			Process.Stack.Push(LContextVar);
+			Program.Stack.Push(LContextVar);
 			try
 			{
-				PlanNode LBrowseVariantNode = Node.GetBrowseVariantNode(Process.Plan, LOriginIndex, AForward, LInclusive);
+				PlanNode LBrowseVariantNode = Node.GetBrowseVariantNode(Program.Plan, LOriginIndex, AForward, LInclusive);
 				#if TRACEBROWSEEVENTS
 				Trace.WriteLine(String.Format("BrowseTableItem created with query: {0}", new D4TextEmitter().Emit(LBrowseVariantNode.EmitStatement(EmitMode.ForCopy))));
 				#endif
@@ -604,7 +604,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					new BrowseTableItem
 					(
 						this, 
-						(Table)LBrowseVariantNode.Execute(Process),
+						(Table)LBrowseVariantNode.Execute(Program),
 						LContextVar,
 						LOrigin, 
 						AForward, 
@@ -613,7 +613,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			finally
 			{
-				Process.Stack.Pop();
+				Program.Stack.Pop();
 			}
         }
         
@@ -909,13 +909,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 				if (AIndexKey.HasValue(LIndex) && ACompareKey.HasValue(LIndex))
 				{
-					Process.Stack.Push(AIndexKey[LIndex]);
+					Program.Stack.Push(AIndexKey[LIndex]);
 					try
 					{
-						Process.Stack.Push(ACompareKey[LIndex]);
+						Program.Stack.Push(ACompareKey[LIndex]);
 						try
 						{
-							LResult = (int)Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Process);
+							LResult = (int)Node.Order.Columns[LIndex].Sort.CompareNode.Execute(Program);
 
 							// Swap polarity for descending columns
 							if (!Node.Order.Columns[LIndex].Ascending)
@@ -923,12 +923,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						finally
 						{
-							Process.Stack.Pop();
+							Program.Stack.Pop();
 						}
 					}
 					finally
 					{
-						Process.Stack.Pop();
+						Program.Stack.Pop();
 					}
 				}
 				else if (AIndexKey.HasValue(LIndex))

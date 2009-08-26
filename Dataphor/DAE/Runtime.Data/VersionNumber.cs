@@ -328,7 +328,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber(AMajor : Integer, AMinor : Integer, ARevision : Integer, ABuild : Integer) : VersionNumber;
 	public class VersionNumberSelectorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			for (int LIndex = 0; LIndex < AArguments.Length; LIndex++)
@@ -350,7 +350,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadMajor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMajorReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -364,7 +364,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.WriteMajor(AValue : VersionNumber, AMajor : Integer) : VersionNumber;
 	public class VersionNumberMajorWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -379,7 +379,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadMinor(AValue : VersionNumber) : Integer;
 	public class VersionNumberMinorReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -393,7 +393,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.WriteMinor(AValue : VersionNumber, AMinor : Integer) : VersionNumber;
 	public class VersionNumberMinorWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -408,7 +408,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadRevision(AValue : VersionNumber) : Integer;
 	public class VersionNumberRevisionReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -422,7 +422,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.WriteRevision(AValue : VersionNumber, ARevision : Integer) : VersionNumber;
 	public class VersionNumberRevisionWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -437,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.ReadBuild(AValue : VersionNumber) : Integer;
 	public class VersionNumberBuildReadAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -451,7 +451,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator VersionNumber.WriteBuild(AValue : VersionNumber, ABuild : Integer) : VersionNumber;
 	public class VersionNumberBuildWriteAccessorNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -466,7 +466,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // VersionNumberAsStringSelectorNode
     public class VersionNumberAsStringSelectorNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -480,7 +480,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // VersionNumberAsStringReadAccessorNode
     public class VersionNumberAsStringReadAccessorNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -494,7 +494,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     // VersionNumberAsStringWriteAccessorNode
     public class VersionNumberAsStringWriteAccessorNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[1] == null)
@@ -508,7 +508,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator iCompare(ALeftValue : VersionNumber, ARightValue : VersionNumber) : Integer
 	public class VersionNumberCompareNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -522,7 +522,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator Max(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMaxNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments[0] == null)
 				if (AArguments[1] == null)
@@ -543,7 +543,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator Min(ALeftValue : VersionNumber, ARightValue : VersionNumber) : VersionNumber
 	public class VersionNumberMinNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			if (AArguments[0] == null)
 				if (AArguments[1] == null)
@@ -564,7 +564,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberEqualNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -578,7 +578,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iNotEqual(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberNotEqualNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -592,7 +592,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberLessNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -606,7 +606,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iInclusiveLess(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveLessNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -620,7 +620,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberGreaterNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -634,7 +634,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// create operator iInclusiveGreater(const ALeftValue : VersionNumber, const ARightValue : VersionNumber) : Boolean
 	public class VersionNumberInclusiveGreaterNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -648,7 +648,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator Compatible(const ASource : VersionNumber, const ATarget : VersionNumber) : Boolean
 	public class VersionNumberCompatibleNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null || AArguments[1] == null)
@@ -663,7 +663,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToIString(const AVersionNumber : VersionNumber) : IString;
 	public class VersionNumberToStringNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)
@@ -678,7 +678,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	// operator ToVersionNumber(const AString : IString) : VersionNumber;
 	public class StringToVersionNumberNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			#if NILPROPOGATION
 			if (AArguments[0] == null)

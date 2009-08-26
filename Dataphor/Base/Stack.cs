@@ -20,7 +20,6 @@ namespace Alphora.Dataphor
 		{
 			FMaxStackDepth = AMaxStackDepth;
 			FWindows = new StackWindowList(AMaxCallDepth);
-			FWindows.Push(new StackWindow(0)); // ?
 		}
 		
 		protected int FCount;
@@ -143,7 +142,7 @@ namespace Alphora.Dataphor
 			}
 		} // same code as peek and poke, duplicated for performance
 		
-		public void PushWindow(int ACount)
+		public virtual void PushWindow(int ACount)
 		{
 			FWindows.Push(new StackWindow(FCount - ACount));
 		}

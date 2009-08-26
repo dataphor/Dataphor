@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 
 namespace Alphora.Dataphor.DAE.Streams
 {
-	
 	public class ServerStream : StreamBase
 	{
 		public ServerStream(ServerStreamManager AStreamManager, StreamID AStreamID, Stream ASourceStream) : base()

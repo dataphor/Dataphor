@@ -14,12 +14,10 @@ using System.Globalization;
 using Alphora.Dataphor.DAE.Connection;
 using Alphora.Dataphor.DAE.Device.SQL;
 using Alphora.Dataphor.DAE.Language.D4;
-
-
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Device.MSSQL
 {
-
 	/*
 			
         Data type mapping ->
@@ -72,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast({0} as {1})", (bool)AValue ? "1" : "0", DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if (AValue is bool)
 				return (bool)AValue;
@@ -107,7 +105,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		{
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
 			// it is coming back as a short, I don't know why, maybe interop?
@@ -141,7 +139,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 		{
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToDecimal(AValue);
 		}
@@ -199,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast('{0}' as {1})", LValue.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			var LDateTime = (DateTime)AValue;
 			// If the value is equal to the device's zero date, set it to Dataphor's zero date
@@ -265,7 +263,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast('{0}' as {1})", LValue.ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			var LDateTime = (DateTime)AValue;
 			// If the value is equal to the Device's zero date, set it to Dataphor's zero date
@@ -332,7 +330,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast('{0}' as {1})", LValue.ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return new DateTime(((DateTime)AValue).Ticks % TimeSpan.TicksPerDay);
 		}
@@ -377,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast('{0}' as {1})", (Guid)AValue, DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if (AValue is string)
 				return new Guid((string)AValue);
@@ -468,7 +466,7 @@ namespace Alphora.Dataphor.DAE.Device.MSSQL
 			return String.Format("cast('{0}' as {1})", Convert.ToBase64String((byte[])AValue), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (byte[])AValue;
 		}

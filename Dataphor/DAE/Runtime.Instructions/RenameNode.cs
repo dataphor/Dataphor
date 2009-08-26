@@ -287,9 +287,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return Nodes[0].EmitStatement(AMode);
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			RenameTable LTable = new RenameTable(this, AProcess);
+			RenameTable LTable = new RenameTable(this, AProgram);
 			try
 			{
 				LTable.Open();
@@ -331,14 +331,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Validate
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (AIsDescending && PropagateValidate)
 			{
 				Row LOldRow;
 				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProcess, DataType.RowType);
+					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
 					AOldRow.CopyTo(LOldRow);
 				}
 				else
@@ -348,24 +348,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Row LNewRow;
 					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProcess, DataType.RowType);
+						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
 						ANewRow.CopyTo(LNewRow);
 					}
 					else
 						LNewRow = ANewRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProcess, SourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row LOldSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
 						try
 						{
 							LOldSourceRow.ValuesOwned = false;
 							
-							Row LNewSourceRow = new Row(AProcess, SourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row LNewSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
 							try
 							{
 								LNewSourceRow.ValuesOwned = false;
 								
-								bool LChanged = SourceNode.Validate(AProcess, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool LChanged = SourceNode.Validate(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
 								
 								if (LChanged && !ReferenceEquals(ANewRow, LNewRow))
 									LNewRow.CopyTo(ANewRow);
@@ -397,7 +397,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Default
-		protected override bool InternalDefault(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
+		protected override bool InternalDefault(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending)
 		{
 			if (AIsDescending && PropagateDefault)
 			{
@@ -406,7 +406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Row LOldRow;
 				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProcess, DataType.RowType);
+					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
 					AOldRow.CopyTo(LOldRow);
 				}
 				else
@@ -416,24 +416,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Row LNewRow;
 					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProcess, DataType.RowType);
+						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
 						ANewRow.CopyTo(LNewRow);
 					}
 					else
 						LNewRow = ANewRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row LOldSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
 						try
 						{
 							LOldSourceRow.ValuesOwned = false;
 							
-							Row LNewSourceRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row LNewSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
 							try
 							{
 								LNewSourceRow.ValuesOwned = false;
 
-								bool LChanged = LSourceNode.Default(AProcess, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool LChanged = LSourceNode.Default(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
 								
 								if (LChanged && (ANewRow != LNewRow))
 									LNewRow.CopyTo(ANewRow);
@@ -464,16 +464,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return false;
 		}
 		
-		public override void JoinApplicationTransaction(ServerProcess AProcess, Row ARow)
+		public override void JoinApplicationTransaction(Program AProgram, Row ARow)
 		{
 			Schema.RowType LRowType = new Schema.RowType();
 			foreach (Schema.Column LColumn in ARow.DataType.Columns)
 				LRowType.Columns.Add(SourceNode.DataType.Columns[DataType.Columns.IndexOfName(LColumn.Name)].Copy());
 				
-			Row LRow = new Row(AProcess, LRowType, (NativeRow)ARow.AsNative);
+			Row LRow = new Row(AProgram.ValueManager, LRowType, (NativeRow)ARow.AsNative);
 			try
 			{
-				SourceNode.JoinApplicationTransaction(AProcess, LRow);
+				SourceNode.JoinApplicationTransaction(AProgram, LRow);
 			}
 			finally
 			{
@@ -482,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Change
-		protected override bool InternalChange(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
+		protected override bool InternalChange(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName)
 		{
 			if (PropagateChange)
 			{
@@ -491,7 +491,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				Row LOldRow;
 				if (!(AOldRow.DataType.Columns.Equivalent(DataType.Columns)))
 				{
-					LOldRow = new Row(AProcess, DataType.RowType);
+					LOldRow = new Row(AProgram.ValueManager, DataType.RowType);
 					AOldRow.CopyTo(LOldRow);
 				}
 				else
@@ -501,24 +501,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					Row LNewRow;
 					if (!(ANewRow.DataType.Columns.Equivalent(DataType.Columns)))
 					{
-						LNewRow = new Row(AProcess, DataType.RowType);
+						LNewRow = new Row(AProgram.ValueManager, DataType.RowType);
 						ANewRow.CopyTo(LNewRow);
 					}
 					else
 						LNewRow = ANewRow;
 					try
 					{
-						Row LOldSourceRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
+						Row LOldSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LOldRow.AsNative);
 						try
 						{
 							LOldSourceRow.ValuesOwned = false;
 
-							Row LNewSourceRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
+							Row LNewSourceRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)LNewRow.AsNative);
 							try
 							{
 								LNewSourceRow.ValuesOwned = false;
 
-								bool LChanged = LSourceNode.Change(AProcess, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
+								bool LChanged = LSourceNode.Change(AProgram, LOldSourceRow, LNewSourceRow, AValueFlags, AColumnName == String.Empty ? String.Empty : LNewSourceRow.DataType.Columns[LNewRow.DataType.Columns.IndexOfName(AColumnName)].Name);
 								
 								if (LChanged && (ANewRow != LNewRow))
 									LNewRow.CopyTo(ANewRow);
@@ -551,35 +551,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Insert
-		protected override void InternalExecuteInsert(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
+		protected override void InternalExecuteInsert(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
 			switch (PropagateInsert)
 			{
 				case PropagateAction.True :
-					using (Row LInsertRow = new Row(AProcess, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
+					using (Row LInsertRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
 					{
 						LInsertRow.ValuesOwned = false;
-						SourceNode.Insert(AProcess, AOldRow, LInsertRow, AValueFlags, AUnchecked);
+						SourceNode.Insert(AProgram, AOldRow, LInsertRow, AValueFlags, AUnchecked);
 					}
 				break;
 				
 				case PropagateAction.Ensure :
 				case PropagateAction.Ignore :
-					using (Row LInsertRow = new Row(AProcess, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
+					using (Row LInsertRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative))
 					{
 						LInsertRow.ValuesOwned = false;
-						using (Row LSourceRow = new Row(AProcess, SourceNode.DataType.RowType))
+						using (Row LSourceRow = new Row(AProgram.ValueManager, SourceNode.DataType.RowType))
 						{
 							LInsertRow.CopyTo(LSourceRow);
-							using (Row LCurrentRow = SourceNode.Select(AProcess, LSourceRow))
+							using (Row LCurrentRow = SourceNode.Select(AProgram, LSourceRow))
 							{
 								if (LCurrentRow != null)
 								{
 									if (PropagateInsert == PropagateAction.Ensure)
-										SourceNode.Update(AProcess, LCurrentRow, LInsertRow, AValueFlags, false, AUnchecked);
+										SourceNode.Update(AProgram, LCurrentRow, LInsertRow, AValueFlags, false, AUnchecked);
 								}
 								else
-									SourceNode.Insert(AProcess, AOldRow, LInsertRow, AValueFlags, AUnchecked);
+									SourceNode.Insert(AProgram, AOldRow, LInsertRow, AValueFlags, AUnchecked);
 							}
 						}
 					}
@@ -588,20 +588,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Update
-		protected override void InternalExecuteUpdate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteUpdate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateUpdate)
 			{
 				TableNode LSourceNode = SourceNode;
-				Row LOldRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)AOldRow.AsNative);
+				Row LOldRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)AOldRow.AsNative);
 				try
 				{
 					LOldRow.ValuesOwned = false;
-					Row LNewRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative);
+					Row LNewRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)ANewRow.AsNative);
 					try
 					{
 						LNewRow.ValuesOwned = false;
-						LSourceNode.Update(AProcess, LOldRow, LNewRow, AValueFlags, ACheckConcurrency, AUnchecked);
+						LSourceNode.Update(AProgram, LOldRow, LNewRow, AValueFlags, ACheckConcurrency, AUnchecked);
 					}
 					finally
 					{
@@ -616,16 +616,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Delete
-		protected override void InternalExecuteDelete(ServerProcess AProcess, Row ARow, bool ACheckConcurrency, bool AUnchecked)
+		protected override void InternalExecuteDelete(Program AProgram, Row ARow, bool ACheckConcurrency, bool AUnchecked)
 		{
 			if (PropagateDelete)
 			{
 				TableNode LSourceNode = SourceNode;
-				Row LRow = new Row(AProcess, LSourceNode.DataType.RowType, (NativeRow)ARow.AsNative);
+				Row LRow = new Row(AProgram.ValueManager, LSourceNode.DataType.RowType, (NativeRow)ARow.AsNative);
 				try
 				{
 					LRow.ValuesOwned = false;
-					LSourceNode.Delete(AProcess, LRow, ACheckConcurrency, AUnchecked);
+					LSourceNode.Delete(AProgram, LRow, ACheckConcurrency, AUnchecked);
 				}
 				finally
 				{

@@ -3,22 +3,19 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+using System;
+using System.Collections;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	using System.Collections;
-
-	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 	
 	public class TableValue : DataValue
 	{
-		public TableValue(IServerProcess AProcess, NativeTable ATable) : base(AProcess, ATable.TableType)
+		public TableValue(IValueManager AManager, NativeTable ATable) : base(AManager, ATable.TableType)
 		{	
 			FTable = ATable;
 		}
@@ -33,7 +30,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			set 
 			{
 				if (FTable != null)
-					FTable.Drop(Process.GetServerProcess());
+					FTable.Drop(Manager);
 				FTable = (NativeTable)value; 
 			} 
 		}
@@ -91,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				AOffset++;
 				
 				int LRowSize;
-				Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 				
 				LInt32Conveyor.Write(FRowList.Count, ABuffer, AOffset);
 				AOffset += sizeof(int);
@@ -112,9 +109,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public override void ReadFromPhysical(byte[] ABuffer, int AOffset)
 		{
-			FTable.Truncate(Process.GetServerProcess());
+			FTable.Truncate(Manager);
 			
-			Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+			Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 			
 			if (ABuffer[AOffset] != 0)
 			{
@@ -127,9 +124,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				{
 					LRowSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 					AOffset += sizeof(int);
-					using (Row LRow = (Row)DataValue.FromPhysical(Process, FTable.RowType, ABuffer, AOffset))
+					using (Row LRow = (Row)DataValue.FromPhysical(Manager, FTable.RowType, ABuffer, AOffset))
 					{
-						FTable.Insert(Process.GetServerProcess(), LRow);
+						FTable.Insert(Manager, LRow);
 					}
 					AOffset += LRowSize;
 				}
@@ -138,23 +135,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		public override Table OpenCursor()
 		{
-			Table LTable = new TableScan(Process.GetServerProcess(), FTable, FTable.TableVar.FindClusteringOrder(Process.GetServerProcess().Plan), ScanDirection.Forward, null, null);
+			Table LTable = new TableScan(Manager, FTable, Manager.FindClusteringOrder(FTable.TableVar), ScanDirection.Forward, null, null);
 			LTable.Open();
 			return LTable;
 		}
 		
 		public override object CopyNativeAs(Schema.IDataType ADataType)
 		{
-			ServerProcess LServerProcess = Process.GetServerProcess();
-			NativeTable LNewTable = new NativeTable(LServerProcess, FTable.TableVar);
-			using (Scan LScan = new Scan(LServerProcess, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null))
+			NativeTable LNewTable = new NativeTable(Manager, FTable.TableVar);
+			using (Scan LScan = new Scan(Manager, FTable, FTable.ClusteredIndex, ScanDirection.Forward, null, null))
 			{
 				LScan.Open();
 				while (LScan.Next())
 				{
 					using (Row LRow = LScan.GetRow())
 					{
-						LNewTable.Insert(LServerProcess, LRow);
+						LNewTable.Insert(Manager, LRow);
 					}
 				}
 			}
@@ -165,11 +161,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     /// <remarks> Table </remarks>
     public abstract class Table : DataValue, IActive
     {        
-		public Table(TableNode ANode, ServerProcess AProcess) : base(AProcess, ANode.DataType)
+		protected Table(IValueManager AManager, Schema.ITableType ATableType) : base(AManager, ATableType) { }
+		
+		protected Table(IValueManager AManager, TableNode ANode) : base(AManager, ANode.DataType)
 		{
-			if (ANode == null)
-				throw new RuntimeException(RuntimeException.Codes.TableNodeRequired);
 			FNode = ANode;
+		}
+		
+		protected Table(TableNode ANode, Program AProgram) : base(AProgram.ValueManager, ANode.DataType)
+		{
+			FNode = ANode;
+			FProgram = AProgram;
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -178,25 +180,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			base.Dispose(ADisposing);
 			FNode = null;
 		}
-        
-		// Process		
-		public new ServerProcess Process { get { return base.Process.GetServerProcess(); } }
 		
+		protected Program FProgram;
+		public Program Program { get { return FProgram; } }
+        
         // DataType
         public new Schema.ITableType DataType { get { return (Schema.ITableType)base.DataType; } }
         
 		// Node
 		protected TableNode FNode;
-		public TableNode Node { get { return FNode; } }
+		public TableNode Node
+		{
+			get
+			{
+				#if DEBUG
+				if (FNode == null)
+					throw new RuntimeException(RuntimeException.Codes.InternalError, "FNode is null.");
+				#endif
+				return FNode;
+			}
+		}
 
 		// CursorType
-		public CursorType CursorType { get { return Node.RequestedCursorType; } }
+		public virtual CursorType CursorType { get { return Node.RequestedCursorType; } }
 		
         // Capabilities
-        public CursorCapability Capabilities { get { return Node.CursorCapabilities; }  }
+        public virtual CursorCapability Capabilities { get { return Node.CursorCapabilities; }  }
 		
 		// Isolation
-		public CursorIsolation Isolation { get { return Node.CursorIsolation; } }
+		public virtual CursorIsolation Isolation { get { return Node.CursorIsolation; } }
 		
         public bool Supports(CursorCapability ACapability)
         {
@@ -207,6 +219,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         {
 			if (!Supports(ACapability))
 				throw new RuntimeException(RuntimeException.Codes.CapabilityNotSupported, Enum.GetName(typeof(CursorCapability), ACapability));
+        }
+        
+        protected void CheckAborted()
+        {
+            if (FProgram != null)
+				FProgram.CheckAborted();
         }
         
         // Open        
@@ -300,7 +318,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
         public Row Select()
         {
-			Row LRow = new Row(Process, DataType.RowType);
+			Row LRow = new Row(Manager, DataType.RowType);
 			try
 			{
 				Select(LRow);
@@ -320,7 +338,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			#if SAFETABLES
             CheckActive();
             #endif
-			Process.CheckAborted();
+            CheckAborted();
 			return InternalNext();
         }
         
@@ -382,7 +400,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             CheckActive();
             CheckCapability(CursorCapability.BackwardsNavigable);
             #endif
-			Process.CheckAborted();
+            CheckAborted();
 			return InternalPrior();
         }
         
@@ -575,7 +593,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		// Updateable        
 		protected virtual void InternalInsert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
-			Node.Insert(Process, AOldRow, ANewRow, AValueFlags, AUnchecked);
+			Node.Insert(Program, AOldRow, ANewRow, AValueFlags, AUnchecked);
 			if (CursorType == CursorType.Dynamic)
 				OptimisticRefresh(ANewRow);
 		}
@@ -601,7 +619,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			using (Row LRow = Select())
 			{
-				Node.Update(Process, LRow, ARow, AValueFlags, Isolation != CursorIsolation.Isolated, AUnchecked);
+				Node.Update(Program, LRow, ARow, AValueFlags, Isolation != CursorIsolation.Isolated, AUnchecked);
 				if (CursorType == CursorType.Dynamic)
 				{
 					ARow.CopyTo(LRow);
@@ -632,7 +650,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			using (Row LRow = Select())
 			{
-				Node.Delete(Process, LRow, Isolation != CursorIsolation.Isolated, AUnchecked);
+				Node.Delete(Program, LRow, Isolation != CursorIsolation.Isolated, AUnchecked);
 				if (CursorType == CursorType.Dynamic)
 					OptimisticRefresh(LRow);
 			}
@@ -734,27 +752,37 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		///<summary>Returns true if the given key has the same number of columns in the same order as the node order key.</summary>
         protected bool IsKeyRow(Row AKey)
         {
-			for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
-				if ((AKey.DataType.Columns.Count <= LIndex) || !Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, Node.Order.Columns[LIndex].Column.Name))
+			Schema.Order LOrder = Order;
+			if (AKey.DataType.Columns.Count != LOrder.Columns.Count)
+				return false;
+				
+			for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
+				if ((AKey.DataType.Columns.Count <= LIndex) || !Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, LOrder.Columns[LIndex].Column.Name))
 					return false;
-			return AKey.DataType.Columns.Count == Node.Order.Columns.Count;
+
+			return true;
         }
 
 		///<summary>Returns true if the given key has the same or fewer columns in the same order as the node order key, and once any column is null, the rest of the columns are also null.</summary>        
         protected bool IsPartialKeyRow(Row AKey)
         {
 			bool LIsNull = false;
-			for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
+			Schema.Order LOrder = Order;
+			if (AKey.DataType.Columns.Count > LOrder.Columns.Count)
+				return false;
+			
+			for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
 				if (AKey.DataType.Columns.Count > LIndex)
 				{
-					if (!Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, Node.Order.Columns[LIndex].Column.Name))
+					if (!Schema.Object.NamesEqual(AKey.DataType.Columns[LIndex].Name, LOrder.Columns[LIndex].Column.Name))
 						return false;
 					if (LIsNull && AKey.HasValue(LIndex))
 						return false;
 					if (!AKey.HasValue(LIndex))
 						LIsNull = true;
 				}
-			return AKey.DataType.Columns.Count <= Node.Order.Columns.Count;
+				
+			return true;
         }
         
         ///	<summary>
@@ -767,19 +795,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return AKey;
 			else
 			{
-				Schema.IRowType LRowType = Node.DataType.CreateRowType(String.Empty, false);
-				for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
+				Schema.IRowType LRowType = DataType.CreateRowType(String.Empty, false);
+				Schema.Order LOrder = Order;
+				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
 				{
-					//int LColumnIndex = AKey.DataType.Columns.IndexOfName(Node.Order.Columns[LIndex].Column.Name);
+					//int LColumnIndex = AKey.DataType.Columns.IndexOfName(LOrder.Columns[LIndex].Column.Name);
 					//if (LColumnIndex >= 0)
-						LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
+						LRowType.Columns.Add(LOrder.Columns[LIndex].Column.Column.Copy());
 					// BTR 4/25/2005 -> There is no difference between not having the column, and having the column, but not having a value.
 					// as such, I see no reason to throw this error, simply create the row and leave the column empty.
 					//else
 					//	throw new RuntimeException(RuntimeException.Codes.InvalidSearchArgument);
 				}
 
-				Row LKey = new Row(Process, LRowType);
+				Row LKey = new Row(Manager, LRowType);
 				AKey.CopyTo(LKey);
 				return LKey;
 			}
@@ -798,13 +827,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			else
 			{
 				bool LIsNull = false;
-				Schema.IRowType LRowType = Node.DataType.CreateRowType(String.Empty, false);
-				for (int LIndex = 0; LIndex < Node.Order.Columns.Count; LIndex++)
+				Schema.IRowType LRowType = DataType.CreateRowType(String.Empty, false);
+				Schema.Order LOrder = Order;
+				for (int LIndex = 0; LIndex < LOrder.Columns.Count; LIndex++)
 				{
-					int LColumnIndex = AKey.DataType.Columns.IndexOfName(Node.Order.Columns[LIndex].Column.Name);
+					int LColumnIndex = AKey.DataType.Columns.IndexOfName(LOrder.Columns[LIndex].Column.Name);
 					if (LColumnIndex >= 0)
 					{
-						LRowType.Columns.Add(Node.Order.Columns[LIndex].Column.Column.Copy());
+						LRowType.Columns.Add(LOrder.Columns[LIndex].Column.Column.Copy());
 						if (LIsNull && AKey.HasValue(LColumnIndex))
 							return null;
 							
@@ -815,7 +845,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						break;
 				}
 				
-				Row LKey = new Row(Process, LRowType);
+				Row LKey = new Row(Manager, LRowType);
 				AKey.CopyTo(LKey);
 				return LKey;
 			}
@@ -824,9 +854,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
     
 	public class TableScan : Table
 	{
-		public TableScan(TableNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		protected TableScan(TableNode ANode, Program AProgram) : base(ANode, AProgram) { }
+		protected TableScan(IValueManager AManager, TableNode ANode) : base(AManager, ANode) { }
 		
-		public TableScan(ServerProcess AProcess, NativeTable ATable, Schema.Order AKey, ScanDirection ADirection, Row AFirstKey, Row ALastKey) : base(null, AProcess)
+		public TableScan(IValueManager AManager, NativeTable ATable, Schema.Order AKey, ScanDirection ADirection, Row AFirstKey, Row ALastKey) : base(AManager, ATable.TableType)
 		{
 			FNativeTable = ATable;
 			FKey = AKey;
@@ -875,9 +906,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		protected override void InternalOpen()
 		{
 			if (FKey.Equivalent(FNativeTable.ClusteredIndex.Key))
-				FScan = new Scan(Process, FNativeTable, FNativeTable.ClusteredIndex, FDirection, FFirstKey, FLastKey);
+				FScan = new Scan(Manager, FNativeTable, FNativeTable.ClusteredIndex, FDirection, FFirstKey, FLastKey);
 			else
-				FScan = new Scan(Process, FNativeTable, FNativeTable.NonClusteredIndexes[FKey], FDirection, FFirstKey, FLastKey);
+				FScan = new Scan(Manager, FNativeTable, FNativeTable.NonClusteredIndexes[FKey], FDirection, FFirstKey, FLastKey);
 			FScan.Open();
 		}
 		
@@ -977,12 +1008,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class TableValueScan : TableScan
 	{
-		public TableValueScan(TableNode ANode, ServerProcess AProcess) : base(ANode, AProcess) {}
+		public TableValueScan(TableNode ANode, TableValue ATableValue) : base(ATableValue.Manager, ANode)
+		{
+			FNativeTable = ATableValue.AsNative as NativeTable;
+			Key = Manager.FindClusteringOrder(FNativeTable.TableVar); // ?? Why doesn't this use the order from the compile (ANode.Order)?
+			Direction = ScanDirection.Forward;
+		}
 		
 		// Updatable
 		protected override void InternalInsert(Row AOldRow, Row ANewRow, BitArray AValueFlags, bool AUnchecked)
 		{
-			FNativeTable.Insert(Process, ANewRow);
+			FNativeTable.Insert(Manager, ANewRow);
 			if (CursorType == CursorType.Dynamic)
 				Refresh(ANewRow);
 		}
@@ -991,7 +1027,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			using (Row LRow = Select())
 			{
-				FNativeTable.Update(Process, LRow, ARow);
+				FNativeTable.Update(Manager, LRow, ARow);
 				if (CursorType == CursorType.Dynamic)
 				{
 					ARow.CopyTo(LRow);
@@ -1004,7 +1040,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{
 			using (Row LRow = Select())
 			{
-				FNativeTable.Delete(Process, LRow);
+				FNativeTable.Delete(Manager, LRow);
 				if (CursorType == CursorType.Dynamic)
 					Refresh(LRow);
 			}

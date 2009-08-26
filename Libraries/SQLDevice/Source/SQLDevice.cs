@@ -605,9 +605,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			ATableNode.CursorIsolation = APlan.CursorContext.CursorIsolation;
 			
 			// Ensure that the node has an order that is a superset of some key
-			Schema.Key LClusteringKey = ATableNode.TableVar.FindClusteringKey();
+			Schema.Key LClusteringKey = Compiler.FindClusteringKey(APlan, ATableNode.TableVar);
 			if ((ATableNode.Order == null) && (LClusteringKey.Columns.Count > 0))
-				ATableNode.Order = new Schema.Order(LClusteringKey, APlan);
+				ATableNode.Order = Compiler.OrderFromKey(APlan, LClusteringKey);
 
 			if (ATableNode.Order != null)
 			{
@@ -616,25 +616,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				Schema.OrderColumn LNewColumn;
 
 				foreach (Schema.Key LKey in ATableNode.TableVar.Keys)
-					if (ATableNode.Order.Includes(APlan, LKey))
+					if (Compiler.OrderIncludesKey(APlan, ATableNode.Order, LKey))
 					{
 						LOrderUnique = true;
 						break;
 					}
 
 				if (!LOrderUnique)
-					foreach (Schema.TableVarColumn LColumn in ATableNode.TableVar.FindClusteringKey().Columns)
+					foreach (Schema.TableVarColumn LColumn in Compiler.FindClusteringKey(APlan, ATableNode.TableVar).Columns)
 						if (!ATableNode.Order.Columns.Contains(LColumn.Name))
 						{
 							LNewColumn = new Schema.OrderColumn(LColumn, true);
-							LNewColumn.Sort = ((ScalarType)LColumn.DataType).GetSort(APlan);
+							LNewColumn.Sort = Compiler.GetSort(APlan, LColumn.DataType);
 							LNewColumn.IsDefaultSort = true;
 							ATableNode.Order.Columns.Add(LNewColumn);
 						}
 						else 
 						{
 							if (!System.Object.ReferenceEquals(ATableNode.Order.Columns[LColumn.Name].Sort, ((ScalarType)ATableNode.Order.Columns[LColumn.Name].Column.DataType).UniqueSort))
-								ATableNode.Order.Columns[LColumn.Name].Sort = ((ScalarType)LColumn.DataType).GetUniqueSort(APlan);
+								ATableNode.Order.Columns[LColumn.Name].Sort = Compiler.GetUniqueSort(APlan, (ScalarType)LColumn.DataType);
 						}
 			}
 		}
@@ -814,7 +814,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			
 			if (APlanNode.IsLiteral && APlanNode.IsDeterministic && !LScalarType.UseParametersForLiterals)
 			{
-				object LValue = APlanNode.Execute(ADevicePlan.Plan.ServerProcess);
+				object LValue = ADevicePlan.Plan.EvaluateLiteralArgument(APlanNode, APlanNode.Description);
 				
 				Expression LValueExpression = null;
 				if (LValue == null)
@@ -1244,11 +1244,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
         
-		protected virtual Statement TranslateCreateIndex(TableVar ATableVar, Key AKey)
+		protected virtual Statement TranslateCreateIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
 		{
 			CreateIndexStatement LIndex = new CreateIndexStatement();
 			LIndex.IsUnique = !AKey.IsSparse;
-			LIndex.IsClustered = AKey.Equals(ATableVar.FindClusteringKey());
+			LIndex.IsClustered = AKey.Equals(Compiler.FindClusteringKey(APlan.Plan, ATableVar));
 			LIndex.TableSchema = D4.MetaData.GetTag(ATableVar.MetaData, "Storage.Schema", Schema);
 			LIndex.TableName = ToSQLIdentifier(ATableVar);
 			LIndex.IndexSchema = D4.MetaData.GetTag(AKey.MetaData, "Storage.Schema", String.Empty);
@@ -1264,7 +1264,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LIndex;
 		}
         
-		protected virtual Statement TranslateDropIndex(TableVar ATableVar, Key AKey)
+		protected virtual Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Key AKey)
 		{
 			DropIndexStatement LStatement = new DropIndexStatement();
 			LStatement.IndexSchema = D4.MetaData.GetTag(AKey.MetaData, "Storage.Schema", String.Empty);
@@ -1272,7 +1272,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LStatement;
 		}
         
-		protected virtual Statement TranslateCreateIndex(TableVar ATableVar, Order AOrder)
+		protected virtual Statement TranslateCreateIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
 		{
 			CreateIndexStatement LIndex = new CreateIndexStatement();
 			LIndex.IsClustered = Convert.ToBoolean(D4.MetaData.GetTag(AOrder.MetaData, "DAE.IsClustered", "false"));
@@ -1291,7 +1291,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LIndex;
 		}
         
-		protected virtual Statement TranslateDropIndex(TableVar ATableVar, Order AOrder)
+		protected virtual Statement TranslateDropIndex(SQLDevicePlan APlan, TableVar ATableVar, Order AOrder)
 		{
 			DropIndexStatement LStatement = new DropIndexStatement();
 			LStatement.IndexSchema = D4.MetaData.GetTag(AOrder.MetaData, "Storage.Schema", String.Empty);
@@ -1299,7 +1299,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LStatement;
 		}
         
-		protected virtual Statement TranslateCreateTable(ServerProcess AProcess, TableVar ATableVar)
+		protected virtual Statement TranslateCreateTable(SQLDevicePlan APlan, TableVar ATableVar)
 		{
 			Batch LBatch = new Batch();
 			CreateTableStatement LStatement = new CreateTableStatement();
@@ -1309,7 +1309,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			{
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.ShouldReconcile", "true")))
 				{
-					SQLScalarType LSQLScalarType = (SQLScalarType)ResolveDeviceScalarType(AProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+					SQLScalarType LSQLScalarType = (SQLScalarType)ResolveDeviceScalarType(APlan.Plan, (Schema.ScalarType)LColumn.DataType);
 					if (LSQLScalarType == null)
 						throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LColumn.DataType.ToString());
 					LStatement.Columns.Add
@@ -1327,18 +1327,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 			foreach (Key LKey in ATableVar.Keys)
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ATableVar, LKey));
+					LBatch.Statements.Add(TranslateCreateIndex(APlan, ATableVar, LKey));
 
 			foreach (Order LOrder in ATableVar.Orders)
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ATableVar, LOrder));
+					LBatch.Statements.Add(TranslateCreateIndex(APlan, ATableVar, LOrder));
 			
 			return LBatch;
 		}
         
-		protected virtual Statement TranslateCreateTableNode(DevicePlan ADevicePlan, CreateTableNode ANode)
+		protected virtual Statement TranslateCreateTableNode(SQLDevicePlan ADevicePlan, CreateTableNode ANode)
 		{
-			return TranslateCreateTable(ADevicePlan.Plan.ServerProcess, ANode.Table);
+			return TranslateCreateTable(ADevicePlan, ANode.Table);
 		}
 		
 		protected bool AltersStorageTags(D4.AlterMetaData AAlterMetaData)
@@ -1361,7 +1361,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return false;
 		}
         
-		protected virtual Statement TranslateAlterTableNode(DevicePlan ADevicePlan, AlterTableNode ANode)
+		protected virtual Statement TranslateAlterTableNode(SQLDevicePlan ADevicePlan, AlterTableNode ANode)
 		{
 			Batch LBatch = new Batch();
 			string LTableSchema = D4.MetaData.GetTag(ANode.TableVar.MetaData, "Storage.Schema", Schema);
@@ -1432,10 +1432,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (LSchemaLevelDropKeyDefinition != null)
 					LKey = LSchemaLevelDropKeyDefinition.Key;
 				else
-					LKey = ANode.TableVar.FindKey(LKeyDefinition);
+					LKey = Compiler.FindKey(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
 
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateDropIndex(ANode.TableVar, LKey));
+					LBatch.Statements.Add(TranslateDropIndex(ADevicePlan, ANode.TableVar, LKey));
 			}
 				
 			foreach (D4.DropOrderDefinition LOrderDefinition in ANode.AlterTableStatement.DropOrders)
@@ -1445,24 +1445,24 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (LSchemaLevelDropOrderDefinition != null)
 					LOrder = LSchemaLevelDropOrderDefinition.Order;
 				else
-					LOrder = ANode.TableVar.FindOrder(ADevicePlan.Plan, LOrderDefinition);
+					LOrder = Compiler.FindOrder(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition);
 
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateDropIndex(ANode.TableVar, LOrder));
+					LBatch.Statements.Add(TranslateDropIndex(ADevicePlan, ANode.TableVar, LOrder));
 			}
 				
 			foreach (D4.KeyDefinition LKeyDefinition in ANode.AlterTableStatement.CreateKeys)
 			{
 				Schema.Key LKey = Compiler.CompileKeyDefinition(ADevicePlan.Plan, ANode.TableVar, LKeyDefinition);
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LKey.MetaData, "Storage.ShouldReconcile", (LKey.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ANode.TableVar, LKey));
+					LBatch.Statements.Add(TranslateCreateIndex(ADevicePlan, ANode.TableVar, LKey));
 			}
 				
 			foreach (D4.OrderDefinition LOrderDefinition in ANode.AlterTableVarStatement.CreateOrders)
 			{
 				Schema.Order LOrder = Compiler.CompileOrderDefinition(ADevicePlan.Plan, ANode.TableVar, LOrderDefinition, false);
 				if (Convert.ToBoolean(D4.MetaData.GetTag(LOrder.MetaData, "Storage.ShouldReconcile", (LOrder.Columns.Count > 0).ToString())))
-					LBatch.Statements.Add(TranslateCreateIndex(ANode.TableVar, LOrder));
+					LBatch.Statements.Add(TranslateCreateIndex(ADevicePlan, ANode.TableVar, LOrder));
 			}
 
 			return LBatch;
@@ -1611,33 +1611,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							ServerStatementPlan LPlan = new ServerStatementPlan(ADevicePlan.Plan.ServerProcess);
 							try
 							{
-								ADevicePlan.Plan.ServerProcess.PushExecutingPlan(LPlan);
+								LPlan.Plan.PushStatementContext(LDevicePlan.Plan.StatementContext);
+								LPlan.Plan.PushSecurityContext(LDevicePlan.Plan.SecurityContext);
+								LPlan.Plan.PushCursorContext(LDevicePlan.Plan.CursorContext);
+								if (LDevicePlan.Plan.InRowContext)
+									LPlan.Plan.EnterRowContext();
+								for (int LIndex = LDevicePlan.Plan.Symbols.Count - 1; LIndex >= 0; LIndex--)
+									LPlan.Plan.Symbols.Push(LDevicePlan.Plan.Symbols.Peek(LIndex));
 								try
 								{
-									LPlan.Plan.PushStatementContext(LDevicePlan.Plan.StatementContext);
-									LPlan.Plan.PushSecurityContext(LDevicePlan.Plan.SecurityContext);
-									LPlan.Plan.PushCursorContext(LDevicePlan.Plan.CursorContext);
-									if (LDevicePlan.Plan.InRowContext)
-										LPlan.Plan.EnterRowContext();
-									for (int LIndex = LDevicePlan.Plan.Symbols.Count - 1; LIndex >= 0; LIndex--)
-										LPlan.Plan.Symbols.Push(LDevicePlan.Plan.Symbols.Peek(LIndex));
-									try
-									{
-										PlanNode LNode = Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
-										LNode = Compiler.OptimizeNode(LPlan.Plan, LNode);
-										LNode.InternalDetermineBinding(LPlan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
-										APlanNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
-										return FromScalar(LDevicePlan, LNode);
-									}
-									finally
-									{
-										while (LPlan.Plan.Symbols.Count > 0)
-											LPlan.Plan.Symbols.Pop();
-									}
+									PlanNode LNode = Compiler.CompileExpression(LPlan.Plan, new D4.Parser(true).ParseExpression(LInstructionNode.EmitStatementAsString()));
+									LNode = Compiler.OptimizeNode(LPlan.Plan, LNode);
+									LNode.InternalDetermineBinding(LPlan.Plan); // Don't use the compiler bind here because we already know a determine device call on the top level node will fail
+									APlanNode.CouldSupport = true; // Set this to indicate that support could be provided if it would be beneficial to do so
+									return FromScalar(LDevicePlan, LNode);
 								}
 								finally
 								{
-									ADevicePlan.Plan.ServerProcess.PopExecutingPlan(LPlan);
+									while (LPlan.Plan.Symbols.Count > 0)
+										LPlan.Plan.Symbols.Pop();
 								}
 							}
 							finally
@@ -1841,22 +1833,25 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					if (Convert.ToBoolean(D4.MetaData.GetTag(LBaseTableVar.MetaData, "Storage.ShouldReconcile", "true")))
 					{	
-						int LObjectIndex = ADeviceCatalog.IndexOf(LBaseTableVar.Name);
-						if (LObjectIndex < 0)
-							LBatch.Statements.Add(TranslateCreateTable(AProcess, LBaseTableVar));
-						else
+						AlterTableNode LAlterTableNode = new AlterTableNode();
+						using (Plan LPlan = new Plan(AProcess))
 						{
-							// Compile and translate the D4.AlterTableStatement returned from ReconcileTable and add it to LBatch
-							bool LReconciliationRequired;
-							D4.AlterTableStatement LD4AlterTableStatement = ReconcileTable(AProcess, LBaseTableVar, (Schema.TableVar)ADeviceCatalog[LObjectIndex], AOptions, out LReconciliationRequired);
-							if (LReconciliationRequired)
+							using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, LAlterTableNode))
 							{
-								AlterTableNode LAlterTableNode = new AlterTableNode();
-								LAlterTableNode.AlterTableStatement = LD4AlterTableStatement;
-								LAlterTableNode.DetermineDevice(AProcess.Plan);
-								using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(AProcess.Plan, this, LAlterTableNode))
+								int LObjectIndex = ADeviceCatalog.IndexOf(LBaseTableVar.Name);
+								if (LObjectIndex < 0)
+									LBatch.Statements.Add(TranslateCreateTable(LDevicePlan, LBaseTableVar));
+								else
 								{
-									LBatch.Statements.Add(TranslateAlterTableNode(LDevicePlan, LAlterTableNode));
+									// Compile and translate the D4.AlterTableStatement returned from ReconcileTable and add it to LBatch
+									bool LReconciliationRequired;
+									D4.AlterTableStatement LD4AlterTableStatement = ReconcileTable(LPlan, LBaseTableVar, (Schema.TableVar)ADeviceCatalog[LObjectIndex], AOptions, out LReconciliationRequired);
+									if (LReconciliationRequired)
+									{
+										LAlterTableNode.AlterTableStatement = LD4AlterTableStatement;
+										LAlterTableNode.DetermineDevice(LDevicePlan.Plan);
+										LBatch.Statements.Add(TranslateAlterTableNode(LDevicePlan, LAlterTableNode));
+									}
 								}
 							}
 						}
@@ -1872,9 +1867,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					if ((LBaseTableVar != null) && !AServerCatalog.Contains(LBaseTableVar.Name))
 					{
 						DropTableNode LDropTableNode = new DropTableNode(LBaseTableVar);
-						using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(AProcess.Plan, this, LDropTableNode))
+						using (Plan LPlan = new Plan(AProcess))
 						{
-							LBatch.Statements.Add(TranslateDropTableNode(LDevicePlan, new DropTableNode(LBaseTableVar)));
+							using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, LDropTableNode))
+							{
+								LBatch.Statements.Add(TranslateDropTableNode(LDevicePlan, new DropTableNode(LBaseTableVar)));
+							}
 						}
 					}
 				}
@@ -1957,41 +1955,55 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			if (AMaster == D4.ReconcileMaster.Server)
 			{
-				SQLDeviceSession LDeviceSession = (SQLDeviceSession)AProcess.DeviceConnect(this);
+				using (Plan LPlan = new Plan(AProcess))
 				{
-					Statement LStatement = TranslateCreateTable(AProcess, ATableVar);
-					Batch LBatch = LStatement as Batch;
-					if (LBatch != null)
+					using (SQLDevicePlan LDevicePlan = new SQLDevicePlan(LPlan, this, null))
 					{
-						foreach (Statement LSingleStatement in LBatch.Statements)
-							LDeviceSession.Connection.Execute(Emitter.Emit(LSingleStatement));
+						Statement LStatement = TranslateCreateTable(LDevicePlan, ATableVar);
+						SQLDeviceSession LDeviceSession = (SQLDeviceSession)LPlan.DeviceConnect(this);
+						{
+							Batch LBatch = LStatement as Batch;
+							if (LBatch != null)
+							{
+								foreach (Statement LSingleStatement in LBatch.Statements)
+									LDeviceSession.Connection.Execute(Emitter.Emit(LSingleStatement));
+							}
+							else
+								LDeviceSession.Connection.Execute(Emitter.Emit(LStatement));
+						}
 					}
-					else
-						LDeviceSession.Connection.Execute(Emitter.Emit(LStatement));
 				}
 			}
 			else if (AMaster == D4.ReconcileMaster.Device)
 			{
 				// Add the TableVar to the Catalog
 				// Note that this does not call the usual CreateTable method because there is no need to request device storage.
-				AProcess.Plan.PlanCatalog.Add(ATableVar);
+				Plan LPlan = new Plan(AProcess);
 				try
 				{
-					AProcess.Plan.PushCreationObject(ATableVar);
+					LPlan.PlanCatalog.Add(ATableVar);
 					try
 					{
-						CheckSupported(AProcess.Plan, ATableVar);
-						if (!AProcess.ServerSession.Server.IsRepository)
-							Compiler.CompileTableVarKeyConstraints(AProcess.Plan, ATableVar);
+						LPlan.PushCreationObject(ATableVar);
+						try
+						{
+							CheckSupported(LPlan, ATableVar);
+							if (!AProcess.ServerSession.Server.IsRepository)
+								Compiler.CompileTableVarKeyConstraints(LPlan, ATableVar);
+						}
+						finally
+						{
+							LPlan.PopCreationObject();
+						}
 					}
 					finally
 					{
-						AProcess.Plan.PopCreationObject();
+						LPlan.PlanCatalog.Remove(ATableVar);
 					}
 				}
 				finally
 				{
-					AProcess.Plan.PlanCatalog.Remove(ATableVar);
+					LPlan.Dispose();
 				}
 
 				AProcess.CatalogDeviceSession.InsertCatalogObject(ATableVar);
@@ -2006,7 +2018,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			else if (AMaster == D4.ReconcileMaster.Device)
 			{
-				Compiler.CompileCreateReferenceStatement(AProcess.Plan, AReference.EmitStatement(D4.EmitMode.ForCopy)).Execute(AProcess);
+				using (Plan LPlan = new Plan(AProcess))
+				{
+					Program LProgram = new Program(AProcess);
+					LProgram.Code = Compiler.CompileCreateReferenceStatement(LPlan, AReference.EmitStatement(D4.EmitMode.ForCopy));
+					LProgram.Execute(null);
+				}
 			}
 		}
 		
@@ -2043,7 +2060,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			public Schema.Order Order { get { return FOrder; } }
 		}
 		
-		public virtual D4.AlterTableStatement ReconcileTable(ServerProcess AProcess, TableVar ASourceTableVar, TableVar ATargetTableVar, ReconcileOptions AOptions, out bool AReconciliationRequired)
+		public virtual D4.AlterTableStatement ReconcileTable(Plan APlan, TableVar ASourceTableVar, TableVar ATargetTableVar, ReconcileOptions AOptions, out bool AReconciliationRequired)
 		{
 			AReconciliationRequired = false;
 			D4.AlterTableStatement LStatement = new D4.AlterTableStatement();
@@ -2067,8 +2084,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							Schema.TableVarColumn LTargetColumn = ATargetTableVar.Columns[LTargetIndex];
 							
 							// Type of the column (Needs to be based on domain name because the reconciliation process will only create the column with the D4 type map for the native domain)
-							SQLScalarType LSourceType = (SQLScalarType)ResolveDeviceScalarType(AProcess.Plan, (Schema.ScalarType)LColumn.DataType);
-							SQLScalarType LTargetType = (SQLScalarType)ResolveDeviceScalarType(AProcess.Plan, (Schema.ScalarType)LTargetColumn.DataType);
+							SQLScalarType LSourceType = (SQLScalarType)ResolveDeviceScalarType(APlan, (Schema.ScalarType)LColumn.DataType);
+							SQLScalarType LTargetType = (SQLScalarType)ResolveDeviceScalarType(APlan, (Schema.ScalarType)LTargetColumn.DataType);
 							bool LDomainsDifferent = 
 								(LSourceType.DomainName(LColumn) != LTargetType.DomainName(LTargetColumn))
 									|| (LSourceType.NativeDomainName(LColumn) != LTargetType.NativeDomainName(LTargetColumn));
@@ -2153,74 +2170,58 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		{
 			if ((AMaster == D4.ReconcileMaster.Server) || (AMaster == D4.ReconcileMaster.Both))
 			{
-				bool LReconciliationRequired;
-				D4.AlterTableStatement LStatement = ReconcileTable(AProcess, AServerTableVar, ADeviceTableVar, ReconcileOptions.All, out LReconciliationRequired);
-				if (LReconciliationRequired)
+				using (Plan LPlan = new Plan(AProcess))
 				{
-					D4.ReconcileMode LSaveMode = ReconcileMode;
-					try
+					bool LReconciliationRequired;
+					D4.AlterTableStatement LStatement = ReconcileTable(LPlan, AServerTableVar, ADeviceTableVar, ReconcileOptions.All, out LReconciliationRequired);
+					if (LReconciliationRequired)
 					{
-						ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-						ServerStatementPlan LPlan = new ServerStatementPlan(AProcess);
+						D4.ReconcileMode LSaveMode = ReconcileMode;
 						try
 						{
-							AProcess.PushExecutingPlan(LPlan);
+							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
+							Program LProgram = new Program(AProcess);
+							LProgram.Code = Compiler.Compile(LPlan, LStatement);
+							LPlan.CheckCompiled();
+							LProgram.Start(null);
 							try
 							{
-								PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
-								LPlan.CheckCompiled();
-								AProcess.DeviceExecute(this, LNode);
+								LProgram.DeviceExecute(this, LProgram.Code);
 							}
 							finally
 							{
-								AProcess.PopExecutingPlan(LPlan);
+								LProgram.Stop(null);
 							}
 						}
 						finally
 						{
-							LPlan.Dispose();
+							ReconcileMode = LSaveMode;
 						}
-					}
-					finally
-					{
-						ReconcileMode = LSaveMode;
 					}
 				}
 			}
 			
 			if ((AMaster == D4.ReconcileMaster.Device) || (AMaster == D4.ReconcileMaster.Both))
 			{
-				bool LReconciliationRequired;
-				D4.AlterTableStatement LStatement = ReconcileTable(AProcess, ADeviceTableVar, AServerTableVar, ReconcileOptions.None, out LReconciliationRequired);
-				if (LReconciliationRequired)
+				using (Plan LPlan = new Plan(AProcess))
 				{
-					D4.ReconcileMode LSaveMode = ReconcileMode;
-					try
+					bool LReconciliationRequired;
+					D4.AlterTableStatement LStatement = ReconcileTable(LPlan, ADeviceTableVar, AServerTableVar, ReconcileOptions.None, out LReconciliationRequired);
+					if (LReconciliationRequired)
 					{
-						ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
-						ServerStatementPlan LPlan = new ServerStatementPlan(AProcess);
+						D4.ReconcileMode LSaveMode = ReconcileMode;
 						try
 						{
-							AProcess.PushExecutingPlan(LPlan);
-							try
-							{
-								PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
-								LPlan.CheckCompiled();
-								LNode.Execute(AProcess);
-							}
-							finally
-							{
-								AProcess.PopExecutingPlan(LPlan);
-							}
+							ReconcileMode = D4.ReconcileMode.None; // turn off reconciliation to avoid a command being re-issued to the target system
+							Program LProgram = new Program(AProcess);
+							LProgram.Code = Compiler.Compile(LPlan, LStatement);
+							LPlan.CheckCompiled();
+							LProgram.Execute(null);
 						}
 						finally
 						{
-							LPlan.Dispose();
+							ReconcileMode = LSaveMode;
 						}
-					}
-					finally
-					{
-						ReconcileMode = LSaveMode;
 					}
 				}
 			}
@@ -2239,7 +2240,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
         
-		public virtual bool ShouldIncludeColumn(ServerProcess AProcess, string ATableName, string AColumnName, string ADomainName)
+		public virtual bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
 		{
 			return true;
 		}
@@ -2267,7 +2268,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			else throw new SQLException(SQLException.Codes.UnsupportedImportType, ADomain.Type.Name);
 		}
         
-		private void ConfigureTableVar(ServerProcess AProcess, TableVar ATableVar, Objects AColumns, Catalog ACatalog)
+		private void ConfigureTableVar(Plan APlan, TableVar ATableVar, Objects AColumns, Catalog ACatalog)
 		{
 			if (ATableVar != null)
 			{
@@ -2283,7 +2284,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		private void AttachKeyOrOrder(ServerProcess AProcess, TableVar ATableVar, ref Key AKey, ref Order AOrder)
+		private void AttachKeyOrOrder(Plan APlan, TableVar ATableVar, ref Key AKey, ref Order AOrder)
 		{
 			if (AKey != null)
 			{
@@ -2339,7 +2340,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LColumnTitle.ToString();
 		}
 		
-		protected string GetServerTableName(ServerProcess AProcess, Catalog AServerCatalog, string ADeviceTableName)
+		protected string GetServerTableName(Plan APlan, Catalog AServerCatalog, string ADeviceTableName)
 		{
 			string LServerTableName = FromSQLIdentifier(ADeviceTableName);
 			StringCollection LNames = new StringCollection();
@@ -2373,7 +2374,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 					
 				if (!LFound)
-					LServerTableName = DAE.Schema.Object.Qualify(LServerTableName, AProcess.Plan.CurrentLibrary.Name);
+					LServerTableName = DAE.Schema.Object.Qualify(LServerTableName, APlan.CurrentLibrary.Name);
 			}
 
 			return LServerTableName;
@@ -2388,12 +2389,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return -1;
 		}
 		
-		public unsafe virtual void GetDeviceTables(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public unsafe virtual void GetDeviceTables(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
 		{
 			string LDeviceTablesExpression = GetDeviceTablesExpression(ATableVar);
 			if (LDeviceTablesExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)AProcess.DeviceConnect(this)).Connection.Open(LDeviceTablesExpression);
+				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceTablesExpression);
 				try
 				{
 					string LTableName = String.Empty;
@@ -2405,15 +2406,15 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						if (LTableName != (string)LCursor[1])
 						{
-							ConfigureTableVar(AProcess, LTableVar, LColumns, ADeviceCatalog);
+							ConfigureTableVar(APlan, LTableVar, LColumns, ADeviceCatalog);
 
 							LTableName = (string)LCursor[1];
 							
 							// Search for a table with this name unqualified in the server catalog
 							string LTableTitle = (string)LCursor[4];
-							LTableVar = new BaseTableVar(GetServerTableName(AProcess, AServerCatalog, LTableName), null);
-							LTableVar.Owner = AProcess.Plan.User;
-							LTableVar.Library = AProcess.Plan.CurrentLibrary;
+							LTableVar = new BaseTableVar(GetServerTableName(APlan, AServerCatalog, LTableName), null);
+							LTableVar.Owner = APlan.User;
+							LTableVar.Library = APlan.CurrentLibrary;
 							LTableVar.Device = this;
 							LTableVar.MetaData = new D4.MetaData();
 							LTableVar.MetaData.Tags.Add(new D4.Tag("Storage.Name", LTableName, true));
@@ -2444,13 +2445,13 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						if (LExistingColumnIndex >= 0)
 							LColumnName = LExistingTableVar.Columns[LExistingColumnIndex].Name;
 						
-						if (ShouldIncludeColumn(AProcess, LTableName, LColumnName, LNativeDomainName))
+						if (ShouldIncludeColumn(APlan, LTableName, LColumnName, LNativeDomainName))
 						{
 							D4.MetaData LMetaData = new D4.MetaData();
 							TableVarColumn LColumn =
 								new TableVarColumn
 								(
-									new Column(LColumnName, FindScalarType(AProcess.Plan, LNativeDomainName, LLength, LMetaData)),
+									new Column(LColumnName, FindScalarType(APlan, LNativeDomainName, LLength, LMetaData)),
 									LMetaData, 
 									TableVarColumnType.Stored
 								);
@@ -2463,7 +2464,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							{
 								LColumn.MetaData.Tags.Add(new D4.Tag("Frontend.Width", Math.Min(Math.Max(3, LLength), 40).ToString()));
 								if (LLength >= 0) // A (n)varchar(max) column in Microsoft SQL Server will reconcile with length -1
-									LColumn.Constraints.Add(Compiler.CompileTableVarColumnConstraint(AProcess.Plan, LTableVar, LColumn, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(LLength)), null)));
+									LColumn.Constraints.Add(Compiler.CompileTableVarColumnConstraint(APlan, LTableVar, LColumn, new D4.ConstraintDefinition("LengthValid", new BinaryExpression(new CallExpression("Length", new Expression[]{new IdentifierExpression(D4.Keywords.Value)}), D4.Instructions.InclusiveLess, new ValueExpression(LLength)), null)));
 							}
 							
 							if (LColumnTitle == LNativeColumnName)
@@ -2482,7 +2483,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						}
 					}	// while
 
-					ConfigureTableVar(AProcess, LTableVar, LColumns, ADeviceCatalog);
+					ConfigureTableVar(APlan, LTableVar, LColumns, ADeviceCatalog);
 				}
 				catch (Exception E)
 				{
@@ -2512,12 +2513,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				);
 		}
 		
-		public virtual void GetDeviceIndexes(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public virtual void GetDeviceIndexes(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
 		{
 			string LDeviceIndexesExpression = GetDeviceIndexesExpression(ATableVar);
 			if (LDeviceIndexesExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)AProcess.DeviceConnect(this)).Connection.Open(LDeviceIndexesExpression);
+				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceIndexesExpression);
 				try
 				{
 					string LTableName = String.Empty;
@@ -2534,7 +2535,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						if (LTableName != (string)LCursor[1])
 						{
 							if ((LTableVar != null) && LShouldIncludeIndex)
-								AttachKeyOrOrder(AProcess, LTableVar, ref LKey, ref LOrder);
+								AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
 							else
 							{
 								LKey = null;
@@ -2542,7 +2543,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 							
 							LTableName = (string)LCursor[1];
-							LTableVar = (BaseTableVar)ADeviceCatalog[GetServerTableName(AProcess, AServerCatalog, LTableName)];
+							LTableVar = (BaseTableVar)ADeviceCatalog[GetServerTableName(APlan, AServerCatalog, LTableName)];
 							LIndexName = (string)LCursor[2];
 							D4.MetaData LMetaData = new D4.MetaData();
 							LMetaData.Tags.Add(new D4.Tag("Storage.Name", LIndexName, true));
@@ -2556,7 +2557,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						if (LIndexName != (string)LCursor[2])
 						{
 							if (LShouldIncludeIndex)
-								AttachKeyOrOrder(AProcess, LTableVar, ref LKey, ref LOrder);
+								AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
 							else
 							{
 								LKey = null;
@@ -2587,7 +2588,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							if (LColumnIndex >= 0)
 							{
 								LOrderColumn = new OrderColumn(LTableVar.Columns[LColumnIndex], Convert.ToInt32(LCursor[6]) == 0);
-								LOrderColumn.Sort = ((Schema.ScalarType)LOrderColumn.Column.DataType).GetSort(AProcess.Plan);
+								LOrderColumn.Sort = Compiler.GetSort(APlan, LOrderColumn.Column.DataType);
 								LOrderColumn.IsDefaultSort = true;
 								LOrder.Columns.Add(LOrderColumn);
 							}
@@ -2597,7 +2598,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					}
 					
 					if (LShouldIncludeIndex)
-						AttachKeyOrOrder(AProcess, LTableVar, ref LKey, ref LOrder);
+						AttachKeyOrOrder(APlan, LTableVar, ref LKey, ref LOrder);
 				}
 				catch (Exception E)
 				{
@@ -2627,12 +2628,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				);
 		}
 		
-		public virtual void GetDeviceForeignKeys(ServerProcess AProcess, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
+		public virtual void GetDeviceForeignKeys(Plan APlan, Catalog AServerCatalog, Catalog ADeviceCatalog, TableVar ATableVar)
 		{
 			string LDeviceForeignKeysExpression = GetDeviceForeignKeysExpression(ATableVar);
 			if (LDeviceForeignKeysExpression != String.Empty)
 			{
-				SQLCursor LCursor = ((SQLDeviceSession)AProcess.DeviceConnect(this)).Connection.Open(LDeviceForeignKeysExpression);
+				SQLCursor LCursor = ((SQLDeviceSession)APlan.DeviceConnect(this)).Connection.Open(LDeviceForeignKeysExpression);
 				try
 				{
 					string LConstraintName = String.Empty;
@@ -2653,8 +2654,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							}
 							
 							LConstraintName = (string)LCursor[1];
-							string LSourceTableName = GetServerTableName(AProcess, AServerCatalog, (string)LCursor[3]);
-							string LTargetTableName = GetServerTableName(AProcess, AServerCatalog, (string)LCursor[6]);
+							string LSourceTableName = GetServerTableName(APlan, AServerCatalog, (string)LCursor[3]);
+							string LTargetTableName = GetServerTableName(APlan, AServerCatalog, (string)LCursor[6]);
 							if (ADeviceCatalog.Contains(LSourceTableName))
 								LSourceTableVar = (TableVar)ADeviceCatalog[LSourceTableName];
 							else
@@ -2674,8 +2675,8 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								LMetaData.Tags.Add(new D4.Tag("DAE.Enforced", "false", true));
 								LReference = new Schema.Reference(DAE.Schema.Object.Qualify(FromSQLIdentifier(LConstraintName), DAE.Schema.Object.Qualifier(LSourceTableVar.Name)));
 								LReference.MergeMetaData(LMetaData);
-								LReference.Owner = AProcess.Plan.User;
-								LReference.Library = AProcess.Plan.CurrentLibrary;
+								LReference.Owner = APlan.User;
+								LReference.Library = APlan.CurrentLibrary;
 								LReference.SourceTable = LSourceTableVar;
 								LReference.TargetTable = LTargetTableVar;
 								LReference.Enforced = false;
@@ -2715,25 +2716,29 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		public override Catalog GetDeviceCatalog(ServerProcess AProcess, Catalog AServerCatalog, TableVar ATableVar)
 		{
 			Catalog LCatalog = base.GetDeviceCatalog(AProcess, AServerCatalog, ATableVar);
-			GetDeviceTables(AProcess, AServerCatalog, LCatalog, ATableVar);
-			GetDeviceIndexes(AProcess, AServerCatalog, LCatalog, ATableVar);
-			GetDeviceForeignKeys(AProcess, AServerCatalog, LCatalog, ATableVar);
-			
-			// Impose a key on each table if one is not defined by the device
-			foreach (Schema.Object LObject in LCatalog)
-				if ((LObject is TableVar) && (((TableVar)LObject).Keys.Count == 0))
-				{
-					TableVar LTableVar = (TableVar)LObject;
-					Key LKey = new Key();
-					foreach (TableVarColumn LColumn in LTableVar.Columns)
-						if (!Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.Deferred", "false")))
-							LKey.Columns.Add(LColumn);
-					LKey.IsGenerated = true;
-					LKey.MetaData = new D4.MetaData();
-					LKey.MetaData.Tags.Add(new D4.Tag("Storage.IsImposedKey", "true"));
-					LTableVar.Keys.Add(LKey);
-				}
-			
+
+			using (Plan LPlan = new Plan(AProcess))
+			{
+				GetDeviceTables(LPlan, AServerCatalog, LCatalog, ATableVar);
+				GetDeviceIndexes(LPlan, AServerCatalog, LCatalog, ATableVar);
+				GetDeviceForeignKeys(LPlan, AServerCatalog, LCatalog, ATableVar);
+				
+				// Impose a key on each table if one is not defined by the device
+				foreach (Schema.Object LObject in LCatalog)
+					if ((LObject is TableVar) && (((TableVar)LObject).Keys.Count == 0))
+					{
+						TableVar LTableVar = (TableVar)LObject;
+						Key LKey = new Key();
+						foreach (TableVarColumn LColumn in LTableVar.Columns)
+							if (!Convert.ToBoolean(D4.MetaData.GetTag(LColumn.MetaData, "Storage.Deferred", "false")))
+								LKey.Columns.Add(LColumn);
+						LKey.IsGenerated = true;
+						LKey.MetaData = new D4.MetaData();
+						LKey.MetaData.Tags.Add(new D4.Tag("Storage.IsImposedKey", "true"));
+						LTableVar.Keys.Add(LKey);
+					}
+			}
+
 			return LCatalog;
 		}
 
@@ -3238,7 +3243,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     {
 		public SQLDevicePlan(Plan APlan, SQLDevice ADevice, PlanNode APlanNode) : base(APlan, ADevice, APlanNode) 
 		{
-			if (APlanNode.DeviceNode != null)
+			if ((APlanNode != null) && (APlanNode.DeviceNode != null))
 				FDevicePlanNode = (SQLDevicePlanNode)APlanNode.DeviceNode;
 		}
 		
@@ -3782,9 +3787,9 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 
-		protected virtual SQLTable CreateSQLTable(TableNode ANode, SelectStatement ASelectStatement, SQLParameters AParameters, bool AIsAggregate)
+		protected virtual SQLTable CreateSQLTable(Program AProgram, TableNode ANode, SelectStatement ASelectStatement, SQLParameters AParameters, bool AIsAggregate)
 		{
-			return new SQLTable(this, ANode, ASelectStatement, AParameters, AIsAggregate);
+			return new SQLTable(this, AProgram, ANode, ASelectStatement, AParameters, AIsAggregate);
 		}
 		
         protected void SetParameterValueLength(object ANativeParamValue, SQLPlanParameter APlanParameter)
@@ -3802,7 +3807,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
             SQLScalarType LParamType;
 			foreach (SQLPlanParameter LPlanParameter in ADevicePlan.DevicePlanNode.PlanParameters)
 			{
-				LParamValue = LPlanParameter.PlanNode.Execute(ADevicePlan.Plan.ServerProcess); 
+				LParamValue = ADevicePlan.Plan.EvaluateLiteralArgument(LPlanParameter.PlanNode, LPlanParameter.SQLParameter.Name);
 				LParamType = (SQLScalarType)Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LPlanParameter.PlanNode.DataType);
                 LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(LParamValue);
                 if (LNativeParamValue != null)
@@ -3824,7 +3829,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 
 		// Execute
-		protected override object InternalExecute(Schema.DevicePlan ADevicePlan)
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
 		{
 			SQLDevicePlan LPlan = (SQLDevicePlan)ADevicePlan;			
 			LPlan.DevicePlanNode = (SQLDevicePlanNode)LPlan.Node.DeviceNode;
@@ -3900,7 +3905,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				{
 					SQLParameters LParameters = new SQLParameters();
 					PrepareSQLParameters(LPlan, true, LParameters);
-					SQLTable LTable = CreateSQLTable((TableNode)LPlan.Node, (SelectStatement)LPlan.DevicePlanNode.Statement, LParameters, LPlan.CurrentQueryContext().IsAggregate);
+					SQLTable LTable = CreateSQLTable(AProgram, (TableNode)LPlan.Node, (SelectStatement)LPlan.DevicePlanNode.Statement, LParameters, LPlan.CurrentQueryContext().IsAggregate);
 					try
 					{
 						LTable.Open();
@@ -3931,14 +3936,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 										if (LCursor.IsNull(0))
 											return null;
 										else
-											return Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LPlan.Node.DataType).ToScalar(ServerProcess, LCursor[0]);	
+											return Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LPlan.Node.DataType).ToScalar(ServerProcess.ValueManager, LCursor[0]);	
 									}
 									else
 									{
-										Row LRow = new Row(ServerProcess, (Schema.IRowType)LPlan.Node.DataType);
+										Row LRow = new Row(AProgram.ValueManager, (Schema.IRowType)LPlan.Node.DataType);
 										for (int LIndex = 0; LIndex < LRow.DataType.Columns.Count; LIndex++)
 											if (!LCursor.IsNull(LIndex))
-												LRow[LIndex] = Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LRow.DataType.Columns[LIndex].DataType).ToScalar(ServerProcess, LCursor[LIndex]);
+												LRow[LIndex] = Device.ResolveDeviceScalarType(ADevicePlan.Plan, (ScalarType)LRow.DataType.Columns[LIndex].DataType).ToScalar(ServerProcess.ValueManager, LCursor[LIndex]);
 												
 										if (LCursor.Next())
 											throw new CompilerException(CompilerException.Codes.InvalidRowExtractorExpression);
@@ -3966,7 +3971,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 
 		// InsertRow
 		protected virtual void InternalVerifyInsertStatement(TableVar ATable, Row ARow, InsertStatement AStatement) {}
-        protected override void InternalInsertRow(TableVar ATable, Row ARow, BitArray AValueFlags)
+        protected override void InternalInsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
         {
 			SQLConnectionHeader LHeader = RequestConnection(false);
 			try
@@ -3993,7 +3998,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							LParameterName = String.Format("P{0}", LIndex.ToString());
 							LInsertStatement.InsertClause.Columns.Add(new InsertFieldExpression(LColumnName));
 							LValues.Expressions.Add(new QueryParameterExpression(LParameterName));
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
 							LCommand.Parameters.Add
 							(
 								new SQLParameter
@@ -4030,7 +4035,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							LParameterName = String.Format("P{0}", LIndex.ToString());
 							LInsertStatement.InsertClause.Columns.Add(new InsertFieldExpression(LColumnName));
 							LSelectExpression.SelectClause.Columns.Add(new ColumnExpression(new QueryParameterExpression(LParameterName), LColumnName));
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
 							LCommand.Parameters.Add
 							(
 								new SQLParameter
@@ -4062,7 +4067,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
         
         // UpdateRow
         protected virtual void InternalVerifyUpdateStatement(TableVar ATable, Row AOldRow, Row ANewRow, UpdateStatement AStatement) {}
-        protected override void InternalUpdateRow(TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        protected override void InternalUpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
         {
 			UpdateStatement LStatement = new UpdateStatement();
 			LStatement.UpdateClause = new UpdateClause();
@@ -4089,7 +4094,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							UpdateFieldExpression LExpression = new UpdateFieldExpression();
 							LExpression.FieldName = LColumnName;
 							LExpression.Expression = new QueryParameterExpression(LParameterName);
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
 							LCommand.Parameters.Add
 							(
 								new SQLParameter
@@ -4107,7 +4112,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					
 					if (LStatement.UpdateClause.Columns.Count > 0)
 					{
-						Schema.Key LClusteringKey = ATable.FindClusteringKey();
+						Schema.Key LClusteringKey = AProgram.FindClusteringKey(ATable);
 						if (LClusteringKey.Columns.Count > 0)
 						{
 							int LRowIndex;
@@ -4118,7 +4123,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								LRowIndex = AOldRow.DataType.Columns.IndexOfName(LColumn.Name);
 								LColumnName = Device.ToSQLIdentifier(LColumn);
 								LParameterName = String.Format("P{0}", (LIndex + ANewRow.DataType.Columns.Count).ToString());
-								LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+								LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
 								LCommand.Parameters.Add
 								(
 									new SQLParameter
@@ -4162,7 +4167,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
         
         // DeleteRow
         protected virtual void InternalVerifyDeleteStatement(TableVar ATable, Row ARow, DeleteStatement AStatement) {}
-        protected override void InternalDeleteRow(TableVar ATable, Row ARow)
+        protected override void InternalDeleteRow(Program AProgram, TableVar ATable, Row ARow)
         {
 			DeleteStatement LStatement = new DeleteStatement();
 			LStatement.DeleteClause = new DeleteClause();
@@ -4180,7 +4185,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					string LParameterName;
 					SQLScalarType LScalarType;
 					
-					Schema.Key LClusteringKey = ATable.FindClusteringKey();
+					Schema.Key LClusteringKey = AProgram.FindClusteringKey(ATable);
 					if (LClusteringKey.Columns.Count > 0)
 					{
 						int LRowIndex;
@@ -4191,7 +4196,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							LRowIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
 							LColumnName = Device.ToSQLIdentifier(LColumn);
 							LParameterName = String.Format("P{0}", LIndex.ToString());
-							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType);
+							LScalarType = (SQLScalarType)Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType);
 							LCommand.Parameters.Add
 							(
 								new SQLParameter
@@ -4402,11 +4407,11 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					{
 						if (FCursor.Next())
 							if (FCursor.IsDeferred(FCursor.ColumnCount - 1))
-								FSourceStream = new DeferredWriteStream(FDeviceScalarType.GetStreamAdapter(FDeviceSession.ServerProcess, FCursor.OpenDeferredStream(FCursor.ColumnCount - 1)));
+								FSourceStream = new DeferredWriteStream(FDeviceScalarType.GetStreamAdapter(FDeviceSession.ServerProcess.ValueManager, FCursor.OpenDeferredStream(FCursor.ColumnCount - 1)));
 							else
 							{
-								FSourceValue = new Scalar(FDeviceSession.ServerProcess, FDeviceScalarType.ScalarType);
-								FSourceValue.AsNative = FDeviceScalarType.ToScalar(FDeviceSession.ServerProcess, FCursor[FCursor.ColumnCount - 1]);
+								FSourceValue = new Scalar(FDeviceSession.ServerProcess.ValueManager, FDeviceScalarType.ScalarType);
+								FSourceValue.AsNative = FDeviceScalarType.ToScalar(FDeviceSession.ServerProcess.ValueManager, FCursor[FCursor.ColumnCount - 1]);
 								FSourceStream = new DeferredWriteStream(FSourceValue.OpenStream());
 							}
 						else
@@ -4543,7 +4548,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 	
 	public class SQLTable : Table
 	{
-		public SQLTable(SQLDeviceSession ADeviceSession, TableNode ATableNode, SelectStatement AStatement, SQLParameters AParameters, bool AIsAggregate) : base(ATableNode, ADeviceSession.ServerProcess)
+		public SQLTable(SQLDeviceSession ADeviceSession, Program AProgram, TableNode ATableNode, SelectStatement AStatement, SQLParameters AParameters, bool AIsAggregate) : base(ATableNode, AProgram)
 		{
 			FDeviceSession = ADeviceSession;
 			FParameters = AParameters;
@@ -4566,7 +4571,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			
 			foreach (TableVarColumn LColumn in Node.TableVar.Columns)
 			{
-				SQLTableColumn LSQLColumn = new SQLTableColumn(LColumn, (DeviceScalarType)FDeviceSession.Device.ResolveDeviceScalarType(ADeviceSession.ServerProcess.Plan, (Schema.ScalarType)LColumn.DataType));
+				SQLTableColumn LSQLColumn = new SQLTableColumn(LColumn, (DeviceScalarType)FDeviceSession.Device.ResolveDeviceScalarType(AProgram.Plan, (Schema.ScalarType)LColumn.DataType));
 				FSQLColumns.Add(LSQLColumn);
 				if (LSQLColumn.IsDeferred)
 					FHasDeferredData = true;
@@ -4825,7 +4830,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						else
 						{
 							// set up a deferred read stream using the device session as the provider
-							StreamID LStreamID = Process.Register(FDeviceSession);
+							StreamID LStreamID = Program.ServerProcess.Register(FDeviceSession);
 							string LStatement;
 							SQLParameters LParameters;
 							GetDeferredStatement(InternalGetKey(), LColumnIndex, out LStatement, out LParameters);
@@ -4847,7 +4852,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						if (FCursor.IsNull(LColumnIndex))
 							ARow.ClearValue(LIndex);
 						else
-							ARow[LIndex] = FSQLColumns[LColumnIndex].ScalarType.ToScalar(Process, FCursor[LColumnIndex]);
+							ARow[LIndex] = FSQLColumns[LColumnIndex].ScalarType.ToScalar(Manager, FCursor[LColumnIndex]);
 					}
 				}
 			}
@@ -4860,7 +4865,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		
 		protected override Row InternalGetKey()
 		{
-			Row LRow = new Row(Process, new RowType(Node.TableVar.FindClusteringKey().Columns));
+			Row LRow = new Row(Manager, new RowType(Program.FindClusteringKey(Node.TableVar).Columns));
 			InternalSelect(LRow, false);
 			return LRow;
 		}
@@ -4905,7 +4910,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			return LSQLDevice;
 		}
 
-		public static ReconcileOptions ResolveReconcileOptions(ServerProcess AProcess, ListValue AList)
+		public static ReconcileOptions ResolveReconcileOptions(ListValue AList)
 		{
 			StringBuilder LList = new StringBuilder();
 			for (int LIndex = 0; LIndex < AList.Count(); LIndex++)
@@ -4923,7 +4928,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator D4ToSQL(ADeviceName : System.Name, AQuery : System.String) : System.String;
     public class D4ToSQLNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			string LStatementString;
 			Schema.Device LDevice = null;
@@ -4932,53 +4937,45 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				LStatementString = (string)AArguments[0];
 			else
 			{
-				LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, (string)AArguments[0]);
+				LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, (string)AArguments[0]);
 				LDevice = LSQLDevice;
 				LStatementString = (string)AArguments[1];
 			}
 
 			string LSQLQuery = String.Empty;
-			ServerStatementPlan LPlan = new ServerStatementPlan(AProcess);
+			Plan LPlan = new Plan(AProgram.ServerProcess);
 			try
 			{
-				AProcess.PushExecutingPlan(LPlan);
-				try
+				ParserMessages LParserMessages = new ParserMessages();
+				Statement LStatement = new D4.Parser().ParseStatement(LStatementString, LParserMessages);
+				LPlan.Messages.AddRange(LParserMessages);
+				PlanNode LNode = Compiler.Compile(LPlan, LStatement);
+				if (LPlan.Messages.HasErrors)
+					throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(CompilerErrorLevel.NonFatal));
+
+				if (LNode is FrameNode)
+					LNode = LNode.Nodes[0];
+				if ((LNode is ExpressionStatementNode) || (LNode is CursorNode))
+					LNode = LNode.Nodes[0];
+					
+				if (LDevice == null)
+					LDevice = LNode.Device;
+					
+				if ((LDevice != null) && LNode.DeviceSupported)
 				{
-					ParserMessages LParserMessages = new ParserMessages();
-					Statement LStatement = new D4.Parser().ParseStatement(LStatementString, LParserMessages);
-					LPlan.Messages.AddRange(LParserMessages);
-					PlanNode LNode = Compiler.Compile(LPlan.Plan, LStatement);
-					if (LPlan.Messages.HasErrors)
-						throw new ServerException(ServerException.Codes.UncompiledPlan, LPlan.Messages.ToString(CompilerErrorLevel.NonFatal));
-
-					if (LNode is FrameNode)
-						LNode = LNode.Nodes[0];
-					if ((LNode is ExpressionStatementNode) || (LNode is CursorNode))
-						LNode = LNode.Nodes[0];
+					if (LSQLDevice == null)
+						LSQLDevice = LDevice as SQLDevice;
 						
-					if (LDevice == null)
-						LDevice = LNode.Device;
-						
-					if ((LDevice != null) && LNode.DeviceSupported)
-					{
-						if (LSQLDevice == null)
-							LSQLDevice = LDevice as SQLDevice;
-							
-						if (LSQLDevice == null)
-							throw new SQLException(SQLException.Codes.QuerySupportedByNonSQLDevice, LDevice.Name);
+					if (LSQLDevice == null)
+						throw new SQLException(SQLException.Codes.QuerySupportedByNonSQLDevice, LDevice.Name);
 
-						if (LNode.Device == LSQLDevice)
-							LSQLQuery = LSQLDevice.Emitter.Emit(((SQLDevicePlan)AProcess.Plan.GetDevicePlan(LNode)).DevicePlanNode.Statement);
-						else
-							throw new SQLException(SQLException.Codes.QuerySupportedByDifferentDevice, LNode.Device.Name, LSQLDevice.Name);
-					}
+					if (LNode.Device == LSQLDevice)
+						LSQLQuery = LSQLDevice.Emitter.Emit(((SQLDevicePlan)LPlan.GetDevicePlan(LNode)).DevicePlanNode.Statement);
 					else
-						throw new SQLException(SQLException.Codes.QueryUnsupported);
+						throw new SQLException(SQLException.Codes.QuerySupportedByDifferentDevice, LNode.Device.Name, LSQLDevice.Name);
 				}
-				finally
-				{
-					AProcess.PopExecutingPlan(LPlan);
-				}
+				else
+					throw new SQLException(SQLException.Codes.QueryUnsupported);
 			}
 			finally
 			{
@@ -5107,7 +5104,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				SetValueNode(APlanNode.Nodes[0], AValue);
 		}
 		
-		public static void GetParameters(ServerProcess AProcess, SQLDevice ADevice, SQLParameters AParameters, Row AInValues, PlanNode[] AConversionNodes)
+		public static void GetParameters(Program AProgram, SQLDevice ADevice, SQLParameters AParameters, Row AInValues, PlanNode[] AConversionNodes)
 		{
 			for (int LIndex = 0; LIndex < AParameters.Count; LIndex++)
 			{
@@ -5118,7 +5115,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						int LInIndex = AInValues.DataType.Columns.IndexOf(AParameters[LIndex].Name);
 						PlanNode LConversionNode = AConversionNodes[LInIndex];
 						Schema.ScalarType LValueType = (Schema.ScalarType)(LConversionNode == null ? AInValues.DataType.Columns[LInIndex].DataType : LConversionNode.DataType);
-						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProcess.Plan, LValueType) as SQLScalarType;
+						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProgram.Plan, LValueType) as SQLScalarType;
 						if (LScalarType == null)
 							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LValueType.Name);
 
@@ -5128,14 +5125,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 							else
 							{
 								SetValueNode(LConversionNode, AInValues.GetValue(LInIndex));
-								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(LConversionNode.Execute(AProcess));
+								AParameters[LIndex].Value = LScalarType.ParameterFromScalar(LConversionNode.Execute(AProgram));
 							}
 					break;
 				}
 			}
 		}
 		
-		public static void SetParameters(ServerProcess AProcess, SQLDevice ADevice, SQLParameters AParameters, Row AOutValues)
+		public static void SetParameters(Program AProgram, SQLDevice ADevice, SQLParameters AParameters, Row AOutValues)
 		{
 			for (int LIndex = 0; LIndex < AParameters.Count; LIndex++)
 				switch (AParameters[LIndex].Direction)
@@ -5144,19 +5141,19 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					case SQLDirection.Out :
 						int LOutIndex = AOutValues.DataType.Columns.IndexOf(AParameters[LIndex].Name);
 						Schema.ScalarType LValueType = (Schema.ScalarType)AOutValues.DataType.Columns[LOutIndex].DataType;
-						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProcess.Plan, LValueType) as SQLScalarType;
+						SQLScalarType LScalarType = ADevice.ResolveDeviceScalarType(AProgram.Plan, LValueType) as SQLScalarType;
 						if (LScalarType == null)
 							throw new SchemaException(SchemaException.Codes.DeviceScalarTypeNotFound, LValueType.Name);
 
 						if (AParameters[LIndex].Value != null)
-							AOutValues[LOutIndex] = LScalarType.ParameterToScalar(AProcess, AParameters[LIndex].Value);
+							AOutValues[LOutIndex] = LScalarType.ParameterToScalar(AProgram.ValueManager, AParameters[LIndex].Value);
 						else
 							AOutValues.ClearValue(LOutIndex);
 					break;
 				}
 		}
 
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
@@ -5166,7 +5163,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				Row LInValues = null;
 				Row LOutValues = null;
 				
-				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name") as IDataType))
+				if (Operator.Operands[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProgram.Plan, "System.Name") as IDataType))
 				{
 					LDeviceName = (string)AArguments[0];
 					LStatement = (string)AArguments[1];
@@ -5177,7 +5174,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				}
 				else
 				{
-					LDeviceName = AProcess.Plan.DefaultDeviceName;
+					LDeviceName = AProgram.Plan.DefaultDeviceName;
 					LStatement = (string)AArguments[0];
 					if (AArguments.Length >= 2)
 						LInValues = (Row)AArguments[1];
@@ -5185,18 +5182,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						LOutValues = (Row)AArguments[2];
 				}
 
-				SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
-				SQLDeviceSession LDeviceSession = AProcess.DeviceConnect(LSQLDevice) as SQLDeviceSession;				
+				SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
+				SQLDeviceSession LDeviceSession = AProgram.DeviceConnect(LSQLDevice) as SQLDeviceSession;				
 				PlanNode[] LConversionNodes = LInValues == null ? new PlanNode[0] : new PlanNode[LInValues.DataType.Columns.Count];
-				SQLParameters LParameters = PrepareParameters(AProcess.Plan, LSQLDevice, LStatement, LInValues == null ? null : LInValues.DataType, LOutValues == null ? null : LOutValues.DataType, LConversionNodes);
-				GetParameters(AProcess, LSQLDevice, LParameters, LInValues, LConversionNodes);
+				SQLParameters LParameters = PrepareParameters(AProgram.Plan, LSQLDevice, LStatement, LInValues == null ? null : LInValues.DataType, LOutValues == null ? null : LOutValues.DataType, LConversionNodes);
+				GetParameters(AProgram, LSQLDevice, LParameters, LInValues, LConversionNodes);
 				LDeviceSession.SQLExecute(LStatement, LParameters);
-				SetParameters(AProcess, LSQLDevice, LParameters, LOutValues);
+				SetParameters(AProgram, LSQLDevice, LParameters, LOutValues);
 				return null;
 			}
 			finally
 			{
-				AProcess.RootExecutingPlan.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				AProgram.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 		}
     }
@@ -5463,10 +5460,10 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				FTableVar.Keys.Add(Compiler.CompileKeyDefinition(APlan, FTableVar, new D4.Parser().ParseKeyDefinition(LKeyDefinition)));
 			}
 			
-			FTableVar.EnsureKey(APlan);
+			Compiler.EnsureKey(APlan, FTableVar);
 			
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
@@ -5478,7 +5475,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					Modifiers = new LanguageModifiers();
 				D4.D4TextEmitter LEmitter = new D4.D4TextEmitter();
 				Modifiers.AddOrUpdate("TableType", LEmitter.Emit(FTableVar.DataType.EmitSpecifier(D4.EmitMode.ForCopy)));
-				Modifiers.AddOrUpdate("KeyInfo", LEmitter.Emit(FTableVar.FindClusteringKey().EmitStatement(D4.EmitMode.ForCopy)));
+				Modifiers.AddOrUpdate("KeyInfo", LEmitter.Emit(Compiler.FindClusteringKey(APlan, FTableVar).EmitStatement(D4.EmitMode.ForCopy)));
 			}
 		}
 
@@ -5488,7 +5485,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		private SQLParameters FParameters;
 		private SQLTableColumns FSQLColumns;
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			long LStartTicks = TimingUtility.CurrentTicks;
 			try
@@ -5496,33 +5493,33 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				Row LInValues = null;
 				Row LOutValues = null;
 				
-				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProcess.Plan, "System.Name", true) as IDataType))
+				if (Nodes[0].DataType.Is(Compiler.ResolveCatalogIdentifier(AProgram.Plan, "System.Name", true) as IDataType))
 				{
 					if ((Nodes.Count >= 3) && (Nodes[2].DataType is Schema.IRowType))
-						LInValues = (Row)Nodes[2].Execute(AProcess);
+						LInValues = (Row)Nodes[2].Execute(AProgram);
 					
 					if ((Nodes.Count >= 4) && (Nodes[3].DataType is Schema.IRowType))
-						LOutValues = (Row)Nodes[3].Execute(AProcess);
+						LOutValues = (Row)Nodes[3].Execute(AProgram);
 				}
 				else
 				{
 					if ((Nodes.Count >= 2) && (Nodes[1].DataType is Schema.IRowType))
-						LInValues = (Row)Nodes[1].Execute(AProcess);
+						LInValues = (Row)Nodes[1].Execute(AProgram);
 						
 					if ((Nodes.Count == 3) && (Nodes[2].DataType is Schema.IRowType))
-						LOutValues = (Row)Nodes[2].Execute(AProcess);
+						LOutValues = (Row)Nodes[2].Execute(AProgram);
 				}
 
-				SQLDeviceSession LDeviceSession = AProcess.DeviceConnect(FSQLDevice) as SQLDeviceSession;				
-				SQLExecuteNode.GetParameters(AProcess, FSQLDevice, FParameters, LInValues, FConversionNodes);
+				SQLDeviceSession LDeviceSession = AProgram.DeviceConnect(FSQLDevice) as SQLDeviceSession;				
+				SQLExecuteNode.GetParameters(AProgram, FSQLDevice, FParameters, LInValues, FConversionNodes);
 				
-				LocalTable LResult = new LocalTable(this, AProcess);
+				LocalTable LResult = new LocalTable(this, AProgram);
 				try
 				{
 					LResult.Open();
 
 					// Populate the result
-					Row LRow = new Row(AProcess, LResult.DataType.RowType);
+					Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 					try
 					{
 						LRow.ValuesOwned = false;
@@ -5534,12 +5531,12 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									FStatement, 
 									FParameters, 
 									SQLTable.CursorTypeToSQLCursorType(CursorType), 
-									SQLTable.CursorIsolationToSQLIsolationLevel(CursorIsolation, AProcess.CurrentIsolationLevel()), 
+									SQLTable.CursorIsolationToSQLIsolationLevel(CursorIsolation, AProgram.ServerProcess.CurrentIsolationLevel()), 
 									SQLCommandBehavior.Default
 								)
 						)
 						{
-							SQLExecuteNode.SetParameters(AProcess, FSQLDevice, FParameters, LOutValues);
+							SQLExecuteNode.SetParameters(AProgram, FSQLDevice, FParameters, LOutValues);
 							
 							while (LCursor.Next())
 							{
@@ -5548,7 +5545,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 									if (LCursor.IsNull(LIndex))
 										LRow.ClearValue(LIndex);
 									else
-										LRow[LIndex] = FSQLColumns[LIndex].ScalarType.ToScalar(AProcess, LCursor[LIndex]);
+										LRow[LIndex] = FSQLColumns[LIndex].ScalarType.ToScalar(AProgram.ValueManager, LCursor[LIndex]);
 								}
 								
 								LResult.Insert(LRow);
@@ -5572,7 +5569,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 			finally
 			{
-				AProcess.RootExecutingPlan.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
+				AProgram.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
 			}
 		}
     }
@@ -5596,18 +5593,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateAvailableTables(ServerProcess AProcess, SQLDevice ADevice, Table ATable, Row ARow)
+		private void PopulateAvailableTables(Program AProgram, SQLDevice ADevice, Table ATable, Row ARow)
 		{
-			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProcess, null);
+			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProgram.ServerProcess, null);
 			Schema.Catalog LCatalog = new Schema.Catalog();
-			ADevice.GetDeviceTables(AProcess, LServerCatalog, LCatalog, null);
+			ADevice.GetDeviceTables(AProgram.Plan, LServerCatalog, LCatalog, null);
 			foreach (Schema.Object LObject in LCatalog)
 			{
 				Schema.BaseTableVar LTableVar = LObject as Schema.BaseTableVar;
@@ -5620,21 +5617,21 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			string LDeviceName = (Nodes.Count == 0) ? AProcess.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProcess);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
-			LocalTable LResult = new LocalTable(this, AProcess);
+			string LDeviceName = (Nodes.Count == 0) ? AProgram.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProgram);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
-					PopulateAvailableTables(AProcess, LSQLDevice, LResult, LRow);
+					PopulateAvailableTables(AProgram, LSQLDevice, LResult, LRow);
 				}
 				finally
 				{
@@ -5672,18 +5669,18 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[]{TableVar.Columns["Name"]}));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
-			Order = TableVar.FindClusteringOrder(APlan);
+			Order = Compiler.FindClusteringOrder(APlan, TableVar);
 			
 			// Ensure the order exists in the orders list
 			if (!TableVar.Orders.Contains(Order))
 				TableVar.Orders.Add(Order);
 		}
 		
-		private void PopulateAvailableReferences(ServerProcess AProcess, SQLDevice ADevice, Table ATable, Row ARow)
+		private void PopulateAvailableReferences(Program AProgram, SQLDevice ADevice, Table ATable, Row ARow)
 		{
-			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProcess, null);
+			Schema.Catalog LServerCatalog = ADevice.GetServerCatalog(AProgram.ServerProcess, null);
 			Schema.Catalog LCatalog = new Schema.Catalog();
-			ADevice.GetDeviceForeignKeys(AProcess, LServerCatalog, LCatalog, null);
+			ADevice.GetDeviceForeignKeys(AProgram.Plan, LServerCatalog, LCatalog, null);
 			foreach (Schema.Object LObject in LCatalog)
 			{
 				Schema.Reference LReference = LObject as Schema.Reference;
@@ -5696,21 +5693,21 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 			}
 		}
 		
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			string LDeviceName = (Nodes.Count == 0) ? AProcess.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProcess);
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, LDeviceName);
-			LocalTable LResult = new LocalTable(this, AProcess);
+			string LDeviceName = (Nodes.Count == 0) ? AProgram.Plan.DefaultDeviceName : (string)Nodes[0].Execute(AProgram);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, LDeviceName);
+			LocalTable LResult = new LocalTable(this, AProgram);
 			try
 			{
 				LResult.Open();
 
 				// Populate the result
-				Row LRow = new Row(AProcess, LResult.DataType.RowType);
+				Row LRow = new Row(AProgram.ValueManager, LResult.DataType.RowType);
 				try
 				{
 					LRow.ValuesOwned = false;
-					PopulateAvailableReferences(AProcess, LSQLDevice, LResult, LRow);
+					PopulateAvailableReferences(AProgram, LSQLDevice, LResult, LRow);
 				}
 				finally
 				{
@@ -5734,31 +5731,31 @@ namespace Alphora.Dataphor.DAE.Device.SQL
     // operator DeviceReconciliationScript(const ADeviceName : Name, const ATableName : Name, const AOptions : list(String)) : String;
     public class DeviceReconciliationScriptNode : InstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProcess.Plan, (string)AArguments[0]);
+			SQLDevice LSQLDevice = SQLDeviceUtility.ResolveSQLDevice(AProgram.Plan, (string)AArguments[0]);
 			string LTableName = String.Empty;
 			ReconcileOptions LOptions = ReconcileOptions.All;
 			switch (AArguments.Length)
 			{
 				case 2 :
-					if (Operator.Operands[1].DataType.Is(AProcess.DataTypes.SystemName))
+					if (Operator.Operands[1].DataType.Is(AProgram.DataTypes.SystemName))
 						LTableName = (string)AArguments[1];
 					else
-						LOptions = SQLDeviceUtility.ResolveReconcileOptions(AProcess, AArguments[1] as ListValue);
+						LOptions = SQLDeviceUtility.ResolveReconcileOptions(AArguments[1] as ListValue);
 				break;
 				
 				case 3 :
 					LTableName = (string)AArguments[1];
-					LOptions = SQLDeviceUtility.ResolveReconcileOptions(AProcess, AArguments[2] as ListValue);
+					LOptions = SQLDeviceUtility.ResolveReconcileOptions(AArguments[2] as ListValue);
 				break;
 			}
 			
 			Batch LBatch;
 			if (LTableName == String.Empty)
-				LBatch = LSQLDevice.DeviceReconciliationScript(AProcess, LOptions);
+				LBatch = LSQLDevice.DeviceReconciliationScript(AProgram.ServerProcess, LOptions);
 			else
-				LBatch = LSQLDevice.DeviceReconciliationScript(AProcess, Compiler.ResolveCatalogIdentifier(AProcess.Plan, LTableName, true) as Schema.TableVar, LOptions);
+				LBatch = LSQLDevice.DeviceReconciliationScript(AProgram.ServerProcess, Compiler.ResolveCatalogIdentifier(AProgram.Plan, LTableName, true) as Schema.TableVar, LOptions);
 				
 			return LSQLDevice.Emitter.Emit(LBatch);
 		}

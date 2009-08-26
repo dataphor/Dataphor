@@ -19,17 +19,20 @@ using Alphora.Dataphor.Frontend.Server.Structuring;
 using Alphora.Dataphor.Frontend.Server.Elaboration;
 using Alphora.Dataphor.Frontend.Server.Production;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.Frontend.Server.Derivation
 {
 	public class InterfaceBuilder : System.Object
 	{
-		public InterfaceBuilder(ServerProcess AProcess, DerivationSeed ASeed) : base()
+		public InterfaceBuilder(Program AProgram, DerivationSeed ASeed) : base()
 		{
-			FProcess = AProcess;
+			FProgram = AProgram;
+			FProcess = AProgram.ServerProcess;
 			FSeed = ASeed;
 		}
 		
+		protected Program FProgram;
 		protected ServerProcess FProcess;
 		protected DerivationSeed FSeed;
 
@@ -41,15 +44,15 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 
 		protected virtual void Describe()
 		{
-			FCatalog = FProcess.Plan.Catalog;
+			FCatalog = FProcess.Catalog;
 			Schema.Object LObject = null;
 			if (Parser.IsValidQualifiedIdentifier(FSeed.Query))
-				LObject = Compiler.ResolveCatalogIdentifier(FProcess.Plan, FSeed.Query, false);
+				LObject = Compiler.ResolveCatalogIdentifier(FProgram.Plan, FSeed.Query, false);
 
 			if (LObject != null)
 			{
 				FElaborableTableVarName = LObject.Name;
-				FElaborableCatalog = FProcess.Plan.Catalog;
+				FElaborableCatalog = FProcess.Catalog;
 			}
 			else
 			{
@@ -75,7 +78,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 			FElaboratedExpression = 
 				new ElaboratedExpression
 				(
-					FProcess,
+					FProgram,
 					FSeed.Query,
 					FSeed.Elaborate,
 					FElaborableCatalog[FElaborableTableVarName] as Schema.TableVar,
@@ -96,7 +99,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 		protected string GetKeyNames(Schema.TableVar ATableVar)
 		{
 			StringBuilder LKeyNames = new StringBuilder();
-			Schema.Key LClusteringKey = ATableVar.FindClusteringKey();
+			Schema.Key LClusteringKey = FProgram.FindClusteringKey(ATableVar);
 			for (int LIndex = 0; LIndex < LClusteringKey.Columns.Count; LIndex++)
 			{
 				if (LIndex > 0)
@@ -123,7 +126,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 			
 			if (ATableVar.Keys.Count > 0)
 			{
-				Schema.Order LOrder = new Schema.Order(ATableVar.FindClusteringKey());
+				Schema.Order LOrder = new Schema.Order(FProgram.FindClusteringKey(ATableVar));
 				if (IsOrderVisible(LOrder))
 					return LOrder;
 
@@ -185,6 +188,7 @@ namespace Alphora.Dataphor.Frontend.Server.Derivation
 
 			// Build the derivation info structure for use in structuring, layout and document production.			
 			FDerivationInfo = new DerivationInfo();
+			FDerivationInfo.Program = FProgram;
 			FDerivationInfo.Process = FProcess;
 			FDerivationInfo.PageType = FSeed.PageType;
 			FDerivationInfo.Query = FSeed.Query;

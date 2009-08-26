@@ -100,7 +100,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			//Fill in the row values
 			bool LFind = true;
-			using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ATarget.DataSet.Process, LRowType))
+			using (DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(ATarget.DataSet.Process.ValueManager, LRowType))
 			{
 				for (int i = 0; i < ATargetColumnNames.Length; i++)
 					if (!ASource.DataSet[ASourceColumnNames[i].Trim()].HasValue())
@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
 						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
 					}
-					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(ASource.DataView.Process, ASource.DataView.Process.DataTypes.SystemBoolean, AAbove)));
+					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(ASource.DataView.Process.ValueManager, ASource.DataView.Process.DataTypes.SystemBoolean, AAbove)));
 
 					ASession.ExecuteScript(LProcess, AScript, LParams);
 				}

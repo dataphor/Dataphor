@@ -320,7 +320,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					ABaseTableVarNode.RequestedCursorType = ADevicePlan.Plan.CursorContext.CursorType;
 					ABaseTableVarNode.CursorCapabilities = CursorCapability.Navigable | (ADevicePlan.Plan.CursorContext.CursorCapabilities & CursorCapability.Updateable);
 					ABaseTableVarNode.CursorIsolation = ADevicePlan.Plan.CursorContext.CursorIsolation;
-					ABaseTableVarNode.Order = new Schema.Order(ABaseTableVarNode.TableVar.FindClusteringKey(), ADevicePlan.Plan);
+					ABaseTableVarNode.Order = Compiler.OrderFromKey(ADevicePlan.Plan, Compiler.FindClusteringKey(ADevicePlan.Plan, ABaseTableVarNode.TableVar));
 					if (LTag.Value == "StoreTable")
 						ADevicePlanNode.Statement.AppendFormat("select * from DAE{0}", Schema.Object.Unqualify(ABaseTableVarNode.TableVar.Name));
 					else
@@ -523,9 +523,9 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			return base.InternalPrepare(ADevicePlan, APlanNode);
 		}
 		
-		private void PopulateServerSettings(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			Server.Server LServer = AProcess.ServerSession.Server;
+			Server.Server LServer = AProgram.ServerProcess.ServerSession.Server;
 			ARow[0] = LServer.Name;
 			ARow[1] = GetType().Assembly.GetName().Version.ToString();
 			ARow[2] = LServer.TracingEnabled;
@@ -542,24 +542,24 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			ARow[13] = LServer.ProcessWaitTimeout;
 			ARow[14] = LServer.ProcessTerminationTimeout;
 			ARow[15] = LServer.PlanCache.Size;
-			ANativeTable.Insert(AProcess, ARow);
+			ANativeTable.Insert(AProgram.ValueManager, ARow);
 		}
 		
-		private void PopulateConnections(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateConnections(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 /*
-			foreach (ServerConnection LConnection in AProcess.ServerSession.Server.Connections)
+			foreach (ServerConnection LConnection in AProgram.ServerProcess.ServerSession.Server.Connections)
 			{
 				ARow[0] = LConnection.ConnectionName;
 				ARow[1] = LConnection.HostName;
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 */
 		}
 		
-		private void PopulateSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 			{
 				ARow[0] = LSession.SessionID;
 				ARow[1] = LSession.User.ID;
@@ -576,13 +576,13 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				ARow[12] = LSession.SessionInfo.DefaultMaxCallDepth;
 				ARow[13] = LSession.SessionInfo.UsePlanCache;
 				ARow[14] = LSession.SessionInfo.ShouldEmitIL;
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}
 		
-		private void PopulateProcesses(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateProcesses(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 				{
 					ARow[0] = LProcess.ProcessID;
@@ -590,16 +590,16 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					ARow[2] = LProcess.DefaultIsolationLevel.ToString();
 					ARow[3] = LProcess.UseDTC;
 					ARow[4] = LProcess.UseImplicitTransactions;
-					ARow[5] = LProcess.Stack.MaxStackDepth;
-					ARow[6] = LProcess.Stack.MaxCallDepth;
+					ARow[5] = LProcess.MaxStackDepth;
+					ARow[6] = LProcess.MaxCallDepth;
 					ARow[7] = LProcess.ExecutingThread != null;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 		}
 		
-		private void PopulateLocks(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLocks(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			LockManager LLockManager = AProcess.ServerSession.Server.LockManager;
+			LockManager LLockManager = AProgram.ServerProcess.ServerSession.Server.LockManager;
 			DictionaryEntry[] LEntries;
 			lock (LLockManager)
 			{
@@ -615,76 +615,76 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				ARow[2] = LLockHeader.Semaphore.Mode.ToString();
 				ARow[3] = LLockHeader.Semaphore.GrantCount();
 				ARow[4] = LLockHeader.Semaphore.WaitCount();
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}
 		
-		private void PopulateScripts(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateScripts(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (ServerScript LScript in LProcess.Scripts)
 					{
 						ARow[0] = LScript.GetHashCode();
 						ARow[1] = LProcess.ProcessID;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 		}
 
-		private void PopulatePlans(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulatePlans(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (ServerPlan LPlan in LProcess.Plans)
 					{
 						ARow[0] = LPlan.ID;
 						ARow[1] = LProcess.ProcessID;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 		}
 
-		private void PopulateLibraries(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Catalog.Libraries)
+			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 			{
 				ARow[0] = LLibrary.Name;
 				ARow[1] = LLibrary.Directory;
 				ARow[2] = LLibrary.Version;
 				ARow[3] = LLibrary.DefaultDeviceName;
-				ARow[4] = true; //AProcess.ServerSession.Server.CanLoadLibrary(LLibrary.Name);
+				ARow[4] = true; //AProgram.ServerProcess.ServerSession.Server.CanLoadLibrary(LLibrary.Name);
 				ARow[5] = LLibrary.IsSuspect;
 				ARow[6] = LLibrary.SuspectReason;
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}											
 		
-		private void PopulateLibraryFiles(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryFiles(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Catalog.Libraries)
+			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				foreach (Schema.FileReference LReference in LLibrary.Files)
 				{
 					ARow[0] = LLibrary.Name;
 					ARow[1] = LReference.FileName;
 					ARow[2] = LReference.IsAssembly;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 		}											
 		
-		private void PopulateLibraryRequisites(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryRequisites(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Catalog.Libraries)
+			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				foreach (LibraryReference LReference in LLibrary.Libraries)
 				{
 					ARow[0] = LLibrary.Name;
 					ARow[1] = LReference.Name;
 					ARow[2] = LReference.Version; 
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 		}											
 		
-		private void PopulateLibrarySettings(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibrarySettings(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Library LLibrary in AProcess.Catalog.Libraries)
+			foreach (Library LLibrary in AProgram.Catalog.Libraries)
 				if (LLibrary.MetaData != null)
 				{
 					#if USEHASHTABLEFORTAGS
@@ -699,85 +699,85 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 						ARow[0] = LLibrary.Name;
 						ARow[1] = LTag.Name;
 						ARow[2] = LTag.Value;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 		}
 		
-		private void PopulateLibraryOwners(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryOwners(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			AProcess.CatalogDeviceSession.SelectLibraryOwners(ANativeTable, ARow);
+			AProgram.CatalogDeviceSession.SelectLibraryOwners(AProgram, ANativeTable, ARow);
 		}
 
-		private void PopulateLibraryVersions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLibraryVersions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			AProcess.CatalogDeviceSession.SelectLibraryVersions(ANativeTable, ARow);
+			AProgram.CatalogDeviceSession.SelectLibraryVersions(AProgram, ANativeTable, ARow);
 		}
 
-		private void PopulateRegisteredAssemblies(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateRegisteredAssemblies(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (RegisteredAssembly LAssembly in AProcess.Catalog.ClassLoader.Assemblies)
+			foreach (RegisteredAssembly LAssembly in AProgram.Catalog.ClassLoader.Assemblies)
 			{
 				ARow[0] = LAssembly.Name.ToString();
 				ARow[1] = LAssembly.Library.Name;
 				ARow[2] = LAssembly.Assembly.Location;
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}											
 		
-		private void PopulateRegisteredClasses(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateRegisteredClasses(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (RegisteredClass LClass in AProcess.Catalog.ClassLoader.Classes)
+			foreach (RegisteredClass LClass in AProgram.Catalog.ClassLoader.Classes)
 			{
 				ARow[0] = LClass.Name;
 				ARow[1] = LClass.Library.Name;
 				ARow[2] = LClass.Assembly.Name.ToString();
 				ARow[3] = LClass.ClassName;
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}											
 		
-		private void PopulateLoadedLibraries(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateLoadedLibraries(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			List<string> LLibraryNames = AProcess.CatalogDeviceSession.SelectLoadedLibraries();
+			List<string> LLibraryNames = AProgram.CatalogDeviceSession.SelectLoadedLibraries();
 			for (int LIndex = 0; LIndex < LLibraryNames.Count; LIndex++)
 			{
 				ARow[0] = LLibraryNames[LIndex];
-				ANativeTable.Insert(AProcess, ARow);
+				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}
 		
-		private void PopulateSessionCatalogObjects(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateSessionCatalogObjects(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (Schema.SessionObject LObject in LSession.SessionObjects)
 				{
 					ARow[0] = LSession.SessionID;
 					ARow[1] = LObject.Name;
 					ARow[2] = LObject.GlobalName;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 		}
 
 		#if USETYPEINHERITANCE
-		private void PopulateScalarTypeParentScalarTypes(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateScalarTypeParentScalarTypes(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Catalog)
+			foreach (Schema.Object LObject in AProgram.Catalog)
 				if (LObject is Schema.ScalarType)
 					foreach (Schema.ScalarType LParentScalarType in ((Schema.ScalarType)LObject).ParentTypes)
 					{
 						ARow[0] = LObject.Name;
 						ARow[1] = LParentScalarType.Name;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 			
 		}
 		#endif
 		
 		#if USETYPEINHERITANCE		
-		private void PopulateScalarTypeExplicitCastFunctions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateScalarTypeExplicitCastFunctions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Catalog)
+			foreach (Schema.Object LObject in AProgram.Catalog)
 				if (LObject is Schema.ScalarType)
 				{
 					Schema.ScalarType LScalarType = (Schema.ScalarType)LObject;
@@ -785,15 +785,15 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					{
 						ARow[0] = LScalarType.Name;
 						ARow[1] = LOperator.Name;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 		}
 		#endif
 		
-		private void PopulateServerLinks(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateServerLinks(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Catalog)
+			foreach (Schema.Object LObject in AProgram.Catalog)
 			{
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
@@ -808,14 +808,14 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 					ARow[7] = LServerLink.InstanceName;
 					ARow[8] = LServerLink.OverridePortNumber;
 					ARow[9] = LServerLink.UseSessionInfo;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 			}
 		}
 		
-		private void PopulateServerLinkUsers(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateServerLinkUsers(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (Schema.Object LObject in AProcess.Catalog)
+			foreach (Schema.Object LObject in AProgram.Catalog)
 			{
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
@@ -825,84 +825,84 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 						ARow[0] = LLinkUser.UserID;
 						ARow[1] = LServerLink.Name;
 						ARow[2] = LLinkUser.ServerLinkUserID;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 				}
 			}
 		}
 		
-		private void PopulateRemoteSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateRemoteSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (RemoteSession LRemoteSession in LProcess.RemoteSessions)
 					{
 						ARow[0] = LRemoteSession.ServerLink.Name;
 						ARow[1] = LProcess.ProcessID;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 		}
 		
-		private void PopulateDeviceSessions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateDeviceSessions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			foreach (ServerSession LSession in AProcess.ServerSession.Server.Sessions)
+			foreach (ServerSession LSession in AProgram.ServerProcess.ServerSession.Server.Sessions)
 				foreach (ServerProcess LProcess in LSession.Processes)
 					foreach (DeviceSession LDeviceSession in LProcess.DeviceSessions)
 					{
 						ARow[0] = LDeviceSession.Device.Name;
 						ARow[1] = LProcess.ProcessID;
-						ANativeTable.Insert(AProcess, ARow);
+						ANativeTable.Insert(AProgram.ValueManager, ARow);
 					}
 		}
 		
-		private void PopulateApplicationTransactions(ServerProcess AProcess, NativeTable ANativeTable, Row ARow)
+		private void PopulateApplicationTransactions(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			lock (AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.SyncRoot)
+			lock (AProgram.ServerProcess.ServerSession.Server.ATDevice.ApplicationTransactions.SyncRoot)
 			{
-				foreach (ApplicationTransaction.ApplicationTransaction LTransaction in AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.Values)
+				foreach (ApplicationTransaction.ApplicationTransaction LTransaction in AProgram.ServerProcess.ServerSession.Server.ATDevice.ApplicationTransactions.Values)
 				{
 					ARow[0] = LTransaction.ID;
 					ARow[1] = LTransaction.Session.SessionID;
 					ARow[2] = LTransaction.Device.Name;
-					ANativeTable.Insert(AProcess, ARow);
+					ANativeTable.Insert(AProgram.ValueManager, ARow);
 				}
 			}
 		}
 		
-		protected internal virtual void PopulateTableVar(ServerProcess AProcess, CatalogHeader AHeader)
+		protected internal virtual void PopulateTableVar(Program AProgram, CatalogHeader AHeader)
 		{
-			AHeader.NativeTable.Truncate(AProcess);
-			Row LRow = new Row(AProcess, AHeader.TableVar.DataType.RowType);
+			AHeader.NativeTable.Truncate(AProgram.ValueManager);
+			Row LRow = new Row(AProgram.ValueManager, AHeader.TableVar.DataType.RowType);
 			try
 			{
 				switch (AHeader.TableVar.Name)
 				{
-					case "System.ServerSettings" : PopulateServerSettings(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Connections" : PopulateConnections(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Sessions" : PopulateSessions(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Processes" : PopulateProcesses(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Locks" : PopulateLocks(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Scripts" : PopulateScripts(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Plans" : PopulatePlans(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.Libraries" : PopulateLibraries(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LibraryFiles" : PopulateLibraryFiles(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LibraryRequisites" : PopulateLibraryRequisites(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LibrarySettings" : PopulateLibrarySettings(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LibraryOwners" : PopulateLibraryOwners(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LibraryVersions" : PopulateLibraryVersions(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.RegisteredClasses" : PopulateRegisteredClasses(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.LoadedLibraries" : PopulateLoadedLibraries(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.SessionCatalogObjects" : PopulateSessionCatalogObjects(AProcess, AHeader.NativeTable, LRow); break;
+					case "System.ServerSettings" : PopulateServerSettings(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Connections" : PopulateConnections(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Sessions" : PopulateSessions(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Processes" : PopulateProcesses(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Locks" : PopulateLocks(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Scripts" : PopulateScripts(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Plans" : PopulatePlans(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.Libraries" : PopulateLibraries(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LibraryFiles" : PopulateLibraryFiles(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LibraryRequisites" : PopulateLibraryRequisites(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LibrarySettings" : PopulateLibrarySettings(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LibraryOwners" : PopulateLibraryOwners(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LibraryVersions" : PopulateLibraryVersions(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.RegisteredAssemblies" : PopulateRegisteredAssemblies(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.RegisteredClasses" : PopulateRegisteredClasses(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.LoadedLibraries" : PopulateLoadedLibraries(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.SessionCatalogObjects" : PopulateSessionCatalogObjects(AProgram, AHeader.NativeTable, LRow); break;
 					#if USETYPEINHERITANCE
-					case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.ScalarTypeExplicitCastFunctions" : PopulateScalarTypeExplicitCastFunctions(AProcess, AHeader.NativeTable, LRow); break;
+					case "System.ScalarTypeParentScalarTypes" : PopulateScalarTypeParentScalarTypes(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.ScalarTypeExplicitCastFunctions" : PopulateScalarTypeExplicitCastFunctions(AProgram, AHeader.NativeTable, LRow); break;
 					#endif
-					case "System.DeviceSessions" : PopulateDeviceSessions(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.ApplicationTransactions" : PopulateApplicationTransactions(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.ServerLinks": PopulateServerLinks(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.ServerLinkUsers": PopulateServerLinkUsers(AProcess, AHeader.NativeTable, LRow); break;
-					case "System.RemoteSessions": PopulateRemoteSessions(AProcess, AHeader.NativeTable, LRow); break;
+					case "System.DeviceSessions" : PopulateDeviceSessions(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.ApplicationTransactions" : PopulateApplicationTransactions(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.ServerLinks": PopulateServerLinks(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.ServerLinkUsers": PopulateServerLinkUsers(AProgram, AHeader.NativeTable, LRow); break;
+					case "System.RemoteSessions": PopulateRemoteSessions(AProgram, AHeader.NativeTable, LRow); break;
 				}
 			}
 			finally
@@ -910,7 +910,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				LRow.Dispose();
 			}
 
-			AHeader.TimeStamp = AProcess.Catalog.TimeStamp;
+			AHeader.TimeStamp = AProgram.Catalog.TimeStamp;
 		}
 	}
 }

@@ -7,7 +7,6 @@ using System;
 using System.Text;
 using System.Collections.Specialized;
 
-using Alphora.Dataphor;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.Language;
@@ -17,6 +16,7 @@ using Alphora.Dataphor.Frontend.Server.Elaboration;
 using Alphora.Dataphor.Frontend.Server.Derivation;
 using Alphora.Dataphor.Frontend.Server.Device;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.Frontend.Server.Structuring
 {
@@ -32,6 +32,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 	{
 		public readonly static Char[] CColumnNameDelimiters = new Char[] {',',';'};
 
+		public Program Program;
 		public ServerProcess Process;
 		public Schema.TableVar TableVar;
 		public ElaboratedExpression ElaboratedExpression;

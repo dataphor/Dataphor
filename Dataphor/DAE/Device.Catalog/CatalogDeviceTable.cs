@@ -35,7 +35,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDeviceTable : Table
 	{
-		public CatalogDeviceTable(CatalogDevicePlanNode ADevicePlanNode, ServerProcess AProcess, CatalogDeviceSession ASession) : base(ADevicePlanNode.Node as TableNode, AProcess)
+		public CatalogDeviceTable(CatalogDevicePlanNode ADevicePlanNode, Program AProgram, CatalogDeviceSession ASession) : base(ADevicePlanNode.Node as TableNode, AProgram)
 		{
 			FDevicePlanNode = ADevicePlanNode;
 			FSession = ASession;
@@ -74,7 +74,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			foreach (CatalogPlanParameter LPlanParameter in FDevicePlanNode.PlanParameters)
 			{
 				FCommand.Parameters.Add(LPlanParameter.SQLParameter);
-				LPlanParameter.SQLParameter.Value = GetSQLValue(LPlanParameter.PlanNode.DataType, LPlanParameter.PlanNode.Execute(Session.ServerProcess));
+				LPlanParameter.SQLParameter.Value = GetSQLValue(LPlanParameter.PlanNode.DataType, LPlanParameter.PlanNode.Execute(Program));
 			}
 
 			// Open a cursor from the command

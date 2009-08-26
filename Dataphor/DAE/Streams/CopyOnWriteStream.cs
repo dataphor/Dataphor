@@ -3,14 +3,13 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+using System.Runtime.Remoting.Lifetime;
+
 namespace Alphora.Dataphor.DAE.Streams
 {
-	using System;
-	using System.IO;
-	using System.Runtime.Remoting.Lifetime;
-
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Runtime;
 
 	// TODO: Handle copy on write streams > 4GB

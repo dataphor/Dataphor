@@ -2488,8 +2488,17 @@ namespace Alphora.Dataphor.DAE.Server
 				// Ensure the general library is loaded
 				if (!FCatalog.LoadedLibraries.Contains(CGeneralLibraryName))
 				{
-					SystemEnsureLibraryRegisteredNode.EnsureLibraryRegistered(FSystemProcess, CGeneralLibraryName, true);
-					FSystemSession.CurrentLibrary = FSystemLibrary;
+					Program LProgram = new Program(FSystemProcess);
+					LProgram.Start(null);
+					try
+					{
+						SystemEnsureLibraryRegisteredNode.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
+						FSystemSession.CurrentLibrary = FSystemLibrary; // reset current library of the system session because it will be set by registering General
+					}
+					finally
+					{
+						LProgram.Stop(null);
+					}
 				}
 			}
 		}
@@ -2514,9 +2523,11 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (!ADevice.Running)
 			{
-				AProcess.Plan.PushSecurityContext(new SecurityContext(ADevice.Owner));
-				try
-				{
+				// TODO: It's not at all clear that this would have had any effect.
+				// 
+				//AProcess.Plan.PushSecurityContext(new SecurityContext(ADevice.Owner));
+				//try
+				//{
 					DoDeviceStarting(ADevice);
 					try
 					{
@@ -2541,11 +2552,11 @@ namespace Alphora.Dataphor.DAE.Server
 					}
 
 					DoDeviceStarted(ADevice);
-				}
-				finally
-				{
-					AProcess.Plan.PopSecurityContext();
-				}
+				//}
+				//finally
+				//{
+				//	AProcess.Plan.PopSecurityContext();
+				//}
 			}
 		}
 		

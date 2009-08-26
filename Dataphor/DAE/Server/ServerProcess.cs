@@ -48,19 +48,26 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FServerSession = AServerSession;
 			FPlans = new ServerPlans();
-			FExecutingPlans = new ServerPlans();
 			FScripts = new ServerScripts();
 			FParser = new Parser();
 			FProcessID = GetHashCode();
 			FProcessInfo = AProcessInfo;
 			FDeviceSessions = new Schema.DeviceSessions(false);
 			FStreamManager = (IStreamManager)this;
+			FValueManager = new ValueManager(this, this);
 			#if PROCESSSTREAMSOWNED
 			FOwnedStreams = new Dictionary<StreamID, bool>();
 			#endif
-			FStack = new Stack(FServerSession.SessionInfo.DefaultMaxStackDepth, FServerSession.SessionInfo.DefaultMaxCallDepth);
-			FProcessPlan = new ServerStatementPlan(this);
-			PushExecutingPlan(FProcessPlan);
+
+			FExecutingPrograms = new Programs();
+			
+			FProcessProgram = new Program(this);
+			FProcessProgram.Start(null);
+			
+			#if ALLOWPROCESSCONTEXT
+			FProcessStack = new Stack(FServerSession.SessionInfo.DefaultMaxStackDepth, 1); // Process stack has only 1 window
+			FProcessStack.PushWindow(0);
+			#endif
 			
 			if (FServerSession.DebuggerID > 0)
 				FServerSession.Server.GetDebugger(FServerSession.DebuggerID).Attach(this);
@@ -76,8 +83,8 @@ namespace Alphora.Dataphor.DAE.Server
 		#if ALLOWPROCESSCONTEXT	
 		protected void DeallocateContextVariables()
 		{
-			for (int LIndex = 0; LIndex < FStack.Count; LIndex++)
-				DataValue.DisposeValue(this, FStack[LIndex]);
+			for (int LIndex = 0; LIndex < FProcessStack.Count; LIndex++)
+				DataValue.DisposeValue(FValueManager, FProcessStack[LIndex]);
 		}
 		#endif
 		
@@ -135,13 +142,13 @@ namespace Alphora.Dataphor.DAE.Server
 											}
 											finally
 											{
-												if (FStack != null)
+												#if ALLOWPROCESSCONTEXT
+												if (FProcessStack != null)
 												{
-													#if ALLOWPROCESSCONTEXT
 													DeallocateContextVariables();
-													#endif
-													FStack = null;
+													FProcessStack = null;
 												}
+												#endif
 											}
 										}
 										finally
@@ -187,12 +194,10 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							finally
 							{
-								if (FExecutingPlans != null)
+								if (FProcessProgram != null)
 								{
-									while (FExecutingPlans.Count > 0)
-										FExecutingPlans.DisownAt(0);
-									FExecutingPlans.Dispose();
-									FExecutingPlans = null;
+									FProcessProgram.Stop(null);
+									FProcessProgram = null;
 								}
 							}
 						}
@@ -239,18 +244,7 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					try
-					{
-						if (FProcessPlan != null)
-						{
-							FProcessPlan.Dispose();
-							FProcessPlan = null;
-						}
-					}
-					finally
-					{
-						ReleaseLocks();
-					}
+					ReleaseLocks();
 				}
 			}
 			finally
@@ -258,10 +252,12 @@ namespace Alphora.Dataphor.DAE.Server
 				#if PROCESSSTREAMSOWNED
 				ReleaseStreams();
 				#endif
-
+				
+				FExecutingPrograms = null;
 				FSQLParser = null;
 				FSQLCompiler = null;
 				FStreamManager = null;
+				FValueManager = null;
 				FServerSession = null;
 				FProcessID = -1;
 				FParser = null;
@@ -273,7 +269,14 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerSession FServerSession;
 		public ServerSession ServerSession { get { return FServerSession; } }
 		
-		private ServerPlan FProcessPlan;
+		// This is an internal program used to ensure that there is always at
+		// least on executing program on the process. At this point, this is used 
+		// only by the value manager to evaluate sorts and perform scalar 
+		// representation processing to avoid the overhead of having to create
+		// a program each time a sort comparison or scalar transformation is
+		// required. Even then, it is only necessary for out-of-process
+		// processes, or in-process Dataphoria processes.
+		private Program FProcessProgram;
 		
 		// ProcessID
 		private int FProcessID = -1;
@@ -283,23 +286,10 @@ namespace Alphora.Dataphor.DAE.Server
 		private ProcessInfo FProcessInfo;
 		public ProcessInfo ProcessInfo { get { return FProcessInfo; } }
 		
-		// Plan State Exposed from ExecutingPlan
-		public Plan Plan { get { return ExecutingPlan.Plan; } }
-		
-		// Context		
-		private Stack FStack;
-		public Stack Stack { get { return FStack; } }
-		
-		public Stack SwitchContext(Stack AContext)
-		{
-			Stack LContext = FStack;
-			FStack = AContext;
-			return LContext;
-		}
+		// ProcessStack
+		private Stack FProcessStack;
 		
 		/// <summary>Determines the default isolation level for transactions on this process.</summary>
-		[System.ComponentModel.DefaultValue(IsolationLevel.CursorStability)]
-		[System.ComponentModel.Description("Determines the default isolation level for transactions on this process.")]
 		public IsolationLevel DefaultIsolationLevel
 		{
 			get { return FProcessInfo.DefaultIsolationLevel; }
@@ -310,6 +300,32 @@ namespace Alphora.Dataphor.DAE.Server
 		public IsolationLevel CurrentIsolationLevel()
 		{
 			return FTransactions.Count > 0 ? FTransactions.CurrentTransaction().IsolationLevel : DefaultIsolationLevel;
+		}
+		
+		// MaxStackDepth
+		public int MaxStackDepth
+		{
+			get { return FExecutingPrograms.Count == 0 ? FServerSession.SessionInfo.DefaultMaxStackDepth : ExecutingProgram.Stack.MaxStackDepth; }
+			set 
+			{ 
+				if (FExecutingPrograms.Count == 0)
+					FServerSession.SessionInfo.DefaultMaxStackDepth = value;
+				else
+					ExecutingProgram.Stack.MaxStackDepth = value;
+			}
+		}
+		
+		// MaxCallDepth
+		public int MaxCallDepth
+		{
+			get { return FExecutingPrograms.Count == 0 ? FServerSession.SessionInfo.DefaultMaxCallDepth : ExecutingProgram.Stack.MaxCallDepth; }
+			set
+			{
+				if (FExecutingPrograms.Count == 0)
+					FServerSession.SessionInfo.DefaultMaxCallDepth = value;
+				else
+					ExecutingProgram.Stack.MaxCallDepth = value;
+			}
 		}
 		
 		// NonLogged - Indicates whether logging is performed within the device.  
@@ -483,6 +499,10 @@ namespace Alphora.Dataphor.DAE.Server
 			// TODO: Release locks taken for a given process (presumably keep a hash table of locks acquired on this process, which means every request for a lock must go through the process)
 			//FServerSession.Server.LockManager.Unlock(FProcessID);
 		}
+		
+		// IValueManager
+		private IValueManager FValueManager;
+		public IValueManager ValueManager { get { return FValueManager; } }
 		
 		// IStreamManager
 		private IStreamManager FStreamManager;
@@ -677,24 +697,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public object DeviceExecute(Schema.Device ADevice, PlanNode APlanNode)
-		{	
-			if (IsReconciliationEnabled() || (APlanNode.DataType != null))
-			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				try
-				{
-					return DeviceConnect(ADevice).Execute(Plan.GetDevicePlan(APlanNode));
-				}
-				finally
-				{
-					RootExecutingPlan.Statistics.DeviceExecuteTime += TimingUtility.TimeSpanFromTicks(LStartTicks);
-				}
-			}
-
-			return null;
-		}
-		
 		public void EnsureDeviceStarted(Schema.Device ADevice)
 		{
 			ServerSession.Server.StartDevice(this, ADevice);
@@ -800,87 +802,79 @@ namespace Alphora.Dataphor.DAE.Server
 			// Note that this uses the current context count rather than the symbols count to 
 			// allow for the possibility that a window has been pushed on the current context
 			// For example, a dynamic evaluation.
-			for (int LIndex = Math.Min(FProcessSymbols.Count, FStack.Count) - 1; LIndex >= 0; LIndex--)
+			for (int LIndex = Math.Min(FProcessSymbols.Count, FProcessStack.Count) - 1; LIndex >= 0; LIndex--)
 				APlan.Symbols.Push(FProcessSymbols[LIndex]);
 
-			if (FStack.AllowExtraWindowAccess)
+			if (FProcessStack.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = true;
 		}
 				
 		internal void PopProcessSymbols(Plan APlan)
 		{
 			APlan.Symbols.PopFrame();
-			if (FStack.AllowExtraWindowAccess)
+			if (FProcessStack.AllowExtraWindowAccess)
 				APlan.Symbols.AllowExtraWindowAccess = false;
 		}
 		
 		#endif
 		
-		private void Compile(ServerPlan AServerPlan, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
+		private void Compile(Plan APlan, Program AProgram, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
 		{
-			PushExecutingPlan(AServerPlan);
+			#if ALLOWPROCESSCONTEXT
+			// Push process context on the symbols for the plan
+			PushProcessSymbols(APlan);
 			try
 			{
-				#if ALLOWPROCESSCONTEXT
-				// Push process context on the symbols for the plan
-				PushProcessSymbols(AServerPlan.Plan);
+			#endif
+				#if TIMING
+				DateTime LStartTime = DateTime.Now;
+				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
+				#endif
+				#if TRACEEVENTS
+				RaiseTraceEvent(TraceCodes.BeginCompile, "Begin Compile");
+				#endif
+				Schema.DerivedTableVar LTableVar = null;
+				LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AProgram.ID));
+				LTableVar.SessionObjectName = LTableVar.Name;
+				LTableVar.SessionID = APlan.SessionID;
+				APlan.PushCreationObject(LTableVar);
 				try
 				{
-				#endif
-					#if TIMING
-					DateTime LStartTime = DateTime.Now;
-					System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
-					#endif
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.BeginCompile, "Begin Compile");
-					#endif
-					Schema.DerivedTableVar LTableVar = null;
-					LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AServerPlan.ID));
-					LTableVar.SessionObjectName = LTableVar.Name;
-					LTableVar.SessionID = AServerPlan.ServerProcess.ServerSession.SessionID;
-					AServerPlan.Plan.PushCreationObject(LTableVar);
-					try
-					{
-						AServerPlan.Code = Compiler.Compile(AServerPlan.Plan, AStatement, AParams, AIsExpression, ASourceContext);
-						AServerPlan.SetSourceContext(ASourceContext);
+					AProgram.Code = Compiler.Compile(APlan, AStatement, AParams, AIsExpression, ASourceContext);
+					AProgram.SetSourceContext(ASourceContext);
 
-						#if ALLOWPROCESSCONTEXT
-						// Include dependencies for any process context that may be being referenced by the plan
-						// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-						for (int LIndex = FProcessSymbols.Count - 1; LIndex >= 0; LIndex--)
-							AServerPlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, AServerPlan.Plan.Catalog, FProcessSymbols[LIndex].DataType, EmitMode.ForRemote);
-						#endif
+					#if ALLOWPROCESSCONTEXT
+					// Include dependencies for any process context that may be being referenced by the plan
+					// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
+					for (int LIndex = FProcessSymbols.Count - 1; LIndex >= 0; LIndex--)
+						APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, FProcessSymbols[LIndex].DataType, EmitMode.ForRemote);
+					#endif
 
-						if (!AServerPlan.Plan.Messages.HasErrors && AIsExpression)
-						{
-							if (AServerPlan.Code.DataType == null)
-								throw new CompilerException(CompilerException.Codes.ExpressionExpected);
-							AServerPlan.DataType = CopyDataType(AServerPlan, LTableVar);
-						}
-					}
-					finally
+					if (!APlan.Messages.HasErrors && AIsExpression)
 					{
-						AServerPlan.Plan.PopCreationObject();
+						if (AProgram.Code.DataType == null)
+							throw new CompilerException(CompilerException.Codes.ExpressionExpected);
+						AProgram.DataType = CopyDataType(APlan, AProgram.Code, LTableVar);
 					}
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.EndCompile, "End Compile");
-					#endif
-					#if TIMING
-					System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
-					#endif
-				#if ALLOWPROCESSCONTEXT
 				}
 				finally
 				{
-					// Pop process context from the plan
-					PopProcessSymbols(AServerPlan.Plan);
+					APlan.PopCreationObject();
 				}
+				#if TRACEEVENTS
+				RaiseTraceEvent(TraceCodes.EndCompile, "End Compile");
 				#endif
+				#if TIMING
+				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
+				#endif
+			#if ALLOWPROCESSCONTEXT
 			}
 			finally
 			{
-				PopExecutingPlan(AServerPlan);
+				// Pop process context from the plan
+				PopProcessSymbols(APlan);
 			}
+			#endif
 		}
         
 		internal ServerPlan CompileStatement(Statement AStatement, ParserMessages AMessages, DataParams AParams, SourceContext ASourceContext)
@@ -890,7 +884,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (AMessages != null)
 					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AStatement, AParams, false, ASourceContext);
+				Compile(LPlan.Plan, LPlan.Program, AStatement, AParams, false, ASourceContext);
 				FPlans.Add(LPlan);
 				return LPlan;
 			}
@@ -952,7 +946,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (LPlan != null)
 				{
 					FPlans.Add(LPlan);
-					((ServerPlan)LPlan).SetSourceContext(new SourceContext(AStatement, ALocator));
+					((ServerPlan)LPlan).Program.SetSourceContext(new SourceContext(AStatement, ALocator));
 				}
 				else
 				{
@@ -997,14 +991,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private Schema.IDataType CopyDataType(ServerPlan APlan, Schema.DerivedTableVar ATableVar)
+		private Schema.IDataType CopyDataType(Plan APlan, PlanNode ACode, Schema.DerivedTableVar ATableVar)
 		{
 			#if TIMING
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerProcess.CopyDataType", DateTime.Now.ToString("hh:mm:ss.ffff")));
 			#endif
-			if (APlan.Code.DataType is Schema.CursorType)
+			if (ACode.DataType is Schema.CursorType)
 			{
-				TableNode LSourceNode = (TableNode)APlan.Code.Nodes[0];	
+				TableNode LSourceNode = (TableNode)ACode.Nodes[0];	
 				Schema.TableVar LSourceTableVar = LSourceNode.TableVar;
 
 				AdornExpression LAdornExpression = new AdornExpression();
@@ -1038,7 +1032,7 @@ namespace Alphora.Dataphor.DAE.Server
 				while (LViewNode is BaseOrderNode)
 					LViewNode = LViewNode.Nodes[0];
 					
-				LViewNode = Compiler.EmitAdornNode(APlan.Plan, LViewNode, LAdornExpression);
+				LViewNode = Compiler.EmitAdornNode(APlan, LViewNode, LAdornExpression);
 
 				ATableVar.CopyTableVar((TableNode)LViewNode);
 				ATableVar.CopyReferences((TableNode)LViewNode);
@@ -1065,7 +1059,7 @@ namespace Alphora.Dataphor.DAE.Server
 					Schema.TableVar LATTableVar = LATObject as Schema.TableVar;
 					if (LATTableVar != null)
 					{
-						Schema.TableVar LTableVar = (Schema.TableVar)APlan.Plan.Catalog[APlan.Plan.Catalog.IndexOfName(LATTableVar.SourceTableName)];
+						Schema.TableVar LTableVar = (Schema.TableVar)APlan.Catalog[APlan.Catalog.IndexOfName(LATTableVar.SourceTableName)];
 						ATableVar.Dependencies.Ensure(LTableVar);
 						continue;
 					}
@@ -1073,21 +1067,21 @@ namespace Alphora.Dataphor.DAE.Server
 					Schema.Operator LATOperator = LATObject as Schema.Operator;
 					if (LATOperator != null)
 					{
-						ATableVar.Dependencies.Ensure(ServerSession.Server.ATDevice.ResolveSourceOperator(this, LATOperator));
+						ATableVar.Dependencies.Ensure(ServerSession.Server.ATDevice.ResolveSourceOperator(APlan, LATOperator));
 					}
 				}
 				
-				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
-				APlan.Plan.PlanCatalog.Remove(ATableVar);
-				APlan.Plan.PlanCatalog.Add(ATableVar);
+				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ATableVar, EmitMode.ForRemote);
+				APlan.PlanCatalog.Remove(ATableVar);
+				APlan.PlanCatalog.Add(ATableVar);
 				return ATableVar.DataType;
 			}
 			else
 			{
-				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, ATableVar, EmitMode.ForRemote);
-				APlan.Plan.PlanCatalog.SafeRemove(ATableVar);
-				APlan.Plan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Plan.Catalog, APlan.Code.DataType, EmitMode.ForRemote);
-				return APlan.Code.DataType;
+				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ATableVar, EmitMode.ForRemote);
+				APlan.PlanCatalog.SafeRemove(ATableVar);
+				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ACode.DataType, EmitMode.ForRemote);
+				return ACode.DataType;
 			}
 		}
 
@@ -1098,7 +1092,7 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				if (AMessages != null)
 					LPlan.Plan.Messages.AddRange(AMessages);
-				Compile(LPlan, AExpression, AParams, true, ASourceContext);
+				Compile(LPlan.Plan, LPlan.Program, AExpression, AParams, true, ASourceContext);
 				FPlans.Add(LPlan);
 				return LPlan;
 			}
@@ -1125,7 +1119,7 @@ namespace Alphora.Dataphor.DAE.Server
 				if (LPlan != null)
 				{
 					FPlans.Add(LPlan);
-					((ServerPlan)LPlan).SetSourceContext(new SourceContext(AExpression, ALocator));
+					((ServerPlan)LPlan).Program.SetSourceContext(new SourceContext(AExpression, ALocator));
 				}
 				else
 				{
@@ -1200,7 +1194,6 @@ namespace Alphora.Dataphor.DAE.Server
 				UnprepareExpression(LPlan);
 			}
 		}
-		
 		
 		public IServerScript PrepareScript(string AScript)
 		{
@@ -1460,14 +1453,24 @@ namespace Alphora.Dataphor.DAE.Server
 				foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
 					LDeviceSession.PrepareTransaction();
 					
-				// Invoke event handlers for work done during this transaction
-				LTransaction.InvokeDeferredHandlers(this);
+				// Create a new program to perform the deferred validation
+				Program LProgram = new Program(this);
+				LProgram.Start(null);
+				try
+				{
+					// Invoke event handlers for work done during this transaction
+					LTransaction.InvokeDeferredHandlers(LProgram);
 
-				// Validate Constraints which have been affected by work done during this transaction
-				FTransactions.ValidateDeferredConstraints(this);
+					// Validate Constraints which have been affected by work done during this transaction
+					FTransactions.ValidateDeferredConstraints(LProgram);
 
-				foreach (Schema.CatalogConstraint LConstraint in LTransaction.CatalogConstraints)
-					LConstraint.Validate(this);
+					foreach (Schema.CatalogConstraint LConstraint in LTransaction.CatalogConstraints)
+						LConstraint.Validate(LProgram);
+				}
+				finally
+				{
+					LProgram.Stop(null);
+				}
 				
 				LTransaction.Prepared = true;
 			}
@@ -1874,108 +1877,35 @@ namespace Alphora.Dataphor.DAE.Server
 			FTimeStampCount--;
 		}
 		
+		internal Programs FExecutingPrograms;
+		
+		internal Program ExecutingProgram
+		{
+			get
+			{
+				if (FExecutingPrograms.Count == 0)
+					throw new ServerException(ServerException.Codes.NoExecutingProgram);
+				return FExecutingPrograms[FExecutingPrograms.Count - 1];
+			}
+		}
+		
+		internal void PushExecutingProgram(Program AProgram)
+		{
+			FExecutingPrograms.Add(AProgram);
+		}
+		
+		internal void PopExecutingProgram(Program AProgram)
+		{
+			if (ExecutingProgram.ID != AProgram.ID)
+				throw new ServerException(ServerException.Codes.ProgramNotExecuting, AProgram.ID.ToString());
+			FExecutingPrograms.RemoveAt(FExecutingPrograms.Count - 1);
+		}
+		
 		// Execution
-		private ServerPlans FExecutingPlans;
-
 		private System.Threading.Thread FExecutingThread;
 		public System.Threading.Thread ExecutingThread { get { return FExecutingThread; } }
 		
 		private int FExecutingThreadCount = 0;
-		
-		public ServerPlan ExecutingPlan
-		{
-			get 
-			{
-				if (FExecutingPlans.Count == 0)
-					throw new ServerException(ServerException.Codes.NoExecutingPlan);
-				return FExecutingPlans[FExecutingPlans.Count - 1];
-			}
-		}
-		
-		public ServerPlan RootExecutingPlan
-		{
-			get
-			{
-				if (FExecutingPlans.Count <= 1)
-					return ExecutingPlan;
-				return FExecutingPlans[1];
-			}
-		}
-		
-		public void PushExecutingPlan(ServerPlan APlan)
-		{
-			lock (this)
-			{
-				FExecutingPlans.Add(APlan);
-			}
-		}
-		
-		public void PopExecutingPlan(ServerPlan APlan)
-		{
-			lock (this)
-			{
-				if (ExecutingPlan != APlan)
-					throw new ServerException(ServerException.Codes.PlanNotExecuting, APlan.ID.ToString());
-				FExecutingPlans.DisownAt(FExecutingPlans.Count - 1);
-			}
-		}
-		
-		public void Start(ServerPlan APlan, DataParams AParams)
-		{
-			PushExecutingPlan(APlan);
-			try
-			{
-				if (AParams != null)
-					foreach (DataParam LParam in AParams)
-						FStack.Push(LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : DataValue.CopyValue(this, LParam.Value)) : LParam.Value);
-			}
-			catch
-			{
-				PopExecutingPlan(APlan);
-				throw;
-			}
-		}
-		
-		public void Stop(ServerPlan APlan, DataParams AParams)
-		{
-			try
-			{
-				if (AParams != null)
-					for (int LIndex = AParams.Count - 1; LIndex >= 0; LIndex--)
-					{
-						object LValue = FStack.Pop();
-						if (AParams[LIndex].Modifier != Modifier.In)
-							AParams[LIndex].Value = LValue;
-					}
-			}
-			finally
-			{
-				PopExecutingPlan(APlan);
-			}
-		}
-		
-		public object Execute(ServerPlan APlan, PlanNode ANode, DataParams AParams)
-		{	
-			object LResult;
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginExecute, "Begin Execute");
-			#endif
-			Start(APlan, AParams);
-			try
-			{
-				long LStartTicks = TimingUtility.CurrentTicks;
-				LResult = ANode.Execute(this);
-				APlan.Plan.Statistics.ExecuteTime = TimingUtility.TimeSpanFromTicks(LStartTicks);
-			}
-			finally
-			{
-				Stop(APlan, AParams);
-			}
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndExecute, "End Execute");
-			#endif
-			return LResult;
-		}
 		
 		// SyncHandle is used to synchronize CLI calls to the process, ensuring that only one call originating in the CLI is allowed to run through the process at a time
 		private object FSyncHandle = new System.Object();
@@ -2198,136 +2128,6 @@ namespace Alphora.Dataphor.DAE.Server
 			if ((FDebugger != null) && (ADebugger != null))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, FProcessID);
 			FDebugger = ADebugger;
-		}
-		
-		private PlanNode FCurrentLocation;
-		
-		public DebugLocator GetCurrentLocation()
-		{
-			try
-			{
-				// Use call stack or executing plan source to build a locator
-				//InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
-				//if ((LOriginator != null) && (LOriginator.Operator != null))
-				//	return new DebugLocator(LOriginator.Operator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-
-				if (ExecutingPlan.Locator != null)
-					return new DebugLocator(ExecutingPlan.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-
-				return new DebugLocator(DebugLocator.CPlanLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-			}
-			catch (Exception E)
-			{
-				throw new ServerException(ServerException.Codes.CouldNotDetermineProcessLocation, E, FProcessID);
-			}
-		}
-		
-		public DebugLocator SafeGetCurrentLocation()
-		{
-			try
-			{
-				return GetCurrentLocation();
-			}
-			catch (Exception E)
-			{
-				return new DebugLocator(E.Message, -1, -1);
-			}
-		}
-		
-		public DebugContext GetCurrentContext()
-		{
-			try
-			{
-				//InstructionNodeBase LOriginator = FContext.CurrentStackWindow.Originator as InstructionNodeBase;
-				//if ((LOriginator != null) && (LOriginator.Operator != null))
-				//{
-				//	if (DebugLocator.IsOperatorLocator(LOriginator.Operator.Locator.Locator))
-				//		return new DebugContext(new D4TextEmitter().Emit(LOriginator.Operator.EmitStatement(EmitMode.ForCopy)), LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-				//
-				//	return new DebugContext(null, LOriginator.Operator.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-				//}
-
-				if (ExecutingPlan.Locator != null)
-					return new DebugContext(null, ExecutingPlan.Locator.Locator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-
-				return new DebugContext(ExecutingPlan.Source, DebugLocator.CPlanLocator, FCurrentLocation.Line, FCurrentLocation.LinePos);
-			}
-			catch (Exception E)
-			{
-				throw new ServerException(ServerException.Codes.CouldNotDetermineProcessLocation, E, FProcessID);
-			}
-		}
-		
-		public DebugContext SafeGetCurrentContext()
-		{
-			try
-			{
-				return GetCurrentContext();
-			}
-			catch (Exception E)
-			{
-				return new DebugContext("<Error retrieving debug context>", E.Message, -1, -1);
-			}
-		}
-		
-		public void Yield(PlanNode APlanNode)
-		{
-			CheckAborted();
-			if (FDebugger != null)
-			{
-				FCurrentLocation = APlanNode;
-				FDebugger.Yield(this, APlanNode, null);
-			}
-		}
-		
-		public void Yield(PlanNode APlanNode, Exception AException)
-		{
-			CheckAborted();
-			if (FDebugger != null)
-			{
-				FCurrentLocation = APlanNode;
-				FDebugger.Yield(this, APlanNode, AException);
-			}
-		}
-		
-		private SourceContexts FSourceContexts = new SourceContexts();
-
-		public void PushSourceContext(SourceContext AContext)
-		{
-			FSourceContexts.Push(AContext);
-		}
-		
-		public void PopSourceContext(SourceContext AContext)
-		{
-			FSourceContexts.Pop();
-		}
-		
-		public SourceContext CurrentSourceContext
-		{
-			get
-			{
-				if (FSourceContexts.Count > 0)
-					return FSourceContexts.Peek();
-				return null;
-			}
-		}
-		
-		// ActiveCursor
-		protected ServerCursor FActiveCursor;
-		public ServerCursor ActiveCursor { get { return FActiveCursor; } }
-		
-		public void SetActiveCursor(ServerCursor AActiveCursor)
-		{
-			/*
-			if (FActiveCursor != null)
-				throw new ServerException(ServerException.Codes.PlanCursorActive);
-			FActiveCursor = AActiveCursor;
-			*/
-		}
-		
-		public void ClearActiveCursor()
-		{
-			//FActiveCursor = null;
 		}
 		
 		// Catalog

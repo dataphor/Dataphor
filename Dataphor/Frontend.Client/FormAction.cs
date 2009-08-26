@@ -574,7 +574,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 						if (LSourceKey != null)
 						{						
-							using (Row LRow = new Row(LSourceView.Process, new Schema.RowType(LSourceKey.Columns)))
+							using (Row LRow = new Row(LSourceView.Process.ValueManager, new Schema.RowType(LSourceKey.Columns)))
 							{
 								for (int LIndex = 0; LIndex < LSourceKey.Columns.Count; LIndex++)
 								{

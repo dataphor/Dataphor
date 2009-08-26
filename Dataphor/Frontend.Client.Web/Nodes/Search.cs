@@ -394,7 +394,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 						break;
 				}
 
-				DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.Process, LRowType);
+				DAE.Runtime.Data.Row LRow = new DAE.Runtime.Data.Row(Source.Process.ValueManager, LRowType);
 				try
 				{
 					Source.DataView.InitializeFromMaster(LRow);

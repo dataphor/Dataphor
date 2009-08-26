@@ -59,10 +59,19 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected void UnprepareDeferredHandlers()
 		{
-			for (int LIndex = FHandlers.Count - 1; LIndex >= 0; LIndex--)
+			Program LProgram = new Program(Process);
+			LProgram.Start(null);
+			try
 			{
-				FHandlers[LIndex].Deallocate(Process);
-				FHandlers.RemoveAt(LIndex);
+				for (int LIndex = FHandlers.Count - 1; LIndex >= 0; LIndex--)
+				{
+					FHandlers[LIndex].Deallocate(LProgram);
+					FHandlers.RemoveAt(LIndex);
+				}
+			}
+			finally
+			{
+				LProgram.Stop(null);
 			}
 		}
 		
@@ -119,24 +128,24 @@ namespace Alphora.Dataphor.DAE.Server
 		private ServerTableVars FTableVars = new ServerTableVars();
 		public ServerTableVars TableVars { get { return FTableVars; } }
 
-		public void InvokeDeferredHandlers(ServerProcess AProcess)
+		public void InvokeDeferredHandlers(Program AProgram)
 		{
 			if (FHandlers.Count > 0)
 			{
-				AProcess.InternalBeginTransaction(IsolationLevel.Isolated);
+				AProgram.ServerProcess.InternalBeginTransaction(IsolationLevel.Isolated);
 				try
 				{
 					foreach (ServerHandler LHandler in FHandlers)
-						LHandler.Invoke(AProcess);
-					AProcess.InternalCommitTransaction();
+						LHandler.Invoke(AProgram);
+					AProgram.ServerProcess.InternalCommitTransaction();
 				}
 				catch (Exception LException)
 				{
-					if (AProcess.InTransaction)
+					if (AProgram.ServerProcess.InTransaction)
 					{
 						try
 						{
-							AProcess.InternalRollbackTransaction();
+							AProgram.ServerProcess.InternalRollbackTransaction();
 						}
 						catch (Exception LRollbackException)
 						{
@@ -223,10 +232,10 @@ namespace Alphora.Dataphor.DAE.Server
 			return this[0];
 		}
 
-		public void ValidateDeferredConstraints(ServerProcess AProcess)
+		public void ValidateDeferredConstraints(Program AProgram)
 		{
 			foreach (ServerTableVar LTableVar in this[Count - 1].TableVars.Values)
-				LTableVar.Validate(AProcess, Count - 1);
+				LTableVar.Validate(AProgram, Count - 1);
 		}
 		
 		public void UnprepareDeferredConstraintChecks()
@@ -483,7 +492,7 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			Schema.SessionObject LSessionObject = (Schema.SessionObject)Process.ServerSession.SessionObjects[FCheckTableName];
 			LSessionObject.IsGenerated = true;
-			FCheckTable = Process.Plan.Catalog[LSessionObject.GlobalName] as Schema.TableVar;
+			FCheckTable = Process.Catalog[LSessionObject.GlobalName] as Schema.TableVar;
 			FCheckTable.IsGenerated = true;
 			FCheckTableKey = FCheckTable.Keys.MinimumKey(true);
 			FCheckRowType = new Schema.RowType(FCheckTable.DataType.Columns);
@@ -517,9 +526,9 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							LCursor.Select(LRow);
 							if (LRow.HasValue(FOldRowColumnName))
-								DataValue.DisposeNative(Process, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
+								DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
 							if (LRow.HasValue(FNewRowColumnName))
-								DataValue.DisposeNative(Process, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
+								DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
 							LCursor.Delete();
 						}
 					}
@@ -548,9 +557,9 @@ namespace Alphora.Dataphor.DAE.Server
 					{
 						LCursor.Select(LRow);
 						if (LRow.HasValue(FOldRowColumnName))
-							DataValue.DisposeNative(Process, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
+							DataValue.DisposeNative(Process.ValueManager, OldRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FOldRowColumnName)]);
 						if (LRow.HasValue(FNewRowColumnName))
-							DataValue.DisposeNative(Process, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
+							DataValue.DisposeNative(Process.ValueManager, NewRowType, ((NativeRow)LRow.AsNative).Values[LRow.DataType.Columns.IndexOfName(FNewRowColumnName)]);
 						LCursor.Delete();
 					}
 				}
@@ -586,19 +595,11 @@ namespace Alphora.Dataphor.DAE.Server
 					Process.ServerSession.SessionInfo.UsePlanCache = false;
 					try
 					{
-						Process.Stack.PushWindow(0);
-						try
-						{
-							FPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName), null);
-							FTransactionParams = new DataParams();
-							FTransactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
-							FTransactionParams.Add(FTransactionParam);
-							FTransactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName, FTransactionIndexColumnName), FTransactionParams);
-						}
-						finally
-						{
-							Process.Stack.PopWindow();
-						}
+						FPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName), null);
+						FTransactionParams = new DataParams();
+						FTransactionParam = new DataParam("ATransactionIndex", Process.DataTypes.SystemInteger, Modifier.In, 0);
+						FTransactionParams.Add(FTransactionParam);
+						FTransactionPlan = ((IServerProcess)Process).PrepareExpression(String.Format("select {0} where {1} = ATransactionIndex capabilities {{ navigable, searchable, updateable }} type dynamic;", FCheckTableName, FTransactionIndexColumnName), FTransactionParams);
 					}
 					finally
 					{
@@ -646,27 +647,21 @@ namespace Alphora.Dataphor.DAE.Server
 						LTransaction.PushGlobalContext();
 					try
 					{
-						ServerStatementPlan LPlan = new ServerStatementPlan(Process);
+						Plan LPlan = new Plan(Process);
 						try
 						{
-							LPlan.Plan.EnterTimeStampSafeContext();
+							LPlan.EnterTimeStampSafeContext();
 							try
 							{
 								// Push a loading context to prevent the DDL from being logged.
 								Process.PushLoadingContext(new LoadingContext(Process.ServerSession.User, true));
 								try
 								{
-									Process.PushExecutingPlan(LPlan);
-									try
-									{
-										PlanNode LPlanNode = Compiler.BindNode(LPlan.Plan, Compiler.CompileStatement(LPlan.Plan, new DropTableStatement(FCheckTableName)));
-										LPlan.Plan.CheckCompiled();
-										LPlanNode.Execute(Process);
-									}
-									finally
-									{
-										Process.PopExecutingPlan(LPlan);
-									}
+									PlanNode LPlanNode = Compiler.BindNode(LPlan, Compiler.CompileStatement(LPlan, new DropTableStatement(FCheckTableName)));
+									LPlan.CheckCompiled();
+									Program LProgram = new Program(Process);
+									LProgram.Code = LPlanNode;
+									LProgram.Execute(null);
 								}
 								finally
 								{
@@ -675,7 +670,7 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							finally
 							{
-								LPlan.Plan.ExitTimeStampSafeContext();
+								LPlan.ExitTimeStampSafeContext();
 							}
 						}
 						finally
@@ -856,7 +851,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void Validate(ServerProcess AProcess, int ATransactionIndex)
+		public void Validate(Program AProgram, int ATransactionIndex)
 		{
 			// cursor through each check and validate all constraints for each check
 			IServerCursor LCursor = FTransactionPlan.Open(GetTransactionParams(ATransactionIndex));
@@ -875,14 +870,14 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LRow = (Row)LCheckRow[FNewRowColumnName];
 								try
 								{
-									AProcess.Stack.Push(LRow);
+									AProgram.Stack.Push(LRow);
 									try
 									{
-										ValidateCheck(Schema.Transition.Insert);
+										ValidateCheck(AProgram, Schema.Transition.Insert);
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 								}
 								finally
@@ -897,20 +892,20 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LOldRow = (Row)LCheckRow[FOldRowColumnName];
 								try
 								{
-									AProcess.Stack.Push(LOldRow);
+									AProgram.Stack.Push(LOldRow);
 									try
 									{
 										Row LNewRow = (Row)LCheckRow[FNewRowColumnName];
 										try
 										{
-											AProcess.Stack.Push(LNewRow);
+											AProgram.Stack.Push(LNewRow);
 											try
 											{
-												ValidateCheck(Schema.Transition.Update);
+												ValidateCheck(AProgram, Schema.Transition.Update);
 											}
 											finally
 											{
-												AProcess.Stack.Pop();
+												AProgram.Stack.Pop();
 											}
 										}
 										finally
@@ -920,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Server
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 								}
 								finally
@@ -935,14 +930,14 @@ namespace Alphora.Dataphor.DAE.Server
 								Row LRow = (Row)LCheckRow[FOldRowColumnName];
 								try
 								{
-									AProcess.Stack.Push(LRow);
+									AProgram.Stack.Push(LRow);
 									try
 									{
-										ValidateCheck(Schema.Transition.Delete);
+										ValidateCheck(AProgram, Schema.Transition.Delete);
 									}
 									finally
 									{
-										AProcess.Stack.Pop();
+										AProgram.Stack.Pop();
 									}
 								}
 								finally
@@ -965,25 +960,25 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public void ValidateCheck(Schema.Transition ATransition)
+		public void ValidateCheck(Program AProgram, Schema.Transition ATransition)
 		{
 			switch (ATransition)
 			{
 				case Schema.Transition.Insert :
 				{
-					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Stack.Peek(0)).AsNative);
+					Row LNewRow = new Row(AProgram.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)AProgram.Stack.Peek(0)).AsNative);
 					try
 					{
-						Process.Stack.Push(LNewRow);
+						AProgram.Stack.Push(LNewRow);
 						try
 						{
 							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
 								if (LConstraint.Enforced && LConstraint.IsDeferred)
-									LConstraint.Validate(Process, ATransition);
+									LConstraint.Validate(AProgram, ATransition);
 						}
 						finally
 						{
-							Process.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
@@ -993,25 +988,25 @@ namespace Alphora.Dataphor.DAE.Server
 
 					foreach (Schema.TransitionConstraint LConstraint in FTableVar.InsertConstraints)
 						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(Process, Schema.Transition.Insert);
+							LConstraint.Validate(AProgram, Schema.Transition.Insert);
 				}
 				break;
 
 				case Schema.Transition.Update :
 				{
-					Row LNewRow = new Row(Process, this.TableVar.DataType.RowType, (NativeRow)((Row)Process.Stack.Peek(0)).AsNative);
+					Row LNewRow = new Row(AProgram.ValueManager, this.TableVar.DataType.RowType, (NativeRow)((Row)AProgram.Stack.Peek(0)).AsNative);
 					try
 					{
-						Process.Stack.Push(LNewRow);
+						AProgram.Stack.Push(LNewRow);
 						try
 						{
 							foreach (Schema.RowConstraint LConstraint in FTableVar.RowConstraints)
 								if (LConstraint.Enforced && LConstraint.IsDeferred)
-									LConstraint.Validate(Process, Schema.Transition.Update);
+									LConstraint.Validate(AProgram, Schema.Transition.Update);
 						}
 						finally
 						{
-							Process.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
@@ -1021,14 +1016,14 @@ namespace Alphora.Dataphor.DAE.Server
 							
 					foreach (Schema.TransitionConstraint LConstraint in FTableVar.UpdateConstraints)
 						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(Process, Schema.Transition.Update);
+							LConstraint.Validate(AProgram, Schema.Transition.Update);
 				}
 				break;
 
 				case Schema.Transition.Delete :
 					foreach (Schema.TransitionConstraint LConstraint in FTableVar.DeleteConstraints)
 						if (LConstraint.Enforced && LConstraint.IsDeferred)
-							LConstraint.Validate(Process, Schema.Transition.Delete);
+							LConstraint.Validate(AProgram, Schema.Transition.Delete);
 				break;
 			}
 		}
@@ -1052,17 +1047,17 @@ namespace Alphora.Dataphor.DAE.Server
 		protected Schema.TableVarEventHandler FHandler;
 		public Schema.TableVarEventHandler Handler { get { return FHandler; } }
 		
-		public abstract void Invoke(ServerProcess AProcess);
+		public abstract void Invoke(Program AProgram);
 		
-		public abstract void Deallocate(ServerProcess AProcess);
+		public abstract void Deallocate(Program AProgram);
 	}
 	
 	public class ServerHandlers : List<ServerHandler>
 	{
-		public void Deallocate(ServerProcess AProcess)
+		public void Deallocate(Program AProgram)
 		{
 			for (int LIndex = 0; LIndex < Count; LIndex++)
-				this[LIndex].Deallocate(AProcess);
+				this[LIndex].Deallocate(AProgram);
 		}
 	}
 	
@@ -1076,19 +1071,19 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public NativeRow NativeRow;
 		
-		public override void Invoke(ServerProcess AProcess)
+		public override void Invoke(Program AProgram)
 		{
-			Row LRow = new Row(AProcess, FNewRowType, NativeRow);
+			Row LRow = new Row(AProgram.ValueManager, FNewRowType, NativeRow);
 			try
 			{
-				AProcess.Stack.Push(LRow);
+				AProgram.Stack.Push(LRow);
 				try
 				{
-					FHandler.PlanNode.Execute(AProcess);
+					FHandler.PlanNode.Execute(AProgram);
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
@@ -1097,11 +1092,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public override void Deallocate(ServerProcess AProcess)
+		public override void Deallocate(Program AProgram)
 		{
 			if (NativeRow != null)
 			{
-				DataValue.DisposeNative(AProcess, FNewRowType, NativeRow);
+				DataValue.DisposeNative(AProgram.ValueManager, FNewRowType, NativeRow);
 				NativeRow = null;
 			}
 		}
@@ -1120,30 +1115,30 @@ namespace Alphora.Dataphor.DAE.Server
 		public NativeRow OldNativeRow;
 		public NativeRow NewNativeRow;
 
-		public override void Invoke(ServerProcess AProcess)
+		public override void Invoke(Program AProgram)
 		{
-			Row LOldRow = new Row(AProcess, FOldRowType, OldNativeRow);
+			Row LOldRow = new Row(AProgram.ValueManager, FOldRowType, OldNativeRow);
 			try
 			{
-				Row LNewRow = new Row(AProcess, FNewRowType, NewNativeRow);
+				Row LNewRow = new Row(AProgram.ValueManager, FNewRowType, NewNativeRow);
 				try
 				{
-					AProcess.Stack.Push(LOldRow);
+					AProgram.Stack.Push(LOldRow);
 					try
 					{
-						AProcess.Stack.Push(LNewRow);
+						AProgram.Stack.Push(LNewRow);
 						try
 						{
-							FHandler.PlanNode.Execute(AProcess);
+							FHandler.PlanNode.Execute(AProgram);
 						}
 						finally
 						{
-							AProcess.Stack.Pop();
+							AProgram.Stack.Pop();
 						}
 					}
 					finally
 					{
-						AProcess.Stack.Pop();
+						AProgram.Stack.Pop();
 					}
 				}
 				finally
@@ -1157,17 +1152,17 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public override void Deallocate(ServerProcess AProcess)
+		public override void Deallocate(Program AProgram)
 		{
 			if (OldNativeRow != null)
 			{
-				DataValue.DisposeNative(AProcess, FOldRowType, OldNativeRow);
+				DataValue.DisposeNative(AProgram.ValueManager, FOldRowType, OldNativeRow);
 				OldNativeRow = null;
 			}
 
 			if (NewNativeRow != null)
 			{
-				DataValue.DisposeNative(AProcess, FNewRowType, NewNativeRow);
+				DataValue.DisposeNative(AProgram.ValueManager, FNewRowType, NewNativeRow);
 				NewNativeRow = null;
 			}
 		}
@@ -1183,19 +1178,19 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public NativeRow NativeRow;
 
-		public override void Invoke(ServerProcess AProcess)
+		public override void Invoke(Program AProgram)
 		{
-			Row LRow = new Row(AProcess, FOldRowType, NativeRow);
+			Row LRow = new Row(AProgram.ValueManager, FOldRowType, NativeRow);
 			try
 			{
-				AProcess.Stack.Push(LRow);
+				AProgram.Stack.Push(LRow);
 				try
 				{
-					FHandler.PlanNode.Execute(AProcess);
+					FHandler.PlanNode.Execute(AProgram);
 				}
 				finally
 				{
-					AProcess.Stack.Pop();
+					AProgram.Stack.Pop();
 				}
 			}
 			finally
@@ -1204,11 +1199,11 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		public override void Deallocate(ServerProcess AProcess)
+		public override void Deallocate(Program AProgram)
 		{
 			if (NativeRow != null)
 			{
-				DataValue.DisposeNative(AProcess, FOldRowType, NativeRow);
+				DataValue.DisposeNative(AProgram.ValueManager, FOldRowType, NativeRow);
 				NativeRow = null;
 			}
 		}

@@ -3,17 +3,13 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+using System;
+
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
-	using System;
-	
-	using Alphora.Dataphor;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Runtime;
-	
 	public class CursorValue : DataValue
 	{
-		public CursorValue(IServerProcess AProcess, Schema.ICursorType ACursorType, int AID) : base(AProcess, ACursorType)
+		public CursorValue(IValueManager AManager, Schema.ICursorType ACursorType, int AID) : base(AManager, ACursorType)
 		{
 			FID = AID;
 		}
@@ -80,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FID = AID;
 			FTable = ATable;
 			FManager = AManager;
-			SnapshotContext(ATable.Process);
+			SnapshotContext(ATable.Program);
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -111,16 +107,20 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected Stack FContext;
 		
-		public void SnapshotContext(ServerProcess AProcess)
+		public void SnapshotContext(Program AProgram)
 		{
-			FContext = new Stack(AProcess.Stack.MaxStackDepth, AProcess.Stack.MaxCallDepth);
-			for (int LIndex = AProcess.Stack.Count - 1; LIndex >= 0; LIndex--)
-				FContext.Push(DataValue.CopyValue(AProcess, AProcess.Stack.Peek(LIndex)));
+			if (AProgram != null)
+			{
+				FContext = new Stack(AProgram.Stack.MaxStackDepth, AProgram.Stack.MaxCallDepth);
+				for (int LIndex = AProgram.Stack.Count - 1; LIndex >= 0; LIndex--)
+					FContext.Push(DataValue.CopyValue(AProgram.ValueManager, AProgram.Stack.Peek(LIndex)));
+			}
 		}
 		
-		public void SwitchContext(ServerProcess AProcess)
+		public void SwitchContext(Program AProgram)
 		{
-			FContext = AProcess.SwitchContext(FContext);
+			if (AProgram != null)
+				FContext = AProgram.SwitchContext(FContext);
 		}
 		
 		// ID

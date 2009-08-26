@@ -4,23 +4,17 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Security.Permissions;
-using System.Security.Cryptography;
-
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	public enum TableVarColumnType { Stored, Virtual, RowExists, Level, Sequence, InternalID }
 	
 	/// <remarks> Provides the representation for a column header (Name:DataType) </remarks>
@@ -1112,25 +1106,6 @@ namespace Alphora.Dataphor.DAE.Schema
 				FColumns.Add(new OrderColumn(AKey.Columns[LIndex], true, true));
 		}
 		
-		public Order(Key AKey, Plan APlan) : base(String.Empty)
-		{
-			OrderColumn LOrderColumn;
-			TableVarColumn LColumn;
-			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
-			{
-				LColumn = AKey.Columns[LIndex];
-				LOrderColumn = new OrderColumn(LColumn, true, true);
-				if (LColumn.DataType is Schema.ScalarType)
-					LOrderColumn.Sort = ((Schema.ScalarType)LColumn.DataType).GetUniqueSort(APlan);
-				else
-					LOrderColumn.Sort = Compiler.CompileSortDefinition(APlan, LColumn.DataType);
-				LOrderColumn.IsDefaultSort = true;
-				if (LOrderColumn.Sort.HasDependencies())
-					APlan.AttachDependencies(LOrderColumn.Sort.Dependencies);
-				FColumns.Add(LOrderColumn);
-			}
-		}
-
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Order"), DisplayName); } }
 
 		public override int CatalogObjectID { get { return FTableVar == null ? -1 : FTableVar.ID; } }
@@ -1249,33 +1224,6 @@ namespace Alphora.Dataphor.DAE.Schema
             return base.Equals(AObject);
         }
 
-		// returns true if the order includes the key as a subset, including the use of the unique sort algorithm for the type of each column
-		public bool Includes(Plan APlan, Key AKey)
-		{
-			Schema.TableVarColumn LColumn;
-			for (int LIndex = 0; LIndex < AKey.Columns.Count; LIndex++)
-			{
-				LColumn = AKey.Columns[LIndex];
-				if (!Columns.Contains(LColumn.Name, Compiler.GetUniqueSort(APlan, LColumn.DataType)))
-					return false;
-			}
-
-			return true;
-		}
-		
-		public bool Includes(Plan APlan, Order AOrder)
-		{
-			Schema.OrderColumn LColumn;
-			for (int LIndex = 0; LIndex < AOrder.Columns.Count; LIndex++)
-			{
-				LColumn = AOrder.Columns[LIndex];
-				if (!Columns.Contains(LColumn.Column.Name, LColumn.Sort))
-					return false;
-			}
-			
-			return true;
-		}
-		
         // GetHashCode
         public override int GetHashCode()
         {
@@ -1603,7 +1551,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				LColumn = Columns[LIndex];
 				// TODO: Fix this boundary-cross
-				Schema.Sort LSort = Compiler.GetUniqueSort(ASession.ServerProcess.Plan, LColumn.DataType);
+				Schema.Sort LSort = ASession.ServerProcess.ValueManager.GetUniqueSort(LColumn.DataType);
 				if (LSort != null)
 					LSort.IncludeDependencies(ASession, ASourceCatalog, ATargetCatalog, AMode);
 			}
@@ -1843,14 +1791,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Keys FKeys;
 		public Keys Keys { get { return FKeys; } }
 		
-		public Key KeyFromKeyColumnDefinitions(KeyColumnDefinitions AKeyColumns)
-		{
-			Key LKey = new Schema.Key();
-			foreach (KeyColumnDefinition LColumn in AKeyColumns)
-				LKey.Columns.Add(Columns[LColumn.ColumnName]);
-			return LKey;
-		}
-		
 		/// <summary>Returns the index of the key with the same columns as the given key.</summary>
 		/// <remarks>
 		/// This is not the same as using Keys.IndexOf, because that method is based on key equality,
@@ -1865,73 +1805,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			return -1;
 		}
 		
-		public Key FindKey(KeyColumnDefinitions AKeyColumns)
-		{
-			Key LKey = KeyFromKeyColumnDefinitions(AKeyColumns);
-			
-			int LIndex = IndexOfKey(LKey);
-			if (LIndex >= 0)
-				return Keys[LIndex];
-			
-			throw new SchemaException(SchemaException.Codes.ObjectNotFound, LKey.Name);
-		}
-		
-		public Key FindKey(KeyDefinitionBase AKeyDefinition)
-		{
-			return FindKey(AKeyDefinition.Columns);
-		}
-		
-		public Schema.Key FindClusteringKey()
-		{
-			Schema.Key LMinimumKey = null;
-			foreach (Schema.Key LKey in Keys)
-			{
-				if (Convert.ToBoolean(MetaData.GetTag(LKey.MetaData, "DAE.IsClustered", "false")))
-					return LKey;
-				
-				if (!LKey.IsSparse)
-					if (LMinimumKey == null)
-						LMinimumKey = LKey;
-					else
-						if (LMinimumKey.Columns.Count > LKey.Columns.Count)
-							LMinimumKey = LKey;
-			}
-					
-			if (LMinimumKey != null)
-				return LMinimumKey;
-
-			throw new SchemaException(SchemaException.Codes.KeyRequired, DisplayName);
-		}
-		
-		public Schema.Order FindClusteringOrder(Plan APlan)
-		{
-			Schema.Key LMinimumKey = null;
-			foreach (Schema.Key LKey in Keys)
-			{
-				if (Convert.ToBoolean(MetaData.GetTag(LKey.MetaData, "DAE.IsClustered", "false")))
-					return new Schema.Order(LKey, APlan);
-					
-				if (!LKey.IsSparse)
-					if (LMinimumKey == null)
-						LMinimumKey = LKey;
-					else
-						if (LMinimumKey.Columns.Count > LKey.Columns.Count)
-							LMinimumKey = LKey;
-			}
-
-			foreach (Schema.Order LOrder in Orders)
-				if (Convert.ToBoolean(MetaData.GetTag(LOrder.MetaData, "DAE.IsClustered", "false")))
-					return LOrder;
-					
-			if (LMinimumKey != null)
-				return new Schema.Order(LMinimumKey, APlan);
-					
-			if (Orders.Count > 0)
-				return Orders[0];
-				
-			throw new SchemaException(SchemaException.Codes.KeyRequired, DisplayName);
-		}
-		
 		// EnsureTableVarColumns()
 		public void EnsureTableVarColumns()
 		{
@@ -1940,26 +1813,9 @@ namespace Alphora.Dataphor.DAE.Schema
 					FColumns.Add(new Schema.TableVarColumn(LColumn));
 		}
 		
-		public void EnsureKey(Plan APlan)
-		{
-			if (FKeys.Count == 0)
-			{
-				Schema.Key LKey = new Schema.Key();
-				foreach (Schema.TableVarColumn LColumn in FColumns)
-					if (Compiler.SupportsComparison(APlan, LColumn.DataType))
-						LKey.Columns.Add(LColumn);
-				FKeys.Add(LKey);
-			}
-		}
-
 		// Orders
 		private Orders FOrders;
 		public Orders Orders { get { return FOrders; } }
-		
-		public Order OrderFromOrderDefinition(Plan APlan, OrderDefinitionBase AOrderDefinition)
-		{
-			return Compiler.CompileOrderDefinition(APlan, this, AOrderDefinition, false);
-		}
 		
 		public int IndexOfOrder(Order AOrder)
 		{
@@ -1968,17 +1824,6 @@ namespace Alphora.Dataphor.DAE.Schema
 					return LIndex;
 					
 			return -1;
-		}
-		
-		public Order FindOrder(Plan APlan, OrderDefinitionBase AOrderDefinition)
-		{
-			Order LOrder = OrderFromOrderDefinition(APlan, AOrderDefinition);
-			
-			int LIndex = IndexOfOrder(LOrder);
-			if (LIndex >= 0)
-				return Orders[LIndex];
-
-			throw new SchemaException(SchemaException.Codes.ObjectNotFound, LOrder.Name);
 		}
 		
 		// Constraints

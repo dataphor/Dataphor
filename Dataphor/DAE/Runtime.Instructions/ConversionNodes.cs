@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToString(System.Boolean) : System.String </remarks>
 	public class BooleanToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -67,7 +67,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToBoolean(System.String) : System.Boolean </remarks>
 	public class StringToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToString(System.Byte) : System.String </remarks>
 	public class ByteToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -95,7 +95,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToByte(System.String) : System.Byte </remarks>
 	public class StringToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -110,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToString(System.SByte) : System.String </remarks>
 	public class SByteToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -124,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToSByte(System.String) : System.SByte </remarks>
 	public class StringToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -139,7 +139,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToString(System.Short) : System.String </remarks>
 	public class ShortToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -153,7 +153,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToShort(System.String) : System.Short </remarks>
 	public class StringToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -168,7 +168,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToString(System.UShort) : System.String </remarks>
 	public class UShortToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -182,7 +182,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToUShort(System.String) : System.UShort </remarks>
 	public class StringToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -197,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToString(System.Integer) : System.String </remarks>
 	public class IntegerToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -211,7 +211,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToInteger(System.String) : System.Integer </remarks>
 	public class StringToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToString(System.UInteger) : System.String </remarks>
 	public class UIntegerToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToUInteger(System.String) : System.UInteger </remarks>
 	public class StringToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToString(System.Long) : System.String </remarks>
 	public class LongToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -269,7 +269,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToLong(System.String) : System.Long </remarks>
 	public class StringToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -284,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToString(System.ULong) : System.String </remarks>
 	public class ULongToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -298,7 +298,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToULong(System.String) : System.ULong </remarks>
 	public class StringToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -313,7 +313,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator ToString(AGuid : Guid) : string </remarks>
     public class GuidToStringNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -327,7 +327,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     /// <remarks> operator ToGuid(AString : string) : Guid </remarks>
 	public class StringToGuidNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -341,7 +341,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToBoolean(System.Byte) : System.Boolean </remarks>
 	public class ByteToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -355,7 +355,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToByte(System.Boolean) : System.Byte </remarks>
 	public class BooleanToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -370,7 +370,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToBoolean(System.SByte) : System.Boolean </remarks>
 	public class SByteToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -384,7 +384,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToSByte(System.Boolean) : System.SByte </remarks>
 	public class BooleanToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -399,7 +399,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToBoolean(System.Short) : System.Boolean </remarks>
 	public class ShortToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -413,7 +413,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToShort(System.Boolean) : System.Short </remarks>
 	public class BooleanToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -428,7 +428,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToBoolean(System.UShort) : System.Boolean </remarks>
 	public class UShortToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -442,7 +442,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToUShort(System.Boolean) : System.UShort </remarks>
 	public class BooleanToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -457,7 +457,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToBoolean(System.Integer) : System.Boolean </remarks>
 	public class IntegerToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -471,7 +471,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToInteger(System.Boolean) : System.Integer </remarks>
 	public class BooleanToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -486,7 +486,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToBoolean(System.UInteger) : System.Boolean </remarks>
 	public class UIntegerToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -500,7 +500,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToUInteger(System.Boolean) : System.UInteger </remarks>
 	public class BooleanToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -515,7 +515,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToBoolean(System.Long) : System.Boolean </remarks>
 	public class LongToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -529,7 +529,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToLong(System.Boolean) : System.Long </remarks>
 	public class BooleanToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -544,7 +544,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToBoolean(System.ULong) : System.Boolean </remarks>
 	public class ULongToBooleanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -558,7 +558,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator BooleanToULong(System.Boolean) : System.ULong </remarks>
 	public class BooleanToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -574,7 +574,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToSByte(System.Byte) : System.SByte </remarks>
 	public class ByteToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -588,7 +588,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToByte(System.SByte) : System.Byte </remarks>
 	public class SByteToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -603,7 +603,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToShort(System.Byte) : System.Short </remarks>
 	public class ByteToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -617,7 +617,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToByte(System.Short) : System.Byte </remarks>
 	public class ShortToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -637,7 +637,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToUShort(System.Byte) : System.UShort </remarks>
 	public class ByteToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -651,7 +651,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToByte(System.UShort) : System.Byte </remarks>
 	public class UShortToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -666,7 +666,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToInteger(System.Byte) : System.Integer </remarks>
 	public class ByteToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -680,7 +680,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToByte(System.Integer) : System.Byte </remarks>
 	public class IntegerToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -700,7 +700,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToUInteger(System.Byte) : System.UInteger </remarks>
 	public class ByteToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -714,7 +714,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToByte(System.UInteger) : System.Byte </remarks>
 	public class UIntegerToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -729,7 +729,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToLong(System.Byte) : System.Long </remarks>
 	public class ByteToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -743,7 +743,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToByte(System.Long) : System.Byte </remarks>
 	public class LongToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -763,7 +763,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ByteToULong(System.Byte) : System.ULong </remarks>
 	public class ByteToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -777,7 +777,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToByte(System.ULong) : System.Byte </remarks>
 	public class ULongToByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -793,7 +793,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToShort(System.SByte) : System.Short </remarks>
 	public class SByteToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -807,7 +807,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToSByte(System.Short) : System.SByte </remarks>
 	public class ShortToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -821,7 +821,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToUShort(System.SByte) : System.UShort </remarks>
 	public class SByteToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -835,7 +835,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToSByte(System.UShort) : System.SByte </remarks>
 	public class UShortToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -849,7 +849,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToInteger(System.SByte) : System.Integer </remarks>
 	public class SByteToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -863,7 +863,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToSByte(System.Integer) : System.SByte </remarks>
 	public class IntegerToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -877,7 +877,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToUInteger(System.SByte) : System.UInteger </remarks>
 	public class SByteToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -891,7 +891,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToSByte(System.UInteger) : System.SByte </remarks>
 	public class UIntegerToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -905,7 +905,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToLong(System.SByte) : System.Long </remarks>
 	public class SByteToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -919,7 +919,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToSByte(System.Long) : System.SByte </remarks>
 	public class LongToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -933,7 +933,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator SByteToULong(System.SByte) : System.ULong </remarks>
 	public class SByteToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -947,7 +947,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToSByte(System.ULong) : System.SByte </remarks>
 	public class ULongToSByteNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -963,7 +963,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToUShort(System.Short) : System.UShort </remarks>
 	public class ShortToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -977,7 +977,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToShort(System.UShort) : System.Short </remarks>
 	public class UShortToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -992,7 +992,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToInteger(System.Short) : System.Integer </remarks>
 	public class ShortToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1006,7 +1006,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToShort(System.Integer) : System.Short </remarks>
 	public class IntegerToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1026,7 +1026,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToUInteger(System.Short) : System.UInteger </remarks>
 	public class ShortToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1040,7 +1040,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToShort(System.UInteger) : System.Short </remarks>
 	public class UIntegerToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1055,7 +1055,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToLong(System.Short) : System.Long </remarks>
 	public class ShortToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1069,7 +1069,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToShort(System.Long) : System.Short </remarks>
 	public class LongToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1089,7 +1089,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ShortToULong(System.Short) : System.ULong </remarks>
 	public class ShortToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1103,7 +1103,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToShort(System.ULong) : System.Short </remarks>
 	public class ULongToShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1117,7 +1117,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToInteger(System.UShort) : System.Integer </remarks>
 	public class UShortToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1131,7 +1131,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToUShort(System.Integer) : System.UShort </remarks>
 	public class IntegerToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1145,7 +1145,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToUInteger(System.UShort) : System.UInteger </remarks>
 	public class UShortToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1159,7 +1159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToUShort(System.UInteger) : System.UShort </remarks>
 	public class UIntegerToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1173,7 +1173,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToLong(System.UShort) : System.Long </remarks>
 	public class UShortToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1187,7 +1187,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToUShort(System.Long) : System.UShort </remarks>
 	public class LongToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1201,7 +1201,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UShortToULong(System.UShort) : System.ULong </remarks>
 	public class UShortToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1215,7 +1215,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToUShort(System.ULong) : System.UShort </remarks>
 	public class ULongToUShortNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1229,7 +1229,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToUInteger(System.Integer) : System.UInteger </remarks>
 	public class IntegerToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1243,7 +1243,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToInteger(System.UInteger) : System.Integer </remarks>
 	public class UIntegerToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1258,7 +1258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToLong(System.Integer) : System.Long </remarks>
 	public class IntegerToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1272,7 +1272,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToInteger(System.Long) : System.Integer </remarks>
 	public class LongToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1292,7 +1292,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToULong(System.Integer) : System.ULong </remarks>
 	public class IntegerToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1306,7 +1306,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToInteger(System.ULong) : System.Integer </remarks>
 	public class ULongToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1320,7 +1320,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToLong(System.UInteger) : System.Long </remarks>
 	public class UIntegerToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1334,7 +1334,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToUInteger(System.Long) : System.UInteger </remarks>
 	public class LongToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1348,7 +1348,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToULong(System.UInteger) : System.ULong </remarks>
 	public class UIntegerToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1362,7 +1362,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToUInteger(System.ULong) : System.UInteger </remarks>
 	public class ULongToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1376,7 +1376,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToULong(System.Long) : System.ULong </remarks>
 	public class LongToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1390,7 +1390,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToLong(System.ULong) : System.Long </remarks>
 	public class ULongToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1406,7 +1406,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DoubleToString(System.Double) : System.String </remarks>
 	public class DoubleToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToString((double)AArgument1);
 		}
@@ -1415,7 +1415,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToDouble(System.String) : System.Double </remarks>
 	public class StringToDoubleNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToDouble((string)AArgument1);
 		}
@@ -1424,7 +1424,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DoubleToInteger(System.Double) : System.Integer </remarks>
 	public class DoubleToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToInt32((double)AArgument1());
 		}
@@ -1433,7 +1433,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToDouble(System.Integer) : System.Double </remarks>
 	public class IntegerToDoubleNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToDouble((int)AArgument1);
 		}
@@ -1443,7 +1443,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToString(System.Decimal) : System.String </remarks>
 	public class DecimalToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1457,7 +1457,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator MoneyToString(System.Decimal) : System.String </remarks>
 	public class MoneyToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1471,7 +1471,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToDecimal(System.String) : System.Decimal </remarks>
 	public class StringToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1485,7 +1485,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToMoney(System.String) : System.Decimal </remarks>
 	public class StringToMoneyNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1499,7 +1499,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToInteger(System.Decimal) : System.Integer </remarks>
 	public class DecimalToIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1518,7 +1518,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IntegerToDecimal(System.Integer) : System.Decimal </remarks>
 	public class IntegerToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1533,7 +1533,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToDouble(System.Decimal) : System.Double </remarks>
 	public class DecimalToDoubleNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToDouble((decimal)AArgument1);
 		}
@@ -1542,7 +1542,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DoubleToDecimal(System.Double) : System.Decimal </remarks>
 	public class DoubleToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			return Convert.ToDecimal((double)AArgument1);
 		}
@@ -1551,7 +1551,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 	public class DecimalToMoneyNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1566,7 +1566,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToUInteger(System.Decimal) : System.UInteger </remarks>
 	public class DecimalToUIntegerNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1580,7 +1580,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator UIntegerToDecimal(System.UInteger) : System.Decimal </remarks>
 	public class UIntegerToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1595,7 +1595,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToLong(System.Decimal) : System.Long </remarks>
 	public class DecimalToLongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1614,7 +1614,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator LongToDecimal(System.Long) : System.Decimal </remarks>
 	public class LongToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1629,7 +1629,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator DecimalToULong(System.Decimal) : System.ULong </remarks>
 	public class DecimalToULongNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1643,7 +1643,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator ULongToDecimal(System.ULong) : System.Decimal </remarks>
 	public class ULongToDecimalNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1658,7 +1658,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator System.TimeSpan(System.DateTime) : System.TimeSpan; </remarks>
 	public class DateTimeToTimeSpanNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1672,7 +1672,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator System.DateTime(System.TimeSpan) : System.DateTime; </remarks>
 	public class TimeSpanToDateTimeNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1687,7 +1687,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator IStringToString(System.IString) : System.String </remarks>
 	public class IStringToStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -1701,7 +1701,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 	/// <remarks> operator StringToIString(System.String) : System.IString </remarks>
 	public class StringToIStringNode : UnaryInstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)

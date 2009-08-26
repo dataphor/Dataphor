@@ -231,13 +231,13 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
-		public abstract object ToScalar(IServerProcess AProcess, object AValue);
+		public abstract object ToScalar(IValueManager AManager, object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for a particular data type.</summary>
 		public abstract object FromScalar(object AValue);
 		
 		/// <summary>Override this method to provide transformation services to the device for stream access data types.</summary>
-		public virtual Stream GetStreamAdapter(IServerProcess AProcess, Stream AStream)
+		public virtual Stream GetStreamAdapter(IValueManager AManager, Stream AStream)
 		{
 			return AStream;
 		}
@@ -863,46 +863,38 @@ namespace Alphora.Dataphor.DAE.Schema
 				LServerCatalog.Add(ATableVar);
 			else
 			{
-				AProcess.Stack.PushWindow(0);
+				DataParams LParams = new DataParams();
+				LParams.Add(new DataParam("ADeviceID", AProcess.DataTypes.SystemInteger, Modifier.In, ID));
+				IServerExpressionPlan LPlan = 
+					((IServerProcess)AProcess).PrepareExpression
+					(
+						@"
+							select System.ObjectDependencies where Dependency_Object_ID = ADeviceID { Object_ID ID }
+								join (Objects where Type = 'BaseTableVar' { ID })
+						",
+						LParams
+					);
 				try
 				{
-					DataParams LParams = new DataParams();
-					LParams.Add(new DataParam("ADeviceID", AProcess.DataTypes.SystemInteger, Modifier.In, ID));
-					IServerExpressionPlan LPlan = 
-						((IServerProcess)AProcess).PrepareExpression
-						(
-							@"
-								select System.ObjectDependencies where Dependency_Object_ID = ADeviceID { Object_ID ID }
-									join (Objects where Type = 'BaseTableVar' { ID })
-							",
-							LParams
-						);
+					IServerCursor LCursor = LPlan.Open(LParams);
 					try
 					{
-						IServerCursor LCursor = LPlan.Open(LParams);
-						try
+						while (LCursor.Next())
 						{
-							while (LCursor.Next())
+							using (Row LRow = LCursor.Select())
 							{
-								using (Row LRow = LCursor.Select())
-								{
-									LServerCatalog.Add(AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0]));
-								}
+								LServerCatalog.Add(AProcess.CatalogDeviceSession.ResolveCatalogObject((int)LRow[0]));
 							}
-						}
-						finally
-						{
-							LPlan.Close(LCursor);
 						}
 					}
 					finally
 					{
-						((IServerProcess)AProcess).UnprepareExpression(LPlan);
+						LPlan.Close(LCursor);
 					}
 				}
 				finally
 				{
-					AProcess.Stack.PopWindow();
+					((IServerProcess)AProcess).UnprepareExpression(LPlan);
 				}
 			}
 
@@ -1506,36 +1498,45 @@ namespace Alphora.Dataphor.DAE.Schema
 			UpdateOperation LUpdateOperation;
 			DeleteOperation LDeleteOperation;
 			Exception LException = null;
-			for (int LIndex = ATransaction.Operations.Count - 1; LIndex >= 0; LIndex--)
+			Program LProgram = new Program(ServerProcess);
+			LProgram.Start(null);
+			try
 			{
-				try
+				for (int LIndex = ATransaction.Operations.Count - 1; LIndex >= 0; LIndex--)
 				{
-					LOperation = ATransaction.Operations[LIndex];
 					try
 					{
-						LInsertOperation = LOperation as InsertOperation;
-						if (LInsertOperation != null)
-							InternalInsertRow(LInsertOperation.TableVar, LInsertOperation.Row, LInsertOperation.ValueFlags);
+						LOperation = ATransaction.Operations[LIndex];
+						try
+						{
+							LInsertOperation = LOperation as InsertOperation;
+							if (LInsertOperation != null)
+								InternalInsertRow(LProgram, LInsertOperation.TableVar, LInsertOperation.Row, LInsertOperation.ValueFlags);
 
-						LUpdateOperation = LOperation as UpdateOperation;
-						if (LUpdateOperation != null)
-							InternalUpdateRow(LUpdateOperation.TableVar, LUpdateOperation.OldRow, LUpdateOperation.NewRow, LUpdateOperation.ValueFlags);
+							LUpdateOperation = LOperation as UpdateOperation;
+							if (LUpdateOperation != null)
+								InternalUpdateRow(LProgram, LUpdateOperation.TableVar, LUpdateOperation.OldRow, LUpdateOperation.NewRow, LUpdateOperation.ValueFlags);
 
-						LDeleteOperation = LOperation as DeleteOperation;
-						if (LDeleteOperation != null)
-							InternalDeleteRow(LDeleteOperation.TableVar, LDeleteOperation.Row);
+							LDeleteOperation = LOperation as DeleteOperation;
+							if (LDeleteOperation != null)
+								InternalDeleteRow(LProgram, LDeleteOperation.TableVar, LDeleteOperation.Row);
+						}
+						finally
+						{
+							ATransaction.Operations.RemoveAt(LIndex);
+							LOperation.Dispose();
+						}
 					}
-					finally
+					catch (Exception E)
 					{
-						ATransaction.Operations.RemoveAt(LIndex);
-						LOperation.Dispose();
+						LException = E;
+						ServerProcess.ServerSession.Server.LogError(E);
 					}
 				}
-				catch (Exception E)
-				{
-					LException = E;
-					ServerProcess.ServerSession.Server.LogError(E);
-				}
+			}
+			finally
+			{
+				LProgram.Stop(null);
 			}
 			
 			if (LException != null)
@@ -1587,18 +1588,18 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Execute
-        protected virtual object InternalExecute(DevicePlan ADevicePlan)
+        protected virtual object InternalExecute(Program AProgram, DevicePlan ADevicePlan)
         {
 			throw new DAE.Device.DeviceException(DAE.Device.DeviceException.Codes.InvalidExecuteRequest, Device.Name, ADevicePlan.Node.GetType().Name);
         }
         
-        public object Execute(DevicePlan ADevicePlan)
+        public object Execute(Program AProgram, DevicePlan ADevicePlan)
         {
 			if (ADevicePlan.Node is DropTableNode)
 				RemoveTransactionReferences(((DropTableNode)ADevicePlan.Node).Table);
 			try
 			{
-				return InternalExecute(ADevicePlan);
+				return InternalExecute(AProgram, ADevicePlan);
 			}
 			catch (Exception LException)
 			{
@@ -1613,12 +1614,12 @@ namespace Alphora.Dataphor.DAE.Schema
         }
         
         // Row level operations are provided as implementation details only, not exposed through the Dataphor language.
-        protected virtual void InternalInsertRow(TableVar ATable, Row ARow, BitArray AValueFlags)
+        protected virtual void InternalInsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelInsert, Device.Name);
         }
 
-        public void InsertRow(TableVar ATable, Row ARow, BitArray AValueFlags)
+        public void InsertRow(Program AProgram, TableVar ATable, Row ARow, BitArray AValueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1626,7 +1627,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			try
 			{
-				InternalInsertRow(ATable, ARow, AValueFlags);
+				InternalInsertRow(AProgram, ATable, ARow, AValueFlags);
 			}
 			catch (Exception LException)
 			{
@@ -1637,12 +1638,12 @@ namespace Alphora.Dataphor.DAE.Schema
 				Transactions.CurrentTransaction().Operations.Add(new DeleteOperation(ATable, (Row)ARow.Copy()));
         }
         
-        protected virtual void InternalUpdateRow(TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        protected virtual void InternalUpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelUpdate, Device.Name);
         }
         
-        public void UpdateRow(TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
+        public void UpdateRow(Program AProgram, TableVar ATable, Row AOldRow, Row ANewRow, BitArray AValueFlags)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
@@ -1650,7 +1651,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			
 			try
 			{
-				InternalUpdateRow(ATable, AOldRow, ANewRow, AValueFlags);
+				InternalUpdateRow(AProgram, ATable, AOldRow, ANewRow, AValueFlags);
 			}
 			catch (Exception LException)
 			{
@@ -1661,19 +1662,19 @@ namespace Alphora.Dataphor.DAE.Schema
 				Transactions.CurrentTransaction().Operations.Add(new UpdateOperation(ATable, (Row)ANewRow.Copy(), (Row)AOldRow.Copy(), AValueFlags));
         }
         
-        protected virtual void InternalDeleteRow(TableVar ATable, Row ARow)
+        protected virtual void InternalDeleteRow(Program AProgram, TableVar ATable, Row ARow)
         {
 			throw new SchemaException(SchemaException.Codes.CapabilityNotSupported, DeviceCapability.RowLevelDelete, Device.Name);
 		}
         
-        public void DeleteRow(TableVar ATable, Row ARow)
+        public void DeleteRow(Program AProgram, TableVar ATable, Row ARow)
         {
 			if (ServerProcess.NonLogged)
 				CheckCapability(DeviceCapability.NonLoggedOperations);
 			CheckCapability(DeviceCapability.RowLevelDelete);
 			try
 			{
-				InternalDeleteRow(ATable, ARow);
+				InternalDeleteRow(AProgram, ATable, ARow);
 			}
 			catch (Exception LException)
 			{

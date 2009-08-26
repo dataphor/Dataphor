@@ -24,7 +24,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsStringSelectorNode
     public class BooleanAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsStringReadAccessorNode
     public class BooleanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsStringWriteAccessorNode
     public class BooleanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -63,7 +63,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsDisplayStringSelectorNode
     public class BooleanAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsDisplayStringReadAccessorNode
     public class BooleanAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BooleanAsDisplayStringWriteAccessorNode
     public class BooleanAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ByteAsStringSelectorNode
     public class ByteAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -115,7 +115,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ByteAsStringReadAccessorNode
     public class ByteAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -128,7 +128,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ByteAsStringWriteAccessorNode
     public class ByteAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -141,7 +141,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ShortAsStringSelectorNode
     public class ShortAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -154,7 +154,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ShortAsStringReadAccessorNode
     public class ShortAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -167,7 +167,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // ShortAsStringWriteAccessorNode
     public class ShortAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -180,7 +180,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // IntegerAsStringSelectorNode
     public class IntegerAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -193,7 +193,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // IntegerAsStringReadAccessorNode
     public class IntegerAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -206,7 +206,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // IntegerAsStringWriteAccessorNode
     public class IntegerAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -219,7 +219,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // LongAsStringSelectorNode
     public class LongAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -232,7 +232,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // LongAsStringReadAccessorNode
     public class LongAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // LongAsStringWriteAccessorNode
     public class LongAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -258,7 +258,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DecimalAsStringSelectorNode
     public class DecimalAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -271,7 +271,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DecimalAsStringReadAccessorNode
     public class DecimalAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -284,7 +284,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DecimalAsStringWriteAccessorNode
     public class DecimalAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -297,7 +297,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GuidAsStringSelectorNode
     public class GuidAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -310,7 +310,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GuidAsStringReadAccessorNode
     public class GuidAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -323,7 +323,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GuidAsStringWriteAccessorNode
     public class GuidAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -336,7 +336,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // MoneyAsStringSelectorNode
     public class MoneyAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -349,7 +349,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // MoneyAsStringReadAccessorNode
     public class MoneyAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -362,7 +362,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // MoneyAsDisplayStringReadAccessorNode
     public class MoneyAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -375,7 +375,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // MoneyAsStringWriteAccessorNode
     public class MoneyAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -388,7 +388,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateTimeAsStringSelectorNode
     public class DateTimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -401,7 +401,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateTimeAsStringReadAccessorNode
     public class DateTimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -414,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateTimeAsStringWriteAccessorNode
     public class DateTimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -427,7 +427,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateAsStringSelectorNode
     public class DateAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -440,7 +440,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateAsStringReadAccessorNode
     public class DateAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -453,7 +453,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // DateAsStringWriteAccessorNode
     public class DateAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -752,7 +752,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			return LTimeSpan;
 		}
 
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -765,7 +765,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // TimeSpanAsStringReadAccessorNode
     public class TimeSpanAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -778,7 +778,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // TimeSpanAsStringWriteAccessorNode
     public class TimeSpanAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -791,7 +791,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // TimeAsStringSelectorNode
     public class TimeAsStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -804,7 +804,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // TimeAsStringReadAccessorNode
     public class TimeAsStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -817,7 +817,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // TimeAsStringWriteAccessorNode
     public class TimeAsStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			#if NILPROPOGATION
 			if (AArgument2 == null)
@@ -830,7 +830,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BinaryAsDisplayStringSelectorNode
     public class BinaryAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
@@ -839,7 +839,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BinaryAsDisplayStringReadAccessorNode
     public class BinaryAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -852,7 +852,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // BinaryAsDisplayStringWriteAccessorNode
     public class BinaryAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Binary");
 		}
@@ -861,7 +861,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringSelectorNode
     public class GraphicAsDisplayStringSelectorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}
@@ -870,7 +870,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringReadAccessorNode
     public class GraphicAsDisplayStringReadAccessorNode : UnaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1)
+		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
 			#if NILPROPOGATION
 			if (AArgument1 == null)
@@ -883,7 +883,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
     // GraphicAsDisplayStringWriteAccessorNode
     public class GraphicAsDisplayStringWriteAccessorNode : BinaryInstructionNode
     {
-		public override object InternalExecute(ServerProcess AProcess, object AArgument1, object AArgument2)
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
 		{
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}

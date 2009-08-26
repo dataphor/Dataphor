@@ -290,7 +290,7 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				if (IsMasterSetup() && !MasterSource.DataSet.IsEmpty())
 				{
-					Row LOriginalRow = new Row(ARow.Process, ARow.DataType);
+					Row LOriginalRow = new Row(ARow.Manager, ARow.DataType);
 					try
 					{
 						Schema.TableVarColumn LColumn;

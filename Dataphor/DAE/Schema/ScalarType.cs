@@ -3,6 +3,7 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
 using System.IO;
 using System.Text;
@@ -12,22 +13,20 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Security.Cryptography;
 
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Language;
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Device.Catalog;
-
-// TODO: Need to refactor these dependencies
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+
+	// TODO: Need to refactor these dependencies
+	//using Alphora.Dataphor.DAE.Compiling;
+	//using Alphora.Dataphor.DAE.Server;
+	//using Alphora.Dataphor.DAE.Streams;
+	//using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data; // Need to move NativeRepresentation resolution to the ValueManager
+	using Alphora.Dataphor.DAE.Runtime.Instructions; // PlanNode
+
 	public class Property : Object
 	{
 		public Property(int AID, string AName) : base(AID, AName) {}
@@ -415,104 +414,18 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 
         private PlanNode FReadNode;
-        
-        private void EnsureReadNode(Plan APlan)
+        public PlanNode ReadNode
         {
-			if (FReadNode == null)
-			{
-				if (FProperties.Count > 1)
-					throw new SchemaException(SchemaException.Codes.InvalidConversionRepresentation, Name, FScalarType.Name);
-					
-				APlan.Symbols.Push(new Symbol("AValue", FScalarType));
-				try
-				{
-					FReadNode = Compiler.Bind(APlan, Compiler.EmitPropertyReadNode(APlan, new StackReferenceNode("AValue", FScalarType, 0, true), ScalarType, FProperties[0]));
-				}
-				finally
-				{
-					APlan.Symbols.Pop();
-				}
-			}
-        }
+			get { return FReadNode; }
+			set { FReadNode = value; }
+		}
         
         private PlanNode FWriteNode;
-        
-        private void EnsureWriteNode(Plan APlan)
+        public PlanNode WriteNode
         {
-			if (FWriteNode == null)
-			{
-				if (FProperties.Count > 1)
-					throw new SchemaException(SchemaException.Codes.InvalidConversionRepresentation, Name, FScalarType.Name);
-					
-				APlan.Symbols.Push(new Symbol("AValue", FScalarType));
-				try
-				{
-					APlan.Symbols.Push(new Symbol("ANewValue", FProperties[0].DataType));
-					try
-					{
-						FWriteNode = Compiler.Bind(APlan, Compiler.EmitPropertyWriteNode(APlan, null, FProperties[0], new StackReferenceNode("ANewValue", FProperties[0].DataType, 0, true), new StackReferenceNode("AValue", FScalarType, 1, true))).Nodes[1];
-					}
-					finally
-					{
-						APlan.Symbols.Pop();
-					}
-				}
-				finally
-				{
-					APlan.Symbols.Pop();
-				}					
-			}
-        }
-        
-        public DataValue GetAsDataValue(ServerProcess AProcess, object AValue)
-        {
-			EnsureReadNode(AProcess.Plan);
-			AProcess.Stack.Push(AValue);
-			try
-			{
-				return DataValue.FromNative(AProcess, ScalarType, FReadNode.Execute(AProcess));
-			}
-			finally
-			{
-				AProcess.Stack.Pop();
-			}
-        }
-        
-        public object GetAsNative(ServerProcess AProcess, object AValue)
-        {
-			EnsureReadNode(AProcess.Plan);
-			AProcess.Stack.Push(AValue);
-			try
-			{
-				return FReadNode.Execute(AProcess);
-			}
-			finally
-			{
-				AProcess.Stack.Pop();
-			}
-        }
-        
-        public object SetAsNative(ServerProcess AProcess, object AValue, object ANewValue)
-        {
-			EnsureWriteNode(AProcess.Plan);
-			AProcess.Stack.Push(AValue);
-			try
-			{
-				AProcess.Stack.Push(ANewValue);
-				try
-				{
-					return FWriteNode.Execute(AProcess);
-				}
-				finally
-				{
-					AProcess.Stack.Pop();
-				}
-			}
-			finally
-			{
-				AProcess.Stack.Pop();
-			}
-        }
+			get { return FWriteNode; }
+			set { FWriteNode = value; }
+		}
         
 		public bool IsNativeAccessorRepresentation(NativeAccessor ANativeAccessor, bool AExplicit)
 		{
@@ -1043,131 +956,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public class OperatorResolutionCache : System.Object
-	{
-		private Hashtable FResolutions = new Hashtable();
-
-		public OperatorBindingContext this[OperatorBindingContext AContext]
-		{
-			get
-			{
-				return FResolutions[AContext] as OperatorBindingContext;
-			}
-		}		
-		
-		public void Add(OperatorBindingContext AContext)
-		{
-			if (!FResolutions.Contains(AContext))
-				FResolutions.Add(AContext, AContext);
-		}
-		
-		public void Clear()
-		{
-			FResolutions.Clear();
-		}
-		
-		/// <summary>Removes cached resolutions for this operator, if any.</summary>
-		public void Clear(Operator AOperator)
-		{
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (((OperatorBindingContext)LEntry.Value).Operator == AOperator)
-					LResolutions.Add(LEntry.Value);
-			
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
-		}
-		
-		/// <summary>Removes cached resolutions for the given operator name, if any.</summary>
-		public void Clear(string AOperatorName)
-		{
-			string LUnqualifiedName = Schema.Object.Unqualify(AOperatorName);
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (Schema.Object.NamesEqual(Schema.Object.EnsureUnrooted(((OperatorBindingContext)LEntry.Value).OperatorName), LUnqualifiedName))
-					LResolutions.Add(LEntry.Value);
-					
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
-		}
-		
-		/// <summary>Removes cached resolutions involving conversions referencing the given scalar type, if any.</summary>
-		public void Clear(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType)
-		{
-			ArrayList LResolutions = new ArrayList();
-			OperatorBindingContext LContext;
-			foreach (DictionaryEntry LEntry in FResolutions)
-			{
-				LContext = (OperatorBindingContext)LEntry.Value;
-				foreach (OperatorMatch LMatch in LContext.Matches)
-					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
-					{
-						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
-						if (LScalarConversionContext != null)
-						{
-							if (!LScalarConversionContext.CanConvert && LConversionContext.SourceType.Equals(ASourceType) || LConversionContext.TargetType.Equals(ASourceType) || LConversionContext.SourceType.Equals(ATargetType) || LConversionContext.TargetType.Equals(ATargetType))
-							{
-								LResolutions.Add(LEntry.Value);
-								goto Continue;
-							}
-							
-							foreach (Schema.ScalarConversionPath LPath in LScalarConversionContext.Paths)
-								if (LPath.Contains(ASourceType) || LPath.Contains(ATargetType))
-								{
-									LResolutions.Add(LEntry.Value);
-									goto Continue;
-								}
-						}
-					}
-					
-				Continue: continue;
-			}
-			
-			foreach (OperatorBindingContext LRemoveContext in LResolutions)
-				FResolutions.Remove(LRemoveContext);
-		}
-		
-		/// <summary>Removes cached resolutions involving conversion paths using the given conversion, if any.</summary>
-		public void Clear(Schema.Conversion AConversion)
-		{
-			ArrayList LResolutions = new ArrayList();
-			OperatorBindingContext LContext;
-			foreach (DictionaryEntry LEntry in FResolutions)
-			{
-				LContext = (OperatorBindingContext)LEntry.Value;
-				foreach (OperatorMatch LMatch in LContext.Matches)
-					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
-					{
-						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
-						if (LScalarConversionContext != null)
-							foreach (Schema.ScalarConversionPath LPath in LScalarConversionContext.Paths)
-								if (LPath.Contains(AConversion))
-								{
-									LResolutions.Add(LEntry.Value);
-									goto Continue;
-								}
-					}
-					
-				Continue: continue;
-			}
-			
-			foreach (OperatorBindingContext LRemoveContext in LResolutions)
-				FResolutions.Remove(LRemoveContext);
-		}
-		
-		/// <summary>Removes cached resolutions involving the given name resolution path, if any.</summary>
-		public void Clear(Schema.NameResolutionPath AResolutionPath)
-		{
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (((OperatorBindingContext)LEntry.Value).ResolutionPath == AResolutionPath)
-					LResolutions.Add(LEntry.Value);
-					
-			foreach (OperatorBindingContext LContext in LResolutions)
-				FResolutions.Remove(LContext);
-		}
-	}
-	
 	public class Special : Object
     {
 		public Special(int AID, string AName) : base(AID, AName) {}
@@ -1658,17 +1446,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			return LRepresentation;
 		}
 		
-		private Conveyor FConveyor;
-		public Conveyor GetConveyor(IServerProcess AProcess)
-		{
-			lock (this)
-			{
-				if (FConveyor == null)
-					FConveyor = (Conveyor)AProcess.CreateObject(FClassDefinition, null);
-				return FConveyor;
-			}
-		}
-		
 		#if USETYPEINHERITANCE
         // ParentTypes
         private ScalarTypes FParentTypes;
@@ -1932,46 +1709,6 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 
-		/// <summary>Returns a Schema.Sort, possibly user-defined for use in orders where uniqueness is not required.</summary>		
-		public Sort GetSort(Plan APlan)
-		{
-			if (FSort == null)
-			{
-				if (FSortID >= 0)
-					APlan.CatalogDeviceSession.ResolveCatalogObject(FSortID);
-				else
-					return GetUniqueSort(APlan);
-			}
-			return FSort;
-		}
-
-		/// <summary>Returns a Schema.Sort suitable for use in keys where uniqueness is required.</summary>		
-		public Sort GetUniqueSort(Plan APlan)
-		{
-			if (FUniqueSort == null)
-			{
-				if (FUniqueSortID >= 0)
-					APlan.CatalogDeviceSession.ResolveCatalogObject(FUniqueSortID);
-				else
-				{
-					APlan.PushLoadingContext(new LoadingContext(Owner, Library.Name, false));
-					try
-					{
-						CreateSortNode LCreateSortNode = new CreateSortNode();
-						LCreateSortNode.ScalarType = this;
-						LCreateSortNode.Sort = Compiler.CompileSortDefinition(APlan, this);
-						LCreateSortNode.IsUnique = true;
-						APlan.ExecuteNode(LCreateSortNode);
-					}
-					finally
-					{
-						APlan.PopLoadingContext();
-					}
-				}
-			}
-			return FUniqueSort;
-		}
-
 		// HasHandlers
 		public bool HasHandlers()
 		{
@@ -2005,54 +1742,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		private Conversions FImplicitConversions = new Conversions();
 		public Conversions ImplicitConversions { get { return FImplicitConversions; } }
 		
-		// TODO: Fix this boundary crossing
-		public object ValidateValue(ServerProcess AProcess, object AValue)
-		{
-			return ValidateValue(AProcess, AValue, null);
-		}
-		
-		public object ValidateValue(ServerProcess AProcess, object AValue, Schema.Operator AFromOperator)
-		{
-			AProcess.Stack.Push(AValue);
-			try
-			{
-				TableNode.ValidateScalarTypeConstraints(AProcess, this, false);
-				TableNode.ExecuteScalarTypeValidateHandlers(AProcess, this, AFromOperator);
-			}
-			finally
-			{
-				AValue = AProcess.Stack.Pop();
-			}
-			
-			return AValue;
-		}
-		
-		public object DefaultValue(ServerProcess AProcess)
-		{
-			// ScalarType level default trigger handlers
-			AProcess.Stack.Push(null);
-			try
-			{
-				if (FEventHandlers != null)
-					foreach (Schema.EventHandler LHandler in FEventHandlers)
-						if ((LHandler.EventType & EventType.Default) != 0)
-						{
-							object LResult = LHandler.PlanNode.Execute(AProcess);
-							if ((LResult != null) && (bool)LResult)
-								return AProcess.Stack.Peek(0);
-						}
-			}
-			finally
-			{
-				AProcess.Stack.Pop();
-			}
-
-			if (FDefault != null)
-				return FDefault.Node.Execute(AProcess);
-			else
-				return null;
-		}
-
 		#if USEPROPOSABLEEVENTS
         // OnValidateValue
         public event ColumnValidateHandler OnValidateValue;

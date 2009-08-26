@@ -17,7 +17,7 @@ namespace Alphora.Dataphor.DAE.Connection
 {
 	public class ClearAllPoolsNode : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			SqlConnection.ClearAllPools();
 			return null;

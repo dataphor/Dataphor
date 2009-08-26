@@ -69,18 +69,33 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// Statistics
-		internal bool FStatisticsCached = true;
-		public PlanStatistics Statistics 
+		internal bool FPlanStatisticsCached = true;
+		public PlanStatistics PlanStatistics 
 		{ 
 			get 
 			{ 
-				if (!FStatisticsCached)
+				if (!FPlanStatisticsCached)
 				{
-					FDescriptor.Statistics = FPlan.Statistics;
-					FStatisticsCached = true;
+					FDescriptor.Statistics = FPlan.PlanStatistics;
+					FPlanStatisticsCached = true;
 				}
 				return FDescriptor.Statistics; 
 			} 
+		}
+		
+		internal bool FProgramStatisticsCached = true;
+		internal ProgramStatistics FProgramStatistics;
+		public ProgramStatistics ProgramStatistics 
+		{ 
+			get 
+			{ 
+				if (!FProgramStatisticsCached)
+				{
+					FProgramStatistics = FPlan.ProgramStatistics; 
+					FProgramStatisticsCached = true;
+				}
+				return FProgramStatistics;
+			}
 		}
 	}
     
@@ -90,6 +105,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			FPlan = APlan;
 			FParams = AParams;
+			FInternalPlan = new Plan(FProcess.FInternalProcess);
 			GetDataType();
 		}
 
@@ -102,6 +118,12 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 			finally
 			{
+				if (FInternalPlan != null)
+				{
+					FInternalPlan.Dispose();
+					FInternalPlan = null;
+				}
+
 				FPlan = null;
 				FParams = null;
 				FDataType = null;
@@ -112,6 +134,8 @@ namespace Alphora.Dataphor.DAE.Server
 		protected DataParams FParams;
 		protected IRemoteServerExpressionPlan FPlan;
 		public IRemoteServerExpressionPlan RemotePlan { get { return FPlan; } }
+
+		private Plan FInternalPlan;
 		
 		// Isolation
 		public CursorIsolation Isolation { get { return FDescriptor.CursorIsolation; } }
@@ -130,10 +154,10 @@ namespace Alphora.Dataphor.DAE.Server
 		public DataValue Evaluate(DataParams AParams)
 		{
 			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			byte[] LResult = FPlan.Evaluate(ref LParams, out FDescriptor.Statistics.ExecuteTime, FProcess.GetProcessCallInfo());
-			FStatisticsCached = false;
+			byte[] LResult = FPlan.Evaluate(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+			FProgramStatisticsCached = false;
 			FProcess.RemoteParamDataToDataParams(AParams, LParams);
-			return LResult == null ? null : DataValue.FromPhysical(FProcess, DataType, LResult, 0);
+			return LResult == null ? null : DataValue.FromPhysical(FProcess.ValueManager, DataType, LResult, 0);
 		}
 
         /// <summary>Opens a server-side cursor based on the prepared statement this plan represents.</summary>        
@@ -147,15 +171,15 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				Guid[] LBookmarks;
 				RemoteFetchData LFetchData;
-				LServerCursor = FPlan.Open(ref LParams, out FDescriptor.Statistics.ExecuteTime, out LBookmarks, FProcess.ProcessInfo.FetchCount, out LFetchData, FProcess.GetProcessCallInfo());
-				FStatisticsCached = false;
+				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics.ExecuteTime, out LBookmarks, FProcess.ProcessInfo.FetchCount, out LFetchData, FProcess.GetProcessCallInfo());
+				FProgramStatisticsCached = false;
 				LCursor = new LocalCursor(this, LServerCursor);
 				LCursor.ProcessFetchData(LFetchData, LBookmarks, true);
 			}
 			else
 			{
-				LServerCursor = FPlan.Open(ref LParams, out FDescriptor.Statistics.ExecuteTime, FProcess.GetProcessCallInfo());
-				FStatisticsCached = false;
+				LServerCursor = FPlan.Open(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+				FProgramStatisticsCached = false;
 				LCursor = new LocalCursor(this, LServerCursor);
 			}
 			((LocalProcess)FProcess).RemoteParamDataToDataParams(AParams, LParams);
@@ -184,7 +208,9 @@ namespace Alphora.Dataphor.DAE.Server
 				LocalServer.AcquireCacheLock(FProcess, LockMode.Exclusive);
 				try
 				{
-					(new DropViewNode((Schema.DerivedTableVar)FTableVar)).Execute(FProcess.FInternalProcess);
+					Program LProgram = new Program(FProcess.FInternalProcess);
+					LProgram.Code = new DropViewNode((Schema.DerivedTableVar)FTableVar);
+					LProgram.Execute(null);
 				}
 				finally
 				{
@@ -202,87 +228,79 @@ namespace Alphora.Dataphor.DAE.Server
 				LocalServer.AcquireCacheLock(FProcess, FDescriptor.CacheChanged ? LockMode.Exclusive : LockMode.Shared);
 				try
 				{
-					FProcess.FInternalProcess.Stack.PushWindow(0);
-					try
+					if (FDescriptor.CacheChanged)
 					{
-						if (FDescriptor.CacheChanged)
+						LocalServer.EnsureCacheConsistent(FDescriptor.CacheTimeStamp);
+						try
 						{
-							LocalServer.EnsureCacheConsistent(FDescriptor.CacheTimeStamp);
+							if (FDescriptor.Catalog != String.Empty)
+							{
+								IServerScript LScript = ((IServerProcess)FProcess.FInternalProcess).PrepareScript(FDescriptor.Catalog);
+								try
+								{
+									LScript.Execute(FParams);
+								}
+								finally
+								{
+									((IServerProcess)FProcess.FInternalProcess).UnprepareScript(LScript);
+								}
+							}
+						}
+						finally
+						{
+							LocalServer.SetCacheTimeStamp(FProcess, FDescriptor.ClientCacheTimeStamp);
+							LTimeStampSet = true;
+						}
+					}
+					
+					if (LocalServer.Catalog.ContainsName(FDescriptor.ObjectName))
+					{
+						Schema.Object LObject = LocalServer.Catalog[FDescriptor.ObjectName];
+						if (LObject is Schema.TableVar)
+						{
+							FTableVar = (Schema.TableVar)LObject;
+							Plan LPlan = new Plan(FProcess.FInternalProcess);
 							try
 							{
-								if (FDescriptor.Catalog != String.Empty)
-								{
-									IServerScript LScript = ((IServerProcess)FProcess.FInternalProcess).PrepareScript(FDescriptor.Catalog);
-									try
-									{
-										LScript.Execute(FParams);
-									}
-									finally
-									{
-										((IServerProcess)FProcess.FInternalProcess).UnprepareScript(LScript);
-									}
-								}
+								if (FParams != null)
+									foreach (DataParam LParam in FParams)
+										LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
+										
+								FProcess.FInternalProcess.PushProcessSymbols(LPlan);
+								FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
 							}
 							finally
 							{
-								LocalServer.SetCacheTimeStamp(FProcess, FDescriptor.ClientCacheTimeStamp);
-								LTimeStampSet = true;
+								LPlan.Dispose();
 							}
-						}
-						
-						if (LocalServer.Catalog.ContainsName(FDescriptor.ObjectName))
-						{
-							Schema.Object LObject = LocalServer.Catalog[FDescriptor.ObjectName];
-							if (LObject is Schema.TableVar)
-							{
-								FTableVar = (Schema.TableVar)LObject;
-								Plan LPlan = new Plan(FProcess.FInternalProcess);
-								try
-								{
-									if (FParams != null)
-										foreach (DataParam LParam in FParams)
-											LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
-											
-									FProcess.FInternalProcess.PushProcessSymbols(LPlan);
-									FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
-								}
-								finally
-								{
-									LPlan.Dispose();
-								}
-								FDataType = FTableVar.DataType;			
-							}
-							else
-								FDataType = (Schema.IDataType)LObject;
+							FDataType = FTableVar.DataType;			
 						}
 						else
+							FDataType = (Schema.IDataType)LObject;
+					}
+					else
+					{
+						try
 						{
+							Plan LPlan = new Plan(FProcess.FInternalProcess);
 							try
 							{
-								Plan LPlan = new Plan(FProcess.FInternalProcess);
-								try
-								{
-									FDataType = Compiler.CompileTypeSpecifier(LPlan, new DAE.Language.D4.Parser().ParseTypeSpecifier(FDescriptor.ObjectName));
-								}
-								finally
-								{
-									LPlan.Dispose();
-								}
+								FDataType = Compiler.CompileTypeSpecifier(LPlan, new DAE.Language.D4.Parser().ParseTypeSpecifier(FDescriptor.ObjectName));
 							}
-							catch
+							finally
 							{
-								// Notify the server that the client cache is out of sync
-								Process.Execute(".System.UpdateTimeStamps();", null);
-								throw;
+								LPlan.Dispose();
 							}
 						}
-						
-						return FDataType;
+						catch
+						{
+							// Notify the server that the client cache is out of sync
+							Process.Execute(".System.UpdateTimeStamps();", null);
+							throw;
+						}
 					}
-					finally
-					{
-						FProcess.FInternalProcess.Stack.PopWindow();
-					}
+					
+					return FDataType;
 				}
 				finally
 				{
@@ -353,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Server
 			get 
 			{
 				if ((FOrder == null) && (FDescriptor.Order != String.Empty))
-					FOrder = Compiler.CompileOrderDefinition(FProcess.FInternalProcess.Plan, TableVar, new Parser().ParseOrderDefinition(FDescriptor.Order), false);
+					FOrder = Compiler.CompileOrderDefinition(FInternalPlan, TableVar, new Parser().ParseOrderDefinition(FDescriptor.Order), false);
 				return FOrder; 
 			}
 		}
@@ -365,7 +383,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public Row RequestRow()
 		{
-			return new Row(FProcess, TableVar.DataType.RowType);
+			return new Row(FProcess.ValueManager, TableVar.DataType.RowType);
 		}
 		
 		public void ReleaseRow(Row ARow)
@@ -394,8 +412,8 @@ namespace Alphora.Dataphor.DAE.Server
         public void Execute(DataParams AParams)
         {
 			RemoteParamData LParams = FProcess.DataParamsToRemoteParamData(AParams);
-			FPlan.Execute(ref LParams, out FDescriptor.Statistics.ExecuteTime, FProcess.GetProcessCallInfo());
-			FStatisticsCached = false;
+			FPlan.Execute(ref LParams, out FProgramStatistics.ExecuteTime, FProcess.GetProcessCallInfo());
+			FProgramStatisticsCached = false;
 			FProcess.RemoteParamDataToDataParams(AParams, LParams);
 		}
     }

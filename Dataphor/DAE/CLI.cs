@@ -513,6 +513,9 @@ namespace Alphora.Dataphor.DAE
 		object CreateObject(ClassDefinition AClassDefinition, object[] AActualParameters);
 
 		/// <nodoc/>
+		IValueManager ValueManager { get; }
+
+        /// <nodoc/>
 		ServerProcess GetServerProcess();
     }
 
@@ -623,6 +626,24 @@ namespace Alphora.Dataphor.DAE
 		public TimeSpan DeviceExecuteTime;
 	}
 	
+	[Serializable]
+	public class ProgramStatistics
+	{
+		/// <summary>Returns the total execution time for the program.</summary>
+		/// <remarks>
+		///	Execution time is the total time spent executing on this program. 
+		/// This includes all calls made through this program, or cursors based on the program.
+		/// </remarks>
+		public TimeSpan ExecuteTime;
+		
+		/// <summary>Returns the amount of time spent executing in devices.</summary>
+		/// <remarks>
+		/// This statistic tracks the total amount of time spent waiting for execution on other systems, 
+		/// as opposed to time spent within the Dataphor query processor.
+		/// </remarks>
+		public TimeSpan DeviceExecuteTime;
+	}
+	
 	/// <summary> Exposes the base functionality for a plan in the CLI. </summary>
     public interface IServerPlanBase : IDisposableNotify
     {
@@ -632,8 +653,11 @@ namespace Alphora.Dataphor.DAE
 		/// <summary> Ensures that this plan was successfully compiled.  Raises an error containing the messages encountered by the compiler, if any. </summary>
 		void CheckCompiled();
 		
-		/// <summary> Returns statistics about plan preparation and execution times. </summary>
-		PlanStatistics Statistics { get; }
+		/// <summary> Returns statistics about plan preparation times. </summary>
+		PlanStatistics PlanStatistics { get; }
+		
+		/// <summary> Returns statistics about plan execution times. </summary>
+		ProgramStatistics ProgramStatistics { get; }
    }
 
     /// <summary> Prepared and compiled execution plan. </summary>

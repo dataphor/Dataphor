@@ -309,7 +309,7 @@ namespace Alphora.Dataphor.DAE.Debug
 				
 			if (FBreakpoints.Count > 0)
 			{
-				DebugLocator LCurrentLocation = AProcess.GetCurrentLocation();
+				DebugLocator LCurrentLocation = AProcess.ExecutingProgram.GetCurrentLocation();
 				
 				// Determine whether or not a breakpoint has been hit
 				for (int LIndex = 0; LIndex < FBreakpoints.Count; LIndex++)
@@ -364,7 +364,7 @@ namespace Alphora.Dataphor.DAE.Debug
 						{
 							ProcessID = LProcess.ProcessID,
 							IsPaused = LProcess.IsRunning && LIsPaused,
-							Location = (LProcess.IsRunning && LIsPaused) ? LProcess.SafeGetCurrentLocation() : null,
+							Location = (LProcess.IsRunning && LIsPaused) ? LProcess.ExecutingProgram.SafeGetCurrentLocation() : null,
 							DidBreak = FBrokenProcesses.Contains(LProcess)
 						}
 					);
@@ -383,31 +383,22 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
 					
-				List<StackWindow> LStackWindows = LProcess.Stack.GetCallStack();
-				
 				CallStack LCallStack = new CallStack();
 				
-				LCallStack.Add(new CallStackEntry(0, "<Plan>", LProcess.GetCurrentLocation()));
-				
-				for (int LIndex = 0; LIndex < LStackWindows.Count; LIndex++)
+				foreach (Program LProgram in LProcess.FExecutingPrograms)
 				{
-					//InstructionNodeBase LOriginator = LStackWindows[LIndex].Originator as InstructionNodeBase;
-					//if ((LOriginator != null) && (LOriginator.Operator != null))
-					//	LCallStack.Add(new CallStackEntry(LIndex, LOriginator.Operator.DisplayName, new DebugLocator(LOriginator.Operator.Locator.Locator, LOriginator.Line, LOriginator.LinePos)));
-					//else 
-						LCallStack.Add(new CallStackEntry(LIndex, "<Plan>", null));
+					DebugLocator LCurrentLocation = LProgram.Locator;
+					foreach (RuntimeStackWindow LWindow in LProgram.Stack.GetCallStack())
+					{
+						if (LWindow.Originator != null)
+							LCallStack.Add(new CallStackEntry(LCallStack.Count, LWindow.Originator.Description, new DebugLocator(LCurrentLocation, LWindow.Originator.Line, LWindow.Originator.LinePos)));
+						else
+							LCallStack.Add(new CallStackEntry(LCallStack.Count, String.Format("Program:{0}", LProgram.ID), LCurrentLocation));
+						LCurrentLocation = LWindow.Locator;
+					}
 				}
+				
 				return LCallStack;
-			}
-		}
-		
-		public DebugContext GetContext(int AProcessID)
-		{
-			CheckPaused();
-			
-			lock (FSyncHandle)
-			{
-				return FProcesses.GetProcess(AProcessID).SafeGetCurrentContext();
 			}
 		}
 		
@@ -420,21 +411,20 @@ namespace Alphora.Dataphor.DAE.Debug
 			
 			lock (FSyncHandle)
 			{
-				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
-				object[] LStackWindow = LProcess.Stack.GetStack(AWindowIndex);
 				List<StackEntry> LStack = new List<StackEntry>();
-				for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
-					LStack.Add
-					(
-						new StackEntry
-						{ 
-							Index = LIndex, 
-							Name = String.Format("Location{0}", LIndex), 
-							Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName, 
-							Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString() 
-						}
-					);
-
+				//ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
+				//object[] LStackWindow = LProcess.Stack.GetStack(AWindowIndex);
+				//for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
+				//    LStack.Add
+				//    (
+				//        new StackEntry
+				//        { 
+				//            Index = LIndex, 
+				//            Name = String.Format("Location{0}", LIndex), 
+				//            Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName, 
+				//            Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString() 
+				//        }
+				//    );
 				return LStack;
 			}
 		}

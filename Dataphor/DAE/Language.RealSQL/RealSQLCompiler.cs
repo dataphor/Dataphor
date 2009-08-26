@@ -1017,7 +1017,7 @@ namespace Alphora.Dataphor.DAE.Language.RealSQL
 	// operator RealSQLToD4(ARealSQLStatement : string) : string;
 	public class RealSQLToD4Node : InstructionNode
 	{
-		public override object InternalExecute(ServerProcess AProcess, object[] AArguments)
+		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
 			return 
 				new D4.D4TextEmitter().Emit

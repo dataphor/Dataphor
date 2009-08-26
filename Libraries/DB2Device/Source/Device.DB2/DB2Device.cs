@@ -3,13 +3,14 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
+using System;
+using System.IO;
+using System.Resources;	   
+using System.Globalization;
+
 namespace Alphora.Dataphor.DAE.Device.DB2
 {
-	using System;
-	using System.IO;
-	using System.Resources;	   
-	using System.Globalization;
-
 	using Alphora.Dataphor.DAE.Schema;
 	using Alphora.Dataphor.DAE.Server;	
 	using Alphora.Dataphor.DAE.Device;
@@ -18,6 +19,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.SQL;
 	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
@@ -412,7 +414,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 						//"DB2Device.DB2ODBCConnectionStringBuilder" :
 						Device.ConnectionStringBuilderClass
 				);
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
 
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("DataSource", Device.DataSource);
@@ -425,7 +427,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);
 				
-			return (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			return (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
 		}
 		
 		protected override void InternalVerifyInsertStatement(TableVar ATable, Row ARow, InsertStatement AStatement) 
@@ -857,7 +859,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2Long(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return Convert.ToInt64(AValue);
 		}
@@ -882,7 +884,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 //	{
 //		public DB2400Long() : base(){}
 //
-//		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+//		public override Scalar ToScalar(IValueManager AManager, object AValue)
 //		{
 //			return new Scalar(AProcess, ScalarType, Convert.ToInt64(AValue));
 //		}
@@ -915,7 +917,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 //	{
 //		public DB2400Decimal() : base(){}
 //
-//		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+//		public override Scalar ToScalar(IValueManager AManager, object AValue)
 //		{
 //			// TODO: This should be a decimal cast but the ADOConnection is returning an integer value as the result of evaluating Avg(Integer) when the result is a whole number
 //			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue)); 
@@ -959,7 +961,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 //	{
 //		public DB2400Money() : base(){}
 //
-//		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+//		public override Scalar ToScalar(IValueManager AManager, object AValue)
 //		{
 //			// TODO: This should be a decimal cast but the ADOConnection is returning an integer value as the result of evaluating Avg(Integer) when the result is a whole number
 //			return new Scalar(AProcess, ScalarType, Convert.ToDecimal(AValue)); 
@@ -1003,7 +1005,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	{
 		public DB2TimeSpan(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{										  
 			return new TimeSpan(Convert.ToInt64(AValue));
 		}
@@ -1032,7 +1034,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 //	{
 //		public DB2400TimeSpan() : base(){}
 //
-//		public override Scalar ToScalar(IServerProcess AProcess, object AValue)
+//		public override Scalar ToScalar(IValueManager AManager, object AValue)
 //		{										  
 //			return new Scalar(AProcess, ScalarType, new TimeSpan(Convert.ToInt64(AValue)));
 //		}
@@ -1096,7 +1098,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1116,7 +1118,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "date";
 		}
 		
-		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IValueManager AManager, object AValue)
 		{
 			return DateTime.ParseExact((string)AValue, DateFormat, DateTimeFormatInfo.InvariantInfo);
 		}
@@ -1162,7 +1164,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1208,7 +1210,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -1228,7 +1230,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "timestamp";
 		}
 		
-		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IValueManager AManager, object AValue)
 		{
 			return 
 				DateTime.ParseExact
@@ -1280,7 +1282,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LDateTime = new DateTime(((TimeSpan)AValue).Ticks);
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
@@ -1327,7 +1329,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return String.Format("cast('{0}' as {1})", ((DateTime)AValue).ToString(TimeFormat, DateTimeFormatInfo.InvariantInfo), DomainName());
 		}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			DateTime LDateTime = (DateTime)AValue;
 			return new DateTime(1, 1, 1, LDateTime.Hour, LDateTime.Minute, LDateTime.Second, LDateTime.Millisecond);
@@ -1348,7 +1350,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 			return "time";
 		}
 		
-		public override object ParameterToScalar(IServerProcess AProcess, object AValue)
+		public override object ParameterToScalar(IValueManager AManager, object AValue)
 		{
 			return DateTime.ParseExact((string)AValue, TimeFormat, DateTimeFormatInfo.InvariantInfo);
 		}

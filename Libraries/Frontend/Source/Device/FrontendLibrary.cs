@@ -212,14 +212,14 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			return new Document(LFileName, LDocumentType);
 		}
 		
-		public void CheckDataType(ServerProcess AProcess, Schema.ScalarType AExpectedDataType)
+		public void CheckDataType(Plan APlan, Schema.ScalarType AExpectedDataType)
 		{
-			Schema.Object LDataTypeObject = Compiler.ResolveCatalogIdentifier(AProcess.Plan, DocumentType.DataType, true);
+			Schema.Object LDataTypeObject = Compiler.ResolveCatalogIdentifier(APlan, DocumentType.DataType, true);
 			if 
 			(
 				!(LDataTypeObject is Schema.ScalarType) || 
 				(
-					(AExpectedDataType != AProcess.DataTypes.SystemBinary) && 
+					(AExpectedDataType != APlan.DataTypes.SystemBinary) && 
 					!((Schema.ScalarType)LDataTypeObject).Is(AExpectedDataType)
 				)
 			)
@@ -275,10 +275,10 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 	{
 		public const string CDocumentsName = @"Documents";
 		
-		public FrontendLibrary(ServerProcess AProcess, string AName) : base(AName) 
+		public FrontendLibrary(Program AProgram, string AName) : base(AName) 
 		{
-			FFrontendDevice = FrontendDevice.GetFrontendDevice(AProcess);
-			FDirectoryName = AProcess.Catalog.Libraries[AName].GetLibraryDirectory(AProcess.ServerSession.Server.LibraryDirectory);
+			FFrontendDevice = FrontendDevice.GetFrontendDevice(AProgram);
+			FDirectoryName = AProgram.Catalog.Libraries[AName].GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
 			FDocumentsDirectoryName = Path.Combine(FDirectoryName, CDocumentsName);
 			LoadDocuments();
 			if (Directory.Exists(FDirectoryName))
@@ -297,7 +297,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 			}
 		}
 
-		public void Close(ServerProcess AProcess)
+		public void Close(Program AProgram)
 		{
 			#if USEWATCHERS
 			if (FWatcher != null)

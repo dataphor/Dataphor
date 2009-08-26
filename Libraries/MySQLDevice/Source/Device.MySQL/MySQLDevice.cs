@@ -108,7 +108,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
         }
         
         // ShouldIncludeColumn
-        public override bool ShouldIncludeColumn(ServerProcess AProcess, string ATableName, string AColumnName, string ADomainName)
+        public override bool ShouldIncludeColumn(Plan APlan, string ATableName, string AColumnName, string ADomainName)
         {
 			switch (ADomainName.ToLower())
 			{
@@ -244,7 +244,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 						Device.ConnectionStringBuilderClass
 				);
 
-			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
+			ConnectionStringBuilder LConnectionStringBuilder = (ConnectionStringBuilder)ServerProcess.Catalog.ClassLoader.CreateObject(LBuilderClass, new object[]{});
 			
 			D4.Tags LTags = new D4.Tags();
 			LTags.AddOrUpdate("ServerName", Device.ServerName);
@@ -255,7 +255,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 			LTags = LConnectionStringBuilder.Map(LTags);
 			Device.GetConnectionParameters(LTags, DeviceSessionInfo);
 			string LConnectionString = SQLDevice.TagsToString(LTags);				
-			return (SQLConnection)ServerProcess.Plan.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
+			return (SQLConnection)ServerProcess.Catalog.ClassLoader.CreateObject(LClassDefinition, new object[]{LConnectionString});
 		}
     }
 
@@ -303,7 +303,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLBoolean(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			if (AValue is bool)
 				return (bool)AValue;
@@ -335,7 +335,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLByte(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			// According to the docs for the SQLOLEDB provider this is supposed to come back as a byte, but
 			// it is coming back as a short, I don't know why, maybe interop?
@@ -371,7 +371,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 
 		public MySQLDateTime(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -404,7 +404,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLDate(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}
@@ -437,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
     {
 		public MySQLTime(int AID, string AName) : base(AID, AName) {}
 
-		public override object ToScalar(IServerProcess AProcess, object AValue)
+		public override object ToScalar(IValueManager AManager, object AValue)
 		{
 			return (DateTime)AValue;
 		}

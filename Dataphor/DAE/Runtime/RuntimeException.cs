@@ -3,14 +3,14 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
+
 using System;
 using System.Resources;
 
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-
 namespace Alphora.Dataphor.DAE.Runtime
 {
+	using Alphora.Dataphor.DAE.Runtime.Instructions;
+
 	[Serializable]
 	public class RuntimeException : DAEException, ILocatedException
 	{

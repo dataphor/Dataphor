@@ -11,15 +11,15 @@ using System.IO;
 using System.Text;
 using System.Collections;
 
-#if USEDATATYPESINNATIVEROW
-using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-#endif
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
+	#if USEDATATYPESINNATIVEROW
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Compiling;
+	#endif
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+
 	/*
 		Row ->
 		
@@ -52,108 +52,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public BitArray ModifiedFlags;
 	}
 	
-/*
-	public class Row : IDisposable
-	{
-		public Row(IServerProcess AProcess, Schema.IRowType ADataType)
-		{
-			FProcess = AProcess;
-			FDataType = ADataType;
-			FNativeRow = new NativeRow(ADataType.Columns.Count);
-		}
-		
-		public Row(IServerProcess AProcess, Schema.IRowType ADataType, NativeRow ANativeRow)
-		{
-			FProcess = AProcess;
-			FDataType = ADataType;
-			FNativeRow = ANativeRow;
-		}
-		
-		public void Dispose()
-		{
-			if (FProcess != null)
-			{
-				if (FValuesOwned)
-					ClearValues();
-				FProcess = null;
-				FDataType = null;
-				FNativeRow = null;
-			}
-		}
-		
-		private IServerProcess FProcess;
-		public IServerProcess Process { get { return FProcess; } }
-		
-		private bool FValuesOwned;
-		public bool ValuesOwned 
-		{ 
-			get { return FValuesOwned; } 
-			set { FValuesOwned = value; } 
-		}
-		
-		private Schema.IRowType FDataType;
-		public Schema.IRowType DataType { get { return FDataType; } }
-		
-		private NativeRow FNativeRow;
-		public NativeRow GetNativeRow() { return FNativeRow; }
-		
-		public object this[int AIndex]
-		{
-			get { return FNativeRow[AIndex]; }
-			set 
-			{ 
-				if (FValuesOwned && (FNativeRow[AIndex] != null))
-					DataValue.DisposeValue(FProcess.GetServerProcess(), FNativeRow[AIndex]);
-				FNativeRow[AIndex] = value; 
-			}
-		}
-		
-		public bool HasValue(int AIndex)
-		{
-			return FNativeRow[AIndex] != null;
-		}
-		
-		public void ClearValue(int AIndex)
-		{
-			this[AIndex] = null;
-		}
-		
-		public void ClearValues()
-		{
-			for (int LIndex = 0; LIndex < DataType.Columns.Count; LIndex++)
-				ClearValue(LIndex);
-		}
-		
-		public Row Copy()
-		{
-			Row LRow = new Row(FProcess, FDataType, (NativeRow)DataValue.CopyValue(FProcess.GetServerProcess(), FNativeRow));
-			LRow.ValuesOwned = true;
-			return LRow;
-		}
-		
-		public void CopyTo(Row ARow)
-		{
-			for (int LIndex = 0; LIndex < FDataType.Columns.Count; LIndex++)
-			{
-				int LColumnIndex = ARow.DataType.Columns.IndexOfColumn(FDataType.Columns[LIndex].Name);
-				if (LColumnIndex >= 0)
-					ARow[LColumnIndex] = this[LIndex];
-			}
-		}
-		
-		public NativeRow AsNative
-		{
-			get { return FNativeRow; }
-			set
-			{
-				if ((FNativeRow != null) && FValuesOwned)
-					ClearValues();
-				FNativeRow = value;
-			}
-		}
-	}
-*/
-	
 	/// <remarks>
 	/// Provides a fixed length buffer for cell values with overflow management built in.
 	/// Used in conjunction with the CellValueStream, provides transparent variable length
@@ -161,7 +59,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// </remarks>    
 	public class Row : DataValue
 	{
-		public Row(IServerProcess AProcess, Schema.IRowType ADataType) : base(AProcess, ADataType)
+		public Row(IValueManager AManager, Schema.IRowType ADataType) : base(AManager, ADataType)
 		{
 			FRow = new NativeRow(DataType.Columns.Count);
 			#if USEDATATYPESINNATIVEROW
@@ -172,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 
 		// The given object[] is assumed to contains values of the appropriate type for the given data type
-		public Row(IServerProcess AProcess, Schema.IRowType ADataType, NativeRow ARow) : base(AProcess, ADataType)
+		public Row(IValueManager AManager, Schema.IRowType ADataType, NativeRow ARow) : base(AManager, ADataType)
 		{
 			FRow = ARow;
 			ValuesOwned = false;
@@ -264,10 +162,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					{
 						#if USEDATATYPESINNATIVEROW
 						if (!DataType.Columns[LIndex].DataType.Equals(FRow.DataTypes[LIndex]))
-							LSize += Process.DataTypes.SystemString.GetConveyor(Process).GetSize(FRow.DataTypes[LIndex].Name); // write the name of the data type of the value
+							LSize += Manager.GetConveyor(Manager.DataTypes.SystemString).GetSize(FRow.DataTypes[LIndex].Name); // write the name of the data type of the value
 						#endif
 						/*							
-						LElement = DataValue.FromNativeRow(Process, DataType, FRow, LIndex);
+						LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
 						FElementWriteList[LIndex] = LElement;
 						LElementSize = LElement.GetPhysicalSize(AExpandStreams);
 						FWriteList[LIndex] = LElementSize;
@@ -288,7 +186,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									if (LStreamID != StreamID.Null)
 									{
-										LStream = Process.Open((StreamID)FRow.Values[LIndex], LockMode.Exclusive);
+										LStream = Manager.StreamManager.Open((StreamID)FRow.Values[LIndex], LockMode.Exclusive);
 										FWriteList[LIndex] = LStream;
 										LSize += sizeof(int) + (int)LStream.Length;
 									}
@@ -305,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							}
 							else
 							{
-								LConveyor = LScalarType.GetConveyor(Process);
+								LConveyor = Manager.GetConveyor(LScalarType);
 								if (LConveyor.IsStreaming)
 								{
 									LStream = new MemoryStream(64);
@@ -324,7 +222,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						}
 						else
 						{
-							LElement = DataValue.FromNativeRow(Process, DataType, FRow, LIndex);
+							LElement = DataValue.FromNativeRow(Manager, DataType, FRow, LIndex);
 							FElementWriteList[LIndex] = LElement;
 							LElementSize = LElement.GetPhysicalSize(AExpandStreams);
 							FWriteList[LIndex] = LElementSize;
@@ -352,8 +250,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				#if USEDATATYPESINNATIVEROW
 				Streams.Conveyor LStringConveyor = null;
 				#endif
-				Streams.Conveyor LInt64Conveyor = Process.DataTypes.SystemLong.GetConveyor(Process);
-				Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+				Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
 				Stream LStream;
 				StreamID LStreamID;
@@ -401,7 +299,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 										ABuffer[AOffset] = (byte)5; // Write the native specialized value indicator
 										AOffset++;
 										if (LStringConveyor == null)
-											LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+											LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 										LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
 										LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 										AOffset += LElementSize;
@@ -439,14 +337,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 									ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
 									AOffset++;
 									if (LStringConveyor == null)
-										LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+										LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 									LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
 									LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 									AOffset += LElementSize;
 								}
 								#endif
 
-								LConveyor = LScalarType.GetConveyor(Process);
+								LConveyor = Manager.GetConveyor(LScalarType);
 								if (LConveyor.IsStreaming)
 								{
 									LStream = (Stream)FWriteList[LIndex];
@@ -480,7 +378,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								ABuffer[AOffset] = (byte)4; // Write the native specialized value indicator
 								AOffset++;
 								if (LStringConveyor == null)
-									LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+									LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 								LElementSize = LStringConveyor.GetSize(FRow.DataTypes[LIndex].Name);
 								LStringConveyor.Write(FRow.DataTypes[LIndex].Name, ABuffer, AOffset); // Write the name of the data type of the value
 								AOffset += LElementSize;
@@ -517,12 +415,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				AOffset++;
 					
 				#if USEDATATYPESINNATIVEROW
-				Streams.Conveyor LStringConveyor = Process.DataTypes.SystemString.GetConveyor(Process);
+				Streams.Conveyor LStringConveyor = Manager.GetConveyor(Manager.DataTypes.SystemString);
 				string LDataTypeName;
 				Schema.IDataType LDataType;
 				#endif
-				Streams.Conveyor LInt64Conveyor = Process.DataTypes.SystemLong.GetConveyor(Process);
-				Streams.Conveyor LInt32Conveyor = Process.DataTypes.SystemInteger.GetConveyor(Process);
+				Streams.Conveyor LInt64Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemLong);
+				Streams.Conveyor LInt32Conveyor = Manager.GetConveyor(Manager.DataTypes.SystemInteger);
 
 				Stream LStream;
 				StreamID LStreamID;
@@ -554,7 +452,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							LScalarType = DataType.Columns[LIndex].DataType as Schema.ScalarType;
 							if ((LScalarType != null) && !LScalarType.IsCompound)
 							{
-								LConveyor = LScalarType.GetConveyor(Process);
+								LConveyor = Manager.GetConveyor(LScalarType);
 								if (LConveyor.IsStreaming)
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
@@ -584,7 +482,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								#if USEDATATYPESINNATIVEROW
 								FRow.DataTypes[LIndex] = DataType.Columns[LIndex].DataType;
 								#endif
-								using (DataValue LValue = DataValue.FromPhysical(Process, DataType.Columns[LIndex].DataType, ABuffer, AOffset))
+								using (DataValue LValue = DataValue.FromPhysical(Manager, DataType.Columns[LIndex].DataType, ABuffer, AOffset))
 								{
 									FRow.Values[LIndex] = LValue.AsNative;
 									LValue.ValuesOwned = false;
@@ -601,8 +499,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStreamID = Process.Allocate();
-									LStream = Process.Open(LStreamID, LockMode.Exclusive);
+									LStreamID = Manager.StreamManager.Allocate();
+									LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
 									LStream.Write(ABuffer, AOffset, LElementSize);
 									LStream.Close();
 									#if USEDATATYPESINNATIVEROW
@@ -629,12 +527,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						case 4 : // native specialized value
 							#if USEDATATYPESINNATIVEROW
 							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
+							LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
 							AOffset += LStringConveyor.GetSize(LDataTypeName);
 							LScalarType = LDataType as Schema.ScalarType;
 							if ((LScalarType != null) && !LScalarType.IsCompound)
 							{
-								LConveyor = LScalarType.GetConveyor(Process);
+								LConveyor = Manager.GetConveyor(LScalarType);
 								if (LConveyor.IsStreaming)
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
@@ -658,7 +556,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 								AOffset += sizeof(int);
 								FRow.DataTypes[LIndex] = LDataType;
-								using (DataValue LValue = DataValue.FromPhysical(Process, LDataType, ABuffer, AOffset))
+								using (DataValue LValue = DataValue.FromPhysical(Manager, LDataType, ABuffer, AOffset))
 								{
 									FRow.Values[LIndex] = LValue.AsNative;
 									LValue.ValuesOwned = false;
@@ -673,7 +571,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						case 5 : // non-native specialized value
 							#if USEDATATYPESINNATIVEROW
 							LDataTypeName = (string)LStringConveyor.Read(ABuffer, AOffset);
-							LDataType = Compiler.CompileTypeSpecifier(Process.GetServerProcess().Plan, new Parser().ParseTypeSpecifier(LDataTypeName));
+							LDataType = Manager.CompileTypeSpecifier(LDataTypeName);
 							AOffset += LStringConveyor.GetSize(LDataTypeName);
 							LScalarType = LDataType as Schema.ScalarType;
 							if (LScalarType != null)
@@ -682,8 +580,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								{
 									LElementSize = (int)LInt32Conveyor.Read(ABuffer, AOffset);
 									AOffset += sizeof(int);
-									LStreamID = Process.Allocate();
-									LStream = Process.Open(LStreamID, LockMode.Exclusive);
+									LStreamID = Manager.StreamManager.Allocate();
+									LStream = Manager.StreamManager.Open(LStreamID, LockMode.Exclusive);
 									LStream.Write(ABuffer, AOffset, LElementSize);
 									LStream.Close();
 									FRow.DataTypes[LIndex] = LScalarType;
@@ -727,7 +625,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <summary>This is a by-reference access of the value, changes made to the resulting DataValue will be refelected in the actual row.</summary>
 		public DataValue GetValue(int AIndex)
 		{
-			return FromNativeRow(Process, DataType, FRow, AIndex);
+			return FromNativeRow(Manager, DataType, FRow, AIndex);
 		}
 		
 		public void SetValue(int AIndex, DataValue AValue)
@@ -742,15 +640,15 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{ 
 				if (DataType.Columns[AIndex].DataType is Schema.IScalarType)
 					return FRow.Values[AIndex];
-				return FromNativeRow(Process, DataType, FRow, AIndex); 
+				return FromNativeRow(Manager, DataType, FRow, AIndex); 
 			}
 			set
 			{
 				if (FRow.Values[AIndex] != null)
 					#if USEDATATYPESINNATIVEROW
-					DataValue.DisposeNative(Process, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
 					#else
-					DataValue.DisposeNative(Process, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
 					#endif
 					
 				DataValue LValue = value as DataValue;
@@ -764,13 +662,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				else if (value != null)
 				{
 					#if USEDATATYPESINNATIVEROW
-					if ((DataType.Columns[AIndex].DataType == Process.DataTypes.SystemGeneric) || (DataType.Columns[AIndex].DataType == Process.DataTypes.SystemScalar))
-						FRow.DataTypes[AIndex] = DataValue.NativeTypeToScalarType(Process.GetServerProcess(), value.GetType());
+					if ((DataType.Columns[AIndex].DataType == Manager.DataTypes.SystemGeneric) || (DataType.Columns[AIndex].DataType == Manager.DataTypes.SystemScalar))
+						FRow.DataTypes[AIndex] = DataValue.NativeTypeToScalarType(Manager, value.GetType());
 					else
 						FRow.DataTypes[AIndex] = DataType.Columns[AIndex].DataType;
-					FRow.Values[AIndex] = DataValue.CopyNative(Process, FRow.DataTypes[AIndex], value);
+					FRow.Values[AIndex] = DataValue.CopyNative(Manager, FRow.DataTypes[AIndex], value);
 					#else
-					FRow.Values[AIndex] = DataValue.CopyNative(Process, DataType.Columns[AIndex].DataType, value);
+					FRow.Values[AIndex] = DataValue.CopyNative(Manager, DataType.Columns[AIndex].DataType, value);
 					#endif
 				}
 				else
@@ -880,9 +778,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			{
 				if (ValuesOwned)
 					#if USEDATATYPESINNATIVEROW
-					DataValue.DisposeNative(Process, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, FRow.DataTypes[AIndex], FRow.Values[AIndex]);
 					#else
-					DataValue.DisposeNative(Process, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
+					DataValue.DisposeNative(Manager, DataType.Columns[AIndex].DataType, FRow.Values[AIndex]);
 					#endif
 				
 				#if USEDATATYPESINNATIVEROW
@@ -925,9 +823,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					{
 						#if USEDATATYPESINNATIVEROW
 						LNewRow.DataTypes[LIndex] = FRow.DataTypes[LIndex];
-						LNewRow.Values[LIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+						LNewRow.Values[LIndex] = CopyNative(Manager, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
 						#else
-						LNewRow.Values[LIndex] = CopyNative(Process, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
+						LNewRow.Values[LIndex] = CopyNative(Manager, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
 						#endif
 					}
 				return LNewRow;
@@ -942,9 +840,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						int LNewIndex = LNewRowType.Columns.IndexOfName(DataType.Columns[LIndex].Name);
 						#if USEDATATYPESINNATIVEROW
 						LNewRow.DataTypes[LNewIndex] = FRow.DataTypes[LIndex];
-						LNewRow.Values[LNewIndex] = CopyNative(Process, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
+						LNewRow.Values[LNewIndex] = CopyNative(Manager, FRow.DataTypes[LIndex], FRow.Values[LIndex]);
 						#else
-						LNewRow.Values[LNewIndex] = CopyNative(Process, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
+						LNewRow.Values[LNewIndex] = CopyNative(Manager, DataType.Columns[LIndex].DataType, FRow.Values[LIndex]);
 						#endif
 					}
 				return LNewRow;

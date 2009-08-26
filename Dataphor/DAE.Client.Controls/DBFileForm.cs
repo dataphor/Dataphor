@@ -635,7 +635,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
             {
                 if (LFileStream.Length > FMaximumContentLength)
                     throw new ControlsException(ControlsException.Codes.MaximumContentLengthExceeded, LFileStream.Length, FMaximumContentLength);
-                using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(DataSet.Process, DataSet.Process.DataTypes.SystemBinary))
+                using (DAE.Runtime.Data.Scalar LNewValue = new DAE.Runtime.Data.Scalar(DataSet.Process.ValueManager, DataSet.Process.DataTypes.SystemBinary))
                 {
                     using (Stream LStream = LNewValue.OpenStream())
                         StreamUtility.CopyStream(LFileStream, LStream);

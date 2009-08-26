@@ -110,19 +110,19 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class RowTreeNode : Disposable
 	{
-		public RowTreeNode(ServerProcess AProcess, NativeRowTree ATree, NativeRowTreeNode ANode, LockMode ALockMode)
+		public RowTreeNode(IValueManager AManager, NativeRowTree ATree, NativeRowTreeNode ANode, LockMode ALockMode)
 		{
-			Process = AProcess;
+			Manager = AManager;
 			Tree = ATree;
 			Node = ANode;
 			DataNode = Node as NativeRowTreeDataNode;
 			RoutingNode = Node as NativeRowTreeRoutingNode;
 			#if LOCKROWTREE
-			Process.Lock(Node.LockID, ALockMode);
+			Manager.Lock(Node.LockID, ALockMode);
 			#endif
 		}
 		
-		public ServerProcess Process;
+		public IValueManager Manager;
 		public NativeRowTree Tree;
 		
 		public NativeRowTreeNode Node;
@@ -131,12 +131,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		protected override void Dispose(bool ADisposing)
 		{
-			if (Process != null)
+			if (Manager != null)
 			{
 				#if LOCKROWTREE
-				Process.Unlock(Node.LockID);
+				Manager.Unlock(Node.LockID);
 				#endif
-				Process = null;
+				Manager = null;
 			}
 			base.Dispose(ADisposing);
 		}
@@ -156,7 +156,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			while (LLo <= LHi)
 			{
 				LIndex = (LLo + LHi) / 2;
-				LResult = Tree.Compare(Process, Tree.KeyRowType, Node.Keys[LIndex], AKeyRowType, AKey);
+				LResult = Tree.Compare(Manager, Tree.KeyRowType, Node.Keys[LIndex], AKeyRowType, AKey);
 				if (LResult == 0)
 					break;
 				else if (LResult > 0)
@@ -189,7 +189,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				return
 					new RowTreeNode
 					(
-						Process,
+						Manager,
 						Tree, 
 						RoutingNode.Nodes[AEntryNumber],
 						LockMode.Shared
@@ -225,7 +225,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void UpdateData(NativeRow AData, int AEntryNumber)
 		{
-			Tree.DisposeData(Process, DataNode.Rows[AEntryNumber]);
+			Tree.DisposeData(Manager, DataNode.Rows[AEntryNumber]);
 			DataNode.Rows[AEntryNumber] = AData;
 		}
 		
@@ -236,8 +236,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void DeleteData(int AEntryNumber)
 		{
-			Tree.DisposeData(Process, DataNode.Rows[AEntryNumber]);
-			Tree.DisposeKey(Process, DataNode.Keys[AEntryNumber]);
+			Tree.DisposeData(Manager, DataNode.Rows[AEntryNumber]);
+			Tree.DisposeKey(Manager, DataNode.Keys[AEntryNumber]);
 			
 			DataNode.Delete(AEntryNumber);
 			
@@ -247,7 +247,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public void DeleteRouting(int AEntryNumber)
 		{
-			Tree.DisposeKey(Process, RoutingNode.Keys[AEntryNumber]);
+			Tree.DisposeKey(Manager, RoutingNode.Keys[AEntryNumber]);
 			
 			RoutingNode.Delete(AEntryNumber);
 			
@@ -327,24 +327,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		public bool IsClustered;
 
-		public void Drop(ServerProcess AProcess)
+		public void Drop(IValueManager AManager)
 		{
 			// Deallocate all nodes in the tree
-			DeallocateNode(AProcess, Root);
+			DeallocateNode(AManager, Root);
 			Root = null;
 			Tail = null;
 			Head = null;
 			Height = 0;
 		}
 		
-		protected RowTreeNode AllocateNode(ServerProcess AProcess, NativeRowTreeNodeType ANodeType)
+		protected RowTreeNode AllocateNode(IValueManager AManager, NativeRowTreeNodeType ANodeType)
 		{
-			return new RowTreeNode(AProcess, this, ANodeType == NativeRowTreeNodeType.Routing ? (NativeRowTreeNode)new NativeRowTreeRoutingNode(this) : new NativeRowTreeDataNode(this), LockMode.Exclusive);
+			return new RowTreeNode(AManager, this, ANodeType == NativeRowTreeNodeType.Routing ? (NativeRowTreeNode)new NativeRowTreeRoutingNode(this) : new NativeRowTreeDataNode(this), LockMode.Exclusive);
 		}
 		
-		protected void DeallocateNode(ServerProcess AProcess, NativeRowTreeNode ANode)
+		protected void DeallocateNode(IValueManager AManager, NativeRowTreeNode ANode)
 		{
-			using (RowTreeNode LNode = new RowTreeNode(AProcess, this, ANode, LockMode.Exclusive))
+			using (RowTreeNode LNode = new RowTreeNode(AManager, this, ANode, LockMode.Exclusive))
 			{
 				NativeRowTreeDataNode LDataNode = ANode as NativeRowTreeDataNode;
 				NativeRowTreeRoutingNode LRoutingNode = ANode as NativeRowTreeRoutingNode;
@@ -353,13 +353,13 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (ANode.NodeType == NativeRowTreeNodeType.Routing)
 					{
 						if (LEntryIndex > 0)
-							DisposeKey(AProcess, ANode.Keys[LEntryIndex]);
-						DeallocateNode(AProcess, LRoutingNode.Nodes[LEntryIndex]);
+							DisposeKey(AManager, ANode.Keys[LEntryIndex]);
+						DeallocateNode(AManager, LRoutingNode.Nodes[LEntryIndex]);
 					}
 					else
 					{
-						DisposeKey(AProcess, LDataNode.Keys[LEntryIndex]);
-						DisposeData(AProcess, LDataNode.Rows[LEntryIndex]);
+						DisposeKey(AManager, LDataNode.Keys[LEntryIndex]);
+						DisposeData(AManager, LDataNode.Rows[LEntryIndex]);
 					}
 				}
 				
@@ -367,7 +367,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					Tail = ANode.PriorNode;
 				else
 				{
-					using (RowTreeNode LNextNode = new RowTreeNode(AProcess, this, ANode.NextNode, LockMode.Exclusive))
+					using (RowTreeNode LNextNode = new RowTreeNode(AManager, this, ANode.NextNode, LockMode.Exclusive))
 					{
 						LNextNode.Node.PriorNode = ANode.PriorNode;
 					}
@@ -377,7 +377,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					Head = ANode.NextNode;
 				else
 				{
-					using (RowTreeNode LPriorNode = new RowTreeNode(AProcess, this, ANode.PriorNode, LockMode.Exclusive))
+					using (RowTreeNode LPriorNode = new RowTreeNode(AManager, this, ANode.PriorNode, LockMode.Exclusive))
 					{
 						LPriorNode.Node.NextNode = ANode.NextNode;
 					}
@@ -389,16 +389,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// The given streams are copied into the index, so references within the streams 
 		/// are considered owned by the index after the insert.
 		/// </summary>
-		public void Insert(ServerProcess AProcess, NativeRow AKey, NativeRow AData)
+		public void Insert(IValueManager AManager, NativeRow AKey, NativeRow AData)
 		{
 			int LEntryNumber;
 			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AProcess, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
+				bool LResult = FindKey(AManager, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
 				if (LResult)
 					throw new IndexException(IndexException.Codes.DuplicateKey);
 					
-				InternalInsert(AProcess, LRowTreeSearchPath, LEntryNumber, AKey, AData);
+				InternalInsert(AManager, LRowTreeSearchPath, LEntryNumber, AKey, AData);
 			}
 		}
 		
@@ -439,7 +439,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return LEntryPivot;
 		}
 		
-		private void InternalInsert(ServerProcess AProcess, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber, NativeRow AKey, NativeRow AData)
+		private void InternalInsert(IValueManager AManager, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber, NativeRow AKey, NativeRow AData)
 		{
 			// Walk back up the search path, inserting data and splitting pages as necessary
 			RowTreeNode LNewRowTreeNode;
@@ -449,7 +449,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				if (ARowTreeSearchPath[LIndex].Node.EntryCount >= Capacity)
 				{
 					// Allocate a new node
-					using (LNewRowTreeNode = AllocateNode(AProcess, ARowTreeSearchPath[LIndex].Node.NodeType))
+					using (LNewRowTreeNode = AllocateNode(AManager, ARowTreeSearchPath[LIndex].Node.NodeType))
 					{
 						// Thread it into the list of leaves, if necessary
 						if (LNewRowTreeNode.Node.NodeType == NativeRowTreeNodeType.Data)
@@ -461,7 +461,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 								Tail = LNewRowTreeNode.Node;
 							else
 							{
-								using (RowTreeNode LNextRowTreeNode = new RowTreeNode(AProcess, this, LNewRowTreeNode.Node.NextNode, LockMode.Exclusive))
+								using (RowTreeNode LNextRowTreeNode = new RowTreeNode(AManager, this, LNewRowTreeNode.Node.NextNode, LockMode.Exclusive))
 								{
 									LNextRowTreeNode.Node.PriorNode = LNewRowTreeNode.Node;
 								}
@@ -484,7 +484,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 							
 						// Reset the AKey for the next round
 						// The key for the entry one level up is the first key for the newly allocated node
-						AKey = CopyKey(AProcess, LNewRowTreeNode.Node.Keys[0]);
+						AKey = CopyKey(AManager, LNewRowTreeNode.Node.Keys[0]);
 						
 						// Set LSplitNode to the newly allocated node
 						LSplitNode = LNewRowTreeNode.Node;
@@ -493,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					if (LIndex == 0)
 					{
 						// Allocate a new root node and grow the height of the tree by 1
-						using (LNewRowTreeNode = AllocateNode(AProcess, NativeRowTreeNodeType.Routing))
+						using (LNewRowTreeNode = AllocateNode(AManager, NativeRowTreeNodeType.Routing))
 						{
 							LNewRowTreeNode.InsertRouting(null, ARowTreeSearchPath[LIndex].Node, 0); // 1st key of a routing node is not used
 							LNewRowTreeNode.InsertRouting(AKey, LSplitNode, 1);
@@ -523,22 +523,22 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		}
 		
 		/// <summary>Updates the entry given by AOldKey to the stream given by ANewKey.  The data for the entry is moved to the new location.</summary>
-		public void Update(ServerProcess AProcess, NativeRow AOldKey, NativeRow ANewKey)
+		public void Update(IValueManager AManager, NativeRow AOldKey, NativeRow ANewKey)
 		{
-			Update(AProcess, AOldKey, ANewKey, null);
+			Update(AManager, AOldKey, ANewKey, null);
 		}
 		
 		/// <summary>Updates the entry given by AOldKey to the entry given by ANewKey and ANewData.  If AOldKey == ANewKey, the data for the entry is updated in place, otherwise it is moved to the location given by ANewKey.</summary>
-		public void Update(ServerProcess AProcess, NativeRow AOldKey, NativeRow ANewKey, NativeRow ANewData)
+		public void Update(IValueManager AManager, NativeRow AOldKey, NativeRow ANewKey, NativeRow ANewData)
 		{
 			int LEntryNumber;
 			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AProcess, KeyRowType, AOldKey, LRowTreeSearchPath, out LEntryNumber);
+				bool LResult = FindKey(AManager, KeyRowType, AOldKey, LRowTreeSearchPath, out LEntryNumber);
 				if (!LResult)
 					throw new IndexException(IndexException.Codes.KeyNotFound);
 					
-				if (Compare(AProcess, KeyRowType, AOldKey, KeyRowType, ANewKey) == 0)
+				if (Compare(AManager, KeyRowType, AOldKey, KeyRowType, ANewKey) == 0)
 				{
 					if (ANewData != null)
 						LRowTreeSearchPath.DataNode.UpdateData(ANewData, LEntryNumber);
@@ -551,35 +551,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						LRowTreeSearchPath.DataNode.DataNode.Delete(LEntryNumber); // Don't dispose here this is a move
 					}
 					else
-						InternalDelete(AProcess, LRowTreeSearchPath, LEntryNumber); // Dispose here this is not a move
+						InternalDelete(AManager, LRowTreeSearchPath, LEntryNumber); // Dispose here this is not a move
 
 					LRowTreeSearchPath.Dispose();
-					LResult = FindKey(AProcess, KeyRowType, ANewKey, LRowTreeSearchPath, out LEntryNumber);
+					LResult = FindKey(AManager, KeyRowType, ANewKey, LRowTreeSearchPath, out LEntryNumber);
 					if (LResult)
 						throw new IndexException(IndexException.Codes.DuplicateKey);
 						
-					InternalInsert(AProcess, LRowTreeSearchPath, LEntryNumber, ANewKey, ANewData);
+					InternalInsert(AManager, LRowTreeSearchPath, LEntryNumber, ANewKey, ANewData);
 				}
 			}
 		}
 		
-		private void InternalDelete(ServerProcess AProcess, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber)
+		private void InternalDelete(IValueManager AManager, RowTreeSearchPath ARowTreeSearchPath, int AEntryNumber)
 		{
 			ARowTreeSearchPath.DataNode.DeleteData(AEntryNumber);
 		}
 		
 		// TODO: Asynchronous collapsed node recovery
 		/// <summary>Deletes the entry given by AKey.  The streams are disposed through the DisposeKey event, so it is the responsibility of the index user to dispose references within the streams.</summary>
-		public void Delete(ServerProcess AProcess, NativeRow AKey)
+		public void Delete(IValueManager AManager, NativeRow AKey)
 		{
 			int LEntryNumber;
 			using (RowTreeSearchPath LRowTreeSearchPath = new RowTreeSearchPath())
 			{
-				bool LResult = FindKey(AProcess, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
+				bool LResult = FindKey(AManager, KeyRowType, AKey, LRowTreeSearchPath, out LEntryNumber);
 				if (!LResult)
 					throw new IndexException(IndexException.Codes.KeyNotFound);
 					
-				InternalDelete(AProcess, LRowTreeSearchPath, LEntryNumber);
+				InternalDelete(AManager, LRowTreeSearchPath, LEntryNumber);
 			}
 		}
 
@@ -592,26 +592,26 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		/// <param name="ARowTreeSearchPath">A <see cref="RowTreeSearchPath"/> which will contain the set of nodes along the search path to the key.</param>
 		/// <param name="AEntryNumber">The EntryNumber where the key either is, or should be, depending on the result of the find.</param>
 		/// <returns>A boolean value indicating the success or failure of the find.</returns>
-		public bool FindKey(ServerProcess AProcess, Schema.IRowType AKeyRowType, NativeRow AKey, RowTreeSearchPath ARowTreeSearchPath, out int AEntryNumber)
+		public bool FindKey(IValueManager AManager, Schema.IRowType AKeyRowType, NativeRow AKey, RowTreeSearchPath ARowTreeSearchPath, out int AEntryNumber)
 		{
-			return new RowTreeNode(AProcess, this, Root, LockMode.Shared).FindKey(AKeyRowType, AKey, ARowTreeSearchPath, out AEntryNumber);
+			return new RowTreeNode(AManager, this, Root, LockMode.Shared).FindKey(AKeyRowType, AKey, ARowTreeSearchPath, out AEntryNumber);
 		}
 		
-		public int Compare(ServerProcess AProcess, Schema.IRowType AIndexKeyRowType, NativeRow AIndexKey, Schema.IRowType ACompareKeyRowType, NativeRow ACompareKey)
+		public int Compare(IValueManager AManager, Schema.IRowType AIndexKeyRowType, NativeRow AIndexKey, Schema.IRowType ACompareKeyRowType, NativeRow ACompareKey)
 		{
 			// If AIndexKeyRowType is null, the index key must have the structure of an index key,
 			// Otherwise, the IndexKey row could be a subset of the actual index key.
 			// In that case, AIndexKeyRowType is the RowType for the IndexKey row.
 			// It is the caller's responsibility to ensure that the passed IndexKey RowType 
 			// is a subset of the actual IndexKey with order intact.
-			//Row LIndexKey = new Row(AProcess, AIndexKeyRowType, AIndexKey);
+			//Row LIndexKey = new Row(AManager, AIndexKeyRowType, AIndexKey);
 				
 			// If ACompareContext is null, the compare key must have the structure of an index key,
 			// Otherwise the CompareKey could be a subset of the actual index key.
 			// In that case, ACompareContext is the RowType for the CompareKey row.
 			// It is the caller's responsibility to ensure that the passed CompareKey RowType 
 			// is a subset of the IndexKey with order intact.
-			//Row LCompareKey = new Row(AProcess, ACompareKeyRowType, ACompareKey);
+			//Row LCompareKey = new Row(AManager, ACompareKeyRowType, ACompareKey);
 				
 			int LResult = 0;
 			for (int LIndex = 0; LIndex < AIndexKeyRowType.Columns.Count; LIndex++)
@@ -621,20 +621,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					
 				if ((AIndexKey.Values[LIndex] != null) && (ACompareKey.Values[LIndex] != null))
 				{
-					/*
-					if ((AIndexKey.Values[LIndex] is IComparable) && (ACompareKey.Values[LIndex] is IComparable))
-						LResult = Key.Columns[LIndex].Ascending ? ((IComparable)AIndexKey.Values[LIndex]).CompareTo(ACompareKey.Values[LIndex]) : -((IComparable)AIndexKey.Values[LIndex]).CompareTo(ACompareKey.Values[LIndex]);
-					else
-					{
-					*/
-						AProcess.Stack.Push(AIndexKey.Values[LIndex]);
-						AProcess.Stack.Push(ACompareKey.Values[LIndex]);
-						LResult = Key.Columns[LIndex].Ascending ? 
-							(int)Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess) : 
-							-(int)(Key.Columns[LIndex].Sort.CompareNode.Execute(AProcess));
-						AProcess.Stack.Pop();
-						AProcess.Stack.Pop();
-					//} 
+					LResult = AManager.EvaluateSort(Key.Columns[LIndex], AIndexKey.Values[LIndex], ACompareKey.Values[LIndex]);
 				}
 				else if (AIndexKey.Values[LIndex] != null)
 				{
@@ -658,24 +645,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			return LResult;
 		}
 		
-		public NativeRow CopyKey(ServerProcess AProcess, NativeRow ASourceKey)
+		public NativeRow CopyKey(IValueManager AManager, NativeRow ASourceKey)
 		{
-			return (NativeRow)DataValue.CopyNative(AProcess, KeyRowType, ASourceKey);
+			return (NativeRow)DataValue.CopyNative(AManager, KeyRowType, ASourceKey);
 		}
 		
-		public NativeRow CopyData(ServerProcess AProcess, NativeRow ASourceData)
+		public NativeRow CopyData(IValueManager AManager, NativeRow ASourceData)
 		{
-			return (NativeRow)DataValue.CopyNative(AProcess, DataRowType, ASourceData);
+			return (NativeRow)DataValue.CopyNative(AManager, DataRowType, ASourceData);
 		}
 		
-		public void DisposeKey(ServerProcess AProcess, NativeRow AKey)
+		public void DisposeKey(IValueManager AManager, NativeRow AKey)
 		{
-			DataValue.DisposeNative(AProcess, KeyRowType, AKey);
+			DataValue.DisposeNative(AManager, KeyRowType, AKey);
 		}
 		
-		public void DisposeData(ServerProcess AProcess, NativeRow AData)
+		public void DisposeData(IValueManager AManager, NativeRow AData)
 		{
-			DataValue.DisposeNative(AProcess, DataRowType, AData);
+			DataValue.DisposeNative(AManager, DataRowType, AData);
 		}
 
 		public event NativeRowTreeRowsMovedHandler OnRowsMoved;
@@ -852,40 +839,40 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		
 		private Hashtable FRows;
 		
-		internal IServerProcess FProcess; // Only used during the Add and Remove calls
+		internal IManager FManager; // Only used during the Add and Remove calls
 		
 		private NativeRowHashTableHashCodeProvider FHashCodeProvider;
 		
 		private NativeRowHashTableComparer FComparer;
 		
-		public void Add(IServerProcess AProcess, NativeRow AKey, NativeRow AData)
+		public void Add(IIValueManager AManager, NativeRow AKey, NativeRow AData)
 		{
 			lock (this)
 			{
-				FProcess = AProcess;
+				FManager = AManager;
 				try
 				{
 					FRows.Add(AKey, AData);
 				}
 				finally
 				{
-					FProcess = null;
+					FManager = null;
 				}
 			}
 		}
 		
-		public void Remove(IServerProcess AProcess, NativeRow AKey)
+		public void Remove(IIValueManager AManager, NativeRow AKey)
 		{
 			lock (this)
 			{
-				FProcess = AProcess;
+				FManager = AManager;
 				try
 				{
 					FRows.Remove(AKey);
 				}
 				finally
 				{
-					FProcess = null;
+					FManager = null;
 				}
 			}
 		}

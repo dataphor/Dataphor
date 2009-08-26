@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
     public class UnionTable : Table
     {
-		public UnionTable(UnionNode ANode, ServerProcess AProcess) : base(ANode, AProcess){}
+		public UnionTable(UnionNode ANode, Program AProgram) : base(ANode, AProgram){}
 
         public new UnionNode Node { get { return (UnionNode)FNode; } }
         
@@ -34,11 +34,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         
         protected override void InternalOpen()
         {
-			FSourceRow = new Row(Process, Node.DataType.RowType);
-			FLeftTable = Node.Nodes[0].Execute(Process) as Table;
+			FSourceRow = new Row(Manager, Node.DataType.RowType);
+			FLeftTable = Node.Nodes[0].Execute(Program) as Table;
 			try
 			{
-				FRightTable = Node.Nodes[1].Execute(Process) as Table;
+				FRightTable = Node.Nodes[1].Execute(Program) as Table;
 			}
 			catch
 			{
@@ -47,7 +47,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			}
 			
 			Schema.TableType LTableType = new Schema.TableType();
-			Schema.BaseTableVar LTableVar = new Schema.BaseTableVar(LTableType, Process.Plan.TempDevice);
+			Schema.BaseTableVar LTableVar = new Schema.BaseTableVar(LTableType, Program.TempDevice);
 			Schema.TableVarColumn LNewColumn;
 			foreach (Schema.TableVarColumn LColumn in FLeftTable.Node.TableVar.Columns)
 			{
@@ -61,10 +61,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				LKey.Columns.Add(LTableVar.Columns[LColumn.Name]);
 			LTableVar.Keys.Add(LKey);
 			
-			FBuffer = new NativeTable(Process, LTableVar);
+			FBuffer = new NativeTable(Manager, LTableVar);
 			PopulateBuffer();
 
-			FScan = new Scan(Process, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
         }
         
@@ -78,7 +78,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			
 			if (FBuffer != null)
 			{
-				FBuffer.Drop(Process);
+				FBuffer.Drop(Manager);
 				FBuffer = null;
 			}
 			
@@ -106,14 +106,14 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			while (FLeftTable.Next())
 			{
 				FLeftTable.Select(FSourceRow);
-				FBuffer.Insert(Process, FSourceRow);
+				FBuffer.Insert(Manager, FSourceRow);
 			}
 			
 			while (FRightTable.Next())
 			{
 				FRightTable.Select(FSourceRow);
-				if (!FBuffer.HasRow(Process, FSourceRow))
-					FBuffer.Insert(Process, FSourceRow);
+				if (!FBuffer.HasRow(Manager, FSourceRow))
+					FBuffer.Insert(Manager, FSourceRow);
 			}
         }
         
@@ -123,9 +123,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			FRightTable.Reset();
 			FScan.Close();
 			FScan.Dispose();
-			FBuffer.Truncate(Process);
+			FBuffer.Truncate(Manager);
 			PopulateBuffer();
-			FScan = new Scan(Process, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
+			FScan = new Scan(Manager, FBuffer, FBuffer.ClusteredIndex, ScanDirection.Forward, null, null);
 			FScan.Open();
         }
         

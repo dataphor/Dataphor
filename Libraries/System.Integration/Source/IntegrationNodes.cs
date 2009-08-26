@@ -20,12 +20,12 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Insert(ASource : table, ATarget : table) : String
 	public class InsertNode : InstructionNodeBase
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
 			return
 				IntegrationHelper.Copy
 				(
-					AProcess,
+					AProgram,
 					(TableNode)Nodes[0],
 					(TableNode)Nodes[1],
 					new GenerateStatementHandler(IntegrationHelper.GenerateInsertStatement)
@@ -36,30 +36,30 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASourceExpression : String, ATargetExpression : String, AKeyColumnNames : String, AInsertOnly : Boolean) : String
 	public class CopyNode : InstructionNodeBase
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProcess) : null;
-			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProcess) : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProgram) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProgram) : false;
 			
-			IServerExpressionPlan ASourcePlan = ((IServerProcess)AProcess).PrepareExpression((string)Nodes[0].Execute(AProcess), null);
+			IServerExpressionPlan ASourcePlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression((string)Nodes[0].Execute(AProgram), null);
 			try
 			{
-				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProcess).PrepareExpression((string)Nodes[1].Execute(AProcess), null);
+				IServerExpressionPlan ATargetPlan = ((IServerProcess)AProgram.ServerProcess).PrepareExpression((string)Nodes[1].Execute(AProgram), null);
 				try
 				{
-					TableNode ASourceTable = ((CursorNode)((ServerPlan)ASourcePlan).Code).SourceNode;
-					TableNode ATargetTable = ((CursorNode)((ServerPlan)ATargetPlan).Code).SourceNode;
+					TableNode ASourceTable = ((CursorNode)((ServerPlan)ASourcePlan).Program.Code).SourceNode;
+					TableNode ATargetTable = ((CursorNode)((ServerPlan)ATargetPlan).Program.Code).SourceNode;
 
-					return CopyTablesNode.InternalCopy(AProcess, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
+					return CopyTablesNode.InternalCopy(AProgram, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 				}
 				finally
 				{
-					((IServerProcess)AProcess).UnprepareExpression(ATargetPlan);
+					((IServerProcess)AProgram.ServerProcess).UnprepareExpression(ATargetPlan);
 				}
 			}
 			finally
 			{
-				((IServerProcess)AProcess).UnprepareExpression(ASourcePlan);
+				((IServerProcess)AProgram.ServerProcess).UnprepareExpression(ASourcePlan);
 			}
 		}
 	}
@@ -69,23 +69,23 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 	// operator Copy(ASource : table, ATarget : table) : String
 	public class CopyTablesNode : InstructionNodeBase
 	{
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProcess) : null;
-			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProcess) : false;
+			string AKeyColumnNames = Nodes.Count > 2 ? (string)Nodes[2].Execute(AProgram) : null;
+			bool AInsertOnly = Nodes.Count > 3 ? (bool)Nodes[3].Execute(AProgram) : false;
 
 			TableNode ASourceTable = (TableNode)Nodes[0];
 			TableNode ATargetTable = (TableNode)Nodes[1];
 
-			return InternalCopy(AProcess, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
+			return InternalCopy(AProgram, FDataType, ASourceTable, ATargetTable, AKeyColumnNames, AInsertOnly);
 		}
 
-		internal static object InternalCopy(ServerProcess AProcess, Schema.IDataType ADataType, TableNode ASourceTable, TableNode ATargetTable, string AKeyColumnNames, bool AInsertOnly)
+		internal static object InternalCopy(Program AProgram, Schema.IDataType ADataType, TableNode ASourceTable, TableNode ATargetTable, string AKeyColumnNames, bool AInsertOnly)
 		{
 			return
 				IntegrationHelper.Copy
 				(
-					AProcess,
+					AProgram,
 					ASourceTable,
 					ATargetTable,
 					delegate(TableNode ASourceTableInner, TableNode ATargetTableInner, Expression ATargetExpression)
@@ -93,6 +93,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 						return
 							IntegrationHelper.GenerateConditionedInsertStatement
 							(
+								AProgram,
 								ASourceTableInner,
 								ATargetTableInner,
 								ATargetExpression,
@@ -106,7 +107,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 
 	public sealed class IntegrationHelper
 	{
-		public static string Copy(ServerProcess AProcess, TableNode ASourceTable, TableNode ATargetTable, GenerateStatementHandler AGenerateStatement)
+		public static string Copy(Program AProgram, TableNode ASourceTable, TableNode ATargetTable, GenerateStatementHandler AGenerateStatement)
 		{
 			Statement LTargetStatement =
 				AGenerateStatement
@@ -115,7 +116,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 					ATargetTable,
 					(Expression)ATargetTable.EmitStatement(Alphora.Dataphor.DAE.Language.D4.EmitMode.ForCopy)
 				);
-			Schema.Key LDisplaySourceKey = ASourceTable.TableVar.FindClusteringKey();
+			Schema.Key LDisplaySourceKey = AProgram.FindClusteringKey(ASourceTable.TableVar);
 
 			StringBuilder LResult = new StringBuilder();
 			long LSucceededUpdateCount = 0;
@@ -123,103 +124,123 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			bool LMaxResultLengthMessageWritten = false;
 
 			// Start a new process so that we don't mess with the transaction context of this one
-			ProcessInfo LInfo = new ProcessInfo(AProcess.ServerSession.SessionInfo);
+			ProcessInfo LInfo = new ProcessInfo(AProgram.ServerProcess.ServerSession.SessionInfo);
 			LInfo.UseImplicitTransactions = false;
-			IServerProcess LTargetProcess = ((IServerSession)AProcess.ServerSession).StartProcess(LInfo);
+			IServerProcess LTargetProcess = ((IServerSession)AProgram.ServerProcess.ServerSession).StartProcess(LInfo);
 			try
 			{
-				// Have the target process use the main process' context
-				Stack LOldTargetContext = ((ServerProcess)LTargetProcess).SwitchContext(AProcess.Stack);
+				Program LTargetProgram = new Program((ServerProcess)LTargetProcess);
+				LTargetProgram.Code = ATargetTable;
+				LTargetProgram.Start(null);
 				try
 				{
-					LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
-					IServerProcess LSourceProcess = ((IServerSession)AProcess.ServerSession).StartProcess(LInfo);
+					// Have the target program use the main program's context
+					Stack LOldTargetContext = LTargetProgram.SwitchContext(AProgram.Stack);
 					try
 					{
-						// Have the source process use the main process' context
-						Stack LOldSourceContext = ((ServerProcess)LSourceProcess).SwitchContext(AProcess.Stack);
+						LInfo.DefaultIsolationLevel = IsolationLevel.Browse;
+						IServerProcess LSourceProcess = ((IServerSession)AProgram.ServerProcess.ServerSession).StartProcess(LInfo);
 						try
 						{
-							Table LSource = (Table)ASourceTable.Execute((ServerProcess)LSourceProcess);
+							Program LSourceProgram = new Program((ServerProcess)LSourceProcess);
+							LSourceProgram.Code = ASourceTable;
+							LSourceProgram.Start(null);
 							try
 							{
-								LSource.Open();
-
-								// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
-								// There is a MarshalRow call in the LocalProcess, would that solve this problem?
-								using (Row LRow = new Row(LTargetProcess, ASourceTable.DataType.CreateRowType()))
+								// Have the source program use the main program's context
+								Stack LOldSourceContext = LSourceProgram.SwitchContext(AProgram.Stack);
+								try
 								{
-									DataParams LParams = new DataParams();
-									LParams.Add(new DataParam("ASourceRow", LRow.DataType, DAE.Language.Modifier.Const, LRow));
-
-									IServerStatementPlan LTarget = LTargetProcess.PrepareStatement(new D4TextEmitter().Emit(LTargetStatement), LParams);
+									Table LSource = (Table)ASourceTable.Execute(LSourceProgram);
 									try
 									{
-										LTarget.CheckCompiled();
+										LSource.Open();
 
-										while (LSource.Next())
+										// TODO: IBAS Project #26790 - allow cross-process row copies for streamed types
+										// There is a MarshalRow call in the LocalProcess, would that solve this problem?
+										using (Row LRow = new Row(LTargetProcess.ValueManager, ASourceTable.DataType.CreateRowType()))
 										{
-											LRow.ClearValues();
-											LTargetProcess.BeginTransaction(IsolationLevel.Isolated);
+											DataParams LParams = new DataParams();
+											LParams.Add(new DataParam("ASourceRow", LRow.DataType, DAE.Language.Modifier.Const, LRow));
+
+											IServerStatementPlan LTarget = LTargetProcess.PrepareStatement(new D4TextEmitter().Emit(LTargetStatement), LParams);
 											try
 											{
-												LSource.Select(LRow);
-												LTarget.Execute(LParams);
-												LTargetProcess.CommitTransaction();
-												LSucceededUpdateCount++;
-											}
-											catch (Exception LException)
-											{
-												LFailedUpdateCount++;
-												LTargetProcess.RollbackTransaction();
-												if (LResult.Length < 100000)
-													LResult.Append(KeyValuesToString(LDisplaySourceKey, LRow) + " - " + LException.Message + "\r\n");
-												else
+												LTarget.CheckCompiled();
+
+												while (LSource.Next())
 												{
-													if (!LMaxResultLengthMessageWritten)
+													LRow.ClearValues();
+													LTargetProcess.BeginTransaction(IsolationLevel.Isolated);
+													try
 													{
-														LResult.Append(Strings.Get("MaxResultLengthExceeded"));
-														LMaxResultLengthMessageWritten = true;
+														LSource.Select(LRow);
+														LTarget.Execute(LParams);
+														LTargetProcess.CommitTransaction();
+														LSucceededUpdateCount++;
 													}
+													catch (Exception LException)
+													{
+														LFailedUpdateCount++;
+														LTargetProcess.RollbackTransaction();
+														if (LResult.Length < 100000)
+															LResult.Append(KeyValuesToString(LDisplaySourceKey, LRow) + " - " + LException.Message + "\r\n");
+														else
+														{
+															if (!LMaxResultLengthMessageWritten)
+															{
+																LResult.Append(Strings.Get("MaxResultLengthExceeded"));
+																LMaxResultLengthMessageWritten = true;
+															}
+														}
+													}
+
+													// Yield in case our process is aborted.
+													AProgram.CheckAborted();
 												}
 											}
-
-											// Yield in case our process is aborted.
-											AProcess.CheckAborted();
+											finally
+											{
+												LTargetProcess.UnprepareStatement(LTarget);
+											}
 										}
 									}
 									finally
 									{
-										LTargetProcess.UnprepareStatement(LTarget);
+										LSource.Close();
 									}
+								}
+								finally
+								{
+									LSourceProgram.SwitchContext(LOldSourceContext);	// Don't let the source program cleanup the main context
 								}
 							}
 							finally
 							{
-								LSource.Close();
+								LSourceProgram.Stop(null);
 							}
 						}
 						finally
 						{
-							((ServerProcess)LSourceProcess).SwitchContext(LOldSourceContext);	// Don't let the source process cleanup the main context
+							((IServerSession)AProgram.ServerProcess.ServerSession).StopProcess(LSourceProcess);
 						}
+
+						LResult.AppendFormat(Strings.Get("Results"), LSucceededUpdateCount, LFailedUpdateCount);
+						return LResult.ToString();
 					}
 					finally
 					{
-						((IServerSession)AProcess.ServerSession).StopProcess(LSourceProcess);
+						LTargetProgram.SwitchContext(LOldTargetContext);	// Don't let the target program cleanup the main context
 					}
-
-					LResult.AppendFormat(Strings.Get("Results"), LSucceededUpdateCount, LFailedUpdateCount);
-					return LResult.ToString();
 				}
 				finally
 				{
-					((ServerProcess)LTargetProcess).SwitchContext(LOldTargetContext);	// Don't let the target process cleanup the main context
+					LTargetProgram.Stop(null);
 				}
 			}
 			finally
 			{
-				((IServerSession)AProcess.ServerSession).StopProcess(LTargetProcess);
+				((IServerSession)AProgram.ServerProcess.ServerSession).StopProcess(LTargetProcess);
 			}
 		}
 
@@ -228,7 +249,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			return new InsertStatement(new IdentifierExpression("ASourceRow"), ATargetExpression);
 		}
 
-		public static Statement GenerateConditionedInsertStatement(TableNode ASourceTable, TableNode ATargetTable, Expression ATargetExpression, bool AInsertOnly, string AKeyColumns)
+		public static Statement GenerateConditionedInsertStatement(Program AProgram, TableNode ASourceTable, TableNode ATargetTable, Expression ATargetExpression, bool AInsertOnly, string AKeyColumns)
 		{
 			// Produced statement looks similar to this:
 			//	if not exists (<target> rename Target where <key column restriction>) then
@@ -240,7 +261,7 @@ namespace Alphora.Dataphor.Libraries.System.Integration
 			if (AKeyColumns == null)
 			{
 				// If no key columns are specified, default to a key from the target
-				Schema.Key LKey = ATargetTable.TableVar.FindClusteringKey();
+				Schema.Key LKey = AProgram.FindClusteringKey(ATargetTable.TableVar);
 				LKeyColumnNames = new string[LKey.Columns.Count];
 				for (int i = 0; i < LKey.Columns.Count; i++)
 					LKeyColumnNames[i] = LKey.Columns[i].Name;

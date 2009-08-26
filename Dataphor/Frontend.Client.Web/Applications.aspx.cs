@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 					Alphora.Dataphor.DAE.IServerCursor LCursor = LPlan.Open(null);
 					try
 					{
-						using (Alphora.Dataphor.DAE.Runtime.Data.Row LRow = new Alphora.Dataphor.DAE.Runtime.Data.Row(WebSession.Pipe.Process, ((Alphora.Dataphor.DAE.Schema.TableType)LPlan.DataType).CreateRowType()))
+						using (Alphora.Dataphor.DAE.Runtime.Data.Row LRow = new Alphora.Dataphor.DAE.Runtime.Data.Row(WebSession.Pipe.Process.ValueManager, ((Alphora.Dataphor.DAE.Schema.TableType)LPlan.DataType).CreateRowType()))
 						{
 							while (LCursor.Next())
 							{

@@ -540,10 +540,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 															Strings.PrepareSuccessful,
 															new object[]
 															{
-																LPlan.Statistics.PrepareTime.ToString(),
-																LPlan.Statistics.CompileTime.ToString(),
-																LPlan.Statistics.OptimizeTime.ToString(),
-																LPlan.Statistics.BindingTime.ToString()
+																LPlan.PlanStatistics.PrepareTime.ToString(),
+																LPlan.PlanStatistics.CompileTime.ToString(),
+																LPlan.PlanStatistics.OptimizeTime.ToString(),
+																LPlan.PlanStatistics.BindingTime.ToString()
 															}
 														);
 														LResult.Append("\r\n");
@@ -569,10 +569,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 															Strings.PrepareSuccessful,
 															new object[]
 															{
-																LPlan.Statistics.PrepareTime.ToString(),
-																LPlan.Statistics.CompileTime.ToString(),
-																LPlan.Statistics.OptimizeTime.ToString(),
-																LPlan.Statistics.BindingTime.ToString()
+																LPlan.PlanStatistics.PrepareTime.ToString(),
+																LPlan.PlanStatistics.CompileTime.ToString(),
+																LPlan.PlanStatistics.OptimizeTime.ToString(),
+																LPlan.PlanStatistics.BindingTime.ToString()
 															}
 														);
 														LResult.Append("\r\n");

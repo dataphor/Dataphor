@@ -352,7 +352,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			foreach (Schema.Key LKey in SourceTableVar.Keys)
 				if (!LKey.IsSparse && (LKey.Columns.Count == LKeyColumns.Count) && LKey.Columns.IsSupersetOf(LKeyColumns))
-					return new Schema.Order(LKey, APlan);
+					return Compiler.OrderFromKey(APlan, LKey);
 
 			return null;
 		}
@@ -518,7 +518,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 			foreach (Schema.Key LKey in SourceTableVar.Keys)
 			{
-				LNewOrder = new Schema.Order(LKey, APlan);
+				LNewOrder = Compiler.OrderFromKey(APlan, LKey);
 				if (IsValidScanOrder(APlan, LNewOrder, FClosedConditions, FOpenConditions, FScanCondition))
 					return LNewOrder;
 			}
@@ -835,9 +835,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Execute
-		public override object InternalExecute(ServerProcess AProcess)
+		public override object InternalExecute(Program AProgram)
 		{
-			RestrictTable LTable = (RestrictTable)Activator.CreateInstance(FRestrictionAlgorithm, new object[]{this, AProcess});
+			RestrictTable LTable = (RestrictTable)Activator.CreateInstance(FRestrictionAlgorithm, new object[]{this, AProgram});
 			try
 			{
 				LTable.Open();
@@ -890,25 +890,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 		
 		// Validate
-		protected override bool InternalValidate(ServerProcess AProcess, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
+		protected override bool InternalValidate(Program AProgram, Row AOldRow, Row ANewRow, BitArray AValueFlags, string AColumnName, bool AIsDescending, bool AIsProposable)
 		{
 			if (FEnforcePredicate && (AColumnName == String.Empty))
 			{
-				PushRow(AProcess, ANewRow);
+				PushRow(AProgram, ANewRow);
 				try
 				{
-					object LObject = Nodes[1].Execute(AProcess);
+					object LObject = Nodes[1].Execute(AProgram);
 					// BTR 05/03/2005 -> Because the restriction considers nil to be false, the validation should consider it false as well.
 					if ((LObject == null) || !(bool)LObject)
 						throw new RuntimeException(RuntimeException.Codes.NewRowViolatesRestrictPredicate, ErrorSeverity.User);
 				}
 				finally
 				{
-					PopRow(AProcess);
+					PopRow(AProgram);
 				}
 			}
 
-			return base.InternalValidate(AProcess, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
+			return base.InternalValidate(AProgram, AOldRow, ANewRow, AValueFlags, AColumnName, AIsDescending, AIsProposable);
 		}
 		
 		public override bool IsContextLiteral(int ALocation)

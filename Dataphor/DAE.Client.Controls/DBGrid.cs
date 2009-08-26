@@ -5447,7 +5447,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				}
 
 				DAEData.Row LViewRow = (DAEData.Row)RowValueAt(ARowIndex);
-				DAEData.Row LRow = new DAEData.Row(LDataSet.Process, LRowType);
+				DAEData.Row LRow = new DAEData.Row(LDataSet.Process.ValueManager, LRowType);
 				foreach (DAESchema.OrderColumn LColumn in LDataSet.Order.Columns)
 				{
 					LColumnName = LColumn.Column.Name;

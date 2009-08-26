@@ -1361,7 +1361,7 @@ namespace Alphora.Dataphor.DAE.Client
 			Edit();
 			Row LActiveRow = FBuffer[FActiveOffset].Row;
 			Row LSaveOldRow = FOldRow;
-			FOldRow = new Row(LActiveRow.Process, LActiveRow.DataType);
+			FOldRow = new Row(LActiveRow.Manager, LActiveRow.DataType);
 			try
 			{
 				LActiveRow.CopyTo(FOldRow);
@@ -2280,7 +2280,7 @@ namespace Alphora.Dataphor.DAE.Client
 			public void Add(int ACount, DataSet ADataSet)
 			{
 				for (int LIndex = 0; LIndex < ACount; LIndex++)
-					Add(new DataSetRow(new Row(ADataSet.Process, ADataSet.TableType.RowType), new RowFlag(), Guid.Empty));
+					Add(new DataSetRow(new Row(ADataSet.Process.ValueManager, ADataSet.TableType.RowType), new RowFlag(), Guid.Empty));
 			}
 		}
 		
@@ -2541,7 +2541,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsNative = value; // Has to be done thiw way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2559,7 +2559,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsBoolean = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2576,7 +2576,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsBoolean(string ARepresentationName, bool AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsBoolean(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2593,7 +2593,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsByte = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2610,7 +2610,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsByte(string ARepresentationName, byte AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsByte(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2627,7 +2627,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsDecimal = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2644,7 +2644,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsDecimal(string ARepresentationName, decimal AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsDecimal(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2661,7 +2661,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsTimeSpan = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2678,7 +2678,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsTimeSpan(string ARepresentationName, TimeSpan AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsTimeSpan(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2695,7 +2695,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsDateTime = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2712,7 +2712,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsDateTime(string ARepresentationName, DateTime AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsDateTime(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2743,7 +2743,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsInt16 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2760,7 +2760,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsInt16(string ARepresentationName, short AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsInt16(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2777,7 +2777,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsInt32 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2794,7 +2794,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsInt32(string ARepresentationName, int AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsInt32(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2811,7 +2811,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsInt64 = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2828,7 +2828,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsInt64(string ARepresentationName, long AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsInt64(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2845,7 +2845,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsString = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2862,7 +2862,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsString(string ARepresentationName, string AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsString(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
@@ -2879,7 +2879,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsDisplayString = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2897,7 +2897,7 @@ namespace Alphora.Dataphor.DAE.Client
 			set
 			{
 				CheckDataSetNotEmpty();
-				Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+				Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 				LValue.AsGuid = value; // Has to be done this way in order to fire the appropriate dataset events
 				Value = LValue;
 			}
@@ -2914,7 +2914,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public void SetAsGuid(string ARepresentationName, Guid AValue)
 		{
 			CheckDataSetNotEmpty();
-			Scalar LValue = new Scalar(FDataSet.Process, DataType, null);
+			Scalar LValue = new Scalar(FDataSet.Process.ValueManager, DataType, null);
 			LValue.SetAsGuid(ARepresentationName, AValue); // Has to be done this way in order to fire the appropriate dataset events
 			Value = LValue;
 		}
