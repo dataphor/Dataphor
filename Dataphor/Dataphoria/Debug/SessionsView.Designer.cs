@@ -51,9 +51,9 @@
 			// 
 			// FSessionDataView
 			// 
-			this.FSessionDataView.Expression = "\tSessions { ID, User_ID, HostName, Connection_Name }\r\n\t\twhere (ID <> SessionID())" +
-				" and (ID <> 0)\r\n\t\tleft join (GetSessions() { Session_ID ID }) include rowexists " +
-				"IsAttached\r\n";
+			this.FSessionDataView.Expression = "\t.System.Sessions { ID, User_ID, HostName, Connection_Name }\r\n\t\twhere (ID <> Sess" +
+				"ionID()) and (ID <> 0)\r\n\t\tleft join (GetSessions() { Session_ID ID }) include ro" +
+				"wexists IsAttached\r\n\t\tbrowse by { ID }";
 			this.FSessionDataView.IsReadOnly = true;
 			this.FSessionDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
@@ -174,12 +174,12 @@
 			this.FRefreshButton.Text = "Refresh";
 			this.FRefreshButton.Click += new System.EventHandler(this.FRefreshButton_Click);
 			// 
-			// SessionView
+			// SessionsView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.toolStripContainer1);
-			this.Name = "SessionView";
+			this.Name = "SessionsView";
 			this.Size = new System.Drawing.Size(863, 228);
 			((System.ComponentModel.ISupportInitialize)(this.FSessionDataView)).EndInit();
 			this.FContextMenu.ResumeLayout(false);

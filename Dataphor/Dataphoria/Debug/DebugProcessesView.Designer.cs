@@ -49,7 +49,7 @@
 			// 
 			// FDebugProcessDataView
 			// 
-			this.FDebugProcessDataView.Expression = "\tGetProcesses()";
+			this.FDebugProcessDataView.Expression = "\t.System.Debug.GetProcesses()\r\n\t\tbrowse by { Session_ID, ID }";
 			this.FDebugProcessDataView.IsReadOnly = true;
 			this.FDebugProcessDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)

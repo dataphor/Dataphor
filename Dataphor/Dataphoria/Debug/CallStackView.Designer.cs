@@ -29,6 +29,7 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CallStackView));
 			this.FCallStackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
 			this.FCallStackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
@@ -53,9 +54,7 @@
 			// 
 			// FCallStackDataView
 			// 
-			this.FCallStackDataView.Expression = "\tSessions { ID, User_ID, HostName, Connection_Name }\r\n\t\twhere (ID <> SessionID())" +
-				" and (ID <> 0)\r\n\t\tleft join (GetSessions() { Session_ID ID }) include rowexists " +
-				"IsAttached\r\n";
+			this.FCallStackDataView.Expression = resources.GetString("FCallStackDataView.Expression");
 			this.FCallStackDataView.IsReadOnly = true;
 			this.FCallStackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
@@ -111,13 +110,13 @@
             this.FSelectContextMenuItem,
             this.FRefreshContextMenuItem});
 			this.FContextMenu.Name = "FContextMenu";
-			this.FContextMenu.Size = new System.Drawing.Size(153, 70);
+			this.FContextMenu.Size = new System.Drawing.Size(133, 48);
 			// 
 			// FSelectContextMenuItem
 			// 
 			this.FSelectContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
 			this.FSelectContextMenuItem.Name = "FSelectContextMenuItem";
-			this.FSelectContextMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.FSelectContextMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.FSelectContextMenuItem.Text = "Select";
 			this.FSelectContextMenuItem.Click += new System.EventHandler(this.FSelectButton_Click);
 			// 
@@ -126,7 +125,7 @@
 			this.FRefreshContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Refresh;
 			this.FRefreshContextMenuItem.Name = "FRefreshContextMenuItem";
 			this.FRefreshContextMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.FRefreshContextMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.FRefreshContextMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.FRefreshContextMenuItem.Text = "Refresh";
 			this.FRefreshContextMenuItem.Click += new System.EventHandler(this.FRefreshButton_Click);
 			// 
