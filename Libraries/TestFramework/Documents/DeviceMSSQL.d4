@@ -1,0 +1,20 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+create device TestingDevice
+	reconciliation {mode={command}, master=device}
+class "MSSQLDevice.MSSQLDevice"
+	attributes
+{
+	"ServerName" = "HUITZILOPOCHTLI",
+	"DatabaseName" = "DataphorTests",
+	"ConnectionClass" = "Connection.MSSQLConnection"	
+};
+
+CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
+CreateDeviceUser("System", "TestingDevice", "sa", "welcome");
+
+SetDefaultDeviceName("TestingDevice");
+
