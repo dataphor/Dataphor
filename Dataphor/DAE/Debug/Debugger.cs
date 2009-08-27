@@ -385,7 +385,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					
 				CallStack LCallStack = new CallStack();
 				
-				foreach (Program LProgram in LProcess.FExecutingPrograms)
+				foreach (Program LProgram in LProcess.ExecutingPrograms)
 				{
 					DebugLocator LCurrentLocation = LProgram.Locator;
 					foreach (RuntimeStackWindow LWindow in LProgram.Stack.GetCallStack())

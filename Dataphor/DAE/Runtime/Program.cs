@@ -101,6 +101,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 		private DataParams FProcessLocals = new DataParams();
 		public DataParams ProcessLocals { get { return FProcessLocals; } }
 		
+		private bool FShouldPushLocals;
+		/// <summary>
+		/// Indicates whether or not process local variables should be pushed onto the program's stack.
+		/// </summary>
+		public bool ShouldPushLocals
+		{
+			get { return FShouldPushLocals; }
+			set { FShouldPushLocals = value; }
+		}
+		
 		// Used to track the set of process local variables pushed when the program was started.
 		private DataParams FLocalParams;
 		
@@ -209,12 +219,13 @@ namespace Alphora.Dataphor.DAE.Runtime
 			{
 				FLocalParams = new DataParams();
 				DataParams LParams = new DataParams();
-				foreach (DataParam LParam in FServerProcess.ProcessLocals)
-					if (!ProcessLocals.Contains(LParam.Name))
-					{
-						FLocalParams.Add(LParam);
-						LParams.Add(LParam);
-					}
+				if (FShouldPushLocals)
+					foreach (DataParam LParam in FServerProcess.ProcessLocals)
+						if (!ProcessLocals.Contains(LParam.Name))
+						{
+							FLocalParams.Add(LParam);
+							LParams.Add(LParam);
+						}
 				
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)

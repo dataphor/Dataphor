@@ -25,6 +25,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcess = AProcess;
 			FPlan = new Plan(AProcess);
 			FProgram = new Program(AProcess, FID);
+			FProgram.ShouldPushLocals = true;
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
 			if (FProcess.ServerSession.Server.FPlanCounter != null)

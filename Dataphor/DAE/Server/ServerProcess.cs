@@ -59,7 +59,8 @@ namespace Alphora.Dataphor.DAE.Server
 			#endif
 
 			FExecutingPrograms = new Programs();
-			FProcessLocals = new DataParams();
+			FProcessLocalStack = new List<DataParams>();
+			PushProcessLocals();
 			FProcessProgram = new Program(this);
 			FProcessProgram.Start(null);
 			
@@ -73,11 +74,17 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		private bool FDisposed;
-	
-		protected void DeallocateProcessLocals()
+		
+		protected void DeallocateProcessLocals(DataParams AParams)
 		{
-			foreach (DataParam LParam in FProcessLocals)
+			foreach (DataParam LParam in AParams)
 				DataValue.DisposeValue(FValueManager, LParam.Value);
+		}
+	
+		protected void DeallocateProcessLocalStack()
+		{
+			foreach (DataParams LParams in FProcessLocalStack)
+				DeallocateProcessLocals(LParams);
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -184,10 +191,10 @@ namespace Alphora.Dataphor.DAE.Server
 							}
 							finally
 							{
-								if (FProcessLocals != null)
+								if (FProcessLocalStack != null)
 								{
-									DeallocateProcessLocals();
-									FProcessLocals = null;
+									DeallocateProcessLocalStack();
+									FProcessLocalStack = null;
 								}
 							}
 						}
@@ -767,20 +774,32 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// ProcessLocals
-		private DataParams FProcessLocals;
-		public DataParams ProcessLocals { get { return FProcessLocals; } }
+		private List<DataParams> FProcessLocalStack;
+		public DataParams ProcessLocals { get { return FProcessLocalStack[FProcessLocalStack.Count - 1]; } }
+		
+		public void PushProcessLocals()
+		{
+			FProcessLocalStack.Add(new DataParams());
+		}
+		
+		public void PopProcessLocals()
+		{
+			DeallocateProcessLocals(ProcessLocals);
+			FProcessLocalStack.RemoveAt(FProcessLocalStack.Count - 1);
+		}
 		
 		public void AddProcessLocal(DataParam LParam)
 		{
-			int LParamIndex = FProcessLocals.IndexOf(LParam.Name);
+			DataParams LProcessLocals = ProcessLocals;
+			int LParamIndex = LProcessLocals.IndexOf(LParam.Name);
 			if (LParamIndex >= 0)
 			{
-				DataValue.DisposeValue(FValueManager, FProcessLocals[LParamIndex].Value);
-				FProcessLocals[LParamIndex].Value = LParam.Value;
+				DataValue.DisposeValue(FValueManager, LProcessLocals[LParamIndex].Value);
+				LProcessLocals[LParamIndex].Value = LParam.Value;
 				LParam.Value = null;
 			}
 			else
-				FProcessLocals.Add(LParam);
+				LProcessLocals.Add(LParam);
 		}
 		
 		private void Compile(Plan APlan, Program AProgram, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
@@ -800,8 +819,9 @@ namespace Alphora.Dataphor.DAE.Server
 			try
 			{
 				DataParams LParams = new DataParams();
-				foreach (DataParam LParam in FProcessLocals)
-					LParams.Add(LParam);
+				if (AProgram.ShouldPushLocals)
+					foreach (DataParam LParam in ProcessLocals)
+						LParams.Add(LParam);
 
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)
@@ -812,7 +832,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 				// Include dependencies for any process context that may be being referenced by the plan
 				// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-				if (APlan.NewSymbols != null)
+				if (AProgram.ShouldPushLocals && APlan.NewSymbols != null)
 					foreach (Symbol LSymbol in APlan.NewSymbols)
 					{
 						AProgram.ProcessLocals.Add(new DataParam(LSymbol.Name, LSymbol.DataType, Modifier.Var));
@@ -878,8 +898,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private int GetContextHashCode(DataParams AParams)
 		{
 			StringBuilder LContextName = new StringBuilder();
-			for (int LIndex = 0; LIndex < FProcessLocals.Count; LIndex++)
-				LContextName.Append(FProcessLocals[LIndex].DataType.Name);
+			for (int LIndex = 0; LIndex < ProcessLocals.Count; LIndex++)
+				LContextName.Append(ProcessLocals[LIndex].DataType.Name);
 			if (AParams != null)
 				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
 					LContextName.Append(AParams[LIndex].DataType.Name);
@@ -1836,7 +1856,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FTimeStampCount--;
 		}
 		
-		internal Programs FExecutingPrograms;
+		private Programs FExecutingPrograms;
+		internal Programs ExecutingPrograms { get { return FExecutingPrograms; } }
 		
 		internal Program ExecutingProgram
 		{

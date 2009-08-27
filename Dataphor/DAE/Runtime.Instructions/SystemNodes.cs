@@ -1116,17 +1116,25 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public static void ExecuteScript(ServerProcess AProcess, Program AProgram, PlanNode ANode, string AScript, Row AInParams, Row AOutParams, DebugLocator ALocator)
 		{
 			DataParams LParams = SystemEvaluateNode.ParamsFromRows(AProgram, AInParams, AOutParams);
-			IServerProcess LProcess = (IServerProcess)AProcess;
-			IServerScript LScript = LProcess.PrepareScript(AScript, ALocator);
+			AProcess.PushProcessLocals();
 			try
 			{
-				LScript.Execute(LParams);
+				IServerProcess LProcess = (IServerProcess)AProcess;
+				IServerScript LScript = LProcess.PrepareScript(AScript, ALocator);
+				try
+				{
+					LScript.Execute(LParams);
+				}
+				finally
+				{
+					LProcess.UnprepareScript(LScript);
+				}
+				SystemEvaluateNode.UpdateRowFromParams(AOutParams, LParams);
 			}
 			finally
 			{
-				LProcess.UnprepareScript(LScript);
+				AProcess.PopProcessLocals();
 			}
-			SystemEvaluateNode.UpdateRowFromParams(AOutParams, LParams);
 		}
 
 		public override object InternalExecute(Program AProgram, object[] AArguments)
@@ -1196,24 +1204,32 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		private object Evaluate(ServerProcess AProcess, Program AProgram, PlanNode ANode, string AExpression, Row AInParams, Row AOutParams)
 		{
 			DataParams LParams = ParamsFromRows(AProgram, AInParams, AOutParams);
-
-			IServerProcess LProcess = (IServerProcess)AProcess;
-			IServerExpressionPlan LPlan = LProcess.PrepareExpression(AExpression, LParams);
+			
+			AProcess.PushProcessLocals();
 			try
 			{
-				LPlan.CheckCompiled();
-				PlanNode LNode = ((ServerExpressionPlan)LPlan).Program.Code;
-				if ((IsLiteral && !LNode.IsLiteral) || (IsFunctional && !LNode.IsFunctional) || (IsDeterministic && !LNode.IsDeterministic) || (IsRepeatable && !LNode.IsRepeatable) || (!IsNilable && LNode.IsNilable))
-					throw new RuntimeException(RuntimeException.Codes.InvalidCharacteristicOverride, PlanNode.CharacteristicsToString(this), PlanNode.CharacteristicsToString(LNode));
-				
-				DataValue LResult = LPlan.Evaluate(LParams);
-				UpdateRowFromParams(AOutParams, LParams);
-				Scalar LScalar = LResult as Scalar;
-				return LScalar == null ? LResult : LScalar.AsNative;
+				IServerProcess LProcess = (IServerProcess)AProcess;
+				IServerExpressionPlan LPlan = LProcess.PrepareExpression(AExpression, LParams);
+				try
+				{
+					LPlan.CheckCompiled();
+					PlanNode LNode = ((ServerExpressionPlan)LPlan).Program.Code;
+					if ((IsLiteral && !LNode.IsLiteral) || (IsFunctional && !LNode.IsFunctional) || (IsDeterministic && !LNode.IsDeterministic) || (IsRepeatable && !LNode.IsRepeatable) || (!IsNilable && LNode.IsNilable))
+						throw new RuntimeException(RuntimeException.Codes.InvalidCharacteristicOverride, PlanNode.CharacteristicsToString(this), PlanNode.CharacteristicsToString(LNode));
+					
+					DataValue LResult = LPlan.Evaluate(LParams);
+					UpdateRowFromParams(AOutParams, LParams);
+					Scalar LScalar = LResult as Scalar;
+					return LScalar == null ? LResult : LScalar.AsNative;
+				}
+				finally
+				{
+					LProcess.UnprepareExpression(LPlan);
+				}
 			}
 			finally
 			{
-				LProcess.UnprepareExpression(LPlan);
+				AProcess.PopProcessLocals();
 			}
 		}
 		
