@@ -3807,7 +3807,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
             SQLScalarType LParamType;
 			foreach (SQLPlanParameter LPlanParameter in ADevicePlan.DevicePlanNode.PlanParameters)
 			{
-				LParamValue = ADevicePlan.Plan.EvaluateLiteralArgument(LPlanParameter.PlanNode, LPlanParameter.SQLParameter.Name);
+				LParamValue = ADevicePlan.Plan.ExecuteNode(LPlanParameter.PlanNode);
 				LParamType = (SQLScalarType)Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LPlanParameter.PlanNode.DataType);
                 LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(LParamValue);
                 if (LNativeParamValue != null)
