@@ -12,9 +12,9 @@ ExecuteScript('Coverage.Base', 'Types');
 ExecuteScript('Coverage.Base', 'Tables'); 
 //ExecuteScript('Coverage.Base', 'Logic');
 // Insert the test cases for the main coverage:
-//if not exists (Cases) then
-//ExecuteScript('Coverage.Base', 'InsertCases');
-//ExecuteScript('Coverage.Base', 'CreateTableFunctions');
+if not exists (Cases) then
+ExecuteScript('Coverage.Base', 'InsertCases');
+ExecuteScript('Coverage.Base', 'CreateTableFunctions');
 
 
 

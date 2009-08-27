@@ -7,9 +7,10 @@
 ExecuteScript('Coverage.Devices', 'Types');
 ExecuteScript('Coverage.Devices', 'TypesMSSQL');
 ExecuteScript('Coverage.Devices', 'Tables');
-//ExecuteScript('Coverage.Devices', 'InsertIntoIdealDeviceOperatorsTable');
+alter device System.Temp alter class { alter "MaxRowCount" = "-1" };
+ExecuteScript('Coverage.Devices', 'InsertIntoIdealDeviceOperatorsTable');
 // Populates CurrentCase.
-//ExecuteScript('Coverage.Devices', 'InsertDeviceCase');
+ExecuteScript('Coverage.Devices', 'InsertDeviceCase');
 ExecuteScript('Coverage.Devices', 'Logic');
 
 

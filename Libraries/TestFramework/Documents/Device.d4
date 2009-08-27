@@ -3,20 +3,20 @@
 	© Copyright 2000-2008 Alphora
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
-create device TestingDevice
-	reconciliation {mode={none}, master=device}
+/*create device TestingDevice
+	reconciliation {mode={command}, master=device}
 class "MSSQLDevice.MSSQLDevice"
 	attributes
 {
 	"ServerName" = "HUITZILOPOCHTLI",
-	"DatabaseName" = "Testing",
+	"DatabaseName" = "DataphorTests",
 	"ConnectionClass" = "Connection.MSSQLConnection"	
 };
 
 CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
-CreateDeviceUser("System", "TestingDevice", "sa", "welcome=");
+CreateDeviceUser("System", "TestingDevice", "sa", "welcome");
 
-SetDefaultDeviceName("TestingDevice");
+SetDefaultDeviceName("TestingDevice");*/
 
 /*
 create device TestingDevice
@@ -34,20 +34,20 @@ CreateDeviceUserWithEncryptedPassword("System", "TestingDevice", "sa", "EP2o1xgS
 
 SetDefaultDeviceName("TestingDevice");
 */
-/*
+
 // Oracle
 create device TestingDevice
-	reconciliation {mode={none}, master = device}
-	class "OracleDevice"
+	reconciliation {mode={command}, master = device}
+	class "OracleDevice.OracleDevice"
 	attributes
 	{
-		"HostName" = "nigel",
-		"Schema" = "Testing"	
+		"HostName" = "(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = XE)))",
+		"Schema" = "DATAPHORTESTS",
+		"ConnectionClass" = "OracleConnection.OracleConnection"				
 	};
 
-CreateDeviceUser("System", "TestingDevice", "d4test", "test");
-CreateDeviceUser("Admin", "TestingDevice", "d4test", "test");
+CreateDeviceUser("System", "TestingDevice", "DATAPHORTESTS", "DATAPHORTESTS");
+CreateDeviceUser("Admin", "TestingDevice", "DATAPHORTESTS", "DATAPHORTESTS");
 EnsureDeviceStarted("TestingDevice");
 
 SetDefaultDeviceName("TestingDevice");
-*/
