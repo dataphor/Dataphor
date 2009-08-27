@@ -266,7 +266,9 @@ namespace Alphora.Dataphor.DAE.Server
 									foreach (DataParam LParam in FParams)
 										LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
 										
-								FProcess.FInternalProcess.PushProcessSymbols(LPlan);
+								foreach (DataParam LParam in FProcess.FInternalProcess.ProcessLocals)
+									LPlan.Symbols.Push(new Symbol(LParam.Name, LParam.DataType));
+										
 								FTableNode = (TableNode)Compiler.EmitTableVarNode(LPlan, FTableVar);
 							}
 							finally

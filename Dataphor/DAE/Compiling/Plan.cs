@@ -236,9 +236,14 @@ namespace Alphora.Dataphor.DAE.Compiling
 		protected Symbols FSymbols;
 		public Symbols Symbols { get { return FSymbols; } }
 		
+		protected List<Symbol> FNewSymbols;
+		public List<Symbol> NewSymbols { get { return FNewSymbols; } }
+		
 		public void ReportProcessSymbols()
 		{
-			FServerProcess.ReportProcessSymbols(FSymbols);
+			FNewSymbols = new List<Symbol>();
+			for (int LIndex = FSymbols.FrameCount - 1; LIndex >= 0; LIndex--)
+				FNewSymbols.Add(FSymbols[LIndex]);
 		}
 		
 		// InErrorContext

@@ -7,7 +7,6 @@
 #define USEOPERATORRESOLUTIONCACHE
 #define USECONVERSIONPATHCACHE
 #define USEROOTEDIDENTIFIERSINKEYEXPRESSIONS
-#define ALLOWPROCESSCONTEXT
 //#define DISALLOWAMBIGUOUSNAMES
 
 using System;
@@ -616,7 +615,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LNode = CompileCursor(APlan, AStatement is Expression ? (Expression)AStatement : ((SelectStatement)AStatement).CursorDefinition);
 					else
 					{
-						#if ALLOWPROCESSCONTEXT
 						APlan.Symbols.PushFrame();
 						try
 						{
@@ -627,9 +625,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 						{
 							APlan.Symbols.PopFrame();
 						}
-						#else
-						LNode = CompileFrameNode(APlan, AStatement);
-						#endif
 					}
 				}
 				catch (Exception LException)
@@ -683,19 +678,15 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static PlanNode Bind(Plan APlan, PlanNode APlanNode)
 		{
-			#if ALLOWPROCESSCONTEXT
 			APlan.Symbols.PushFrame();
 			try
 			{
-			#endif
 				return BindNode(APlan, APlanNode);
-			#if ALLOWPROCESSCONTEXT
 			}
 			finally
 			{
 				APlan.Symbols.PopFrame();
 			}
-			#endif
 		}
 		
 		public static PlanNode BindNode(Plan APlan, PlanNode APlanNode)

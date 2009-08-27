@@ -5,7 +5,6 @@
 */
 
 //#define TRACEEVENTS // Enable this to turn on tracing
-#define ALLOWPROCESSCONTEXT
 #define LOADFROMLIBRARIES
 #define PROCESSSTREAMSOWNED // Determines whether or not the process will deallocate all streams allocated by the process.
 
@@ -60,14 +59,9 @@ namespace Alphora.Dataphor.DAE.Server
 			#endif
 
 			FExecutingPrograms = new Programs();
-			
+			FProcessLocals = new DataParams();
 			FProcessProgram = new Program(this);
 			FProcessProgram.Start(null);
-			
-			#if ALLOWPROCESSCONTEXT
-			FProcessStack = new Stack(FServerSession.SessionInfo.DefaultMaxStackDepth, 1); // Process stack has only 1 window
-			FProcessStack.PushWindow(0);
-			#endif
 			
 			if (FServerSession.DebuggerID > 0)
 				FServerSession.Server.GetDebugger(FServerSession.DebuggerID).Attach(this);
@@ -80,13 +74,11 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private bool FDisposed;
 	
-		#if ALLOWPROCESSCONTEXT	
-		protected void DeallocateContextVariables()
+		protected void DeallocateProcessLocals()
 		{
-			for (int LIndex = 0; LIndex < FProcessStack.Count; LIndex++)
-				DataValue.DisposeValue(FValueManager, FProcessStack[LIndex]);
+			foreach (DataParam LParam in FProcessLocals)
+				DataValue.DisposeValue(FValueManager, LParam.Value);
 		}
-		#endif
 		
 		protected override void Dispose(bool ADisposing)
 		{
@@ -142,62 +134,60 @@ namespace Alphora.Dataphor.DAE.Server
 											}
 											finally
 											{
-												#if ALLOWPROCESSCONTEXT
-												if (FProcessStack != null)
+												if (FDeviceSessions != null)
 												{
-													DeallocateContextVariables();
-													FProcessStack = null;
+													try
+													{
+														CloseDeviceSessions();
+													}
+													finally
+													{
+														FDeviceSessions.Dispose();
+														FDeviceSessions = null;
+													}
 												}
-												#endif
 											}
 										}
 										finally
 										{
-											if (FDeviceSessions != null)
+											if (FRemoteSessions != null)
 											{
 												try
 												{
-													CloseDeviceSessions();
+													CloseRemoteSessions();
 												}
 												finally
 												{
-													FDeviceSessions.Dispose();
-													FDeviceSessions = null;
+													FRemoteSessions.Dispose();
+													FRemoteSessions = null;
 												}
 											}
 										}
 									}
 									finally
 									{
-										if (FRemoteSessions != null)
+										if (FTransactions != null)
 										{
-											try
-											{
-												CloseRemoteSessions();
-											}
-											finally
-											{
-												FRemoteSessions.Dispose();
-												FRemoteSessions = null;
-											}
+											FTransactions.Dispose();
+											FTransactions = null;
 										}
 									}
 								}
 								finally
 								{
-									if (FTransactions != null)
+									if (FProcessProgram != null)
 									{
-										FTransactions.Dispose();
-										FTransactions = null;
+										FProcessProgram.Stop(null);
+										FProcessProgram = null;
 									}
 								}
 							}
 							finally
 							{
-								if (FProcessProgram != null)
+								if (FProcessLocals != null)
 								{
-									FProcessProgram.Stop(null);
-									FProcessProgram = null;
+									DeallocateProcessLocals();
+									FProcessLocals = null;
 								}
 							}
 						}
@@ -285,9 +275,6 @@ namespace Alphora.Dataphor.DAE.Server
 		// ProcessInfo
 		private ProcessInfo FProcessInfo;
 		public ProcessInfo ProcessInfo { get { return FProcessInfo; } }
-		
-		// ProcessStack
-		private Stack FProcessStack;
 		
 		/// <summary>Determines the default isolation level for transactions on this process.</summary>
 		public IsolationLevel DefaultIsolationLevel
@@ -779,101 +766,75 @@ namespace Alphora.Dataphor.DAE.Server
 			set { FProcessInfo.SuppressWarnings = value; }
 		}
 		
-		#if ALLOWPROCESSCONTEXT
-		private Symbols FProcessSymbols = new Symbols();
-		internal Symbols ProcessSymbols { get { return FProcessSymbols; } }
-
-		internal void ReportProcessSymbols(Symbols ASymbols)
-		{
-			for (int LIndex = ASymbols.FrameCount - 1; LIndex >= 0; LIndex--)
-				FProcessSymbols.Push(ASymbols[LIndex]);
-		}
+		// ProcessLocals
+		private DataParams FProcessLocals;
+		public DataParams ProcessLocals { get { return FProcessLocals; } }
 		
-		internal void ClearProcessSymbols()
+		public void AddProcessLocal(DataParam LParam)
 		{
-			while (FProcessSymbols.Count > 0)
-				FProcessSymbols.Pop();
+			int LParamIndex = FProcessLocals.IndexOf(LParam.Name);
+			if (LParamIndex >= 0)
+			{
+				DataValue.DisposeValue(FValueManager, FProcessLocals[LParamIndex].Value);
+				FProcessLocals[LParamIndex].Value = LParam.Value;
+				LParam.Value = null;
+			}
+			else
+				FProcessLocals.Add(LParam);
 		}
-
-		internal void PushProcessSymbols(Plan APlan)
-		{
-			APlan.Symbols.PushFrame();
-			
-			// Note that this uses the current context count rather than the symbols count to 
-			// allow for the possibility that a window has been pushed on the current context
-			// For example, a dynamic evaluation.
-			for (int LIndex = Math.Min(FProcessSymbols.Count, FProcessStack.Count) - 1; LIndex >= 0; LIndex--)
-				APlan.Symbols.Push(FProcessSymbols[LIndex]);
-
-			if (FProcessStack.AllowExtraWindowAccess)
-				APlan.Symbols.AllowExtraWindowAccess = true;
-		}
-				
-		internal void PopProcessSymbols(Plan APlan)
-		{
-			APlan.Symbols.PopFrame();
-			if (FProcessStack.AllowExtraWindowAccess)
-				APlan.Symbols.AllowExtraWindowAccess = false;
-		}
-		
-		#endif
 		
 		private void Compile(Plan APlan, Program AProgram, Statement AStatement, DataParams AParams, bool AIsExpression, SourceContext ASourceContext)
 		{
-			#if ALLOWPROCESSCONTEXT
-			// Push process context on the symbols for the plan
-			PushProcessSymbols(APlan);
+			#if TIMING
+			DateTime LStartTime = DateTime.Now;
+			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
+			#endif
+			#if TRACEEVENTS
+			RaiseTraceEvent(TraceCodes.BeginCompile, "Begin Compile");
+			#endif
+			Schema.DerivedTableVar LTableVar = null;
+			LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AProgram.ID));
+			LTableVar.SessionObjectName = LTableVar.Name;
+			LTableVar.SessionID = APlan.SessionID;
+			APlan.PushCreationObject(LTableVar);
 			try
 			{
-			#endif
-				#if TIMING
-				DateTime LStartTime = DateTime.Now;
-				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
-				#endif
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginCompile, "Begin Compile");
-				#endif
-				Schema.DerivedTableVar LTableVar = null;
-				LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AProgram.ID));
-				LTableVar.SessionObjectName = LTableVar.Name;
-				LTableVar.SessionID = APlan.SessionID;
-				APlan.PushCreationObject(LTableVar);
-				try
-				{
-					AProgram.Code = Compiler.Compile(APlan, AStatement, AParams, AIsExpression, ASourceContext);
-					AProgram.SetSourceContext(ASourceContext);
+				DataParams LParams = new DataParams();
+				foreach (DataParam LParam in FProcessLocals)
+					LParams.Add(LParam);
 
-					#if ALLOWPROCESSCONTEXT
-					// Include dependencies for any process context that may be being referenced by the plan
-					// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
-					for (int LIndex = FProcessSymbols.Count - 1; LIndex >= 0; LIndex--)
-						APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, FProcessSymbols[LIndex].DataType, EmitMode.ForRemote);
-					#endif
+				if (AParams != null)
+					foreach (DataParam LParam in AParams)
+						LParams.Add(LParam);
 
-					if (!APlan.Messages.HasErrors && AIsExpression)
+				AProgram.Code = Compiler.Compile(APlan, AStatement, LParams, AIsExpression, ASourceContext);
+				AProgram.SetSourceContext(ASourceContext);
+
+				// Include dependencies for any process context that may be being referenced by the plan
+				// This is necessary to support the variable declaration statements that will be added to support serialization of the plan
+				if (APlan.NewSymbols != null)
+					foreach (Symbol LSymbol in APlan.NewSymbols)
 					{
-						if (AProgram.Code.DataType == null)
-							throw new CompilerException(CompilerException.Codes.ExpressionExpected);
-						AProgram.DataType = CopyDataType(APlan, AProgram.Code, LTableVar);
+						AProgram.ProcessLocals.Add(new DataParam(LSymbol.Name, LSymbol.DataType, Modifier.Var));
+						APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, LSymbol.DataType, EmitMode.ForRemote);
 					}
-				}
-				finally
+
+				if (!APlan.Messages.HasErrors && AIsExpression)
 				{
-					APlan.PopCreationObject();
+					if (AProgram.Code.DataType == null)
+						throw new CompilerException(CompilerException.Codes.ExpressionExpected);
+					AProgram.DataType = CopyDataType(APlan, AProgram.Code, LTableVar);
 				}
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndCompile, "End Compile");
-				#endif
-				#if TIMING
-				System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
-				#endif
-			#if ALLOWPROCESSCONTEXT
 			}
 			finally
 			{
-				// Pop process context from the plan
-				PopProcessSymbols(APlan);
+				APlan.PopCreationObject();
 			}
+			#if TRACEEVENTS
+			RaiseTraceEvent(TraceCodes.EndCompile, "End Compile");
+			#endif
+			#if TIMING
+			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
 			#endif
 		}
         
@@ -917,10 +878,8 @@ namespace Alphora.Dataphor.DAE.Server
 		private int GetContextHashCode(DataParams AParams)
 		{
 			StringBuilder LContextName = new StringBuilder();
-			#if ALLOWPROCESSCONTEXT
-			for (int LIndex = 0; LIndex < FProcessSymbols.Count; LIndex++)
-				LContextName.Append(FProcessSymbols[LIndex].DataType.Name);
-			#endif
+			for (int LIndex = 0; LIndex < FProcessLocals.Count; LIndex++)
+				LContextName.Append(FProcessLocals[LIndex].DataType.Name);
 			if (AParams != null)
 				for (int LIndex = 0; LIndex < AParams.Count; LIndex++)
 					LContextName.Append(AParams[LIndex].DataType.Name);

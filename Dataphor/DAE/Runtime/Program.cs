@@ -97,6 +97,13 @@ namespace Alphora.Dataphor.DAE.Runtime
 			set { FDataType = value; } 
 		}
 		
+		// ProcessLocals - New local variables declared by allocation statements in the program
+		private DataParams FProcessLocals = new DataParams();
+		public DataParams ProcessLocals { get { return FProcessLocals; } }
+		
+		// Used to track the set of process local variables pushed when the program was started.
+		private DataParams FLocalParams;
+		
 		// Source
 		protected string FSource;
 		/// <summary>
@@ -200,9 +207,21 @@ namespace Alphora.Dataphor.DAE.Runtime
 			FServerProcess.PushExecutingProgram(this);
 			try
 			{
+				FLocalParams = new DataParams();
+				DataParams LParams = new DataParams();
+				foreach (DataParam LParam in FServerProcess.ProcessLocals)
+					if (!ProcessLocals.Contains(LParam.Name))
+					{
+						FLocalParams.Add(LParam);
+						LParams.Add(LParam);
+					}
+				
 				if (AParams != null)
 					foreach (DataParam LParam in AParams)
-						FStack.Push(LParam.Modifier == Modifier.In ? ((LParam.Value == null) ? null : DataValue.CopyValue(ValueManager, LParam.Value)) : LParam.Value);
+						LParams.Add(LParam);
+						
+				foreach (DataParam LParam in LParams)
+					FStack.Push(LParam.Modifier == Modifier.In ? DataValue.CopyValue(ValueManager, LParam.Value) : LParam.Value);
 			}
 			catch
 			{
@@ -216,13 +235,26 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			try
 			{
+				DataParams LParams = new DataParams();
+				foreach (DataParam LParam in FLocalParams)
+					LParams.Add(LParam);
+					
 				if (AParams != null)
-					for (int LIndex = AParams.Count - 1; LIndex >= 0; LIndex--)
-					{
-						object LValue = FStack.Pop();
-						if (AParams[LIndex].Modifier != Modifier.In)
-							AParams[LIndex].Value = LValue;
-					}
+					foreach (DataParam LParam in AParams)
+						LParams.Add(LParam);
+						
+				for (int LIndex = ProcessLocals.Count - 1; LIndex >= 0; LIndex--)
+				{
+					ProcessLocals[LIndex].Value = FStack.Pop();
+					FServerProcess.AddProcessLocal(ProcessLocals[LIndex]);
+				}
+						
+				for (int LIndex = LParams.Count - 1; LIndex >= 0; LIndex--)
+				{
+					object LValue = FStack.Pop();
+					if (LParams[LIndex].Modifier != Modifier.In)
+						LParams[LIndex].Value = LValue;
+				}
 			}
 			finally
 			{
