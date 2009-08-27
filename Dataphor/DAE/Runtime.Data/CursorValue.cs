@@ -112,6 +112,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (AProgram != null)
 			{
 				FContext = new Stack(AProgram.Stack.MaxStackDepth, AProgram.Stack.MaxCallDepth);
+				FContext.PushWindow(0);
 				for (int LIndex = AProgram.Stack.Count - 1; LIndex >= 0; LIndex--)
 					FContext.Push(DataValue.CopyValue(AProgram.ValueManager, AProgram.Stack.Peek(LIndex)));
 			}
