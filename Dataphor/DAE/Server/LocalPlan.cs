@@ -84,7 +84,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		internal bool FProgramStatisticsCached = true;
-		internal ProgramStatistics FProgramStatistics;
+		internal ProgramStatistics FProgramStatistics = new ProgramStatistics();
 		public ProgramStatistics ProgramStatistics 
 		{ 
 			get 

@@ -47,6 +47,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			FServerProcess = AProcess;
 			FCode.BindToProcess(APlan);
+			if (FPlan != null)
+				FPlan.BindToProcess(FServerProcess);
 			
 			// Reset execution time
 			FStatistics.ExecuteTime = TimeSpan.Zero;

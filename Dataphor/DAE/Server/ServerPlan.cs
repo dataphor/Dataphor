@@ -98,48 +98,6 @@ namespace Alphora.Dataphor.DAE.Server
 		public PlanStatistics PlanStatistics { get { return FPlan.Statistics; } }
 		public ProgramStatistics ProgramStatistics { get { return FProgram.Statistics; } }
 		
-/*
-		// Code
-		protected PlanNode FCode;
-		public PlanNode Code
-		{
-			get { return FCode; }
-			set { FCode = value; }
-		}
-		
-		// Source
-		protected string FSource;
-		/// <summary>
-		/// Contains the source text for the plan. Only present if no debug locator is provided.
-		/// </summary>
-		public string Source { get { return FSource; } }
-		
-		// Locator
-		protected DebugLocator FLocator;
-		/// <summary>
-		/// Provides a reference for identifying the source text for the plan. May be null for dynamic or ad-hoc execution.
-		/// </summary>
-		public DebugLocator Locator { get { return FLocator; } }
-		
-		/// <summary>
-		/// Sets the source context for the plan.
-		/// </summary>
-		public void SetSourceContext(SourceContext ASourceContext)
-		{
-			// Clear existing context
-			FSource = null;
-			FLocator = null;
-			
-			if (ASourceContext.Locator != null)
-				FLocator = ASourceContext.Locator;
-			else
-			{
-				FLocator = new DebugLocator(DebugLocator.PlanLocator(this.ID), 1, 1);
-				FSource = ASourceContext.Script;
-			}
-		}
-*/
-		
 		// Process        
 		protected ServerProcess FProcess;
 		public ServerProcess ServerProcess { get { return FProcess; } }
@@ -172,19 +130,6 @@ namespace Alphora.Dataphor.DAE.Server
 			FActiveCursor = null;
 			//FProcess.ClearActiveCursor();
 		}
-		
-/*
-		protected Schema.IDataType FDataType;
-		public Schema.IDataType DataType 
-		{ 
-			get 
-			{ 
-				CheckCompiled();
-				return FDataType; 
-			} 
-			set { FDataType = value; } 
-		}
-*/
 		
 		public virtual Statement EmitStatement()
 		{
@@ -371,7 +316,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public Row RequestRow()
 		{
 			CheckCompiled();
-			return new Row(FProcess.ValueManager, ((Schema.TableType)FProgram.DataType).RowType);
+			return new Row(FProcess.ValueManager, SourceNode.DataType.RowType);
 		}
 		
 		public void ReleaseRow(Row ARow)
