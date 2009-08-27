@@ -1779,90 +1779,98 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			lock (AProgram.Catalog.Libraries)
 			{
-				Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
-				VersionNumber LCurrentVersion = AProgram.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
-				
-				if (AProgram.Catalog.LoadedLibraries.Contains(LLibrary.Name))
-					throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
-
-				bool LIsLoaded = false;				
-				bool LAreAssembliesRegistered = false;	
-				Schema.LoadedLibrary LLoadedLibrary = null;
 				try
 				{
-					LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
-					LLoadedLibrary.Owner = AProgram.CatalogDeviceSession.ResolveUser(AProgram.CatalogDeviceSession.GetLibraryOwner(ALibraryName));
-						
-					//	Ensure that each required library is loaded
-					foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
-					{
-						Schema.Library LRequiredLibrary = AProgram.Catalog.Libraries[LReference.Name];
-						if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
-							throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
-
-						if (!AProgram.Catalog.LoadedLibraries.Contains(LReference.Name))
-						{
-							if (!LRequiredLibrary.IsSuspect)
-								LoadLibrary(AProgram, LReference.Name, AIsKnown);
-							else
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, ALibraryName, LReference.Name);
-						}
-						
-						LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
-						AProgram.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProgram.ServerProcess.ServerSession.Server.SystemLibrary));
-						LLoadedLibrary.ClearNameResolutionPath();
-					}
+					Schema.Library LLibrary = AProgram.Catalog.Libraries[ALibraryName];
+					VersionNumber LCurrentVersion = AProgram.CatalogDeviceSession.GetCurrentLibraryVersion(ALibraryName);
 					
-					AProgram.ServerProcess.ServerSession.Server.DoLibraryLoading(LLibrary.Name);
+					if (AProgram.Catalog.LoadedLibraries.Contains(LLibrary.Name))
+						throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryAlreadyLoaded, ALibraryName);
+
+					bool LIsLoaded = false;				
+					bool LAreAssembliesRegistered = false;	
+					Schema.LoadedLibrary LLoadedLibrary = null;
 					try
 					{
-						// RegisterAssemblies
-						SystemRegisterLibraryNode.RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
-						
-						LAreAssembliesRegistered = true;
+						LLoadedLibrary = new Schema.LoadedLibrary(ALibraryName);
+						LLoadedLibrary.Owner = AProgram.CatalogDeviceSession.ResolveUser(AProgram.CatalogDeviceSession.GetLibraryOwner(ALibraryName));
+							
+						//	Ensure that each required library is loaded
+						foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
+						{
+							Schema.Library LRequiredLibrary = AProgram.Catalog.Libraries[LReference.Name];
+							if (!VersionNumber.Compatible(LReference.Version, LRequiredLibrary.Version))
+								throw new Schema.SchemaException(Schema.SchemaException.Codes.LibraryVersionMismatch, LReference.Name, LReference.Version.ToString(), LRequiredLibrary.Version.ToString());
 
-						AProgram.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
-						LLoadedLibrary.AttachLibrary();
+							if (!AProgram.Catalog.LoadedLibraries.Contains(LReference.Name))
+							{
+								if (!LRequiredLibrary.IsSuspect)
+									LoadLibrary(AProgram, LReference.Name, AIsKnown);
+								else
+									throw new Schema.SchemaException(Schema.SchemaException.Codes.RequiredLibraryNotLoaded, ALibraryName, LReference.Name);
+							}
+							
+							LLoadedLibrary.RequiredLibraries.Add(AProgram.CatalogDeviceSession.ResolveLoadedLibrary(LReference.Name));
+							AProgram.Catalog.OperatorResolutionCache.Clear(LLoadedLibrary.GetNameResolutionPath(AProgram.ServerProcess.ServerSession.Server.SystemLibrary));
+							LLoadedLibrary.ClearNameResolutionPath();
+						}
+						
+						AProgram.ServerProcess.ServerSession.Server.DoLibraryLoading(LLibrary.Name);
 						try
 						{
-							AProgram.CatalogDeviceSession.SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
-						}
-						catch (Exception LRegisterException)
-						{
-							LLoadedLibrary.DetachLibrary();
-							throw LRegisterException;
-						}
+							// RegisterAssemblies
+							SystemRegisterLibraryNode.RegisterLibraryFiles(AProgram, LLibrary, LLoadedLibrary);
+							
+							LAreAssembliesRegistered = true;
 
-						LIsLoaded = true; // If we reach this point, a subsequent exception must unload the library
-						if (LLibrary.IsSuspect)
+							AProgram.CatalogDeviceSession.InsertLoadedLibrary(LLoadedLibrary);
+							LLoadedLibrary.AttachLibrary();
+							try
+							{
+								AProgram.CatalogDeviceSession.SetLibraryOwner(LLoadedLibrary.Name, LLoadedLibrary.Owner.ID);
+							}
+							catch (Exception LRegisterException)
+							{
+								LLoadedLibrary.DetachLibrary();
+								throw LRegisterException;
+							}
+
+							LIsLoaded = true; // If we reach this point, a subsequent exception must unload the library
+							if (LLibrary.IsSuspect)
+							{
+								LLibrary.IsSuspect = false;
+								LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
+							}					
+						}
+						finally
 						{
-							LLibrary.IsSuspect = false;
-							LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
-						}					
+							AProgram.ServerProcess.ServerSession.Server.DoLibraryLoaded(LLibrary.Name);
+						}
 					}
-					finally
+					catch (Exception LException)
 					{
-						AProgram.ServerProcess.ServerSession.Server.DoLibraryLoaded(LLibrary.Name);
-					}
-				}
-				catch (Exception LException)
-				{
-					AProgram.ServerProcess.ServerSession.Server.LogError(LException);
-					LLibrary.IsSuspect = true;
-					LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
-					LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
-					
-					if (LIsLoaded)
-						SystemUnregisterLibraryNode.UnregisterLibrary(AProgram, ALibraryName, false);
-					else if (LAreAssembliesRegistered)
-						SystemRegisterLibraryNode.UnregisterLibraryAssemblies(AProgram, LLoadedLibrary);
+						AProgram.ServerProcess.ServerSession.Server.LogError(LException);
+						LLibrary.IsSuspect = true;
+						LLibrary.SuspectReason = ExceptionUtility.DetailedDescription(LException);
+						LLibrary.SaveInfoToFile(Path.Combine(LLibrary.GetInstanceLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.InstanceDirectory), Schema.Library.GetInfoFileName(LLibrary.Name)));
 						
-					throw;
-				}
+						if (LIsLoaded)
+							SystemUnregisterLibraryNode.UnregisterLibrary(AProgram, ALibraryName, false);
+						else if (LAreAssembliesRegistered)
+							SystemRegisterLibraryNode.UnregisterLibraryAssemblies(AProgram, LLoadedLibrary);
+							
+						throw;
+					}
 
-				AProgram.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
-				
-				AProgram.Catalog.Libraries.DoLibraryLoaded(AProgram, LLibrary.Name);
+					AProgram.CatalogDeviceSession.SetCurrentLibraryVersion(LLibrary.Name, LCurrentVersion); // Once a library has loaded, record the version number
+					
+					AProgram.Catalog.Libraries.DoLibraryLoaded(AProgram, LLibrary.Name);
+				}
+				catch
+				{
+					if (AProgram.ServerProcess.ServerSession.Server.State == ServerState.Started)
+						throw;
+				}
 			}
 		}
 		

@@ -1,6 +1,4 @@
 <library xmlns:bop="www.alphora.com/schemas/bop" version="*" defaultdevicename="TestingDevice" assembliesasstring="" librariesasstring="" settings="" name="TestFramework" issystem="False" generatorid="-1" isgenerated="False" isremotable="True" xmlns="Alphora.Dataphor.DAE.Schema,Alphora.Dataphor.DAE">
-    <libraries.libraryreference name="ADOConnection" version="*" />
+    <libraries.libraryreference name="System" version="*" />
     <libraries.libraryreference name="MSSQLDevice" version="*" />
-    <libraries.libraryreference name="OracleDevice" version="*" />
-    <libraries.libraryreference name="OracleConnection" version="*" />
 </library>

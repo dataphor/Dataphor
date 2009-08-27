@@ -25,7 +25,8 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
-
+			MSSQLServerConfigurationManager.ResetDatabase("DataphorTests");
+			
 			FServerConfigurationManager = new SQLCEServerConfigurationManager();
 			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
 			FServerConfigurationManager.ResetInstance();
@@ -64,7 +65,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[SetUp]
 		public void SetUp()
 		{
-			FSession = FServer.Connect(new SessionInfo("Admin", ""));
+			FSession = FServer.Connect(new SessionInfo("Admin", "", "TestFramework.Coverage.Devices"));
 			FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
 		}
 		
@@ -87,6 +88,12 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		private void ExecuteScript(string ALibraryName, string AScriptName)
 		{
 			FProcess.ExecuteScript(String.Format("ExecuteScript('{0}', '{1}');", ALibraryName, AScriptName));
+		}
+		
+		[Test]
+		public void TestMSSQLDevice()
+		{
+			ExecuteScript("TestFramework.Coverage.Devices", "TestMSSQLDevice");
 		}
 
 		[Test]

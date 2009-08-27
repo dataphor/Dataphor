@@ -5,7 +5,7 @@
 */
 
 ExecuteScript('Coverage.Devices', 'Types');
-ExecuteScript('Coverage.Devices', 'TypesMSSQL');
+//ExecuteScript('Coverage.Devices', 'TypesMSSQL');
 ExecuteScript('Coverage.Devices', 'Tables');
 alter device System.Temp alter class { alter "MaxRowCount" = "-1" };
 ExecuteScript('Coverage.Devices', 'InsertIntoIdealDeviceOperatorsTable');

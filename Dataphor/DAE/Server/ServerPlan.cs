@@ -210,6 +210,15 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		public Schema.IDataType ActualDataType
+		{
+			get
+			{
+				CheckCompiled();
+				return FProgram.Code.DataType;
+			}
+		}
+		
 		public DataValue Evaluate(DataParams AParams)
 		{
 			Exception LException = null;

@@ -25,7 +25,6 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
-
 			FServerConfigurationManager = new SQLCEServerConfigurationManager();
 			FConfiguration = FServerConfigurationManager.GetTestConfiguration("TestInstance");
 			FServerConfigurationManager.ResetInstance();

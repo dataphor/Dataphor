@@ -3800,14 +3800,14 @@ namespace Alphora.Dataphor.DAE.Device.SQL
                 LParameterType.Length = LStringParamValue.Length <= 20 ? 20 : LStringParamValue.Length;
         }
 
-		protected void PrepareSQLParameters(SQLDevicePlan ADevicePlan, bool AIsCursor, SQLParameters AParameters)
+		protected void PrepareSQLParameters(SQLDevicePlan ADevicePlan, Program AProgram, bool AIsCursor, SQLParameters AParameters)
 		{
 			object LParamValue;
 			object LNativeParamValue;
             SQLScalarType LParamType;
 			foreach (SQLPlanParameter LPlanParameter in ADevicePlan.DevicePlanNode.PlanParameters)
 			{
-				LParamValue = ADevicePlan.Plan.ExecuteNode(LPlanParameter.PlanNode);
+				LParamValue = LPlanParameter.PlanNode.Execute(AProgram);
 				LParamType = (SQLScalarType)Device.ResolveDeviceScalarType(ADevicePlan.Plan, (Schema.ScalarType)LPlanParameter.PlanNode.DataType);
                 LNativeParamValue = (LParamValue == null) ? null : LParamType.ParameterFromScalar(LParamValue);
                 if (LNativeParamValue != null)
@@ -3841,7 +3841,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 					using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
 					{
 						LCommand.Statement = Device.Emitter.Emit(LPlan.DevicePlanNode.Statement);						
-						PrepareSQLParameters(LPlan, false, LCommand.Parameters);
+						PrepareSQLParameters(LPlan, AProgram, false, LCommand.Parameters);
 						LCommand.Execute();
 						return null;
 					}
@@ -3885,7 +3885,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 								using (SQLCommand LCommand = LHeader.Connection.CreateCommand(false))
 								{
 									LCommand.Statement = LStatement;									
-									PrepareSQLParameters(LPlan, false, LCommand.Parameters);
+									PrepareSQLParameters(LPlan, AProgram, false, LCommand.Parameters);
 									LCommand.Execute();
 								}
 							}
@@ -3904,7 +3904,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 				if (LPlan.Node is TableNode)
 				{
 					SQLParameters LParameters = new SQLParameters();
-					PrepareSQLParameters(LPlan, true, LParameters);
+					PrepareSQLParameters(LPlan, AProgram, true, LParameters);
 					SQLTable LTable = CreateSQLTable(AProgram, (TableNode)LPlan.Node, (SelectStatement)LPlan.DevicePlanNode.Statement, LParameters, LPlan.CurrentQueryContext().IsAggregate);
 					try
 					{
@@ -3925,7 +3925,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						using (SQLCommand LCommand = LHeader.Connection.CreateCommand(true))
 						{
 							LCommand.Statement = Device.Emitter.Emit(LPlan.DevicePlanNode.Statement);							
-							PrepareSQLParameters(LPlan, true, LCommand.Parameters);
+							PrepareSQLParameters(LPlan, AProgram, true, LCommand.Parameters);
 							SQLCursor LCursor = LCommand.Open(SQLCursorType.Dynamic, IsolationLevelToSQLIsolationLevel(ServerProcess.CurrentIsolationLevel())); //SQLIsolationLevel.ReadCommitted);
 							try
 							{

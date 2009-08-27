@@ -121,11 +121,11 @@ end;
 SafeDrop('TestDevice(Name, Integer)');
 create operator TestDevice(ADeviceName : Name, AID : Integer)
 begin
+	if not(ObjectExists(ADeviceName)) then
+		raise Error("Device '" + ADeviceName + "' doesn't exist.");
+	
 	if IsNil(AID) then
 		PrepareApplicableDeviceCases(ADeviceName);
-	
-	if not exists (Devices over { Name } where Name = ADeviceName) then
-		raise Error("Device '" + ADeviceName + "' doesn't exist. Ensure the device name has been fully qualified.");
 	
 	var LOldDevice : Name := GetDefaultDeviceName();
 	try

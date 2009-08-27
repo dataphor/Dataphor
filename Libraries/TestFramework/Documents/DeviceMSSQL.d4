@@ -8,13 +8,14 @@ create device TestingDevice
 class "MSSQLDevice.MSSQLDevice"
 	attributes
 {
-	"ServerName" = "HUITZILOPOCHTLI",
+	"ServerName" = ".",
 	"DatabaseName" = "DataphorTests",
-	"ConnectionClass" = "Connection.MSSQLConnection"	
+	"ConnectionClass" = "Connection.MSSQLConnection",
+	"UseIntegratedSecurity" = "True"
 };
 
-CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
-CreateDeviceUser("System", "TestingDevice", "sa", "welcome");
+//CreateDeviceUser("Admin", "TestingDevice", "sa", "welcome");
+//CreateDeviceUser("System", "TestingDevice", "sa", "welcome");
 
 SetDefaultDeviceName("TestingDevice");
 

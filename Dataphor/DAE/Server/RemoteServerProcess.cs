@@ -245,7 +245,7 @@ namespace Alphora.Dataphor.DAE.Server
 			LDescriptor.ID = APlan.ID;
 			LDescriptor.Statistics = APlan.PlanStatistics;
 			LDescriptor.Messages = APlan.Messages;
-			if (APlan.ServerExpressionPlan.DataType is Schema.ICursorType)
+			if (APlan.ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 			{
 				LDescriptor.Capabilities = APlan.Capabilities;
 				LDescriptor.CursorIsolation = APlan.Isolation;

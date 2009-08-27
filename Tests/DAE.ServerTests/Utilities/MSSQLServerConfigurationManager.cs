@@ -37,6 +37,20 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 			// Delete the DAECatalog database if this is an MSSQL store regression test
 			ResetMSSQLCatalog();
 		}
+		
+		public static void ResetDatabase(string ADatabaseName)
+		{
+			using (SqlConnection LConnection = new SqlConnection("Data Source=localhost;Initial Catalog=master;Integrated Security=True"))
+			{
+				LConnection.Open();
+				using (SqlCommand LCommand = LConnection.CreateCommand())
+				{
+					LCommand.CommandType = CommandType.Text;
+					LCommand.CommandText = String.Format("if exists (select * from sysdatabases where name = '{0}') drop database {0}", ADatabaseName);
+					LCommand.ExecuteNonQuery();
+				}
+			}
+		}
 
 		private void ResetMSSQLCatalog()
 		{
@@ -60,12 +74,16 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 				if (!Parser.IsValidIdentifier(LDatabaseName))
 					throw new ArgumentException("Database name specified in store connection string is not a valid identifier.");
 
-				SqlConnection LConnection = new SqlConnection(LBuilder.ConnectionString);
-				LConnection.Open();
-				SqlCommand LCommand = LConnection.CreateCommand();
-				LCommand.CommandType = CommandType.Text;
-				LCommand.CommandText = String.Format("if exists (select * from sysdatabases where name = '{0}') drop database {0}", LDatabaseName);
-				LCommand.ExecuteNonQuery();
+				using (SqlConnection LConnection = new SqlConnection(LBuilder.ConnectionString))
+				{
+					LConnection.Open();
+					using (SqlCommand LCommand = LConnection.CreateCommand())
+					{
+						LCommand.CommandType = CommandType.Text;
+						LCommand.CommandText = String.Format("if exists (select * from sysdatabases where name = '{0}') drop database {0}", LDatabaseName);
+						LCommand.ExecuteNonQuery();
+					}
+				}
 			}
 		}
 

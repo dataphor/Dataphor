@@ -223,7 +223,7 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			ServerExpressionPlan.CheckCompiled();
 
-			if (ServerExpressionPlan.DataType is Schema.ICursorType)
+			if (ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 			{
 				FCacheObjectName = Schema.Object.NameFromGuid(ID);
 				ACatalogObjectName = FCacheObjectName;
@@ -240,7 +240,7 @@ namespace Alphora.Dataphor.DAE.Server
 			string[] LRequiredObjects = FProcess.Session.Server.CatalogCaches.GetRequiredObjects(FProcess.Session, ServerExpressionPlan.Plan.PlanCatalog, ACacheTimeStamp, out AClientCacheTimeStamp);
 			if (LRequiredObjects.Length > 0)
 			{
-				if (ServerExpressionPlan.DataType is Schema.ICursorType)
+				if (ServerExpressionPlan.ActualDataType is Schema.ICursorType)
 				{
 					string[] LAllButCatalogObject = new string[LRequiredObjects.Length - 1];
 					int LTargetIndex = 0;

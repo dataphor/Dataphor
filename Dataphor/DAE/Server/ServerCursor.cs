@@ -66,6 +66,7 @@ namespace Alphora.Dataphor.DAE.Server
 		public ServerExpressionPlan Plan { get { return FPlan; } }
 		
 		private Program FProgram;
+		private bool FProgramStarted;
 		
 		IServerExpressionPlan IServerCursor.Plan { get { return FPlan; } }
 
@@ -142,9 +143,11 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			// get a table object to supply the data
 			FPlan.SetActiveCursor(this);
-			FProgram.Start(FParams);
 			try
 			{
+				FProgram.Start(FParams);
+				FProgramStarted = true;
+
 				long LStartTicks = TimingUtility.CurrentTicks;
 
 				CursorNode LCursorNode = FPlan.CursorNode;
@@ -188,7 +191,8 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				finally
 				{
-					FProgram.Stop(FParams);
+					if (FProgramStarted)
+						FProgram.Stop(FParams);
 				}
 			}
 			finally

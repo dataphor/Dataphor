@@ -1053,8 +1053,7 @@ namespace Alphora.Dataphor.DAE.Server
 				APlan.PlanCatalog.IncludeDependencies(CatalogDeviceSession, APlan.Catalog, ATableVar, EmitMode.ForRemote);
 				APlan.PlanCatalog.Remove(ATableVar);
 				APlan.PlanCatalog.Add(ATableVar);
-				//return ATableVar.DataType; // ?? Why??
-				return ACode.DataType; // Needs to return this data type or the local expression plan won't pick it up properly.
+				return ATableVar.DataType;
 			}
 			else
 			{
