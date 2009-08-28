@@ -1,0 +1,58 @@
+/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+	
+	Runs device coverage for the MSSQLDevice.
+*/
+
+SafeDrop('TestDevice');
+create device TestDevice
+	reconciliation { mode = { command }, master = device }
+class "MSSQLDevice.MSSQLDevice"
+	attributes
+	{
+		"ServerName" = ".",
+		"DatabaseName" = "DataphorTests",
+		"ConnectionClass" = "Connection.MSSQLConnection",
+		"UseIntegratedSecurity" = "True"
+	};
+
+// Make sure the device is functional and connected
+EnsureDeviceStarted('TestDevice');
+
+if not exists (DeviceScalarTypes where Device_Name = ObjectName('TestDevice')) then
+	raise Error('WTF');
+	
+if not exists (DeviceOperators where Device_Name = ObjectName('TestDevice')) then
+	raise Error('WTF');
+
+// reset applicable cases
+delete ApplicableDeviceCases;
+
+// Run the tests
+TestDevice(ObjectName('TestDevice'), nil);
+
+// If any test failed, throw an error with all the test failure messages.
+if exists (DeviceCaseResults where DeviceName = ObjectName('TestDevice') and Status = "Failed") then
+	raise
+		Error
+		(
+			Concat
+			(
+				{ Message, Delimiter } 
+					from 
+					(
+						DeviceCaseResults 
+							where DeviceName = ObjectName('TestDevice')
+								and Status = "Failed" 
+							{ 
+								DeviceCase_ID,
+								'Device Case ' + DeviceCase_ID.ToString() + ' failed: ' + Results Message, 
+								ASCII(list(Byte) { 10, 13 }) Delimiter 
+							}
+					)
+				order by { DeviceCase_ID }
+			)
+		);
+
