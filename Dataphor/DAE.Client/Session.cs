@@ -378,6 +378,8 @@ namespace Alphora.Dataphor.DAE.Client
             }
             return LParams;
         }
+        
+        #region ExecuteScript
 
 		/// <summary>Executes the given script using the utility process.</summary>
 		public void ExecuteScript(string AScript)
@@ -418,6 +420,10 @@ namespace Alphora.Dataphor.DAE.Client
 				}
 			}
 		}
+		
+		#endregion
+		
+		#region Execute
 		
 		/// <summary>Executes the given statement using the utility process.</summary>
 		public void Execute(string AStatement)
@@ -479,27 +485,215 @@ namespace Alphora.Dataphor.DAE.Client
 
             Execute(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
         }
-
-		/// <summary> Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression)
+        
+        #endregion
+        
+        #region Evaluate
+        
+		/// <summary> Evaluates the given expression using the utility process and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(string AExpression)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression);
+        }
+        
+		/// <summary>Evaluates the given expression on the given process and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression);
+        }
+        
+		/// <summary>Evaluates the given expression using the utility process and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>Evaluates the given expression using the given process and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>Evaluates the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>Evaluates the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a scalar.</summary>
+        public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>Evaluates the given expression on the given process using the given parameter names and values and returns the result as a scalar.</summary>
+		public DAE.Runtime.Data.Scalar Evaluate(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
 		{
-			return Evaluate(null, AExpression, (DAE.Runtime.DataParams)null);
+			return (DAE.Runtime.Data.Scalar)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+		}
+		
+		#endregion
+		
+        #region EvaluateRow
+        
+		/// <summary> EvaluateRows the given expression using the utility process and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(string AExpression)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression);
+        }
+        
+		/// <summary>EvaluateRows the given expression on the given process and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression);
+        }
+        
+		/// <summary>EvaluateRows the given expression using the utility process and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateRows the given expression using the given process and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateRows the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateRows the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a row.</summary>
+        public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateRows the given expression on the given process using the given parameter names and values and returns the result as a row.</summary>
+		public DAE.Runtime.Data.Row EvaluateRow(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		{
+			return (DAE.Runtime.Data.Row)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+		}
+		
+		#endregion
+		
+        #region EvaluateList
+        
+		/// <summary> EvaluateLists the given expression using the utility process and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression);
+        }
+        
+		/// <summary>EvaluateLists the given expression on the given process and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression);
+        }
+        
+		/// <summary>EvaluateLists the given expression using the utility process and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateLists the given expression using the given process and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateLists the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateLists the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a list.</summary>
+        public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateLists the given expression on the given process using the given parameter names and values and returns the result as a list.</summary>
+		public DAE.Runtime.Data.ListValue EvaluateList(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		{
+			return (DAE.Runtime.Data.ListValue)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+		}
+		
+		#endregion
+		
+        #region EvaluateTable
+        
+		/// <summary> EvaluateTables the given expression using the utility process and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(string AExpression)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression);
+        }
+        
+		/// <summary>EvaluateTables the given expression on the given process and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression);
+        }
+        
+		/// <summary>EvaluateTables the given expression using the utility process and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateTables the given expression using the given process and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateTables the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateTables the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result as a table.</summary>
+        public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, params object[] AParams)
+        {
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParams);
+        }
+        
+		/// <summary>EvaluateTables the given expression on the given process using the given parameter names and values and returns the result as a table.</summary>
+		public DAE.Runtime.Data.Table EvaluateTable(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		{
+			return (DAE.Runtime.Data.Table)EvaluateRaw(AProcess, AExpression, AParamNames, AParams);
+		}
+		
+		#endregion
+		
+		#region EvaluateRaw
+		
+		/// <summary> Evaluates the given expression using the utility process and returns the result.</summary>
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression)
+		{
+			return EvaluateRaw(null, AExpression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression on the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression)
 		{
-			return Evaluate(AProcess, AExpression, (DAE.Runtime.DataParams)null);
+			return EvaluateRaw(AProcess, AExpression, (DAE.Runtime.DataParams)null);
 		}
 
 		/// <summary>Evaluates the given expression using the utility process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression, DAE.Runtime.DataParams AParams)
 		{
-			return Evaluate(null, AExpression, AParams);
+			return EvaluateRaw(null, AExpression, AParams);
 		}
 
 		/// <summary>Evaluates the given expression using the given process and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, DAE.Runtime.DataParams AParams)
 		{
 			CheckActive();
 
@@ -518,28 +712,32 @@ namespace Alphora.Dataphor.DAE.Client
 		}
 		
 		/// <summary>Evaluates the given expression using the utility process and the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(string AExpression, params object[] AParams)
 		{
-			return Evaluate(null, AExpression, AParams);
+			return EvaluateRaw(null, AExpression, AParams);
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter values (auto numbered A0..An-1) and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, params object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, params object[] AParams)
 		{
 			if (AProcess == null)
 				AProcess = UtilityProcess;
 			
-			return Evaluate(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParams));
+			return EvaluateRaw(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParams));
 		}
 
 		/// <summary>Evaluates the given expression on the given process using the given parameter names and values and returns the result.</summary>
-		public DAE.Runtime.Data.DataValue Evaluate(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
+		public DAE.Runtime.Data.DataValue EvaluateRaw(IServerProcess AProcess, string AExpression, string[] AParamNames, object[] AParams)
 		{
 			if (AProcess == null)
 				AProcess = UtilityProcess;
 			
-			return Evaluate(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
+			return EvaluateRaw(AProcess, AExpression, DataParamsFromNativeParams(AProcess, AParamNames, AParams));
 		}
+		
+		#endregion
+		
+		#region OpenCursor
 
 		/// <summary>Opens a cursor on the given expression using the utility process.</summary>
 		public IServerCursor OpenCursor(string AExpression)
@@ -608,6 +806,10 @@ namespace Alphora.Dataphor.DAE.Client
 			LPlan.Process.UnprepareExpression(LPlan);
 		}
 		
+		#endregion
+		
+		#region OpenDataView
+		
 		private DataView OpenDataView(string AExpression, DataSetState AInitialState, bool AIsReadOnly)
 		{
 			DataView LDataView = new DataView();
@@ -651,6 +853,8 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			return OpenDataView(AExpression, DataSetState.Browse, true);
 		}
+		
+		#endregion
 	}
 
 	/// <summary> Wraps the connection to, and session retrieval from a Server </summary>

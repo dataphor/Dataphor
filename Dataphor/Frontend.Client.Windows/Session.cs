@@ -436,7 +436,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			using 
 			(
 				DAE.Runtime.Data.Scalar LNodeTable = 
-					(DAE.Runtime.Data.Scalar)DataSession.Evaluate
+					DataSession.Evaluate
 					(
 						CLibraryNodeTypesExpression,
 						LParams
@@ -451,7 +451,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		public void SetFormDesigner()
 		{
-			using (DAE.Runtime.Data.Scalar LNodeTable = (DAE.Runtime.Data.Scalar)DataSession.Evaluate(CFormDesignerNodeTypesExpression))
+			using (DAE.Runtime.Data.Scalar LNodeTable = DataSession.Evaluate(CFormDesignerNodeTypesExpression))
 			{
 				NodeTypeTable.Clear();
 				NodeTypeTable.LoadFromString(LNodeTable.AsString);

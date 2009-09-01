@@ -131,18 +131,18 @@ namespace Alphora.Dataphor.Frontend.Client
 			LParams.Add(DAE.Runtime.DataParam.Create(Pipe.Process, "AClientType", AClientType));
 			
 			// Get the node types table
-			using (DAE.Runtime.Data.DataValue LNodeTable = DataSession.Evaluate(CApplicationNodeTableExpression, LParams))
+			using (DAE.Runtime.Data.Scalar LNodeTable = DataSession.Evaluate(CApplicationNodeTableExpression, LParams))
 			{
 				NodeTypeTable.Clear();
-				NodeTypeTable.LoadFromString(((DAE.Runtime.Data.Scalar)LNodeTable).AsString);
+				NodeTypeTable.LoadFromString(LNodeTable.AsString);
 			}
 			ValidateNodeTypeTable();
 
 			// Prepare the application and get name of the starting document
 			string LDocumentString = null;
-			using (DAE.Runtime.Data.DataValue LStartingDocument = DataSession.Evaluate(CPrepareApplicationExpression, LParams))
+			using (DAE.Runtime.Data.Scalar LStartingDocument = DataSession.Evaluate(CPrepareApplicationExpression, LParams))
 			{
-				LDocumentString = ((DAE.Runtime.Data.Scalar)LStartingDocument).AsString;
+				LDocumentString = LStartingDocument.AsString;
 			}
 
 			// Load the files required to register any nodes, if necessary				
