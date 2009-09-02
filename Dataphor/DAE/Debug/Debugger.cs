@@ -385,16 +385,18 @@ namespace Alphora.Dataphor.DAE.Debug
 					
 				CallStack LCallStack = new CallStack();
 				
-				foreach (Program LProgram in LProcess.ExecutingPrograms)
+				for (int LProgramIndex = LProcess.ExecutingPrograms.Count - 1; LProgramIndex > 0; LProgramIndex--)
 				{
-					DebugLocator LCurrentLocation = LProgram.Locator;
-					foreach (RuntimeStackWindow LWindow in LProgram.Stack.GetCallStack())
+					PlanNode LCurrentNode = LProcess.ExecutingPrograms[LProgramIndex].CurrentNode;
+					
+					foreach (RuntimeStackWindow LWindow in LProcess.ExecutingPrograms[LProgramIndex].Stack.GetCallStack())
 					{
-						if (LWindow.Originator != null)
-							LCallStack.Add(new CallStackEntry(LCallStack.Count, LWindow.Originator.Description, new DebugLocator(LCurrentLocation, LWindow.Originator.Line, LWindow.Originator.LinePos)));
+						if (LCurrentNode != null)
+							LCallStack.Add(new CallStackEntry(LCallStack.Count, LWindow.Locator.Locator, new DebugLocator(LWindow.Locator.Locator, LCurrentNode.Line, LCurrentNode.LinePos)));
 						else
-							LCallStack.Add(new CallStackEntry(LCallStack.Count, DebugLocator.ProgramLocator(LProgram.ID), LCurrentLocation));
-						LCurrentLocation = LWindow.Locator;
+							LCallStack.Add(new CallStackEntry(LCallStack.Count, LWindow.Locator.Locator, new DebugLocator(LWindow.Locator.Locator, -1, -1)));
+							
+						LCurrentNode = LWindow.Originator;
 					}
 				}
 				

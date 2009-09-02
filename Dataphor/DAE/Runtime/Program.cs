@@ -321,6 +321,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		}
 		
 		private PlanNode FCurrentNode;
+		public PlanNode CurrentNode { get { return FCurrentNode; } }
 		
 		public void Yield(PlanNode APlanNode)
 		{
