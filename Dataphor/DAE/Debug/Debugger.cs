@@ -30,45 +30,54 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 
 		#region IDisposable Members
-
+		
+		private bool FDisposed;
+		
 		public void Dispose()
 		{
-			if (FSessions != null)
+			lock (FSyncHandle)
 			{
-				while (FSessions.Count > 0)
-					DetachSession(FSessions[FSessions.Count - 1]);
-				FSessions.Dispose();
-				FSessions = null;
-			}
+				FDisposed = true;
+				
+				if (FSessions != null)
+				{
+					while (FSessions.Count > 0)
+						DetachSession(FSessions[FSessions.Count - 1]);
+					FSessions.Dispose();
+					FSessions = null;
+				}
 
-			if (FProcesses != null)
-			{
-				while (FProcesses.Count > 0)
-					Detach(FProcesses[FProcesses.Count - 1]);
-				FProcesses.Dispose();
-				FProcesses = null;
+				if (FProcesses != null)
+				{
+					while (FProcesses.Count > 0)
+						Detach(FProcesses[FProcesses.Count - 1]);
+					FProcesses.Dispose();
+					FProcesses = null;
+				}
+				
+				if (FBrokenProcesses != null)
+				{
+					FBrokenProcesses.DisownAll();
+					FBrokenProcesses.Dispose();
+					FBrokenProcesses = null;
+				}
+				
+				if (FWaitSignal != null)
+				{
+					FWaitSignal.Set();
+					FWaitSignal.Close();
+					FWaitSignal = null;
+				}
+				
+				if (FPauseSignal != null)
+				{
+					FPauseSignal.Set();
+					FPauseSignal.Close();
+					FPauseSignal = null;
+				}
+				
+				SetSession(null);
 			}
-			
-			if (FBrokenProcesses != null)
-			{
-				FBrokenProcesses.DisownAll();
-				FBrokenProcesses.Dispose();
-				FBrokenProcesses = null;
-			}
-			
-			if (FWaitSignal != null)
-			{
-				FWaitSignal.Close();
-				FWaitSignal = null;
-			}
-			
-			if (FPauseSignal != null)
-			{
-				FPauseSignal.Close();
-				FPauseSignal = null;
-			}
-			
-			SetSession(null);
 		}
 
 		#endregion
@@ -231,6 +240,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				if (IsPaused)
 					return;
+					
+				if (FDisposed)
+					return;
 				
 				FWaitSignal.WaitOne(500);
 				AProcess.CheckAborted();
@@ -304,6 +316,9 @@ namespace Alphora.Dataphor.DAE.Debug
 		
 		private bool ShouldBreak(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
+			if (FDisposed)
+				return false;
+				
 			if (FBreakOnException && (AException != null))
 				return true;
 				
@@ -377,10 +392,10 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public CallStack GetCallStack(int AProcessID)
 		{
-			CheckPaused();
-			
 			lock (FSyncHandle)
 			{
+				CheckPaused();
+			
 				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
 					
 				CallStack LCallStack = new CallStack();
@@ -406,10 +421,10 @@ namespace Alphora.Dataphor.DAE.Debug
 		
 		public Program FindProgram(Guid AProgramID)
 		{
-			CheckPaused();
-			
 			lock (FSyncHandle)
 			{
+				CheckPaused();
+			
 				foreach (ServerProcess LProcess in FProcesses)
 					foreach (Program LProgram in LProcess.ExecutingPrograms)
 						if (LProgram.ID == AProgramID)
@@ -433,10 +448,10 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public List<StackEntry> GetStack(int AProcessID, int AWindowIndex)
 		{
-			CheckPaused();
-			
 			lock (FSyncHandle)
 			{
+				CheckPaused();
+				
 				List<StackEntry> LStack = new List<StackEntry>();
 				//ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
 				//object[] LStackWindow = LProcess.Stack.GetStack(AWindowIndex);
@@ -464,17 +479,20 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <returns>True if the breakpoint was set, false if it was cleared.</returns>
 		public bool ToggleBreakpoint(string ALocator, int ALine, int ALinePos)
 		{
-			Breakpoint LBreakpoint = new Breakpoint(ALocator, ALine, ALinePos);
-			int LIndex = FBreakpoints.IndexOf(LBreakpoint);
-			if (LIndex >= 0)
+			lock (FSyncHandle)
 			{
-				FBreakpoints.Remove(LBreakpoint);
-				return false;
-			}
-			else
-			{
-				FBreakpoints.Add(LBreakpoint);
-				return true;
+				Breakpoint LBreakpoint = new Breakpoint(ALocator, ALine, ALinePos);
+				int LIndex = FBreakpoints.IndexOf(LBreakpoint);
+				if (LIndex >= 0)
+				{
+					FBreakpoints.Remove(LBreakpoint);
+					return false;
+				}
+				else
+				{
+					FBreakpoints.Add(LBreakpoint);
+					return true;
+				}
 			}
 		}
 		
@@ -483,20 +501,40 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
-			if (ShouldBreak(AProcess, ANode, AException) && FProcesses.Contains(AProcess))
+			try
 			{
-				lock (FSyncHandle)
+				Monitor.Enter(FSyncHandle);
+				try
 				{
-					FBrokenProcesses.Add(AProcess);
-					InternalPause();
+					if (ShouldBreak(AProcess, ANode, AException))
+					{
+						FBrokenProcesses.Add(AProcess);
+						InternalPause();
+					}
+
+					while (FIsPauseRequested && FProcesses.Contains(AProcess))
+					{
+						FPausedCount++;
+						Monitor.Exit(FSyncHandle);
+						try
+						{
+							WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
+						}
+						finally
+						{
+							Monitor.Enter(FSyncHandle);
+							FPausedCount--;
+						}
+					}
+				}
+				finally
+				{
+					Monitor.Exit(FSyncHandle);
 				}
 			}
-
-			while (FIsPauseRequested && FProcesses.Contains(AProcess))
+			catch
 			{
-				Interlocked.Increment(ref FPausedCount);
-				WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
-				Interlocked.Decrement(ref FPausedCount);
+				// Do nothing, no error should ever be thrown from here
 			}
 		}
 	}
