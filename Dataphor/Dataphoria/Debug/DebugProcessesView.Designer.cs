@@ -39,6 +39,8 @@
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
 			this.FDetachButton = new System.Windows.Forms.ToolStripButton();
 			this.FRefreshButton = new System.Windows.Forms.ToolStripButton();
+			this.FSelectButton = new System.Windows.Forms.ToolStripButton();
+			this.FSelectContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.FDebugProcessDataView)).BeginInit();
 			this.FContextMenu.SuspendLayout();
 			this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -55,7 +57,6 @@
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
 						| Alphora.Dataphor.DAE.CursorCapability.Searchable)));
 			this.FDebugProcessDataView.SessionName = "";
-			this.FDebugProcessDataView.DataChanged += new System.EventHandler(this.DataViewDataChanged);
 			// 
 			// dbGrid1
 			// 
@@ -72,10 +73,11 @@
 			// FContextMenu
 			// 
 			this.FContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSelectContextMenuItem,
             this.FDetachContextMenuItem,
             this.FRefreshContextMenuItem});
 			this.FContextMenu.Name = "FContextMenu";
-			this.FContextMenu.Size = new System.Drawing.Size(154, 48);
+			this.FContextMenu.Size = new System.Drawing.Size(154, 92);
 			// 
 			// FDetachContextMenuItem
 			// 
@@ -122,11 +124,12 @@
 			// 
 			this.FToolStrip.Dock = System.Windows.Forms.DockStyle.None;
 			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSelectButton,
             this.FDetachButton,
             this.FRefreshButton});
 			this.FToolStrip.Location = new System.Drawing.Point(3, 0);
 			this.FToolStrip.Name = "FToolStrip";
-			this.FToolStrip.Size = new System.Drawing.Size(58, 25);
+			this.FToolStrip.Size = new System.Drawing.Size(81, 25);
 			this.FToolStrip.TabIndex = 0;
 			// 
 			// FDetachButton
@@ -148,6 +151,24 @@
 			this.FRefreshButton.Size = new System.Drawing.Size(23, 22);
 			this.FRefreshButton.Text = "Refresh";
 			this.FRefreshButton.Click += new System.EventHandler(this.FRefreshButton_Click);
+			// 
+			// FSelectButton
+			// 
+			this.FSelectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FSelectButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
+			this.FSelectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FSelectButton.Name = "FSelectButton";
+			this.FSelectButton.Size = new System.Drawing.Size(23, 22);
+			this.FSelectButton.Text = "Select";
+			this.FSelectButton.Click += new System.EventHandler(this.FSelectButton_Click);
+			// 
+			// FSelectContextMenuItem
+			// 
+			this.FSelectContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
+			this.FSelectContextMenuItem.Name = "FSelectContextMenuItem";
+			this.FSelectContextMenuItem.Size = new System.Drawing.Size(153, 22);
+			this.FSelectContextMenuItem.Text = "Select";
+			this.FSelectContextMenuItem.Click += new System.EventHandler(this.FSelectButton_Click);
 			// 
 			// DebugProcessesView
 			// 
@@ -181,6 +202,8 @@
 		private System.Windows.Forms.ToolStripMenuItem FRefreshContextMenuItem;
 		private System.Windows.Forms.ToolStripButton FDetachButton;
 		private System.Windows.Forms.ToolStripMenuItem FDetachContextMenuItem;
+		private System.Windows.Forms.ToolStripButton FSelectButton;
+		private System.Windows.Forms.ToolStripMenuItem FSelectContextMenuItem;
 
 	}
 }

@@ -101,6 +101,7 @@
 			this.dbGrid1.Location = new System.Drawing.Point(0, 0);
 			this.dbGrid1.Name = "dbGrid1";
 			this.dbGrid1.Size = new System.Drawing.Size(869, 231);
+			this.dbGrid1.Source = this.FCallStackSource;
 			this.dbGrid1.TabIndex = 0;
 			this.dbGrid1.Text = "dbGrid1";
 			// 

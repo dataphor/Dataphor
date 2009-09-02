@@ -58,13 +58,8 @@ namespace Alphora.Dataphor.Dataphoria
 			FSupressSettingProcessID = true;
 			try
 			{
-				var LSelectedID = Dataphoria.Debugger.SelectedProcessID;
-				if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty() && LSelectedID >= 0 && FDebugProcessDataView["Process_ID"].AsInt32 != LSelectedID)
-				{
-					foreach (Row LRow in FDebugProcessDataView)
-						if ((int)LRow["Process_ID"] == LSelectedID)
-							break;
-				}	
+				//var LSelectedID = Dataphoria.Debugger.SelectedProcessID;
+				// TODO: selected indicator
 			}
 			finally
 			{
@@ -122,12 +117,12 @@ namespace Alphora.Dataphor.Dataphoria
 					if (Dataphoria.Debugger.IsStarted)
 					{
 						FDebugProcessDataView.Open();
-						UpdateButtonEnabled();
+						UpdateButtonsEnabled();
 					}
 					else
 					{
 						FDebugProcessDataView.Close();
-						UpdateButtonEnabled();
+						UpdateButtonsEnabled();
 					}
 				}
 				finally
@@ -141,20 +136,21 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private void DataViewDataChanged(object sender, EventArgs e)
-		{
-			UpdateButtonEnabled();
-			if (!FSupressSettingProcessID && Dataphoria.Debugger.IsStarted && FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
-				Dataphoria.Debugger.SelectedProcessID = FDebugProcessDataView["Process_ID"].AsInt32;
-		}
-
-		private void UpdateButtonEnabled()
+		private void UpdateButtonsEnabled()
 		{
 			FRefreshButton.Enabled = FDebugProcessDataView.Active;
 			FRefreshContextMenuItem.Enabled = FRefreshButton.Enabled;
 			var LHasRow = FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty();
 			FDetachButton.Enabled = LHasRow;
 			FDetachContextMenuItem.Enabled = LHasRow;
+			FSelectButton.Enabled = LHasRow;
+			FSelectContextMenuItem.Enabled = LHasRow;
+		}
+
+		private void FSelectButton_Click(object sender, EventArgs e)
+		{
+			if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
+				FDataphoria.Debugger.SelectedProcessID = FDebugProcessDataView["ID"].AsInt32;
 		}
 	}
 }
