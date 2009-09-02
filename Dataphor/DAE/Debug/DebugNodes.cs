@@ -518,9 +518,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar = new Schema.ResultTableVar(this);
 			FTableVar.Owner = APlan.User;
 
-			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemName));
-			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemString));
-			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				

@@ -1013,7 +1013,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				TextLocation ALogicPos = AIconBar.TextArea.TextView.GetLogicalPosition(0, AMousePos.Y - AViewRect.Top);
 
 				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
-					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Y, -1));
+					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Line + 1, -1));
 			}
 		}
 				
@@ -1054,15 +1054,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
  			{
  				var LLocation = new TextLocation(LNewCurrent.LinePos < 1 ? 0 : LNewCurrent.LinePos - 1, LNewCurrent.Line - 1);
  				FCurrentBookmark = new CurrentLineBookmark(FTextEdit.Document, LLocation, LNewCurrent);
-				AddBookmark(FCurrentBookmark, LLocation.Y);
+				AddBookmark(FCurrentBookmark);
  			}
 		}
 
-		private void AddBookmark(DebugBookmark ABookmark, int ALine)
+		private void AddBookmark(DebugBookmark ABookmark)
 		{
 			FTextEdit.Document.BookmarkManager.AddMark(ABookmark);
-			FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, ALine, ALine));
+			FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, ABookmark.LineNumber, ABookmark.LineNumber));
 			FTextEdit.Document.CommitUpdate();
+			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
+		}
+
+		private void RemoveBookmark(BreakpointBookmark LOldBookmark)
+		{
+			FTextEdit.Document.BookmarkManager.RemoveMark(LOldBookmark);
+			LOldBookmark.RemoveMarker();
 			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
@@ -1072,33 +1079,22 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			{
 				if (AIsAdded)
 				{
-					var LLocation = new TextLocation(AItem.LinePos - 1, AItem.Line - 1);
+					var LLocation = new TextLocation((AItem.LinePos >= 0 ? AItem.LinePos - 1 : 0), AItem.Line - 1);
 					var LNewBookmark = new BreakpointBookmark(FTextEdit.Document, LLocation, AItem);
-					AddBookmark(LNewBookmark, LLocation.Y);
+					AddBookmark(LNewBookmark);
 				}
 				else
 				{
 					var LOldBookmark = (BreakpointBookmark)FTextEdit.Document.BookmarkManager.GetFirstMark((Bookmark APredicate) => { return (APredicate is BreakpointBookmark) && ((BreakpointBookmark)APredicate).Locator == AItem; });
 					if (LOldBookmark != null)
-					{
-						FTextEdit.Document.BookmarkManager.RemoveMark(LOldBookmark);
-						LOldBookmark.RemoveMarker();
-					}
+						RemoveBookmark(LOldBookmark);
 				}
 			}
 		}
 
 		private DebugLocator GetLocator()
 		{
-			int LLine = 1;
-			int LColumn = -1;
-			if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
-			{
-				var LSelectionStart = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
-				LLine = LSelectionStart.Line;
-				//LColumn = LSelectionStart.Column;	// Don't set on the column position for now
-			}
-			return new DebugLocator(Service.GetLocatorName(), LLine, LColumn);
+			return new DebugLocator(Service.GetLocatorName(), FTextEdit.ActiveTextAreaControl.Caret.Line + 1, -1);
 		}
 
 		private void ToggleBreakpoint()
