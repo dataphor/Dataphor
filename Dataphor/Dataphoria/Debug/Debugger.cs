@@ -270,7 +270,7 @@ namespace Alphora.Dataphor.Dataphoria
 		/// <summary> Sets the selected process to a debugged process, preferrably the one that broke. </summary>
 		private void ResetSelectedProcess()
 		{
-			var LProcesses = FDataphoria.OpenCursor(".System.Debug.GetProcesses()");
+			var LProcesses = FDataphoria.OpenCursor(".System.Debug.GetProcesses() where IsPaused");
 			try
 			{
 				int LCandidateID = -1;

@@ -29,7 +29,6 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CallStackView));
 			this.FCallStackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
 			this.FCallStackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
@@ -54,7 +53,8 @@
 			// 
 			// FCallStackDataView
 			// 
-			this.FCallStackDataView.Expression = resources.GetString("FCallStackDataView.Expression");
+			this.FCallStackDataView.Expression = "GetCallStack(AProcessID) \r\n\tadd { IfNil(Index = ASelectedIndex, false) IsSelected" +
+				" }\r\n\tbrowse by { Index }";
 			this.FCallStackDataView.IsReadOnly = true;
 			this.FCallStackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)

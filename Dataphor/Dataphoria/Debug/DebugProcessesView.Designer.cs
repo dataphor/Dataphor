@@ -32,15 +32,15 @@
 			this.FDebugProcessDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.dbGrid1 = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
 			this.FContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.FSelectContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDetachContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FRefreshContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDebugProcessSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
 			this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
+			this.FSelectButton = new System.Windows.Forms.ToolStripButton();
 			this.FDetachButton = new System.Windows.Forms.ToolStripButton();
 			this.FRefreshButton = new System.Windows.Forms.ToolStripButton();
-			this.FSelectButton = new System.Windows.Forms.ToolStripButton();
-			this.FSelectContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.FDebugProcessDataView)).BeginInit();
 			this.FContextMenu.SuspendLayout();
 			this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -51,12 +51,14 @@
 			// 
 			// FDebugProcessDataView
 			// 
-			this.FDebugProcessDataView.Expression = "\t.System.Debug.GetProcesses()\r\n\t\tbrowse by { Process_ID }";
+			this.FDebugProcessDataView.Expression = ".System.Debug.GetProcesses()\r\n\tadd { (Process_ID = ASelectedProcessID) IsSelected" +
+				" }\r\n\tbrowse by { Process_ID }";
 			this.FDebugProcessDataView.IsReadOnly = true;
 			this.FDebugProcessDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
 						| Alphora.Dataphor.DAE.CursorCapability.Searchable)));
 			this.FDebugProcessDataView.SessionName = "";
+			this.FDebugProcessDataView.DataChanged += new System.EventHandler(this.FDebugProcessDataView_DataChanged);
 			// 
 			// dbGrid1
 			// 
@@ -77,7 +79,15 @@
             this.FDetachContextMenuItem,
             this.FRefreshContextMenuItem});
 			this.FContextMenu.Name = "FContextMenu";
-			this.FContextMenu.Size = new System.Drawing.Size(154, 92);
+			this.FContextMenu.Size = new System.Drawing.Size(154, 70);
+			// 
+			// FSelectContextMenuItem
+			// 
+			this.FSelectContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
+			this.FSelectContextMenuItem.Name = "FSelectContextMenuItem";
+			this.FSelectContextMenuItem.Size = new System.Drawing.Size(153, 22);
+			this.FSelectContextMenuItem.Text = "Select";
+			this.FSelectContextMenuItem.Click += new System.EventHandler(this.FSelectButton_Click);
 			// 
 			// FDetachContextMenuItem
 			// 
@@ -132,6 +142,16 @@
 			this.FToolStrip.Size = new System.Drawing.Size(81, 25);
 			this.FToolStrip.TabIndex = 0;
 			// 
+			// FSelectButton
+			// 
+			this.FSelectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FSelectButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
+			this.FSelectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FSelectButton.Name = "FSelectButton";
+			this.FSelectButton.Size = new System.Drawing.Size(23, 22);
+			this.FSelectButton.Text = "Select";
+			this.FSelectButton.Click += new System.EventHandler(this.FSelectButton_Click);
+			// 
 			// FDetachButton
 			// 
 			this.FDetachButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -151,24 +171,6 @@
 			this.FRefreshButton.Size = new System.Drawing.Size(23, 22);
 			this.FRefreshButton.Text = "Refresh";
 			this.FRefreshButton.Click += new System.EventHandler(this.FRefreshButton_Click);
-			// 
-			// FSelectButton
-			// 
-			this.FSelectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.FSelectButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
-			this.FSelectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.FSelectButton.Name = "FSelectButton";
-			this.FSelectButton.Size = new System.Drawing.Size(23, 22);
-			this.FSelectButton.Text = "Select";
-			this.FSelectButton.Click += new System.EventHandler(this.FSelectButton_Click);
-			// 
-			// FSelectContextMenuItem
-			// 
-			this.FSelectContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
-			this.FSelectContextMenuItem.Name = "FSelectContextMenuItem";
-			this.FSelectContextMenuItem.Size = new System.Drawing.Size(153, 22);
-			this.FSelectContextMenuItem.Text = "Select";
-			this.FSelectContextMenuItem.Click += new System.EventHandler(this.FSelectButton_Click);
 			// 
 			// DebugProcessesView
 			// 

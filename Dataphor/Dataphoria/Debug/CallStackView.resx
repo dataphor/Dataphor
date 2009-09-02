@@ -123,12 +123,6 @@
   <metadata name="FCallStackDataView.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>159, 17</value>
   </metadata>
-  <data name="FCallStackDataView.Expression" xml:space="preserve">
-    <value>	.System.Sessions { ID, User_ID, HostName, Connection_Name }
-		where (ID &lt;&gt; SessionID()) and (ID &lt;&gt; 0)
-		left join (.System.Debug.GetSessions() { Session_ID ID }) include rowexists IsAttached
-		browse by { ID }</value>
-  </data>
   <metadata name="FToolStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>306, 18</value>
   </metadata>

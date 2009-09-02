@@ -6,6 +6,7 @@ using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Runtime.Data;
+using Alphora.Dataphor.DAE.Client;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -41,40 +42,30 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private bool FSupressSettingProcessID;
-		
 		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
 		{
-			if (AArgs.PropertyName == "IsStarted")
-				UpdateDataView();
-			else if (!FSupressSettingProcessID && AArgs.PropertyName == "SelectedProcessID")
-				UpdateSelected();
-			else if (AArgs.PropertyName == "IsPaused")
-				RefreshDataView();
-		}
-
-		private void UpdateSelected()
-		{
-			FSupressSettingProcessID = true;
 			try
 			{
-				//var LSelectedID = Dataphoria.Debugger.SelectedProcessID;
-				// TODO: selected indicator
+				if (AArgs.PropertyName == "IsStarted" || AArgs.PropertyName == "IsPaused" || AArgs.PropertyName == "SelectedProcessID")
+					UpdateDataView();
 			}
-			finally
+			catch (Exception LException)
 			{
-				FSupressSettingProcessID = false;
+				FDataphoria.Warnings.AppendError(null, LException, false);
 			}
 		}
 
 		private void FDataphoria_Disconnected(object sender, EventArgs e)
 		{
+			FDebugProcessDataView.Close();
 			FDebugProcessDataView.Session = null;
+			DeinitializeParamGroup();
 		}
 		
 		private void FDataphoria_Connected(object sender, EventArgs e)
 		{
 			FDebugProcessDataView.Session = FDataphoria.DataSession;
+			InitializeParamGroup();
 		}
 
 		private void FDetachButton_Click(object sender, EventArgs e)
@@ -94,46 +85,23 @@ namespace Alphora.Dataphor.Dataphoria
 		private void RefreshDataView()
 		{
 			if (FDebugProcessDataView.Active)
-			{
-				FSupressSettingProcessID = true;
-				try
-				{
-					FDebugProcessDataView.Refresh();
-				}
-				finally
-				{
-					FSupressSettingProcessID = false;
-				}
-			}
+				FDebugProcessDataView.Refresh();
 		}
 
 		private void UpdateDataView()
 		{
-			try
+			if (Dataphoria.Debugger.IsStarted)
 			{
-				FSupressSettingProcessID = true;
-				try
-				{
-					if (Dataphoria.Debugger.IsStarted)
-					{
-						FDebugProcessDataView.Open();
-						UpdateButtonsEnabled();
-					}
-					else
-					{
-						FDebugProcessDataView.Close();
-						UpdateButtonsEnabled();
-					}
-				}
-				finally
-				{
-					FSupressSettingProcessID = false;
-				}
+				FSelectedProcessIDParam.Value = FDataphoria.Debugger.SelectedProcessID;
+				FDebugProcessDataView.Open();
 			}
-			catch (Exception LException)
-			{
-				FDataphoria.Warnings.AppendError(null, LException, false);
-			}
+			else
+				FDebugProcessDataView.Close();
+		}
+
+		private void FDebugProcessDataView_DataChanged(object sender, EventArgs e)
+		{
+			UpdateButtonsEnabled();
 		}
 
 		private void UpdateButtonsEnabled()
@@ -150,7 +118,31 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FSelectButton_Click(object sender, EventArgs e)
 		{
 			if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
-				FDataphoria.Debugger.SelectedProcessID = FDebugProcessDataView["ID"].AsInt32;
+				FDataphoria.Debugger.SelectedProcessID = FDebugProcessDataView["Process_ID"].AsInt32;
 		}
+
+		private void InitializeParamGroup()
+		{
+			if (FGroup == null)
+			{
+				FGroup = new DataSetParamGroup();
+				FSelectedProcessIDParam = new DataSetParam() { Name = "ASelectedProcessID", DataType = FDataphoria.UtilityProcess.DataTypes.SystemInteger };
+				FGroup.Params.Add(FSelectedProcessIDParam);
+				FDebugProcessDataView.ParamGroups.Add(FGroup);
+			}
+		}
+
+		private void DeinitializeParamGroup()
+		{
+			if (FGroup != null)
+			{
+				FDebugProcessDataView.ParamGroups.Remove(FGroup);
+				FGroup.Dispose();
+				FGroup = null;
+			}
+		}
+
+		private DataSetParam FSelectedProcessIDParam;
+		private DataSetParamGroup FGroup;
 	}
 }
