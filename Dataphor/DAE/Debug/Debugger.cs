@@ -393,13 +393,37 @@ namespace Alphora.Dataphor.DAE.Debug
 						if (LWindow.Originator != null)
 							LCallStack.Add(new CallStackEntry(LCallStack.Count, LWindow.Originator.Description, new DebugLocator(LCurrentLocation, LWindow.Originator.Line, LWindow.Originator.LinePos)));
 						else
-							LCallStack.Add(new CallStackEntry(LCallStack.Count, String.Format("Program:{0}", LProgram.ID), LCurrentLocation));
+							LCallStack.Add(new CallStackEntry(LCallStack.Count, DebugLocator.ProgramLocator(LProgram.ID), LCurrentLocation));
 						LCurrentLocation = LWindow.Locator;
 					}
 				}
 				
 				return LCallStack;
 			}
+		}
+		
+		public Program FindProgram(Guid AProgramID)
+		{
+			CheckPaused();
+			
+			lock (FSyncHandle)
+			{
+				foreach (ServerProcess LProcess in FProcesses)
+					foreach (Program LProgram in LProcess.ExecutingPrograms)
+						if (LProgram.ID == AProgramID)
+							return LProgram;
+							
+				return null;
+			}
+		}
+		
+		public Program GetProgram(Guid AProgramID)
+		{
+			Program LProgram = FindProgram(AProgramID);
+			if (LProgram == null)
+				throw new ServerException(ServerException.Codes.ProgramNotFound, AProgramID);
+				
+			return LProgram;
 		}
 		
 		/// <summary>
@@ -457,7 +481,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
-			if (ShouldBreak(AProcess, ANode, AException))
+			if (ShouldBreak(AProcess, ANode, AException) && FProcesses.Contains(AProcess))
 			{
 				lock (FSyncHandle)
 				{

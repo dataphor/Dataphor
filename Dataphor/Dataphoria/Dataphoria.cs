@@ -462,8 +462,9 @@ namespace Alphora.Dataphor.Dataphoria
 							{
 								if (FDataSession != null)
 								{
-									FDataSession.Dispose();
+									DataSession LDataSession = FDataSession;
 									FDataSession = null;
+									LDataSession.Dispose(); // Set the DataSession null before the close to ensure the Dataphoria appears disconnected and cleanup executes properly.
 								}
 							}							
 						}
@@ -1699,7 +1700,7 @@ namespace Alphora.Dataphor.Dataphoria
  					UpdateDebuggerState();
  					UpdateBreakOnException();
  					break;
- 				case "CurentLocation" :
+ 				case "CurrentLocation" :
  					EnsureEditorForCurrentLocation();
  					break;
  				case "BreakOnException" :

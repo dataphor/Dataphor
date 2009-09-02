@@ -51,7 +51,7 @@ create operator Debug.DetachSession(ASessionID : Integer)
 
 //* Operator: GetCallStack
 create operator Debug.GetCallStack(AProcessID : Integer) 
-	: table { Index : Integer, Description : String }
+	: table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer }
 	class "System.DebugGetCallStackNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
@@ -62,8 +62,7 @@ create operator Debug.GetStack(AProcessID : Integer, AWindowIndex : Integer)
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
 //* Operator: GetContext	
-create operator Debug.GetContext(AProcessID : Integer)
-	: row { Locator : String, Line : Integer, LinePos : Integer, Script : String }
+create operator Debug.GetContext(ALocator : String) : String
 	class "System.DebugGetContextNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	

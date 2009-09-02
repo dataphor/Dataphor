@@ -305,6 +305,12 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106201: "Could not determine the current location for program {0}."</summary>
 			CouldNotDetermineProgramLocation = 106201,
+			
+			/// <summary>Error code 106202: "Invalid debug locator: "{0}". Only program and operator locators may be used to obtain program context."</summary>
+			InvalidDebugLocator = 106202,
+			
+			/// <summary>Error code 106203: "Program {0} not found. Only running programs in processes currently attached to the debugger are reachable."</summary>
+			ProgramNotFound = 106203,
 		}
 		
 		// Resource manager for this exception class

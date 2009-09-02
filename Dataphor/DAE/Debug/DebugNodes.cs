@@ -274,7 +274,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 	
-	// operator GetCallStack(AProcessID : Integer) : table { Index : Integer, Description : String }
+	// operator GetCallStack(AProcessID : Integer) : table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer }
 	public class DebugGetCallStackNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -286,6 +286,9 @@ namespace Alphora.Dataphor.DAE.Debug
 
 			DataType.Columns.Add(new Schema.Column("Index", APlan.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("Description", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -321,6 +324,9 @@ namespace Alphora.Dataphor.DAE.Debug
 						{
 							LRow[0] = LEntry.Index;
 							LRow[1] = LEntry.Description;
+							LRow[2] = LEntry.Location.Locator;
+							LRow[3] = LEntry.Location.Line;
+							LRow[4] = LEntry.Location.LinePos;
 							LResult.Insert(LRow);
 						}
 					}
@@ -411,21 +417,23 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 	
-	//* Operator: GetContext(AProcessID : Integer) : row { Locator : String, Line : Integer, LinePos : Integer, Script : String }
+	//* Operator: GetContext(ALocator : String) : String
 	public class DebugGetContextNode : UnaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			throw new NotImplementedException();
-/*
-			DebugContext LContext = AProgram.ServerProcess.ServerSession.CheckedDebugger.GetContext((int)AArgument1);
-			Row LRow = new Row(AProgram.ValueManager, (Schema.RowType)DataType);
-			LRow[0] = LContext.Locator;
-			LRow[1] = LContext.Line;
-			LRow[2] = LContext.LinePos;
-			LRow[3] = LContext.Script;
-			return LRow;
-*/
+			if (AArgument1 == null)
+				return null;
+				
+			string LLocator = (string)AArgument1;
+
+			if (DebugLocator.IsProgramLocator(LLocator))
+				return AProgram.ServerProcess.ServerSession.CheckedDebugger.GetProgram(DebugLocator.GetProgramID(LLocator)).Source;
+
+			if (DebugLocator.IsOperatorLocator(LLocator))
+				return new D4TextEmitter().Emit(((Schema.Operator)AProgram.ResolveCatalogObjectSpecifier(DebugLocator.GetOperatorSpecifier(LLocator), true)).EmitStatement(EmitMode.ForCopy));
+				
+			throw new ServerException(ServerException.Codes.InvalidDebugLocator, LLocator);
 		}
 	}
 		
@@ -515,8 +523,8 @@ namespace Alphora.Dataphor.DAE.Debug
 			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
-
-			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Index"] }));
+				
+			TableVar.Keys.Add(new Schema.Key(new Schema.TableVarColumn[] { TableVar.Columns["Locator"], TableVar.Columns["Line"], TableVar.Columns["LinePos"] }));
 
 			TableVar.DetermineRemotable(APlan.CatalogDeviceSession);
 			Order = Compiler.FindClusteringOrder(APlan, TableVar);

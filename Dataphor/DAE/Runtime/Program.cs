@@ -128,7 +128,15 @@ namespace Alphora.Dataphor.DAE.Runtime
 		/// <summary>
 		/// Provides a reference for identifying the source text for the plan. May be null for dynamic or ad-hoc execution.
 		/// </summary>
-		public DebugLocator Locator { get { return FLocator; } }
+		public DebugLocator Locator 
+		{ 
+			get 
+			{ 
+				if (FLocator == null)
+					FLocator = new DebugLocator(DebugLocator.ProgramLocator(FID), -1, -1);
+				return FLocator; 
+			} 
+		}
 		
 		/// <summary>
 		/// Sets the source context for the plan.
@@ -143,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				FLocator = ASourceContext.Locator;
 			else
 			{
-				FLocator = new DebugLocator(DebugLocator.PlanLocator(this.ID), 1, 1);
+				FLocator = new DebugLocator(DebugLocator.ProgramLocator(this.ID), 1, 1);
 				FSource = ASourceContext.Script;
 			}
 		}
@@ -319,10 +327,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 			if (FServerProcess.IsAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 
+			// Double-check debugger here to optimize for the case that there is no debugger
+			// With this check first, if there is no debugger we've saved an assignment
 			if (FServerProcess.Debugger != null)
 			{
-				FCurrentNode = APlanNode;
-				FServerProcess.Debugger.Yield(FServerProcess, APlanNode, null);
+				Debugger LDebugger = FServerProcess.Debugger;
+				if (LDebugger != null)
+				{
+					FCurrentNode = APlanNode;
+					LDebugger.Yield(FServerProcess, APlanNode, null);
+				}
 			}
 		}
 		
@@ -331,10 +345,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 			if (FServerProcess.IsAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 
+			// Double-check debugger here to optimize for the case that there is no debugger
+			// With this check first, if there is no debugger we've saved an assignment
 			if (FServerProcess.Debugger != null)
 			{
-				FCurrentNode = APlanNode;
-				FServerProcess.Debugger.Yield(FServerProcess, APlanNode, AException);
+				Debugger LDebugger = FServerProcess.Debugger;
+				if (LDebugger != null)
+				{
+					FCurrentNode = APlanNode;
+					LDebugger.Yield(FServerProcess, APlanNode, AException);
+				}
 			}
 		}
 		

@@ -410,4 +410,10 @@
   <data name="106201" xml:space="preserve">
     <value>Could not determine the current location for program {0}.</value>
   </data>
+  <data name="106202" xml:space="preserve">
+    <value>Invalid debug locator: "{0}". Only program and operator locators may be used to obtain program context.</value>
+  </data>
+  <data name="106203" xml:space="preserve">
+    <value>Program {0} not found. Only running programs in processes currently attached to the debugger are reachable.</value>
+  </data>
 </root>

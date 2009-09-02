@@ -60,13 +60,15 @@ namespace Alphora.Dataphor.Dataphoria
                     try
                     {
                         SDataphoriaInstance.OpenFiles(AArgs);
-                        Application.Run((Form) SDataphoriaInstance);
+                        Application.Run((Form)SDataphoriaInstance);
                     }
                     finally
                     {
                         SDataphoriaInstance.Dispose();
                         SDataphoriaInstance = null;
                     }
+                    
+                    //Application.DoEvents();
                 }
                 catch (Exception LException)
                 {

@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.Dataphoria
 			
 			ResetSelectedProcess();
 			
-			if (((Scalar)Dataphoria.EvaluateQuery("exists(.Debug.GetBreakpoints())")).AsBoolean)
+			if (((Scalar)Dataphoria.EvaluateQuery("exists(.System.Debug.GetBreakpoints())")).AsBoolean)
 				RefreshBreakpoints();
 		}
 
@@ -186,6 +186,7 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private void InternalUnpause()
 		{
+			SelectedProcessID = -1;
 			InternalSetIsPaused(false);
 			new Thread(new ThreadStart(DebuggerThread)).Start();
 		}
@@ -198,16 +199,19 @@ namespace Alphora.Dataphor.Dataphoria
 				try
 				{
 					LProcess.Execute(".System.Debug.WaitForPause();", null);
-					FDataphoria.Invoke(new ThreadStart(delegate { DebuggerPaused(); }));
+					if (FDataphoria.IsConnected)
+						FDataphoria.Invoke(new ThreadStart(delegate { DebuggerPaused(); }));
 				}
 				finally
 				{
-					FDataphoria.DataSession.ServerSession.StopProcess(LProcess);
+					if (FDataphoria.IsConnected)
+						FDataphoria.DataSession.ServerSession.StopProcess(LProcess);
 				}
 			}
 			catch (Exception LException)
 			{
-				FDataphoria.Invoke(new ThreadStart(delegate { FDataphoria.Warnings.AppendError(null, LException, false); }));
+				if (FDataphoria.IsConnected)
+					FDataphoria.Invoke(new ThreadStart(delegate { FDataphoria.Warnings.AppendError(null, LException, false); }));
 			}
 		}
 
@@ -313,7 +317,10 @@ namespace Alphora.Dataphor.Dataphoria
 		private void ResetSelectedCallStackIndex()
 		{
 			// Don't check that it's different in a reset
-			InternalSetCallStackIndex(0);
+			if (FSelectedProcessID >= 0)
+				InternalSetCallStackIndex(0);
+			else
+				InternalSetCallStackIndex(-1);
 		}
 
 		// CurrentLocation

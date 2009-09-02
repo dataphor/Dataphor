@@ -90,18 +90,34 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 		
 		/// <summary>
-		/// Plan locator string used to indicate that a locator is a reference to dynamic or ad-hoc execution
+		/// Program locator string used to indicate that a locator is a reference to dynamic or ad-hoc execution
 		/// </summary>
-		public const string CPlanLocator = "plan";
+		public const string CProgramLocator = "program";
 		
 		/// <summary>
 		/// Operator locator string used to indicate that a locator is a reference to an operator created by a dynamic or ad-hoc execution
 		/// </summary>
 		public const string COperatorLocator = "operator";
 		
-		public static string PlanLocator(Guid APlanID)
+		public static string ProgramLocator(Guid APlanID)
 		{
-			return String.Format("{0}:{1}", CPlanLocator, APlanID.ToString());
+			return String.Format("{0}:{1}", CProgramLocator, APlanID.ToString());
+		}
+		
+		/// <summary>
+		/// Returns true if the locator is a program locator
+		/// </summary>
+		public static bool IsProgramLocator(string ALocator)
+		{
+			return ALocator.StartsWith(CProgramLocator + ":");
+		}
+		
+		/// <summary>
+		/// Returns the program id encoded in the given program locator.
+		/// </summary>
+		public static Guid GetProgramID(string AProgramLocator)
+		{
+			return new Guid(AProgramLocator.Substring(AProgramLocator.IndexOf(':') + 1));
 		}
 		
 		/// <summary>
@@ -112,11 +128,6 @@ namespace Alphora.Dataphor.DAE.Debug
 			return String.Format("{0}:{1}", COperatorLocator, AOperatorSpecifier);
 		}
 		
-		public static bool IsPlanLocator(string ALocator)
-		{
-			return ALocator.StartsWith(CPlanLocator + ":");
-		}
-		
 		/// <summary>
 		/// Returns true if the locator is an operator locator
 		/// </summary>
@@ -125,6 +136,14 @@ namespace Alphora.Dataphor.DAE.Debug
 			return ALocator.StartsWith(COperatorLocator + ":");
 		}
 
+		/// <summary>
+		/// Returns the operator specifier encoded in the given operator locator.
+		/// </summary>
+		public static string GetOperatorSpecifier(string AOperatorLocator)
+		{
+			return AOperatorLocator.Substring(AOperatorLocator.IndexOf(':') + 1);
+		}
+		
 		/// <summary>
 		/// Dynamic debug locator used as the locator for all dynamic execution.
 		/// </summary>
