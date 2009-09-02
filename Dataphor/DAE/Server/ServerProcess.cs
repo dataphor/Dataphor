@@ -9,12 +9,14 @@
 #define PROCESSSTREAMSOWNED // Determines whether or not the process will deallocate all streams allocated by the process.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Alphora.Dataphor.Logging;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -33,6 +35,8 @@ namespace Alphora.Dataphor.DAE.Server
 	// ServerProcess
 	public class ServerProcess : ServerChildObject, IServerProcess
 	{
+		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof(ServerProcess));
+		
 		internal ServerProcess(ServerSession AServerSession) : base()
 		{
 			InternalCreate(AServerSession, new ProcessInfo(AServerSession.SessionInfo));
@@ -1320,6 +1324,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// BeginTransaction
 		public void BeginTransaction(IsolationLevel AIsolationLevel)
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Will begin transaction {0}", AIsolationLevel);
 			BeginCall();
 			try
 			{
@@ -1356,6 +1361,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// CommitTransaction
 		public void CommitTransaction()
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Will commit transaction");
 			BeginCall();
 			try
 			{
