@@ -80,6 +80,10 @@
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
       <Name>DAE</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Dataphor\Logging\Logging.csproj">
+      <Project>{47AC1A13-6F39-41CD-9F5F-7F5B1792CB84}</Project>
+      <Name>Logging</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

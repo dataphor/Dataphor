@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Alphora.Dataphor.DAE.ServerTests.Utilities;
+using Alphora.Dataphor.Logging;
 using NUnit.Framework;
 using Alphora.Dataphor.DAE.Server;
 
@@ -16,6 +17,8 @@ namespace Alphora.Dataphor.DAE.ServerTests
 	[TestFixture]
 	public class CoverageTest
 	{
+		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (CoverageTest));
+		
 		private ServerConfigurationManager FServerConfigurationManager;
 		private ServerConfiguration FConfiguration;
 		private IServer FServer;
