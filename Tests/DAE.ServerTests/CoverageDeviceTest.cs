@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Alphora.Dataphor.DAE.ServerTests.Utilities;
 using Alphora.Dataphor.Logging;
@@ -27,6 +28,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TestFixtureSetUp]
 		public void SetUpFixture()
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Test Fixture Set Up");
 			MSSQLServerConfigurationManager.ResetDatabase("DataphorTests");
 			
 			FServerConfigurationManager = new SQLCEServerConfigurationManager();
@@ -60,6 +62,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TestFixtureTearDown]
 		public void TearDownFixture()
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Test Fixture Tear Down");
 			FServer.Stop();
 			FServerConfigurationManager.ResetInstance();
 		}
@@ -67,6 +70,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[SetUp]
 		public void SetUp()
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Test Setup");
 			FSession = FServer.Connect(new SessionInfo("Admin", "", "TestFramework.Coverage.Devices"));
 			FProcess = FSession.StartProcess(new ProcessInfo(FSession.SessionInfo));
 		}
@@ -74,6 +78,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 		[TearDown]
 		public void TearDown()
 		{
+			SRFLogger.WriteLine(TraceLevel.Verbose, "Test TearDown");
 			if (FProcess != null)
 			{
 				FSession.StopProcess(FProcess);
