@@ -1017,6 +1017,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			base.NameOrModifiedChanged(ASender, AArgs);
 			ClearBreakpointBookmarks();
 			LoadBreakpointBookmarks();
+			UpdateCurrentLocation();
 		}
 
 		private void ClearBreakpointBookmarks()
