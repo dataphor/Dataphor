@@ -14,11 +14,6 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 		}
 
-		public override bool CanToggle
-		{
-			get { return false; }
-		}
-
 		public override void Draw(IconBarMargin margin, Graphics g, Point p)
 		{
 			margin.DrawArrow(g, p.Y);

@@ -16,6 +16,11 @@ namespace Alphora.Dataphor.Dataphoria
 			SetMarker();
 		}
 
+		public override bool CanToggle
+		{
+			get { return false; }
+		}
+
 		private DebugLocator FLocator;
 		
 		public DebugLocator Locator
