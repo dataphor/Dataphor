@@ -55,6 +55,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private ToolStripMenuItem FScriptMenu;
 		private ToolStripMenuItem FSelectBlockMenuItem;
 		private ToolStripMenuItem FShowResultsMenuItem;
+		private ToolStripMenuItem FToggleBreakpointMenuItem;
 
 		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (D4Editor));
 
@@ -73,6 +74,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			InitializeDocking();
 
 			InitializeExtendendMenu();
+			
+			InitializeDebugger();
 
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
 			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
@@ -144,6 +147,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FPriorBlockMenuItem = new ToolStripMenuItem();
 			FNextBlockMenuItem = new ToolStripMenuItem();
 			FShowResultsMenuItem = new ToolStripMenuItem();
+			FToggleBreakpointMenuItem = new ToolStripMenuItem();
 
 			// 
 			// FViewMenu
@@ -173,7 +177,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 													   FAnalyzeLineMenuItem,
 													   FSelectBlockMenuItem,
 													   FPriorBlockMenuItem,
-													   FNextBlockMenuItem
+													   FNextBlockMenuItem,
+													   FToggleBreakpointMenuItem
 												   });
 			FScriptMenu.Text = "&Script";
 			FScriptMenu.MergeAction = MergeAction.Insert;
@@ -288,6 +293,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FShowResultsMenuItem.Text = "&Results";
 			FShowResultsMenuItem.Click += FMainMenuStrip_ItemClicked;
 			FShowResultsMenuItem.ShortcutKeys = Keys.F7;
+			//
+			// FToggleBreakpointMenuItem
+			//
+			FToggleBreakpointMenuItem.Text = "Set Breakpoint";
+			FToggleBreakpointMenuItem.Click += FMainMenuStrip_ItemClicked;
+			FToggleBreakpointMenuItem.ShortcutKeys = Keys.F9;
 			// 
 			// D4Editor
 			// 
@@ -375,6 +386,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				else if (ASender == FShowResultsMenuItem)
 				{
 					ShowResults();
+				}
+				else if (ASender == FToggleBreakpointMenuItem)
+				{
+					ToggleBreakpoint();
 				}
 			}
 			catch (AbortException)
@@ -706,19 +721,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FExecutor.Start();
 		}
 
-		private DebugLocator GetLocator()
-		{
-			int LLine = 1;
-			int LColumn = 1;
-			if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
-			{
-				var LSelectionStart = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
-				LLine = LSelectionStart.Line;
-				LColumn = LSelectionStart.Column;
-			}
-			return new DebugLocator(Service.GetLocatorName(), LLine, LColumn);
-		}
-
 		public bool SelectLine()
 		{
 			if (FTextEdit.Document.TextLength > 0)
@@ -1011,10 +1013,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				TextLocation ALogicPos = AIconBar.TextArea.TextView.GetLogicalPosition(0, AMousePos.Y - AViewRect.Top);
 
 				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
-				{
 					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Y, -1));
-					AIconBar.TextArea.Refresh(AIconBar);
-				}
 			}
 		}
 				
@@ -1064,6 +1063,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FTextEdit.Document.BookmarkManager.AddMark(ABookmark);
 			FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, ALine, ALine));
 			FTextEdit.Document.CommitUpdate();
+			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
 		private void Debugger_BreakpointsChanged(NotifyingBaseList<DebugLocator> ASender, bool AIsAdded, DebugLocator AItem, int AIndex)
@@ -1086,6 +1086,24 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					}
 				}
 			}
+		}
+
+		private DebugLocator GetLocator()
+		{
+			int LLine = 1;
+			int LColumn = -1;
+			if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+			{
+				var LSelectionStart = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
+				LLine = LSelectionStart.Line;
+				//LColumn = LSelectionStart.Column;	// Don't set on the column position for now
+			}
+			return new DebugLocator(Service.GetLocatorName(), LLine, LColumn);
+		}
+
+		private void ToggleBreakpoint()
+		{
+			Dataphoria.Debugger.ToggleBreakpoint(GetLocator());
 		}
 
 		#endregion
