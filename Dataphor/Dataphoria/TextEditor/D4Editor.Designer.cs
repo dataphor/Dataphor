@@ -21,7 +21,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             try
             {
-                components.Dispose();
+				Deinitialize();
+				components.Dispose();
             }
             finally
             {

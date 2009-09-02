@@ -202,7 +202,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         // Service callbacks
 
-        private void NameOrModifiedChanged(object ASender, EventArgs AArgs)
+        protected virtual void NameOrModifiedChanged(object ASender, EventArgs AArgs)
         {
             UpdateTitle();
         }

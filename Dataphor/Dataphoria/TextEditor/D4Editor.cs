@@ -70,13 +70,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
-
 			InitializeDocking();
-
 			InitializeExtendendMenu();
-			
 			InitializeDebugger();
-
+			
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
 			FTextEdit.EditActions[Keys.Control | Keys.Oemcomma] = new PriorBlock();
 			FTextEdit.EditActions[Keys.Control | Keys.OemPeriod] = new NextBlock();
@@ -87,11 +84,14 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FResultPanel.ReplacementsPerformed += ReplacementsPerformed;
 			FResultPanel.TextNotFound += TextNotFound;
 
-			ADataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
-			ADataphoria.Debugger.Breakpoints.Changed += Debugger_BreakpointsChanged;
 			UpdateCurrentLocation();
 		}
 
+		private void Deinitialize()
+		{
+			DeinitializeDebugger();
+		}
+		
 		private void InitializeDocking()
 		{
 			FResultPanel = new ResultPanel();
@@ -319,7 +319,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			FDockContentResultPanel.Show();
 		}
-
 
 		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
 		{
@@ -1002,15 +1001,39 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void InitializeDebugger()
 		{
+			Dataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+			Dataphoria.Debugger.Breakpoints.Changed += Debugger_BreakpointsChanged;
 			FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin.MouseDown += IconBarMouseDown;
+		}
+		
+		private void DeinitializeDebugger()
+		{
+			Dataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
+			Dataphoria.Debugger.Breakpoints.Changed -= Debugger_BreakpointsChanged;
+		}
+
+        protected override void NameOrModifiedChanged(object ASender, EventArgs AArgs)
+        {
+			base.NameOrModifiedChanged(ASender, AArgs);
+			ClearBreakpointBookmarks();
+			LoadBreakpointBookmarks();
+		}
+
+		private void ClearBreakpointBookmarks()
+		{
+			FTextEdit.Document.BookmarkManager.Clear();
 		}
 
 		private void IconBarMouseDown(AbstractMargin AIconBar, Point AMousePos, MouseButtons AMouseButtons)
 		{
 			if (AMouseButtons == MouseButtons.Left)
 			{
-				Rectangle AViewRect = AIconBar.TextArea.TextView.DrawingPosition;
-				TextLocation ALogicPos = AIconBar.TextArea.TextView.GetLogicalPosition(0, AMousePos.Y - AViewRect.Top);
+				TextLocation ALogicPos = 
+					AIconBar.TextArea.TextView.GetLogicalPosition
+					(
+						0, 
+						AMousePos.Y - AIconBar.TextArea.TextView.DrawingPosition.Top
+					);
 
 				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
 					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Line + 1, -1));
@@ -1078,11 +1101,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			if (Service.LocatorNameMatches(AItem.Locator))
 			{
 				if (AIsAdded)
-				{
-					var LLocation = new TextLocation((AItem.LinePos >= 0 ? AItem.LinePos - 1 : 0), AItem.Line - 1);
-					var LNewBookmark = new BreakpointBookmark(FTextEdit.Document, LLocation, AItem);
-					AddBookmark(LNewBookmark);
-				}
+					AddBreakpointBookmark(AItem);
 				else
 				{
 					var LOldBookmark = (BreakpointBookmark)FTextEdit.Document.BookmarkManager.GetFirstMark((Bookmark APredicate) => { return (APredicate is BreakpointBookmark) && ((BreakpointBookmark)APredicate).Locator == AItem; });
@@ -1090,6 +1109,20 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 						RemoveBookmark(LOldBookmark);
 				}
 			}
+		}
+		
+		private void LoadBreakpointBookmarks()
+		{
+			foreach (DebugLocator LItem in Dataphoria.Debugger.Breakpoints)
+			if (Service.LocatorNameMatches(LItem.Locator))
+				AddBreakpointBookmark(LItem);
+		}
+
+		private void AddBreakpointBookmark(DebugLocator AItem)
+		{
+			var LLocation = new TextLocation((AItem.LinePos >= 0 ? AItem.LinePos - 1 : 0), AItem.Line - 1);
+			var LNewBookmark = new BreakpointBookmark(FTextEdit.Document, LLocation, AItem);
+			AddBookmark(LNewBookmark);
 		}
 
 		private DebugLocator GetLocator()
