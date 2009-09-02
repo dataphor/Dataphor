@@ -44,8 +44,8 @@ namespace Alphora.Dataphor.Dataphoria
 		
 		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
 		{
-			if (!FSupressDebuggerChange && AArgs.PropertyName == "IsStarted")
-				RefreshProcesses();
+			if (!FSupressDebuggerChange && (AArgs.PropertyName == "IsStarted" || AArgs.PropertyName == "IsPaused"))
+				RefreshDataView();
 		}
 
 		private void FDataphoria_Disconnected(object sender, EventArgs e)
@@ -89,7 +89,7 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					FSupressDebuggerChange = false;
 				}
-				RefreshProcesses();
+				RefreshDataView();
 			}
 		}
 
@@ -106,16 +106,16 @@ namespace Alphora.Dataphor.Dataphoria
 				{
 					FSupressDebuggerChange = false;
 				}
-				RefreshProcesses();
+				RefreshDataView();
 			}
 		}
 
 		private void FRefreshButton_Click(object sender, EventArgs e)
 		{
-			RefreshProcesses();
+			RefreshDataView();
 		}
 
-		private void RefreshProcesses()
+		private void RefreshDataView()
 		{
 			if (FProcessDataView.Active)
 				FProcessDataView.Refresh();

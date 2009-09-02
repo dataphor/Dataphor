@@ -49,6 +49,8 @@ namespace Alphora.Dataphor.Dataphoria
 				UpdateDataView();
 			else if (!FSupressSettingProcessID && AArgs.PropertyName == "SelectedProcessID")
 				UpdateSelected();
+			else if (AArgs.PropertyName == "IsPaused")
+				RefreshDataView();
 		}
 
 		private void UpdateSelected()

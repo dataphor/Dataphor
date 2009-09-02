@@ -998,6 +998,26 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		#region Debugger
 
+		private void InitializeDebugger()
+		{
+			FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin.MouseDown += IconBarMouseDown;
+		}
+
+		private void IconBarMouseDown(AbstractMargin AIconBar, Point AMousePos, MouseButtons AMouseButtons)
+		{
+			if (AMouseButtons == MouseButtons.Left)
+			{
+				Rectangle AViewRect = AIconBar.TextArea.TextView.DrawingPosition;
+				TextLocation ALogicPos = AIconBar.TextArea.TextView.GetLogicalPosition(0, AMousePos.Y - AViewRect.Top);
+
+				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
+				{
+					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Y, -1));
+					AIconBar.TextArea.Refresh(AIconBar);
+				}
+			}
+		}
+				
 		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
 		{
 			switch (AArgs.PropertyName)
