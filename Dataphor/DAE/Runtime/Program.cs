@@ -121,7 +121,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 		/// <summary>
 		/// Contains the source text for the plan. Only present if no debug locator is provided.
 		/// </summary>
-		public string Source { get { return FSource; } }
+		public string Source
+		{ 
+			get 
+			{
+				if (FSource != null) 
+					return FSource;
+					
+				if (FCode != null)
+					return FCode.SafeEmitStatementAsString(false);
+					
+				return "<Program has no source>";
+			} 
+		}
 		
 		// Locator
 		protected DebugLocator FLocator;

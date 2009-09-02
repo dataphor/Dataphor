@@ -61,9 +61,9 @@ create operator Debug.GetStack(AProcessID : Integer, AWindowIndex : Integer)
 	class "System.DebugGetStackNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
-//* Operator: GetContext	
-create operator Debug.GetContext(ALocator : String) : String
-	class "System.DebugGetContextNode"
+//* Operator: GetSource
+create operator Debug.GetSource(ALocator : String) : String
+	class "System.DebugGetSourceNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 	
 //* Operator: GetStepIntoOperators

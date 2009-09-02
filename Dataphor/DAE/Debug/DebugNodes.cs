@@ -417,8 +417,8 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 	
-	//* Operator: GetContext(ALocator : String) : String
-	public class DebugGetContextNode : UnaryInstructionNode
+	//* Operator: GetSource(ALocator : String) : String
+	public class DebugGetSourceNode : UnaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
