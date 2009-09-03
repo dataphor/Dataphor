@@ -113,7 +113,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentDebugProcessesView = new DockContent();
 			FDockContentDebugProcessesView.HideOnClose = true;
 			FDockContentDebugProcessesView.Controls.Add(FDebugProcessesView);
-			FDockContentDebugProcessesView.TabText = "Debug Processes";
+			FDockContentDebugProcessesView.TabText = "Debug Processes ";
 			FDockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
 			FDockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
 
@@ -1687,26 +1687,21 @@ namespace Alphora.Dataphor.Dataphoria
 			if (FDebugger == null)
 			{
 				FDebugger = new Debugger(this);
-				FDebugger.PropertyChanged += new PropertyChangedEventHandler(DebuggerPropertyChanged);
+				FDebugger.PropertyChanged += DebuggerPropertyChanged;
 			}
 		}
 
-		private void DebuggerPropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void DebuggerPropertyChanged(object ASender, string[] APropertyNames)
 		{
- 			switch (AArgs.PropertyName)
+			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
  			{
- 				case "IsStarted" : 
- 				case "IsPaused" :
- 					UpdateDebuggerState();
- 					UpdateBreakOnException();
- 					break;
- 				case "CurrentLocation" :
- 					EnsureEditorForCurrentLocation();
- 					break;
- 				case "BreakOnException" :
- 					UpdateBreakOnException();
- 					break;
+ 				UpdateDebuggerState();
+ 				UpdateBreakOnException();
  			}
+			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
+				EnsureEditorForCurrentLocation();
+			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
+				UpdateBreakOnException();
 		}
 
 		private void EnsureEditorForCurrentLocation()

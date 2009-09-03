@@ -27,14 +27,14 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged -= new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
 					}
 					FDataphoria = value;
 					if (FDataphoria != null)
 					{
 						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged += new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
 					}
 				}
 			}
@@ -42,9 +42,9 @@ namespace Alphora.Dataphor.Dataphoria
 
 		private bool FSupressDebuggerChange;
 		
-		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
 		{
-			if (!FSupressDebuggerChange && (AArgs.PropertyName == "IsStarted" || AArgs.PropertyName == "IsPaused"))
+			if (!FSupressDebuggerChange && Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused"; }))
 				RefreshDataView();
 		}
 

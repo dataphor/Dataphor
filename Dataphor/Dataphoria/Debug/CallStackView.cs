@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Alphora.Dataphor.DAE.Client;
+using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -28,24 +29,24 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged -= new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
 					}
 					FDataphoria = value;
 					if (FDataphoria != null)
 					{
 						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged += new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
 					}
 				}
 			}
 		}
 
-		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
 		{
 			try
 			{
-				if (AArgs.PropertyName == "SelectedProcessID" || AArgs.PropertyName == "IsPaused" || AArgs.PropertyName == "SelectedCallStackIndex")
+				if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "SelectedProcessID" || AItem == "IsPaused" || AItem == "SelectedCallStackIndex"; }))
 					UpdateDataView();
 			}
 			catch (Exception LException)
@@ -58,9 +59,19 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (FDataphoria.Debugger.IsPaused && FDataphoria.Debugger.SelectedProcessID >= 0)
 			{
+				// Save old postion
+				Row LOld = null;
+				if (FCallStackDataView.Active && !FCallStackDataView.IsEmpty())
+					LOld = FCallStackDataView.ActiveRow;
+
+				// Update the selected process
 				FProcessIDParam.Value = FDataphoria.Debugger.SelectedProcessID;
 				FSelectedIndexParam.Value = FDataphoria.Debugger.SelectedCallStackIndex;
 				FCallStackDataView.Open();
+
+				// Attempt to seek to old position
+				if (LOld != null)
+					FCallStackDataView.Refresh(LOld);
 			}
 			else
 				FCallStackDataView.Close();

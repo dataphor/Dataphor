@@ -9,7 +9,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-	public class Debugger : INotifyPropertyChanged
+	public class Debugger : INotifyMultiPropertyChanged
 	{
 		public Debugger(IDataphoria ADataphoria)
 		{
@@ -20,12 +20,15 @@ namespace Alphora.Dataphor.Dataphoria
 			UpdateDebuggerState();
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		// TODO: Improve the debugger performance by implementing a property notification service which 
+		//  allows multiple properties to be included in a single notification.
 		
-		protected void NotifyPropertyChanged(string APropertyName)
+		public event MultiPropertyChangedEventHandler PropertyChanged;
+
+		protected void NotifyPropertyChanged(string[] APropertyNames)
 		{
 			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(APropertyName));
+				PropertyChanged(this, APropertyNames);
 		}
 
 		private IDataphoria FDataphoria;
@@ -68,12 +71,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FSelectedCallStackIndex = -1;
 			FCurrentLocation = null;
 
-			NotifyPropertyChanged("IsStarted");
-			NotifyPropertyChanged("IsPaused");
-			NotifyPropertyChanged("BreakOnException");
-			NotifyPropertyChanged("SelectedProcessID");
-			NotifyPropertyChanged("SelectedCallStackIndex");
-			NotifyPropertyChanged("CurrentLocation");
+			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
 
 			if (!AIsPaused)
 				InternalUnpause();
@@ -93,12 +91,7 @@ namespace Alphora.Dataphor.Dataphoria
 			FSelectedCallStackIndex = -1;
 			FCurrentLocation = null;
 
-			NotifyPropertyChanged("IsStarted");
-			NotifyPropertyChanged("IsPaused");
-			NotifyPropertyChanged("BreakOnException");
-			NotifyPropertyChanged("SelectedProcessID");
-			NotifyPropertyChanged("SelectedCallStackIndex");
-			NotifyPropertyChanged("CurrentLocation");
+			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
 
 			RefreshBreakpoints();
 		}
@@ -125,7 +118,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void InternalSetIsStarted(bool AValue)
 		{
 				FIsStarted = AValue;
-				NotifyPropertyChanged("IsStarted");
+				NotifyPropertyChanged(new string[] { "IsStarted" });
 		}
 		
 		public void Start()
@@ -158,7 +151,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (AValue != FIsPaused)
 			{
 				FIsPaused = AValue;
-				NotifyPropertyChanged("IsPaused");
+				NotifyPropertyChanged(new string[] { "IsPaused" });
 			}
 		}
 
@@ -239,7 +232,7 @@ namespace Alphora.Dataphor.Dataphoria
 					if (FIsStarted)
 						ApplyBreakOnException();
 					FBreakOnException = value;
-					NotifyPropertyChanged("BreakOnException");
+					NotifyPropertyChanged(new string[] { "BreakOnException" });
 				}
 			}
 		}
@@ -261,7 +254,7 @@ namespace Alphora.Dataphor.Dataphoria
 				if (value != FSelectedProcessID)
 				{
 					FSelectedProcessID = value; 
-					NotifyPropertyChanged("SelectedProcessID");
+					NotifyPropertyChanged(new string[] { "SelectedProcessID" });
 					ResetSelectedCallStackIndex();
 				}
 			}
@@ -310,7 +303,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void InternalSetCallStackIndex(int AValue)
 		{
 			FSelectedCallStackIndex = AValue;
-			NotifyPropertyChanged("SelectedCallStackIndex");
+			NotifyPropertyChanged(new string[] { "SelectedCallStackIndex" });
 			UpdateCurrentLocation();
 		}
 
@@ -358,7 +351,7 @@ namespace Alphora.Dataphor.Dataphoria
 			)
 			{
 				FCurrentLocation = LLocation;
-				NotifyPropertyChanged("CurrentLocation");
+				NotifyPropertyChanged(new string[] { "CurrentLocation" });
 			}
 		}
 		
@@ -450,28 +443,44 @@ namespace Alphora.Dataphor.Dataphoria
 
 		// Functions
 
+		public event EventHandler SessionAttached;
+		
 		public void AttachSession(int ASessionID)
 		{
 			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachSession({0});", ASessionID));
+			if (SessionAttached != null)
+				SessionAttached(this, EventArgs.Empty);
 		}
+
+		public event EventHandler SessionDetached;
 
 		public void DetachSession(int ASessionID)
 		{
 			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachSession({0});", ASessionID));
+			if (SessionDetached != null)
+				SessionDetached(this, EventArgs.Empty);
 		}
+
+		public event EventHandler ProcessAttached;
 
 		public void AttachProcess(int AProcessID)
 		{
 			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.AttachProcess({0});", AProcessID));
+			if (ProcessAttached != null)
+				ProcessAttached(this, EventArgs.Empty);
 		}
+
+		public event EventHandler ProcessDetached;
 
 		public void DetachProcess(int AProcessID)
 		{
 			Start();
 			FDataphoria.ExecuteScript(String.Format(".System.Debug.DetachProcess({0});", AProcessID));
+			if (ProcessDetached != null)
+				ProcessDetached(this, EventArgs.Empty);
 		}
 		
 		public void StepOver()
@@ -492,4 +501,11 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 	}
+	
+	public interface INotifyMultiPropertyChanged
+	{
+		event MultiPropertyChangedEventHandler PropertyChanged;
+	}
+	
+	public delegate void MultiPropertyChangedEventHandler(object ASender, string[] APropertyNames);
 }

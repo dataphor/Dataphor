@@ -29,24 +29,37 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						FDataphoria.Disconnected -= new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected -= new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged -= new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged -= Debugger_PropertyChanged;
+						FDataphoria.Debugger.SessionAttached -= new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.SessionDetached -= new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.ProcessAttached -= new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.ProcessDetached -= new EventHandler(Debugger_AttachmentChanged);
 					}
 					FDataphoria = value;
 					if (FDataphoria != null)
 					{
 						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
-						FDataphoria.Debugger.PropertyChanged += new PropertyChangedEventHandler(Debugger_PropertyChanged);
+						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+						FDataphoria.Debugger.SessionAttached += new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.SessionDetached += new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.ProcessAttached += new EventHandler(Debugger_AttachmentChanged);
+						FDataphoria.Debugger.ProcessDetached += new EventHandler(Debugger_AttachmentChanged);
 					}
 				}
 			}
 		}
 
-		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+		private void Debugger_AttachmentChanged(object sender, EventArgs e)
+		{
+			RefreshDataView();
+		}
+
+		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
 		{
 			try
 			{
-				if (AArgs.PropertyName == "IsStarted" || AArgs.PropertyName == "IsPaused" || AArgs.PropertyName == "SelectedProcessID")
+				if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsStarted" || AItem == "IsPaused" || AItem == "SelectedProcessID"; }))
 					UpdateDataView();
 			}
 			catch (Exception LException)
@@ -71,10 +84,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void FDetachButton_Click(object sender, EventArgs e)
 		{
 			if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
-			{
 				FDataphoria.Debugger.DetachProcess(FDebugProcessDataView["ID"].AsInt32);
-				RefreshDataView();
-			}
 		}
 
 		private void FRefreshButton_Click(object sender, EventArgs e)
@@ -92,8 +102,20 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			if (Dataphoria.Debugger.IsStarted)
 			{
+				// Save old postion
+				Row LOld = null;
+				if (FDebugProcessDataView.Active && !FDebugProcessDataView.IsEmpty())
+					LOld = FDebugProcessDataView.ActiveRow;
+					
+				// Update the selected process
 				FSelectedProcessIDParam.Value = FDataphoria.Debugger.SelectedProcessID;
+				
+				// Open the DataView
 				FDebugProcessDataView.Open();
+
+				// Attempt to seek to old position
+				if (LOld != null)
+					FDebugProcessDataView.Refresh(LOld);
 			}
 			else
 				FDebugProcessDataView.Close();

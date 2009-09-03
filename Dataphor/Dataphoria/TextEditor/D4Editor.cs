@@ -1040,16 +1040,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Line + 1, -1));
 			}
 		}
-				
-		private void Debugger_PropertyChanged(object ASender, PropertyChangedEventArgs AArgs)
+
+		private void Debugger_PropertyChanged(object ASender, string[] APropertyNames)
 		{
-			switch (AArgs.PropertyName)
-			{
-				case "IsPaused" :
-				case "CurrentLocation" :
-					UpdateCurrentLocation();
-					break;
-			}
+			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "IsPaused" || AItem == "CurrentLocation"; }))
+				UpdateCurrentLocation();
 		}
 
 		private CurrentLineBookmark FCurrentBookmark;
