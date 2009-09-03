@@ -1121,11 +1121,17 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private DebugLocator GetLocator()
 		{
-			int LOffset = 
-				FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected 
-					? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition.Line + 1
-					: 1;
-			return new DebugLocator(Service.GetLocatorName(), LOffset, -1);
+			var LLocatorName = Service.GetLocatorName();
+			if (!String.IsNullOrEmpty(LLocatorName))
+			{
+				int LOffset = 
+					FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected 
+						? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition.Line + 1
+						: 1;
+				return new DebugLocator(LLocatorName, LOffset, -1);
+			}
+			else
+				return null;
 		}
 
 		private void ToggleBreakpoint()
