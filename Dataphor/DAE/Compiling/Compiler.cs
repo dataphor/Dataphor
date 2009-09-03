@@ -5855,7 +5855,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							new DebugLocator
 							(
 								APlan.SourceContext.Locator.Locator, 
-								APlan.SourceContext.Locator.Line + LLineInfo.Line, 
+								APlan.SourceContext.Locator.Line + LLineInfo.Line - 1, 
 								LLineInfo.LinePos
 							);
 					}
@@ -6184,7 +6184,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							new DebugLocator
 							(
 								APlan.SourceContext.Locator.Locator, 
-								APlan.SourceContext.Locator.Line + LLineInfo.Line, 
+								APlan.SourceContext.Locator.Line + LLineInfo.Line - 1, 
 								LLineInfo.LinePos
 							);
 					}
