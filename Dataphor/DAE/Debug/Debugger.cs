@@ -513,6 +513,9 @@ namespace Alphora.Dataphor.DAE.Debug
 						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
 						PlanNode LCurrentNode = LProgram.CurrentNode;
 						
+						if (AWindowIndex < 0)
+							break;
+						
 						if (AWindowIndex < LProgram.Stack.CallDepth)
 						{
 							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);

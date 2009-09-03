@@ -2667,33 +2667,41 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					Plan LPlan = new Plan(ServerProcess);
 					try
 					{
-						//LPlan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
-						LPlan.Messages.AddRange(LParserMessages);
-						LPlan.PushSecurityContext(new SecurityContext(AUser));
+						LPlan.PushSourceContext(new Debug.SourceContext(AScript, null));
 						try
 						{
-							PlanNode LPlanNode = null;
+							//LPlan.PlanCatalog.AddRange(LCurrentPlan.PlanCatalog); // add the set of objects currently being compiled
+							LPlan.Messages.AddRange(LParserMessages);
+							LPlan.PushSecurityContext(new SecurityContext(AUser));
 							try
 							{
-								LPlanNode = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
+								PlanNode LPlanNode = null;
+								try
+								{
+									LPlanNode = Compiler.Bind(LPlan, Compiler.CompileStatement(LPlan, LStatement));
+								}
+								finally
+								{
+									//LCurrentPlan.Messages.AddRange(LPlan.Messages); // Propagate compiler exceptions to the outer plan
+								}
+								try
+								{
+									LPlan.CheckCompiled();
+									LPlanNode.Execute(AProgram);
+								}
+								catch (Exception E)
+								{
+									throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, AObjectID);
+								}
 							}
 							finally
 							{
-								//LCurrentPlan.Messages.AddRange(LPlan.Messages); // Propagate compiler exceptions to the outer plan
-							}
-							try
-							{
-								LPlan.CheckCompiled();
-								LPlanNode.Execute(AProgram);
-							}
-							catch (Exception E)
-							{
-								throw new Schema.SchemaException(Schema.SchemaException.Codes.CatalogDeserializationError, ErrorSeverity.System, E, AObjectID);
+								LPlan.PopSecurityContext();
 							}
 						}
 						finally
 						{
-							LPlan.PopSecurityContext();
+							LPlan.PopSourceContext();
 						}
 					}
 					finally
