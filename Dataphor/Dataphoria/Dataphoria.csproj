@@ -270,6 +270,10 @@
     <Compile Include="Designers\DesignService.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Designers\DocumentDesignBuffer.cs" />
+    <Compile Include="Designers\FileDesignBuffer.cs" />
+    <Compile Include="Designers\ProgramDesignBuffer.cs" />
+    <Compile Include="Designers\PropertyDesignBuffer.cs" />
     <Compile Include="DocumentExpressionForm.cs">
       <SubType>Code</SubType>
     </Compile>

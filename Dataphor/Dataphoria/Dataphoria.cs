@@ -1734,15 +1734,17 @@ namespace Alphora.Dataphor.Dataphoria
 			AInfo = new DesignerInfo();
 			DesignBuffer LBuffer = null;
 			
+			// TODO: Introduce a buffer factory for locators
+			
 			// Files
-			if (ALocator.StartsWith(FileDesignBuffer.CFileLocatorPrefix))
+			if (FileDesignBuffer.IsFileLocator(ALocator))
 			{
 				var LFileName = ALocator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
 				LBuffer = new FileDesignBuffer(this, LFileName);
 				AInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
 			}
 			// Documents
-			else if (ALocator.StartsWith(DocumentDesignBuffer.CDocLocatorPrefix))
+			else if (DocumentDesignBuffer.IsDocumentLocator(ALocator))
 			{
 				var LSegments = ALocator.Split(':');
 				if (LSegments.Length == 3)
@@ -1750,6 +1752,11 @@ namespace Alphora.Dataphor.Dataphoria
 					LBuffer = new DocumentDesignBuffer(this, LSegments[1], LSegments[2]);
 					AInfo = GetDefaultDesigner(GetDocumentType(LSegments[1], LSegments[2]));
 				}
+			}
+			else if (ProgramDesignBuffer.IsProgramLocator(ALocator))
+			{
+				LBuffer = new ProgramDesignBuffer(this, ALocator);
+				AInfo = GetDefaultDesigner("d4");
 			}
 			
 			return LBuffer;
