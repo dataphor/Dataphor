@@ -84,8 +84,8 @@ namespace Alphora.Dataphor.DAE.Debug
 				new DebugLocator
 				(
 					AValue.Substring(0, LIndexOfAt),
-					Int32.Parse(AValue.Substring(LIndexOfAt + 1, LIndexOfColon - LIndexOfAt)),
-					Int32.Parse(AValue.Substring(LIndexOfColon + 1, AValue.Length - LIndexOfColon))
+					Int32.Parse(AValue.Substring(LIndexOfAt + 1, LIndexOfColon - LIndexOfAt - 1)),
+					Int32.Parse(AValue.Substring(LIndexOfColon + 1, AValue.Length - LIndexOfColon - 1))
 				);
 		}
 		
