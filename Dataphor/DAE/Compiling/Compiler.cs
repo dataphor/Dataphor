@@ -5825,29 +5825,29 @@ namespace Alphora.Dataphor.DAE.Compiling
 			// the actual script contained in the SourceContext. Line numbers in AOperatorLineInfo will be relative 
 			// to the actual script in SourceContext, not the locator.
 			
-			if (APlan.SourceContext != null)
+			// Pull the debug locator from the DAE.Locator metadata tag, if present
+			DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
+			if (LLocator != null)
+				LNode.CreateOperator.Locator = LLocator;
+			else
 			{
-				// Determine the line offsets for the operator declaration
-				LineInfo LLineInfo = new LineInfo();
-				LLineInfo.Line = AStatement.Line;
-				LLineInfo.LinePos = AStatement.LinePos;
-				LLineInfo.EndLine = AStatement.Block.Line;
-				LLineInfo.EndLinePos = AStatement.Block.LinePos;
+				if (APlan.SourceContext != null)
+				{
+					// Determine the line offsets for the operator declaration
+					LineInfo LLineInfo = new LineInfo();
+					LLineInfo.Line = AStatement.Line;
+					LLineInfo.LinePos = AStatement.LinePos;
+					LLineInfo.EndLine = AStatement.Block.Line;
+					LLineInfo.EndLinePos = AStatement.Block.LinePos;
 
-				// Copy the text of the operator from the source context
-				// Note that the text does not include the metadata for the operator, just the operator header and body.
-				if (AStatement.Block.ClassDefinition == null)
-				{
-					LNode.CreateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
-					LNode.CreateOperator.BodyText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Block.LineInfo);
-				}
-				
-				// Pull the debug locator from the DAE.Locator metadata tag, if present
-				DebugLocator LLocator = Schema.Operator.GetLocator(LNode.CreateOperator.MetaData);
-				if (LLocator != null)
-					LNode.CreateOperator.Locator = LLocator;
-				else
-				{
+					// Copy the text of the operator from the source context
+					// Note that the text does not include the metadata for the operator, just the operator header and body.
+					if (AStatement.Block.ClassDefinition == null)
+					{
+						LNode.CreateOperator.DeclarationText = SourceUtility.CopySection(APlan.SourceContext.Script, LLineInfo);
+						LNode.CreateOperator.BodyText = SourceUtility.CopySection(APlan.SourceContext.Script, AStatement.Block.LineInfo);
+					}
+					
 					// Set the debug locator to the combination of the source context debug locator and the operator line info
 					if (APlan.SourceContext.Locator != null)
 					{

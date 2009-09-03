@@ -1991,6 +1991,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			Nodes.Add(ATargetNode);
 			Nodes.Add(AValueNode);
 			ShouldEmitIL = true;
+			IsBreakable = true;
 		}
 
 		public override void DetermineDataType(Plan APlan)

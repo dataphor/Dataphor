@@ -423,8 +423,19 @@ namespace Alphora.Dataphor.DAE.Debug
 												: LWindow.Locator.Locator
 										), 
 									LCurrentNode != null 
-										? new DebugLocator(LWindow.Locator.Locator, LCurrentNode.Line, LCurrentNode.LinePos) 
-										: new DebugLocator(LWindow.Locator.Locator, -1, -1)
+										? new DebugLocator(LWindow.Locator, LCurrentNode.Line, LCurrentNode.LinePos) 
+										: new DebugLocator(LWindow.Locator, -1, -1),
+									LWindow.Originator != null
+										? DebugLocator.OperatorLocator(((InstructionNodeBase)LWindow.Originator).Operator.DisplayName)
+										: DebugLocator.ProgramLocator(LProgram.ID),
+									LCurrentNode != null
+										? LCurrentNode.SafeEmitStatementAsString()
+										: 
+										(
+											LProgram.Code != null 
+												? LProgram.Code.SafeEmitStatementAsString() 
+												: "<no statement available>"
+										)
 								)
 							);
 								

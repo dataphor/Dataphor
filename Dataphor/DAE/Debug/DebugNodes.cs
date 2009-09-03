@@ -274,7 +274,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 	
-	// operator GetCallStack(AProcessID : Integer) : table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer }
+	// operator GetCallStack(AProcessID : Integer) : table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer, Location : String, Statement : String }
 	public class DebugGetCallStackNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -289,6 +289,8 @@ namespace Alphora.Dataphor.DAE.Debug
 			DataType.Columns.Add(new Schema.Column("Locator", APlan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("Location", APlan.DataTypes.SystemString));
+			DataType.Columns.Add(new Schema.Column("Statement", APlan.DataTypes.SystemString));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -324,9 +326,11 @@ namespace Alphora.Dataphor.DAE.Debug
 						{
 							LRow[0] = LEntry.Index;
 							LRow[1] = LEntry.Description;
-							LRow[2] = LEntry.Location.Locator;
-							LRow[3] = LEntry.Location.Line;
-							LRow[4] = LEntry.Location.LinePos;
+							LRow[2] = LEntry.Locator.Locator;
+							LRow[3] = LEntry.Locator.Line;
+							LRow[4] = LEntry.Locator.LinePos;
+							LRow[5] = LEntry.Location;
+							LRow[6] = LEntry.Statement;
 							LResult.Insert(LRow);
 						}
 					}

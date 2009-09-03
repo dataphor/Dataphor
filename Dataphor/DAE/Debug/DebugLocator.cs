@@ -38,7 +38,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		public DebugLocator(DebugLocator ALocator, int ALine, int ALinePos) : base()
 		{
 			FLocator = ALocator.Locator;
-			FLine = ALocator.Line - 1 + ALine;
+			FLine = Math.Max(ALocator.Line - 1, 0) + ALine;
 			FLinePos = ALocator.Line == ALine ? ALocator.LinePos + ALinePos : ALinePos;
 		}
 		

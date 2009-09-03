@@ -51,7 +51,7 @@ create operator Debug.DetachSession(ASessionID : Integer)
 
 //* Operator: GetCallStack
 create operator Debug.GetCallStack(AProcessID : Integer) 
-	: table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer }
+	: table { Index : Integer, Description : String, Locator : String, Line : Integer, LinePos : Integer, Location : String, Statement : String }
 	class "System.DebugGetCallStackNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
 
