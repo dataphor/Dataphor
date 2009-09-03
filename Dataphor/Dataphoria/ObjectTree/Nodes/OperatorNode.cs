@@ -7,6 +7,8 @@ using System;
 using System.Windows.Forms;
 
 using Alphora.Dataphor.Dataphoria;
+using Alphora.Dataphor.Dataphoria.Designers;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 {
@@ -56,6 +58,27 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 		protected override string GetViewExpression()
 		{
 			return ".System.Operators";
+		}
+
+		protected override ContextMenu GetContextMenu()
+		{
+			ContextMenu LMenu = base.GetContextMenu();
+			LMenu.MenuItems.Add
+			(
+				0, 
+				new MenuItem(Strings.ObjectTree_OpenMenuText, new EventHandler(OpenClicked)) { DefaultItem = true }
+			);
+			return LMenu;
+		}
+
+		private void OpenClicked(object ASender, EventArgs AArgs)
+		{
+			var LBuffer = new ProgramDesignBuffer(Dataphoria, DebugLocator.COperatorLocator + ":" + FFriendlyName);
+			IDesigner LDesigner = Dataphoria.GetDesigner(LBuffer);
+			if (LDesigner != null)
+				LDesigner.Select();
+			else
+				Dataphoria.OpenDesigner(Dataphoria.GetDefaultDesigner("d4"), LBuffer);
 		}
 	}
 }
