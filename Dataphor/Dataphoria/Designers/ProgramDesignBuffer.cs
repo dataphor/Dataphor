@@ -50,7 +50,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override string LoadData()
 		{
-			return ((Scalar)Dataphoria.EvaluateQuery(String.Format(".Debug.GetSource('{0}')", Locator.Replace("'", "''")))).AsString;
+			return ((Scalar)Dataphoria.EvaluateQuery(String.Format(".System.Debug.GetSource('{0}')", Locator.Replace("'", "''")))).AsString;
 		}
 
 		public override void LoadData(System.IO.Stream AData)

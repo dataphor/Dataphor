@@ -27,8 +27,16 @@ namespace Alphora.Dataphor.Dataphoria
 
 		protected void NotifyPropertyChanged(string[] APropertyNames)
 		{
-			if (PropertyChanged != null)
-				PropertyChanged(this, APropertyNames);
+			try
+			{
+				if (PropertyChanged != null)
+					PropertyChanged(this, APropertyNames);
+			}
+			catch (Exception LException)
+			{
+				if (FDataphoria.IsConnected)
+					FDataphoria.Invoke(new ThreadStart(delegate { FDataphoria.Warnings.AppendError(null, LException, false); }));
+			}
 		}
 
 		private IDataphoria FDataphoria;
@@ -332,7 +340,16 @@ namespace Alphora.Dataphor.Dataphoria
 				DebugLocator LLocation = null;
 				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
 				if (LWindow != null)
-				    LLocation = new DebugLocator((string)LWindow["Locator"], (int)LWindow["Line"], (int)LWindow["LinePos"]);
+				{
+					var LLocator = (string)LWindow["Locator"];
+				    LLocation = 
+						new DebugLocator
+						(
+							(String.IsNullOrEmpty(LLocator) ? (string)LWindow["Location"] : LLocator), 
+							(int)LWindow["Line"], 
+							(int)LWindow["LinePos"]
+						);
+				}
 				InternalSetCurrentLocation(LLocation);
 			}
 			else
