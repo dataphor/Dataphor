@@ -81,53 +81,13 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
 
-			FSessionsView = new SessionsView();
-			FSessionsView.Dataphoria = this;
-			FSessionsView.Name = "FSessionView";
-			FSessionsView.Dock = DockStyle.Fill;
+			EnsureSessionView();
 
-			FDockContentSessionsView = new DockContent();
-			FDockContentSessionsView.HideOnClose = true;
-			FDockContentSessionsView.Controls.Add(FSessionsView);
-			FDockContentSessionsView.TabText = "Sessions";
-			FDockContentSessionsView.Text = "Sessions - Dataphoria";
-			FDockContentSessionsView.ShowHint = DockState.DockBottomAutoHide;
-			
-			FCallStackView = new CallStackView();
-			FCallStackView.Dataphoria = this;
-			FCallStackView.Name = "FCallStackView";
-			FCallStackView.Dock = DockStyle.Fill;
+			EnsureCallStackView();
 
-			FDockContentCallStackView = new DockContent();
-			FDockContentCallStackView.HideOnClose = true;
-			FDockContentCallStackView.Controls.Add(FCallStackView);
-			FDockContentCallStackView.TabText = "Call Stack";
-			FDockContentCallStackView.Text = "Call Stack - Dataphoria";
-			FDockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
-			
-			FDebugProcessesView = new DebugProcessesView();
-			FDebugProcessesView.Dataphoria = this;
-			FDebugProcessesView.Name = "FDebugProcessesView";
-			FDebugProcessesView.Dock = DockStyle.Fill;
+			EnsureDebugProcessesView();
 
-			FDockContentDebugProcessesView = new DockContent();
-			FDockContentDebugProcessesView.HideOnClose = true;
-			FDockContentDebugProcessesView.Controls.Add(FDebugProcessesView);
-			FDockContentDebugProcessesView.TabText = "Debug Processes ";
-			FDockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
-			FDockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
-
-			FProcessesView = new ProcessesView();
-			FProcessesView.Dataphoria = this;
-			FProcessesView.Name = "FProcessesView";
-			FProcessesView.Dock = DockStyle.Fill;
-
-			FDockContentProcessesView = new DockContent();
-			FDockContentProcessesView.HideOnClose = true;
-			FDockContentProcessesView.Controls.Add(FProcessesView);
-			FDockContentProcessesView.TabText = "Processes";
-			FDockContentProcessesView.Text = "Processes - Dataphoria";
-			FDockContentProcessesView.ShowHint = DockState.DockBottomAutoHide;
+			EnsureProcessesView();
 
 			FDockContentExplorer.Show(this.FDockPanel);
 			FDockContentErrorListView.Show(this.FDockPanel);
@@ -193,6 +153,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private CallStackView FCallStackView;
 		private DebugProcessesView FDebugProcessesView;
 		private ProcessesView FProcessesView;
+		private StackView FStackView;
 
 		private DockContent FDockContentExplorer;
 		private DockContent FDockContentErrorListView;
@@ -200,6 +161,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private DockContent FDockContentCallStackView;
 		private DockContent FDockContentDebugProcessesView;
 		private DockContent FDockContentProcessesView;
+		private DockContent FDockContentStackView;
 
 		#region Settings
 
@@ -1627,46 +1589,6 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FDocumentTypesToolStripMenuItem" :
 					BrowseDocumentTypes(); 
 					break;
-				case "FDebugStopMenuItem" :
-				case "FDebugStopButton" :
-					Debugger.Stop();
-					break;
-				case "FViewSessionsMenuItem" :
-				case "FViewSessionsButton" :
-					FDockContentSessionsView.Show(FDockPanel);
-					break;
-				case "FViewProcessesMenuItem":
-				case "FViewProcessesButton":
-					FDockContentProcessesView.Show(FDockPanel);
-					break;
-				case "FViewDebugProcessesMenuItem" :
-				case "FViewDebugProcessesButton":
-					FDockContentDebugProcessesView.Show(FDockPanel);
-					break;
-				case "FDebugPauseMenuItem" :
-				case "FDebugPauseButton" :
-					Debugger.Pause();
-					break;
-				case "FDebugRunMenuItem" :
-				case "FDebugRunButton" :
-					Debugger.Run();
-					break;
-				case "FDebugStepOverMenuItem" :
-				case "FDebugStepOverButton" :
-					Debugger.StepOver();
-					break;
-				case "FDebugStepIntoMenuItem":
-				case "FDebugStepIntoButton":
-					Debugger.StepInto();
-					break;
-				case "FViewCallStackMenuItem":
-				case "FViewCallStackButton" :
-					FDockContentCallStackView.Show(FDockPanel);
-					break;
-				case "FBreakOnExceptionMenuItem" :
-				case "FBreakOnExceptionButton" :
-					Debugger.BreakOnException = !Debugger.BreakOnException;
-					break;
 			}
 		}
 
@@ -1762,6 +1684,62 @@ namespace Alphora.Dataphor.Dataphoria
 			return LBuffer;
 		}
 
+		private void DebugMenuItemClicked(object ASender, ToolStripItemClickedEventArgs AArgs)
+		{
+			switch (AArgs.ClickedItem.Name)
+			{
+				case "FDebugStopMenuItem" :
+				case "FDebugStopButton" :
+					Debugger.Stop();
+					break;
+				case "FDebugPauseMenuItem":
+				case "FDebugPauseButton":
+					Debugger.Pause();
+					break;
+				case "FDebugRunMenuItem":
+				case "FDebugRunButton":
+					Debugger.Run();
+					break;
+				case "FDebugStepOverMenuItem":
+				case "FDebugStepOverButton":
+					Debugger.StepOver();
+					break;
+				case "FDebugStepIntoMenuItem":
+				case "FDebugStepIntoButton":
+					Debugger.StepInto();
+					break;
+				case "FBreakOnExceptionMenuItem":
+				case "FBreakOnExceptionButton":
+					Debugger.BreakOnException = !Debugger.BreakOnException;
+					break;
+				case "FViewSessionsMenuItem":
+				case "FViewSessionsButton" :
+					EnsureSessionView();
+					FDockContentSessionsView.Show(FDockPanel);
+					break;
+				case "FViewProcessesMenuItem":
+				case "FViewProcessesButton":
+					EnsureProcessesView();
+					FDockContentProcessesView.Show(FDockPanel);
+					break;
+				case "FViewDebugProcessesMenuItem" :
+				case "FViewDebugProcessesButton":
+					EnsureDebugProcessesView();
+					FDockContentDebugProcessesView.Show(FDockPanel);
+					break;
+				case "FViewCallStackMenuItem":
+				case "FViewCallStackButton" :
+					EnsureCallStackView();
+					FDockContentCallStackView.Show(FDockPanel);
+					break;
+				case "FViewStackMenuItem":
+				case "FViewStackButton":
+					EnsureStackView();
+					FDockContentStackView.Show(FDockPanel);
+					break;
+			}
+		}
+
 		private void UpdateDebuggerState()
 		{
 			FDebugStopButton.Enabled = IsConnected && Debugger.IsStarted;
@@ -1782,12 +1760,104 @@ namespace Alphora.Dataphor.Dataphoria
 			FDebugStepOverMenuItem.Enabled = FDebugStepOverButton.Enabled;
 			FDebugStepIntoButton.Enabled = IsConnected && Debugger.IsPaused;
 			FDebugStepIntoMenuItem.Enabled = FDebugStepIntoButton.Enabled;
+			FViewStackButton.Enabled = IsConnected && Debugger.IsPaused;
+			FViewStackMenuItem.Enabled = FViewStackButton.Enabled;
 		}
 
 		private void UpdateBreakOnException()
 		{
 			FBreakOnExceptionButton.Enabled = IsConnected;
 			FBreakOnExceptionButton.Checked = IsConnected && Debugger.BreakOnException;
+		}
+
+		private void EnsureSessionView()
+		{
+			if (FSessionsView == null)
+			{
+				FSessionsView = new SessionsView();
+				FSessionsView.Dataphoria = this;
+				FSessionsView.Name = "FSessionView";
+				FSessionsView.Dock = DockStyle.Fill;
+
+				FDockContentSessionsView = new DockContent();
+				FDockContentSessionsView.HideOnClose = true;
+				FDockContentSessionsView.Controls.Add(FSessionsView);
+				FDockContentSessionsView.TabText = "Sessions";
+				FDockContentSessionsView.Text = "Sessions - Dataphoria";
+				FDockContentSessionsView.ShowHint = DockState.DockBottomAutoHide;
+			}
+		}
+
+		private void EnsureProcessesView()
+		{
+			if (FProcessesView == null)
+			{
+				FProcessesView = new ProcessesView();
+				FProcessesView.Dataphoria = this;
+				FProcessesView.Name = "FProcessesView";
+				FProcessesView.Dock = DockStyle.Fill;
+
+				FDockContentProcessesView = new DockContent();
+				FDockContentProcessesView.HideOnClose = true;
+				FDockContentProcessesView.Controls.Add(FProcessesView);
+				FDockContentProcessesView.TabText = "Processes";
+				FDockContentProcessesView.Text = "Processes - Dataphoria";
+				FDockContentProcessesView.ShowHint = DockState.DockBottomAutoHide;
+			}
+		}
+
+		private void EnsureDebugProcessesView()
+		{
+			if (FDebugProcessesView == null)
+			{
+				FDebugProcessesView = new DebugProcessesView();
+				FDebugProcessesView.Dataphoria = this;
+				FDebugProcessesView.Name = "FDebugProcessesView";
+				FDebugProcessesView.Dock = DockStyle.Fill;
+
+				FDockContentDebugProcessesView = new DockContent();
+				FDockContentDebugProcessesView.HideOnClose = true;
+				FDockContentDebugProcessesView.Controls.Add(FDebugProcessesView);
+				FDockContentDebugProcessesView.TabText = "Debug Processes ";
+				FDockContentDebugProcessesView.Text = "Debug Processes - Dataphoria";
+				FDockContentDebugProcessesView.ShowHint = DockState.DockBottomAutoHide;
+			}
+		}
+
+		private void EnsureCallStackView()
+		{
+			if (FCallStackView == null)
+			{
+				FCallStackView = new CallStackView();
+				FCallStackView.Dataphoria = this;
+				FCallStackView.Name = "FCallStackView";
+				FCallStackView.Dock = DockStyle.Fill;
+
+				FDockContentCallStackView = new DockContent();
+				FDockContentCallStackView.HideOnClose = true;
+				FDockContentCallStackView.Controls.Add(FCallStackView);
+				FDockContentCallStackView.TabText = "Call Stack";
+				FDockContentCallStackView.Text = "Call Stack - Dataphoria";
+				FDockContentCallStackView.ShowHint = DockState.DockBottomAutoHide;
+			}
+		}
+
+		private void EnsureStackView()
+		{
+			if (FStackView == null)
+			{
+				FStackView = new StackView();
+				FStackView.Dataphoria = this;
+				FStackView.Name = "FStackView";
+				FStackView.Dock = DockStyle.Fill;
+
+				FDockContentStackView = new DockContent();
+				FDockContentStackView.HideOnClose = true;
+				FDockContentStackView.Controls.Add(FStackView);
+				FDockContentStackView.TabText = "Stack";
+				FDockContentStackView.Text = "Stack - Dataphoria";
+				FDockContentStackView.ShowHint = DockState.DockBottomAutoHide;
+			}
 		}
 
 		#endregion

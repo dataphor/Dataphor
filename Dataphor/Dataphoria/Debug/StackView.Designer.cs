@@ -1,6 +1,6 @@
 ﻿namespace Alphora.Dataphor.Dataphoria
 {
-	partial class CallStackView
+	partial class StackView
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -29,17 +29,15 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.FCallStackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
-			this.FCallStackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
+			this.FStackSource = new Alphora.Dataphor.DAE.Client.DataSource(this.components);
+			this.FStackDataView = new Alphora.Dataphor.DAE.Client.DataView(this.components);
 			this.FToolStrip = new System.Windows.Forms.ToolStrip();
-			this.FSelectButton = new System.Windows.Forms.ToolStripButton();
 			this.FRefreshButton = new System.Windows.Forms.ToolStripButton();
 			this.dbGrid1 = new Alphora.Dataphor.DAE.Client.Controls.DBGrid();
 			this.FContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.FSelectContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FRefreshContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
-			((System.ComponentModel.ISupportInitialize)(this.FCallStackDataView)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.FStackDataView)).BeginInit();
 			this.FToolStrip.SuspendLayout();
 			this.FContextMenu.SuspendLayout();
 			this.toolStripContainer1.ContentPanel.SuspendLayout();
@@ -47,41 +45,29 @@
 			this.toolStripContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// FCallStackSource
+			// FStackSource
 			// 
-			this.FCallStackSource.DataSet = this.FCallStackDataView;
+			this.FStackSource.DataSet = this.FStackDataView;
 			// 
-			// FCallStackDataView
+			// FStackDataView
 			// 
-			this.FCallStackDataView.Expression = ".System.Debug.GetCallStack(AProcessID) \r\n\tadd { IfNil(Index = ASelectedIndex, fal" +
-				"se) IsSelected }\r\n\tbrowse by { Index }";
-			this.FCallStackDataView.IsReadOnly = true;
-			this.FCallStackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
+			this.FStackDataView.Expression = ".System.Debug.GetStack(AProcessID, ACallStackIndex) \r\n\tbrowse by { Index }";
+			this.FStackDataView.IsReadOnly = true;
+			this.FStackDataView.RequestedCapabilities = ((Alphora.Dataphor.DAE.CursorCapability)((((Alphora.Dataphor.DAE.CursorCapability.Navigable | Alphora.Dataphor.DAE.CursorCapability.BackwardsNavigable)
 						| Alphora.Dataphor.DAE.CursorCapability.Bookmarkable)
 						| Alphora.Dataphor.DAE.CursorCapability.Searchable)));
-			this.FCallStackDataView.SessionName = "";
-			this.FCallStackDataView.DataChanged += new System.EventHandler(this.FCallStackDataView_DataChanged);
+			this.FStackDataView.SessionName = "";
+			this.FStackDataView.DataChanged += new System.EventHandler(this.FStackDataView_DataChanged);
 			// 
 			// FToolStrip
 			// 
 			this.FToolStrip.Dock = System.Windows.Forms.DockStyle.None;
 			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FSelectButton,
             this.FRefreshButton});
 			this.FToolStrip.Location = new System.Drawing.Point(3, 0);
 			this.FToolStrip.Name = "FToolStrip";
-			this.FToolStrip.Size = new System.Drawing.Size(58, 25);
+			this.FToolStrip.Size = new System.Drawing.Size(35, 25);
 			this.FToolStrip.TabIndex = 0;
-			// 
-			// FSelectButton
-			// 
-			this.FSelectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.FSelectButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
-			this.FSelectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.FSelectButton.Name = "FSelectButton";
-			this.FSelectButton.Size = new System.Drawing.Size(23, 22);
-			this.FSelectButton.Text = "Select";
-			this.FSelectButton.Click += new System.EventHandler(this.FSelectButton_Click);
 			// 
 			// FRefreshButton
 			// 
@@ -101,26 +87,16 @@
 			this.dbGrid1.Location = new System.Drawing.Point(0, 0);
 			this.dbGrid1.Name = "dbGrid1";
 			this.dbGrid1.Size = new System.Drawing.Size(869, 231);
-			this.dbGrid1.Source = this.FCallStackSource;
+			this.dbGrid1.Source = this.FStackSource;
 			this.dbGrid1.TabIndex = 0;
 			this.dbGrid1.Text = "dbGrid1";
-			this.dbGrid1.DoubleClick += new System.EventHandler(this.FSelectButton_Click);
 			// 
 			// FContextMenu
 			// 
 			this.FContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FSelectContextMenuItem,
             this.FRefreshContextMenuItem});
 			this.FContextMenu.Name = "FContextMenu";
-			this.FContextMenu.Size = new System.Drawing.Size(133, 48);
-			// 
-			// FSelectContextMenuItem
-			// 
-			this.FSelectContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugCallStack;
-			this.FSelectContextMenuItem.Name = "FSelectContextMenuItem";
-			this.FSelectContextMenuItem.Size = new System.Drawing.Size(132, 22);
-			this.FSelectContextMenuItem.Text = "Select";
-			this.FSelectContextMenuItem.Click += new System.EventHandler(this.FSelectButton_Click);
+			this.FContextMenu.Size = new System.Drawing.Size(133, 26);
 			// 
 			// FRefreshContextMenuItem
 			// 
@@ -150,14 +126,14 @@
 			// 
 			this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FToolStrip);
 			// 
-			// CallStackView
+			// StackView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.toolStripContainer1);
-			this.Name = "CallStackView";
+			this.Name = "StackView";
 			this.Size = new System.Drawing.Size(869, 256);
-			((System.ComponentModel.ISupportInitialize)(this.FCallStackDataView)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.FStackDataView)).EndInit();
 			this.FToolStrip.ResumeLayout(false);
 			this.FToolStrip.PerformLayout();
 			this.FContextMenu.ResumeLayout(false);
@@ -172,14 +148,12 @@
 
 		#endregion
 
-		private Alphora.Dataphor.DAE.Client.DataSource FCallStackSource;
-		private Alphora.Dataphor.DAE.Client.DataView FCallStackDataView;
+		private Alphora.Dataphor.DAE.Client.DataSource FStackSource;
+		private Alphora.Dataphor.DAE.Client.DataView FStackDataView;
 		private System.Windows.Forms.ToolStrip FToolStrip;
-		private System.Windows.Forms.ToolStripButton FSelectButton;
 		private System.Windows.Forms.ToolStripButton FRefreshButton;
 		private Alphora.Dataphor.DAE.Client.Controls.DBGrid dbGrid1;
 		private System.Windows.Forms.ContextMenuStrip FContextMenu;
-		private System.Windows.Forms.ToolStripMenuItem FSelectContextMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem FRefreshContextMenuItem;
 		private System.Windows.Forms.ToolStripContainer toolStripContainer1;
 	}

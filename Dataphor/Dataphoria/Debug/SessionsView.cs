@@ -35,6 +35,8 @@ namespace Alphora.Dataphor.Dataphoria
 						FDataphoria.Disconnected += new EventHandler(FDataphoria_Disconnected);
 						FDataphoria.Connected += new EventHandler(FDataphoria_Connected);
 						FDataphoria.Debugger.PropertyChanged += Debugger_PropertyChanged;
+						if (FDataphoria.IsConnected)
+							FDataphoria_Connected(this, EventArgs.Empty);
 					}
 				}
 			}

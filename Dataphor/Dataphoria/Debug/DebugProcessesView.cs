@@ -45,6 +45,11 @@ namespace Alphora.Dataphor.Dataphoria
 						FDataphoria.Debugger.SessionDetached += new EventHandler(Debugger_AttachmentChanged);
 						FDataphoria.Debugger.ProcessAttached += new EventHandler(Debugger_AttachmentChanged);
 						FDataphoria.Debugger.ProcessDetached += new EventHandler(Debugger_AttachmentChanged);
+						if (FDataphoria.IsConnected)
+						{
+							FDataphoria_Connected(this, EventArgs.Empty);
+							UpdateDataView();
+						}
 					}
 				}
 			}

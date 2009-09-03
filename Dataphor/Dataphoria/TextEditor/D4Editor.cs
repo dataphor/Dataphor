@@ -431,10 +431,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			return
 				(
 					FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected
-						?
-							FTextEdit.ActiveTextAreaControl.SelectionManager.SelectedText
-						:
-							FTextEdit.Document.TextContent
+						? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectedText
+						: FTextEdit.Document.TextContent
 				);
 		}
 
@@ -1123,7 +1121,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private DebugLocator GetLocator()
 		{
-			return new DebugLocator(Service.GetLocatorName(), FTextEdit.ActiveTextAreaControl.Caret.Line + 1, -1);
+			int LOffset = 
+				FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected 
+					? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition.Line + 1
+					: 1;
+			return new DebugLocator(Service.GetLocatorName(), LOffset, -1);
 		}
 
 		private void ToggleBreakpoint()
