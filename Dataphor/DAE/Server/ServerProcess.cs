@@ -2116,6 +2116,61 @@ namespace Alphora.Dataphor.DAE.Server
 			FDebugger = ADebugger;
 		}
 		
+		private bool FBreakNext;
+		private int FBreakOnProgramDepth;
+		private int FBreakOnCallDepth;
+		
+		internal void SetStepOver()
+		{
+			FBreakOnProgramDepth = ExecutingPrograms.Count;
+			FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+		}
+		
+		internal void SetStepInto()
+		{
+			FBreakNext = true;
+		}
+		
+		internal void ClearBreakInfo()
+		{
+			FBreakNext = false;
+			FBreakOnProgramDepth = -1;
+			FBreakOnCallDepth = -1;
+		}
+		
+		private bool InternalShouldBreak()
+		{
+			if (FBreakNext)
+				return true;
+				
+			if (ExecutingPrograms.Count < FBreakOnProgramDepth)
+			{
+				FBreakOnProgramDepth = ExecutingPrograms.Count;
+				FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+			}
+			
+			if (ExecutingProgram.Stack.CallDepth < FBreakOnCallDepth)
+			{
+				FBreakOnCallDepth = ExecutingProgram.Stack.CallDepth;
+			}
+				
+			if ((FBreakOnProgramDepth == ExecutingPrograms.Count) && (FBreakOnCallDepth == ExecutingProgram.Stack.CallDepth))
+				return true;
+				
+			return false;
+		}
+		
+		internal bool ShouldBreak()
+		{
+			if (InternalShouldBreak())
+			{
+				ClearBreakInfo();
+				return true;
+			}
+			
+			return false;
+		}
+		
 		// Catalog
 		public Schema.Catalog Catalog { get { return FServerSession.Server.Catalog; } }
 		

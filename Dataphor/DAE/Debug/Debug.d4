@@ -114,14 +114,14 @@ create operator Debug.Run()
 //	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
 //* Operator: StepOver
-//create operator Debug.StepOver(AProcessID : Integer) 
-//	class "System.DebugStepOverNode"
-//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+create operator Debug.StepOver(AProcessID : Integer) 
+	class "System.DebugStepOverNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
 //* Operator: StepInto
-//create operator Debug.StepInto(AProcessID : Integer) 
-//	class "System.DebugStepIntoNode"
-//	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
+create operator Debug.StepInto(AProcessID : Integer) 
+	class "System.DebugStepIntoNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
 //* Operator: StepIntoSpecific
 //create operator Debug.StepIntoSpecific(AProcessID : Integer, AOperatorName : Name) 

@@ -653,18 +653,15 @@ namespace Alphora.Dataphor.DAE.Debug
  			}
  		}
 	}
+*/
 
 	// operator Debug.StepOver(AProcessID : Integer) 
 	public class DebugStepOverNode : UnaryInstructionNode
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
- 			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
- 			if (LDebugger != null)
- 			{
- 				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArgument1);
- 				LDebugger.StepOver(LProcess);
- 			}
+ 			AProgram.ServerProcess.ServerSession.CheckedDebugger.StepOver((int)AArgument1);
+ 			return null;
 		}
 	}
 
@@ -673,15 +670,12 @@ namespace Alphora.Dataphor.DAE.Debug
 	{
 		public override object InternalExecute(Program AProgram, object AArgument1)
 		{
-			var LDebugger = AProgram.ServerProcess.ServerSession.CheckedDebugger;
-			if (LDebugger != null)
-			{
-				var LProcess = AProgram.ServerProcess.ServerSession.Processes.GetProcess((int)AArgument1);
-				LDebugger.StepInto(LProcess);
-			}
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.StepInto((int)AArgument1);
+			return null;
 		}
 	}
 
+/*
 	// operator StepIntoSpecific(AProcessID : Integer, AOperatorName : Name) 
 	public class DebugStepIntoSpecificNode : BinaryInstructionNode
 	{

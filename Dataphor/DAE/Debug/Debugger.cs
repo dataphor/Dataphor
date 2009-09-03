@@ -38,9 +38,9 @@ namespace Alphora.Dataphor.DAE.Debug
 			lock (FSyncHandle)
 			{
 				FDisposed = true;
-
-				FIsPauseRequested = false;
 				
+				InternalRun();
+
 				if (FSessions != null)
 				{
 					while (FSessions.Count > 0)
@@ -148,7 +148,7 @@ namespace Alphora.Dataphor.DAE.Debug
 
 		private ServerProcesses FBrokenProcesses = new ServerProcesses();
 		//public ServerProcesses BrokenProcesses { get { return FBrokenProcesses; } }
-
+		
 		/// <summary>
 		/// Stops the debugger
 		/// </summary>
@@ -306,15 +306,31 @@ namespace Alphora.Dataphor.DAE.Debug
 		public void RunTo(ServerProcess AProcess, ExecutionContext AContext)
 		{
 		}
-		
-		public void StepOver(ServerProcess AProcess)
-		{
-		}
-		
-		public void StepInto(ServerProcess AProcess)
-		{
-		}
 */
+		
+		public void StepOver(int AProcessID)
+		{
+			lock (FSyncHandle)
+			{
+				if (IsPaused)
+				{
+					FProcesses.GetProcess(AProcessID).SetStepOver();
+					InternalRun();
+				}
+			}
+		}
+		
+		public void StepInto(int AProcessID)
+		{
+			lock (FSyncHandle)
+			{
+				if (IsPaused)
+				{
+					FProcesses.GetProcess(AProcessID).SetStepInto();
+					InternalRun();
+				}
+			}
+		}
 		
 		private bool ShouldBreak(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
@@ -322,6 +338,9 @@ namespace Alphora.Dataphor.DAE.Debug
 				return false;
 				
 			if (FBreakOnException && (AException != null))
+				return true;
+				
+			if (AProcess.ShouldBreak())
 				return true;
 				
 			if (FBreakpoints.Count > 0)
@@ -494,7 +513,7 @@ namespace Alphora.Dataphor.DAE.Debug
 						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
 						PlanNode LCurrentNode = LProgram.CurrentNode;
 						
-						if (AWindowIndex < LProgram.Stack.WindowCount)
+						if (AWindowIndex < LProgram.Stack.CallDepth)
 						{
 							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
 							for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
@@ -515,7 +534,7 @@ namespace Alphora.Dataphor.DAE.Debug
 						}
 						else
 						{
-							AWindowIndex -= LProgram.Stack.WindowCount;
+							AWindowIndex -= LProgram.Stack.CallDepth;
 						}
 					}
 				}
@@ -551,7 +570,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 		
 		/// <summary>
-		/// Yields the current process to the debugger if a breakpoint or break condition is satisfied.
+		/// Yields the current program to the debugger if a breakpoint or break condition is satisfied.
 		/// </summary>
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{

@@ -45,6 +45,8 @@ namespace Alphora.Dataphor
 			set { FWindows.MaxCallDepth = value; }
 		}
 		
+		public int CallDepth { get { return FWindows.Count; } }
+		
 		protected T[] FStack = new T[CInitialCapacity];
 		protected StackWindowList FWindows;
 		protected int Base { get { return FWindows.CurrentStackWindow.Base; } }
@@ -185,8 +187,6 @@ namespace Alphora.Dataphor
 		{
 			return FWindows.GetCallStack();
 		}
-		
-		public int WindowCount { get { return FWindows.Count; } }
 		
 		public object[] GetStack(int AWindowIndex)
 		{
