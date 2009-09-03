@@ -38,6 +38,8 @@ namespace Alphora.Dataphor.DAE.Debug
 			lock (FSyncHandle)
 			{
 				FDisposed = true;
+
+				FIsPauseRequested = false;
 				
 				if (FSessions != null)
 				{
@@ -481,20 +483,43 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				CheckPaused();
 				
+				ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
+
 				List<StackEntry> LStack = new List<StackEntry>();
-				//ServerProcess LProcess = FProcesses.GetProcess(AProcessID);
-				//object[] LStackWindow = LProcess.Stack.GetStack(AWindowIndex);
-				//for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
-				//    LStack.Add
-				//    (
-				//        new StackEntry
-				//        { 
-				//            Index = LIndex, 
-				//            Name = String.Format("Location{0}", LIndex), 
-				//            Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName, 
-				//            Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString() 
-				//        }
-				//    );
+				
+				if (LProcess.IsRunning)
+				{
+					for (int LProgramIndex = LProcess.ExecutingPrograms.Count - 1; LProgramIndex > 0; LProgramIndex--)
+					{
+						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
+						PlanNode LCurrentNode = LProgram.CurrentNode;
+						
+						if (AWindowIndex < LProgram.Stack.WindowCount)
+						{
+							object[] LStackWindow = LProgram.Stack.GetStack(AWindowIndex);
+							for (int LIndex = 0; LIndex < LStackWindow.Length; LIndex++)
+							{
+								LStack.Add
+								(
+									new StackEntry
+									{
+										Index = LIndex,
+										Name = String.Format("Location{0}", LIndex),
+										Type = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].GetType().FullName,
+										Value = LStackWindow[LIndex] == null ? "<no value>" : LStackWindow[LIndex].ToString()
+									}
+								);
+							}
+							
+							break;
+						}
+						else
+						{
+							AWindowIndex -= LProgram.Stack.WindowCount;
+						}
+					}
+				}
+
 				return LStack;
 			}
 		}

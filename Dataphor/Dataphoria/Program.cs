@@ -67,8 +67,6 @@ namespace Alphora.Dataphor.Dataphoria
                         SDataphoriaInstance.Dispose();
                         SDataphoriaInstance = null;
                     }
-                    
-                    //Application.DoEvents();
                 }
                 catch (Exception LException)
                 {

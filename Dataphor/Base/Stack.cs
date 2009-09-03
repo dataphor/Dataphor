@@ -186,14 +186,16 @@ namespace Alphora.Dataphor
 			return FWindows.GetCallStack();
 		}
 		
+		public int WindowCount { get { return FWindows.Count; } }
+		
 		public object[] GetStack(int AWindowIndex)
 		{
 			int LBase = FWindows[AWindowIndex].Base;
-			int LCeiling = AWindowIndex >= FWindows.Count ? FCount : FWindows[AWindowIndex + 1].Base;
+			int LCeiling = AWindowIndex == 0 ? FCount : FWindows[AWindowIndex - 1].Base;
 			
 			object[] LResult = new object[LCeiling - LBase];
 			for (int LIndex = LBase; LIndex < LCeiling; LIndex++)
-				LResult[LResult.Length - 1 - LIndex] = FStack[LIndex];
+				LResult[LResult.Length - 1 - (LIndex - LBase)] = FStack[LIndex];
 			return LResult;
 		}
 	}
