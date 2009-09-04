@@ -984,7 +984,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
 		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
 		{
-			if (ASender == FSaveToolStripButton)
+			if (ASender == FSaveToolStripButton || ASender == FSaveToolStripMenuItem)
 			{
 				Save();
 			}

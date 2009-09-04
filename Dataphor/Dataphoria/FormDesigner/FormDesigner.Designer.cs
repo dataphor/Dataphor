@@ -99,6 +99,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			this.FPasteToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.FDeleteToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.FRenameToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.FSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
 			this.FMenuStrip.SuspendLayout();
 			this.FToolStrip.SuspendLayout();
 			this.SuspendLayout();
@@ -162,6 +164,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			// FFileToolStripMenuItem
 			// 
 			this.FFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.FSaveToolStripMenuItem,
             this.FSaveAsFileToolStripMenuItem,
             this.FSaveAsDocumentToolStripMenuItem,
             this.FCloseToolStripMenuItem});
@@ -176,7 +179,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			this.FSaveAsFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.FSaveAsFileToolStripMenuItem.MergeIndex = 8;
 			this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
-			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.FSaveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+						| System.Windows.Forms.Keys.F)));
+			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
 			this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
 			this.FSaveAsFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
@@ -186,7 +191,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			this.FSaveAsDocumentToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.FSaveAsDocumentToolStripMenuItem.MergeIndex = 9;
 			this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
-			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.FSaveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+						| System.Windows.Forms.Keys.D)));
+			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
 			this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
 			this.FSaveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
@@ -196,7 +203,8 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			this.FCloseToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.FCloseToolStripMenuItem.MergeIndex = 12;
 			this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
-			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.FCloseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
+			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
 			this.FCloseToolStripMenuItem.Text = "Close";
 			this.FCloseToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
@@ -257,6 +265,7 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			// FViewToolStripMenuItem
 			// 
 			this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
             this.FPaletteToolStripMenuItem,
             this.FPropertiesToolStripMenuItem,
             this.FFormToolStripMenuItem});
@@ -390,6 +399,22 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			this.FRenameToolStripButton.Text = "toolStripButton1";
 			this.FRenameToolStripButton.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
+			// FSaveToolStripMenuItem
+			// 
+			this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
+			this.FSaveToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			this.FSaveToolStripMenuItem.MergeIndex = 8;
+			this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
+			this.FSaveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+			this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(247, 22);
+			this.FSaveToolStripMenuItem.Text = "Save";
+			this.FSaveToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
+			// 
+			// toolStripMenuItem1
+			// 
+			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+			// 
 			// FormDesigner
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -410,6 +435,9 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 
         }
         #endregion
+
+		private ToolStripMenuItem FSaveToolStripMenuItem;
+		private ToolStripSeparator toolStripMenuItem1;
 
 
 	}

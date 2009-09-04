@@ -133,19 +133,23 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FCancelMenuItem = new ToolStripMenuItem();
 			FPrepareMenuItem = new ToolStripMenuItem();
 			FAnalyzeMenuItem = new ToolStripMenuItem();
-			FInjectMenuItem = new ToolStripMenuItem();
+			var LSep1 = new ToolStripSeparator();
+			FExecuteLineMenuItem = new ToolStripMenuItem();
+			FPrepareLineMenuItem = new ToolStripMenuItem();
+			FAnalyzeLineMenuItem = new ToolStripMenuItem();
+			var LSep3 = new ToolStripSeparator();
+			FSelectBlockMenuItem = new ToolStripMenuItem();
+			FPriorBlockMenuItem = new ToolStripMenuItem();
+			FNextBlockMenuItem = new ToolStripMenuItem();
+			var LSep4 = new ToolStripSeparator();
+			FShowResultsMenuItem = new ToolStripMenuItem();
+			var LSep5 = new ToolStripSeparator();
+			FToggleBreakpointMenuItem = new ToolStripMenuItem();
+
 			FExportMenu = new ToolStripMenuItem();
 			FExecuteSchemaMenuItem = new ToolStripMenuItem();
 			FExportDataMenuItem = new ToolStripMenuItem();
 			FExecuteBothMenuItem = new ToolStripMenuItem();
-			FExecuteLineMenuItem = new ToolStripMenuItem();
-			FPrepareLineMenuItem = new ToolStripMenuItem();
-			FAnalyzeLineMenuItem = new ToolStripMenuItem();
-			FSelectBlockMenuItem = new ToolStripMenuItem();
-			FPriorBlockMenuItem = new ToolStripMenuItem();
-			FNextBlockMenuItem = new ToolStripMenuItem();
-			FShowResultsMenuItem = new ToolStripMenuItem();
-			FToggleBreakpointMenuItem = new ToolStripMenuItem();
 
 			// 
 			// FViewMenu
@@ -163,19 +167,23 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			// 
 			// FScriptMenu
 			// 
-			FScriptMenu.DropDownItems.AddRange(new[]
+			FScriptMenu.DropDownItems.AddRange(new ToolStripItem[]
 												   {
 													   FExecuteMenuItem,
 													   FCancelMenuItem,
 													   FPrepareMenuItem,
 													   FAnalyzeMenuItem,
-													   FInjectMenuItem,
+													   LSep1,
 													   FExecuteLineMenuItem,
 													   FPrepareLineMenuItem,
 													   FAnalyzeLineMenuItem,
+													   LSep3,
 													   FSelectBlockMenuItem,
 													   FPriorBlockMenuItem,
 													   FNextBlockMenuItem,
+													   LSep4,
+													   FShowResultsMenuItem,
+													   LSep5,
 													   FToggleBreakpointMenuItem
 												   });
 			FScriptMenu.Text = "&Script";
@@ -215,15 +223,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FAnalyzeMenuItem.Image = MenuImages.Analyze;
 			FAnalyzeMenuItem.ShortcutKeys = Keys.Control | Keys.T;
 			// 
-			// FInjectMenuItem
-			// 
-
-			FInjectMenuItem.ImageIndex = 3;
-			FInjectMenuItem.Text = "&Inject As Upgrade";
-			FInjectMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FInjectMenuItem.Image = MenuImages.Inject;
-			FInjectMenuItem.ShortcutKeys = Keys.Control | Keys.I;
-			// 
 			// FExportMenu
 			// 
 
@@ -233,8 +232,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 													   FExportDataMenuItem,
 													   FExecuteBothMenuItem
 												   });
+			FScriptMenu.MergeAction = MergeAction.Insert;
+			FScriptMenu.MergeIndex = 5;
 			FExportMenu.Text = "E&xport";
-			FExportMenu.Visible = false;			
 			// 
 			// FExecuteSchemaMenuItem
 			// 
