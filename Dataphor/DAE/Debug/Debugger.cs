@@ -577,40 +577,43 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// </summary>
 		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
 		{
-			try
+			if (!AProcess.IsLoading())
 			{
-				Monitor.Enter(FSyncHandle);
 				try
 				{
-					if (ShouldBreak(AProcess, ANode, AException))
+					Monitor.Enter(FSyncHandle);
+					try
 					{
-						FBrokenProcesses.Add(AProcess);
-						InternalPause();
-					}
+						if (ShouldBreak(AProcess, ANode, AException))
+						{
+							FBrokenProcesses.Add(AProcess);
+							InternalPause();
+						}
 
-					while (FIsPauseRequested && FProcesses.Contains(AProcess))
-					{
-						FPausedCount++;
-						Monitor.Exit(FSyncHandle);
-						try
+						while (FIsPauseRequested && FProcesses.Contains(AProcess))
 						{
-							WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
-						}
-						finally
-						{
-							Monitor.Enter(FSyncHandle);
-							FPausedCount--;
+							FPausedCount++;
+							Monitor.Exit(FSyncHandle);
+							try
+							{
+								WaitHandle.SignalAndWait(FWaitSignal, FPauseSignal);
+							}
+							finally
+							{
+								Monitor.Enter(FSyncHandle);
+								FPausedCount--;
+							}
 						}
 					}
+					finally
+					{
+						Monitor.Exit(FSyncHandle);
+					}
 				}
-				finally
+				catch
 				{
-					Monitor.Exit(FSyncHandle);
+					// Do nothing, no error should ever be thrown from here
 				}
-			}
-			catch
-			{
-				// Do nothing, no error should ever be thrown from here
 			}
 		}
 	}

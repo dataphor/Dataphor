@@ -311,6 +311,9 @@ namespace Alphora.Dataphor.DAE.Server
 			
 			/// <summary>Error code 106203: "Program {0} not found. Only running programs in processes currently attached to the debugger are reachable."</summary>
 			ProgramNotFound = 106203,
+			
+			/// <summary>Error code 106204: "The debugger cannot be attached to an in-process session."</summary>
+			CannotAttachToAnInProcessSession = 106204,
 		}
 		
 		// Resource manager for this exception class

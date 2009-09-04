@@ -379,6 +379,8 @@ namespace Alphora.Dataphor.DAE.Server
 		/// </summary>
 		internal void SetDebuggerID(int ADebuggerID)
 		{
+			if (!String.IsNullOrEmpty(FSessionInfo.CatalogCacheName))
+				throw new ServerException(ServerException.Codes.CannotAttachToAnInProcessSession, FSessionID);
 			if ((FDebugger != null) && (FSessionID == ADebuggerID))
 				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, FSessionID);
 			if ((FDebuggerID != 0) && (ADebuggerID != 0))

@@ -416,4 +416,7 @@
   <data name="106203" xml:space="preserve">
     <value>Program {0} not found. Only running programs in processes currently attached to the debugger are reachable.</value>
   </data>
+  <data name="106204" xml:space="preserve">
+    <value>The debugger cannot be attached to an in-process session.</value>
+  </data>
 </root>
