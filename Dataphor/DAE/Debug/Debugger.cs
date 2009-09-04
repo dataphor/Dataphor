@@ -130,6 +130,13 @@ namespace Alphora.Dataphor.DAE.Debug
 			} 
 		}
 		
+		private bool FBreakOnStart;
+		public bool BreakOnStart
+		{
+			get { return FBreakOnStart; }
+			set { FBreakOnStart = value; }
+		}
+		
 		private bool FBreakOnException;
 		public bool BreakOnException
 		{
@@ -336,6 +343,9 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			if (FDisposed)
 				return false;
+				
+			if (FBreakOnStart && Object.ReferenceEquals(AProcess.ExecutingProgram.Code, ANode))
+				return true;
 				
 			if (FBreakOnException && (AException != null))
 				return true;

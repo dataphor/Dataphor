@@ -10,9 +10,14 @@
 
 //* Operator: GetDebuggers
 create operator Debug.GetDebuggers() 
-	: table { Session_ID : Integer, BreakOnException : Boolean, IsPaused : Boolean }
+	: table { Session_ID : Integer, BreakOnStart : Boolean, BreakOnException : Boolean, IsPaused : Boolean }
 	class "System.DebugGetDebuggersNode"
 	static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False", DAE.IsFunctional = "False", DAE.IsDeterministic = "False", DAE.IsRepeatable = "False" };
+	
+//* Operator: SetBreakOnStart
+create operator Debug.SetBreakOnStart(ABreakOnStart : Boolean)
+	class "System.DebugSetBreakOnStartNode"
+	static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 
 //* Operator: SetBreakOnException
 create operator Debug.SetBreakOnException(ABreakOnException : Boolean)

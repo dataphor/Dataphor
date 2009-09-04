@@ -16,7 +16,7 @@ namespace Alphora.Dataphor.DAE.Debug
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-	// operator GetDebuggers() : table { Session_ID : Integer, BreakOnException : Boolean, IsPaused : Boolean }
+	// operator GetDebuggers() : table { Session_ID : Integer, BreakOnStart : Boolean, BreakOnException : Boolean, IsPaused : Boolean }
 	public class DebugGetDebuggersNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -27,6 +27,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			FTableVar.Owner = APlan.User;
 
 			DataType.Columns.Add(new Schema.Column("Session_ID", APlan.DataTypes.SystemInteger));
+			DataType.Columns.Add(new Schema.Column("BreakOnStart", APlan.DataTypes.SystemBoolean));
 			DataType.Columns.Add(new Schema.Column("BreakOnException", APlan.DataTypes.SystemBoolean));
 			DataType.Columns.Add(new Schema.Column("IsPaused", APlan.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
@@ -58,8 +59,9 @@ namespace Alphora.Dataphor.DAE.Debug
 					foreach (Debugger LDebugger in AProgram.ServerProcess.ServerSession.Server.GetDebuggers())
 					{
 						LRow[0] = LDebugger.Session.SessionID;
-						LRow[1] = LDebugger.BreakOnException;
-						LRow[2] = LDebugger.IsPaused;
+						LRow[1] = LDebugger.BreakOnStart;
+						LRow[2] = LDebugger.BreakOnException;
+						LRow[3] = LDebugger.IsPaused;
 						LResult.Insert(LRow);
 					}
 				}
@@ -77,6 +79,16 @@ namespace Alphora.Dataphor.DAE.Debug
 				LResult.Dispose();
 				throw;
 			}
+		}
+	}
+	
+	// operator Debug.SetBreakOnStart(ABreakOnStart : Boolean)
+	public class DebugSetBreakOnStartNode : UnaryInstructionNode
+	{
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+ 			 AProgram.ServerProcess.ServerSession.CheckedDebugger.BreakOnStart = (bool)AArgument1;
+ 			 return null;
 		}
 	}
 
