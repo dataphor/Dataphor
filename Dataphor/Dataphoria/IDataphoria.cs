@@ -2,12 +2,13 @@ using System;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
+using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
-using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
+using Session = Alphora.Dataphor.Frontend.Client.Windows.Session;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -35,6 +36,10 @@ namespace Alphora.Dataphor.Dataphoria
         IDesigner GetDesigner(DesignBuffer ABuffer);
 
         IDesigner OpenDesigner(DesignerInfo AInfo, DesignBuffer ABuffer);
+        
+        DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, DebugLocator ALocator);
+        
+        void OpenLocator(DebugLocator ALocator);
 
         DesignerInfo GetDefaultDesigner(string ADocumentTypeID);
 

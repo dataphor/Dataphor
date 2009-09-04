@@ -37,8 +37,10 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		event RequestHandler AfterSaveAsDocument;
 		void SaveAsDocument();
 		void SaveAsFile();
-		string GetLocatorName();
+		DebugLocator GetLocator();
 		bool LocatorNameMatches(string AName);
+		event LocateEventHandler LocateRequested;
+		void RequestLocate(DebugLocator LLocator);
 	}
 
 	public class DesignService : IDesignService
@@ -201,6 +203,8 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			RequestLoad(ABuffer);
 			SetBuffer(ABuffer);
 			SetModified(false);
+			if (ABuffer.Locator != null)
+				RequestLocate(ABuffer.Locator);
 		}
 
 		public void New()
@@ -306,12 +310,20 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			}
 		}
 
-		public string GetLocatorName()
+		public event LocateEventHandler LocateRequested;
+
+		public void RequestLocate(DebugLocator ALocator)
+		{
+			if (LocateRequested != null)
+				LocateRequested(this, ALocator);
+		}
+
+		public DebugLocator GetLocator()
 		{
 			if (FBuffer == null)
 				return null;
 			else
-				return FBuffer.GetLocatorName();
+				return new DebugLocator(FBuffer.Locator.Locator, 1, 1);
 		}
 
 		public bool LocatorNameMatches(string AName)
@@ -324,4 +336,5 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 	}
 
 	public delegate void RequestHandler(DesignService AService, DesignBuffer ABuffer);
+	public delegate void LocateEventHandler(DesignService AService, DebugLocator ALocator);
 }

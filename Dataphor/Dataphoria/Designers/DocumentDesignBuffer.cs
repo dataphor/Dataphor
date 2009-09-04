@@ -1,15 +1,26 @@
 ﻿using System;
 using System.IO;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public class DocumentDesignBuffer : DesignBuffer
 	{
 		public DocumentDesignBuffer(IDataphoria ADataphoria, string ALibraryName, string ADocumentName)
-			: base(ADataphoria)
+			: this(ADataphoria, new DebugLocator(DocumentDesignBuffer.GetLocatorName(ALibraryName, ADocumentName), 1, 1))
+		{ }
+		
+		public DocumentDesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator)
+			: base(ADataphoria, ALocator)
 		{
-			FLibraryName = (ALibraryName == null ? String.Empty : ALibraryName);
-			FDocumentName = (ADocumentName == null ? String.Empty : ADocumentName);
+			var LSegments = ALocator.Locator.Split(':');
+			if (LSegments.Length == 3)
+			{
+				FLibraryName = LSegments[1];
+				FDocumentName = LSegments[2];
+			}
+			else
+				Error.Fail("DocumentDesignBuffer given locator with other than 3 segments.");
 		}
 
 		private string FLibraryName = String.Empty;
@@ -119,11 +130,6 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public const string CDocLocatorPrefix = "doc:";
 
-		public override string GetLocatorName()
-		{
-			return CDocLocatorPrefix + FLibraryName + ":" + FDocumentName;
-		}
-
 		public override bool LocatorNameMatches(string AName)
 		{
 			if (AName != null && AName.StartsWith(CDocLocatorPrefix))
@@ -138,6 +144,11 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public static bool IsDocumentLocator(string AName)
 		{
 			return AName.StartsWith(CDocLocatorPrefix);
+		}
+
+		public static string GetLocatorName(string ALibraryName, string ADocumentName)
+		{
+			return CDocLocatorPrefix + ALibraryName + ":" + ADocumentName;
 		}
 	}
 }

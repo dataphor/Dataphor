@@ -18,9 +18,10 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public abstract class DesignBuffer
 	{
-		public DesignBuffer(IDataphoria ADataphoria)
+		public DesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator)
 		{
 			FDataphoria = ADataphoria;
+			FLocator = ALocator;
 		}
 
 		// Dataphoria
@@ -31,9 +32,15 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			get { return FDataphoria; }
 		}
 
-		public abstract string GetDescription();
+		// Locator
+		
+		private DebugLocator FLocator;
+		public DebugLocator Locator
+		{
+			get { return FLocator; }
+		}
 
-		// Data
+		public abstract string GetDescription();
 
 		public abstract void SaveData(string AData);
 
@@ -42,8 +49,6 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public abstract string LoadData();
 
 		public abstract void LoadData(Stream AData);
-
-		public abstract string GetLocatorName();
 
 		public abstract bool LocatorNameMatches(string AName);
 	}

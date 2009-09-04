@@ -29,6 +29,7 @@ using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 using Alphora.Dataphor.DAE.Server;
 
 using WeifenLuo.WinFormsUI.Docking;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -80,14 +81,6 @@ namespace Alphora.Dataphor.Dataphoria
 			FDockContentErrorListView.TabText = "Errors/Warnings ";	// HACK: Space is to work around last character being cut-off in tab
 			FDockContentErrorListView.Text = "Errors/Warnings - Dataphoria";
 			FDockContentErrorListView.ShowHint = DockState.DockBottomAutoHide;
-
-			EnsureSessionView();
-
-			EnsureCallStackView();
-
-			EnsureDebugProcessesView();
-
-			EnsureProcessesView();
 
 			FDockContentExplorer.Show(this.FDockPanel);
 			FDockContentErrorListView.Show(this.FDockPanel);
@@ -1633,16 +1626,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				try
 				{
-					DesignerInfo LInfo;
-					DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, Debugger.CurrentLocation.Locator);
-					if (LBuffer != null)
-					{
-						IDesigner LDesigner = this.GetDesigner(LBuffer);
-						if (LDesigner != null)
-							LDesigner.Select();
-						else
-							OpenDesigner(LInfo, LBuffer);
-					}
+					OpenLocator(Debugger.CurrentLocation);
 				}
 				catch (Exception LException)
 				{
@@ -1652,7 +1636,24 @@ namespace Alphora.Dataphor.Dataphoria
 			}
 		}
 
-		private DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, string ALocator)
+		public void OpenLocator(DebugLocator ALocator)
+		{
+			DesignerInfo LInfo;
+			DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, ALocator);
+			if (LBuffer != null)
+			{
+				IDesigner LDesigner = this.GetDesigner(LBuffer);
+				if (LDesigner != null)
+				{
+					LDesigner.Service.RequestLocate(ALocator);
+					LDesigner.Select();
+				}
+				else
+					OpenDesigner(LInfo, LBuffer);
+			}
+		}
+
+		public DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, DebugLocator ALocator)
 		{
 			AInfo = new DesignerInfo();
 			DesignBuffer LBuffer = null;
@@ -1660,23 +1661,20 @@ namespace Alphora.Dataphor.Dataphoria
 			// TODO: Introduce a buffer factory for locators
 			
 			// Files
-			if (FileDesignBuffer.IsFileLocator(ALocator))
+			if (FileDesignBuffer.IsFileLocator(ALocator.Locator))
 			{
-				var LFileName = ALocator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
-				LBuffer = new FileDesignBuffer(this, LFileName);
-				AInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileName));
+				var LFileBuffer = new FileDesignBuffer(this, ALocator);
+				AInfo = GetDefaultDesigner(Program.DocumentTypeFromFileName(LFileBuffer.FileName));
+				LBuffer = LFileBuffer;
 			}
 			// Documents
-			else if (DocumentDesignBuffer.IsDocumentLocator(ALocator))
+			else if (DocumentDesignBuffer.IsDocumentLocator(ALocator.Locator))
 			{
-				var LSegments = ALocator.Split(':');
-				if (LSegments.Length == 3)
-				{
-					LBuffer = new DocumentDesignBuffer(this, LSegments[1], LSegments[2]);
-					AInfo = GetDefaultDesigner(GetDocumentType(LSegments[1], LSegments[2]));
-				}
+				var LDocumentBuffer = new DocumentDesignBuffer(this, ALocator);
+				AInfo = GetDefaultDesigner(GetDocumentType(LDocumentBuffer.LibraryName, LDocumentBuffer.DocumentName));
+				LBuffer = LDocumentBuffer;
 			}
-			else if (ProgramDesignBuffer.IsProgramLocator(ALocator))
+			else if (ProgramDesignBuffer.IsProgramLocator(ALocator.Locator))
 			{
 				LBuffer = new ProgramDesignBuffer(this, ALocator);
 				AInfo = GetDefaultDesigner("d4");

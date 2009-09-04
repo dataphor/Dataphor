@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public class PropertyDesignBuffer : DesignBuffer
 	{
 		public PropertyDesignBuffer(IDataphoria ADataphoria, object AInstance, PropertyDescriptor ADescriptor)
-			: base(ADataphoria)
+			: base(ADataphoria, null)
 		{
 			FInstance = AInstance;
 			FDescriptor = ADescriptor;
@@ -80,11 +81,6 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public override void LoadData(Stream AData)
 		{
 			Error.Fail("LoadData(Stream) is not supported for PropertyDesignBuffer");
-		}
-
-		public override string GetLocatorName()
-		{
-			return null;
 		}
 
 		public override bool LocatorNameMatches(string AName)

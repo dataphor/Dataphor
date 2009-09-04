@@ -1,14 +1,19 @@
 ﻿using System;
 using System.IO;
+using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria.Designers
 {
 	public class FileDesignBuffer : DesignBuffer
 	{
 		public FileDesignBuffer(IDataphoria ADataphoria, string AFileName)
-			: base(ADataphoria)
+			: this(ADataphoria, FileDesignBuffer.GetLocatorName(AFileName))
+		{ }
+
+		public FileDesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator)
+			: base(ADataphoria, ALocator)
 		{
-			FFileName = (AFileName == null ? String.Empty : AFileName);
+			FFileName = ALocator.Locator.Substring(FileDesignBuffer.CFileLocatorPrefix.Length);
 		}
 
 		// FileName
@@ -93,12 +98,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		}
 
 		public const string CFileLocatorPrefix = "file:";
-
-		public override string GetLocatorName()
-		{
-			return CFileLocatorPrefix + FFileName;
-		}
-
+		
 		public override bool LocatorNameMatches(string AName)
 		{
 			return
@@ -110,6 +110,11 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 		public static bool IsFileLocator(string AName)
 		{
 			return AName.StartsWith(CFileLocatorPrefix);
+		}
+
+		public static DebugLocator GetLocatorName(string AFileName)
+		{
+			return new DebugLocator(CFileLocatorPrefix + AFileName, 1, 1);
 		}
 	}
 }

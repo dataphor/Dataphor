@@ -46,6 +46,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FService.OnNameChanged += NameOrModifiedChanged;
             FService.OnRequestLoad += LoadData;
             FService.OnRequestSave += SaveData;
+			FService.LocateRequested += LocateRequested;
 
             FTextEdit.HelpRequested += FTextArea_HelpRequested;
 
@@ -217,7 +218,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             ABuffer.SaveData(EditorText);
         }
 
-        // Status bar
+		private void LocateRequested(DesignService AService, Alphora.Dataphor.DAE.Debug.DebugLocator ALocator)
+		{
+			if (ALocator.Line >= 1)
+				FTextEdit.ActiveTextAreaControl.Caret.Line = ALocator.Line - 1;
+		}
+
+		// Status bar
 
         private void TextAreaEnter(object ASender, EventArgs AArgs)
         {

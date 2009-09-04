@@ -711,7 +711,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					GetTextToExecute(),
 					ExecutorProgress,
 					ExecutorFinished,
-					GetLocator()
+					GetExecuteLocator()
 				);
 			FExecutor.Start();
 		}
@@ -1033,7 +1033,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					);
 
 				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
-					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocatorName(), ALogicPos.Line + 1, -1));
+					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocator().Locator, ALogicPos.Line + 1, -1));
 			}
 		}
 
@@ -1117,16 +1117,24 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			AddBookmark(LNewBookmark);
 		}
 
-		private DebugLocator GetLocator()
+		private DebugLocator GetExecuteLocator()
 		{
-			var LLocatorName = Service.GetLocatorName();
-			if (!String.IsNullOrEmpty(LLocatorName))
+			var LLocator = Service.GetLocator();
+			if (LLocator != null)
 			{
-				int LOffset = 
-					FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected 
-						? FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition.Line + 1
-						: 1;
-				return new DebugLocator(LLocatorName, LOffset, -1);
+				if (FTextEdit.ActiveTextAreaControl.SelectionManager.HasSomethingSelected)
+				{
+					TextLocation LLocation = FTextEdit.ActiveTextAreaControl.SelectionManager.SelectionCollection[0].StartPosition;
+					return 
+						new DebugLocator
+						(
+							LLocator.Locator, 
+							LLocation.Line + 1, 
+							LLocation.Column + 1
+						);
+				}
+				else
+					return LLocator;
 			}
 			else
 				return null;
@@ -1134,7 +1142,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		private void ToggleBreakpoint()
 		{
-			Dataphoria.Debugger.ToggleBreakpoint(GetLocator());
+			var LLocator = Service.GetLocator();
+			if (LLocator != null)
+				Dataphoria.Debugger.ToggleBreakpoint
+				(
+					new DebugLocator(LLocator.Locator, FTextEdit.ActiveTextAreaControl.Caret.Line + 1, -1)
+				);
 		}
 
 		#endregion

@@ -8,26 +8,20 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 	public class ProgramDesignBuffer : DesignBuffer
 	{
-		public ProgramDesignBuffer(IDataphoria ADataphoria, string ALocator) : base(ADataphoria)
+		public ProgramDesignBuffer(IDataphoria ADataphoria, DebugLocator ALocator) 
+			: base(ADataphoria, ALocator)
 		{
-			FLocator = ALocator;
-		}
-		
-		private string FLocator;
-		public string Locator 
-		{ 
-			get { return FLocator; } 
 		}
 		
 		public override string GetDescription()
 		{
-			return FLocator;
+			return Locator.Locator;
 		}
 
 		public override bool Equals(object AObject)
 		{
 			ProgramDesignBuffer LBuffer = AObject as ProgramDesignBuffer;
-			if ((LBuffer != null) && (LBuffer.Locator == Locator))
+			if ((LBuffer != null) && (LBuffer.Locator.Locator == Locator.Locator))
 				return true;
 			else
 				return base.Equals(AObject);
@@ -35,7 +29,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override int GetHashCode()
 		{
-			return Locator.GetHashCode();
+			return Locator.Locator.GetHashCode();
 		}
 
 		public override void SaveData(string AData)
@@ -50,7 +44,7 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 
 		public override string LoadData()
 		{
-			return ((Scalar)Dataphoria.EvaluateQuery(String.Format(".System.Debug.GetSource('{0}')", Locator.Replace("'", "''")))).AsString;
+			return ((Scalar)Dataphoria.EvaluateQuery(String.Format(".System.Debug.GetSource('{0}')", Locator.Locator.Replace("'", "''")))).AsString;
 		}
 
 		public override void LoadData(System.IO.Stream AData)
@@ -58,14 +52,9 @@ namespace Alphora.Dataphor.Dataphoria.Designers
 			Error.Fail("LoadData(Stream) is not supported for ProgramDesignBuffer");
 		}
 
-		public override string GetLocatorName()
-		{
-			return Locator;
-		}
-
 		public override bool LocatorNameMatches(string AName)
 		{
-			return AName != null && AName == Locator;
+			return AName != null && String.Equals(AName, Locator.Locator);
 		}
 		
 		public static bool IsProgramLocator(string AName)

@@ -23,27 +23,29 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		protected override string GetChildExpression()
 		{
-			return ".System.Operators " + CSchemaListFilter + " add { OperatorName + Signature DisplayName } over { Name, DisplayName }";
+			return ".System.Operators " + CSchemaListFilter + " { Name, OperatorName + Signature DisplayName, Locator, Line, LinePos }";
 		}
 		
 		protected override BaseNode CreateChildNode(DAE.Runtime.Data.Row ARow)
 		{
-			return new OperatorNode(this, (string)ARow["Name"], (string)ARow["DisplayName"]);
+			return new OperatorNode(this, (string)ARow["Name"], (string)ARow["DisplayName"], new DebugLocator((string)ARow["Locator"], (int)ARow["Line"], (int)ARow["LinePos"]));
 		}
 	}
 
 	public class OperatorNode : SchemaItemNode
 	{
-		public OperatorNode(OperatorListNode ANode, string ACatalogName, string AOperatorName) : base()
+		public OperatorNode(OperatorListNode ANode, string ACatalogName, string AOperatorName, DebugLocator ALocator) : base()
 		{
 			ParentSchemaList = ANode;
 			FFriendlyName = AOperatorName;
 			ObjectName = ACatalogName;
 			ImageIndex = 12;
 			SelectedImageIndex = ImageIndex;
+			FLocator = ALocator;
 		}
 
 		private string FFriendlyName;
+		private DebugLocator FLocator;
 
 		protected override void UpdateText()
 		{
@@ -73,12 +75,7 @@ namespace Alphora.Dataphor.Dataphoria.ObjectTree.Nodes
 
 		private void OpenClicked(object ASender, EventArgs AArgs)
 		{
-			var LBuffer = new ProgramDesignBuffer(Dataphoria, DebugLocator.COperatorLocator + ":" + FFriendlyName);
-			IDesigner LDesigner = Dataphoria.GetDesigner(LBuffer);
-			if (LDesigner != null)
-				LDesigner.Select();
-			else
-				Dataphoria.OpenDesigner(Dataphoria.GetDefaultDesigner("d4"), LBuffer);
+			Dataphoria.OpenLocator(FLocator);
 		}
 	}
 }
