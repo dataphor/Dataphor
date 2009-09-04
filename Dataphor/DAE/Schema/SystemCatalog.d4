@@ -1571,6 +1571,9 @@ begin
 		IsGenerated : Boolean,
 		OperatorName : Name,
 		Signature : String,
+		Locator : String,
+		Line : Integer,
+		LinePos : Integer,
 		key { ID } static tags { DAE.Enforced = "False" },
 		key { Name } static tags { DAE.Enforced = "False" },
 		reference Operators_CatalogObjects { Name } references CatalogObjects { Name } static tags { DAE.Enforced = "False" }

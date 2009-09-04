@@ -293,6 +293,9 @@ create table DAEOperators
 	ID int not null,
 	OperatorName character varying(200) not null,
 	Signature text not null,
+	Locator text not null,
+	Line int not null,
+	LinePos int not null,
 	constraint PK_DAEOperators primary key (ID)
 	--reference Operators_OperatorNames { OperatorName } references OperatorNames { Name },
 	--reference Operators_CatalogObjects { ID } references CatalogObjects { ID },

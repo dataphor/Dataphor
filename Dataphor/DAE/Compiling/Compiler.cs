@@ -4221,7 +4221,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperator.Operands.Add(new Schema.Operand(LOperator, LProperty.Name, LProperty.DataType, Modifier.Const));
 					APlan.AttachDependencies(LProperty.Dependencies);
 				}
-
+				
+				LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
+				
 				if (ASelector.ClassDefinition != null)
 				{
 					if (!ARepresentation.IsDefaultSelector)
@@ -4262,6 +4264,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LOperator.Operands.Add(new Schema.Operand(LOperator, Keywords.Value, AScalarType, Modifier.Const));
 			LOperator.Library = AScalarType.Library;
 			LOperator.Owner = AScalarType.Owner;
+			LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 			APlan.PushCreationObject(LOperator);
 			try
 			{
@@ -4308,6 +4311,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LOperator.Operands.Add(new Schema.Operand(LOperator, AProperty.Name, AProperty.DataType, Modifier.Const));
 			LOperator.Library = AScalarType.Library;
 			LOperator.Owner = AScalarType.Owner;
+			LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 			APlan.PushCreationObject(LOperator);
 			try
 			{
@@ -4601,7 +4605,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 			LOperator.Owner = AScalarType.Owner;
 			LOperator.Library = AScalarType.Library;
-
+			LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 			APlan.PushCreationObject(LOperator);
 			try
 			{
@@ -4690,6 +4694,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 			LOperator.ReturnDataType = AScalarType;
 			LOperator.Owner = AScalarType.Owner;
 			LOperator.Library = AScalarType.Library;
+			LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 			APlan.PushCreationObject(LOperator);
 			try
 			{
@@ -4729,7 +4734,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 				LOperator.Owner = AScalarType.Owner;
 				LOperator.Library = AScalarType.Library;
-				
+				LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
+	
 				APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 				APlan.AttachDependency(AScalarType);
 
@@ -4794,6 +4800,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 						LOperator.Owner = AScalarType.Owner;
 						LOperator.Library = AScalarType.Library;
+						LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 
 						APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 						APlan.AttachDependency(AScalarType);
@@ -4829,6 +4836,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 						LOperator.ReturnDataType = APlan.DataTypes.SystemInteger;
 						LOperator.Owner = AScalarType.Owner;
 						LOperator.Library = AScalarType.Library;
+						LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 
 						APlan.AttachDependency(APlan.DataTypes.SystemInteger);
 						APlan.AttachDependency(AScalarType);
@@ -4862,6 +4870,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperator.ReturnDataType = APlan.DataTypes.SystemBoolean;
 					LOperator.Owner = AScalarType.Owner;
 					LOperator.Library = AScalarType.Library;
+					LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 
 					APlan.AttachDependency(APlan.DataTypes.SystemBoolean);
 					APlan.AttachDependency(AScalarType);
@@ -4894,6 +4903,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					LOperator.Operands.Add(new Schema.Operand(LOperator, CAccessorValueParameterName, LParentType, Modifier.Const));
 					LOperator.Owner = AScalarType.Owner;
 					LOperator.Library = AScalarType.Library;
+					LOperator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LOperator.DisplayName), 0, 1);
 					LOperator.Block.ClassDefinition = DefaultSelector();
 					if (!APlan.Catalog.Contains(LOperator) && !APlan.PlanCatalog.Contains(LOperator))
 					{
@@ -7940,6 +7950,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
 									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
@@ -7986,6 +7997,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
 									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
@@ -8018,6 +8030,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.UpdateHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.UpdateHandler.Operator, "ANewRow", new Schema.RowType(true)));
 									LNode.Reference.UpdateHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.UpdateHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.UpdateHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.UpdateHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.UpdateHandler.Operator.SessionObjectName = LNode.Reference.UpdateHandler.Operator.OperatorName;
 									LNode.Reference.UpdateHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
@@ -8056,6 +8069,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
 									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Delete));
@@ -8107,6 +8121,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
 									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));
@@ -8145,6 +8160,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 									LNode.Reference.DeleteHandler.Operator.Operands.Add(new Schema.Operand(LNode.Reference.DeleteHandler.Operator, "ARow", new Schema.RowType(true)));
 									LNode.Reference.DeleteHandler.Operator.Owner = LNode.Reference.Owner;
 									LNode.Reference.DeleteHandler.Operator.Library = LNode.Reference.Library;
+									LNode.Reference.DeleteHandler.Operator.Locator = new DebugLocator(DebugLocator.OperatorLocator(LNode.Reference.DeleteHandler.Operator.DisplayName), 0, 1);
 									LNode.Reference.DeleteHandler.Operator.SessionObjectName = LNode.Reference.DeleteHandler.Operator.OperatorName;
 									LNode.Reference.DeleteHandler.Operator.SessionID = APlan.SessionID;
 									APlan.PushStatementContext(new StatementContext(StatementType.Update));

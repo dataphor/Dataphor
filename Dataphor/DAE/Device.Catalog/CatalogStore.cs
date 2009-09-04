@@ -2220,7 +2220,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					}
 					
 					// Insert the DAEOperators row
-					InsertRow("DAEOperators", LOperator.ID, LOperator.OperatorName, LOperator.Signature.ToString());
+					InsertRow("DAEOperators", LOperator.ID, LOperator.OperatorName, LOperator.Signature.ToString(), LOperator.Locator.Locator, LOperator.Locator.Line, LOperator.Locator.LinePos);
 				}
 				
 				if (AObject is Schema.EventHandler)

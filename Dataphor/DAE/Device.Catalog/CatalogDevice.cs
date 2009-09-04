@@ -123,7 +123,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					AStatement.Append
 					(
 						@"
-select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, J.IsSystem, J.IsGenerated, O.OperatorName, O.Signature
+select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, J.IsSystem, J.IsGenerated, O.OperatorName, O.Signature, O.Locator, O.Line, O.LinePos
 	from DAEOperators O
 		join DAECatalogObjects C on O.ID = C.ID
 		join DAEObjects J on O.ID = J.ID
