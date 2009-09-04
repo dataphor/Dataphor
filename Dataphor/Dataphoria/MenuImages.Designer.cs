@@ -116,6 +116,13 @@ namespace Alphora.Dataphor.Dataphoria {
             }
         }
         
+        internal static System.Drawing.Bitmap DebugBreakStart {
+            get {
+                object obj = ResourceManager.GetObject("DebugBreakStart", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap DebugCallStack {
             get {
                 object obj = ResourceManager.GetObject("DebugCallStack", resourceCulture);

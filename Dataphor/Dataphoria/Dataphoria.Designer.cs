@@ -98,6 +98,7 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FViewStackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
 			this.FBreakOnExceptionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FBreakOnStartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDebugStepOverMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDebugStepIntoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.LHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,6 +123,7 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FDebugStepIntoButton = new System.Windows.Forms.ToolStripButton();
 			this.FDebugStepOverButton = new System.Windows.Forms.ToolStripButton();
 			this.FBreakOnExceptionButton = new System.Windows.Forms.ToolStripButton();
+			this.FBreakOnStartButton = new System.Windows.Forms.ToolStripButton();
 			this.FViewSessionsButton = new System.Windows.Forms.ToolStripButton();
 			this.FViewProcessesButton = new System.Windows.Forms.ToolStripButton();
 			this.FViewDebugProcessesButton = new System.Windows.Forms.ToolStripButton();
@@ -424,6 +426,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FViewStackMenuItem,
             this.toolStripMenuItem8,
             this.FBreakOnExceptionMenuItem,
+            this.FBreakOnStartMenuItem,
             this.FDebugStepOverMenuItem,
             this.FDebugStepIntoMenuItem});
 			this.FDebugToolStripMenuItem.Name = "FDebugToolStripMenuItem";
@@ -505,6 +508,13 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FBreakOnExceptionMenuItem.Name = "FBreakOnExceptionMenuItem";
 			this.FBreakOnExceptionMenuItem.Size = new System.Drawing.Size(191, 22);
 			this.FBreakOnExceptionMenuItem.Text = "Break On Exception";
+			// 
+			// FBreakOnStartMenuItem
+			// 
+			this.FBreakOnStartMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugBreakStart;
+			this.FBreakOnStartMenuItem.Name = "FBreakOnStartMenuItem";
+			this.FBreakOnStartMenuItem.Size = new System.Drawing.Size(191, 22);
+			this.FBreakOnStartMenuItem.Text = "Break On Start";
 			// 
 			// FDebugStepOverMenuItem
 			// 
@@ -653,6 +663,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FDebugStepIntoButton,
             this.FDebugStepOverButton,
             this.FBreakOnExceptionButton,
+            this.FBreakOnStartButton,
             this.FViewSessionsButton,
             this.FViewProcessesButton,
             this.FViewDebugProcessesButton,
@@ -724,6 +735,16 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FBreakOnExceptionButton.Name = "FBreakOnExceptionButton";
 			this.FBreakOnExceptionButton.Size = new System.Drawing.Size(23, 22);
 			this.FBreakOnExceptionButton.Text = "Break On Exception";
+			// 
+			// FBreakOnStartButton
+			// 
+			this.FBreakOnStartButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FBreakOnStartButton.Enabled = false;
+			this.FBreakOnStartButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugBreakStart;
+			this.FBreakOnStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FBreakOnStartButton.Name = "FBreakOnStartButton";
+			this.FBreakOnStartButton.Size = new System.Drawing.Size(23, 22);
+			this.FBreakOnStartButton.Text = "Break On Start";
 			// 
 			// FViewSessionsButton
 			// 
@@ -866,6 +887,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private System.Windows.Forms.ToolStripMenuItem FViewCallStackMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
 		private System.Windows.Forms.ToolStripMenuItem FBreakOnExceptionMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem FBreakOnStartMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem FDebugStepOverMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem FDebugStepIntoMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem LHelpToolStripMenuItem;
@@ -890,6 +912,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private System.Windows.Forms.ToolStripButton FDebugStepIntoButton;
 		private System.Windows.Forms.ToolStripButton FDebugStepOverButton;
 		private System.Windows.Forms.ToolStripButton FBreakOnExceptionButton;
+		private System.Windows.Forms.ToolStripButton FBreakOnStartButton;
 		private System.Windows.Forms.ToolStripButton FViewSessionsButton;
 		private System.Windows.Forms.ToolStripButton FViewProcessesButton;
 		private System.Windows.Forms.ToolStripButton FViewDebugProcessesButton;

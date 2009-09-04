@@ -1612,9 +1612,15 @@ namespace Alphora.Dataphor.Dataphoria
  			{
  				UpdateDebuggerState();
  				UpdateBreakOnException();
+ 				UpdateBreakOnStart();
 			}
-			else if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
-				UpdateBreakOnException();
+			else 
+			{
+				if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
+					UpdateBreakOnException();
+				else if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnStart"; }))
+					UpdateBreakOnStart();
+			}
 			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
 				EnsureEditorForCurrentLocation();
 			
@@ -1711,6 +1717,10 @@ namespace Alphora.Dataphor.Dataphoria
 				case "FBreakOnExceptionButton":
 					Debugger.BreakOnException = !Debugger.BreakOnException;
 					break;
+				case "FBreakOnStartMenuItem":
+				case "FBreakOnStartButton":
+					Debugger.BreakOnStart = !Debugger.BreakOnStart;
+					break;
 				case "FViewSessionsMenuItem":
 				case "FViewSessionsButton" :
 					EnsureSessionView();
@@ -1769,6 +1779,14 @@ namespace Alphora.Dataphor.Dataphoria
 			FBreakOnExceptionMenuItem.Enabled = FBreakOnExceptionButton.Enabled;
 			FBreakOnExceptionButton.Checked = IsConnected && Debugger.BreakOnException;
 			FBreakOnExceptionMenuItem.Checked = FBreakOnExceptionButton.Checked;
+		}
+
+		private void UpdateBreakOnStart()
+		{
+			FBreakOnStartButton.Enabled = IsConnected;
+			FBreakOnStartMenuItem.Enabled = FBreakOnStartButton.Enabled;
+			FBreakOnStartButton.Checked = IsConnected && Debugger.BreakOnStart;
+			FBreakOnStartMenuItem.Checked = FBreakOnStartButton.Checked;
 		}
 
 		private void EnsureSessionView()

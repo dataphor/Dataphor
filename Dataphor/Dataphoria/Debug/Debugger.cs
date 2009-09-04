@@ -62,7 +62,7 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				var LDebugger = FDataphoria.EvaluateQuery("(.System.Debug.GetDebuggers() where Session_ID = SessionID())[]") as Row;
 				if (LDebugger != null)
-					InternalInitializeState((bool)LDebugger["IsPaused"], (bool)LDebugger["BreakOnException"]);
+					InternalInitializeState((bool)LDebugger["IsPaused"], (bool)LDebugger["BreakOnException"], (bool)LDebugger["BreakOnStart"]);
 				else
 					InternalClearState();
 			}
@@ -70,16 +70,17 @@ namespace Alphora.Dataphor.Dataphoria
 				InternalClearState();
 		}
 
-		private void InternalInitializeState(bool AIsPaused, bool ABreakOnException)
+		private void InternalInitializeState(bool AIsPaused, bool ABreakOnException, bool ABreakOnStart)
 		{
 			FIsStarted = true;
 			FIsPaused = AIsPaused;
 			FBreakOnException = ABreakOnException;
+			FBreakOnStart = ABreakOnStart;
 			FSelectedProcessID = -1;
 			FSelectedCallStackIndex = -1;
 			FCurrentLocation = null;
 
-			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
+			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "BreakOnStart", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
 
 			if (!AIsPaused)
 				InternalUnpause();
@@ -95,11 +96,12 @@ namespace Alphora.Dataphor.Dataphoria
 			FIsStarted = false;
 			FIsPaused = false;
 			FBreakOnException = false;
+			FBreakOnStart = false;
 			FSelectedProcessID = -1;
 			FSelectedCallStackIndex = -1;
 			FCurrentLocation = null;
 
-			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
+			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "BreakOnStart", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
 
 			RefreshBreakpoints();
 		}
@@ -136,6 +138,7 @@ namespace Alphora.Dataphor.Dataphoria
 				FDataphoria.ExecuteScript(@".System.Debug.Start();");
 				UpdateDebuggerState();
 				ApplyBreakOnException();
+				ApplyBreakOnStart();
 			}
 		}
 
@@ -248,6 +251,30 @@ namespace Alphora.Dataphor.Dataphoria
 		private void ApplyBreakOnException()
 		{
 			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnException(" + FBreakOnException.ToString().ToLowerInvariant() + ")");
+		}
+
+		// BreakOnStart
+
+		private bool FBreakOnStart;
+
+		public bool BreakOnStart
+		{
+			get { return FBreakOnStart; }
+			set
+			{
+				if (FBreakOnStart != value)
+				{
+					FBreakOnStart = value;
+					if (FIsStarted)
+						ApplyBreakOnStart();
+					NotifyPropertyChanged(new string[] { "BreakOnStart" });
+				}
+			}
+		}
+
+		private void ApplyBreakOnStart()
+		{
+			FDataphoria.ExecuteScript(".System.Debug.SetBreakOnStart(" + FBreakOnStart.ToString().ToLowerInvariant() + ")");
 		}
 
 		// SelectedProcessID
