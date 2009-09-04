@@ -341,11 +341,10 @@ namespace Alphora.Dataphor.Dataphoria
 				var LWindow = FDataphoria.EvaluateQuery(String.Format("(.System.Debug.GetCallStack({0}) where Index = {1})[]", FSelectedProcessID, FSelectedCallStackIndex)) as Row;
 				if (LWindow != null)
 				{
-					var LLocator = (string)LWindow["Locator"];
 				    LLocation = 
 						new DebugLocator
 						(
-							(String.IsNullOrEmpty(LLocator) ? (string)LWindow["Location"] : LLocator), 
+							(string)LWindow["Locator"], 
 							(int)LWindow["Line"], 
 							(int)LWindow["LinePos"]
 						);

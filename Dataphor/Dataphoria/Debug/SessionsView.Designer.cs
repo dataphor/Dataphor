@@ -72,6 +72,7 @@
 			this.dbGrid1.Source = this.FSessionSource;
 			this.dbGrid1.TabIndex = 0;
 			this.dbGrid1.Text = "dbGrid1";
+			this.dbGrid1.DoubleClick += new System.EventHandler(this.FAttachButton_Click);
 			// 
 			// FContextMenu
 			// 
