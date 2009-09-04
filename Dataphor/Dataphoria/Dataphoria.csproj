@@ -320,8 +320,8 @@
       <DependentUpon>General.resx</DependentUpon>
     </Compile>
     <Compile Include="IDataphoria.cs" />
-    <Compile Include="IStatusBarClient.cs" />
-    <Compile Include="IChildFormWithToolBar.cs" />
+    <Compile Include="Designers\IStatusBarClient.cs" />
+    <Compile Include="Designers\IToolBarClient.cs" />
     <Compile Include="MenuImages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

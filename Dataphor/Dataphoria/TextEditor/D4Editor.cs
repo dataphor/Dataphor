@@ -15,19 +15,17 @@ using System.Windows.Forms;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Client.Provider;
-using Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.Dataphoria.TextEditor.BlockActions;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.Logging;
+using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
 using WeifenLuo.WinFormsUI.Docking;
-using DataSet=System.Data.DataSet;
-using Image=System.Drawing.Image;
-using SD = ICSharpCode.TextEditor;
-using ICSharpCode.TextEditor;
-using Alphora.Dataphor.DAE.Debug;
-using Alphora.Dataphor.DAE.Compiling;
+using DataSet = System.Data.DataSet;
+using Image = System.Drawing.Image;
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {

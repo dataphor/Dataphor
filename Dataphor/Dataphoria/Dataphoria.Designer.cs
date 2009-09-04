@@ -95,6 +95,7 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FViewProcessesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FViewDebugProcessesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FViewCallStackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.FViewStackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
 			this.FBreakOnExceptionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FDebugStepOverMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,7 +129,6 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FViewStackButton = new System.Windows.Forms.ToolStripButton();
 			this.FBottomToolStripPanel = new System.Windows.Forms.ToolStripPanel();
 			this.FStatusStrip = new System.Windows.Forms.StatusStrip();
-			this.FViewStackMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.FTopToolStripPanel.SuspendLayout();
 			this.FMainMenuStrip.SuspendLayout();
 			this.FToolStrip.SuspendLayout();
@@ -487,6 +487,13 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FViewCallStackMenuItem.Size = new System.Drawing.Size(191, 22);
 			this.FViewCallStackMenuItem.Text = "View Call Stack";
 			// 
+			// FViewStackMenuItem
+			// 
+			this.FViewStackMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStack;
+			this.FViewStackMenuItem.Name = "FViewStackMenuItem";
+			this.FViewStackMenuItem.Size = new System.Drawing.Size(191, 22);
+			this.FViewStackMenuItem.Text = "View Stack";
+			// 
 			// toolStripMenuItem8
 			// 
 			this.toolStripMenuItem8.Name = "toolStripMenuItem8";
@@ -494,7 +501,6 @@ namespace Alphora.Dataphor.Dataphoria
 			// 
 			// FBreakOnExceptionMenuItem
 			// 
-			this.FBreakOnExceptionMenuItem.CheckOnClick = true;
 			this.FBreakOnExceptionMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugBreakException;
 			this.FBreakOnExceptionMenuItem.Name = "FBreakOnExceptionMenuItem";
 			this.FBreakOnExceptionMenuItem.Size = new System.Drawing.Size(191, 22);
@@ -654,7 +660,7 @@ namespace Alphora.Dataphor.Dataphoria
             this.FViewStackButton});
 			this.FDebugToolStrip.Location = new System.Drawing.Point(136, 24);
 			this.FDebugToolStrip.Name = "FDebugToolStrip";
-			this.FDebugToolStrip.Size = new System.Drawing.Size(296, 25);
+			this.FDebugToolStrip.Size = new System.Drawing.Size(265, 25);
 			this.FDebugToolStrip.TabIndex = 16;
 			this.FDebugToolStrip.Text = "Debug";
 			this.FDebugToolStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.DebugMenuItemClicked);
@@ -711,7 +717,6 @@ namespace Alphora.Dataphor.Dataphoria
 			// 
 			// FBreakOnExceptionButton
 			// 
-			this.FBreakOnExceptionButton.CheckOnClick = true;
 			this.FBreakOnExceptionButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.FBreakOnExceptionButton.Enabled = false;
 			this.FBreakOnExceptionButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugBreakException;
@@ -789,13 +794,6 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FStatusStrip.TabIndex = 4;
 			this.FStatusStrip.Text = "statusStrip1";
 			// 
-			// FViewStackMenuItem
-			// 
-			this.FViewStackMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.DebugStack;
-			this.FViewStackMenuItem.Name = "FViewStackMenuItem";
-			this.FViewStackMenuItem.Size = new System.Drawing.Size(191, 22);
-			this.FViewStackMenuItem.Text = "View Stack";
-			// 
 			// Dataphoria
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -806,6 +804,7 @@ namespace Alphora.Dataphor.Dataphoria
 			this.Controls.Add(this.FTopToolStripPanel);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.IsMdiContainer = true;
+			this.MainMenuStrip = this.FMainMenuStrip;
 			this.Name = "Dataphoria";
 			this.Text = "Dataphoria";
 			this.Shown += new System.EventHandler(this.Dataphoria_Shown);

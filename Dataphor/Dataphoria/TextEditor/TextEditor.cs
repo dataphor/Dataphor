@@ -20,7 +20,7 @@ using SD = ICSharpCode.TextEditor;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
     /// <summary> Text Editor form for Dataphoria. </summary>
-    public partial class TextEditor :BaseForm, IChildFormWithToolBar, IDesigner
+    public partial class TextEditor :BaseForm, IToolBarClient, IDesigner
     {
         private string FDesignerID;
         protected DockContent FDockContentTextEdit;
@@ -86,7 +86,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
         #region IChildFormWithToolBar Members
 
-        public void MergeToolbarWith(ToolStrip AParentToolStrip)
+        public virtual void MergeToolbarWith(ToolStrip AParentToolStrip)
         {
             ToolStripManager.Merge(FToolStrip, AParentToolStrip);
         }

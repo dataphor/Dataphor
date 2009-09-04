@@ -237,9 +237,9 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				if (FBreakOnException != value)
 				{
+					FBreakOnException = value;
 					if (FIsStarted)
 						ApplyBreakOnException();
-					FBreakOnException = value;
 					NotifyPropertyChanged(new string[] { "BreakOnException" });
 				}
 			}

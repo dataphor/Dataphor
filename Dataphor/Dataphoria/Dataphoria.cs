@@ -1142,7 +1142,7 @@ namespace Alphora.Dataphor.Dataphoria
 			MergeOrRevertMergeOfToolbars();
 			MergeOrRevertMergeOfStatusBars();
 		}
-
+		
 		private void MergeOrRevertMergeOfStatusBars()
 		{
 			ToolStripManager.RevertMerge(this.FStatusStrip);
@@ -1156,7 +1156,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void MergeOrRevertMergeOfToolbars()
 		{
 			ToolStripManager.RevertMerge(this.FToolStrip);			
-			var LChildForm = ActiveMdiChild as IChildFormWithToolBar;
+			var LChildForm = ActiveMdiChild as IToolBarClient;
 			if (LChildForm != null)
 			{
 				LChildForm.MergeToolbarWith(this.FToolStrip);
@@ -1619,11 +1619,12 @@ namespace Alphora.Dataphor.Dataphoria
  			{
  				UpdateDebuggerState();
  				UpdateBreakOnException();
- 			}
+			}
+			else if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
+				UpdateBreakOnException();
 			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
 				EnsureEditorForCurrentLocation();
-			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
-				UpdateBreakOnException();
+			
 		}
 
 		private void EnsureEditorForCurrentLocation()
@@ -1767,7 +1768,9 @@ namespace Alphora.Dataphor.Dataphoria
 		private void UpdateBreakOnException()
 		{
 			FBreakOnExceptionButton.Enabled = IsConnected;
+			FBreakOnExceptionMenuItem.Enabled = FBreakOnExceptionButton.Enabled;
 			FBreakOnExceptionButton.Checked = IsConnected && Debugger.BreakOnException;
+			FBreakOnExceptionMenuItem.Checked = FBreakOnExceptionButton.Checked;
 		}
 
 		private void EnsureSessionView()
