@@ -113,6 +113,23 @@ namespace Alphora.Dataphor.DAE.Server
 			FProgram.BindToProcess(AProcess, FPlan);
 		}
 		
+		// Released
+		/// <summary>
+		/// Used to indicate that the plan has been released back to the cache and should be considered disposed for anything looking at the plan external to the server.
+		/// </summary>
+		public event EventHandler Released;
+		
+		protected void DoReleased()
+		{
+			if (Released != null)
+				Released(this, EventArgs.Empty);
+		}
+		
+		public void NotifyReleased()
+		{
+			DoReleased();
+		}
+
 		// ActiveCursor
 		protected ServerCursor FActiveCursor;
 		public ServerCursor ActiveCursor { get { return FActiveCursor; } }

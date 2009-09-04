@@ -29,18 +29,18 @@ namespace Alphora.Dataphor.DAE.Server
 		private void AttachServerPlan()
 		{
 			FServerPlan.Disposed += new EventHandler(FServerPlanDisposed);
+			FServerPlan.Released += new EventHandler(FServerPlanDisposed);
 		}
-
+		
 		private void FServerPlanDisposed(object ASender, EventArgs AArgs)
 		{
-			DetachServerPlan();
-			FServerPlan = null;
 			Dispose();
 		}
 		
 		private void DetachServerPlan()
 		{
 			FServerPlan.Disposed -= new EventHandler(FServerPlanDisposed);
+			FServerPlan.Released -= new EventHandler(FServerPlanDisposed);
 		}
 
 		protected override void Dispose(bool ADisposing)
@@ -48,7 +48,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (FServerPlan != null)
 			{
 				DetachServerPlan();
-				FServerPlan.Dispose();
+				//FServerPlan.Dispose(); // Do not dispose the base plan, disposal will be handled by the server (it may be cached)
 				FServerPlan = null;
 			}
 			

@@ -433,6 +433,8 @@ namespace Alphora.Dataphor.DAE.Server
 					ServerPlan LPlan = FPlans.DisownAt(0) as ServerPlan;
 					if (!ServerSession.ReleaseCachedPlan(this, LPlan))
 						LPlan.Dispose();
+					else
+						LPlan.NotifyReleased();
 				}
 				catch (Exception E)
 				{
@@ -888,6 +890,8 @@ namespace Alphora.Dataphor.DAE.Server
 				FPlans.Disown(APlan);
 				if (!ServerSession.ReleaseCachedPlan(this, APlan))
 					APlan.Dispose();
+				else
+					APlan.NotifyReleased();
 			}
 			catch (Exception E)
 			{

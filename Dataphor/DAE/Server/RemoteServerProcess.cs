@@ -276,7 +276,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void UnprepareExpression(IRemoteServerExpressionPlan APlan)
 		{
-			FServerProcess.UnprepareExpression(((RemoteServerExpressionPlan)APlan).ServerExpressionPlan);
+			try
+			{
+				FServerProcess.UnprepareExpression(((RemoteServerExpressionPlan)APlan).ServerExpressionPlan);
+			}
+			catch (Exception E)
+			{
+				throw WrapException(E);
+			}
 		}
 		
 		// Evaluate
