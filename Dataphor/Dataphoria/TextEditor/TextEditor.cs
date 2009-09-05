@@ -20,7 +20,7 @@ using SD = ICSharpCode.TextEditor;
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
     /// <summary> Text Editor form for Dataphoria. </summary>
-    public partial class TextEditor :BaseForm, IToolBarClient, IDesigner
+    public partial class TextEditor : BaseForm, IToolBarClient, IDesigner
     {
         private string FDesignerID;
         protected DockContent FDockContentTextEdit;
@@ -221,7 +221,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void LocateRequested(DesignService AService, Alphora.Dataphor.DAE.Debug.DebugLocator ALocator)
 		{
 			if (ALocator.Line >= 1)
-				FTextEdit.ActiveTextAreaControl.Caret.Line = ALocator.Line - 1;
+				GotoPosition(ALocator.Line, 1);
 		}
 
 		// Status bar
@@ -432,7 +432,21 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             }
         }
 
-        #region StatusBar
+		protected void GotoPosition(int ALine, int ALinePos)
+		{
+			if (ALine >= 1)
+			{
+				if (ALinePos < 1)
+					ALinePos = 1;
+				FTextEdit.ActiveTextAreaControl.SelectionManager.ClearSelection();
+				FTextEdit.ActiveTextAreaControl.Caret.Position = new TextLocation(ALinePos - 1, ALine - 1);
+				FTextEdit.ActiveTextAreaControl.Caret.ValidateCaretPos();
+				FTextEdit.ActiveTextAreaControl.TextArea.SetDesiredColumn();
+				FTextEdit.ActiveTextAreaControl.Invalidate();
+			}
+		}
+
+		#region StatusBar
 
         protected ToolStripStatusLabel FPositionStatus;
 
@@ -440,34 +454,18 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
         {
             base.InitializeStatusBar();
 
-            this.FPositionStatus = new ToolStripStatusLabel
-            {
-                Text = "0:0",                
-                Name = "FStatusStrip",
-                Dock = DockStyle.Bottom
-            };
+			this.FPositionStatus = new ToolStripStatusLabel
+			{
+				Text = "0:0",
+				Name = "FPositionStatus",
+				MergeIndex = 100,
+				BorderSides = ToolStripStatusLabelBorderSides.All,
+				Alignment = ToolStripItemAlignment.Right,
+				DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+			};
 
-            /*FPositionStatus = new StatusStrip
-                                  {
-                                      Text = "0:0",
-                                      SizeToContent = true,
-                                      HAlign = HorzFlowAlign.Right,
-                                      Alignment = HorizontalAlignment.Center,
-                                      BorderStyle = BorderStyle.FixedSingle,
-                                      BorderColor = Color.Gray
-                                  };*/
-            FStatusStrip.Items.Add(FPositionStatus);
+			FStatusStrip.Items.Add(FPositionStatus);
         }
-
-        protected override void DisposeStatusBar()
-        {
-            FPositionStatus.Dispose();
-            FPositionStatus = null;
-
-            base.DisposeStatusBar();
-        }
-
-       
 
         #endregion
     }

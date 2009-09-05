@@ -12,6 +12,9 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using DataSet = System.Data.DataSet;
+using Image = System.Drawing.Image;
+
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.DAE.Client.Provider;
@@ -21,11 +24,12 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.Dataphoria.TextEditor.BlockActions;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.Logging;
+
 using ICSharpCode.TextEditor;
 using ICSharpCode.TextEditor.Document;
+
 using WeifenLuo.WinFormsUI.Docking;
-using DataSet = System.Data.DataSet;
-using Image = System.Drawing.Image;
+
 
 namespace Alphora.Dataphor.Dataphoria.TextEditor
 {
@@ -43,7 +47,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private ToolStripMenuItem FExecuteSchemaMenuItem;
 		private ToolStripMenuItem FExportDataMenuItem;
 		private ToolStripMenuItem FExportMenu;
-		private ToolStripMenuItem FInjectMenuItem;
 		private ToolStripMenuItem FNextBlockMenuItem;
 		private ToolStripMenuItem FPrepareLineMenuItem;
 		private ToolStripMenuItem FPrepareMenuItem;
@@ -364,10 +367,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				{
 					AnalyzeLine();
 				}
-				else if (ASender == FInjectMenuItem)
-				{
-					Inject();
-				}
 				else if (ASender == FExportDataMenuItem)
 				{
 					PromptAndExport(ExportType.Data);
@@ -478,30 +477,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 				Dataphoria.Warnings.AppendError(this, LException, LIsWarning);
 			}
-		}
-
-		public void Inject()
-		{
-			PrepareForExecute();
-
-			SetStatus
-			(
-				String.Format
-				(
-					Strings.ScriptInjected,
-					((DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery("System.LibraryName();")).AsString,
-					(
-						(DAE.Runtime.Data.Scalar)Dataphoria.EvaluateQuery
-						(
-							String.Format
-							(
-								@"System.InjectUpgrade(System.LibraryName(), ""{0}"");",
-								GetTextToExecute().Replace(@"""", @"""""")
-							)
-						)
-					).AsString
-				)
-			);
 		}
 
 		public void Prepare()
@@ -789,20 +764,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		// IErrorSource
 
-		private void GotoPosition(int ALine, int ALinePos)
-		{
-			if (ALine >= 1)
-			{
-				if (ALinePos < 1)
-					ALinePos = 1;
-				FTextEdit.ActiveTextAreaControl.SelectionManager.ClearSelection();
-				FTextEdit.ActiveTextAreaControl.Caret.Position = new TextLocation(ALinePos - 1, ALine - 1);
-				FTextEdit.ActiveTextAreaControl.Caret.ValidateCaretPos();
-				FTextEdit.ActiveTextAreaControl.TextArea.SetDesiredColumn();
-				FTextEdit.ActiveTextAreaControl.Invalidate();
-			}
-		}
-
 		protected override void OnClosing(CancelEventArgs AArgs)
 		{
 			base.OnClosing(AArgs);
@@ -937,42 +898,31 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		{
 			base.InitializeStatusBar();
 
-			/*FExecutionTimeStatus = new StatusBarAdvPanel
-									   {
-										   Text = "0:00:00",
-										   SizeToContent = true,
-										   HAlign = HorzFlowAlign.Right,
-										   Alignment = HorizontalAlignment.Center,
-										   BorderStyle = BorderStyle.FixedSingle,
-										   BorderColor = Color.Yellow
-									   };*/
 			this.FExecutionTimeStatus = new ToolStripStatusLabel 
 			{
-				Name = "FStatusStrip",
-				Dock = DockStyle.Bottom,
-				Text = "0:00:00",				
+				Name = "FExecutionTimeStatus",
+				Alignment = ToolStripItemAlignment.Right,
+				MergeIndex = 150,
+				BorderSides = ToolStripStatusLabelBorderSides.All,
+				Text = "0:00:00",
+				DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
 			};
 
 			const string LCResourceName = "Alphora.Dataphor.Dataphoria.Images.Rider.gif";
 			Stream LManifestResourceStream = GetType().Assembly.GetManifestResourceStream(LCResourceName);
-			Debug.Assert(LManifestResourceStream != null, "Resource must exist: " + LCResourceName);
+			Error.AssertFail(LManifestResourceStream != null, "Resource must exist: " + LCResourceName);
 			FWorkingAnimation = 
 				new PictureBox
 				{
 					Image = Image.FromStream(LManifestResourceStream),
 					SizeMode = PictureBoxSizeMode.AutoSize											
 				};
-			FWorkingStatus = new ToolStripControlHost(FWorkingAnimation, "FWorkingStatus");
-		   
-			/*FWorkingStatus = new StatusBarAdvPanel
-								 {
-									 Text = "",
-									 HAlign = HorzFlowAlign.Right,
-									 Alignment = HorizontalAlignment.Center,
-									 BorderStyle = BorderStyle.None
-								 };*/			
-			FWorkingStatus.Size = FWorkingAnimation.Size;
-			FWorkingStatus.Visible = false;
+			FWorkingStatus = new ToolStripControlHost(FWorkingAnimation, "FWorkingStatus")
+			{
+				Size = FWorkingAnimation.Size,
+				Visible = false,
+				Alignment = ToolStripItemAlignment.Right,
+			};
 			
 			FStatusStrip.Items.Add(FExecutionTimeStatus);
 			FStatusStrip.Items.Add(FWorkingStatus);
@@ -983,12 +933,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			base.DisposeStatusBar();
 
 			FWorkingAnimation.Image.Dispose(); //otherwise the animation thread will still be hanging around
-
-			/*FWorkingStatus.Dispose();
-			FWorkingStatus = null;
-
-			FExecutionTimeStatus.Dispose();
-			FExecutionTimeStatus = null;*/
 		}
 
 		#endregion

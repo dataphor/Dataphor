@@ -16,15 +16,17 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using Cursors = System.Windows.Forms.Cursors;
+using Image = System.Drawing.Image;
+
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.Dataphoria.Designers;
 using Alphora.Dataphor.Dataphoria.FormDesigner.ToolBox;
 using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
+using Session = Alphora.Dataphor.Frontend.Client.Windows.Session;
+
 using WeifenLuo.WinFormsUI.Docking;
-using Cursors=System.Windows.Forms.Cursors;
-using Image=System.Drawing.Image;
-using Session=Alphora.Dataphor.Frontend.Client.Windows.Session;
 
 namespace Alphora.Dataphor.Dataphoria.FormDesigner
 {
