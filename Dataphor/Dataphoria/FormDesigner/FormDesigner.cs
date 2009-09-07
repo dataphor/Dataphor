@@ -122,23 +122,15 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
 			get { return (FService == null ? null : FService.Dataphoria); }
 		}
 
-		#region IChildFormWithToolBar Members
-
-		public void MergeToolbarWith(ToolStrip AParentToolStrip)
+		void IToolBarClient.MergeToolbarWith(ToolStrip AParentToolStrip)
 		{
 			ToolStripManager.Merge(FToolStrip, AParentToolStrip);
 		}
-
-		#endregion
-
-		#region ILiveDesigner Members
 
 		void IDisposable.Dispose()
 		{
 			// TODO:  Add FormDesigner.System.IDisposable.Dispose implementation
 		}
-
-		#endregion
 
 		#region IServiceProvider Members
 

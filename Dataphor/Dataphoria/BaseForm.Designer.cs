@@ -20,13 +20,18 @@ namespace Alphora.Dataphor.Dataphoria
         {
 			this.components = new System.ComponentModel.Container();
 			this.FToolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.FBottomToolStripPanel = new System.Windows.Forms.ToolStripPanel();
-			this.FStatusStrip = new System.Windows.Forms.StatusStrip();
-			this.FStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.FStatusHighlightTimer = new System.Windows.Forms.Timer(this.components);
+			this.FBottomToolStripPanel = new System.Windows.Forms.ToolStripPanel();
+			this.FStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+			this.FStatusStrip = new System.Windows.Forms.StatusStrip();
 			this.FBottomToolStripPanel.SuspendLayout();
 			this.FStatusStrip.SuspendLayout();
 			this.SuspendLayout();
+			// 
+			// FStatusHighlightTimer
+			// 
+			this.FStatusHighlightTimer.Interval = 1000;
+			this.FStatusHighlightTimer.Tick += new System.EventHandler(this.StatusHighlightTimerTick);
 			// 
 			// FBottomToolStripPanel
 			// 
@@ -38,6 +43,15 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FBottomToolStripPanel.RowMargin = new System.Windows.Forms.Padding(3, 0, 0, 0);
 			this.FBottomToolStripPanel.Size = new System.Drawing.Size(284, 22);
 			// 
+			// FStatusLabel
+			// 
+			this.FStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.FStatusLabel.MergeIndex = 100;
+			this.FStatusLabel.Name = "FStatusLabel";
+			this.FStatusLabel.Size = new System.Drawing.Size(269, 17);
+			this.FStatusLabel.Spring = true;
+			this.FStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// FStatusStrip
 			// 
 			this.FStatusStrip.Dock = System.Windows.Forms.DockStyle.None;
@@ -47,20 +61,6 @@ namespace Alphora.Dataphor.Dataphoria
 			this.FStatusStrip.Name = "FStatusStrip";
 			this.FStatusStrip.Size = new System.Drawing.Size(284, 22);
 			this.FStatusStrip.TabIndex = 0;
-			// 
-			// FStatusLabel
-			// 
-			this.FStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.FStatusLabel.MergeIndex = 100;
-			this.FStatusLabel.Name = "FStatusLabel";
-			this.FStatusLabel.Size = new System.Drawing.Size(238, 17);
-			this.FStatusLabel.Spring = true;
-			this.FStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// FStatusHighlightTimer
-			// 
-			this.FStatusHighlightTimer.Interval = 1000;
-			this.FStatusHighlightTimer.Tick += new System.EventHandler(this.StatusHighlightTimerTick);
 			// 
 			// BaseForm
 			// 
@@ -83,9 +83,9 @@ namespace Alphora.Dataphor.Dataphoria
         #endregion
 
 		private System.Windows.Forms.ToolTip FToolTip;
+		private Timer FStatusHighlightTimer;
 		protected ToolStripPanel FBottomToolStripPanel;
 		protected StatusStrip FStatusStrip;
 		private ToolStripStatusLabel FStatusLabel;
-		private Timer FStatusHighlightTimer;
 	}
 }

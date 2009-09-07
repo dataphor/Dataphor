@@ -27,8 +27,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private WeifenLuo.WinFormsUI.Docking.DockPanel FDockPanel;
         private System.Windows.Forms.ImageList FNodesImageList;
 
-
-
         private MenuStrip FMenuStrip;
         private ToolStripMenuItem FFileToolStripMenuItem;
         private ToolStripMenuItem FSaveAsFileToolStripMenuItem;
@@ -54,12 +52,6 @@ namespace Alphora.Dataphor.Dataphoria.FormDesigner
         private ToolStripButton FPasteToolStripButton;
         private ToolStripButton FDeleteToolStripButton;
         private ToolStripButton FRenameToolStripButton;
-
-
-
-
-   
-
 
         #region Windows Form Designer generated code
         /// <summary>

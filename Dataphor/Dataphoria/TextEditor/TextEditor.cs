@@ -85,7 +85,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             set { FTextEdit.SetText(value); }
         }
 
-        #region IChildFormWithToolBar Members
+        #region IToolBarClient Members
 
         public virtual void MergeToolbarWith(ToolStrip AParentToolStrip)
         {

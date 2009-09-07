@@ -190,79 +190,80 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.toolStripMenuItem1,
             this.FPrintToolStripMenuItem});
 			this.FFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+			this.FFileToolStripMenuItem.MergeIndex = 10;
 			this.FFileToolStripMenuItem.Name = "FFileToolStripMenuItem";
 			this.FFileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-			this.FFileToolStripMenuItem.Text = "File";
+			this.FFileToolStripMenuItem.Text = "&File";
 			// 
 			// FSaveToolStripMenuItem
 			// 
 			this.FSaveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
 			this.FSaveToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FSaveToolStripMenuItem.MergeIndex = 8;
+			this.FSaveToolStripMenuItem.MergeIndex = 60;
 			this.FSaveToolStripMenuItem.Name = "FSaveToolStripMenuItem";
 			this.FSaveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
-			this.FSaveToolStripMenuItem.Text = "Save";
+			this.FSaveToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			this.FSaveToolStripMenuItem.Text = "&Save";
 			this.FSaveToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FSaveAsFileToolStripMenuItem
 			// 
 			this.FSaveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
 			this.FSaveAsFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FSaveAsFileToolStripMenuItem.MergeIndex = 9;
+			this.FSaveAsFileToolStripMenuItem.MergeIndex = 60;
 			this.FSaveAsFileToolStripMenuItem.Name = "FSaveAsFileToolStripMenuItem";
 			this.FSaveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.F)));
-			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
-			this.FSaveAsFileToolStripMenuItem.Text = "Save As File";
+			this.FSaveAsFileToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			this.FSaveAsFileToolStripMenuItem.Text = "Save As &File...";
 			this.FSaveAsFileToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FSaveAsDocumentToolStripMenuItem
 			// 
 			this.FSaveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
 			this.FSaveAsDocumentToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FSaveAsDocumentToolStripMenuItem.MergeIndex = 10;
+			this.FSaveAsDocumentToolStripMenuItem.MergeIndex = 60;
 			this.FSaveAsDocumentToolStripMenuItem.Name = "FSaveAsDocumentToolStripMenuItem";
 			this.FSaveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.D)));
-			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
-			this.FSaveAsDocumentToolStripMenuItem.Text = "Save As Document";
+			this.FSaveAsDocumentToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			this.FSaveAsDocumentToolStripMenuItem.Text = "Save As &Document...";
 			this.FSaveAsDocumentToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem5
 			// 
 			this.toolStripMenuItem5.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.toolStripMenuItem5.MergeIndex = 12;
+			this.toolStripMenuItem5.MergeIndex = 80;
 			this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-			this.toolStripMenuItem5.Size = new System.Drawing.Size(258, 6);
+			this.toolStripMenuItem5.Size = new System.Drawing.Size(253, 6);
 			// 
 			// FCloseToolStripMenuItem
 			// 
 			this.FCloseToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
 			this.FCloseToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FCloseToolStripMenuItem.MergeIndex = 13;
+			this.FCloseToolStripMenuItem.MergeIndex = 80;
 			this.FCloseToolStripMenuItem.Name = "FCloseToolStripMenuItem";
 			this.FCloseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
-			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
-			this.FCloseToolStripMenuItem.Text = "Close";
+			this.FCloseToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			this.FCloseToolStripMenuItem.Text = "C&lose";
 			this.FCloseToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.toolStripMenuItem1.MergeIndex = 14;
+			this.toolStripMenuItem1.MergeIndex = 100;
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(258, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(253, 6);
 			// 
 			// FPrintToolStripMenuItem
 			// 
 			this.FPrintToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Print;
 			this.FPrintToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FPrintToolStripMenuItem.MergeIndex = 15;
+			this.FPrintToolStripMenuItem.MergeIndex = 100;
 			this.FPrintToolStripMenuItem.Name = "FPrintToolStripMenuItem";
 			this.FPrintToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-			this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(261, 22);
-			this.FPrintToolStripMenuItem.Text = "Print";
+			this.FPrintToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+			this.FPrintToolStripMenuItem.Text = "&Print";
 			this.FPrintToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FEditToolStripMenuItem
@@ -281,96 +282,105 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             this.FReplaceToolStripMenuItem,
             this.FFindNextToolStripMenuItem});
 			this.FEditToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
-			this.FEditToolStripMenuItem.MergeIndex = 1;
+			this.FEditToolStripMenuItem.MergeIndex = 15;
 			this.FEditToolStripMenuItem.Name = "FEditToolStripMenuItem";
 			this.FEditToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-			this.FEditToolStripMenuItem.Text = "Edit";
+			this.FEditToolStripMenuItem.Text = "&Edit";
 			// 
 			// FUndoToolStripMenuItem
 			// 
 			this.FUndoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Undo;
 			this.FUndoToolStripMenuItem.Name = "FUndoToolStripMenuItem";
-			this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FUndoToolStripMenuItem.Text = "Undo";
+			this.FUndoToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+Z";
+			this.FUndoToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FUndoToolStripMenuItem.Text = "&Undo";
 			this.FUndoToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FRedoToolStripMenuItem
 			// 
 			this.FRedoToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Redo;
 			this.FRedoToolStripMenuItem.Name = "FRedoToolStripMenuItem";
-			this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FRedoToolStripMenuItem.Text = "Redo";
+			this.FRedoToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+Y";
+			this.FRedoToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FRedoToolStripMenuItem.Text = "&Redo";
 			this.FRedoToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(121, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(161, 6);
 			// 
 			// FCutToolStripMenuItem
 			// 
 			this.FCutToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Cut;
 			this.FCutToolStripMenuItem.Name = "FCutToolStripMenuItem";
-			this.FCutToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FCutToolStripMenuItem.Text = "Cut";
+			this.FCutToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+X";
+			this.FCutToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FCutToolStripMenuItem.Text = "C&ut";
 			this.FCutToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FCopyToolStripMenuItem
 			// 
 			this.FCopyToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
 			this.FCopyToolStripMenuItem.Name = "FCopyToolStripMenuItem";
-			this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FCopyToolStripMenuItem.Text = "Copy";
+			this.FCopyToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+C";
+			this.FCopyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FCopyToolStripMenuItem.Text = "&Copy";
 			this.FCopyToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FPasteToolStripMenuItem
 			// 
 			this.FPasteToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Paste;
 			this.FPasteToolStripMenuItem.Name = "FPasteToolStripMenuItem";
-			this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FPasteToolStripMenuItem.Text = "Paste";
+			this.FPasteToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+V";
+			this.FPasteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FPasteToolStripMenuItem.Text = "&Paste";
 			this.FPasteToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem3
 			// 
 			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(121, 6);
+			this.toolStripMenuItem3.Size = new System.Drawing.Size(161, 6);
 			// 
 			// FSelectAllToolStripMenuItem
 			// 
 			this.FSelectAllToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SelectAll;
 			this.FSelectAllToolStripMenuItem.Name = "FSelectAllToolStripMenuItem";
-			this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FSelectAllToolStripMenuItem.Text = "Select All";
+			this.FSelectAllToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+A";
+			this.FSelectAllToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FSelectAllToolStripMenuItem.Text = "&Select All";
 			this.FSelectAllToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(121, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(161, 6);
 			// 
 			// FFindToolStripMenuItem
 			// 
 			this.FFindToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Find;
 			this.FFindToolStripMenuItem.Name = "FFindToolStripMenuItem";
-			this.FFindToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FFindToolStripMenuItem.Text = "Find";
+			this.FFindToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F";
+			this.FFindToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FFindToolStripMenuItem.Text = "&Find...";
 			this.FFindToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FReplaceToolStripMenuItem
 			// 
 			this.FReplaceToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Replace;
 			this.FReplaceToolStripMenuItem.Name = "FReplaceToolStripMenuItem";
-			this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FReplaceToolStripMenuItem.Text = "Replace";
+			this.FReplaceToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+H";
+			this.FReplaceToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FReplaceToolStripMenuItem.Text = "R&eplace";
 			this.FReplaceToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FFindNextToolStripMenuItem
 			// 
 			this.FFindNextToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.FindNext;
 			this.FFindNextToolStripMenuItem.Name = "FFindNextToolStripMenuItem";
-			this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-			this.FFindNextToolStripMenuItem.Text = "Find Next";
+			this.FFindNextToolStripMenuItem.ShortcutKeyDisplayString = "F3";
+			this.FFindNextToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.FFindNextToolStripMenuItem.Text = "Find &Next";
 			this.FFindNextToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FViewToolStripMenuItem
@@ -378,9 +388,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.FViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FSplitWindowToolStripMenuItem});
 			this.FViewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
+			this.FViewToolStripMenuItem.MergeIndex = 20;
 			this.FViewToolStripMenuItem.Name = "FViewToolStripMenuItem";
 			this.FViewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-			this.FViewToolStripMenuItem.Text = "View";
+			this.FViewToolStripMenuItem.Text = "&View";
 			// 
 			// FSplitWindowToolStripMenuItem
 			// 
@@ -388,8 +399,8 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.FSplitWindowToolStripMenuItem.Name = "FSplitWindowToolStripMenuItem";
 			this.FSplitWindowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.D1)));
-			this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(230, 22);
-			this.FSplitWindowToolStripMenuItem.Text = "Split Window";
+			this.FSplitWindowToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+			this.FSplitWindowToolStripMenuItem.Text = "&Split Window";
 			this.FSplitWindowToolStripMenuItem.Click += new System.EventHandler(this.FMainMenuStrip_ItemClicked);
 			// 
 			// FToolStrip
@@ -570,6 +581,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			this.Name = "TextEditor";
 			this.TabText = "Untitled";
 			this.Text = "";
+			this.Controls.SetChildIndex(this.FDockPanel, 0);
+			this.Controls.SetChildIndex(this.FToolStrip, 0);
+			this.Controls.SetChildIndex(this.FMenuStrip, 0);
 			this.FMenuStrip.ResumeLayout(false);
 			this.FMenuStrip.PerformLayout();
 			this.FToolStrip.ResumeLayout(false);
@@ -581,12 +595,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		#endregion
 
         protected ToolStrip FToolStrip;
-        protected MenuStrip FMenuStrip;
-        protected ToolStripMenuItem FFileToolStripMenuItem;
-        protected ToolStripMenuItem FEditToolStripMenuItem;
-        protected ToolStripMenuItem FViewToolStripMenuItem;
+		protected MenuStrip FMenuStrip;
 		private ToolStripSeparator toolStripMenuItem5;
-
-		
+		protected ToolStripMenuItem FFileToolStripMenuItem;
+		protected ToolStripMenuItem FEditToolStripMenuItem;
+		protected ToolStripMenuItem FViewToolStripMenuItem;
     }
 }

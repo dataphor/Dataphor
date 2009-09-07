@@ -78,6 +78,7 @@ namespace Alphora.Dataphor.Dataphoria
 		public virtual void MergeStatusBarWith(StatusStrip AStatusBar) 
 		{
             ToolStripManager.Merge(FStatusStrip, AStatusBar);
+            FStatusStrip.Visible = false;
 		}
 		
 		#endregion

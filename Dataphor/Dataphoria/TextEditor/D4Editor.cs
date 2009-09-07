@@ -36,43 +36,21 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 	/// <summary> D4 text editor. </summary>
 	public partial class D4Editor : TextEditor, IErrorSource
 	{
-		private ToolStripMenuItem FAnalyzeLineMenuItem;
-		private ToolStripMenuItem FAnalyzeMenuItem;
-		private ToolStripMenuItem FCancelMenuItem;
-
 		protected DockContent FDockContentResultPanel;
-		private ToolStripMenuItem FExecuteBothMenuItem;
-		private ToolStripMenuItem FExecuteLineMenuItem;
-		private ToolStripMenuItem FExecuteMenuItem;
-		private ToolStripMenuItem FExecuteSchemaMenuItem;
-		private ToolStripMenuItem FExportDataMenuItem;
-		private ToolStripMenuItem FExportMenu;
-		private ToolStripMenuItem FNextBlockMenuItem;
-		private ToolStripMenuItem FPrepareLineMenuItem;
-		private ToolStripMenuItem FPrepareMenuItem;
-		private ToolStripMenuItem FPriorBlockMenuItem;
 		private ResultPanel FResultPanel;
 
-		private ToolStripMenuItem FScriptMenu;
-		private ToolStripMenuItem FSelectBlockMenuItem;
-		private ToolStripMenuItem FShowResultsMenuItem;
-		private ToolStripMenuItem FToggleBreakpointMenuItem;
-
 		private static readonly ILogger SRFLogger = LoggerFactory.Instance.CreateLogger(typeof (D4Editor));
-
 
 		public D4Editor() // dummy constructor for MDI menu merging
 		{
 			InitializeComponent();
 			InitializeDocking();
-			InitializeExtendendMenu();
 		}
 
 		public D4Editor(IDataphoria ADataphoria, string ADesignerID) : base(ADataphoria, ADesignerID)
 		{
 			InitializeComponent();
 			InitializeDocking();
-			InitializeExtendendMenu();
 			InitializeDebugger();
 			
 			FTextEdit.EditActions[Keys.Shift | Keys.Control | Keys.OemQuestion] = new ToggleBlockDelimiter();
@@ -103,7 +81,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FResultPanel.BackColor = SystemColors.Control;
 			FResultPanel.CausesValidation = false;
 			FResultPanel.EnableFolding = false;
-			//this.FResultPanel.Encoding = ((System.Text.Encoding)(resources.GetObject("FResultPanel.Encoding")));
 			FResultPanel.IndentStyle = IndentStyle.Auto;
 			FResultPanel.IsIconBarVisible = false;
 			FResultPanel.Location = new Point(1, 21);
@@ -129,182 +106,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		}
 
 
-		private void InitializeExtendendMenu()
-		{
-			FScriptMenu = new ToolStripMenuItem();
-			FExecuteMenuItem = new ToolStripMenuItem();
-			FCancelMenuItem = new ToolStripMenuItem();
-			FPrepareMenuItem = new ToolStripMenuItem();
-			FAnalyzeMenuItem = new ToolStripMenuItem();
-			var LSep1 = new ToolStripSeparator();
-			FExecuteLineMenuItem = new ToolStripMenuItem();
-			FPrepareLineMenuItem = new ToolStripMenuItem();
-			FAnalyzeLineMenuItem = new ToolStripMenuItem();
-			var LSep3 = new ToolStripSeparator();
-			FSelectBlockMenuItem = new ToolStripMenuItem();
-			FPriorBlockMenuItem = new ToolStripMenuItem();
-			FNextBlockMenuItem = new ToolStripMenuItem();
-			var LSep4 = new ToolStripSeparator();
-			FShowResultsMenuItem = new ToolStripMenuItem();
-			var LSep5 = new ToolStripSeparator();
-			FToggleBreakpointMenuItem = new ToolStripMenuItem();
-
-			FExportMenu = new ToolStripMenuItem();
-			FExecuteSchemaMenuItem = new ToolStripMenuItem();
-			FExportDataMenuItem = new ToolStripMenuItem();
-			FExecuteBothMenuItem = new ToolStripMenuItem();
-
-			// 
-			// FViewMenu
-			// 
-			FMenuStrip.Items.AddRange(new[]
-										  {
-											  FScriptMenu,
-											  FExportMenu
-										  });
-
-			//
-			//FViewToolStripMenuItem
-			//
-			FViewToolStripMenuItem.DropDownItems.Add(FShowResultsMenuItem);
-			// 
-			// FScriptMenu
-			// 
-			FScriptMenu.DropDownItems.AddRange(new ToolStripItem[]
-												   {
-													   FExecuteMenuItem,
-													   FCancelMenuItem,
-													   FPrepareMenuItem,
-													   FAnalyzeMenuItem,
-													   LSep1,
-													   FExecuteLineMenuItem,
-													   FPrepareLineMenuItem,
-													   FAnalyzeLineMenuItem,
-													   LSep3,
-													   FSelectBlockMenuItem,
-													   FPriorBlockMenuItem,
-													   FNextBlockMenuItem,
-													   LSep4,
-													   FShowResultsMenuItem,
-													   LSep5,
-													   FToggleBreakpointMenuItem
-												   });
-			FScriptMenu.Text = "&Script";
-			FScriptMenu.MergeAction = MergeAction.Insert;
-			FScriptMenu.MergeIndex = 2;
-			// 
-			// FExecuteMenuItem
-			// 
-
-			FExecuteMenuItem.ImageIndex = 0;
-			FExecuteMenuItem.Text = "&Execute";
-			FExecuteMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FExecuteMenuItem.Image = MenuImages.Execute;
-			FExecuteMenuItem.ShortcutKeys = Keys.Control | Keys.E;
-			// 
-			// FCancelMenuItem
-			// 
-
-			FCancelMenuItem.Enabled = false;
-			FCancelMenuItem.Text = "&Cancel Execute";
-			FCancelMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FCancelMenuItem.Image = MenuImages.CancelExecute;
-			// 
-			// FPrepareMenuItem
-			//									 
-			FPrepareMenuItem.Text = "&Prepare";
-			FPrepareMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FPrepareMenuItem.Image = MenuImages.Prepare;
-			FPrepareMenuItem.ShortcutKeys = Keys.Control | Keys.R;
-			// 
-			// FAnalyzeMenuItem
-			// 
-
-			FAnalyzeMenuItem.ImageIndex = 4;
-			FAnalyzeMenuItem.Text = "&Analyze";
-			FAnalyzeMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FAnalyzeMenuItem.Image = MenuImages.Analyze;
-			FAnalyzeMenuItem.ShortcutKeys = Keys.Control | Keys.T;
-			// 
-			// FExportMenu
-			// 
-
-			FExportMenu.DropDownItems.AddRange(new[]
-												   {
-													   FExecuteSchemaMenuItem,
-													   FExportDataMenuItem,
-													   FExecuteBothMenuItem
-												   });
-			FScriptMenu.MergeAction = MergeAction.Insert;
-			FScriptMenu.MergeIndex = 5;
-			FExportMenu.Text = "E&xport";
-			// 
-			// FExecuteSchemaMenuItem
-			// 
-
-			FExecuteSchemaMenuItem.Text = "&Schema Only...";
-			FExecuteSchemaMenuItem.Click += FMainMenuStrip_ItemClicked;			
-			// 
-			// FExportDataMenuItem
-			// 
-			FExportDataMenuItem.Text = "&Data Only...";
-			FExportDataMenuItem.Click += FMainMenuStrip_ItemClicked;
-			// 
-			// FExecuteBothMenuItem
-			// 
-			FExecuteBothMenuItem.Text = "S&chema and Data...";
-			FExecuteBothMenuItem.Click += FMainMenuStrip_ItemClicked;			
-			// 
-			// FExecuteLineMenuItem
-			// 
-			FExecuteLineMenuItem.Text = "E&xecute Line";
-			FExecuteLineMenuItem.Click += FMainMenuStrip_ItemClicked;   
-			FExecuteLineMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.E;		 
-			// 
-			// FPrepareLineMenuItem
-			// 
-			FPrepareLineMenuItem.Text = "P&repare Line";
-			FPrepareLineMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FPrepareLineMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.R;
-			// 
-			// FAnalyzeLineMenuItem
-			// 
-			FAnalyzeLineMenuItem.Text = "A&nalyze Line";
-			FAnalyzeLineMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FAnalyzeLineMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.T;
-			// 
-			// FSelectBlockMenuItem
-			// 
-			FSelectBlockMenuItem.Text = "Select &Block";
-			FSelectBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FSelectBlockMenuItem.ShortcutKeys = Keys.Control | Keys.D;
-			// 
-			// FPriorBlockMenuItem
-			// 
-			FPriorBlockMenuItem.Text = "&Prior Block";
-			FPriorBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
-			// 
-			// FNextBlockMenuItem
-			// 
-			FNextBlockMenuItem.Text = "&Next Block";
-			FNextBlockMenuItem.Click += FMainMenuStrip_ItemClicked;
-			// 
-			// FShowResultsMenuItem
-			// 
-			FShowResultsMenuItem.Text = "&Results";
-			FShowResultsMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FShowResultsMenuItem.ShortcutKeys = Keys.F7;
-			//
-			// FToggleBreakpointMenuItem
-			//
-			FToggleBreakpointMenuItem.Text = "Set Breakpoint";
-			FToggleBreakpointMenuItem.Click += FMainMenuStrip_ItemClicked;
-			FToggleBreakpointMenuItem.ShortcutKeys = Keys.F9;
-			// 
-			// D4Editor
-			// 
-		}
-
 		protected override IHighlightingStrategy GetHighlightingStrategy()
 		{
 			switch (DesignerID)
@@ -319,79 +120,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void ShowResults()
 		{
 			FDockContentResultPanel.Show();
-		}
-
-		private void FMainMenuStrip_ItemClicked(object ASender, EventArgs AArgs)
-		{
-			try
-			{
-				SRFLogger.WriteLine(TraceLevel.Verbose, "Sender {0}", ASender);
-	
-				if (ASender == FSelectBlockMenuItem)
-				{
-					new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
-				}
-				else if (ASender == FPriorBlockMenuItem)
-				{
-					new PriorBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
-				}
-				else if (ASender == FNextBlockMenuItem)
-				{
-					new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
-				}
-				else if (ASender == FExecuteMenuItem)
-				{
-					Execute();
-				}
-				else if (ASender == FExecuteLineMenuItem)
-				{
-					ExecuteLine();
-				}
-				else if (ASender == FCancelMenuItem)
-				{
-					CancelExecute();
-				}
-				else if (ASender == FPrepareMenuItem)
-				{
-					Prepare();
-				}
-				else if (ASender == FPrepareLineMenuItem)
-				{
-					PrepareLine();
-				}
-				else if (ASender == FAnalyzeMenuItem)
-				{
-					Analyze();
-				}
-				else if (ASender == FAnalyzeLineMenuItem)
-				{
-					AnalyzeLine();
-				}
-				else if (ASender == FExportDataMenuItem)
-				{
-					PromptAndExport(ExportType.Data);
-				}
-				else if (ASender == FExecuteBothMenuItem)
-				{
-					PromptAndExport(ExportType.Data | ExportType.Schema);
-				}
-				else if (ASender == FExecuteSchemaMenuItem)
-				{
-					PromptAndExport(ExportType.Schema);
-				}
-				else if (ASender == FShowResultsMenuItem)
-				{
-					ShowResults();
-				}
-				else if (ASender == FToggleBreakpointMenuItem)
-				{
-					ToggleBreakpoint();
-				}
-			}
-			catch (AbortException)
-			{
-				// do nothing
-			}
 		}
 
 		#region Execution
@@ -675,8 +403,10 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FResultPanel.Clear();
 
 			FExecuteMenuItem.Enabled = false;
+			FExecuteButton.Enabled = false;
 			FExecuteLineMenuItem.Enabled = false;
-			FCancelMenuItem.Enabled = true;
+			FCancelExecuteMenuItem.Enabled = true;
+			FCancelExecuteButton.Enabled = true;
 			FWorkingAnimation.Visible = true;
 
 			FExecutor = 
@@ -729,7 +459,9 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FWorkingAnimation.Visible = false;
 			FExecuteLineMenuItem.Enabled = true;
 			FExecuteMenuItem.Enabled = true;
-			FCancelMenuItem.Enabled = false;
+			FExecuteButton.Enabled = true;
+			FCancelExecuteMenuItem.Enabled = false;
+			FCancelExecuteButton.Enabled = false;
 
 			// Handler Error/Warnings
 			ProcessErrors(AMessages);
@@ -888,7 +620,7 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 
 		#endregion
 
-		#region StatusBar
+		#region Status and tool bar
 
 		protected ToolStripStatusLabel FExecutionTimeStatus;
 		private PictureBox FWorkingAnimation;
@@ -935,6 +667,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			FWorkingAnimation.Image.Dispose(); //otherwise the animation thread will still be hanging around
 		}
 
+		public override void MergeToolbarWith(ToolStrip AParentToolStrip)
+		{
+			base.MergeToolbarWith(AParentToolStrip);
+		}
+
 		#endregion
 
 		#region Debugger
@@ -977,7 +714,11 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 					);
 
 				if (ALogicPos.Y >= 0 && ALogicPos.Y < AIconBar.TextArea.Document.TotalNumberOfLines)
-					Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(Service.GetLocator().Locator, ALogicPos.Line + 1, -1));
+				{
+					var LLocator = Service.GetLocator();
+					if (LLocator != null)
+						Dataphoria.Debugger.ToggleBreakpoint(new DebugLocator(LLocator.Locator, ALogicPos.Line + 1, -1));
+				}
 			}
 		}
 
@@ -1095,7 +836,84 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		}
 
 		#endregion
-	}
 
-	
+		#region Commands
+		
+		private void ExecuteClicked(object sender, EventArgs e)
+		{
+			Execute();
+		}
+
+		private void CancelExecuteClicked(object sender, EventArgs e)
+		{
+			CancelExecute();
+		}
+
+		private void PrepareClicked(object sender, EventArgs e)
+		{
+			Prepare();
+		}
+
+		private void AnalyzeClicked(object sender, EventArgs e)
+		{
+			Analyze();
+		}
+
+		private void ExecuteLineClicked(object sender, EventArgs e)
+		{
+			ExecuteLine();
+		}
+
+		private void PrepareLineClicked(object sender, EventArgs e)
+		{
+			PrepareLine();
+		}
+
+		private void AnalyzeLineClicked(object sender, EventArgs e)
+		{
+			AnalyzeLine();
+		}
+
+		private void SelectBlockClicked(object sender, EventArgs e)
+		{
+			new SelectBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+		}
+
+		private void PriorBlockClicked(object sender, EventArgs e)
+		{
+			new PriorBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+		}
+
+		private void NextBlockClicked(object sender, EventArgs e)
+		{
+			new NextBlock().Execute(FTextEdit.ActiveTextAreaControl.TextArea);
+		}
+
+		private void ToggleBreakpointClicked(object sender, EventArgs e)
+		{
+			ToggleBreakpoint();
+		}
+
+		private void ExportSchemaClicked(object sender, EventArgs e)
+		{
+			PromptAndExport(ExportType.Schema);
+		}
+
+		private void ExportDataClicked(object sender, EventArgs e)
+		{
+			PromptAndExport(ExportType.Data);
+		}
+
+		private void ExportSchemaAndDataClicked(object sender, EventArgs e)
+		{
+			PromptAndExport(ExportType.Data | ExportType.Schema);
+		}
+
+		private void ViewResultsClicked(object sender, EventArgs e)
+		{
+			ShowResults();
+		}
+		
+		#endregion
+	}
 }
