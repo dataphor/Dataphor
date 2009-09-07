@@ -137,8 +137,6 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				FDataphoria.ExecuteScript(@".System.Debug.Start();");
 				UpdateDebuggerState();
-				ApplyBreakOnException();
-				ApplyBreakOnStart();
 			}
 		}
 
