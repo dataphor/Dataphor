@@ -22,11 +22,11 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 {
 	// Don't put any definitions above the Analyzer class
 
-	public class Analyzer : BaseForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner
+	public class Analyzer : BaseForm, Alphora.Dataphor.Dataphoria.Designers.IDesigner, IToolBarClient
 	{
 		private AnalyzerControl FAnalyzerControl;
 		private MenuStrip MenuStip;
-		private ToolStrip ToolStrip;
+		private ToolStrip FToolStrip;
 		private ToolStripButton toolStripButton1;
 		private ToolStripButton FExpandOnDemand;
 
@@ -93,7 +93,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			this.FExpandOnDemand = new System.Windows.Forms.ToolStripButton();
 			this.FAnalyzerControl = new Alphora.Dataphor.Dataphoria.Analyzer.AnalyzerControl();
 			this.MenuStip = new System.Windows.Forms.MenuStrip();
-			this.ToolStrip = new System.Windows.Forms.ToolStrip();
+			this.FToolStrip = new System.Windows.Forms.ToolStrip();
 			this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
 			toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -109,8 +109,13 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			toolStripButton4 = new System.Windows.Forms.ToolStripButton();
 			toolStripButton5 = new System.Windows.Forms.ToolStripButton();
 			this.MenuStip.SuspendLayout();
-			this.ToolStrip.SuspendLayout();
+			this.FToolStrip.SuspendLayout();
 			this.SuspendLayout();
+			// 
+			// FBottomToolStripPanel
+			// 
+			this.FBottomToolStripPanel.Location = new System.Drawing.Point(0, 496);
+			this.FBottomToolStripPanel.Size = new System.Drawing.Size(687, 22);
 			// 
 			// toolStripMenuItem1
 			// 
@@ -120,7 +125,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
             saveAsDocumentToolStripMenuItem,
             closeToolStripMenuItem});
 			toolStripMenuItem1.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
-			toolStripMenuItem1.MergeIndex = 1;
+			toolStripMenuItem1.MergeIndex = 10;
 			toolStripMenuItem1.Name = "toolStripMenuItem1";
 			toolStripMenuItem1.Size = new System.Drawing.Size(37, 20);
 			toolStripMenuItem1.Text = "&File";
@@ -128,7 +133,8 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// saveToolStripMenuItem
 			// 
 			saveToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Save;
-			saveToolStripMenuItem.MergeIndex = 20;
+			saveToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			saveToolStripMenuItem.MergeIndex = 90;
 			saveToolStripMenuItem.Name = "saveToolStripMenuItem";
 			saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
 			saveToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
@@ -138,7 +144,8 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// saveAsFileToolStripMenuItem
 			// 
 			saveAsFileToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveFile;
-			saveAsFileToolStripMenuItem.MergeIndex = 20;
+			saveAsFileToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			saveAsFileToolStripMenuItem.MergeIndex = 90;
 			saveAsFileToolStripMenuItem.Name = "saveAsFileToolStripMenuItem";
 			saveAsFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.F)));
@@ -149,7 +156,8 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// saveAsDocumentToolStripMenuItem
 			// 
 			saveAsDocumentToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.SaveDocument;
-			saveAsDocumentToolStripMenuItem.MergeIndex = 20;
+			saveAsDocumentToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.Insert;
+			saveAsDocumentToolStripMenuItem.MergeIndex = 90;
 			saveAsDocumentToolStripMenuItem.Name = "saveAsDocumentToolStripMenuItem";
 			saveAsDocumentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
 						| System.Windows.Forms.Keys.D)));
@@ -160,7 +168,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// closeToolStripMenuItem
 			// 
 			closeToolStripMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Close;
-			closeToolStripMenuItem.MergeIndex = 20;
+			closeToolStripMenuItem.MergeIndex = 120;
 			closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			closeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F4)));
 			closeToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
@@ -174,7 +182,7 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
             zoomOutToolStripMenuItem,
             expandOnDemandToolStripMenuItem});
 			viewToolStripMenuItem.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
-			viewToolStripMenuItem.MergeIndex = 10;
+			viewToolStripMenuItem.MergeIndex = 20;
 			viewToolStripMenuItem.Name = "viewToolStripMenuItem";
 			viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			viewToolStripMenuItem.Text = "&View";
@@ -262,9 +270,9 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// FAnalyzerControl
 			// 
 			this.FAnalyzerControl.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.FAnalyzerControl.Location = new System.Drawing.Point(0, 24);
+			this.FAnalyzerControl.Location = new System.Drawing.Point(0, 0);
 			this.FAnalyzerControl.Name = "FAnalyzerControl";
-			this.FAnalyzerControl.Size = new System.Drawing.Size(687, 494);
+			this.FAnalyzerControl.Size = new System.Drawing.Size(687, 518);
 			this.FAnalyzerControl.TabIndex = 4;
 			// 
 			// MenuStip
@@ -276,20 +284,22 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			this.MenuStip.Name = "MenuStip";
 			this.MenuStip.Size = new System.Drawing.Size(687, 24);
 			this.MenuStip.TabIndex = 9;
+			this.MenuStip.Visible = false;
 			// 
-			// ToolStrip
+			// FToolStrip
 			// 
-			this.ToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
             toolStripButton2,
             toolStripButton3,
             toolStripButton4,
             toolStripButton5,
             this.FExpandOnDemand});
-			this.ToolStrip.Location = new System.Drawing.Point(0, 24);
-			this.ToolStrip.Name = "ToolStrip";
-			this.ToolStrip.Size = new System.Drawing.Size(687, 25);
-			this.ToolStrip.TabIndex = 10;
+			this.FToolStrip.Location = new System.Drawing.Point(0, 0);
+			this.FToolStrip.Name = "FToolStrip";
+			this.FToolStrip.Size = new System.Drawing.Size(687, 25);
+			this.FToolStrip.TabIndex = 10;
+			this.FToolStrip.Visible = false;
 			// 
 			// toolStripButton1
 			// 
@@ -304,19 +314,24 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 			// 
 			// Analyzer
 			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.CausesValidation = false;
 			this.ClientSize = new System.Drawing.Size(687, 518);
-			this.Controls.Add(this.ToolStrip);
+			this.Controls.Add(this.FToolStrip);
 			this.Controls.Add(this.FAnalyzerControl);
 			this.Controls.Add(this.MenuStip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.MenuStip;
 			this.Name = "Analyzer";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+			this.Controls.SetChildIndex(this.MenuStip, 0);
+			this.Controls.SetChildIndex(this.FAnalyzerControl, 0);
+			this.Controls.SetChildIndex(this.FToolStrip, 0);
+			this.Controls.SetChildIndex(this.FBottomToolStripPanel, 0);
 			this.MenuStip.ResumeLayout(false);
 			this.MenuStip.PerformLayout();
-			this.ToolStrip.ResumeLayout(false);
-			this.ToolStrip.PerformLayout();
+			this.FToolStrip.ResumeLayout(false);
+			this.FToolStrip.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -335,6 +350,11 @@ namespace Alphora.Dataphor.Dataphoria.Analyzer
 				AArgs.Cancel = true;
 				throw;
 			}
+		}
+
+		public virtual void MergeToolbarWith(ToolStrip AParentToolStrip)
+		{
+			ToolStripManager.Merge(FToolStrip, AParentToolStrip);
 		}
 
 		#region Service
