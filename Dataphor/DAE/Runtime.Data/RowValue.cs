@@ -637,8 +637,12 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		public object this[int AIndex]
 		{
 			get 
-			{ 
+			{
+				#if USEDATATYPESINNATIVEROW
+				if (FRow.DataTypes[AIndex] is Schema.IScalarType)
+				#else
 				if (DataType.Columns[AIndex].DataType is Schema.IScalarType)
+				#endif
 					return FRow.Values[AIndex];
 				return FromNativeRow(Manager, DataType, FRow, AIndex); 
 			}
