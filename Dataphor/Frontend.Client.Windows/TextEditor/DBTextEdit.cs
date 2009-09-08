@@ -34,7 +34,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void InitializeDataLink()
 		{
-			AttachDocumentChanged();
 			FLink = new FieldDataLink();
 			FLink.OnSaveRequested += new DataLinkHandler(SaveRequested);
 			FLink.OnFieldChanged += new DataLinkFieldHandler(FieldChanged);
@@ -49,16 +48,6 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				FLink.Dispose();
 				FLink = null;
 			}
-		}
-
-		private void AttachDocumentChanged()
-		{
-			Document.DocumentChanged += new ICSharpCode.TextEditor.Document.DocumentEventHandler(DocumentChanged);
-		}
-
-		private void DetachDocumentChanged()
-		{
-			Document.DocumentChanged -= new ICSharpCode.TextEditor.Document.DocumentEventHandler(DocumentChanged);
 		}
 
 		/// <summary> Gets or sets a value indicating whether to allow the user to modify the file. </summary>
@@ -121,20 +110,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 
 		private void FieldChanged(DataLink ALink, DataSet ADataSet, DataField AField)
 		{
-			DetachDocumentChanged();
-			try
-			{
-				SetHasValue((DataField != null) && DataField.HasValue());
-				SetText(HasValue ? DataField.AsString : "");
-			}
-			finally
-			{
-				AttachDocumentChanged();
-			}
+			SetHasValue((DataField != null) && DataField.HasValue());
+			SetText(HasValue ? DataField.AsString : "");
 		}
 
-		private void DocumentChanged(object sender, ICSharpCode.TextEditor.Document.DocumentEventArgs e)
+		protected override void DoDocumentChanged(object ASender, ICSharpCode.TextEditor.Document.DocumentEventArgs AArgs)
 		{
+			base.DoDocumentChanged(ASender, AArgs);
 			SetHasValue((Document.TextContent != String.Empty) || !NilIfBlank);
 			EnsureEdit();
 		}

@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ICSharpCode.TextEditor;
 using SD = ICSharpCode.TextEditor;
+using ICSharpCode.TextEditor.Document;
 
 namespace Alphora.Dataphor.Frontend.Client.Windows
 {
@@ -44,6 +45,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			IndentStyle = SD.Document.IndentStyle.Auto;
 			LineViewerStyle = SD.Document.LineViewerStyle.None;
 			Document.TextEditorProperties.LineTerminator = "\r\n";
+			Document.DocumentChanged += new ICSharpCode.TextEditor.Document.DocumentEventHandler(DocumentDocumentChanged);
 			editactions[Keys.L | Keys.Control] = new SD.Actions.DeleteLine();
 			editactions[Keys.BrowserBack] = new SD.Actions.GotoPrevBookmark(new Predicate<ICSharpCode.TextEditor.Document.Bookmark>(delegate { return true; }));
 			editactions[Keys.BrowserForward] = new SD.Actions.GotoNextBookmark(new Predicate<ICSharpCode.TextEditor.Document.Bookmark>(delegate { return true; }));
@@ -71,52 +73,91 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			);
 		}
 
+		private bool FSettingText;
+
+		/// <summary> Document changed event that is only raised if the change wasn't caused by text changing. </summary>
+		public event DocumentEventHandler DocumentChanged;
+
+		private void DocumentDocumentChanged(object ASender, ICSharpCode.TextEditor.Document.DocumentEventArgs AArgs)
+		{
+			if (!FSettingText)
+				DoDocumentChanged(ASender, AArgs);
+		}
+
+		protected virtual void DoDocumentChanged(object ASender, DocumentEventArgs AArgs)
+		{
+			if (DocumentChanged != null)
+				DocumentChanged(ASender, AArgs);
+		}
+		
 		public void AppendText(string ANewText)
 		{
+			FSettingText = true;
 			BeginUpdate();
+			try
+			{
+				TextLocation LOldEndPoint = Document.OffsetToPosition(Document.TextLength);
+				
+				bool LOldReadOnly = Document.ReadOnly;
+				Document.ReadOnly = false;
 
-			TextLocation LOldEndPoint = Document.OffsetToPosition(Document.TextLength);
-			
-			bool LOldReadOnly = Document.ReadOnly;
-			Document.ReadOnly = false;
+				if ((Document.TextLength > 0) && (ANewText.Length > 0))
+					Document.Insert(Document.TextLength, "\r\n");
+				Document.Insert(Document.TextLength, ANewText);
 
-			if ((Document.TextLength > 0) && (ANewText.Length > 0))
-				Document.Insert(Document.TextLength, "\r\n");
-			Document.Insert(Document.TextLength, ANewText);
+				Document.ReadOnly = LOldReadOnly;
 
-			Document.ReadOnly = LOldReadOnly;
-
-			ActiveTextAreaControl.Caret.Position = LOldEndPoint;
-			ActiveTextAreaControl.ScrollToCaret();
-
-			EndUpdate();
+				ActiveTextAreaControl.Caret.Position = LOldEndPoint;
+				ActiveTextAreaControl.ScrollToCaret();
+			}
+			finally
+			{
+				FSettingText = false;
+				EndUpdate();
+			}
 
 			Refresh();  // if this isn't done then half the loaded text won't show up.
 		}
 		
 		public void SetText(string ANewText)
 		{
+			FSettingText = true;
 			BeginUpdate();
-			Document.TextContent = FRepairCRLF.Replace(ANewText, "\r\n"); 
-			Document.UndoStack.ClearAll();
-			Document.BookmarkManager.Clear();
-			Document.UpdateQueue.Clear();
-			ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
-			ActiveTextAreaControl.ScrollToCaret();
-			EndUpdate();
+			try
+			{
+				Document.TextContent = FRepairCRLF.Replace(ANewText, "\r\n"); 
+				Document.UndoStack.ClearAll();
+				Document.BookmarkManager.Clear();
+				Document.UpdateQueue.Clear();
+				ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
+				ActiveTextAreaControl.ScrollToCaret();
+			}
+			finally
+			{
+				FSettingText = false;
+				EndUpdate();
+			}
 
 			Refresh();  // if this isn't done then half the loaded text won't show up.
 		}
 
 		public void Clear()
 		{
+			FSettingText = true;
 			BeginUpdate();
-			Document.TextContent = String.Empty;
-			Document.UndoStack.ClearAll();
-			Document.BookmarkManager.Clear();
-			Document.UpdateQueue.Clear();
-			ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
-			EndUpdate();
+			try
+			{
+				Document.TextContent = String.Empty;
+				Document.UndoStack.ClearAll();
+				Document.BookmarkManager.Clear();
+				Document.UpdateQueue.Clear();
+				ActiveTextAreaControl.Caret.Position = TextLocation.Empty;
+			}
+			finally
+			{
+				FSettingText = false;
+				EndUpdate();
+			}
 
 			Refresh();
 		}

@@ -51,13 +51,12 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
             FTextEdit.HelpRequested += FTextArea_HelpRequested;
 
             FTextEdit.Document.HighlightingStrategy = GetHighlightingStrategy();
-            FTextEdit.Document.DocumentChanged += DocumentChanged;
+            FTextEdit.DocumentChanged += DocumentChanged;
             TextEditInitialized(FTextEdit, FTextEdit.ActiveTextAreaControl);
             FTextEdit.OnInitializeTextAreaControl += TextEditInitialized;
             FTextEdit.BeginningFind += BeginningFind;
             FTextEdit.ReplacementsPerformed += ReplacementsPerformed;
             FTextEdit.TextNotFound += TextNotFound;
-            //FEditorPanel.Controls.Add(FTextEdit);
 
             UpdateLineNumberStatus();
             UpdateTitle();

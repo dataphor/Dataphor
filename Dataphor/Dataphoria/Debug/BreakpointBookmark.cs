@@ -23,10 +23,10 @@ namespace Alphora.Dataphor.Dataphoria
 
 		protected override TextMarker CreateMarker()
 		{
-			LineSegment ALineSeg = Anchor.Line;
-			TextMarker AMarker = new TextMarker(ALineSeg.Offset, ALineSeg.Length, TextMarkerType.SolidBlock, CMarkerColor, Color.White);
-			Document.MarkerStrategy.AddMarker(AMarker);
-			return AMarker;
+			LineSegment ALineSeg = Document.GetLineSegment(LineNumber);
+			TextMarker LMarker = new TextMarker(ALineSeg.Offset, ALineSeg.Length, TextMarkerType.SolidBlock, CMarkerColor, Color.White);
+			Document.MarkerStrategy.InsertMarker(0, LMarker);
+			return LMarker;
 		}
 	}
 }

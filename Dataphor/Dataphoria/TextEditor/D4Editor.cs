@@ -697,11 +697,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 			UpdateCurrentLocation();
 		}
 
-		private void ClearBreakpointBookmarks()
-		{
-			FTextEdit.Document.BookmarkManager.Clear();
-		}
-
 		private void IconBarMouseDown(AbstractMargin AIconBar, Point AMousePos, MouseButtons AMouseButtons)
 		{
 			if (AMouseButtons == MouseButtons.Left)
@@ -761,15 +756,13 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void AddBookmark(DebugBookmark ABookmark)
 		{
 			FTextEdit.Document.BookmarkManager.AddMark(ABookmark);
-			FTextEdit.Document.RequestUpdate(new TextAreaUpdate(TextAreaUpdateType.LinesBetween, ABookmark.LineNumber, ABookmark.LineNumber));
-			FTextEdit.Document.CommitUpdate();
 			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
-		private void RemoveBookmark(BreakpointBookmark LOldBookmark)
+		private void RemoveBookmark(BreakpointBookmark ABookmark)
 		{
-			FTextEdit.Document.BookmarkManager.RemoveMark(LOldBookmark);
-			LOldBookmark.RemoveMarker();
+			FTextEdit.Document.BookmarkManager.RemoveMark(ABookmark);
+			ABookmark.RemoveMarker();
 			FTextEdit.ActiveTextAreaControl.TextArea.Refresh(FTextEdit.ActiveTextAreaControl.TextArea.IconBarMargin);
 		}
 
@@ -791,8 +784,18 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 		private void LoadBreakpointBookmarks()
 		{
 			foreach (DebugLocator LItem in Dataphoria.Debugger.Breakpoints)
-			if (Service.LocatorNameMatches(LItem.Locator))
-				AddBreakpointBookmark(LItem);
+				if (Service.LocatorNameMatches(LItem.Locator))
+					AddBreakpointBookmark(LItem);
+		}
+
+		private void ClearBreakpointBookmarks()
+		{
+			for (int i = FTextEdit.Document.BookmarkManager.Marks.Count - 1; i >= 0; i--)
+			{
+				var LBookmark = FTextEdit.Document.BookmarkManager.Marks[i] as BreakpointBookmark;
+				if (LBookmark != null)
+					RemoveBookmark(LBookmark);
+			}
 		}
 
 		private void AddBreakpointBookmark(DebugLocator AItem)
