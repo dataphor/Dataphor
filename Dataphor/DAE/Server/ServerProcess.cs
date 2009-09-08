@@ -68,8 +68,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FProcessProgram = new Program(this);
 			FProcessProgram.Start(null);
 			
-			if (FServerSession.DebuggerID > 0)
-				FServerSession.Server.GetDebugger(FServerSession.DebuggerID).Attach(this);
+			if (FServerSession.DebuggedByID > 0)
+				FServerSession.Server.GetDebugger(FServerSession.DebuggedByID).Attach(this);
 
 			#if !DISABLE_PERFORMANCE_COUNTERS
 			if (FServerSession.Server.FProcessCounter != null)
@@ -115,8 +115,8 @@ namespace Alphora.Dataphor.DAE.Server
 												{
 													try
 													{
-														if (FDebugger != null)
-															FDebugger.Detach(this);
+														if (FDebuggedBy != null)
+															FDebuggedBy.Detach(this);
 															
 														if (FApplicationTransactionID != Guid.Empty)
 															LeaveApplicationTransaction();
@@ -2110,14 +2110,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// Debugging
 		
-		private Debugger FDebugger;
-		public Debugger Debugger { get { return FDebugger; } }
+		private Debugger FDebuggedBy;
+		public Debugger DebuggedBy { get { return FDebuggedBy; } }
 		
-		internal void SetDebugger(Debugger ADebugger)
+		internal void SetDebuggedBy(Debugger ADebuggedBy)
 		{
-			if ((FDebugger != null) && (ADebugger != null))
+			if ((FDebuggedBy != null) && (ADebuggedBy != null))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttached, FProcessID);
-			FDebugger = ADebugger;
+			FDebuggedBy = ADebuggedBy;
 		}
 		
 		private bool FBreakNext;

@@ -626,7 +626,7 @@ namespace Alphora.Dataphor.DAE.Debug
 	{
 		public override object NilaryInternalExecute(Program AProgram)
 		{
-			AProgram.ServerProcess.ServerSession.CheckedDebugger.WaitForPause(AProgram.ServerProcess);
+			AProgram.ServerProcess.ServerSession.CheckedDebugger.WaitForPause(AProgram, this);
 			return null;
 		}
 	}

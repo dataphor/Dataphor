@@ -171,7 +171,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			lock (FSyncHandle)
 			{
-				AProcess.SetDebugger(this);
+				AProcess.SetDebuggedBy(this);
 				FProcesses.Add(AProcess);
 			}
 		}
@@ -185,7 +185,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				FProcesses.Disown(AProcess);
 				FBrokenProcesses.SafeDisown(AProcess);
-				AProcess.SetDebugger(null);
+				AProcess.SetDebuggedBy(null);
 			}
 			
 			Pulse();
@@ -203,7 +203,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		{
 			lock (FSyncHandle)
 			{
-				ASession.SetDebuggerID(DebuggerID);
+				ASession.SetDebuggedByID(DebuggerID);
 				FSessions.Add(ASession);
 				lock (ASession.Processes)
 					foreach (ServerProcess LProcess in ASession.Processes)
@@ -217,11 +217,11 @@ namespace Alphora.Dataphor.DAE.Debug
 			{
 				lock (ASession.Processes)
 					foreach (ServerProcess LProcess in ASession.Processes)
-						if (LProcess.Debugger == this)
+						if (LProcess.DebuggedBy == this)
 							Detach(LProcess);
 							
 				FSessions.Disown(ASession);
-				ASession.SetDebuggerID(0);
+				ASession.SetDebuggedByID(0);
 			}
 		}
 		
@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Waits for the debugger to pause
 		/// </summary>
-		public void WaitForPause(ServerProcess AProcess)
+		public void WaitForPause(Program AProgram, PlanNode ANode)
 		{
 			while (true)
 			{
@@ -254,7 +254,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					return;
 				
 				FWaitSignal.WaitOne(500);
-				AProcess.CheckAborted();
+				AProgram.Yield(ANode);
 			}
 		}
 		

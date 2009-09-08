@@ -367,25 +367,24 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if ((FDebugger != null) && (ADebugger != null) && (FDebugger != ADebugger))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyStarted, FSessionID);
-			FDebuggerID = 0; // Clear the debugger ID, just in case
 			FDebugger = ADebugger;
 		}
 		
-		private int FDebuggerID;
-		public int DebuggerID { get { return FDebuggerID; } }
+		private int FDebuggedByID;
+		public int DebuggedByID { get { return FDebuggedByID; } }
 		
 		/// <summary>
 		/// Sets the ID of the debugger to which this session is attached.
 		/// </summary>
-		internal void SetDebuggerID(int ADebuggerID)
+		internal void SetDebuggedByID(int ADebuggedByID)
 		{
 			if (String.IsNullOrEmpty(FSessionInfo.CatalogCacheName))
 				throw new ServerException(ServerException.Codes.CannotAttachToAnInProcessSession, FSessionID);
-			if ((FDebugger != null) && (FSessionID == ADebuggerID))
+			if ((FDebugger != null) && (FSessionID == ADebuggedByID))
 				throw new ServerException(ServerException.Codes.CannotAttachToDebuggerSession, FSessionID);
-			if ((FDebuggerID != 0) && (ADebuggerID != 0))
+			if ((FDebuggedByID != 0) && (ADebuggedByID != 0))
 				throw new ServerException(ServerException.Codes.DebuggerAlreadyAttachedToSession, FSessionID);
-			FDebuggerID = ADebuggerID;
+			FDebuggedByID = ADebuggedByID;
 		}
 
 		// Execution

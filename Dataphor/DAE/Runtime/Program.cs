@@ -342,9 +342,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 
 			// Double-check debugger here to optimize for the case that there is no debugger
 			// With this check first, if there is no debugger we've saved an assignment
-			if (FServerProcess.Debugger != null)
+			if (FServerProcess.DebuggedBy != null)
 			{
-				Debugger LDebugger = FServerProcess.Debugger;
+				Debugger LDebugger = FServerProcess.DebuggedBy;
 				if (LDebugger != null)
 				{
 					FCurrentNode = APlanNode;
@@ -360,9 +360,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 
 			// Double-check debugger here to optimize for the case that there is no debugger
 			// With this check first, if there is no debugger we've saved an assignment
-			if (FServerProcess.Debugger != null)
+			if (FServerProcess.DebuggedBy != null)
 			{
-				Debugger LDebugger = FServerProcess.Debugger;
+				Debugger LDebugger = FServerProcess.DebuggedBy;
 				if (LDebugger != null)
 				{
 					FCurrentNode = APlanNode;

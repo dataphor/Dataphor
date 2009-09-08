@@ -1068,8 +1068,8 @@ namespace Alphora.Dataphor.DAE.Server
 							if ((AProcess.ExecutingThread == null) || !AProcess.ExecutingThread.IsAlive)
 								return;
 								
-							if (AProcess.Debugger != null)
-								LDebugger = AProcess.Debugger;
+							if (AProcess.DebuggedBy != null)
+								LDebugger = AProcess.DebuggedBy;
 						}
 						finally
 						{
