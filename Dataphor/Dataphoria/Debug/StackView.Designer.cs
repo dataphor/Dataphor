@@ -37,6 +37,8 @@
 			this.FContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.FRefreshContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+			this.FCopyButton = new System.Windows.Forms.ToolStripButton();
+			this.FCopyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.FStackDataView)).BeginInit();
 			this.FToolStrip.SuspendLayout();
 			this.FContextMenu.SuspendLayout();
@@ -63,10 +65,11 @@
 			// 
 			this.FToolStrip.Dock = System.Windows.Forms.DockStyle.None;
 			this.FToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FRefreshButton});
+            this.FRefreshButton,
+            this.FCopyButton});
 			this.FToolStrip.Location = new System.Drawing.Point(3, 0);
 			this.FToolStrip.Name = "FToolStrip";
-			this.FToolStrip.Size = new System.Drawing.Size(35, 25);
+			this.FToolStrip.Size = new System.Drawing.Size(58, 25);
 			this.FToolStrip.TabIndex = 0;
 			// 
 			// FRefreshButton
@@ -94,16 +97,17 @@
 			// FContextMenu
 			// 
 			this.FContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FRefreshContextMenuItem});
+            this.FRefreshContextMenuItem,
+            this.FCopyMenuItem});
 			this.FContextMenu.Name = "FContextMenu";
-			this.FContextMenu.Size = new System.Drawing.Size(133, 26);
+			this.FContextMenu.Size = new System.Drawing.Size(246, 48);
 			// 
 			// FRefreshContextMenuItem
 			// 
 			this.FRefreshContextMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Refresh;
 			this.FRefreshContextMenuItem.Name = "FRefreshContextMenuItem";
 			this.FRefreshContextMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.FRefreshContextMenuItem.Size = new System.Drawing.Size(132, 22);
+			this.FRefreshContextMenuItem.Size = new System.Drawing.Size(245, 22);
 			this.FRefreshContextMenuItem.Text = "Refresh";
 			this.FRefreshContextMenuItem.Click += new System.EventHandler(this.FRefreshButton_Click);
 			// 
@@ -125,6 +129,25 @@
 			// toolStripContainer1.TopToolStripPanel
 			// 
 			this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.FToolStrip);
+			// 
+			// FCopyButton
+			// 
+			this.FCopyButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.FCopyButton.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
+			this.FCopyButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.FCopyButton.Name = "FCopyButton";
+			this.FCopyButton.Size = new System.Drawing.Size(23, 22);
+			this.FCopyButton.Text = "Copy Value to Clipboard";
+			this.FCopyButton.Click += new System.EventHandler(this.FCopyMenuItem_Click);
+			// 
+			// FCopyMenuItem
+			// 
+			this.FCopyMenuItem.Image = global::Alphora.Dataphor.Dataphoria.MenuImages.Copy;
+			this.FCopyMenuItem.Name = "FCopyMenuItem";
+			this.FCopyMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+			this.FCopyMenuItem.Size = new System.Drawing.Size(245, 22);
+			this.FCopyMenuItem.Text = "&Copy Value to Clipboard";
+			this.FCopyMenuItem.Click += new System.EventHandler(this.FCopyMenuItem_Click);
 			// 
 			// StackView
 			// 
@@ -156,5 +179,7 @@
 		private System.Windows.Forms.ContextMenuStrip FContextMenu;
 		private System.Windows.Forms.ToolStripMenuItem FRefreshContextMenuItem;
 		private System.Windows.Forms.ToolStripContainer toolStripContainer1;
+		private System.Windows.Forms.ToolStripButton FCopyButton;
+		private System.Windows.Forms.ToolStripMenuItem FCopyMenuItem;
 	}
 }

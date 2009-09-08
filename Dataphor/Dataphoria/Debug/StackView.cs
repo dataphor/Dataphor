@@ -101,6 +101,11 @@ namespace Alphora.Dataphor.Dataphoria
 				FStackDataView.Refresh();
 		}
 
+		private void FCopyMenuItem_Click(object sender, EventArgs e)
+		{
+			Clipboard.SetData(DataFormats.UnicodeText, FStackDataView["Value"].AsString);
+		}
+
 		private void FStackDataView_DataChanged(object sender, EventArgs e)
 		{
 			UpdateButtonsEnabled();
@@ -109,6 +114,7 @@ namespace Alphora.Dataphor.Dataphoria
 		private void UpdateButtonsEnabled()
 		{
 			FRefreshButton.Enabled = FStackDataView.Active;
+			FCopyButton.Enabled = FStackDataView.Active && !FStackDataView.IsEmpty();
 		}
 
 		private void InitializeParamGroup()
