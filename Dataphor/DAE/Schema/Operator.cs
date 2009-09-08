@@ -80,6 +80,24 @@ namespace Alphora.Dataphor.DAE.Schema
     
     public class OperatorBlock : System.Object
     {
+		// LineInfo
+		protected LineInfo FLineInfo;
+		public LineInfo LineInfo { get { return FLineInfo; } }
+		
+		public void SetLineInfo(Plan APlan, LineInfo ALineInfo)
+		{
+			if (ALineInfo != null)
+			{
+				if (FLineInfo == null)
+					FLineInfo = new LineInfo();
+				
+				FLineInfo.Line = ALineInfo.Line - APlan.CompilingOffset.Line;
+				FLineInfo.LinePos = ALineInfo.LinePos - ((APlan.CompilingOffset.Line == ALineInfo.Line) ? APlan.CompilingOffset.LinePos : 0);
+				FLineInfo.EndLine = ALineInfo.EndLine - APlan.CompilingOffset.Line;
+				FLineInfo.EndLinePos = ALineInfo.EndLinePos - ((APlan.CompilingOffset.Line == ALineInfo.EndLine) ? APlan.CompilingOffset.LinePos : 0);
+			}
+		}
+
 		// StackDisplacement
 		protected int FStackDisplacement = 0;
 		public int StackDisplacement

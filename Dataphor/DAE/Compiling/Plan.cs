@@ -720,24 +720,45 @@ namespace Alphora.Dataphor.DAE.Compiling
 		// During compilation, the creation object stack maintains a context for the
 		// object currently being created.  References into the catalog register dependencies
 		// against this object as they are encountered by the compiler.
-		protected ArrayList FCreationObjects;
-		public void PushCreationObject(Schema.Object AObject)
+		protected List<Schema.Object> FCreationObjects;
+		protected List<LineInfo> FCompilingOffsets;
+
+		public void PushCreationObject(Schema.Object AObject, LineInfo ALineInfo)
 		{
 			if (FCreationObjects == null)
-				FCreationObjects = new ArrayList();
+				FCreationObjects = new List<Schema.Object>();
 			FCreationObjects.Add(AObject);
+			if (FCompilingOffsets == null)
+				FCompilingOffsets = new List<LineInfo>();
+			FCompilingOffsets.Add(ALineInfo);
+		}
+		
+		public void PushCreationObject(Schema.Object AObject)
+		{
+			PushCreationObject(AObject, new LineInfo(LineInfo.StartingOffset));
 		}
 		
 		public void PopCreationObject()
 		{
 			FCreationObjects.RemoveAt(FCreationObjects.Count - 1);
+			FCompilingOffsets.RemoveAt(FCompilingOffsets.Count - 1);
+		}
+		
+		public LineInfo CompilingOffset
+		{
+			get
+			{
+				if ((FCompilingOffsets == null) || (FCompilingOffsets.Count == 0))
+					return null;
+				return FCompilingOffsets[FCompilingOffsets.Count - 1];
+			}
 		}
 		
 		public Schema.Object CurrentCreationObject()
 		{
 			if ((FCreationObjects == null) || (FCreationObjects.Count == 0))
 				return null;
-			return (Schema.Object)FCreationObjects[FCreationObjects.Count - 1];
+			return FCreationObjects[FCreationObjects.Count - 1];
 		}
 		
 		public bool IsOperatorCreationContext
@@ -788,7 +809,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void AttachDependency(Schema.Object AObject)
 		{
 			if (FCreationObjects == null)
-				FCreationObjects = new ArrayList();
+				FCreationObjects = new List<Schema.Object>();
 			if (FCreationObjects.Count > 0)
 			{
 				// If this is a generated object, attach the dependency to the generator, rather than the object directly.

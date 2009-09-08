@@ -314,17 +314,24 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			set { FLineInfo = value; }
 		}
 		
-		public void SetLineInfo(LineInfo ALineInfo)
+		public void SetLineInfo(Plan APlan, LineInfo ALineInfo)
 		{
 			if (ALineInfo != null)
 			{
 				if (FLineInfo == null)
 					FLineInfo = new LineInfo();
 				
-				FLineInfo.Line = ALineInfo.Line;
-				FLineInfo.LinePos = ALineInfo.LinePos;
-				FLineInfo.EndLine = ALineInfo.EndLine;
-				FLineInfo.EndLinePos = ALineInfo.EndLinePos;
+				if (APlan.CompilingOffset != null)
+				{
+					FLineInfo.Line = ALineInfo.Line - APlan.CompilingOffset.Line;
+					FLineInfo.LinePos = ALineInfo.LinePos - ((APlan.CompilingOffset.Line == ALineInfo.Line) ? APlan.CompilingOffset.LinePos : 0);
+					FLineInfo.EndLine = ALineInfo.EndLine - APlan.CompilingOffset.Line;
+					FLineInfo.EndLinePos = ALineInfo.EndLinePos - ((APlan.CompilingOffset.Line == ALineInfo.EndLine) ? APlan.CompilingOffset.LinePos : 0);
+				}
+				else
+				{
+					FLineInfo.SetFromLineInfo(ALineInfo);
+				}
 			}
 		}
 

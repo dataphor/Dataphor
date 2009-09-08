@@ -36,7 +36,7 @@ namespace Alphora.Dataphor.DAE.Language
     
     public class LineInfo
     {
-		public LineInfo() { }
+		public LineInfo() : this(-1, -1, -1, -1) { }
 		public LineInfo(int ALine, int ALinePos, int AEndLine, int AEndLinePos)
 		{
 			Line = ALine;
@@ -45,10 +45,27 @@ namespace Alphora.Dataphor.DAE.Language
 			EndLinePos = AEndLinePos;
 		}
 		
-		public int Line = -1;
-		public int LinePos = -1;
-		public int EndLine = -1;
-		public int EndLinePos = -1;
+		public LineInfo(LineInfo ALineInfo)
+		{
+			SetFromLineInfo(ALineInfo == null ? StartingOffset : ALineInfo);
+		}
+		
+		public int Line;
+		public int LinePos;
+		public int EndLine;
+		public int EndLinePos;
+		
+		public void SetFromLineInfo(LineInfo ALineInfo)
+		{
+			Line = ALineInfo.Line;
+			LinePos = ALineInfo.LinePos;
+			EndLine = ALineInfo.EndLine;
+			EndLinePos = ALineInfo.EndLinePos;
+		}
+
+		public static LineInfo Empty = new LineInfo();		
+		public static LineInfo StartingOffset = new LineInfo(0, 0, 0, 0);
+		public static LineInfo StartingLine = new LineInfo(1, 1, 1, 1);
     }
     
 	[Serializable]
