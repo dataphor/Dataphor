@@ -1636,7 +1636,10 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		{
 			// Recompile the operator in the application transaction process
 			OperatorMap LOperatorMap = EnsureOperatorMap(AProcess, AOperator.OperatorName, null);
-			CreateOperatorStatementBase LStatement = (CreateOperatorStatementBase)AOperator.EmitStatement(EmitMode.ForCopy);
+			Statement LSourceStatement = AOperator.EmitStatement(EmitMode.ForCopy);
+			CreateOperatorStatement LStatement = LSourceStatement as CreateOperatorStatement;
+			if (LStatement == null)
+				LStatement = (CreateOperatorStatement)new Parser().ParseStatement(((SourceStatement)LSourceStatement).Source, null);
 			LStatement.OperatorName = String.Format(".{0}", LOperatorMap.TranslatedOperatorName);
 			LStatement.IsSession = false;
 			if (LStatement.MetaData == null)
