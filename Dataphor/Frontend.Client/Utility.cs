@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.Frontend.Client
 						LParams.Add(new DAE.Runtime.DataParam("AFromRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AFromRow[LColumn.Name]));
 						LParams.Add(new DAE.Runtime.DataParam("AToRow." + LColumn.Name, LColumn.DataType, DAE.Language.Modifier.In, AToRow[LColumn.Name]));
 					}
-					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, new DAE.Runtime.Data.Scalar(ASource.DataView.Process.ValueManager, ASource.DataView.Process.DataTypes.SystemBoolean, AAbove)));
+					LParams.Add(new DAE.Runtime.DataParam("AAbove", ASource.DataView.Process.DataTypes.SystemBoolean, DAE.Language.Modifier.In, AAbove));
 
 					ASession.ExecuteScript(LProcess, AScript, LParams);
 				}
