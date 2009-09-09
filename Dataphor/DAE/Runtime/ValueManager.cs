@@ -59,10 +59,17 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public IStreamManager StreamManager { get { return (IStreamManager)FServerProcessInterface; } }
 		
+		private Dictionary<string, Conveyor> FConveyors = new Dictionary<string, Conveyor>();
+		
 		public Conveyor GetConveyor(Schema.ScalarType AScalarType)
 		{
-			// TODO: Cache scalar type conveyors...
-			return (Conveyor)FServerProcessInterface.CreateObject(AScalarType.ClassDefinition, null);
+			Conveyor LConveyor;
+			if (!FConveyors.TryGetValue(AScalarType.Name, out LConveyor))
+			{
+				LConveyor = (Conveyor)FServerProcessInterface.CreateObject(AScalarType.ClassDefinition, null);
+				FConveyors.Add(AScalarType.Name, LConveyor);
+			}
+			return LConveyor;
 		}
 		
 		public Schema.IDataType CompileTypeSpecifier(string ATypeSpecifier)
