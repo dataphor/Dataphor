@@ -257,6 +257,11 @@ namespace Alphora.Dataphor.DAE.Runtime
 							
 					foreach (DataParam LParam in LParams)
 						FStack.Push(LParam.Modifier == Modifier.In ? DataValue.CopyValue(ValueManager, LParam.Value) : LParam.Value);
+						
+					// Set the BreakNext flag for the process if the debugger is set to Break On Start
+					Debugger LDebugger = FServerProcess.DebuggedBy;
+					if ((LDebugger != null) && LDebugger.BreakOnStart)
+						FServerProcess.SetStepInto();
 				}
 				catch
 				{

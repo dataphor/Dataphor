@@ -202,7 +202,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public ExpressionStatementNode(PlanNode ANode) : base()
 		{
 			ShouldEmitIL = true;
-			IsBreakable = true;
 			Nodes.Add(ANode);
 		}
 		
