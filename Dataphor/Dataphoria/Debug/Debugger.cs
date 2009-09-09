@@ -9,7 +9,7 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 
 namespace Alphora.Dataphor.Dataphoria
 {
-	public class Debugger : INotifyMultiPropertyChanged
+	public class Debugger : IDisposable, INotifyMultiPropertyChanged, Frontend.Client.Windows.IErrorSource
 	{
 		public Debugger(IDataphoria ADataphoria)
 		{
@@ -19,6 +19,21 @@ namespace Alphora.Dataphor.Dataphoria
 			FDataphoria.Disconnected += new EventHandler(DataphoriaDisconnected);
 			UpdateDebuggerState();
 		}
+		
+		public void Dispose()
+		{
+			InternalClearState();
+			if (FDataphoria != null)
+			{
+				FDataphoria.Connected -= new EventHandler(DataphoriaConnected);
+				FDataphoria.Disconnected -= new EventHandler(DataphoriaDisconnected);
+				FDataphoria = null;
+			}
+			if (Disposed != null)
+				Disposed(this, EventArgs.Empty);
+		}
+
+		public event EventHandler Disposed;
 
 		// TODO: Improve the debugger performance by implementing a property notification service which 
 		//  allows multiple properties to be included in a single notification.
@@ -104,6 +119,7 @@ namespace Alphora.Dataphor.Dataphoria
 			NotifyPropertyChanged(new string[] { "IsStarted", "IsPaused", "BreakOnException", "BreakOnStart", "SelectedProcessID", "SelectedCallStackIndex", "CurrentLocation" });
 
 			RefreshBreakpoints();
+			ClearSelectedError();
 		}
 
 		// IsStarted
@@ -299,6 +315,7 @@ namespace Alphora.Dataphor.Dataphoria
 			var LProcesses = FDataphoria.OpenCursor(".System.Debug.GetProcesses() where IsPaused");
 			try
 			{
+				ClearSelectedError();
 				int LCandidateID = -1;
 				Row LRow = null;
 				while (LProcesses.Next())
@@ -309,7 +326,15 @@ namespace Alphora.Dataphor.Dataphoria
 						LProcesses.Select(LRow);
 					LCandidateID = (int)LRow["Process_ID"];
 					if (LRow.HasValue("DidBreak") && (bool)LRow["DidBreak"])
+					{
+						if (LRow.HasValue("Error"))
+						{
+							var LErrorMessage = (string)LRow["Error"];
+							if (LErrorMessage != null)
+								SetSelectedError(LErrorMessage);
+						}
 						break;
+					}
 				}
 				SelectedProcessID = LCandidateID;
 			}
@@ -317,6 +342,18 @@ namespace Alphora.Dataphor.Dataphoria
 			{
 				FDataphoria.CloseCursor(LProcesses);
 			}
+		}
+
+		// SelectedError
+		
+		private void SetSelectedError(string AMessage)
+		{
+			Dataphoria.Warnings.AppendError(this, new Exception(AMessage), false);
+		}
+
+		private void ClearSelectedError()
+		{
+			Dataphoria.Warnings.ClearErrors(this);
 		}
 
 		// SelectedCallStackIndex
@@ -541,6 +578,20 @@ namespace Alphora.Dataphor.Dataphoria
 				InternalUnpause();
 			}
 		}
+
+		#region IErrorSource Members
+
+		public void ErrorHighlighted(Exception AException)
+		{
+			// Nothing
+		}
+
+		public void ErrorSelected(Exception AException)
+		{
+			// Nothing
+		}
+
+		#endregion
 	}
 	
 	public interface INotifyMultiPropertyChanged
