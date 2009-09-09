@@ -338,6 +338,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		private PlanNode FCurrentNode;
 		public PlanNode CurrentNode { get { return FCurrentNode; } }
 		
+		private bool FAfterNode;
+		public bool AfterNode { get { return FAfterNode; } }
+		
 		public void ReportStart()
 		{
 			Debugger LDebugger = FServerProcess.DebuggedBy;
@@ -352,7 +355,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				FServerProcess.SetStepInto();
 		}
 		
-		public void Yield(PlanNode APlanNode)
+		public void Yield(PlanNode APlanNode, bool AAfterNode)
 		{
 			if (FServerProcess.IsAborted)
 				throw new ServerException(ServerException.Codes.ProcessAborted);
@@ -365,6 +368,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				if (LDebugger != null)
 				{
 					FCurrentNode = APlanNode;
+					FAfterNode = AAfterNode;
 					LDebugger.Yield(FServerProcess, APlanNode);
 				}
 			}
@@ -376,17 +380,28 @@ namespace Alphora.Dataphor.DAE.Runtime
 				throw new ServerException(ServerException.Codes.ProcessAborted);
 		}
 		
-		public DebugLocator GetCurrentLocation()
+		public DebugLocator GetLocation(PlanNode APlanNode, bool AAfterNode)
 		{
 			try
 			{
 				// Current location is the line/linepos of the current node, with the locator as the current locator on the call stack.
-				return new DebugLocator(((RuntimeStackWindow)FStack.CurrentStackWindow).Locator, FCurrentNode == null ? -1 : FCurrentNode.Line, FCurrentNode == null ? -1 : FCurrentNode.LinePos);
+				return 
+					new DebugLocator
+					(
+						((RuntimeStackWindow)FStack.CurrentStackWindow).Locator, 
+						APlanNode == null ? -1 : (AAfterNode ? APlanNode.EndLine : APlanNode.Line), 
+						APlanNode == null ? -1 : ((AAfterNode && APlanNode.Line != APlanNode.EndLine) ? APlanNode.EndLinePos : APlanNode.LinePos)
+					);
 			}
 			catch (Exception E)
 			{
 				throw new ServerException(ServerException.Codes.CouldNotDetermineProgramLocation, E, FID);
 			}
+		}
+		
+		public DebugLocator GetCurrentLocation()
+		{
+			return GetLocation(FCurrentNode, FAfterNode);
 		}
 		
 		public DebugLocator SafeGetCurrentLocation()

@@ -254,7 +254,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					return;
 				
 				FWaitSignal.WaitOne(500);
-				AProgram.Yield(ANode);
+				AProgram.Yield(ANode, false);
 			}
 		}
 		
@@ -432,6 +432,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					{
 						Program LProgram = LProcess.ExecutingPrograms[LProgramIndex];
 						PlanNode LCurrentNode = LProgram.CurrentNode;
+						bool LAfterNode = LProgram.AfterNode;
 						
 						foreach (RuntimeStackWindow LWindow in LProgram.Stack.GetCallStack())
 						{
@@ -449,7 +450,13 @@ namespace Alphora.Dataphor.DAE.Debug
 												: LWindow.Locator.Locator
 										), 
 									LCurrentNode != null 
-										? new DebugLocator(LWindow.Locator, LCurrentNode.Line, LCurrentNode.LinePos) 
+										? 
+											new DebugLocator
+											(
+												LWindow.Locator, 
+												LAfterNode ? LCurrentNode.EndLine : LCurrentNode.Line, 
+												(LAfterNode && LCurrentNode.Line != LCurrentNode.EndLine) ? LCurrentNode.EndLinePos : LCurrentNode.LinePos
+											) 
 										: new DebugLocator(LWindow.Locator, -1, -1),
 									LWindow.Originator != null
 										? DebugLocator.OperatorLocator(((InstructionNodeBase)LWindow.Originator).Operator.DisplayName)
@@ -466,6 +473,7 @@ namespace Alphora.Dataphor.DAE.Debug
 							);
 								
 							LCurrentNode = LWindow.Originator;
+							LAfterNode = false;
 						}
 					}
 				}

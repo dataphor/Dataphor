@@ -646,7 +646,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			#endif
 
 				if (IsBreakable)
-					AProgram.Yield(this);
+					AProgram.Yield(this, false);
 				else
 					AProgram.CheckAborted();
 
@@ -669,7 +669,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (!LRuntimeException.HasContext())
 					{
-						LRuntimeException.SetLocator(AProgram.GetCurrentLocation());
+						LRuntimeException.SetLocator(AProgram.GetLocation(this, true));
 						LIsNew = true;
 					}
 					LToThrow = LRuntimeException;
@@ -680,7 +680,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 
 				if ((LToThrow == null) && (LException is NullReferenceException))
 				{
-					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, AProgram.GetCurrentLocation());
+					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, AProgram.GetLocation(this, true));
 					LIsNew = true;
 				}
 					
@@ -693,7 +693,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LToThrow = LDataphorException;
 						else
 						{
-							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, AProgram.GetCurrentLocation(), LDataphorException.Message);
+							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, AProgram.GetLocation(this, true), LDataphorException.Message);
 							LIsNew = true;
 						}
 					}
@@ -707,7 +707,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					
 				if (LToThrow == null)
 				{
-					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, AProgram.GetCurrentLocation(), LException.Message);
+					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, AProgram.GetLocation(this, true), LException.Message);
 					LIsNew = true;
 				}
 				
@@ -715,7 +715,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					AProgram.ReportThrow();
 					
 				if (IsBreakable)
-					AProgram.Yield(this);
+					AProgram.Yield(this, true);
 					
 				throw LToThrow;
 			}

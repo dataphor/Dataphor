@@ -735,7 +735,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (NodeCount > 0)
 				AProgram.Stack.ErrorVar = Nodes[0].Execute(AProgram);
 			if (AProgram.Stack.ErrorVar == null)
-				throw new RuntimeException(RuntimeException.Codes.NilEncountered, AProgram.GetCurrentLocation());
+				throw new RuntimeException(RuntimeException.Codes.NilEncountered);
 			AProgram.ReportThrow();
 			throw (Exception)AProgram.Stack.ErrorVar;
 		}
