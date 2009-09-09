@@ -104,4 +104,31 @@ namespace Alphora.Dataphor.DAE.Server
 	{
 		public Row this[Guid AKey] { get { return (Row)base[AKey]; } }
 	}
+	
+	[Serializable]
+	public class ServerFileInfo
+	{
+		public string LibraryName;
+		public string FileName;
+		public DateTime FileDate;
+		public bool IsDotNetAssembly;
+		public bool ShouldRegister;
+	}
+	
+	public class ServerFileInfos : List<ServerFileInfo>
+	{
+		public int IndexOf(string AFileName)
+		{
+			for (int LIndex = 0; LIndex < Count; LIndex++)
+				if (this[LIndex].FileName == AFileName)
+					return LIndex;
+					
+			return -1;
+		}
+		
+		public bool Contains(string AFileName)
+		{
+			return IndexOf(AFileName) >= 0;
+		}
+	}
 }

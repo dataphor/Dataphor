@@ -593,22 +593,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return FServerSession.Server.Catalog.ClassLoader.CreateType(AClassDefinition);
 		}
 		
-		internal void GetFileNames(Schema.Library ALibrary, StringCollection ALibraryNames, StringCollection AFileNames, ArrayList AFileDates)
+		internal ServerFileInfos GetFileNames(Schema.Library ALibrary)
 		{
-			foreach (Schema.FileReference LReference in ALibrary.Files)
-				if (!AFileNames.Contains(LReference.FileName))
-				{
-					ALibraryNames.Add(ALibrary.Name);
-					AFileNames.Add(LReference.FileName);
-					AFileDates.Add(File.GetLastWriteTimeUtc(GetFullFileName(ALibrary, LReference.FileName)));
-				} 
-			
-			foreach (Schema.LibraryReference LLibrary in ALibrary.Libraries)
-				GetFileNames(FServerSession.Server.Catalog.Libraries[LLibrary.Name], ALibraryNames, AFileNames, AFileDates);
-		}
-		
-		internal void GetAssemblyFileNames(Schema.Library ALibrary, StringCollection AFileNames)
-		{
+			ServerFileInfos LFileInfos = new ServerFileInfos();
 			Schema.Libraries LLibraries = new Schema.Libraries();
 			LLibraries.Add(ALibrary);
 			
@@ -616,17 +603,34 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				Schema.Library LLibrary = LLibraries[0];
 				LLibraries.RemoveAt(0);
-
-				foreach (Schema.FileReference LReference in LLibrary.Files)
-					if (LReference.IsAssembly && !AFileNames.Contains(LReference.FileName))
-						AFileNames.Add(LReference.FileName);
-						
+				
+				foreach (Schema.FileReference LReference in ALibrary.Files)
+				{
+					if (!LFileInfos.Contains(LReference.FileName))
+					{
+						string LFullFileName = GetFullFileName(ALibrary, LReference.FileName);
+						LFileInfos.Add
+						(
+							new ServerFileInfo 
+							{ 
+								LibraryName = ALibrary.Name, 
+								FileName = LReference.FileName, 
+								FileDate = File.GetLastWriteTimeUtc(LFullFileName), 
+								IsDotNetAssembly = FileUtility.IsAssembly(LFullFileName), 
+								ShouldRegister = LReference.IsAssembly 
+							}
+						);
+					} 
+				}
+				
 				foreach (Schema.LibraryReference LReference in LLibrary.Libraries)
 					if (!LLibraries.Contains(LReference.Name))
 						LLibraries.Add(FServerSession.Server.Catalog.Libraries[LReference.Name]);
 			}
+			
+			return LFileInfos;
 		}
-		
+
 		public string GetFullFileName(Schema.Library ALibrary, string AFileName)
 		{
 			#if LOADFROMLIBRARIES

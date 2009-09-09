@@ -131,33 +131,20 @@ namespace Alphora.Dataphor.DAE.Server
 			return FServerProcess.ServerSession.Server.Catalog.ClassLoader.Classes[AClassName].ClassName;
 		}
 		
-		public void GetFileNames(string AClassName, out string[] ALibraryNames, out string[] AFileNames, out DateTime[] AFileDates, out string[] AAssemblyFileNames)
+		public ServerFileInfo[] GetFileNames(string AClassName)
 		{
 			Schema.RegisteredClass LClass = FServerProcess.ServerSession.Server.Catalog.ClassLoader.Classes[AClassName];
 
-			StringCollection LLibraryNames = new StringCollection();
-			StringCollection LFileNames = new StringCollection();
-			StringCollection LAssemblyFileNames = new StringCollection();
-			ArrayList LFileDates = new ArrayList();
-			
 			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
 			Schema.Library LLibrary = FServerProcess.ServerSession.Server.Catalog.Libraries[LClass.Library.Name];
-			FServerProcess.GetFileNames(LLibrary, LLibraryNames, LFileNames, LFileDates);
-			FServerProcess.GetAssemblyFileNames(LLibrary, LAssemblyFileNames);
-			
-			ALibraryNames = new string[LLibraryNames.Count];
-			LLibraryNames.CopyTo(ALibraryNames, 0);
-			
-			AFileNames = new string[LFileNames.Count];
-			LFileNames.CopyTo(AFileNames, 0);
-			
-			AFileDates = new DateTime[LFileDates.Count];
-			LFileDates.CopyTo(AFileDates, 0);
+			ServerFileInfos LFileInfos = FServerProcess.GetFileNames(LLibrary);
 			
 			// Return the results in reverse order to ensure that dependencies are loaded in the correct order
-			AAssemblyFileNames = new string[LAssemblyFileNames.Count];
-			for (int LIndex = LAssemblyFileNames.Count - 1; LIndex >= 0; LIndex--)
-				AAssemblyFileNames[LAssemblyFileNames.Count - LIndex - 1] = LAssemblyFileNames[LIndex];
+			ServerFileInfo[] LResults = new ServerFileInfo[LFileInfos.Count];
+			for (int LIndex = LFileInfos.Count - 1; LIndex >= 0; LIndex--)
+				LResults[LFileInfos.Count - LIndex - 1] = LFileInfos[LIndex];
+				
+			return LResults;
 		}
 		
 		public IRemoteStream GetFile(string ALibraryName, string AFileName)

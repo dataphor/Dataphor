@@ -6,6 +6,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Reflection;
 
 namespace Alphora.Dataphor
 {
@@ -32,6 +33,29 @@ namespace Alphora.Dataphor
 				FileAttributes LAttributes = File.GetAttributes(AFileName);
 				if ((LAttributes & FileAttributes.ReadOnly) == 0)
 					File.SetAttributes(AFileName, LAttributes | FileAttributes.ReadOnly);
+			}
+		}
+		
+		/// <summary>
+		/// Returns true if the given file is an assembly, false otherwise.
+		/// </summary>
+		public static bool IsAssembly(string AFileName)
+		{
+			// According to this: http://msdn.microsoft.com/en-us/library/ms173100%28VS.80%29.aspx
+			// This is the Microsoft recommended approach. Thanks for helping follow your recommended
+			// best practice of not using exceptions to indicate return values!
+			try
+			{
+				AssemblyName.GetAssemblyName(AFileName);
+				return true;
+			}
+			catch (FileLoadException)
+			{
+				return true; // The assembly is already loaded
+			}
+			catch (BadImageFormatException)
+			{
+				return false;
 			}
 		}
 	}

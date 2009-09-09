@@ -15,6 +15,8 @@ using DAE = Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Client;
 using Alphora.Dataphor.BOP;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -159,11 +161,29 @@ namespace Alphora.Dataphor.Frontend.Client
 				{
 					using (DAE.Runtime.Data.Row LRow = LCursor.Plan.RequestRow())
 					{
+						bool LShouldLoad;
+						List<string> LFilesToLoad = new List<string>();
+
 						while (LCursor.Next())
 						{
 							LCursor.Select(LRow);
-							((DAE.Server.LocalServer)DataSession.Server).GetFile((DAE.Server.LocalProcess)LCursor.Plan.Process, (string)LRow["Library_Name"], (string)LRow["Name"], (DateTime)LRow["TimeStamp"]);
+							string LFullFileName = 
+								((DAE.Server.LocalServer)DataSession.Server).GetFile
+								(
+									(DAE.Server.LocalProcess)LCursor.Plan.Process, 
+									(string)LRow["Library_Name"], 
+									(string)LRow["Name"], 
+									(DateTime)LRow["TimeStamp"], 
+									(bool)LRow["IsDotNetAssembly"], 
+									out LShouldLoad
+								);
+							if (LShouldLoad)
+								LFilesToLoad.Add(LFullFileName);
 						}
+						
+						// Load each file to ensure they can be reached by the assembly resolver hack (see AssemblyUtility)
+						foreach (string LFullFileName in LFilesToLoad)
+							Assembly.LoadFrom(LFullFileName);
 					}
 				}
 				finally

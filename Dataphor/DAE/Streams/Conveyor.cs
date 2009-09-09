@@ -7,13 +7,13 @@ namespace Alphora.Dataphor.DAE.Streams
 {
     using System;
     using System.IO;
+	using System.Text;
     using System.Collections;
     using System.Runtime.Serialization.Formatters.Binary;
 
     using Alphora.Dataphor;
 	using Alphora.Dataphor.BOP;
 	using Alphora.Dataphor.DAE.Runtime.Data;
-using System.Text;
 	
 	/// <remarks>    
     /// A Conveyor provides host language access to the physical representation of Dataphor values stored in streams
@@ -366,7 +366,7 @@ using System.Text;
 		
 		public override object Read(byte[] ABuffer, int AOffset)
 		{
-			return ByteArrayUtility.ReadInt64(ABuffer, AOffset);
+			return new DateTime(ByteArrayUtility.ReadInt64(ABuffer, AOffset));
 		}
 
 		public override void Write(object AValue, byte[] ABuffer, int AOffset)

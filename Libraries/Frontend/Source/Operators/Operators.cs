@@ -418,7 +418,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		}
 	}
 	
-	// operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime };
+	// operator GetLibraryFiles(const ALibraries : table { Library_Name : Name }) : table { Name : String, TimeStamp : DateTime, IsDotNetAssembly : Boolean };
 	public class GetLibraryFilesNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -431,6 +431,7 @@ namespace Alphora.Dataphor.Frontend.Server
 			DataType.Columns.Add(new Schema.Column("Library_Name", APlan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("Name", APlan.DataTypes.SystemString));
 			DataType.Columns.Add(new Schema.Column("TimeStamp", APlan.DataTypes.SystemDateTime));
+			DataType.Columns.Add(new Schema.Column("IsDotNetAssembly", APlan.DataTypes.SystemBoolean));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 				
@@ -448,9 +449,11 @@ namespace Alphora.Dataphor.Frontend.Server
 		{
 			foreach (Schema.FileReference LFile in ALibrary.Files)
 			{
+				string LFullFileName = AProgram.ServerProcess.GetFullFileName(ALibrary, LFile.FileName);
 				ARow["Library_Name"] = ALibrary.Name;
 				ARow["Name"] = LFile.FileName;
-				ARow["TimeStamp"] = File.GetLastWriteTimeUtc(AProgram.ServerProcess.GetFullFileName(ALibrary, LFile.FileName));
+				ARow["TimeStamp"] = File.GetLastWriteTimeUtc(LFullFileName);
+				ARow["IsDotNetAssembly"] = FileUtility.IsAssembly(LFullFileName);
 				if (!ATable.FindKey(ARow))
 					ATable.Insert(ARow);
 			}

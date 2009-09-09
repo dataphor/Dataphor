@@ -204,11 +204,7 @@ namespace Alphora.Dataphor.DAE
 		string GetClassName(string AClassName);
 		
 		/// <summary>Returns the names of the files and assemblies required to load the given registered class name.</summary>
-		/// <param name="ALibraryNames">The names of the libraries containing the files required to load the assemblies required to load the given registered class name.</param>
-		/// <param name="AFileNames">The names of the files required to load the assemblies required to load the given registered class name.</param>
-		/// <param name="AFileDates">The dates of the files required to load the assemblies required to load the given registered class name.</param>
-		/// <param name="AAssemblyFileNames">The names of the files containing the manifests for the assemblies required to load the given registered class name.</param>
-		void GetFileNames(string AClassName, out string[] ALibraryNames, out string[] AFileNames, out DateTime[] AFileDates, out string[] AAssemblyFileNames);
+		ServerFileInfo[] GetFileNames(string AClassName);
 		
 		/// <summary>Retrieves the file for the given file name.</summary>
 		IRemoteStream GetFile(string ALibraryName, string AFileName);

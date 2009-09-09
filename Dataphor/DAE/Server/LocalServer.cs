@@ -428,16 +428,18 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private string GetLocalFileName(string ALibraryName, string AFileName)
+		private string GetLocalFileName(string ALibraryName, string AFileName, bool AIsDotNetAssembly)
 		{
-			return Path.Combine(ALibraryName == Server.CSystemLibraryName ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
+			return Path.Combine(((ALibraryName == Server.CSystemLibraryName) || !AIsDotNetAssembly) ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
 		}
 		
-		public void GetFile(LocalProcess AProcess, string ALibraryName, string AFileName, DateTime AFileDate)
+		public string GetFile(LocalProcess AProcess, string ALibraryName, string AFileName, DateTime AFileDate, bool AIsDotNetAssembly, out bool AShouldLoad)
 		{
+			AShouldLoad = false;
+			string LFullFileName = GetLocalFileName(ALibraryName, AFileName, AIsDotNetAssembly);
+
 			if (!FFilesCached.Contains(AFileName))
 			{
-				string LFullFileName = GetLocalFileName(ALibraryName, AFileName);
 				if (!File.Exists(LFullFileName) || (File.GetLastWriteTimeUtc(LFullFileName) < AFileDate))
 				{
 					#if LOGFILECACHEEVENTS
@@ -470,7 +472,13 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				
 				FFilesCached.Add(AFileName);
+
+				// Indicate that the assembly should be loaded
+				if (AIsDotNetAssembly)
+					AShouldLoad = true;
 			}
+			
+			return LFullFileName;
 		}
 		
 		public void ClassLoaderMissed(LocalProcess AProcess, Schema.ClassLoader AClassLoader, ClassDefinition AClassDefinition)
@@ -485,23 +493,21 @@ namespace Alphora.Dataphor.DAE.Server
 					//string AFullClassName = AProcess.RemoteProcess.GetClassName(AClassDefinition.ClassName); // BTR 5/17/2004 -> As far as I can tell, this doesn't do anything
 
 					// Retrieve the list of all files required to load the assemblies required to load the class.
-					string[] LLibraryNames;
-					string[] LFileNames;
-					DateTime[] LFileDates;
-					string[] LAssemblyFileNames;
-					AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName, out LLibraryNames, out LFileNames, out LFileDates, out LAssemblyFileNames);
-					for (int LIndex = 0; LIndex < LFileNames.Length; LIndex++)
-						GetFile(AProcess, LLibraryNames[LIndex], LFileNames[LIndex], LFileDates[LIndex]);
-					
-					// Retrieve the list of all assemblies required to load the class.
-					foreach (string LAssemblyFileName in LAssemblyFileNames)
+					ServerFileInfo[] LFileInfos = AProcess.RemoteProcess.GetFileNames(AClassDefinition.ClassName);
+
+					string[] LFullFileNames = new string[LFileInfos.Length];
+					for (int LIndex = 0; LIndex < LFileInfos.Length; LIndex++)
 					{
-						if (!FAssembliesCached.Contains(LAssemblyFileName))
+						bool LShouldLoad;
+						string LFullFileName = GetFile(AProcess, LFileInfos[LIndex].LibraryName, LFileInfos[LIndex].FileName, LFileInfos[LIndex].FileDate, LFileInfos[LIndex].IsDotNetAssembly, out LShouldLoad);
+
+						// Register/Load the assembly if necessary
+						if ((LFileInfos[LIndex].ShouldRegister || LShouldLoad) && !FAssembliesCached.Contains(LFileInfos[LIndex].FileName))
 						{
-							Assembly LAssembly = Assembly.LoadFrom(GetLocalFileName(LLibraryNames[Array.IndexOf<string>(LFileNames, LAssemblyFileName)], LAssemblyFileName));
-							if (!AClassLoader.Assemblies.Contains(LAssembly.GetName()))
+							Assembly LAssembly = Assembly.LoadFrom(LFullFileName);
+							if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
 								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Server.CSystemLibraryName], LAssembly);
-							FAssembliesCached.Add(LAssemblyFileName);
+							FAssembliesCached.Add(LFileInfos[LIndex].FileName);
 						}
 					}
 				}

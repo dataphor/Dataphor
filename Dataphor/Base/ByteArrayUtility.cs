@@ -37,7 +37,7 @@ namespace Alphora.Dataphor
 		public static long ReadInt64(byte[] ABuffer, int AOffset)
 		{
 			return 
-				((uint)(((ABuffer[AOffset + 4] | (ABuffer[AOffset + 5] << 0x08)) | (ABuffer[AOffset + 6] << 0x10)) | (ABuffer[AOffset + 7] << 0x18)) << 0x20) 
+				((long)(((ABuffer[AOffset + 4] | (ABuffer[AOffset + 5] << 0x08)) | (ABuffer[AOffset + 6] << 0x10)) | (ABuffer[AOffset + 7] << 0x18)) << 0x20) 
 					| (uint)(((ABuffer[AOffset + 0] | (ABuffer[AOffset + 1] << 0x08)) | (ABuffer[AOffset + 2] << 0x10)) | (ABuffer[AOffset + 3] << 0x18));
 		}
 
