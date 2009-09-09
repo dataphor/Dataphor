@@ -951,7 +951,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			{
 				SetMode(FormMode.None);
 				HostNode.Session.Forms.Add(this);
-				FForm.Show();
+				FForm.Show(null);
 			}
 			catch
 			{
@@ -979,7 +979,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					else
 						HostNode.Session.Forms.Add(this);
 					AcceptRejectChanged();
-					FForm.Show();
+					FForm.Show(AParentForm);
 				}
 				catch
 				{

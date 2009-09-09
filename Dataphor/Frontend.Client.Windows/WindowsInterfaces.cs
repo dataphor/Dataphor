@@ -179,7 +179,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		Rectangle Bounds { get; set; }
 		WinForms.DialogResult ShowDialog();
 		WinForms.Control ActiveControl { get; set; }
-		void Show();
+		void Show(IFormInterface AParent);
 		void Hide();
 		void Activate();
 		bool Enabled { get; set; }

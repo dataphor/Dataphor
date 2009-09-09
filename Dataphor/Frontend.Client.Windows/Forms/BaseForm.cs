@@ -733,6 +733,13 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 				Close(CloseBehavior.RejectOrClose);
 		}
 
+		public virtual void Show(IFormInterface AParent)
+		{
+			if (AParent != null)
+				Owner = (Form)((FormInterface)AParent).Form;
+			base.Show();
+		}
+		
 		public virtual void Close(CloseBehavior ABehavior)
 		{
 			if (FIsAcceptReject)
@@ -843,8 +850,9 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		protected override void OnDeactivate(EventArgs e)
 		{
 			base.OnDeactivate(e);
-			if (FIsLookup && !Disposing && (OwnedForms.Length == 0) && (DialogResult == DialogResult.None))
-				Close(CloseBehavior.RejectOrClose);
+			// TODO: figure out how to get the form to close on loss of activation, but only if no child-modal forms are shown.  The disabled logic below doesn't seem to be picking up owned forms properly.
+			//if (FIsLookup && !Disposing && (OwnedForms.Length == 0) && (DialogResult == DialogResult.None))
+			    //Close(CloseBehavior.RejectOrClose);
 		}
 
 		private const int CS_DROPSHADOW = 0x00020000;
