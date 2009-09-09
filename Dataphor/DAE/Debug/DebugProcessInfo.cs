@@ -16,5 +16,6 @@ namespace Alphora.Dataphor.DAE.Debug
 		public bool IsPaused;
 		public DebugLocator Location;
 		public bool DidBreak;
+		public Exception Error;
 	}
 }

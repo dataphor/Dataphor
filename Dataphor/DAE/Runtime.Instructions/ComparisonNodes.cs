@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				return null;
 			else
 			#endif
-				throw new RuntimeException(RuntimeException.Codes.ValueEncountered, this);
+				throw new RuntimeException(RuntimeException.Codes.ValueEncountered, AProgram.GetCurrentLocation());
 		}
     }
     

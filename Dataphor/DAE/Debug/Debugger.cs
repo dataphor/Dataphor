@@ -339,13 +339,10 @@ namespace Alphora.Dataphor.DAE.Debug
 			}
 		}
 		
-		private bool ShouldBreak(ServerProcess AProcess, PlanNode ANode, Exception AException)
+		private bool ShouldBreak(ServerProcess AProcess, PlanNode ANode)
 		{
 			if (FDisposed)
 				return false;
-				
-			if (FBreakOnException && (AException != null))
-				return true;
 				
 			if (AProcess.ShouldBreak())
 				return true;
@@ -408,7 +405,8 @@ namespace Alphora.Dataphor.DAE.Debug
 							ProcessID = LProcess.ProcessID,
 							IsPaused = LProcess.IsRunning && LIsPaused,
 							Location = (LProcess.IsRunning && LIsPaused) ? LProcess.ExecutingProgram.SafeGetCurrentLocation() : null,
-							DidBreak = FBrokenProcesses.Contains(LProcess)
+							DidBreak = FBrokenProcesses.Contains(LProcess),
+							Error = (LProcess.IsRunning && LIsPaused) ? LProcess.ExecutingProgram.Stack.ErrorVar as Exception : null
 						}
 					);
 			}
@@ -582,7 +580,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		/// <summary>
 		/// Yields the current program to the debugger if a breakpoint or break condition is satisfied.
 		/// </summary>
-		public void Yield(ServerProcess AProcess, PlanNode ANode, Exception AException)
+		public void Yield(ServerProcess AProcess, PlanNode ANode)
 		{
 			if (!AProcess.IsLoading())
 			{
@@ -591,7 +589,7 @@ namespace Alphora.Dataphor.DAE.Debug
 					Monitor.Enter(FSyncHandle);
 					try
 					{
-						if (ShouldBreak(AProcess, ANode, AException))
+						if (ShouldBreak(AProcess, ANode))
 						{
 							FBrokenProcesses.Add(AProcess);
 							InternalPause();

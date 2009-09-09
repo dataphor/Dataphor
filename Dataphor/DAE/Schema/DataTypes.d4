@@ -514,10 +514,20 @@ create type Error
 		InnerError : Error
 			read class "System.SystemErrorReadInnerErrorNode"
 			write class "System.SystemErrorWriteInnerErrorNode"
-	} class "System.SystemErrorSelectorNode"
+	} class "System.SystemErrorSelectorNode",
+	representation AsDisplayString
+	{
+		AsDisplayString : String
+			read class "System.ErrorAsDisplayStringReadAccessorNode"
+			write class "System.ErrorAsDisplayStringWriteAccessorNode"
+	} class "System.ErrorAsDisplayStringSelectorNode"
 }
 	class "System.ObjectConveyor"
-	static tags { Catalog.Comment = "System Error" };
+	static tags 
+	{ 
+		Catalog.Comment = "System Error",
+		DAE.AsDisplayString = "AsDisplayString"
+	};
 	
 create type Name
 {

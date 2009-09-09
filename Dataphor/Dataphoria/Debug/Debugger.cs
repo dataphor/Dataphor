@@ -329,9 +329,9 @@ namespace Alphora.Dataphor.Dataphoria
 					{
 						if (LRow.HasValue("Error"))
 						{
-							var LErrorMessage = (string)LRow["Error"];
-							if (LErrorMessage != null)
-								SetSelectedError(LErrorMessage);
+							var LError = (Exception)LRow["Error"];
+							if (LError != null)
+								SetSelectedError(LError);
 						}
 						break;
 					}
@@ -346,14 +346,15 @@ namespace Alphora.Dataphor.Dataphoria
 
 		// SelectedError
 		
-		private void SetSelectedError(string AMessage)
+		private void SetSelectedError(Exception AError)
 		{
-			Dataphoria.Warnings.AppendError(this, new Exception(AMessage), false);
+			Dataphoria.Warnings.AppendError(this, AError, false);
 		}
 
 		private void ClearSelectedError()
 		{
-			Dataphoria.Warnings.ClearErrors(this);
+			if ((Dataphoria != null) && (Dataphoria.Warnings != null))
+				Dataphoria.Warnings.ClearErrors(this);
 		}
 
 		// SelectedCallStackIndex

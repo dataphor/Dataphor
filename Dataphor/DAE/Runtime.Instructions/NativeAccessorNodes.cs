@@ -888,4 +888,35 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsString", "System.Graphic");
 		}
     }   
+
+    // ErrorAsDisplayStringSelectorNode
+    public class ErrorAsDisplayStringSelectorNode : UnaryInstructionNode
+    {
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsDisplayString", "System.Error");
+		}
+    }
+    
+    // ErrorAsDisplayStringReadAccessorNode
+    public class ErrorAsDisplayStringReadAccessorNode : UnaryInstructionNode
+    {
+		public override object InternalExecute(Program AProgram, object AArgument1)
+		{
+			#if NILPROPOGATION
+			if (AArgument1 == null)
+				return null;
+			#endif
+			return ExceptionUtility.BriefDescription((Exception)AArgument1);
+		}
+    }
+    
+    // ErrorAsDisplayStringWriteAccessorNode
+    public class ErrorAsDisplayStringWriteAccessorNode : BinaryInstructionNode
+    {
+		public override object InternalExecute(Program AProgram, object AArgument1, object AArgument2)
+		{
+			throw new RuntimeException(RuntimeException.Codes.ReadOnlyRepresentation, "AsDisplayString", "System.Error");
+		}
+    }   
 }

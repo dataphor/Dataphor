@@ -163,7 +163,7 @@ namespace Alphora.Dataphor.DAE.Debug
 		}
 	}
 
-	// operator Debug.GetProcesses() : table { Process_ID : Integer, IsPaused : Boolean, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean }
+	// operator Debug.GetProcesses() : table { Process_ID : Integer, IsPaused : Boolean, Locator : String, Line : Integer, LinePos : Integer, DidBreak : Boolean, Error : Error }
 	public class DebugGetProcessesNode : TableNode
 	{
 		public override void DetermineDataType(Plan APlan)
@@ -179,6 +179,7 @@ namespace Alphora.Dataphor.DAE.Debug
 			DataType.Columns.Add(new Schema.Column("Line", APlan.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("LinePos", APlan.DataTypes.SystemInteger));
 			DataType.Columns.Add(new Schema.Column("DidBreak", APlan.DataTypes.SystemBoolean));
+			DataType.Columns.Add(new Schema.Column("Error", APlan.DataTypes.SystemError));
 			foreach (Schema.Column LColumn in DataType.Columns)
 				TableVar.Columns.Add(new Schema.TableVarColumn(LColumn));
 
@@ -216,6 +217,7 @@ namespace Alphora.Dataphor.DAE.Debug
 								LRow[3] = LProcess.Location.Line;
 								LRow[4] = LProcess.Location.LinePos;
 								LRow[5] = LProcess.DidBreak;
+								LRow[6] = LProcess.Error;
 							}
 							else
 							{
@@ -223,6 +225,7 @@ namespace Alphora.Dataphor.DAE.Debug
 								LRow[3] = null;
 								LRow[4] = null;
 								LRow[5] = null;
+								LRow[6] = null;
 							}
 
 							LResult.Insert(LRow);

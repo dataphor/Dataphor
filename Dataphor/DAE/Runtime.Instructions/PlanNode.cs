@@ -661,13 +661,17 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 			catch (Exception LException)
 			{
+				bool LIsNew = false;
 				Exception LToThrow = null;
 				
 				RuntimeException LRuntimeException = LException as RuntimeException;
 				if (LRuntimeException != null)
 				{
 					if (!LRuntimeException.HasContext())
-						LRuntimeException.SetContext(this);
+					{
+						LRuntimeException.SetLocator(AProgram.GetCurrentLocation());
+						LIsNew = true;
+					}
 					LToThrow = LRuntimeException;
 				}
 				
@@ -675,7 +679,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					throw LException;
 
 				if ((LToThrow == null) && (LException is NullReferenceException))
-					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, this);
+				{
+					LToThrow = new RuntimeException(RuntimeException.Codes.NilEncountered, LException, AProgram.GetCurrentLocation());
+					LIsNew = true;
+				}
 					
 				if (LToThrow == null)
 				{
@@ -685,18 +692,30 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if ((LDataphorException.Severity == ErrorSeverity.User) || (LDataphorException.ServerContext != null) || (LDataphorException.Code == (int)RuntimeException.Codes.RuntimeError))
 							LToThrow = LDataphorException;
 						else
-							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, this, LDataphorException.Message);
+						{
+							LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, LDataphorException.Severity, LDataphorException, AProgram.GetCurrentLocation(), LDataphorException.Message);
+							LIsNew = true;
+						}
 					}
 				}
 				
 				if ((LToThrow == null) && ((LException is FormatException) || (LException is ArgumentException) || (LException is ArithmeticException)))
+				{
 					LToThrow = new DataphorException(ErrorSeverity.User, DataphorException.CApplicationError, LException.Message, LException);
+					LIsNew = true;
+				}
 					
 				if (LToThrow == null)
-					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, this, LException.Message);
+				{
+					LToThrow = new RuntimeException(RuntimeException.Codes.RuntimeError, ErrorSeverity.Application, LException, AProgram.GetCurrentLocation(), LException.Message);
+					LIsNew = true;
+				}
+				
+				if (LIsNew)
+					AProgram.ReportThrow();
 					
 				if (IsBreakable)
-					AProgram.Yield(this, LToThrow);
+					AProgram.Yield(this);
 					
 				throw LToThrow;
 			}

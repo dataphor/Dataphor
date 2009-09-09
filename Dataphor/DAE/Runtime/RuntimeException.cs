@@ -10,6 +10,7 @@ using System.Resources;
 namespace Alphora.Dataphor.DAE.Runtime
 {
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
+using Alphora.Dataphor.DAE.Debug;
 
 	[Serializable]
 	public class RuntimeException : DAEException, ILocatedException
@@ -435,11 +436,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			SetContext(AContext);
 		}
+		public RuntimeException(Codes AErrorCode, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, null)
+		{
+			SetLocator(ALocator);
+		}
 		
 		public RuntimeException(Codes AErrorCode, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) {}
 		public RuntimeException(Codes AErrorCode, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
 		{
 			SetContext(AContext);
+		}
+		public RuntimeException(Codes AErrorCode, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, null, AParams) 
+		{
+			SetLocator(ALocator);
 		}
 		
 		public RuntimeException(Codes AErrorCode, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) {}
@@ -447,11 +456,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			SetContext(AContext);
 		}
+		public RuntimeException(Codes AErrorCode, Exception AInnerException, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, null) 
+		{
+			SetLocator(ALocator);
+		}
 		
 		public RuntimeException(Codes AErrorCode, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) {}
 		public RuntimeException(Codes AErrorCode, Exception AInnerException, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
 		{
 			SetContext(AContext);
+		}
+		public RuntimeException(Codes AErrorCode, Exception AInnerException, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ErrorSeverity.Application, AInnerException, AParams) 
+		{
+			SetLocator(ALocator);
 		}
 		
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null) {}
@@ -459,11 +476,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			SetContext(AContext);
 		}
+		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ASeverity, null, null)
+		{
+			SetLocator(ALocator);
+		}
 		
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
 		{
 			SetContext(AContext);
+		}
+		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) 
+		{
+			SetLocator(ALocator);
 		}
 		
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
@@ -471,15 +496,24 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			SetContext(AContext);
 		}
+		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, DebugLocator ALocator) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) 
+		{
+			SetLocator(ALocator);
+		}
 		
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
 		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, PlanNode AContext, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
 		{
 			SetContext(AContext);
 		}
+		public RuntimeException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, DebugLocator ALocator, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) 
+		{
+			SetLocator(ALocator);
+		}
 		
 		public RuntimeException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) 
 		{
+			FLocator = AInfo.GetString("Locator");
 			FLine = AInfo.GetInt32("Line");
 			FLinePos = AInfo.GetInt32("LinePos");
 			FContext = AInfo.GetString("Context");
@@ -488,6 +522,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public override void GetObjectData(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext)
 		{
 			base.GetObjectData(AInfo, AContext);
+			AInfo.AddValue("Locator", FLocator);
 			AInfo.AddValue("Line", FLine);
 			AInfo.AddValue("LinePos", FLinePos);
 			AInfo.AddValue("Context", FContext);
@@ -506,10 +541,17 @@ namespace Alphora.Dataphor.DAE.Runtime
 			get
 			{
 				if (FLine > -1)
-					return String.Format("{0} ({1}, {2})", base.Message, FLine, FLinePos);
+					return String.Format("{0} ({1}{2}:{3})", base.Message, FLocator == null ? "" : (FLocator + "@"), FLine, FLinePos);
 					
 				return base.Message;
 			}
+		}
+		
+		private string FLocator;
+		public string Locator
+		{
+			get { return FLocator; }
+			set { FLocator = value; }
 		}
 
 		private int FLine = -1;
@@ -547,6 +589,16 @@ namespace Alphora.Dataphor.DAE.Runtime
 			}
 			else
 				FContext = APlanNode.SafeEmitStatementAsString();
+		}
+
+		public void SetLocator(DebugLocator ALocator)
+		{
+			if (ALocator != null)
+			{
+				FLocator = ALocator.Locator;
+				FLine = ALocator.Line;
+				FLinePos = ALocator.LinePos;
+			}
 		}
 	}
 }

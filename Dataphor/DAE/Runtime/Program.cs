@@ -259,9 +259,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 						FStack.Push(LParam.Modifier == Modifier.In ? DataValue.CopyValue(ValueManager, LParam.Value) : LParam.Value);
 						
 					// Set the BreakNext flag for the process if the debugger is set to Break On Start
-					Debugger LDebugger = FServerProcess.DebuggedBy;
-					if ((LDebugger != null) && LDebugger.BreakOnStart)
-						FServerProcess.SetStepInto();
+					ReportStart();
 				}
 				catch
 				{
@@ -340,6 +338,20 @@ namespace Alphora.Dataphor.DAE.Runtime
 		private PlanNode FCurrentNode;
 		public PlanNode CurrentNode { get { return FCurrentNode; } }
 		
+		public void ReportStart()
+		{
+			Debugger LDebugger = FServerProcess.DebuggedBy;
+			if ((LDebugger != null) && LDebugger.BreakOnStart)
+				FServerProcess.SetStepInto();
+		}
+		
+		public void ReportThrow()
+		{
+			Debugger LDebugger = FServerProcess.DebuggedBy;
+			if ((LDebugger != null) && LDebugger.BreakOnException)
+				FServerProcess.SetStepInto();
+		}
+		
 		public void Yield(PlanNode APlanNode)
 		{
 			if (FServerProcess.IsAborted)
@@ -353,25 +365,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				if (LDebugger != null)
 				{
 					FCurrentNode = APlanNode;
-					LDebugger.Yield(FServerProcess, APlanNode, null);
-				}
-			}
-		}
-		
-		public void Yield(PlanNode APlanNode, Exception AException)
-		{
-			if (FServerProcess.IsAborted)
-				throw new ServerException(ServerException.Codes.ProcessAborted);
-
-			// Double-check debugger here to optimize for the case that there is no debugger
-			// With this check first, if there is no debugger we've saved an assignment
-			if (FServerProcess.DebuggedBy != null)
-			{
-				Debugger LDebugger = FServerProcess.DebuggedBy;
-				if (LDebugger != null)
-				{
-					FCurrentNode = APlanNode;
-					LDebugger.Yield(FServerProcess, APlanNode, AException);
+					LDebugger.Yield(FServerProcess, APlanNode);
 				}
 			}
 		}
