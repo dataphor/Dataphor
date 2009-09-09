@@ -206,6 +206,7 @@ namespace Alphora.Dataphor.Dataphoria
 		{
 			SelectedProcessID = -1;
 			InternalSetIsPaused(false);
+			ClearSelectedError();
 			new Thread(new ThreadStart(DebuggerThread)).Start();
 		}
 
