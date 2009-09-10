@@ -694,19 +694,14 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 	
 	public delegate bool GetTableDesignerRequiredHandler(Table ATable, Point ACell, Graphics AGraphics, Rectangle ABounds);
 
-	public class TableColumns : TypedList
+	public class TableColumns : NotifyingBaseList<TableColumn>
 	{
-		public TableColumns(Table ATable) : base(typeof(TableColumn))
+		public TableColumns(Table ATable)
 		{
 			FTable = ATable;
 		}
 
 		private Table FTable;
-
-		public new TableColumn this[int AIndex]
-		{
-			get { return (TableColumn)base[AIndex]; }
-		}
 
 		public TableColumn this[string AName]
 		{
@@ -719,13 +714,13 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 			}
 		}
 
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(TableColumn AValue, int AIndex)
 		{
 			base.Adding(AValue, AIndex);
 			FTable.ColumnChanged();
 		}
 
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removing(TableColumn AValue, int AIndex)
 		{
 			base.Removing(AValue, AIndex);
 			FTable.ColumnChanged();

@@ -5,16 +5,13 @@
 */
 
 using System;
-using System.Xml;
+using System.Collections.Generic;
 using System.Text;
-using System.Collections.Specialized;
-
-using Alphora.Dataphor;
+using System.Xml;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.Frontend.Server;
+using Alphora.Dataphor.Frontend.Server.Derivation;
 using Alphora.Dataphor.Frontend.Server.Elaboration;
 using Alphora.Dataphor.Frontend.Server.Structuring;
-using Alphora.Dataphor.Frontend.Server.Derivation;
 using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.Frontend.Server.Production
@@ -122,7 +119,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			return LColumnNames.ToString();
 		}
 		
-		protected virtual void BuildDetailActions(XmlElement AElement, ElaboratedTableVar ATableVar, StringCollection AMenuItems, StringCollection AToolbarItems)
+		protected virtual void BuildDetailActions(XmlElement AElement, ElaboratedTableVar ATableVar, List<string> AMenuItems, List<string> AToolbarItems)
 		{
 			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
 				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Parent))
@@ -249,8 +246,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 		{
 			//foreach one to many reference in which TableName is a target
 			//	write a detail action with a browse mode
-			StringCollection LMenuItems = new StringCollection();
-			StringCollection LToolbarItems = new StringCollection();
+			List<string> LMenuItems = new List<string>();
+			List<string> LToolbarItems = new List<string>();
 			BuildDetailActions(AElement, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar, LMenuItems, LToolbarItems);
 			
 			if (LMenuItems.Count > 0)
@@ -286,8 +283,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 		protected virtual void BuildExtensionActions(XmlElement AElement)
 		{
 			XmlElement LAction;
-			StringCollection LMenuItems = new StringCollection();
-			StringCollection LToolbarItems = new StringCollection();
+			List<string> LMenuItems = new List<string>();
+			List<string> LToolbarItems = new List<string>();
 			string LFormMode;
 			string LPageType;
 			foreach (ElaboratedReference LReference in FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.ElaboratedReferences)
@@ -411,7 +408,7 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 			}
 		}
 		
-		protected virtual void BuildLookupActions(XmlElement AElement, ElaboratedTableVar ATableVar, StringCollection AMenuItems, StringCollection AToolbarItems)
+		protected virtual void BuildLookupActions(XmlElement AElement, ElaboratedTableVar ATableVar, List<string> AMenuItems, List<string> AToolbarItems)
 		{
 			foreach (ElaboratedReference LReference in ATableVar.ElaboratedReferences)
 				if (LReference.IsEmbedded && (LReference.ReferenceType == ReferenceType.Parent))
@@ -506,8 +503,8 @@ namespace Alphora.Dataphor.Frontend.Server.Production
 		
 		protected virtual void BuildLookupActions(XmlElement AElement)
 		{
-			StringCollection LMenuItems = new StringCollection();
-			StringCollection LToolbarItems = new StringCollection();
+			List<string> LMenuItems = new List<string>();
+			List<string> LToolbarItems = new List<string>();
 			BuildLookupActions(AElement, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar, LMenuItems, LToolbarItems);
 
 			if (LMenuItems.Count > 0)

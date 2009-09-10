@@ -8,26 +8,15 @@
 #define LOGFILECACHEEVENTS
 
 using System;
-using System.IO;
-using System.Text;
-using System.Threading;
 using System.Collections;
-using System.Collections.Specialized;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
-using System.Windows.Forms;
-
-using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
+using System.Threading;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Server;
-using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -411,8 +400,8 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private StringCollection FFilesCached = new StringCollection();
-		private StringCollection FAssembliesCached = new StringCollection();
+		private List<string> FFilesCached = new List<string>();
+		private List<string> FAssembliesCached = new List<string>();
 		
 		private string FLocalBinDirectory;
 		private string LocalBinDirectory

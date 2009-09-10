@@ -4,29 +4,16 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Security.Permissions;
-using System.Security.Cryptography;
-using System.Runtime.Serialization;
 using System.Threading;
-
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
+using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
-											   
+
 namespace Alphora.Dataphor.DAE.Schema
 {
 	// Delegate classes for Table, Row and Column Trigger and Validation events
@@ -1584,7 +1571,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		protected int InternalIndexOf(string AName, bool AThrowIfAmbiguous)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LObjectIndex = InternalIndexOf(AName, LNames);
 			if ((LObjectIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
 				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
@@ -1635,7 +1622,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			}
 		}
 		
-		protected int InternalIndexOf(string AName, StringCollection ANames)
+		protected int InternalIndexOf(string AName, List<String> ANames)
 		{
 			IntegerList LIndexes = InternalIndexesOf(AName);
 			for (int LIndex = 0; LIndex < LIndexes.Count; LIndex++)
@@ -1650,14 +1637,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public int IndexOf(string AName, bool AThrowIfAmbiguous)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LIndex = IndexOf(AName, LNames);
 			if ((LIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
 				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
 			return LIndex;
 		}
 
-		public int IndexOf(string AName, StringCollection ANames)
+		public int IndexOf(string AName, List<String> ANames)
 		{
 			lock (this)
 			{
@@ -1668,14 +1655,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		#if SINGLENAMESPACE
 		protected int InternalIndexOf(string AName, string ANameSpace, bool AThrowIfAmbiguous)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LObjectIndex = InternalIndexOf(AName, ANameSpace, LNames);
 			if ((LObjectIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
 				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
 			return LObjectIndex;
 		}
 		
-		protected int InternalIndexOf(string AName, string ANameSpace, StringCollection ANames)
+		protected int InternalIndexOf(string AName, string ANameSpace, List<string> ANames)
 		{
 			int LObjectIndex = -1;
 			if ((AName.IndexOf(Keywords.Qualifier) != 0) && (ANameSpace != String.Empty))
@@ -1692,14 +1679,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public int IndexOf(string AName, string ANameSpace, bool AThrowIfAmbiguous)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LIndex = IndexOf(AName, ANameSpace, LNames);
 			if ((LIndex < 0) && (LNames.Count > 1) && AThrowIfAmbiguous)
 				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
 			return LIndex;
 		}
 		
-		public int IndexOf(string AName, string ANameSpace, StringCollection ANames)
+		public int IndexOf(string AName, string ANameSpace, List<string> ANames)
 		{
 			lock (this)
 			{
@@ -1708,7 +1695,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		#endif
 		
-		public int ResolveName(string AName, NameResolutionPath APath, StringCollection ANames)
+		public int ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
 		{
 			lock (this)
 			{
@@ -1755,7 +1742,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public int ResolveName(string AName, NameResolutionPath APath)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LIndex = ResolveName(AName, APath, LNames);
 			if ((LIndex < 0) && (LNames.Count > 1))
 				throw new SchemaException(SchemaException.Codes.AmbiguousObjectReference, AName, ExceptionUtility.StringsToCommaList(LNames));
@@ -1964,7 +1951,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			#endif
 		}
 		
-		public bool IsValidObjectName(string AName, StringCollection ANames)
+		public bool IsValidObjectName(string AName, List<string> ANames)
 		{
 			string LObjectName = AName;
 			

@@ -255,21 +255,10 @@ namespace Alphora.Dataphor.DAE.Client
 			{
 				Parser LParser = new Alphora.Dataphor.DAE.Language.D4.Parser();
 				AdornExpression LExpression = (AdornExpression)LParser.ParseExpression(AValue);
-				UnInitializeAdornItems();
-				try
-				{
-					FColumns = LExpression.Expressions;
-					FConstraints = LExpression.Constraints;
-					FOrders = LExpression.Orders;
-					FKeys = LExpression.Keys;
-					#if USENOTIFYLISTFORMETADATA
-					AdornItemChanged(FColumns, null);
-					#endif
-				}
-				finally
-				{
-					InitializeAdornItems();
-				}
+				FColumns = LExpression.Expressions;
+				FConstraints = LExpression.Constraints;
+				FOrders = LExpression.Orders;
+				FKeys = LExpression.Keys;
 			}
 		}
 
@@ -280,34 +269,6 @@ namespace Alphora.Dataphor.DAE.Client
 			get { return AdornExpressionToString(); }
 			set { StringToAdornExpression(value); }
 		}
-		
-		private void InitializeAdornItems()
-		{
-			#if USENOTIFYLISTFORMETADATA
-			FKeys.OnChanged += new ListEventHandler(AdornItemChanged);
-			FOrders.OnChanged += new ListEventHandler(AdornItemChanged);
-			FColumns.OnChanged += new ListEventHandler(AdornItemChanged);
-			FConstraints.OnChanged += new ListEventHandler(AdornItemChanged);
-			#endif
-		}
-
-		private void UnInitializeAdornItems()
-		{
-			#if USENOTIFYLISTFORMETADATA
-			FKeys.OnChanged -= new ListEventHandler(AdornItemChanged);
-			FOrders.OnChanged -= new ListEventHandler(AdornItemChanged);
-			FColumns.OnChanged -= new ListEventHandler(AdornItemChanged);
-			FConstraints.OnChanged -= new ListEventHandler(AdornItemChanged);
-			#endif
-		}
-		
-		#if USENOTIFYLISTFORMETADATA
-		private void AdornItemChanged(object ASender, object AItem)
-		{
-			if (Active)
-				ExpressionChanged(null);
-		}
-		#endif
 		
 		private bool IsAdorned()
 		{

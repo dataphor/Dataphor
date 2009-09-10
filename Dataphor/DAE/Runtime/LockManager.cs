@@ -9,6 +9,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	using System.Text;
 	using System.Collections;
 	using System.Collections.Specialized;
+	using System.Collections.Generic;
 	
 	public struct LockID
 	{
@@ -105,8 +106,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public LockManager(){}
 
-		private Hashtable FLocks = new Hashtable();
-		internal Hashtable Locks { get { return FLocks; } }
+		private Dictionary<LockID, LockHeader> FLocks = new Dictionary<LockID, LockHeader>();
+		internal Dictionary<LockID, LockHeader> Locks { get { return FLocks; } }
 		
 		private LockHeaderLinkChain FAvailable = new LockHeaderLinkChain();
 		private LockHeaderLinkChain FLinkBuffer = new LockHeaderLinkChain();
@@ -120,9 +121,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		private int FLockCount = 0;
 		public int LockCount { get { return FLockCount; } }
-		
-		private StringCollection FLockEvents;
-		public StringCollection LockEvents { get { return FLockEvents; } }
+
+		private List<string> FLockEvents;
+		public List<string> LockEvents { get { return FLockEvents; } }
 		
 		public String LockEventsAsString()
 		{
@@ -145,7 +146,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				if (FLockTracingEnabled != value)
 					FLockTracingEnabled = value;
 				if (FLockTracingEnabled)
-					FLockEvents = new StringCollection();
+					FLockEvents = new List<string>();
 				else
 					FLockEvents = null;
 			}
@@ -155,14 +156,13 @@ namespace Alphora.Dataphor.DAE.Runtime
 		{
 			lock (this)
 			{
-				object LObject = FLocks[ALockID];
-				if (LObject == null)
+				LockHeader LLock;
+				if (!FLocks.TryGetValue(ALockID, out LLock))
 				{
-					LockHeader LLock = RequestLockHeader(ALockID);
+					LLock = RequestLockHeader(ALockID);
 					FLocks.Add(ALockID, LLock);
-					return LLock;
 				}
-				return (LockHeader)LObject;
+				return LLock;
 			}
 		}
 		
@@ -206,18 +206,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 		
 		public bool IsLocked(LockID ALockID)
 		{
-			object LObject;
+			LockHeader LLock;
+			bool LFound;
 			lock (this)
 			{
-				LObject = FLocks[ALockID];
+				LFound = FLocks.TryGetValue(ALockID, out LLock);
 			}
 			
-			if ((LObject != null) && (((LockHeader)LObject).Semaphore.Mode != LockMode.Free))
-				return true;
-			else
-				return false;
-			
-			//return (LObject != null) && (((LockHeader)LObject).Semaphore.Mode != LockMode.Free);
+			return LFound && (LLock.Semaphore.Mode != LockMode.Free);
 		}
 		
 		public void Lock(int AOwnerID, LockID ALockID, LockMode ALockMode, int ATimeout)
@@ -280,9 +276,9 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public string ListLocks(int AResourceManagerID, int AOwnerID, LockMode AMode)
 		{
 			StringBuilder LResult = new StringBuilder();
-			foreach (DictionaryEntry LEntry in FLocks)
+			foreach (KeyValuePair<LockID, LockHeader> LEntry in FLocks)
 			{
-				LockHeader LLock = (LockHeader)LEntry.Value;
+				LockHeader LLock = LEntry.Value;
 				if ((AResourceManagerID == -1) || (LLock.LockID.ResourceManagerID == AResourceManagerID))
 					if (LLock.Semaphore.Mode >= AMode)
 						if ((AOwnerID == -1) || ((LLock.Semaphore.Mode > LockMode.Free) && (LLock.Semaphore.IsSemaphoreOwned(AOwnerID))))

@@ -27,6 +27,7 @@ using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.Frontend.Server;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.Frontend.Server.Device
 {
@@ -274,7 +275,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		private void EnsureDocumentTypeDesigners()
 		{
 			ArrayList LInvalidDesigners;
-			foreach (DocumentType LDocumentType in FDocumentTypes)
+			foreach (DocumentType LDocumentType in FDocumentTypes.Values)
 			{
 				LInvalidDesigners = new ArrayList();
 				foreach (string LString in LDocumentType.Designers)
@@ -342,7 +343,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		
 		public bool HasDocumentTypeDesigners(string ADesignerID)
 		{
-			foreach (DocumentType LDocumentType in DocumentTypes)
+			foreach (DocumentType LDocumentType in DocumentTypes.Values)
 				if (LDocumentType.Designers.Contains(ADesignerID))
 					return true;
 			return false;

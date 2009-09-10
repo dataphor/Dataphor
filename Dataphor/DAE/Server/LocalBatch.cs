@@ -118,22 +118,14 @@ namespace Alphora.Dataphor.DAE.Server
 		}
     }
     
-	// TODO: Protect LocalBatches and other DisposableTypedList CLI descendants from "unauthorized" disposal
-
-    public class LocalBatches : DisposableTypedList, IServerBatches
+    public class LocalBatches : List<LocalBatch>, IServerBatches
     {
-		public LocalBatches() : base(typeof(LocalBatch), true, false) {}
-		
-		public new LocalBatch this[int AIndex]
-		{
-			get { return (LocalBatch)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
+		public LocalBatches() : base() {}
 		
 		IServerBatch IServerBatches.this[int AIndex]
 		{
-			get { return (IServerBatch)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return base[AIndex]; }
+			set { base[AIndex] = (LocalBatch)value; }
 		}
     }
 }

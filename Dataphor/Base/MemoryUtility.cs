@@ -83,9 +83,10 @@ namespace Alphora.Dataphor
 				if (AObject == null)
 					return false;
 					
+#if !SILVERLIGHT					
 				if (AObject is System.Reflection.Pointer)
 					return false; // Unmanaged pointer, do not follow
-					
+#endif
 				Object LVisitedObject;
 				if (FVisitedObjects.TryGetValue(AObject, out LVisitedObject))
 					return false;
@@ -241,7 +242,7 @@ namespace Alphora.Dataphor
 								if (!IsSimpleType(LFieldValueType) && LShouldTraverse)
 									LResult += InternalSizeOf(LFieldValue, ATraversalMode, AObjectContext);
 							}
-							else if ((LFieldValueType.IsArray || (LFieldValueType.GetInterface("IEnumerable") != null)) && AObjectContext.Visit(LFieldValue))
+							else if ((LFieldValueType.IsArray || (LFieldValueType.GetInterface("IEnumerable", false) != null)) && AObjectContext.Visit(LFieldValue))
 							{
 								LResult += InternalSizeOf(LFieldValue, LShouldTraverse ? ATraversalMode : TraversalMode.Shallow, AObjectContext);
 							}

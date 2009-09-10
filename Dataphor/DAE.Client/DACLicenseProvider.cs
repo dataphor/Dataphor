@@ -99,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			// Get the license from DAC.license ..Alphora\Dataphor\DAC.license
 			string LLicenseData = String.Empty;
-			string LLicenseFileName = String.Format("{0}{1}", Alphora.Dataphor.PathUtility.CommonAppDataPath(), LicenseUtility.CLicenseDataFileName);
+			string LLicenseFileName = String.Format("{0}{1}", Alphora.Dataphor.Windows.PathUtility.CommonAppDataPath(), LicenseUtility.CLicenseDataFileName);
 			if (File.Exists(LLicenseFileName))
 				using (StreamReader LReader = new StreamReader(LLicenseFileName))
 				{
@@ -112,7 +112,7 @@ namespace Alphora.Dataphor.DAE.Client
 				// If the license check fails
 				// Get the installation date from DAC.data ..Alphora\Dataphor\DAC.data
 				string LInstallData = String.Empty;
-				string LInstallDataFileName = String.Format("{0}{1}", Alphora.Dataphor.PathUtility.CommonAppDataPath(), LicenseUtility.CInstallDataFileName);
+				string LInstallDataFileName = String.Format("{0}{1}", Alphora.Dataphor.Windows.PathUtility.CommonAppDataPath(), LicenseUtility.CInstallDataFileName);
 
 				// This file will contain the date of the installation as a Rijndael encrypted string using the given key and iv.
 				if (File.Exists(LInstallDataFileName))

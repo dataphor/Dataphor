@@ -60,7 +60,7 @@ namespace Alphora.Dataphor
 			(
 				LMember,
 				AInstance,
-				TypeDescriptor.GetConverter(GetMemberType(LMember)).ConvertFromString(AValue)
+				StringToValue(AValue, GetMemberType(LMember))
 			);
 		}
 
@@ -125,7 +125,7 @@ namespace Alphora.Dataphor
 			string[] LSignatureNames = ASignature.Split(new char[] {';'});
 			Type[] LSignature = new Type[LSignatureNames.Length];
 			for (int i = LSignature.Length - 1; i >= 0; i--)
-				LSignature[i] = AssemblyUtility.GetType(LSignatureNames[i], true, true);
+				LSignature[i] = Type.GetType(LSignatureNames[i], true, true);
 
 			// Find the matching constructor
 			ConstructorInfo LConstructor = AType.GetConstructor(LSignature);
@@ -138,13 +138,104 @@ namespace Alphora.Dataphor
 		/// <summary> Converts a string value type to the .NET value based on the provided type. </summary>
 		public static object StringToValue(string AValue, Type AType)
 		{
+			#if SILVERLIGHT
+			if (AValue == null)
+				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
+			switch (Type.GetTypeCode(AType))
+			{
+				case TypeCode.Boolean:
+					return Convert.ToBoolean(AValue);
+				case TypeCode.Char:
+					return Convert.ToChar(AValue);
+				case TypeCode.SByte:
+					return Convert.ToSByte(AValue);
+				case TypeCode.Byte:
+					return Convert.ToByte(AValue);
+				case TypeCode.Int16:
+					return Convert.ToInt16(AValue);
+				case TypeCode.UInt16:
+					return Convert.ToUInt16(AValue);
+				case TypeCode.Int32:
+					return Convert.ToInt32(AValue);
+				case TypeCode.UInt32:
+					return Convert.ToUInt32(AValue);
+				case TypeCode.Int64:
+					return Convert.ToInt64(AValue);
+				case TypeCode.UInt64:
+					return Convert.ToUInt64(AValue);
+				case TypeCode.Single:
+					return Convert.ToSingle(AValue);
+				case TypeCode.Double:
+					return Convert.ToDouble(AValue);
+				case TypeCode.Decimal:
+					return Convert.ToDecimal(AValue);
+				case TypeCode.DateTime:
+					return Convert.ToDateTime(AValue);
+				case TypeCode.String:
+					return AValue;
+				default:
+					if (AType == typeof(byte[]))
+						return Convert.FromBase64String(AValue);
+					else if (AType != typeof(object))
+					{
+						if (AType == typeof(TimeSpan))
+							return TimeSpan.Parse(AValue);
+						else if (AType == typeof(Guid))
+							return new Guid(AValue);
+						else if (AType == typeof(Uri))
+							return new Uri(AValue);
+						else
+							break;
+					}
+					else if (typeof(Enum).IsAssignableFrom(AType))
+						return Enum.Parse(AType, AValue, true);
+					break;
+			}
+			throw new BaseException(BaseException.Codes.CannotConvertFromString, AType.Name);
+			#else
 			return TypeDescriptor.GetConverter(AType).ConvertFromString(AValue);
+			#endif
 		}
 
 		/// <summary> Converts a .NET value to a string based on the provided type. </summary>
 		public static string ValueToString(object AValue, Type AType)
 		{
+			#if SILVERLIGHT
+			if (AValue == null)
+				throw new BaseException(BaseException.Codes.CannotConvertNull, ErrorSeverity.System);
+			switch (Type.GetTypeCode(AType))
+			{
+				case TypeCode.Boolean:
+				case TypeCode.Char:
+				case TypeCode.SByte:
+				case TypeCode.Byte:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:
+				case TypeCode.Int32:
+				case TypeCode.UInt32:
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+				case TypeCode.Single:
+				case TypeCode.Double:
+				case TypeCode.Decimal:
+				case TypeCode.DateTime:
+				case TypeCode.String:
+					return AValue.ToString();
+
+				default:
+					if (AType == typeof(byte[]))
+						return Convert.ToBase64String((byte[])AValue);
+					else if (AType != typeof(object))
+					{
+						if (AType == typeof(TimeSpan) || AType == typeof(Guid) || AType == typeof(Uri) || typeof(Enum).IsAssignableFrom(AType))
+							return AValue.ToString();
+					}
+					break;
+			}
+			throw new BaseException(BaseException.Codes.CannotConvertToString, AType.Name);
+			#else
 			return TypeDescriptor.GetConverter(AType).ConvertToString(AValue);
+			#endif
 		}
 
 		/// <summary> Gets a field, property, or simple method's value for a particular instance. </summary>

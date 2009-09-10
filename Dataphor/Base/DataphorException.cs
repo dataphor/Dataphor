@@ -9,10 +9,8 @@ using System.Resources;
 
 namespace Alphora.Dataphor
 {
-	[Serializable]
 	public enum ErrorSeverity { User, Application, System, Environment }
 	
-	[Serializable]
 	public class DataphorException : System.Exception
 	{
 		public const int COR_E_EXCEPTION = -2146233088;
@@ -92,6 +90,8 @@ namespace Alphora.Dataphor
 			HResult = COR_E_EXCEPTION;
 		}
 		
+	    #if !SILVERLIGHT // SerializationInfo
+
 		public DataphorException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) 
 		{
 			FCode = AInfo.GetInt32("Code");
@@ -108,6 +108,8 @@ namespace Alphora.Dataphor
 			AInfo.AddValue("Details", FDetails);
 			AInfo.AddValue("ServerContext", FServerContext);
 		}
+		
+		#endif
 		
 		private int FCode;
 		public int Code 

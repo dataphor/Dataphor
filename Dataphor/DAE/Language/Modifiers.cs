@@ -70,7 +70,7 @@ namespace Alphora.Dataphor.DAE.Language
 			set { base[AIndex] = value; }
 		}
 		
-		public new LanguageModifierEnumerator GetEnumerator()
+		public LanguageModifierEnumerator GetEnumerator()
 		{
 			return new LanguageModifierEnumerator(this);
 		}

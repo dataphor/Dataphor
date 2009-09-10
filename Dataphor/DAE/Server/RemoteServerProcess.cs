@@ -5,23 +5,16 @@
 */
 
 using System;
-using System.IO;
-using System.Text;
-using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-
+using System.IO;
+using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
-using Alphora.Dataphor.DAE.Streams;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Catalog;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.DAE.Streams;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -135,6 +128,11 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			Schema.RegisteredClass LClass = FServerProcess.ServerSession.Server.Catalog.ClassLoader.Classes[AClassName];
 
+			List<string> LLibraryNames = new List<string>();
+			List<string> LFileNames = new List<string>();
+			List<string> LAssemblyFileNames = new List<string>();
+			ArrayList LFileDates = new ArrayList();
+			
 			// Build the list of all files required to load the assemblies in all libraries required by the library for the given class
 			Schema.Library LLibrary = FServerProcess.ServerSession.Server.Catalog.Libraries[LClass.Library.Name];
 			ServerFileInfos LFileInfos = FServerProcess.GetFileNames(LLibrary);

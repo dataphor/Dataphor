@@ -42,6 +42,9 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -94,6 +97,9 @@
       <Name>System</Name>
     </Reference>
     <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
@@ -115,15 +121,16 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
+      <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
+      <Name>Base.Windows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\BOP\BOP.csproj">
-      <Name>BOP</Name>
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
@@ -498,6 +505,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime\DataParam.cs" />
+    <Compile Include="Frame.cs" />
     <Compile Include="Runtime\LockManager.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -510,6 +518,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime\Stack.cs" />
+    <Compile Include="Stack.cs" />
+    <Compile Include="StackWindow.cs" />
     <Compile Include="Runtime\ValueManager.cs" />
     <Compile Include="Runtime\ValueUtility.cs" />
     <Compile Include="Schema\Assembly.cs">
@@ -647,6 +657,7 @@
     <Compile Include="SessionInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <None Include="app.config" />
     <None Include="Storage\Database.cs">
       <SubType>Code</SubType>
     </None>

@@ -67,15 +67,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-	public class Operands : NotifyList
+	public class Operands : NotifyingBaseList<Operand>
     {
-		public Operands() : base(false) { }
-
-        public new Operand this[int AIndex]
-        {
-            get { return (Operand)(base[AIndex]); }
-            set { base[AIndex] = value; }
-        }
     }
     
     public class OperatorBlock : System.Object
@@ -161,38 +154,26 @@ namespace Alphora.Dataphor.DAE.Schema
 			FReturnDataType = AReturnType;
 			FOperands.AddRange(AOperands);
 			InternalInitialize();
-			OperandsChanged(null, null);
+			OperandsChanged();
 		}
 
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands) : base(AID, AName)
-		{
-			OperatorName = AName;
-			FBlock.ClassDefinition = new ClassDefinition(AClassName);
-			FReturnDataType = AReturnType;
-			FOperands.AddRange(AOperands);
-			InternalInitialize();
-			OperandsChanged(null, null);
-		}
+		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands) 
+			: this(AID, AName, AClassName, AReturnType, AOperands, false)
+		{ }
 		
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin) : base(AID, AName)
-		{
-			OperatorName = AName;
-			FBlock.ClassDefinition = new ClassDefinition(AClassName);
-			FReturnDataType = AReturnType;
-			FOperands.AddRange(AOperands);
-			InternalInitialize();
-			OperandsChanged(null, null);
-			IsBuiltin = AIsBuiltin;
-		}
+		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin) 
+			: this(AID, AName, AClassName, AReturnType, AOperands, AIsBuiltin, true)
+		{ }
 		
-		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin, bool AIsRemotable) : base(AID, AName)
+		public Operator(int AID, string AName, string AClassName, IDataType AReturnType, Operand[] AOperands, bool AIsBuiltin, bool AIsRemotable) 
+			: base(AID, AName)
 		{
 			OperatorName = AName;
 			FBlock.ClassDefinition = new ClassDefinition(AClassName);
 			FReturnDataType = AReturnType;
 			FOperands.AddRange(AOperands);
 			InternalInitialize();
-			OperandsChanged(null, null);
+			OperandsChanged();
 			IsBuiltin = AIsBuiltin;
 			IsRemotable = AIsRemotable;
 		}
@@ -204,17 +185,16 @@ namespace Alphora.Dataphor.DAE.Schema
 			FIsDeterministic = true;
 			FIsRepeatable = true;
 			FIsNilable = false;
-			FOperands.OnAdding += new ListEventHandler(OperandsChanged);
-			FOperands.OnRemoving += new ListEventHandler(OperandsChanged);
+			FOperands.Changed += OperandsChanged;
 		}
 		
 		public override string DisplayName { get { return String.Format("{0}{1}", FOperatorName, FSignature.ToString()); } }
 		
 		public override string Description { get { return String.Format(Strings.Get("SchemaObjectDescription.Operator"), OperatorName, Signature.ToString()); } }
 
-		private void OperandsChanged(object ASender, object AItem)
+		private void OperandsChanged(NotifyingBaseList<Operand> ASender, bool AIsAdded, Operand AItem, int AIndex)
 		{
-			FNameReset = true;
+			OperandsChanged();
 		}
 		
 		/// <summary>Forces the signature to be recreated.</summary>
@@ -284,7 +264,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				{
 					FOperatorName = (value == null ? String.Empty : value);
 					Name = String.Format("{0}_{1}", FOperatorName.Length > Schema.Object.CMaxGeneratedNameLength ? FOperatorName.Substring(0, Schema.Object.CMaxGeneratedNameLength) : FOperatorName, ID.ToString().PadLeft(Schema.Object.CMaxObjectIDLength, '0'));
-					OperandsChanged(null, null);
+					OperandsChanged();
 				}
 			}
 		}

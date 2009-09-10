@@ -8,29 +8,22 @@
 #define LOGDDLINSTRUCTIONS
 
 using System;
-using System.IO;
-using System.Data;
-using System.Text;
-using System.Threading;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Reflection;
+using System.Threading;
 
-using Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Compiling;
+using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Compiling;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
-using Alphora.Dataphor.DAE.Device.Memory;
-using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-using Alphora.Dataphor.DAE.Connection;
-using Schema = Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Schema;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Store;
 
 namespace Alphora.Dataphor.DAE.Device.Catalog
 {
@@ -1451,7 +1444,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private class AttachEventHandlerInstruction : DDLInstruction
 		{
-			public AttachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+			public AttachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
 				FEventHandler = AEventHandler;
 				FEventSource = AEventSource;
@@ -1462,7 +1455,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			private Schema.EventHandler FEventHandler;
 			private Schema.Object FEventSource;
 			private int FEventSourceColumnIndex;
-			private StringCollection FBeforeOperatorNames;
+			private List<string> FBeforeOperatorNames;
 
 			public override void Undo(CatalogDeviceSession ASession)
 			{
@@ -1472,7 +1465,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private class MoveEventHandlerInstruction : DDLInstruction
 		{
-			public MoveEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+			public MoveEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
 				FEventHandler = AEventHandler;
 				FEventSource = AEventSource;
@@ -1483,7 +1476,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			private Schema.EventHandler FEventHandler;
 			private Schema.Object FEventSource;
 			private int FEventSourceColumnIndex;
-			private StringCollection FBeforeOperatorNames;
+			private List<string> FBeforeOperatorNames;
 
 			public override void Undo(CatalogDeviceSession ASession)
 			{
@@ -1493,7 +1486,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private class DetachEventHandlerInstruction : DDLInstruction
 		{
-			public DetachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+			public DetachEventHandlerInstruction(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 			{
 				FEventHandler = AEventHandler;
 				FEventSource = AEventSource;
@@ -1504,7 +1497,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			private Schema.EventHandler FEventHandler;
 			private Schema.Object FEventSource;
 			private int FEventSourceColumnIndex;
-			private StringCollection FBeforeOperatorNames;
+			private List<string> FBeforeOperatorNames;
 
 			public override void Undo(CatalogDeviceSession ASession)
 			{
@@ -2759,7 +2752,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		/// <summary>Resolves the given name and returns the catalog object, if an unambiguous match is found. Otherwise, returns null.</summary>
-		public Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, StringCollection ANames)
+		public Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
 		{
 			if (ServerProcess.ServerSession.Server.IsRepository)
 			{
@@ -4992,8 +4985,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new UnregisterResourceManagerInstruction(ADevice.ResourceManagerID, ADevice));
 			#endif
 		}
-		
-		private void AttachEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+
+		private void AttachEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 		{
 			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
 			if (LTableVar != null)
@@ -5007,8 +5000,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			else
 				((Schema.ScalarType)AEventSource).EventHandlers.Add(AEventHandler);
 		}
-		
-		private void MoveEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+
+		private void MoveEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 		{
 			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
 			if (LTableVar != null)
@@ -5037,10 +5030,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			else
 				((Schema.ScalarType)AEventSource).EventHandlers.SafeRemove(AEventHandler);
 		}
-		
-		private StringCollection GetEventHandlerBeforeOperatorNames(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex)
+
+		private List<string> GetEventHandlerBeforeOperatorNames(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex)
 		{
-			StringCollection LResult = new StringCollection();
+			List<string> LResult = new List<string>();
 			EventHandlers LHandlers = null;
 			Schema.TableVar LTableVar = AEventSource as Schema.TableVar;
 			if (LTableVar != null)
@@ -5063,7 +5056,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			return LResult;
 		}
 
-		public void CreateEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+		public void CreateEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 		{
 			AttachEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex, ABeforeOperatorNames);
 			#if LOGDDLINSTRUCTIONS
@@ -5074,11 +5067,11 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			// Note the event handlers must be attached first, otherwise properties on the event handler will not be set properly (CatalogObjectID, ParentObjectID, etc.,.)
 			InsertCatalogObject(AEventHandler);
 		}
-		
-		public void AlterEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, StringCollection ABeforeOperatorNames)
+
+		public void AlterEventHandler(Schema.EventHandler AEventHandler, Schema.Object AEventSource, int AEventSourceColumnIndex, List<string> ABeforeOperatorNames)
 		{
 			#if LOGDDLINSTRUCTIONS
-			StringCollection LBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
+			List<string> LBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
 			#endif
 			MoveEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex, ABeforeOperatorNames);
 			#if LOGDDLINSTRUCTIONS
@@ -5092,7 +5085,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			DeleteCatalogObject(AEventHandler);
 			
 			#if LOGDDLINSTRUCTIONS
-			StringCollection LBeforeOperatorNames =	GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
+			List<string> LBeforeOperatorNames = GetEventHandlerBeforeOperatorNames(AEventHandler, AEventSource, AEventSourceColumnIndex);
 			#endif
 			DetachEventHandler(AEventHandler, AEventSource, AEventSourceColumnIndex);
 			#if LOGDDLINSTRUCTIONS

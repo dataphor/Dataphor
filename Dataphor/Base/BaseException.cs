@@ -9,7 +9,6 @@ using System.Reflection;
 
 namespace Alphora.Dataphor
 {
-	[Serializable]
 	public class BaseException : DataphorException
 	{
 		public enum Codes : int
@@ -29,47 +28,11 @@ namespace Alphora.Dataphor
 			/// <summary>Error code 100104: "This list does not allow null items."</summary>
 			CannotAddNull = 100104,
 
-			/// <summary>Error code 100105: "Cannot add an item of type ({0}), collection only allows items of type ({1})."</summary>
-			CollectionOfType = 100105,
-
-			/// <summary>Error code 100106: "Child cover is read only."</summary>
-			ChildCoverIsReadOnly = 100106,
-
-			/// <summary>Error code 100107: "List index ({0}) out of bounds."</summary>
-			InvalidListIndex = 100107,
-
-			/// <summary>Error code 100108: "Method is not supported."</summary>
-			NotSupported = 100108,
-
-			/// <summary>Error code 100109: "Child ({0}) not found."</summary>
-			ChildNotFound = 100109,
-
-			/// <summary>Error code 100110: "Child component must derive from ComponentBase."</summary>
-			ChildMustBeComponentBase = 100110,
-
-			/// <summary>Error code 100111: "Parent component may not contain itself."</summary>
-			CircularParentReference = 100111,
-
-			/// <summary>Error code 100112: "Child component already referenced by this parent."</summary>
-			DuplicateChildReference = 100112,
-
-			/// <summary>Error code 100113: "Object ({0}) is not a container."</summary>
-			NotAContainer = 100113,
-
-			/// <summary>Error code 100114: "Component ({0}) not found."</summary>
-			ComponentNotFound = 100114,
-
 			/// <summary>Error code 100115: "Duplicate value inserted ({0})."</summary>
 			Duplicate = 100115,
 
 			/// <summary>Error code 100116: "List index out of bounds ({0}).  Valid range is (0-{1})."</summary>
 			IndexOutOfBounds = 100116,
-
-			/// <summary>Error code 100117: "Cannot perform this operation on a sorted list."</summary>
-			SortedListError = 100117,
-
-			/// <summary>Error code 100118: "List cover is read only."</summary>
-			ListCoverIsReadOnly = 100118,
 
 			/// <summary>Error code 100119: "Objects cannot be inserted into a hash table, use the Add method instead."</summary>
 			InsertNotSupported = 100119,
@@ -104,6 +67,14 @@ namespace Alphora.Dataphor
 			/// <summary>Error code 100129: "Maximum call stack depth ({0}) has been exceeded."</summary>
 			CallStackOverflow = 100129,
 
+			/// <summary>Error code 100130: "Cannot convert a null reference."</summary>
+			CannotConvertNull = 100130,
+
+			/// <summary>Error code 100131: "Cannot convert type ({0}) from string."</summary>
+			CannotConvertFromString = 100131,
+
+			/// <summary>Error code 100132: "Cannot convert to string from type ({0})."</summary>
+			CannotConvertToString = 100132,
 		};
 
 		// Resource manager for this exception class
@@ -118,7 +89,9 @@ namespace Alphora.Dataphor
 		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, null, AParams) {}
 		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, null) {}
 		public BaseException(Codes AErrorCode, ErrorSeverity ASeverity, Exception AInnerException, params object[] AParams) : base(FResourceManager, (int)AErrorCode, ASeverity, AInnerException, AParams) {}
+	    #if !SILVERLIGHT // SerializationInfo
 		public BaseException(System.Runtime.Serialization.SerializationInfo AInfo, System.Runtime.Serialization.StreamingContext AContext) : base(AInfo, AContext) {}
+		#endif
 	}
 
 	public class AbortException : Exception

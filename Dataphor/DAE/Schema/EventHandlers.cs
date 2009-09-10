@@ -4,19 +4,11 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Security.Permissions;
-using System.Security.Cryptography;
-
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
+using System.Collections.Generic;
+using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Device.Catalog;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 
 namespace Alphora.Dataphor.DAE.Schema
@@ -427,7 +419,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			return -1;
 		}
 		
-		public void Add(EventHandler AHandler, StringCollection ABeforeOperatorNames)
+		public void Add(EventHandler AHandler, List<string> ABeforeOperatorNames)
 		{
 			int LTargetIndex = Count;
 			foreach (string LOperatorName in ABeforeOperatorNames)
@@ -439,7 +431,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			Insert(LTargetIndex, AHandler);
 		}
 		
-		public void MoveBefore(EventHandler AHandler, StringCollection ABeforeOperatorNames)
+		public void MoveBefore(EventHandler AHandler, List<string> ABeforeOperatorNames)
 		{
 			int LCurrentIndex = IndexOf(AHandler);
 			int LTargetIndex = LCurrentIndex;

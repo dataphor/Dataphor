@@ -473,11 +473,11 @@ namespace Alphora.Dataphor.Frontend.Client
 	}
 
 	/// <summary> Used to maintain a node(s) list of children. </summary>
-	public class ChildCollection : Alphora.Dataphor.DisposableList, IChildCollection
+	public class ChildCollection : DisposableList<Node>, IChildCollection
 	{
 		/// <summary> Initializes a Child Collection. </summary>
-		/// <param name="ANode"> The owner node that has this children collection. </param>
-		protected internal ChildCollection(Node ANode) : base(true, false)
+		/// <param name="ANode"> The node that contains this children collection. </param>
+		protected internal ChildCollection(Node ANode) : base(true)
 		{
 			FNode = ANode;
 		}
@@ -489,19 +489,18 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <param name="AValue"> The node to be added. </param>
 		/// <param name="AIndex"> The index of the node. </param>
 		/// <remarks> Also links the node to it's owner. </remarks>
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(Node AValue, int AIndex)
 		{
-			Node LNode = (Node)AValue;
-			LNode.Owner = null;
-			if (LNode.Active)
+			AValue.Owner = null;
+			if (AValue.Active)
 				throw new ClientException(ClientException.Codes.CannotAddActiveChild);
 
 			base.Adding(AValue, AIndex);
 
-			FNode.AddChild(LNode);
+			FNode.AddChild(AValue);
 			try
 			{
-				LNode.FOwner = FNode;
+				AValue.FOwner = FNode;
 				try
 				{
 					if (FNode.Active)
@@ -513,15 +512,15 @@ namespace Alphora.Dataphor.Frontend.Client
 							LHandler = null;
 						try
 						{
-							LNode.ActivateAll();
+							AValue.ActivateAll();
 							try
 							{
-								LNode.AfterActivate();
+								AValue.AfterActivate();
 								FNode.ChildrenChanged();
 							}
 							catch
 							{
-								LNode.DeactivateAll();
+								AValue.DeactivateAll();
 								throw;
 							}
 						}
@@ -534,13 +533,13 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				catch
 				{
-					LNode.FOwner = null;
+					AValue.FOwner = null;
 					throw;
 				}
 			}
 			catch
 			{
-				FNode.RemoveChild(LNode);
+				FNode.RemoveChild(AValue);
 				throw;
 			}
 		}
@@ -549,10 +548,8 @@ namespace Alphora.Dataphor.Frontend.Client
 		/// <param name="AValue"> The node to be removed. </param>
 		/// <param name="AIndex"> The nodes index. </param>
 		/// <remarks> Unlinks a node from it's owner. </remarks>
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removed(Node AValue, int AIndex)
 		{
-			Node LNode = (Node)AValue;
-
 			try
 			{
 				try
@@ -568,11 +565,11 @@ namespace Alphora.Dataphor.Frontend.Client
 						{
 							try
 							{
-								LNode.BeforeDeactivate();
+								AValue.BeforeDeactivate();
 							}
 							finally
 							{
-								LNode.DeactivateAll();
+								AValue.DeactivateAll();
 							}
 						}
 						finally
@@ -584,45 +581,42 @@ namespace Alphora.Dataphor.Frontend.Client
 				}
 				finally
 				{
-					LNode.FOwner = null;
+					AValue.FOwner = null;
 				}
 			}
 			finally
 			{
-				FNode.RemoveChild(LNode);
-				base.Removing(AValue, AIndex);
+				FNode.RemoveChild(AValue);
+				FNode.ChildrenChanged();
+				base.Removed(AValue, AIndex);
 			}
 		}
 
 		/// <summary> Validates the child nodes. </summary>
 		/// <param name="AValue"> The Node to be validated. </param>
 		/// <remarks>  Calls owner node's IsValidChild on the new node. </remarks>
-		protected override void Validate(object AValue)
+		protected override void Validate(Node AValue)
 		{
 			base.Validate(AValue);
-			Node LChild = (Node)AValue;
-			if (!FNode.IsValidChild(LChild))
-				FNode.InvalidChildError(LChild);
+			if (!FNode.IsValidChild(AValue))
+				FNode.InvalidChildError(AValue);
 		}
 
-		public override void Clear()
-		{
-			base.Clear();
-			FNode.ChildrenChanged();
-		}
-
-		public override object RemoveItemAt(int AIndex)
-		{
-			object LResult = base.RemoveItemAt(AIndex);
-			FNode.ChildrenChanged();
-			return LResult;
-		}
-		
 		/// <summary> Index accessor for the children nodes. </summary>
 		public new INode this[int AIndex]
 		{
-			get { return (INode)base[AIndex]; }
-			set { base[AIndex] = value; }
+			get { return base[AIndex]; }
+			set { base[AIndex] = (Node)value; }
+		}
+
+		public void Disown(INode AItem)
+		{
+			base.Disown((Node)AItem);
+		}
+
+		public new INode DisownAt(int AIndex)
+		{
+			return base.DisownAt(AIndex);
 		}
 	}
 }

@@ -22,6 +22,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Schema
 {

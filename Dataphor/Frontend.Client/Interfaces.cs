@@ -362,9 +362,9 @@ namespace Alphora.Dataphor.Frontend.Client
 	{
 		new INode this[int AIndex] { get; }
 
-		object Disown(object AItem);
+		void Disown(INode AItem);
 
-		object DisownAt(int AIndex);
+		INode DisownAt(int AIndex);
 	}
 
 	/// <summary> Abstract base node. </summary>

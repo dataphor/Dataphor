@@ -65,10 +65,6 @@
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Dataphor\BOP\BOP.csproj">
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
-      <Name>BOP</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Dataphor\DAE.MSSQL\DAE.MSSQL.csproj">
       <Project>{E9B0A9CA-0D3D-4EA9-A265-4D8D1C1AE53E}</Project>
       <Name>DAE.MSSQL</Name>

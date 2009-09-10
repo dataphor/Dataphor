@@ -55,6 +55,9 @@
     <ApplicationVersion>2.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -153,15 +156,13 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
+      <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
+      <Name>Base.Windows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\BOP\BOP.csproj">
-      <Name>BOP</Name>
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>True</Private>
     </ProjectReference>

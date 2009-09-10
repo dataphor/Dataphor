@@ -7,26 +7,19 @@
 //#define TRACEEVENTS // Enable this to turn on tracing
 #define NILPROPOGATION
 
-using System; 
-using System.Text;
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Debug;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	/*
@@ -2262,7 +2255,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					LRow.ValuesOwned = false;
-					StringCollection LLogs = AProgram.ServerProcess.ServerSession.Server.ListLogs();
+					List<string> LLogs = AProgram.ServerProcess.ServerSession.Server.ListLogs();
 					for (int LIndex = 0; LIndex < LLogs.Count; LIndex++)
 					{
 						LRow[0] = LIndex;

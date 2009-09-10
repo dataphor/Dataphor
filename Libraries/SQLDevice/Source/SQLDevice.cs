@@ -5,26 +5,25 @@
 */
 
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Resources;
+using System.IO;
+using System.Text;
 
 namespace Alphora.Dataphor.DAE.Device.SQL
 {
-	using Alphora.Dataphor.BOP;
-	using Alphora.Dataphor.DAE.Schema;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.SQL;
-	using D4 = Alphora.Dataphor.DAE.Language.D4;
+	using System.Collections.Generic;
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Connection;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.SQL;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
+	using D4 = Alphora.Dataphor.DAE.Language.D4;
 	
 	/*
 		Meta Data tags controlling SQL translation and reconciliation ->
@@ -2343,7 +2342,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		protected string GetServerTableName(Plan APlan, Catalog AServerCatalog, string ADeviceTableName)
 		{
 			string LServerTableName = FromSQLIdentifier(ADeviceTableName);
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LIndex = AServerCatalog.IndexOf(LServerTableName, LNames);
 			if ((LIndex >= 0) && (AServerCatalog[LIndex].Library != null) && (D4.MetaData.GetTag(AServerCatalog[LIndex].MetaData, "Storage.Name", ADeviceTableName) == ADeviceTableName))
 				LServerTableName = AServerCatalog[LIndex].Name;
@@ -3359,7 +3358,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 		}
 		
 		private int FCounter = 0;
-		private StringCollection FTableAliases = new StringCollection();
+		private List<string> FTableAliases = new List<string>();
 		public string GetNextTableAlias()
 		{
 			FCounter++;

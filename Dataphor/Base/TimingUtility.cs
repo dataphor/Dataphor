@@ -8,18 +8,34 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor
 {
+#if !SILVERLIGHT
 	[System.Security.SuppressUnmanagedCodeSecurity()]
+#endif
 	public sealed class TimingUtility
 	{
+#if SILVERLIGHT
+		public static bool QueryPerformanceCounter(out long lpPerformanceCount)
+		{
+			lpPerformanceCount = Environment.TickCount;
+			return true;
+		}
+		
+		public static bool QueryPerformanceFrequency(out long lpFrequency)
+		{
+			lpFrequency = 1000;
+			return true;
+		}
+#else
 		[DllImport("kernel32.dll", EntryPoint = "QueryPerformanceCounter", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
 
 		[DllImport("kernel32.dll", EntryPoint = "QueryPerformanceFrequency", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
 		public static extern bool QueryPerformanceFrequency(out long lpFrequency);
-
+#endif
 		static TimingUtility()
 		{
 			QueryPerformanceFrequency(out FTicksPerSecond);
@@ -68,13 +84,21 @@ namespace Alphora.Dataphor
 			Debug.WriteLine(String.Format("Timer: '{0}' -- ticks: {1}  secs: {2}", FCurrentTiming.FDescription, LElapsed, (decimal)LElapsed / (decimal)FTicksPerSecond));
 			if (FCurrentTiming.FAccumulations != null)
 			{
-				long LAccum;
-				foreach (DictionaryEntry LItem in FCurrentTiming.FAccumulations)
+				foreach (KeyValuePair<string, long> LItem in FCurrentTiming.FAccumulations)
 				{
-					LAccum = (long)LItem.Value;
-					System.Diagnostics.Debug.WriteLine(String.Format("  Accumulator: '{0}' -- ticks: {1}  secs: {2}   timerdiff: {3}", LItem.Key, LAccum, (decimal)LAccum / (decimal)FTicksPerSecond, (decimal)(LElapsed - LAccum) / (decimal)FTicksPerSecond));
+					System.Diagnostics.Debug.WriteLine
+					(
+						String.Format
+						(
+							"  Accumulator: '{0}' -- ticks: {1}  secs: {2}   timerdiff: {3}", 
+							LItem.Key,
+							LItem.Value,
+							(decimal)LItem.Value / (decimal)FTicksPerSecond, 
+							(decimal)(LElapsed - LItem.Value) / (decimal)FTicksPerSecond
+						)
+					);
 					if (FCurrentTiming.FPrior != null)
-						FCurrentTiming.FPrior.Accumulate((string)LItem.Key, LAccum);
+						FCurrentTiming.FPrior.Accumulate(LItem.Key, LItem.Value);
 				}
 			}
 			FCurrentTiming = FCurrentTiming.FPrior;
@@ -107,20 +131,17 @@ namespace Alphora.Dataphor
 		public Timing FPrior;
 		public long FStart;
 		public string FDescription;
-		public Hashtable FAccumulations;
+		public Dictionary<string, long> FAccumulations;
 		public Accumulator FAccumulator;
 
 		public void Accumulate(string ADescription, long ADuration)
 		{
+			long LCurrent = 0;
 			if (FAccumulations == null)
-				FAccumulations = new Hashtable();
+				FAccumulations = new Dictionary<string, long>();
 			else
-				if (FAccumulations.ContainsKey(ADescription))
-				{	
-					FAccumulations[ADescription] = (long)FAccumulations[ADescription] + ADuration;
-					return;
-				}
-			FAccumulations[ADescription] = ADuration;
+				FAccumulations.TryGetValue(ADescription, out LCurrent);
+			FAccumulations[ADescription] = LCurrent + ADuration;
 		}
 	}
 

@@ -4,13 +4,11 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
-using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
+using System.Windows.Forms;
+using Alphora.Dataphor.Windows;
 
 
 namespace Alphora.Dataphor.DAE.Client.Controls

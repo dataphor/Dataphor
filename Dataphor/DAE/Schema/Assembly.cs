@@ -4,24 +4,12 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Text;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-
-using Alphora.Dataphor;
+using System.Reflection;
 using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Streams;
-using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.DAE.Runtime;
-using Alphora.Dataphor.DAE.Runtime.Data;
-using Alphora.Dataphor.DAE.Runtime.Instructions;
-using D4 = Alphora.Dataphor.DAE.Language.D4;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -173,7 +161,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			string LClassName = LClass.ClassName;
 			try
 			{
-				return AssemblyUtility.GetType(LClassName, true, true);
+				return Type.GetType(LClassName, true, true);
 			}
 			catch (Exception E)
 			{
@@ -220,7 +208,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					if (!FAssemblies.Contains(LAssembly))
 					{
 						SettingsList LClasses = GetClassList(AAssembly);
-						foreach (SettingsItem LSetting in LClasses)
+						foreach (SettingsItem LSetting in LClasses.Values)
 						{
 							RegisteredClass LClass = new RegisteredClass(LSetting.Name, ALibrary, LAssembly, LSetting.Value);
 							FClasses.Add(LClass);
@@ -242,7 +230,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			lock (FAssemblies)
 			{
 				SettingsList LClasses = GetClassList(AAssembly);
-				foreach (SettingsItem LSetting in LClasses)
+				foreach (SettingsItem LSetting in LClasses.Values)
 					if (FClasses.Contains(LSetting.Name))
 					{
 						Schema.RegisteredClass LClass = FClasses[LSetting.Name];

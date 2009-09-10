@@ -889,7 +889,17 @@ namespace Alphora.Dataphor.DAE
     
 	/// <summary> Represents a cursor. </summary>
 	/// <seealso cref="IServerCursor"/> <seealso cref="IRemoteServerCursor"/>
-    public interface IServerCursorBase : IDisposableNotify, IActive, IServerCursorBehavior {}
+    public interface IServerCursorBase : IDisposableNotify, IServerCursorBehavior 
+    {
+		/// <summary> Opens the cursor. </summary>
+		void Open();
+		
+		/// <summary> Closes the cursor. </summary>
+		void Close();
+		
+		/// <summary> Gets or sets whether the cursor is currently open (Active). </summary>
+		bool Active { get; set; }
+	}
     
     /// <summary> Local server "cracked" cursor interface. </summary>
     public interface IServerCursor : IServerCursorBase, IProposable

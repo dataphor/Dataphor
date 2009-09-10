@@ -104,10 +104,6 @@
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Name>Base</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\BOP\BOP.csproj">
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
-      <Name>BOP</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Dataphor\DAE.Client\DAE.Client.csproj">
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Name>DAE.Client</Name>

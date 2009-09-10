@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	/// the same way as a Table value is expected to. A scan is an active window onto the given
 	/// table value, changes made to the underlying data are immediately reflected in the scan.
 	/// </remarks>
-	public class Scan : Disposable, IActive
+	public class Scan : Disposable
 	{
 		/// <remarks> Scan range keys are inclusive. </remarks>		
 		public Scan(IValueManager AManager, NativeTable ATable, NativeRowTree AAccessPath, ScanDirection ADirection, Row AFirstKey, Row ALastKey)

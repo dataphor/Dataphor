@@ -102,38 +102,26 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 	}
 	
-	public class DocumentTypes : HashtableList
+	public class DocumentTypes : HashtableList<string, DocumentType>
 	{
 		public DocumentTypes() : base() {}
 		
-		public DocumentType this[string AID]
+		public new DocumentType this[string AID]
 		{
 			get
 			{
-				DocumentType LResult = (DocumentType)base[AID];
-				if (LResult == null)
+				DocumentType LResult;
+				if (!TryGetValue(AID, out LResult))
 					throw new FrontendDeviceException(FrontendDeviceException.Codes.DocumentTypeNotFound, AID);
 				return LResult;
 			}
 		}
 		
-		public new DocumentType this[int AIndex] { get { return (DocumentType)base[AIndex]; } }
-		
 		public override int Add(object AValue)
 		{
-			DocumentType LValue = AValue as DocumentType;
-			if (LValue != null)
-			{
-				Add(LValue);
-				return IndexOf(LValue.ID);
-			}
-			else
-				return -1;
-		}
-		
-		public void Add(DocumentType AValue)
-		{
-			Add(AValue.ID, AValue);
+			var LDocument = (DocumentType)AValue;
+			Add(LDocument.ID, LDocument);
+			return IndexOf(AValue);
 		}
 	}
 	
@@ -496,38 +484,26 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		}
 	}
 	
-	public class Designers : HashtableList
+	public class Designers : HashtableList<string, Designer>
 	{
 		public Designers() : base() {}
 		
-		public Designer this[string AID]
+		public new Designer this[string AID]
 		{
 			get
 			{
-				Designer LResult = (Designer)base[AID];
-				if (LResult == null)
+				Designer LResult;
+				if (!TryGetValue(AID, out LResult))
 					throw new FrontendDeviceException(FrontendDeviceException.Codes.DesignerNotFound, AID);
 				return LResult;
 			}
 		}
 		
-		public new Designer this[int AIndex] { get { return (Designer)base[AIndex]; } }
-		
 		public override int Add(object AValue)
 		{
-			Designer LValue = AValue as Designer;
-			if (LValue != null)
-			{
-				Add(LValue);
-				return IndexOf(LValue.ID);
-			}
-			else
-				return -1;
-		}
-		
-		public void Add(Designer AValue)
-		{
-			Add(AValue.ID, AValue);
+			Designer LValue = (Designer)AValue;
+			Add(LValue.ID, LValue);
+			return IndexOf(LValue);
 		}
 	}
 	

@@ -176,7 +176,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				Block LBlock = new Block();
 				LBlock.Statements.Add(LStatement);
-				foreach (ServerLinkUser LUser in FUsers)
+				foreach (ServerLinkUser LUser in FUsers.Values)
 					LBlock.Statements.Add
 					(
 						new ExpressionStatement
@@ -227,19 +227,15 @@ namespace Alphora.Dataphor.DAE.Schema
 		public string ServerLinkPassword { get { return FServerLinkPassword; } set { FServerLinkPassword = value == null ? String.Empty : value; } }
 	}
 	
-	public class ServerLinkUsers : HashtableList
+	public class ServerLinkUsers : HashtableList<string, ServerLinkUser>
 	{		
 		public ServerLinkUsers() : base(StringComparer.InvariantCultureIgnoreCase) {}
 		
-		public ServerLinkUser this[string AID] { get { return (ServerLinkUser)base[AID]; } }
-		
 		public override int Add(object AValue)
 		{
-			if (AValue is ServerLinkUser)
-				Add((ServerLinkUser)AValue);
-			else
-				throw new SchemaException(SchemaException.Codes.ServerLinkUserContainer);
-			return IndexOf(AValue);
+			ServerLinkUser LUser = (ServerLinkUser)AValue;
+			Add(LUser.UserID, LUser);
+			return IndexOf(LUser.UserID);
 		}
 		
 		public void Add(ServerLinkUser AServerLinkUser)

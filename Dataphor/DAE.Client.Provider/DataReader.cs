@@ -117,7 +117,7 @@ namespace Alphora.Dataphor.DAE.Client.Provider
 		{
 			DAE.Language.D4.Tag LTag = AColumn.MetaData.Tags.GetTag("DAEDataReader.NativeType");
 			if (LTag != null)
-				return AssemblyUtility.GetType(LTag.Value, true, true);
+				return Type.GetType(LTag.Value, true, true);
 			else
 				return GetNativeType(ADataType, ADataTypes);
 		}

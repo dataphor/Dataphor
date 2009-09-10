@@ -10,6 +10,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Alphora.Dataphor.Dataphoria.Visual
 {
@@ -450,28 +452,23 @@ namespace Alphora.Dataphor.Dataphoria.Visual
 		}
 	}
 
-	public class DepthGuageItems : TypedList
+	public class DepthGuageItems : NotifyingBaseList<string>
 	{
-		public DepthGuageItems(DepthGuage AGuage) : base(typeof(string)) 
+		public DepthGuageItems(DepthGuage AGuage) 
 		{
 			FGuage = AGuage;
 		}
 
 		private DepthGuage FGuage;
 
-		public new string this[int AIndex]
-		{
-			get { return (string)base[AIndex]; }
-		}
-
-		protected override void Adding(object AValue, int AIndex)
+		protected override void Adding(string AValue, int AIndex)
 		{
 			base.Adding(AValue, AIndex);
 			FGuage.InvalidateWidths();
 			FGuage.Invalidate(false);
 		}
 
-		protected override void Removing(object AValue, int AIndex)
+		protected override void Removing(string AValue, int AIndex)
 		{
 			base.Removing(AValue, AIndex);
 			FGuage.InvalidateWidths();

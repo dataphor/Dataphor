@@ -79,15 +79,18 @@ namespace Alphora.Dataphor
 		/// </remarks>
 		protected virtual void Validate(T AValue) { }
 		
-		/// <summary> Adding is called when an item is added to the list </summary>
+		/// <summary> Adding is called when an item is added to the list. </summary>
 		/// <remarks>
 		///		This should NOT be used for validation, but is a good place to put 
 		///		code that interacts with items in the list.  
 		///	</remarks>
 		protected virtual void Adding(T AValue, int AIndex) { }
 		
-		/// <summary> Removing is called when an item is being removed from the List </summary>
+		/// <summary> Removing is called when an item is being removed from the List. </summary>
 		protected virtual void Removing(T AValue, int AIndex) { }
+
+		/// <summary> Removed is call <i>after</i> an item as been removed from the list. </summary>
+		protected virtual void Removed(T AValue, int AIndex) { }
 		
 		/// <summary> Adds an item to the end of the list. </summary>
 		public int Add(T AValue)
@@ -149,6 +152,7 @@ namespace Alphora.Dataphor
 					FItems[LIndex] = FItems[LIndex + 1];
 				FItems[FCount] = default(T); // Clear the last slot
 			}
+			Removed(LItem, AIndex);
 			return LItem;
 		}
 		
@@ -186,9 +190,11 @@ namespace Alphora.Dataphor
 				if ((AIndex < 0) || (AIndex >= Count))
 					throw new IndexOutOfRangeException();
 				#endif
-				Removing(this[AIndex], AIndex);
+				T LItem = this[AIndex];
+				Removing(LItem, AIndex);
 				Validate(value);
 				FItems[AIndex] = value;
+				Removed(LItem, AIndex);
 				Adding(value, AIndex);
 			}
 		}

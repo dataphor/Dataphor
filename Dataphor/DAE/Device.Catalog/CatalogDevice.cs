@@ -600,16 +600,21 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		private void PopulateLocks(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
 			LockManager LLockManager = AProgram.ServerProcess.ServerSession.Server.LockManager;
-			DictionaryEntry[] LEntries;
+			KeyValuePair<LockID, LockHeader>[] LEntries;
 			lock (LLockManager)
 			{
-				LEntries = new DictionaryEntry[LLockManager.Locks.Count];
-				LLockManager.Locks.CopyTo(LEntries, 0);
+				LEntries = new KeyValuePair<LockID, LockHeader>[LLockManager.Locks.Count];
+				var LIndex = 0;
+				foreach (KeyValuePair<LockID, LockHeader> LEntry in LLockManager.Locks)
+				{
+					LEntries[LIndex] = LEntry;
+					LIndex++;
+				}
 			}
-			
-			foreach (DictionaryEntry LEntry in LEntries)
+
+			foreach (KeyValuePair<LockID, LockHeader> LEntry in LEntries)
 			{
-				LockHeader LLockHeader = (LockHeader)LEntry.Value;
+				LockHeader LLockHeader = LEntry.Value;
 				ARow[0] = LLockHeader.LockID.ResourceManagerID;
 				ARow[1] = LLockHeader.LockID.LockName;
 				ARow[2] = LLockHeader.Semaphore.Mode.ToString();
@@ -820,7 +825,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				Schema.ServerLink LServerLink = LObject as Schema.ServerLink;
 				if (LServerLink != null)
 				{
-					foreach (ServerLinkUser LLinkUser in LServerLink.Users)
+					foreach (ServerLinkUser LLinkUser in LServerLink.Users.Values)
 					{
 						ARow[0] = LLinkUser.UserID;
 						ARow[1] = LServerLink.Name;

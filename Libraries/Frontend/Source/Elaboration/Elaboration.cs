@@ -7,19 +7,15 @@
 */
 
 using System;
-using System.Text;
 using System.Collections;
-using System.Collections.Specialized;
-
-using Alphora.Dataphor;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
+using System.Collections.Generic;
+using System.Text;
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Schema = Alphora.Dataphor.DAE.Schema;
-using Frontend = Alphora.Dataphor.Frontend;
-using Alphora.Dataphor.Frontend.Server.Derivation;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.Frontend.Server.Derivation;
+using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.Frontend.Server.Elaboration
 {
@@ -320,7 +316,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		}
 		
 		// Stores the names of all tables in the expression to ensure uniqueness is maintained
-		protected StringCollection FTableNames = new StringCollection();
+		protected List<string> FTableNames = new List<string>();
 		
 		protected string InternalAddTableName(string ATableName)
 		{
@@ -347,7 +343,7 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		// Note that the derived reference names could be used for this purpose, but this would
 		// break backwards compatibility with forms and customizations created before the derived
 		// reference name was introduced (#23692).
-		protected StringCollection FReferenceNames = new StringCollection();
+		protected List<string> FReferenceNames = new List<string>();
 		
 		protected string InternalAddReferenceName(string AReferenceName)
 		{
@@ -736,8 +732,8 @@ namespace Alphora.Dataphor.Frontend.Server.Elaboration
 		public string TableTitle { get { return FTableTitle; } }
 
 		// ColumnNames
-		protected StringCollection FColumnNames = new StringCollection();
-		public StringCollection ColumnNames { get { return FColumnNames; } }
+		protected List<string> FColumnNames = new List<string>();
+		public List<string> ColumnNames { get { return FColumnNames; } }
 		
 		// ElaboratedReferences
 		protected ElaboratedReferences FElaboratedReferences = new ElaboratedReferences();

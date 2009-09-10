@@ -684,7 +684,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class Tags : System.Object
 	{
 		#if USEHASHTABLEFORTAGS
-		private Hashtable FTags = new Hashtable();
+		private Dictionary<string, Tag> FTags = new Dictionary<string, Tag>();
 		#else
 		private ArrayList FTags = new ArrayList();
 		
@@ -730,11 +730,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get
 			{
 				#if USEHASHTABLEFORTAGS
-				object LObject = FTags[AName];
-				Tag LTag = LObject as Tag;
-				if (LTag == null)
+				Tag LTag;
+				if (!FTags.TryGetValue(AName, out LTag))
 				{
-					TagReference LTagReference = LObject as TagReference;
+					TagReference LTagReference = LTag as TagReference;
 					if (LTagReference != null)
 						LTag = LTagReference.Tag;
 				}

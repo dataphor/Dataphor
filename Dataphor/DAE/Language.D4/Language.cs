@@ -5,15 +5,10 @@
 */
 namespace Alphora.Dataphor.DAE.Language.D4
 {
-    using System;
-    using System.Reflection;
-    using System.Collections;
-    using System.Collections.Specialized;
-	using System.ComponentModel.Design.Serialization;
-
-    using Alphora.Dataphor;
-    using Alphora.Dataphor.DAE.Language;
+	using System;
+	using System.Collections.Generic;
 	using System.ComponentModel;
+	using Alphora.Dataphor.DAE.Language;
     
     /*
         Class Hierarchy ->
@@ -1112,19 +1107,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
         }
     }
     
-	#if USENOTIFYLISTFORMETADATA
-    public class AdornColumnExpression : Expression, IMetaData, IAlterMetaData, INotifyListItem
-    #else
     public class AdornColumnExpression : Expression, IMetaData, IAlterMetaData
-    #endif
     {
-		public AdornColumnExpression() : base()
-		{
-			#if USENOTIFYLISTFORMETADATA
-			FConstraints.OnChanged += new ListEventHandler(ListChanged);
-			#endif
-		}
-		
 		// ColumnName
 		protected string FColumnName = String.Empty;
 		public string ColumnName
@@ -1135,9 +1119,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (FColumnName != value)
 				{
 					FColumnName = value == null ? String.Empty : value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
 				}
 			}
 		}
@@ -1164,22 +1145,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public DefaultDefinition Default
 		{
 			get { return FDefault; }
-			set 
-			{ 
-				if (FDefault != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FDefault != null)
-						FDefault.OnChanged -= new ListItemEventHandler(ItemChanged);
-					#endif
-					FDefault = value; 
-					#if USENOTIFYLISTFORMETADATA
-					if (FDefault != null)
-						FDefault.OnChanged += new ListItemEventHandler(ItemChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FDefault = value; }
 		}
 
 		// Constraints
@@ -1187,22 +1153,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public ConstraintDefinitions Constraints
 		{
 			get { return FConstraints; }
-			set 
-			{ 
-				if (FConstraints != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FConstraints != null)
-						FConstraints.OnChanged -= new ListEventHandler(ListChanged);
-					#endif
-					FConstraints = value;
-					#if USENOTIFYLISTFORMETADATA
-					if (FConstraints != null)
-						FConstraints.OnChanged += new ListEventHandler(ListChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FConstraints = value; }
 		}
 		
         // MetaData
@@ -1211,22 +1162,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public MetaData MetaData
         {
 			get { return FMetaData; }
-			set 
-			{ 
-				if (FMetaData != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged -= new ListItemEventHandler(ItemChanged);
-					#endif
-					FMetaData = value; 
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FMetaData = value; }
         }
         
 		protected AlterMetaData FAlterMetaData;
@@ -1235,25 +1171,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			get { return FAlterMetaData; }
 			set { FAlterMetaData = value; }
 		}
-
-		#if USENOTIFYLISTFORMETADATA
-        public event ListItemEventHandler OnChanged;
-        private void Changed()
-        {
-			if (OnChanged != null)
-				OnChanged(this);
-        }
-        
-        private void ItemChanged(object ASender)
-        {
-			Changed();
-        }
-        
-        private void ListChanged(object ASender, object AItem)
-        {
-			Changed();
-        }
-        #endif
     }
     
 	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.AdornColumnExpressionEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
@@ -3880,11 +3797,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         }
 	}
 	
-	#if USENOTIFYLISTFORMETADATA
-	public class ColumnDefinitionBase : D4Statement, INotifyListItem
-	#else
 	public class ColumnDefinitionBase : D4Statement
-	#endif
 	{
 		public ColumnDefinitionBase() : base(){}
 		public ColumnDefinitionBase(string AColumnName) : base()
@@ -3902,21 +3815,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (FColumnName != value)
 				{
 					FColumnName = value == null ? String.Empty : value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
 				}
 			}
 		}
-		
-		#if USENOTIFYLISTFORMETADATA
-		public event ListItemEventHandler OnChanged;
-		protected void Changed()
-		{
-			if (OnChanged != null)
-				OnChanged(this);
-		}
-		#endif
 	}
 	
 	public class ColumnDefinition : ColumnDefinitionBase, IMetaData
@@ -4152,48 +4053,21 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public bool Ascending
 		{
 			get { return FAscending; }
-			set 
-			{ 
-				if (FAscending != value)
-				{
-					FAscending = value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FAscending = value; }
 		}
 		
 		protected bool FIncludeNils = false;
 		public bool IncludeNils
 		{
 			get { return FIncludeNils; }
-			set 
-			{ 
-				if (FIncludeNils != value)
-				{
-					FIncludeNils = value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FIncludeNils = value; }
 		}
 		
 		protected SortDefinition FSort;
 		public SortDefinition Sort
 		{
 			get { return FSort; }
-			set
-			{
-				if (FSort != value)
-				{
-					FSort = value;
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FSort = value; }
 		}
 	}
 
@@ -4524,11 +4398,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
 	}
     
-	#if USENOTIFYLISTFORMETADATA
-	public abstract class ConstraintDefinitionBase : D4Statement, INotifyListItem
-	#else
 	public abstract class ConstraintDefinitionBase : D4Statement
-	#endif
 	{
 		// ConstraintName
 		protected string FConstraintName = String.Empty;
@@ -4540,21 +4410,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				if (FConstraintName != value)
 				{
 					FConstraintName = value == null ? String.Empty : value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
 				}
 			}
 		}
-		
-		#if USENOTIFYLISTFORMETADATA
-		public event ListItemEventHandler OnChanged;
-		protected void Changed()
-		{
-			if (OnChanged != null)
-				OnChanged(this);
-		}
-		#endif
 	}
 	
 	public class CreateConstraintDefinition : ConstraintDefinitionBase, IMetaData
@@ -4564,10 +4422,6 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			FConstraintName = AName;
 			FMetaData = AMetaData;
-			#if USENOTIFYLISTFORMETADATA
-			if (FMetaData != null)
-				FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-			#endif
 		}
 
 		private bool FIsGenerated;
@@ -4583,30 +4437,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public MetaData MetaData
         {
 			get { return FMetaData; }
-			set 
-			{ 
-				if (FMetaData != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged -= new ListItemEventHandler(ItemChanged);
-					#endif
-					FMetaData = value; 
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FMetaData = value; }
         }
-        
-		#if USENOTIFYLISTFORMETADATA
-        private void ItemChanged(object ASender)
-        {
-			Changed();
-		}
-		#endif
 	}
 	
 	public class ConstraintDefinition : CreateConstraintDefinition
@@ -4624,16 +4456,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expression Expression
 		{
 			get { return FExpression; }
-			set 
-			{ 
-				if (FExpression != value)
-				{
-					FExpression = value;
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FExpression = value; }
 		}
 
 		private string ExpressionToString(Expression AExpression)
@@ -4734,16 +4557,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expression OnInsertExpression
 		{
 			get { return FOnInsertExpression; }
-			set 
-			{ 
-				if (FOnInsertExpression != value)
-				{
-					FOnInsertExpression = value;
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FOnInsertExpression = value; }
 		}
 
 		// OnUpdateExpression		
@@ -4751,16 +4565,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expression OnUpdateExpression
 		{
 			get { return FOnUpdateExpression; }
-			set 
-			{ 
-				if (FOnUpdateExpression != value)
-				{
-					FOnUpdateExpression = value;
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FOnUpdateExpression = value; }
 		}
 
 		// OnDeleteExpression		
@@ -4768,16 +4573,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expression OnDeleteExpression
 		{
 			get { return FOnDeleteExpression; }
-			set 
-			{ 
-				if (FOnDeleteExpression != value)
-				{
-					FOnDeleteExpression = value;
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FOnDeleteExpression = value; }
 		}
 	}
 	
@@ -4955,37 +4751,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
         public MetaData MetaData
         {
 			get { return FMetaData; }
-			set 
-			{ 
-				if (FMetaData != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged -= new ListItemEventHandler(ItemChanged);
-					#endif
-					FMetaData = value; 
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FMetaData = value; }
         }
-        
-		#if USENOTIFYLISTFORMETADATA
-        private void ItemChanged(object ASender)
-        {
-			Changed();
-		}
-
-        public event ListItemEventHandler OnChanged;
-        private void Changed()
-        {
-			if (OnChanged != null)
-				OnChanged(this);
-        }
-		#endif
 	}
 	
 	public class DropConversionStatement : D4Statement
@@ -5196,21 +4963,13 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 	public abstract class DefaultDefinitionBase : D4Statement {}
 
-	#if USENOTIFYLISTFORMETADATA
-	public class DefaultDefinition : DefaultDefinitionBase, IMetaData, INotifyListItem
-	#else
 	public class DefaultDefinition : DefaultDefinitionBase, IMetaData
-	#endif
 	{
 		public DefaultDefinition() : base(){}
 		public DefaultDefinition(Expression AExpression, MetaData AMetaData)
 		{
 			FExpression = AExpression;
 			FMetaData = AMetaData;
-			#if USENOTIFYLISTFORMETADATA
-			if (FMetaData != null)
-				FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-			#endif
 		}
 		
 		// Expression		
@@ -5220,16 +4979,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public Expression Expression
 		{
 			get { return FExpression; }
-			set 
-			{ 
-				if (FExpression != value)
-				{
-					FExpression = value; 
-					#if USENOTIFYLISTFORMETADATA
-					Changed();
-					#endif
-				}
-			}
+			set { FExpression = value; }
 		}
 		
 		private bool FIsGenerated;
@@ -5276,37 +5026,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public MetaData MetaData
         {
 			get { return FMetaData; }
-			set 
-			{ 
-				if (FMetaData != value)
-				{
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged -= new ListItemEventHandler(ItemChanged);
-					#endif
-					FMetaData = value; 
-					#if USENOTIFYLISTFORMETADATA
-					if (FMetaData != null)
-						FMetaData.OnChanged += new ListItemEventHandler(ItemChanged);
-					Changed();
-					#endif
-				}
-			}
+			set { FMetaData = value; }
         }
-        
-		#if USENOTIFYLISTFORMETADATA
-        public event ListItemEventHandler OnChanged;
-        private void Changed()
-        {
-			if (OnChanged != null)
-				OnChanged(this);
-        }
-        
-        private void ItemChanged(object ASender)
-        {
-			Changed();
-        }
-        #endif
 	}
 
 	public class AlterDefaultDefinition : DefaultDefinitionBase, IAlterMetaData
@@ -5850,8 +5571,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class AttachStatement : AttachStatementBase, IMetaData
 	{
 		// BeforeOperatorNames
-		protected StringCollection FBeforeOperatorNames = new StringCollection();
-		public StringCollection BeforeOperatorNames { get { return FBeforeOperatorNames; } }
+		protected List<string> FBeforeOperatorNames = new List<string>();
+		public List<string> BeforeOperatorNames { get { return FBeforeOperatorNames; } }
 		
 		// IsGenerated
 		private bool FIsGenerated;
@@ -5873,8 +5594,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 	public class InvokeStatement : AttachStatementBase
 	{
 		// BeforeOperatorNames
-		protected StringCollection FBeforeOperatorNames = new StringCollection();
-		public StringCollection BeforeOperatorNames { get { return FBeforeOperatorNames; } }
+		protected List<string> FBeforeOperatorNames = new List<string>();
+		public List<string> BeforeOperatorNames { get { return FBeforeOperatorNames; } }
 	}
 
 	public class DetachStatement : AttachStatementBase {}

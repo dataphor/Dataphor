@@ -27,6 +27,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -77,18 +78,25 @@
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AssemblyUtility.cs">
+    <Compile Include="BOP\Attributes.cs" />
+    <Compile Include="BOP\Deserializer.cs" />
+    <Compile Include="BOP\Persistence.cs" />
+    <Compile Include="BOP\Structures.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Base.cs">
@@ -100,6 +108,11 @@
     <Compile Include="BaseList.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BOP\BOPException.cs" />
+    <Compile Include="BOP\Dilx.cs" />
+    <Compile Include="BOP\Inheritance.cs" />
+    <Compile Include="BOP\Serializer.cs" />
+    <Compile Include="BOP\Settings.cs" />
     <Compile Include="ByteArrayUtility.cs" />
     <Compile Include="CRC32.cs">
       <SubType>Code</SubType>
@@ -112,21 +125,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FixedSizeCache.cs" />
-    <Compile Include="Frame.cs" />
     <Compile Include="Set.cs" />
     <Compile Include="MemoryUtility.cs" />
     <Compile Include="NonNullList.cs" />
     <Compile Include="NotifyingBaseList.cs" />
-    <Compile Include="Stack.cs" />
-    <Compile Include="StackWindow.cs" />
     <Compile Include="TemporaryStream.cs" />
-    <Compile Include="IdentifierIndex.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="IndexList.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PathUtility.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ReflectionUtility.cs">
@@ -136,18 +140,17 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ThreadUtility.cs" />
-    <Compile Include="TimingUtility.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="TimingUtility.cs" />
     <Compile Include="ValidatingBaseList.cs" />
-    <Compile Include="WebUtility.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <EmbeddedResource Include="Base.resx">
       <DependentUpon>Base.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="BaseException.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOP\BOPException.resx">
+      <DependentUpon>BOPException.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

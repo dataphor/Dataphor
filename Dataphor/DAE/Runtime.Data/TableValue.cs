@@ -159,7 +159,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	}
 	
     /// <remarks> Table </remarks>
-    public abstract class Table : DataValue, IActive
+    public abstract class Table : DataValue
     {        
 		protected Table(IValueManager AManager, Schema.ITableType ATableType) : base(AManager, ATableType) { }
 		

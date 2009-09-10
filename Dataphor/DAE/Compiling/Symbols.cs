@@ -5,9 +5,7 @@
 */
 
 using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace Alphora.Dataphor.DAE.Compiling
 {
@@ -109,8 +107,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FStack[FCount - 1 - AOffset].FIsModified = true;
 			#endif
 		}
-		
-		public bool IsValidVariableIdentifier(string AIdentifier, StringCollection ANames)
+
+		public bool IsValidVariableIdentifier(string AIdentifier, List<string> ANames)
 		{
 			// Returns true if the given identifier is a valid identifier in the current stack window.
 			// If the return value is false, ANames will contain the offending identifier.
@@ -135,8 +133,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			return true;
 		}
-		
-		public int ResolveVariableIdentifier(string AIdentifier, out int AColumnIndex, StringCollection ANames)
+
+		public int ResolveVariableIdentifier(string AIdentifier, out int AColumnIndex, List<string> ANames)
 		{
 			AColumnIndex = -1;
 			int LVariableIndex = -1;

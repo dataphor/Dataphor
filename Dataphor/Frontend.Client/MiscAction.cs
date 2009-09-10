@@ -5,22 +5,13 @@
 */
 
 using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Reflection;
-using System.ComponentModel;
-using System.Drawing.Design;
-using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
 using System.Text;
-using System.IO;
-
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
-
-using Alphora.Dataphor.BOP;
-using DAE = Alphora.Dataphor.DAE.Server;
-using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -175,7 +166,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			return LResult;
 		}
 		
-		private void AddReferencedAssemblies(StringCollection AAssemblies, Assembly AAssembly)
+		private void AddReferencedAssemblies(List<string> AAssemblies, Assembly AAssembly)
 		{
 			// Add all assemblies referenced by the ScriptAction itself
 			string[] LAssemblies = GetReferencedAssemblyNames(AAssembly);
@@ -194,7 +185,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 		
 		private string FSourceCode;
-		private StringCollection FReferencedAssemblies;
+		private List<string> FReferencedAssemblies;
 		private CompilerResults FResults;
 
 		private void InvalidateResults()
@@ -219,7 +210,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				default : throw new ClientException(ClientException.Codes.UnsupportedScriptLanguage, FLanguage);
 			}
 
-			FReferencedAssemblies = new StringCollection();
+			FReferencedAssemblies = new List<string>();
 			AddReferencedAssemblies(FReferencedAssemblies, typeof(ScriptAction).Assembly);
 			FSourceCode = String.Format
 			(
@@ -379,14 +370,14 @@ namespace Alphora.Dataphor.Frontend.Client
 				LField.SetValue(AScript, ANode);
 		}
 		
-		private string BuildNodeReferences(StringCollection AAssemblies)
+		private string BuildNodeReferences(List<string> AAssemblies)
 		{
 			StringBuilder LScript = new StringBuilder();
 			BuildNodeReferences(AAssemblies, LScript, HostNode);
 			return LScript.ToString();
 		}
 		
-		private void BuildNodeReferences(StringCollection AAssemblies, StringBuilder AScript, INode ANode)
+		private void BuildNodeReferences(List<string> AAssemblies, StringBuilder AScript, INode ANode)
 		{
 			foreach (INode LNode in ANode.Children)
 			{
@@ -396,7 +387,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			}
 		}
 		
-		private void BuildNodeReference(StringCollection AAssemblies, StringBuilder AScript, INode ANode)
+		private void BuildNodeReference(List<string> AAssemblies, StringBuilder AScript, INode ANode)
 		{
 			AddReferencedAssemblies(AAssemblies, ANode.GetType().Assembly);
 			switch (FLanguage)

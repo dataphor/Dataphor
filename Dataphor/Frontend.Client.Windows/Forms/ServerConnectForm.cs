@@ -298,7 +298,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			FConfiguration = AConfiguration;
 			FServerList.Items.Clear();
-			foreach (ServerAlias LAlias in AConfiguration.Aliases)
+			foreach (ServerAlias LAlias in AConfiguration.Aliases.Values)
 				AddItem(LAlias);
 			SelectAlias(AConfiguration.DefaultAliasName);
 		}

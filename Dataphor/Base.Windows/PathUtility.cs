@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Reflection;
 
-namespace Alphora.Dataphor
+namespace Alphora.Dataphor.Windows
 {
 	public sealed class FileUtility
 	{

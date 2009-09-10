@@ -26,6 +26,9 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
@@ -97,12 +100,6 @@
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\BOP\BOP.csproj">
-      <Name>BOP</Name>
-      <Project>{D94475FD-DCEA-4A0E-B087-8FF8300B85EB}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\DAE.Client.Controls\DAE.Client.Controls.csproj">
       <Name>DAE.Client.Controls</Name>
       <Project>{A295FB41-D9B6-418C-9EA7-0C0A17BA26DD}</Project>
@@ -167,6 +164,7 @@
     <Compile Include="Host.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="IdentifierIndex.cs" />
     <Compile Include="Interfaces.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -210,6 +208,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

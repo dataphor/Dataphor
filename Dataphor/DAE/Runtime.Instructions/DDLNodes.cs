@@ -5,22 +5,15 @@
 */
 
 using System;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
+	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Device.Memory;
-	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	public abstract class DDLNode : PlanNode 
@@ -28,7 +21,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void DropDeviceMaps(Program AProgram, Schema.Device ADevice)
 		{
 			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(ADevice.ID, false);
-			StringCollection LDependents = new StringCollection();
+			List<string> LDependents = new List<string>();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				if ((LHeaders[LIndex].ObjectType == "DeviceScalarType") || (LHeaders[LIndex].ObjectType == "DeviceOperator"))
@@ -60,8 +53,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void DropGeneratedDependents(Program AProgram, Schema.Object AObject)
 		{
 			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
-			StringCollection LDeviceMaps = new StringCollection(); // Device maps need to be dropped first, because the dependency of a device map on a generated operator will be reported as a dependency on the generator, not the operator
-			StringCollection LDependents = new StringCollection();
+			List<string> LDeviceMaps = new List<string>(); // Device maps need to be dropped first, because the dependency of a device map on a generated operator will be reported as a dependency on the generator, not the operator
+			List<string> LDependents = new List<string>();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				if (LHeaders[LIndex].IsATObject || LHeaders[LIndex].IsSessionObject || LHeaders[LIndex].IsGenerated)
@@ -93,7 +86,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void DropGeneratedSorts(Program AProgram, Schema.Object AObject)
 		{
 			List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
-			StringCollection LDependents = new StringCollection();
+			List<string> LDependents = new List<string>();
 			for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 			{
 				if ((LHeaders[LIndex].IsATObject || LHeaders[LIndex].IsSessionObject || LHeaders[LIndex].IsGenerated) && (LHeaders[LIndex].ObjectType == "Sort"))
@@ -113,7 +106,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!AProgram.ServerProcess.IsLoading())
 			{
 				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
-				StringCollection LDependents = new StringCollection();
+				List<string> LDependents = new List<string>();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
 					LDependents.Add(LHeaders[LIndex].Description);
@@ -131,7 +124,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!AProgram.ServerProcess.IsLoading())
 			{
 				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
-				StringCollection LBaseTableVarDependents = new StringCollection();
+				List<string> LBaseTableVarDependents = new List<string>();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
 					Schema.DependentObjectHeader LHeader = LHeaders[LIndex];
@@ -153,7 +146,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			if (!AProgram.ServerProcess.IsLoading())
 			{
 				List<Schema.DependentObjectHeader> LHeaders = AProgram.CatalogDeviceSession.SelectObjectDependents(AObject.ID, false);
-				StringCollection LOperatorDependents = new StringCollection();
+				List<string> LOperatorDependents = new List<string>();
 				for (int LIndex = 0; LIndex < LHeaders.Count; LIndex++)
 				{
 					Schema.DependentObjectHeader LHeader = LHeaders[LIndex];
@@ -776,9 +769,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return FEventSourceColumnIndex; }
 			set { FEventSourceColumnIndex = value; }
 		}
-		
-		private StringCollection FBeforeOperatorNames;
-		public StringCollection BeforeOperatorNames
+
+		private List<string> FBeforeOperatorNames;
+		public List<string> BeforeOperatorNames
 		{
 			get { return FBeforeOperatorNames; }
 			set { FBeforeOperatorNames = value; }
@@ -824,9 +817,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			get { return FEventSourceColumnIndex; }
 			set { FEventSourceColumnIndex = value; }
 		}
-		
-		private StringCollection FBeforeOperatorNames;
-		public StringCollection BeforeOperatorNames
+
+		private List<string> FBeforeOperatorNames;
+		public List<string> BeforeOperatorNames
 		{
 			get { return FBeforeOperatorNames; }
 			set { FBeforeOperatorNames = value; }

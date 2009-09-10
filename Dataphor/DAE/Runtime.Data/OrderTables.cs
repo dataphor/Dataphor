@@ -406,11 +406,16 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
         protected Row FRow;
     }
     
-    public class BrowseTableList : DisposableTypedList
+    public class BrowseTableList : DisposableList<BrowseTableItem>
     {
         public const int CMinTables = 1;
 
-        // BrowseTable
+		public BrowseTableList(BrowseTable ABrowseTable) : base(true)
+		{
+			FBrowseTable = ABrowseTable;
+		}
+		
+		// BrowseTable
         protected BrowseTable FBrowseTable;
         public BrowseTable BrowseTable { get { return FBrowseTable; } }
         
@@ -429,7 +434,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             }
         }
         
-        public void Add(BrowseTableItem ATable)
+        public new void Add(BrowseTableItem ATable)
         {
             int LIndex = IndexOf(ATable);
             if (LIndex < 0)
@@ -441,19 +446,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             else
             {
                 if (LIndex > 0)
-                {
-					DisownAt(LIndex);
-                    Insert(0, ATable);
-                }
+					Move(LIndex, 0);
             }
         }
         
-        public override void Clear()
-        {
-			base.Clear();
-        }
-        
-        public new BrowseTableItem this[int AIndex] { get { return (BrowseTableItem)base[AIndex]; } }
+        public new BrowseTableItem this[int AIndex] { get { return base[AIndex]; } }
         
         public BrowseTableItem this[Table AIndex]
         {
@@ -461,18 +458,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
             {
                 for (int LIndex = 0; LIndex < Count; LIndex++)
                 {
-                    if (this[LIndex].Table == AIndex)
+                    if (base[LIndex].Table == AIndex)
                         return this[LIndex];
                 }
                 return null;
             }
-        }
-        
-        public BrowseTableList(BrowseTable ABrowseTable) : base()
-        {
-            FBrowseTable = ABrowseTable;
-            FItemsOwned = true;
-            FItemType = typeof(BrowseTableItem);
         }
     }
     

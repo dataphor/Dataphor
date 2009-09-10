@@ -10,6 +10,7 @@ using System.Xml;
 using System.Text;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Xml.Linq;
 
 namespace Alphora.Dataphor
 {
@@ -189,8 +190,16 @@ namespace Alphora.Dataphor
 		/// <summary> Saves a dictionary containing both string key and value entries to a stream as XML. </summary>
 		public static void SaveDictionary(Stream AStream, IDictionary ADictionary)
 		{
-			XmlTextWriter LWriter = new XmlTextWriter(AStream, Encoding.Unicode);
-			LWriter.Formatting = Formatting.Indented;
+			var LWriter = 
+				XmlWriter.Create
+				(
+					AStream, 
+					new XmlWriterSettings() 
+					{ 
+						Encoding = Encoding.Unicode,
+						Indent = true
+					}
+				);
 			LWriter.WriteStartDocument();
 			LWriter.WriteStartElement("stringdictionary");
 			IDictionaryEnumerator LEntry = ADictionary.GetEnumerator();
@@ -209,17 +218,11 @@ namespace Alphora.Dataphor
 		/// <summary> Loads a dictionary containing both string key and value entries from a stream containing XML. </summary>
 		public static void LoadDictionary(Stream AStream, IDictionary ADictionary, Type AKeyType, Type AValueType)
 		{
-			XmlDocument LDocument = new XmlDocument();
-			LDocument.Load(AStream);
-			TypeConverter LKeyConverter = TypeDescriptor.GetConverter(AKeyType);
-			TypeConverter LValueConverter = TypeDescriptor.GetConverter(AValueType);
-			foreach (XmlNode LNode in LDocument.DocumentElement.ChildNodes)
-			{
-				if (LNode is XmlElement)
-				{
-					ADictionary.Add(LKeyConverter.ConvertFromString(LNode.Attributes[CKeyAttribute].Value), LValueConverter.ConvertFromString(LNode.Attributes[CValueAttribute].Value));
-				}
-			}
+			XDocument LDocument;
+			using (var LReader = new StreamReader(AStream))
+				LDocument = XDocument.Load(LReader);
+			foreach (XElement LNode in LDocument.Root.Elements())
+				ADictionary.Add(ReflectionUtility.StringToValue(LNode.Attribute(CKeyAttribute).Value, AKeyType), ReflectionUtility.StringToValue(LNode.Attribute(CValueAttribute).Value, AValueType));
 		}
 	}
 

@@ -137,19 +137,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
  		public CursorManager Manager { get { return FManager; } }
     }
     
-    public class Cursors : DisposableTypedList
+    public class Cursors : DisposableList<Cursor>
     {		
-		public Cursors() : base()
-		{
-			FItemsOwned = true;
-			FItemType = typeof(Cursor);
-		}
-		
-		public new Cursor this[int AIndex]
-		{
-			get { return (Cursor)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
+		public Cursors() : base(true) { }
 		
 		public Cursor GetCursor(int ACursorID)
 		{

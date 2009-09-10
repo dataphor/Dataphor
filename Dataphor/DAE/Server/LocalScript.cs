@@ -26,12 +26,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		protected override void Dispose(bool ADisposing)
 		{
-			if (FBatches != null)
-			{
-				FBatches.Dispose();
-				FBatches = null;
-			}
-
+			FBatches = null;
 			FScript = null;
 			FProcess = null;
 			

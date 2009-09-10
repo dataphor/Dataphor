@@ -15,26 +15,25 @@ namespace Alphora.Dataphor.DAE.Client
 	using Alphora.Dataphor.DAE;
 	using Alphora.Dataphor.DAE.Client.Design;
 	using Alphora.Dataphor.DAE.Server;
+	using System.Collections.Generic;
     
 	public class Sessions : IEnumerable
 	{
-		List FList = new List();
+		List<DataSessionBase> FList = new List<DataSessionBase>();
 
 		public int Count
 		{
 			get { return FList.Count; }
 		}
 
-		public object SyncRoot
-		{
-			get { return FList.SyncRoot; }
-		}
-
+		private Object FSyncRoot = new Object();
+		public object SyncRoot { get { return FSyncRoot; } }
+		
 		protected internal string NextSessionName()
 		{
 			string LRequest;
 			int LCount = 1;
-			lock (FList.SyncRoot)
+			lock (FSyncRoot)
 			{
 				while (LCount <= Count)
 				{
@@ -54,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public bool Contains(string ASessionName)
 		{
-			lock (FList.SyncRoot)
+			lock (FSyncRoot)
 			{
 				foreach (DataSessionBase LSession in FList)
 					if ((LSession.SessionName == ASessionName))
@@ -65,17 +64,17 @@ namespace Alphora.Dataphor.DAE.Client
 
 		public void Add(DataSessionBase ASession)
 		{
-			lock (FList.SyncRoot)
+			lock (FSyncRoot)
 			{
 				FList.Add(ASession);
 			}
 		}
 
-		public void Remove(DataSessionBase ASession)
+		public bool Remove(DataSessionBase ASession)
 		{
-			lock (FList.SyncRoot)
+			lock (FSyncRoot)
 			{
-				FList.Remove(ASession);
+				return FList.Remove(ASession);
 			}
 		}
 		
@@ -83,7 +82,7 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			get
 			{
-				lock (FList.SyncRoot)
+				lock (FSyncRoot)
 				{
 					foreach (DataSessionBase LSession in FList)
 						if ((LSession.SessionName == ASessionName))

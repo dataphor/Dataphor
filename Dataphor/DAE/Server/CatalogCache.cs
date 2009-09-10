@@ -4,11 +4,8 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-using System;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -113,7 +110,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public string[] GetRequiredObjects(RemoteServerSession ASession, Schema.Catalog ACatalog, long ACacheTimeStamp, out long AClientCacheTimeStamp)
 		{
-			StringCollection LRequiredObjects = new StringCollection();
+			List<string> LRequiredObjects = new List<string>();
 			CatalogCache LCache = (CatalogCache)FCaches[ASession.CatalogCacheName];
 
 			lock (LCache)

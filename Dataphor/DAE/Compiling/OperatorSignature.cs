@@ -98,19 +98,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 			FSignature = ASignature;
 		}
 		
-		private OperatorSignature FSignature;		
-		private Hashtable FSignatures = new Hashtable(); // keys : Signature, values : OperatorSignature
+		private OperatorSignature FSignature;
+		private Dictionary<Signature, OperatorSignature> FSignatures = new Dictionary<Signature, OperatorSignature>(); // keys : Signature, values : OperatorSignature
 		
 		public int Count { get { return FSignatures.Count; } }
-		
-		public Hashtable Signatures { get { return FSignatures; } }
+
+		public Dictionary<Signature, OperatorSignature> Signatures { get { return FSignatures; } }
 
 		public OperatorSignature this[Signature ASignature]
 		{
 			get
 			{
-				OperatorSignature LSignature = FSignatures[ASignature] as OperatorSignature;
-				if (LSignature == null)
+				OperatorSignature LSignature;
+				if (!FSignatures.TryGetValue(ASignature, out LSignature))
 					throw new SchemaException(SchemaException.Codes.SignatureNotFound, ASignature.ToString());
 				return LSignature;
 			}
@@ -231,10 +231,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 			}
 			else
 			{
-				OperatorSignature LSignature;
-				foreach (DictionaryEntry LEntry in FSignatures)
+				foreach (KeyValuePair<Signature, OperatorSignature> LEntry in FSignatures)
 				{
-					LSignature = (OperatorSignature)LEntry.Value;
+					var LSignature = LEntry.Value;
 					if (AContext.CallSignature.Is(LSignature.Signature))
 					{
 						int LMatchCount = AContext.Matches.Count;
@@ -315,7 +314,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					return true;
 			return false;
 			#else
-			return FSignatures.Contains(ASignature);
+			return FSignatures.ContainsKey(ASignature);
 			#endif
 		}
 		
@@ -327,8 +326,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public string ShowSignatures(int ADepth)
 		{
 			StringBuilder LString = new StringBuilder();
-			foreach (DictionaryEntry LEntry in FSignatures)
-				LString.Append(((OperatorSignature)LEntry.Value).ShowSignature(ADepth));
+			foreach (KeyValuePair<Signature, OperatorSignature> LEntry in FSignatures)
+				LString.Append(LEntry.Value.ShowSignature(ADepth));
 			return LString.ToString();
 		}
     }

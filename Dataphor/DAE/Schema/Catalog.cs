@@ -4,31 +4,20 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Security.Permissions;
-using System.Security.Cryptography;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
+	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using D4 = Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Device.Catalog;
 
 	// TODO: Refactor these dependencies
 	using Alphora.Dataphor.DAE.Compiling;
 	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Runtime;
-	using Alphora.Dataphor.DAE.Runtime.Data;
-	using Alphora.Dataphor.DAE.Runtime.Instructions;
 
-    /// <summary> Catalog </summary>
+	/// <summary> Catalog </summary>
 	public class Catalog : Objects
     {
 		public Catalog() : base() 
@@ -762,7 +751,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					LRequestedObjects.Add(this[LObjectIndex].ID, this[LObjectIndex]);
 				else
 				{
-					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.ServerSession.NameResolutionPath, new StringCollection());
+					Schema.CatalogObject LObject = ASession.ResolveName(LObjectName, ASession.ServerProcess.ServerSession.NameResolutionPath, new List<string>());
 					if (LObject != null)
 						LRequestedObjects.Add(LObject.ID, LObject);
 				}

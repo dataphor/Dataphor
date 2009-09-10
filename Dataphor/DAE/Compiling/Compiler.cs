@@ -10,26 +10,25 @@
 //#define DISALLOWAMBIGUOUSNAMES
 
 using System;
-using System.Text;
-using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Text;
+using System.Threading;
 
 namespace Alphora.Dataphor.DAE.Compiling
 {
 	using Alphora.Dataphor.DAE.Debug;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Server;
+	using Alphora.Dataphor.DAE.Streams;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
 	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
+	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	// TODO: Scan isolation levels...
     // TODO: table nesting operators
@@ -283,10 +282,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>The schema object which the identifier resolved to if the resolution was successful, null otherwise.</summary>		
 		[Reference]
 		public Schema.Object Object;
-		
-		private StringCollection FNames = new StringCollection();
+
+		private List<string> FNames = new List<string>();
 		/// <summary>The list of names from the namespace which the identifier matches.</summary>
-		public StringCollection Names { get { return FNames; } }
+		public List<string> Names { get { return FNames; } }
 
 		/// <summary>Returns true if the identifier could not be resolved because it matched multiple names in the namespace.</summary>
 		public bool IsAmbiguous { get { return FNames.Count > 1; } }
@@ -429,17 +428,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 		[Reference]
 		private Schema.ITableType FTargetType;
 		public new Schema.ITableType TargetType { get { return FTargetType; } }
-		
-		private Hashtable FColumnConversions = new Hashtable();
-		public Hashtable ColumnConversions { get { return FColumnConversions; } }
+
+		private Dictionary<string, ConversionContext> FColumnConversions = new Dictionary<string, ConversionContext>();
+		public Dictionary<string, ConversionContext> ColumnConversions { get { return FColumnConversions; } }
 		
 		public override int NarrowingScore
 		{
 			get
 			{
 				int LNarrowingScore = 0;
-				foreach (DictionaryEntry LEntry in ColumnConversions)
-					LNarrowingScore += ((ConversionContext)LEntry.Value).NarrowingScore;
+				foreach (KeyValuePair<string, ConversionContext> LEntry in ColumnConversions)
+					LNarrowingScore += LEntry.Value.NarrowingScore;
 				return LNarrowingScore;
 			}
 		}
@@ -449,8 +448,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get
 			{
 				int LPathLength = 0;
-				foreach (DictionaryEntry LEntry in ColumnConversions)
-					LPathLength += ((ConversionContext)LEntry.Value).PathLength;
+				foreach (KeyValuePair<string, ConversionContext> LEntry in ColumnConversions)
+					LPathLength += LEntry.Value.PathLength;
 				return LPathLength;
 			}
 		}
@@ -471,17 +470,17 @@ namespace Alphora.Dataphor.DAE.Compiling
 		[Reference]
 		private Schema.IRowType FTargetType;
 		public new Schema.IRowType TargetType { get { return FTargetType; } }
-		
-		private Hashtable FColumnConversions = new Hashtable();
-		public Hashtable ColumnConversions { get { return FColumnConversions; } }
+
+		private Dictionary<string, ConversionContext> FColumnConversions = new Dictionary<string, ConversionContext>();
+		public Dictionary<string, ConversionContext> ColumnConversions { get { return FColumnConversions; } }
 
 		public override int NarrowingScore
 		{
 			get
 			{
 				int LNarrowingScore = 0;
-				foreach (DictionaryEntry LEntry in ColumnConversions)
-					LNarrowingScore += ((ConversionContext)LEntry.Value).NarrowingScore;
+				foreach (KeyValuePair<string, ConversionContext> LEntry in ColumnConversions)
+					LNarrowingScore += LEntry.Value.NarrowingScore;
 				return LNarrowingScore;
 			}
 		}
@@ -491,8 +490,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			get
 			{
 				int LPathLength = 0;
-				foreach (DictionaryEntry LEntry in ColumnConversions)
-					LPathLength += ((ConversionContext)LEntry.Value).PathLength;
+				foreach (KeyValuePair<string, ConversionContext> LEntry in ColumnConversions)
+					LPathLength += LEntry.Value.PathLength;
 				return LPathLength;
 			}
 		}
@@ -708,11 +707,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		#if USESTATEMENTENTRIES		
 		public delegate PlanNode CompileStatementCallback(Plan APlan, Statement AStatement);
 		
-		public static Hashtable StatementEntries;
+		public static Dictionary<string, CompileStatementCallback> StatementEntries;
 		
 		static Compiler()
 		{
-			StatementEntries = new Hashtable();
+			StatementEntries = new Dictionary<string, CompileStatementCallback>();
 			StatementEntries.Add("Block", new CompileStatementCallback(CompileBlock));
 			StatementEntries.Add("DelimitedBlock", new CompileStatementCallback(CompileDelimitedBlock));
 			StatementEntries.Add("IfStatement", new CompileStatementCallback(CompileIfStatement));
@@ -779,8 +778,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static PlanNode InternalCompileStatement(Plan APlan, Statement AStatement)
 		{
-			CompileStatementCallback LRoutine = StatementEntries[AStatement.GetType().Name] as CompileStatementCallback;
-			if (LRoutine != null)
+			CompileStatementCallback LRoutine = StatementEntries[];
+			if (StatementEntries.TryGetValue(AStatement.GetType().Name, out LRoutine))
 				return LRoutine(APlan, AStatement);
 			throw new CompilerException(CompilerException.Codes.UnknownStatementClass, AStatement, AStatement.GetType().FullName);
 		}
@@ -1155,7 +1154,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					{
 						if (LNode.Statement.VariableName != String.Empty)
 						{
-							StringCollection LNames = new StringCollection();
+							List<string> LNames = new List<string>();
 							if (!APlan.Symbols.IsValidVariableIdentifier(LNode.Statement.VariableName, LNames))
 							{
 								#if DISALLOWAMBIGUOUSNAMES
@@ -1374,7 +1373,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		protected static PlanNode CompileVariableStatement(Plan APlan, Statement AStatement)
 		{
 			VariableStatement LStatement = (VariableStatement)AStatement;
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			if (!APlan.Symbols.IsValidVariableIdentifier(LStatement.VariableName.Identifier, LNames))
 			{
 				#if DISALLOWAMBIGUOUSNAMES
@@ -1573,7 +1572,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static int ResolveVariableIdentifier(Plan APlan, string AIdentifier, out int AColumnIndex)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LIndex = ResolveVariableIdentifier(APlan, AIdentifier, out AColumnIndex, LNames);
 			if (LIndex < 0)
 				if (LNames.Count > 0)
@@ -1585,7 +1584,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		/// <summary> Returns the index of a data object on the stack, -1 if unable to resolve. </summary>
 		/// <param name="AColumnIndex"> If the variable resolves to a column reference, AColumnIndex will contain the column index, -1 otherwise </param>
-		public static int ResolveVariableIdentifier(Plan APlan, string AIdentifier, out int AColumnIndex, StringCollection ANames)
+		public static int ResolveVariableIdentifier(Plan APlan, string AIdentifier, out int AColumnIndex, List<string> ANames)
 		{
 			return APlan.Symbols.ResolveVariableIdentifier(AIdentifier, out AColumnIndex, ANames);
 		}
@@ -8654,7 +8653,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidObjectName(Plan APlan, Schema.Objects AObjects, Statement AStatement, string AObjectName)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			if (!AObjects.IsValidObjectName(AObjectName, LNames))
 			{
 				#if DISALLOWAMBIGUOUSNAMES
@@ -8693,7 +8692,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		
 		public static void CheckValidOperatorName(Plan APlan, Schema.Catalog ACatalog, Statement AStatement, string AOperatorName, Schema.Signature ASignature)
 		{
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			if (!ACatalog.OperatorMaps.IsValidObjectName(AOperatorName, LNames))
 			{
 				#if DISALLOWAMBIGUOUSNAMES
@@ -10894,7 +10893,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							break;
 							case 1 : break;
 							default :
-								StringCollection LConversions = new StringCollection();
+								List<string> LConversions = new List<string>();
 								foreach (Schema.ScalarConversionPath LPath in LContext.BestPaths)
 									if (LPath.Count == LContext.Paths.ShortestLength)
 										LConversions.Add(LPath.ToString());
@@ -10920,8 +10919,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			else if (AContext is TableConversionContext)
 			{
 				TableConversionContext LContext = (TableConversionContext)AContext;
-				foreach (DictionaryEntry LEntry in LContext.ColumnConversions)
-					CheckConversionContext(APlan, (ConversionContext)LEntry.Value, false);
+				foreach (KeyValuePair<string, ConversionContext> LEntry in LContext.ColumnConversions)
+					CheckConversionContext(APlan, LEntry.Value, false);
 				
 				if (!LContext.CanConvert)
 					if (AThrow)
@@ -10952,8 +10951,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			else if (AContext is RowConversionContext)
 			{
 				RowConversionContext LContext = (RowConversionContext)AContext;
-				foreach (DictionaryEntry LEntry in LContext.ColumnConversions)
-					CheckConversionContext(APlan, (ConversionContext)LEntry.Value, false);
+				foreach (KeyValuePair<string, ConversionContext> LEntry in LContext.ColumnConversions)
+					CheckConversionContext(APlan, LEntry.Value, false);
 				
 				if (!LContext.CanConvert)
 					if (AThrow)
@@ -13686,8 +13685,8 @@ indicative of other problems, a reference will never be attached as an explicit 
 			
 			return null;
 		}
-		
-		public static string GetUniqueColumnName(StringCollection AColumnNames)
+
+		public static string GetUniqueColumnName(List<string> AColumnNames)
 		{
 			string LColumnName;
 			int LIndex = 0;
@@ -13731,9 +13730,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 			NamedColumnExpressions LAddExpressions = new NamedColumnExpressions();
 			RenameColumnExpressions LRenameExpressions = new RenameColumnExpressions();
 			ColumnExpressions LProjectExpressions = new ColumnExpressions();
-			
-			StringCollection LResultNames = new StringCollection();
-			StringCollection LProjectNames = new StringCollection();
+
+			List<string> LResultNames = new List<string>();
+			List<string> LProjectNames = new List<string>();
 			
 			// Compute the list of result column names
 			foreach (NamedColumnExpression LExpression in AExpression.Expressions)

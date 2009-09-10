@@ -4,19 +4,14 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
+using System.Collections.Generic;
 using System.Text;
-using System.Collections.Specialized;
-
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.Frontend.Server;
-using Alphora.Dataphor.Frontend.Server.Elaboration;
-using Alphora.Dataphor.Frontend.Server.Derivation;
-using Alphora.Dataphor.Frontend.Server.Device;
-using Schema = Alphora.Dataphor.DAE.Schema;
 using Alphora.Dataphor.DAE.Runtime;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.Frontend.Server.Derivation;
+using Alphora.Dataphor.Frontend.Server.Elaboration;
+using Schema = Alphora.Dataphor.DAE.Schema;
 
 namespace Alphora.Dataphor.Frontend.Server.Structuring
 {
@@ -598,8 +593,8 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			)
 			{
 				int LVisibleCount = 0;
-				StringCollection LMasterColumns = new StringCollection();
-				StringCollection LColumns = new StringCollection();
+				List<string> LMasterColumns = new List<string>();
+				List<string> LColumns = new List<string>();
 				foreach (ElaboratedTableVarColumn LReferenceColumn in AColumn.ElaboratedReference.Columns)
 				{
 					if (LReferenceColumn.IsMaster)
@@ -811,7 +806,7 @@ namespace Alphora.Dataphor.Frontend.Server.Structuring
 			LSearch.Source = FDerivationInfo.MainSourceName;
 			CreateSearchElement(LSearch, FDerivationInfo.ElaboratedExpression.MainElaboratedTableVar.TableVar, String.Empty, FDerivationInfo.PageType, false);
 
-			StringCollection LSearchColumnNames = new StringCollection();
+			List<string> LSearchColumnNames = new List<string>();
 			SearchColumnElement LSearchColumn;
 			foreach (Schema.Order LOrder in FDerivationInfo.TableVar.Orders)
 				if (Convert.ToBoolean(DerivationUtility.GetTag(LOrder.MetaData, "Visible", FDerivationInfo.PageType, "True")))

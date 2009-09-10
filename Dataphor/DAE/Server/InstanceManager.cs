@@ -6,11 +6,9 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Collections.Generic;
-using System.ComponentModel;
 
 using Alphora.Dataphor.BOP;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -152,7 +150,7 @@ namespace Alphora.Dataphor.DAE.Server
 
 	/// <summary> List of server Instances. </summary>
 	/// <remarks> Names must be case insensitively unique. </remarks>
-	public class InstanceList : HashtableList
+	public class InstanceList : HashtableList<string, ServerConfiguration>
 	{
 		public InstanceList() : base(StringComparer.OrdinalIgnoreCase) {}
 
@@ -163,29 +161,18 @@ namespace Alphora.Dataphor.DAE.Server
 			return IndexOf(LInstance.Name);
 		}
 
-		public new ServerConfiguration this[int AIndex]
-		{
-			get { return (ServerConfiguration)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
-
-		public ServerConfiguration this[string AInstanceName]
-		{
-			get { return (ServerConfiguration)base[AInstanceName]; }
-			set { base[AInstanceName] = value; }
-		}
-		
 		public ServerConfiguration GetInstance(string AInstanceName)
 		{
-			ServerConfiguration LInstance = this[AInstanceName];
-			if (LInstance == null)
+			ServerConfiguration LInstance;
+			if (!TryGetValue(AInstanceName, out LInstance))
 				throw new ServerException(ServerException.Codes.InstanceNotFound, AInstanceName);
-			return LInstance;
+			else
+				return LInstance;
 		}
 		
 		public bool HasInstance(string AInstanceName)
 		{
-			return this[AInstanceName] != null;
+			return ContainsKey(AInstanceName);
 		}
 	}
 }

@@ -6,13 +6,11 @@
 #define INVERTEXCEPTIONDESCRIPTIONS
 
 using System;
+using System.Collections.Generic;
 using System.Text;
-using System.Collections;
-using System.Collections.Specialized;
 
 namespace Alphora.Dataphor
 {
-	[Serializable]
 	public class AssertionException : Exception
 	{
 		public AssertionException(string AMessage, params object[] AArguments) : base(String.Format(AMessage, AArguments)) {}
@@ -27,7 +25,11 @@ namespace Alphora.Dataphor
 		[System.Diagnostics.Conditional("DEBUG")]
 		public static void Warn(string AMessage, params object[] AArguments)
 		{
+			#if SILVERLIGHT
+			System.Diagnostics.Debug.WriteLine(String.Format(AMessage, AArguments));
+			#else
 			System.Diagnostics.Trace.WriteLine(String.Format(AMessage, AArguments));
+			#endif
 		}
 
 		/// <summary> Throws an "internal error" assertion exception for an unexpected critical condition. </summary>
@@ -141,7 +143,7 @@ namespace Alphora.Dataphor
 			#endif
 		}
 		
-		public static string StringsToCommaList(StringCollection AStrings)
+		public static string StringsToCommaList(List<string> AStrings)
 		{
 			StringBuilder LBuilder = new StringBuilder();
 			for (int LIndex = 0; LIndex < AStrings.Count; LIndex++)
@@ -165,7 +167,7 @@ namespace Alphora.Dataphor
 			return LBuilder.ToString();
 		}
 		
-		public static string StringsToList(StringCollection AStrings)
+		public static string StringsToList(List<string> AStrings)
 		{
 			StringBuilder LBuilder = new StringBuilder();
 			for (int LIndex = 0; LIndex < AStrings.Count; LIndex++)

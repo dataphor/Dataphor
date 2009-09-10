@@ -5,13 +5,10 @@
 */
 //#define UseFileStreamProvider
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Runtime.Remoting.Lifetime;
-	
 using Alphora.Dataphor.DAE.Runtime;
 
 namespace Alphora.Dataphor.DAE.Streams
@@ -275,8 +272,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		private StreamEvents FStreamEvents;
 		public StreamEvents StreamEvents { get { return FStreamEvents; } }
 		
-		private StringCollection FStreamOpens;
-		public StringCollection StreamOpens { get { return FStreamOpens; } }
+		private List<string> FStreamOpens;
+		public List<string> StreamOpens { get { return FStreamOpens; } }
 		
 		public string StreamOpensAsString()
 		{
@@ -298,7 +295,7 @@ namespace Alphora.Dataphor.DAE.Streams
 					if (FStreamTracingEnabled)
 					{
 						FStreamEvents = new StreamEvents();
-						FStreamOpens = new StringCollection();
+						FStreamOpens = new List<string>();
 					}
 					else
 					{

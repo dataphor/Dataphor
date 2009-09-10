@@ -27,9 +27,10 @@ using Alphora.Dataphor.Frontend.Client;
 using Alphora.Dataphor.Frontend.Client.Windows;
 using Alphora.Dataphor.Dataphoria.ObjectTree.Nodes;
 using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.DAE.Debug;
+using Alphora.Dataphor.Windows;
 
 using WeifenLuo.WinFormsUI.Docking;
-using Alphora.Dataphor.DAE.Debug;
 
 namespace Alphora.Dataphor.Dataphoria
 {
@@ -1613,14 +1614,14 @@ namespace Alphora.Dataphor.Dataphoria
  				UpdateDebuggerState();
  				UpdateBreakOnException();
  				UpdateBreakOnStart();
-			}
+ 			}
 			else 
 			{
-				if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
-					UpdateBreakOnException();
+			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnException"; }))
+				UpdateBreakOnException();
 				else if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "BreakOnStart"; }))
 					UpdateBreakOnStart();
-			}
+		}
 			if (Array.Exists<string>(APropertyNames, (string AItem) => { return AItem == "CurrentLocation"; }))
 				EnsureEditorForCurrentLocation();
 			
@@ -1644,20 +1645,20 @@ namespace Alphora.Dataphor.Dataphoria
 
 		public void OpenLocator(DebugLocator ALocator)
 		{
-			DesignerInfo LInfo;
+					DesignerInfo LInfo;
 			DesignBuffer LBuffer = DesignBufferFromLocator(out LInfo, ALocator);
-			if (LBuffer != null)
-			{
-				IDesigner LDesigner = this.GetDesigner(LBuffer);
-				if (LDesigner != null)
+					if (LBuffer != null)
+					{
+						IDesigner LDesigner = this.GetDesigner(LBuffer);
+						if (LDesigner != null)
 				{
 					LDesigner.Service.RequestLocate(ALocator);
-					LDesigner.Select();
+							LDesigner.Select();
 				}
-				else
-					OpenDesigner(LInfo, LBuffer);
-			}
-		}
+						else
+							OpenDesigner(LInfo, LBuffer);
+					}
+				}
 
 		public DesignBuffer DesignBufferFromLocator(out DesignerInfo AInfo, DebugLocator ALocator)
 		{
@@ -1679,7 +1680,7 @@ namespace Alphora.Dataphor.Dataphoria
 				var LDocumentBuffer = new DocumentDesignBuffer(this, ALocator);
 				AInfo = GetDefaultDesigner(GetDocumentType(LDocumentBuffer.LibraryName, LDocumentBuffer.DocumentName));
 				LBuffer = LDocumentBuffer;
-			}
+				}
 			else if (ProgramDesignBuffer.IsProgramLocator(ALocator.Locator))
 			{
 				LBuffer = new ProgramDesignBuffer(this, ALocator);

@@ -20,6 +20,7 @@ using DAEClient = Alphora.Dataphor.DAE.Client;
 using DAESchema = Alphora.Dataphor.DAE.Schema;
 using DAEStreams = Alphora.Dataphor.DAE.Streams;
 using DAEData = Alphora.Dataphor.DAE.Runtime.Data;
+using System.Collections.Generic;
 
 /*
 	Grid Columns Hierarchy:
@@ -2751,21 +2752,15 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 	[ToolboxItem(false)]
 	[Editor(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.GridColumnCollectionEditor), typeof(System.Drawing.Design.UITypeEditor))]
 	[DesignerSerializer(typeof(Alphora.Dataphor.DAE.Client.Controls.Design.GridColumnsSerializer), typeof(CodeDomSerializer))]
-	public class GridColumns : DisposableList
+	public class GridColumns : DisposableList<GridColumn>
 	{
 
 		protected internal GridColumns(DBGrid AGrid) : base()
 		{
 			FGrid = AGrid;
-			FVisibleColumns = new ArrayList();
+			FVisibleColumns = new List<GridColumn>();
 		}
 		
-		protected override void Dispose(bool ADisposing)
-		{
-			FVisibleColumns = null;
-			base.Dispose(ADisposing);
-		}
-
 		private DBGrid FGrid;
 		/// <summary> Owner of columns. </summary>
 		public DBGrid Grid { get { return FGrid; } }
@@ -2782,54 +2777,35 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		protected override void Validate(object AValue)
+		protected override void Adding(GridColumn AValue, int AIndex)
 		{
-			if (!(AValue is GridColumn))
-				throw new ControlsException(ControlsException.Codes.InvalidGridChild);
+			ShowDefaultColumns = AValue is DataColumn ? ((DataColumn)AValue).IsDefaultGridColumn : false;
+			UpdateVisibleColumns(AValue, true);
+			base.Adding(AValue, AIndex);
+			((GridColumn)AValue).AddingToGrid(this);
+			Grid.InternalUpdateGrid(false, true);
 		}
 
-		/// <summary> Inserts a grid column at a given index. </summary>
-		/// <param name="AIndex"> The index to insert the column to. </param>
-		/// <param name="AValue"> The GridColumn instance to insert. </param>
-		public override void Insert(int AIndex, object AValue)
+		protected override void Removed(GridColumn AValue, int AIndex)
 		{
-			base.Insert(AIndex, AValue);
-			if (FVisibleColumns.IndexOf(AValue) >= 0)
-			{
-				FVisibleColumns.Remove(AValue);
-				FVisibleColumns.Insert(GetInsertIndex(AValue), AValue);
-			}
-		}
-		
-		protected override void Removing(object AValue, int AIndex)
-		{
-			UpdateVisibleColumns((GridColumn)AValue, false);
-			base.Removing(AValue, AIndex);
+			UpdateVisibleColumns(AValue, false);
+			base.Removed(AValue, AIndex);
 			((GridColumn)AValue).RemovingFromGrid(this);
 			if (!IsDisposed)
+			{
 				Grid.InternalUpdateGrid(false, true);
+				if ((Count == 0) || !HasDefaultColumn())
+					RestoreDefaultColumns();
+			}
 		}
 
 		private void DisposeDefaultGridColumns()
 		{
-			int i = 0;
-			DataColumn LGridColumn;
-			while (i <= (Count - 1))
+			for (int i = Count - 1; i >= 0; i--)
 			{
-				if (this[i] is DataColumn)
-				{
-					LGridColumn = (DataColumn)this[i];
-					if (LGridColumn.IsDefaultGridColumn)
-					{
-						Remove(LGridColumn);
-						LGridColumn.Dispose();
-						LGridColumn = null;
-					}
-					else
-						++i;
-				}
-				else
-					++i;
+				DataColumn LGridColumn = this[i] as DataColumn;
+				if (LGridColumn != null && LGridColumn.IsDefaultGridColumn)
+					RemoveAt(i);
 			}
 		}
 
@@ -2857,20 +2833,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		{
 			BuildDefaultGridColumns();
 			//Remove any default grid columns that do not have valid DataBufferColumn name.
-			DataColumn LGridColumn;
-			int i = 0;
-			while (i <= (Count - 1))
+			for (int i = Count - 1; i >= 0; i--)
 			{
-				if (this[i] is DataColumn)
-				{
-					LGridColumn = (DataColumn)this[i];
-					if (LGridColumn.IsDefaultGridColumn && !Grid.Link.DataSet.TableType.Columns.Contains(LGridColumn.ColumnName))
-						LGridColumn.Dispose();
-					else
-						++i;
-				}
-				else
-					++i;
+				DataColumn LGridColumn = this[i] as DataColumn;
+				if (LGridColumn != null && LGridColumn.IsDefaultGridColumn && !Grid.Link.DataSet.TableType.Columns.Contains(LGridColumn.ColumnName))
+					RemoveAt(i);
 			}
 		}
 
@@ -2925,39 +2892,11 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				Grid.InternalUpdateGrid(false, true);
 		}
 
-		/// <summary> Removes all grid columns from the collection and restores default columns. </summary>
-		public override void Clear()
-		{
-			base.Clear();
-			if (!IsDisposed)
-				RestoreDefaultColumns();
-		}
-
-		/// <summary> Removes a grid column at a given index. </summary>
-		/// <param name="AIndex"> Index of the grid column to remove. </param>
-		/// <returns> The column removed. </returns>
-		public override object RemoveItemAt(int AIndex)
-		{
-			object LRemoved = base.RemoveItemAt(AIndex);
-			if (!IsDisposed && ((Count == 0) || !HasDefaultColumn()))
-				RestoreDefaultColumns();
-			return LRemoved;
-		}
-
-		protected override void Adding(object AValue, int AIndex)
-		{
-			ShowDefaultColumns = AValue is DataColumn ? ((DataColumn)AValue).IsDefaultGridColumn : false;
-			UpdateVisibleColumns((GridColumn)AValue, true);
-			base.Adding(AValue, AIndex);
-			((GridColumn)AValue).AddingToGrid(this);
-			Grid.InternalUpdateGrid(false, true);
-		}
-
-		private int GetInsertIndex(object AValue)
+		private int GetVisibleInsertIndex(GridColumn AValue)
 		{
 			int LStartIndex = IndexOf(AValue);
 			while (LStartIndex > 0)
-				if (((GridColumn)this[--LStartIndex]).Visible)
+				if (this[--LStartIndex].Visible)
 					return FVisibleColumns.IndexOf(this[LStartIndex]) + 1;
 			return 0;
 		}
@@ -2967,9 +2906,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			if (AColumn.Visible)
 			{
 				if ((AColumn is DataColumn) && (((DataColumn)AColumn).ColumnName != String.Empty))
-					FVisibleColumns.Insert(GetInsertIndex(AColumn), AColumn);
+					FVisibleColumns.Insert(GetVisibleInsertIndex(AColumn), AColumn);
 				else
-					FVisibleColumns.Insert(GetInsertIndex(AColumn), AColumn);
+					FVisibleColumns.Insert(GetVisibleInsertIndex(AColumn), AColumn);
 			}
 		}
 
@@ -3011,12 +2950,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		/// <summary> Returns a grid column at the given index. </summary>
-		public new GridColumn this[int AIndex]
-		{
-			get { return (GridColumn)base[AIndex]; }
-		}
-
 		/// <summary> Returns a data-aware grid column given the column name. </summary>
 		public DataColumn this[string AColumnName]
 		{
@@ -3029,9 +2962,9 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 			}
 		}
 
-		private ArrayList FVisibleColumns;
+		private List<GridColumn> FVisibleColumns;
 		/// <summary> Collection of visible grid columns. </summary>
-		public ArrayList VisibleColumns
+		public List<GridColumn> VisibleColumns
 		{
 			get { return FVisibleColumns; }
 		}
@@ -4921,8 +4854,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				return DBGrid.DefaultRowHeight;
 		}
 
-		private ArrayList FControls;
-		protected ArrayList Controls
+		private ControlsList FControls;
+		protected ControlsList Controls
 		{
 			get
 			{
@@ -5015,7 +4948,7 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 		/// <param name="AClassName"> The name of the class to instantiate</param>
 		private object CreateObject(string AClassName)
 		{
-			return Activator.CreateInstance(AssemblyUtility.GetType(AClassName, true, true));
+			return Activator.CreateInstance(Type.GetType(AClassName, true, true));
 		}
 
 		private WinForms.Control CreateControl(string AClassName)
@@ -6416,8 +6349,8 @@ namespace Alphora.Dataphor.DAE.Client.Controls
 				return DBGrid.DefaultRowHeight;
 		}
 
-		private ArrayList FLinks;
-		protected ArrayList Links
+		private ControlsList FLinks;
+		protected ControlsList Links
 		{
 			get
 			{

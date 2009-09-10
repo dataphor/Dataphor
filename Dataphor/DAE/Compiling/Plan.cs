@@ -76,12 +76,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				{
 					if (FDevicePlans != null)
 					{
-						Schema.DevicePlan LDevicePlan;
-						foreach (object LObject in FDevicePlans.Keys)
-						{
-							LDevicePlan = (Schema.DevicePlan)FDevicePlans[LObject];
-							LDevicePlan.Device.Unprepare(LDevicePlan);
-						}
+						foreach (KeyValuePair<PlanNode, Schema.DevicePlan> LEntry in FDevicePlans)
+							LEntry.Value.Device.Unprepare(LEntry.Value);
 						FDevicePlans = null;
 					}
 				}
@@ -134,26 +130,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public PlanStatistics Statistics { get { return FStatistics; } }
 		
 		// DevicePlans
-		private Hashtable FDevicePlans = new Hashtable();
+		private Dictionary<PlanNode, Schema.DevicePlan> FDevicePlans = new Dictionary<PlanNode, Schema.DevicePlan>();
 
 		// GetDevicePlan
 		public Schema.DevicePlan GetDevicePlan(PlanNode APlanNode)
 		{
-			object LDevicePlan = FDevicePlans[APlanNode];
-			if (LDevicePlan == null)
+			Schema.DevicePlan LDevicePlan;
+			if (!FDevicePlans.TryGetValue(APlanNode, out LDevicePlan))
 			{
 				EnsureDeviceStarted(APlanNode.Device);
 				Schema.DevicePlan LNewDevicePlan = APlanNode.Device.Prepare(this, APlanNode);
 				AddDevicePlan(LNewDevicePlan);
 				return LNewDevicePlan;
 			}
-			return (Schema.DevicePlan)LDevicePlan;
+			return LDevicePlan;
 		}
 		
 		// AddDevicePlan
 		public void AddDevicePlan(Schema.DevicePlan ADevicePlan)
 		{
-			if (!FDevicePlans.Contains(ADevicePlan.Node))
+			if (!FDevicePlans.ContainsKey(ADevicePlan.Node))
 				FDevicePlans.Add(ADevicePlan.Node, ADevicePlan);
 		}
 		

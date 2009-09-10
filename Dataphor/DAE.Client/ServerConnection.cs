@@ -4,16 +4,12 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.Collections;
 using System.ComponentModel;
-using System.Text;
 using System.IO;
-
-using Alphora.Dataphor;
 using Alphora.Dataphor.BOP;
-using Alphora.Dataphor.DAE;
-using Alphora.Dataphor.DAE.Server;
 using Alphora.Dataphor.DAE.NativeCLI;
+using Alphora.Dataphor.DAE.Server;
+using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -441,7 +437,7 @@ namespace Alphora.Dataphor.DAE.Client
 
 	/// <summary> List of server aliases. </summary>
 	/// <remarks> Names must be case insensitively unique. </remarks>
-	public class AliasList : HashtableList
+	public class AliasList : HashtableList<string, ServerAlias>
 	{
 		public AliasList() : base(StringComparer.OrdinalIgnoreCase) {}
 
@@ -452,29 +448,18 @@ namespace Alphora.Dataphor.DAE.Client
 			return IndexOf(LAlias.Name);
 		}
 
-		public new ServerAlias this[int AIndex]
-		{
-			get { return (ServerAlias)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
-
-		public ServerAlias this[string AAliasName]
-		{
-			get { return (ServerAlias)base[AAliasName]; }
-			set { base[AAliasName] = value; }
-		}
-		
 		public ServerAlias GetAlias(string AAliasName)
 		{
-			ServerAlias LAlias = this[AAliasName];
-			if (LAlias == null)
+			ServerAlias LAlias;
+			if (!TryGetValue(AAliasName, out LAlias))
 				throw new ClientException(ClientException.Codes.AliasNotFound, AAliasName);
-			return LAlias;
+			else
+				return LAlias;
 		}
 		
 		public bool HasAlias(string AAliasName)
 		{
-			return this[AAliasName] != null;
+			return ContainsKey(AAliasName);
 		}
 	}
 

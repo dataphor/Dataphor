@@ -7,23 +7,18 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Collections.Specialized;
-using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Diagnostics
 {
-	using Alphora.Dataphor.DAE.Server;	
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.DAE.Language;
-	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Device.Memory;
-	using Alphora.Dataphor.DAE.Device.Catalog;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	[Serializable]
@@ -150,7 +145,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 			
 			// Verify that ambiguous references are not allowed
 			LObjects.Add(new Schema.ScalarType(Schema.Object.GetNextObjectID(), "B.A"));
-			StringCollection LNames = new StringCollection();
+			List<string> LNames = new List<string>();
 			int LObjectIndex = LObjects.IndexOf("A", LNames);
 			if (LObjectIndex >= 0)
 				throw new TestException("Ambiguous resolution allowed.");
@@ -750,7 +745,7 @@ namespace Alphora.Dataphor.DAE.Diagnostics
 		// operator TestExceptions(const AAssemblyFileName : String, const AExceptionClassName : String);
 		public override object InternalExecute(Program AProgram, object[] AArguments)
 		{
-			StringCollection LUnknownCodes = new StringCollection();
+			List<string> LUnknownCodes = new List<string>();
 			string LAssemblyFileName = ((Scalar)AArguments[0].Value).ToString();
 			if (!Path.IsPathRooted(LAssemblyFileName))
 				LAssemblyFileName = Path.Combine(Application.StartupPath, LAssemblyFileName);

@@ -132,47 +132,11 @@
   <data name="100104" xml:space="preserve">
     <value>This list does not allow null items.</value>
   </data>
-  <data name="100105" xml:space="preserve">
-    <value>Cannot add an item of type ({0}), collection only allows items of type ({1}).</value>
-  </data>
-  <data name="100106" xml:space="preserve">
-    <value>Child cover is read only.</value>
-  </data>
-  <data name="100107" xml:space="preserve">
-    <value>List index ({0}) out of bounds.</value>
-  </data>
-  <data name="100108" xml:space="preserve">
-    <value>Method is not supported.</value>
-  </data>
-  <data name="100109" xml:space="preserve">
-    <value>Child ({0}) not found.</value>
-  </data>
-  <data name="100110" xml:space="preserve">
-    <value>Child component must derive from ComponentBase.</value>
-  </data>
-  <data name="100111" xml:space="preserve">
-    <value>Parent component may not contain itself.</value>
-  </data>
-  <data name="100112" xml:space="preserve">
-    <value>Child component already referenced by this parent.</value>
-  </data>
-  <data name="100113" xml:space="preserve">
-    <value>Object ({0}) is not a container.</value>
-  </data>
-  <data name="100114" xml:space="preserve">
-    <value>Component ({0}) not found.</value>
-  </data>
   <data name="100115" xml:space="preserve">
     <value>Duplicate value inserted ({0}).</value>
   </data>
   <data name="100116" xml:space="preserve">
     <value>List index out of bounds ({0}).  Valid range is (0-{1}).</value>
-  </data>
-  <data name="100117" xml:space="preserve">
-    <value>Cannot perform this operation on a sorted list.</value>
-  </data>
-  <data name="100118" xml:space="preserve">
-    <value>List cover is read only.</value>
   </data>
   <data name="100119" xml:space="preserve">
     <value>Objects cannot be inserted into a hash table, use the Add method instead.</value>
@@ -207,4 +171,13 @@
   <data name="100129" xml:space="preserve">
     <value>Maximum call stack depth ({0}) has been exceeded.</value>
   </data>
+	<data name="100130" xml:space="preserve">
+		<value>Cannot convert a null reference.</value>
+	</data>
+	<data name="100131" xml:space="preserve">
+		<value>Cannot convert type ({0}) from string.</value>
+	</data>
+	<data name="100132" xml:space="preserve">
+		<value>Cannot convert to string from type ({0}).</value>
+	</data>
 </root>

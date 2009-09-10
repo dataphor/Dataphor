@@ -9,18 +9,14 @@
 //#define LOGCACHEEVENTS
 
 using System;
-using System.IO;
-using System.Xml;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.EnterpriseServices;
-using System.Threading;
+using System.IO;
 using System.Reflection;
-using System.Resources;
 using System.Security.Principal;
+using System.Text;
+using System.Threading;
 
 /*
 	DAE Object Hierarchy ->
@@ -70,21 +66,18 @@ using System.Security.Principal;
 
 namespace Alphora.Dataphor.DAE.Server
 {
-	using Alphora.Dataphor.Logging;
-	using Alphora.Dataphor.BOP;
+	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+	using Alphora.Dataphor.DAE.Device.Catalog;
+	using Alphora.Dataphor.DAE.Device.Memory;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
-	using Alphora.Dataphor.DAE.Device.Memory;
-	using Alphora.Dataphor.DAE.Device.Catalog;
-	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
+	using Alphora.Dataphor.DAE.Streams;
+	using Alphora.Dataphor.Logging;
+	using Alphora.Dataphor.Windows;
 	using Schema = Alphora.Dataphor.DAE.Schema;
-	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
 
 	/// <summary> Dataphor DAE Server class. </summary>
 	/// <remarks>
@@ -146,6 +139,7 @@ namespace Alphora.Dataphor.DAE.Server
 		// constructor		
 		public Server() : base()
 		{
+			Alphora.Dataphor.Windows.AssemblyUtility.Initialize();
 			FSessions = new ServerSessions();
 		}
         
@@ -755,7 +749,6 @@ namespace Alphora.Dataphor.DAE.Server
 		private void InternalStarted()
 		{
 			StartDevices();
-			RunStartupScript();
 			#if AUTOUPGRADELIBRARIES
 			SystemUpgradeLibraryNode.UpgradeLibraries(FSystemProcess);
 			#endif
@@ -865,9 +858,9 @@ namespace Alphora.Dataphor.DAE.Server
 			return Path.Combine(GetLogDirectory(), String.Format("{0}{1}.log", CServerLogName, ALogIndex == 0 ? String.Empty : ALogIndex.ToString()));
 		}
 		
-		public StringCollection ListLogs()
+		public List<string> ListLogs()
 		{
-			StringCollection LLogList = new StringCollection();
+			List<string> LLogList = new List<string>();
 			for (int LIndex = 0; LIndex <= CMaxLogs; LIndex++)
 			{
 				string LLogName = GetLogName(LIndex);
@@ -2045,38 +2038,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
-		private void RunStartupScript() 
-		{
-			if (FStartupScriptUri != String.Empty)
-			{
-				IServerSession LSession = ((IServer)this).Connect(new SessionInfo(FAdminUser.ID, FAdminUser.Password));
-				try
-				{
-					IServerProcess LProcess = LSession.StartProcess(new ProcessInfo(LSession.SessionInfo));
-					try
-					{
-						IServerScript LScript = LProcess.PrepareScript(WebUtility.ReadStringFromWeb(FStartupScriptUri));
-						try
-						{
-							LScript.Execute(null);
-						}
-						finally
-						{
-							LProcess.UnprepareScript(LScript);
-						}
-					}
-					finally
-					{
-						LSession.StopProcess(LProcess);
-					}
-				}
-				finally
-				{
-					((IServer)this).Disconnect(LSession);
-				}
-			}
-		}
-
 		public bool MaintainedLibraryUpdate 
 		{ 
 			get 
@@ -2385,9 +2346,9 @@ namespace Alphora.Dataphor.DAE.Server
 			FSystemProcess.CatalogDeviceSession.ResolveUser(CSystemUserID);
 			FSystemProcess.CatalogDeviceSession.CacheCatalogObject(FCatalogDevice);
 			FAdminUser = FSystemProcess.CatalogDeviceSession.ResolveUser(CAdminUserID);
-			FUserRole = (Schema.Role)FSystemProcess.CatalogDeviceSession.ResolveName(CUserRoleName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			FTempDevice = (MemoryDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CTempDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			FATDevice = (ApplicationTransactionDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CATDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
+			FUserRole = (Schema.Role)FSystemProcess.CatalogDeviceSession.ResolveName(CUserRoleName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			FTempDevice = (MemoryDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CTempDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			FATDevice = (ApplicationTransactionDevice)FSystemProcess.CatalogDeviceSession.ResolveName(CATDeviceName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
 		}
 		
 		private void RegisterSystemDataTypes()
@@ -2402,24 +2363,24 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			// Note that these (and the native type references set in BindNativeTypes) are also set in the CatalogDevice (FixupSystemTypeReferences)
 			// The functionality is duplicated to ensure that the references will be set on a delayed load of a system type, as well as to ensure that a repository functions correctly without delayed resolution
-			Catalog.DataTypes.SystemScalar = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemScalar, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemBoolean = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBoolean, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemDecimal = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDecimal, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemLong = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemLong, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemInteger = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemInteger, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemShort = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemShort, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemByte = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemByte, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemString = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemString, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemTimeSpan = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTimeSpan, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemDateTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDateTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemDate = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDate, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemMoney = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemMoney, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemGuid = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGuid, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemBinary = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBinary, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemGraphic = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGraphic, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemError = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemError, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
-			Catalog.DataTypes.SystemName = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new StringCollection());
+			Catalog.DataTypes.SystemScalar = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemScalar, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemBoolean = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBoolean, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDecimal = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDecimal, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemLong = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemLong, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemInteger = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemInteger, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemShort = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemShort, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemByte = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemByte, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemString = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemString, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemTimeSpan = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTimeSpan, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDateTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDateTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemDate = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemDate, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemTime = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemTime, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemMoney = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemMoney, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemGuid = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGuid, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemBinary = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemBinary, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemGraphic = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemGraphic, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemError = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemError, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
+			Catalog.DataTypes.SystemName = (Schema.ScalarType)FSystemProcess.CatalogDeviceSession.ResolveName(Schema.DataTypes.CSystemName, FSystemLibrary.GetNameResolutionPath(FSystemLibrary), new List<string>());
 		}
 		
 		private void BindNativeTypes()

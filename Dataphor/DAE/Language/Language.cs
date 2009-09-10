@@ -159,11 +159,7 @@ namespace Alphora.Dataphor.DAE.Language
 	
 	public class EmptyStatement : Statement {}
     
-	#if USENOTIFYLISTFORMETADATA
-    public class Statements : NotifyList
-    #else
     public class Statements : List
-    #endif
     {
 		public new Statement this[int AIndex]
 		{

@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alphora")]
 [assembly: AssemblyProduct("Dataphor")]
-[assembly: AssemblyCopyright("© Copyright 2000-2008 Alphora")]
+[assembly: AssemblyCopyright("© Copyright 2000-2009 Alphora")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
 

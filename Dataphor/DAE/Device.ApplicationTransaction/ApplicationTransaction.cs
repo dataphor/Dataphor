@@ -5,24 +5,21 @@
 */
 
 using System;
-using System.IO;
-using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Threading;
 
 namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 {
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Device.Memory;
 	using Alphora.Dataphor.DAE.Language;
 	using Alphora.Dataphor.DAE.Language.D4;
-	using Alphora.Dataphor.DAE.Compiling;
-	using Alphora.Dataphor.DAE.Schema;
-	using Alphora.Dataphor.DAE.Device.Memory;
-	using Alphora.Dataphor.DAE.Server;
-	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime;
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
+	using Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.DAE.Server;
 
 	public sealed class ApplicationTransactionUtility : System.Object
 	{
@@ -677,9 +674,9 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		private Operations FOperations = new Operations();
 		public Operations Operations { get { return FOperations; } }
 		
-		// List of processes participating in the transaction
-		private Hashtable FProcesses = new Hashtable();
-		public Hashtable Processes { get { return FProcesses; } }
+		// Dictionary of processes (by ID) participating in the transaction
+		private Dictionary<int, ServerProcess> FProcesses = new Dictionary<int, ServerProcess>();
+		public Dictionary<int, ServerProcess> Processes { get { return FProcesses; } }
 		
 		// List of event handlers that have fired in this application transaction.  Event handlers in this list will not fire during an ATReplay
 		private Schema.EventHandlers FInvokedHandlers = new Schema.EventHandlers();
@@ -918,7 +915,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					}
 					else
 					{
-						Device.AddTableVar(AProcess, (Schema.TableVar)AProcess.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(AATTableVar.SourceTableName), AProcess.ServerSession.NameResolutionPath, new StringCollection()));
+						Device.AddTableVar(AProcess, (Schema.TableVar)AProcess.CatalogDeviceSession.ResolveName(Schema.Object.EnsureRooted(AATTableVar.SourceTableName), AProcess.ServerSession.NameResolutionPath, new List<string>()));
 						AddTableMap(AProcess, Device.TableMaps[AATTableVar.SourceTableName]);
 					}
 				}
@@ -1247,7 +1244,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				{
 					lock (this)
 					{
-						StringCollection LObjectNames = new StringCollection();
+						List<string> LObjectNames = new List<string>();
 						int LTableMapIndex = FTableMaps.IndexOfName(ATableVar.Name);
 						if (LTableMapIndex >= 0)
 						{
@@ -1338,7 +1335,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 				{
 					lock (this)
 					{
-						StringCollection LObjectNames = new StringCollection();
+						List<string> LObjectNames = new List<string>();
 						Schema.Operator LATOperator = null;
 						int LOperatorMapIndex = FOperatorMaps.IndexOfName(AOperator.OperatorName);
 						if (LOperatorMapIndex >= 0)

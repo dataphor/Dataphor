@@ -239,9 +239,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		{
 			this.Text = "Column Expressions";
 			FExpressions = ACollection;
-			#if USENOTIFYLISTFORMETADATA
-			FExpressions.OnChanged += new ListEventHandler(ExpressionsChanged);
-			#endif
 			ExpressionsChanged(FExpressions, null);
 		}
 
@@ -249,9 +246,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		{
 			if (FExpressions != null)
 			{
-				#if USENOTIFYLISTFORMETADATA
-				FExpressions.OnChanged -= new ListEventHandler(ExpressionsChanged);
-				#endif
 				FExpressions = null;
 			}
 			base.Dispose( ADisposing );
@@ -964,16 +958,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					AdornColumnExpressionBrowse LForm = new AdornColumnExpressionBrowse((AdornColumnExpressions)AValue);
 					try
 					{
-						#if USENOTIFYLISTFORMETADATA
-						((AdornColumnExpressions)AValue).OnChanged += new ListEventHandler(ExpressionChanged);
-						#endif
 						FEditorService.ShowDialog(LForm);
 					}
 					finally
 					{
-						#if USENOTIFYLISTFORMETADATA
-						((AdornColumnExpressions)AValue).OnChanged -= new ListEventHandler(ExpressionChanged);
-						#endif
 						FContext = null;
 						LForm.Dispose();
 					}
@@ -1001,19 +989,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		{
 			this.Text = "Constraints";
 			FConstraints = ACollection;
-			#if USENOTIFYLISTFORMETADATA
-			FConstraints.OnChanged += new ListEventHandler(ConstraintsChanged);
-			ConstraintsChanged(FConstraints, null);
-			#endif
 		}
 
 		protected override void Dispose( bool ADisposing )
 		{
 			if (FConstraints != null)
 			{
-				#if USENOTIFYLISTFORMETADATA
-				FConstraints.OnChanged -= new ListEventHandler(ConstraintsChanged);
-				#endif
 				FConstraints = null;
 			}
 			base.Dispose( ADisposing );
@@ -1396,14 +1377,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private ITypeDescriptorContext FContext;
 
-		#if USENOTIFYLISTFORMETADATA
-		private void ConstraintChanged(object ASender, object AItem)
-		{
-			if (FContext != null)
-				FContext.OnComponentChanged();
-		}
-		#endif
-	
 		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
 		{	 
 			if (AContext != null && AContext.Instance != null && AProvider != null) 
@@ -1415,16 +1388,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					ConstraintsBrowse LForm = new ConstraintsBrowse((ConstraintDefinitions)AValue);
 					try
 					{
-						#if USENOTIFYLISTFORMETADATA
-						((ConstraintDefinitions)AValue).OnChanged += new ListEventHandler(ConstraintChanged);
-						#endif
 						FEditorService.ShowDialog(LForm);
 					}
 					finally
 					{
-						#if USENOTIFYLISTFORMETADATA
-						((ConstraintDefinitions)AValue).OnChanged -= new ListEventHandler(ConstraintChanged);
-						#endif
 						FContext = null;
 						LForm.Dispose();
 					}
@@ -1921,19 +1888,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		{
 			this.Text = "Order Definitions";
 			FOrders = ACollection;
-			#if USENOTIFYLISTFORMETADATA
-			FOrders.OnChanged += new ListEventHandler(OrdersChanged);
-			OrdersChanged(FOrders, null);
-			#endif
 		}
 
 		protected override void Dispose( bool ADisposing )
 		{
 			if (FOrders != null)
 			{
-				#if USENOTIFYLISTFORMETADATA
-				FOrders.OnChanged -= new ListEventHandler(OrdersChanged);
-				#endif
 				FOrders = null;
 			}
 			base.Dispose( ADisposing );
@@ -2056,19 +2016,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private ITypeDescriptorContext FContext;
 
-		#if USENOTIFYLISTFORMETADATA
-		private void OrderDefinitionChanged(object ASender, object AItem)
-		{
-			if (FContext != null)
-				FContext.OnComponentChanged();
-		}
-
-		private void OrdersEdited(object ASender, EventArgs AArgs)
-		{
-			OrderDefinitionChanged(ASender, null);
-		}
-		#endif
-	
 		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
 		{	 
 			if (AContext != null && AContext.Instance != null && AProvider != null) 
@@ -2080,18 +2027,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					OrderDefinitionsBrowse LForm = new OrderDefinitionsBrowse((OrderDefinitions)AValue);
 					try
 					{
-						#if USENOTIFYLISTFORMETADATA
-						LForm.OnOrdersEdited += new EventHandler(OrdersEdited);
-						((OrderDefinitions)AValue).OnChanged += new ListEventHandler(OrderDefinitionChanged);
-						#endif
 						FEditorService.ShowDialog(LForm);
 					}
 					finally
 					{
-						#if USENOTIFYLISTFORMETADATA
-						LForm.OnOrdersEdited -= new EventHandler(OrdersEdited);
-						((OrderDefinitions)AValue).OnChanged -= new ListEventHandler(OrderDefinitionChanged);
-						#endif
 						FContext = null;
 						LForm.Dispose();
 					}
@@ -2592,19 +2531,12 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 		{
 			this.Text = "Key Definitions";
 			FKeys = ACollection;
-			#if USENOTIFYLISTFORMETADATA
-			FKeys.OnChanged += new ListEventHandler(KeysChanged);
-			KeysChanged(FKeys, null);
-			#endif
 		}
 
 		protected override void Dispose( bool ADisposing )
 		{
 			if (FKeys != null)
 			{
-				#if USENOTIFYLISTFORMETADATA
-				FKeys.OnChanged -= new ListEventHandler(KeysChanged);
-				#endif
 				FKeys = null;
 			}
 			base.Dispose( ADisposing );
@@ -2615,42 +2547,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 			FListView.Columns.Add("Order", 250, HorizontalAlignment.Left);
 		}
 
-		#if USENOTIFYLISTFORMETADATA
-		private void KeysChanged(object ASender, object AItem)
-		{
-			if (FListView != null)
-			{
-				FListView.BeginUpdate();
-				try
-				{
-					FListView.Items.Clear();
-					int i = 0;
-					string LCaption;
-					foreach (KeyDefinition LKey in FKeys)
-					{
-						FListView.Items.Add(new ListViewItem());
-						LCaption = String.Empty;
-						foreach(KeyColumnDefinition LKeyColumn in LKey.Columns)
-						{
-							if (LCaption != String.Empty)
-								LCaption += ", ";
-							LCaption += LKeyColumn.ColumnName;
-						}
-						FListView.Items[i].Tag = LKey;
-						FListView.Items[i].Text = LCaption;
-						++i;
-					}
-					if (FListView.Items.Count > 0)
-						FListView.Items[0].Focused = true;
-				}
-				finally
-				{
-					FListView.EndUpdate();
-				}
-			}
-		}
-		#endif
-		
 		protected override void btnAdd_Click(object ASender, System.EventArgs AArgs)
 		{
 			base.btnAdd_Click(ASender, AArgs);
@@ -2677,10 +2573,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 				throw new DesignException(DesignException.Codes.NoItemSelected);
 		}
 
-		#if USENOTIFYLISTFORMETADATA
-		public event EventHandler OnKeysEdited;
-		#endif
-
 		protected override void btnEdit_Click(object ASender, System.EventArgs AArgs)
 		{
 			base.btnEdit_Click(ASender, AArgs);
@@ -2695,11 +2587,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 				{
 					if (LKey.Columns.Count == 0)
 						FKeys.Remove(LKey);
-					#if USENOTIFYLISTFORMETADATA
-					KeysChanged(FKeys, LKey);
-					if (OnKeysEdited != null)
-						OnKeysEdited(this, EventArgs.Empty);
-					#endif
 				}
 			}
 			finally
@@ -2717,9 +2604,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 				ListViewItem LListViewItem = FListView.Items[FListView.SelectedIndices[0]];
 				FKeys.RemoveAt(FKeys.IndexOf(LListViewItem.Tag));
 				LListViewItem.Tag = null;
-				#if USENOTIFYLISTFORMETADATA
-				KeysChanged(FKeys, null);
-				#endif
 			}
 		}
 	}
@@ -2730,19 +2614,6 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 
 		private ITypeDescriptorContext FContext;
 
-		#if USENOTIFYLISTFORMETADATA
-		private void KeyDefinitionChanged(object ASender, object AItem)
-		{
-			if (FContext != null)
-				FContext.OnComponentChanged();
-		}
-
-		private void KeysEdited(object ASender, EventArgs AArgs)
-		{
-			KeyDefinitionChanged(ASender, null);
-		}
-		#endif
-	
 		public override object EditValue(ITypeDescriptorContext AContext, IServiceProvider AProvider, object AValue) 
 		{	 
 			if (AContext != null && AContext.Instance != null && AProvider != null) 
@@ -2754,18 +2625,10 @@ namespace Alphora.Dataphor.DAE.Client.Controls.Design
 					KeyDefinitionsBrowse LForm = new KeyDefinitionsBrowse((KeyDefinitions)AValue);
 					try
 					{
-						#if USENOTIFYLISTFORMETADATA
-						LForm.OnKeysEdited += new EventHandler(KeysEdited);
-						((KeyDefinitions)AValue).OnChanged += new ListEventHandler(KeyDefinitionChanged);
-						#endif
 						FEditorService.ShowDialog(LForm);
 					}
 					finally
 					{
-						#if USENOTIFYLISTFORMETADATA
-						LForm.OnKeysEdited -= new EventHandler(KeysEdited);
-						((KeyDefinitions)AValue).OnChanged -= new ListEventHandler(KeyDefinitionChanged);
-						#endif
 						FContext = null;
 						LForm.Dispose();
 					}

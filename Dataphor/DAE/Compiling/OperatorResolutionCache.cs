@@ -15,19 +15,19 @@ namespace Alphora.Dataphor.DAE.Compiling
 	
 	public class OperatorResolutionCache : System.Object
 	{
-		private Hashtable FResolutions = new Hashtable();
+		private Dictionary<OperatorBindingContext, OperatorBindingContext> FResolutions = new Dictionary<OperatorBindingContext, OperatorBindingContext>();
 
 		public OperatorBindingContext this[OperatorBindingContext AContext]
 		{
 			get
 			{
-				return FResolutions[AContext] as OperatorBindingContext;
+				return FResolutions[AContext];
 			}
 		}		
 		
 		public void Add(OperatorBindingContext AContext)
 		{
-			if (!FResolutions.Contains(AContext))
+			if (!FResolutions.ContainsKey(AContext))
 				FResolutions.Add(AContext, AContext);
 		}
 		
@@ -39,9 +39,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Removes cached resolutions for this operator, if any.</summary>
 		public void Clear(Operator AOperator)
 		{
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (((OperatorBindingContext)LEntry.Value).Operator == AOperator)
+			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
+				if (LEntry.Value.Operator == AOperator)
 					LResolutions.Add(LEntry.Value);
 			
 			foreach (OperatorBindingContext LContext in LResolutions)
@@ -52,9 +52,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public void Clear(string AOperatorName)
 		{
 			string LUnqualifiedName = Schema.Object.Unqualify(AOperatorName);
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (Schema.Object.NamesEqual(Schema.Object.EnsureUnrooted(((OperatorBindingContext)LEntry.Value).OperatorName), LUnqualifiedName))
+			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
+				if (Schema.Object.NamesEqual(Schema.Object.EnsureUnrooted(LEntry.Value.OperatorName), LUnqualifiedName))
 					LResolutions.Add(LEntry.Value);
 					
 			foreach (OperatorBindingContext LContext in LResolutions)
@@ -64,12 +64,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Removes cached resolutions involving conversions referencing the given scalar type, if any.</summary>
 		public void Clear(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType)
 		{
-			ArrayList LResolutions = new ArrayList();
-			OperatorBindingContext LContext;
-			foreach (DictionaryEntry LEntry in FResolutions)
+			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
 			{
-				LContext = (OperatorBindingContext)LEntry.Value;
-				foreach (OperatorMatch LMatch in LContext.Matches)
+				foreach (OperatorMatch LMatch in LEntry.Value.Matches)
 					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
 					{
 						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
@@ -100,12 +98,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Removes cached resolutions involving conversion paths using the given conversion, if any.</summary>
 		public void Clear(Schema.Conversion AConversion)
 		{
-			ArrayList LResolutions = new ArrayList();
-			OperatorBindingContext LContext;
-			foreach (DictionaryEntry LEntry in FResolutions)
+			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
 			{
-				LContext = (OperatorBindingContext)LEntry.Value;
-				foreach (OperatorMatch LMatch in LContext.Matches)
+				foreach (OperatorMatch LMatch in LEntry.Value.Matches)
 					foreach (ConversionContext LConversionContext in LMatch.ConversionContexts)
 					{
 						ScalarConversionContext LScalarConversionContext = LConversionContext as ScalarConversionContext;
@@ -128,9 +124,9 @@ namespace Alphora.Dataphor.DAE.Compiling
 		/// <summary>Removes cached resolutions involving the given name resolution path, if any.</summary>
 		public void Clear(Schema.NameResolutionPath AResolutionPath)
 		{
-			ArrayList LResolutions = new ArrayList();
-			foreach (DictionaryEntry LEntry in FResolutions)
-				if (((OperatorBindingContext)LEntry.Value).ResolutionPath == AResolutionPath)
+			List<OperatorBindingContext> LResolutions = new List<OperatorBindingContext>();
+			foreach (KeyValuePair<OperatorBindingContext, OperatorBindingContext> LEntry in FResolutions)
+				if (LEntry.Value.ResolutionPath == AResolutionPath)
 					LResolutions.Add(LEntry.Value);
 					
 			foreach (OperatorBindingContext LContext in LResolutions)

@@ -4,10 +4,7 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor
 {
@@ -20,7 +17,6 @@ namespace Alphora.Dataphor
 	
     /// <summary>Provides the base implementation for <see cref="IDisposable"/> and <see cref="IDisposableNotify"/>. </summary>
     /// <seealso cref="IDisposable"/>
-    [Serializable]
 	public abstract class Disposable : Object, IDisposable, IDisposableNotify
     {
 		/// <summary> <c>Disposed</c> is invoked when this object is Disposed </summary>
@@ -60,14 +56,6 @@ namespace Alphora.Dataphor
 		#endif
 	}
 
-	/// <remarks> Provides an interface for objects that support Open/Closed state. </remarks>
-	public interface IActive
-	{
-        void Open();
-        void Close();
-        bool Active{ get; set; }
-	}
-	
 	public sealed class MathUtility
 	{
 		public static int IntegerCeilingDivide(int ADividend, int ADivisor)
@@ -76,27 +64,13 @@ namespace Alphora.Dataphor
 		}
 	}
 
-	public class ErrorList : List
+	/// <summary> ErrorList is a list of exceptions that can be thrown in aggregate. </summary>
+	public class ErrorList : List<Exception>
 	{
-		protected override void Validate(object AValue)
-		{
-			base.Validate(AValue);
-			if (!(AValue is Exception))
-				throw new BaseException(BaseException.Codes.ExceptionsOnly, AValue.GetType().Name);
-		}
-
-		public new Exception this[int AIndex]
-		{
-			get { return (Exception)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
-
 		public void Throw()
 		{
 			if (Count > 0)
-			{
 				new AggregateException(this);
-			}
 		}
 
 		public override string ToString()
