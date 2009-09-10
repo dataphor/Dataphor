@@ -87,29 +87,6 @@
       <Name>System.XML</Name>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="BOPException.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Dilx.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Inheritance.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Serializer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Settings.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <EmbeddedResource Include="BOPException.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
