@@ -371,6 +371,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 					LColumns.Add("ID");
 					LColumns.Add("OperatorName");
 					LColumns.Add("Signature");
+					LColumns.Add("Locator");
+					LColumns.Add("Line");
+					LColumns.Add("LinePos");
 					return new StoreTableHeader(ATableName, LColumns, "PK_DAEOperators");
 
 				case "DAEEventHandlers" : 
