@@ -5596,6 +5596,11 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public static Schema.IDataType CompileTypeSpecifier(Plan APlan, TypeSpecifier ATypeSpecifier)
 		{
+			return CompileTypeSpecifier(APlan, ATypeSpecifier, false);
+		}
+		
+		public static Schema.IDataType CompileTypeSpecifier(Plan APlan, TypeSpecifier ATypeSpecifier, bool ATrackDependencies)
+		{
 			if (ATypeSpecifier is GenericTypeSpecifier)
 				return APlan.DataTypes.SystemGeneric;
 			else if (ATypeSpecifier is ScalarTypeSpecifier)
@@ -5692,7 +5697,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 				LDummy.SessionID = APlan.SessionID;
 				//LDummy.Library = APlan.CurrentLibrary;
 				Schema.IDataType LDataType;
-				APlan.PushCreationObject(LDummy, new LineInfo(APlan.CompilingOffset));
+				if (!ATrackDependencies)
+					APlan.PushCreationObject(LDummy, new LineInfo(APlan.CompilingOffset));
 				try
 				{
 					APlan.PushTypeOfContext();
@@ -5707,11 +5713,13 @@ namespace Alphora.Dataphor.DAE.Compiling
 				}
 				finally
 				{
-					APlan.PopCreationObject();
+					if (!ATrackDependencies)
+						APlan.PopCreationObject();
 				}
 
 				// Attach dependencies for the resolved data type
-				AttachDataTypeDependencies(APlan, LDataType);
+				if (!ATrackDependencies)
+					AttachDataTypeDependencies(APlan, LDataType);
 				return LDataType;					
 			}
 			else
@@ -5942,10 +5950,10 @@ namespace Alphora.Dataphor.DAE.Compiling
 				try
 				{
 					foreach (FormalParameter LFormalParameter in LStatement.FormalParameters)
-						LNode.CreateOperator.Operands.Add(new Schema.Operand(LNode.CreateOperator, LFormalParameter.Identifier, CompileTypeSpecifier(APlan, LFormalParameter.TypeSpecifier), LFormalParameter.Modifier));
+						LNode.CreateOperator.Operands.Add(new Schema.Operand(LNode.CreateOperator, LFormalParameter.Identifier, CompileTypeSpecifier(APlan, LFormalParameter.TypeSpecifier, true), LFormalParameter.Modifier));
 
 					if (LStatement.ReturnType != null)
-						LNode.CreateOperator.ReturnDataType = CompileTypeSpecifier(APlan, LStatement.ReturnType);
+						LNode.CreateOperator.ReturnDataType = CompileTypeSpecifier(APlan, LStatement.ReturnType, true);
 						
 					try
 					{
@@ -6079,13 +6087,27 @@ namespace Alphora.Dataphor.DAE.Compiling
 												try
 												{
 													// Report dependencies for the signature and return types
-													Schema.Catalog LDependencies = new Schema.Catalog();
-													foreach (Schema.Operand LOperand in AOperator.Operands)
-														LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-													if (AOperator.ReturnDataType != null)
-														AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-													foreach (Schema.Object LObject in LDependencies)
-														LPlan.AttachDependency(LObject);
+													if (AOperator.DeclarationText != null)
+													{
+														Parser LParser = new Parser();
+														CreateOperatorStatement LStatement = LParser.ParseOperatorDeclaration(AOperator.DeclarationText);
+
+														foreach (FormalParameter LFormalParameter in LStatement.FormalParameters)
+															CompileTypeSpecifier(LPlan, LFormalParameter.TypeSpecifier, true);
+
+														if (LStatement.ReturnType != null)
+															CompileTypeSpecifier(LPlan, LStatement.ReturnType, true);
+													}
+													else
+													{
+														Schema.Catalog LDependencies = new Schema.Catalog();
+														foreach (Schema.Operand LOperand in AOperator.Operands)
+															LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+														if (AOperator.ReturnDataType != null)
+															AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+														foreach (Schema.Object LObject in LDependencies)
+															LPlan.AttachDependency(LObject);
+													}
 
 													PlanNode LBlockNode = BindOperatorBlock(LPlan, AOperator, CompileOperatorBlock(LPlan, AOperator, new Parser().ParseStatement(AOperator.BodyText, null))); //AOperator.Block.BlockNode.EmitStatement(EmitMode.ForCopy)));
 													LPlan.CheckCompiled();
@@ -6212,7 +6234,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 					}
 					else
 					{
-						// If there is no locator, this is either dynamic or ad-hoc execution, and the locator should be a negative offset
+						// If there is no locator, this is either dynamic or ad-hoc execution, and the locator should be zero
 						// so the operator text can be returned as the debug context.
 						LNode.CreateOperator.Locator =
 							new DebugLocator
@@ -6471,13 +6493,26 @@ namespace Alphora.Dataphor.DAE.Compiling
 										try
 										{
 											// Report dependencies for the signature and return types
-											Schema.Catalog LDependencies = new Schema.Catalog();
-											foreach (Schema.Operand LOperand in AOperator.Operands)
-												LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-											if (AOperator.ReturnDataType != null)
-												AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
-											foreach (Schema.Object LObject in LDependencies)
-												LPlan.AttachDependency(LObject);
+											if (AOperator.DeclarationText != null)
+											{
+												CreateAggregateOperatorStatement LStatement = new Parser().ParseAggregateOperatorDeclaration(AOperator.DeclarationText);
+
+												foreach (FormalParameter LFormalParameter in LStatement.FormalParameters)
+													CompileTypeSpecifier(LPlan, LFormalParameter.TypeSpecifier, true);
+
+												if (LStatement.ReturnType != null)
+													CompileTypeSpecifier(LPlan, LStatement.ReturnType, true);
+											}
+											else
+											{
+												Schema.Catalog LDependencies = new Schema.Catalog();
+												foreach (Schema.Operand LOperand in AOperator.Operands)
+													LOperand.DataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+												if (AOperator.ReturnDataType != null)
+													AOperator.ReturnDataType.IncludeDependencies(APlan.CatalogDeviceSession, APlan.Catalog, LDependencies, EmitMode.ForCopy);
+												foreach (Schema.Object LObject in LDependencies)
+													LPlan.AttachDependency(LObject);
+											}
 
 											PlanNode LInitializationNode = null;
 											int LInitializationDisplacement = 0;

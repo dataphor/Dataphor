@@ -280,6 +280,58 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			}
 		}
 		
+		public CreateOperatorStatement ParseOperatorDeclaration(string AInput)
+		{
+			FLexer = new Lexer(AInput);
+			try
+			{
+				try
+				{
+					FLexer.NextToken().CheckSymbol(Keywords.Create);
+					FLexer.NextToken();
+					bool LSession = (FLexer[0].AsSymbol == Keywords.Session);
+					if (LSession)
+						FLexer.NextToken();
+					FLexer[0].CheckSymbol(Keywords.Operator);
+					return CreateOperatorStatement(1, 1, LSession, true);
+				}
+				catch (Exception E)
+				{
+					throw new SyntaxException(FLexer, E);
+				}
+			}
+			finally
+			{
+				FLexer = null;
+			}
+		}
+		
+		public CreateAggregateOperatorStatement ParseAggregateOperatorDeclaration(string AInput)
+		{
+			FLexer = new Lexer(AInput);
+			try
+			{
+				try
+				{
+					FLexer.NextToken().CheckSymbol(Keywords.Create);
+					FLexer.NextToken();
+					bool LSession = (FLexer[0].AsSymbol == Keywords.Session);
+					if (LSession)
+						FLexer.NextToken();
+					FLexer[0].CheckSymbol(Keywords.Aggregate);
+					return CreateAggregateOperatorStatement(1, 1, LSession, true);
+				}
+				catch (Exception E)
+				{
+					throw new SyntaxException(FLexer, E);
+				}
+			}
+			finally
+			{
+				FLexer = null;
+			}
+		}
+		
 		/*
 			BNF:
 			<terminated statement> ::=
@@ -3669,8 +3721,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				case Keywords.View: return CreateViewStatement(LLine, LLinePos, false);
 				case Keywords.Constraint: return CreateConstraintStatement(LLine, LLinePos, false);
 				case Keywords.Reference: return CreateReferenceStatement(LLine, LLinePos, false);
-				case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, false);
-				case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, false);
+				case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, false, false);
+				case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, false, false);
 				case Keywords.Session:
 					switch (FLexer.NextToken().AsSymbol)
 					{
@@ -3678,8 +3730,8 @@ namespace Alphora.Dataphor.DAE.Language.D4
 						case Keywords.View: return CreateViewStatement(LLine, LLinePos, true);
 						case Keywords.Constraint: return CreateConstraintStatement(LLine, LLinePos, true);
 						case Keywords.Reference: return CreateReferenceStatement(LLine, LLinePos, true);
-						case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, true);
-						case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, true);
+						case Keywords.Operator: return CreateOperatorStatement(LLine, LLinePos, true, false);
+						case Keywords.Aggregate: return CreateAggregateOperatorStatement(LLine, LLinePos, true, false);
 						default : throw new ParserException(ParserException.Codes.UnknownCreateDirective, FLexer[0].AsSymbol);
 					}
 				case Keywords.Type: return CreateScalarTypeStatement(LLine, LLinePos);
@@ -4697,7 +4749,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			<operator name> ::=
 				<qualified identifier>
         */
-        protected CreateOperatorStatement CreateOperatorStatement(int ALine, int ALinePos, bool AIsSession)
+        protected CreateOperatorStatement CreateOperatorStatement(int ALine, int ALinePos, bool AIsSession, bool AIsDeclarationOnly)
         {
 			CreateOperatorStatement LStatement = new CreateOperatorStatement();
 			LStatement.Line = ALine;
@@ -4711,91 +4763,94 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				LStatement.ReturnType = TypeSpecifier();
 			}
 			
-			#if USETYPEINHERITANCE
-			// [reintroduce] [abstract | virtual | override]
-			// Virtual invocation has been removed until we have a better solution for casting physical representations and specialization by constraint
-			switch (FLexer.PeekTokenSymbol(1))
+			if (!AIsDeclarationOnly)
 			{
-				case Keywords.Reintroduce:
-					FLexer.NextToken();
-					LStatement.IsReintroduced = true;
-					switch (FLexer.PeekTokenSymbol(1))
-					{
-						case Keywords.Abstract:
-							FLexer.NextToken();
-							LStatement.IsAbstract = true;
-						break;
-						
-						case Keywords.Virtual:
-							FLexer.NextToken();
-							LStatement.IsVirtual = true;
-						break;
-						
-						case Keywords.Override:
-							throw new ParserException(ParserException.Codes.InvalidOverrideDirective);
-					}
-				break;
+				#if USETYPEINHERITANCE
+				// [reintroduce] [abstract | virtual | override]
+				// Virtual invocation has been removed until we have a better solution for casting physical representations and specialization by constraint
+				switch (FLexer.PeekTokenSymbol(1))
+				{
+					case Keywords.Reintroduce:
+						FLexer.NextToken();
+						LStatement.IsReintroduced = true;
+						switch (FLexer.PeekTokenSymbol(1))
+						{
+							case Keywords.Abstract:
+								FLexer.NextToken();
+								LStatement.IsAbstract = true;
+							break;
+							
+							case Keywords.Virtual:
+								FLexer.NextToken();
+								LStatement.IsVirtual = true;
+							break;
+							
+							case Keywords.Override:
+								throw new ParserException(ParserException.Codes.InvalidOverrideDirective);
+						}
+					break;
+					
+					case Keywords.Abstract:
+						FLexer.NextToken();
+						LStatement.IsAbstract = true;
+					break;
+					
+					case Keywords.Virtual:
+						FLexer.NextToken();
+						LStatement.IsVirtual = true;
+					break;
+					
+					case Keywords.Override:
+						FLexer.NextToken();
+						LStatement.IsOverride = true;
+					break;
+				}
+				#endif
+
+				bool LHasBody = false;
+				switch (FLexer.PeekTokenSymbol(1))
+				{
+					case Keywords.Class:
+						#if USETYPEINHERITANCE
+						if (LStatement.IsAbstract)
+							throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
+						#endif
+						LStatement.Block.ClassDefinition = ClassDefinition();
+						LStatement.Block.Line = LStatement.Block.ClassDefinition.Line;
+						LStatement.Block.LinePos = LStatement.Block.ClassDefinition.LinePos;
+						LStatement.Block.SetEndPosition(FLexer);
+						LHasBody = true;
+					break;
+					
+					case Keywords.Begin:
+						#if USETYPEINHERITANCE
+						if (LStatement.IsAbstract)
+							throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
+						#endif
+						FLexer.NextToken();
+						ALine = FLexer[0].Line;
+						ALinePos = FLexer[0].LinePos;
+						LStatement.Block.Block = Block();
+						FLexer.NextToken().CheckSymbol(Keywords.End);
+						LStatement.Block.Line = ALine;
+						LStatement.Block.LinePos = ALinePos;
+						LStatement.Block.SetEndPosition(FLexer);
+						LHasBody = true;
+					break;
+				}
+
+				#if USETYPEINHERITANCE			
+				if (!LStatement.IsAbstract && !LHasBody)
+					throw new ParserException(ParserException.Codes.InvalidOperatorDefinition);
+				#endif
 				
-				case Keywords.Abstract:
-					FLexer.NextToken();
-					LStatement.IsAbstract = true;
-				break;
-				
-				case Keywords.Virtual:
-					FLexer.NextToken();
-					LStatement.IsVirtual = true;
-				break;
-				
-				case Keywords.Override:
-					FLexer.NextToken();
-					LStatement.IsOverride = true;
-				break;
+				if (!LHasBody)
+					throw new ParserException(ParserException.Codes.InvalidOperatorDefinition);
+
+				MetaData(LStatement);
+				LStatement.SetEndPosition(FLexer);
 			}
 
-			#endif
-
-			bool LHasBody = false;
-			switch (FLexer.PeekTokenSymbol(1))
-			{
-				case Keywords.Class:
-					#if USETYPEINHERITANCE
-					if (LStatement.IsAbstract)
-						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
-					#endif
-					LStatement.Block.ClassDefinition = ClassDefinition();
-					LStatement.Block.Line = LStatement.Block.ClassDefinition.Line;
-					LStatement.Block.LinePos = LStatement.Block.ClassDefinition.LinePos;
-					LStatement.Block.SetEndPosition(FLexer);
-					LHasBody = true;
-				break;
-				
-				case Keywords.Begin:
-					#if USETYPEINHERITANCE
-					if (LStatement.IsAbstract)
-						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
-					#endif
-					FLexer.NextToken();
-					ALine = FLexer[0].Line;
-					ALinePos = FLexer[0].LinePos;
-					LStatement.Block.Block = Block();
-					FLexer.NextToken().CheckSymbol(Keywords.End);
-					LStatement.Block.Line = ALine;
-					LStatement.Block.LinePos = ALinePos;
-					LStatement.Block.SetEndPosition(FLexer);
-					LHasBody = true;
-				break;
-			}
-
-			#if USETYPEINHERITANCE			
-			if (!LStatement.IsAbstract && !LHasBody)
-				throw new ParserException(ParserException.Codes.InvalidOperatorDefinition);
-			#endif
-			
-			if (!LHasBody)
-				throw new ParserException(ParserException.Codes.InvalidOperatorDefinition);
-
-			MetaData(LStatement);
-			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
         
@@ -5176,7 +5231,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 					finalization (<class definition> | <block>)
 					<metadata>
         */
-        protected CreateAggregateOperatorStatement CreateAggregateOperatorStatement(int ALine, int ALinePos, bool AIsSession)
+        protected CreateAggregateOperatorStatement CreateAggregateOperatorStatement(int ALine, int ALinePos, bool AIsSession, bool AIsDeclarationOnly)
         {
 			CreateAggregateOperatorStatement LStatement = new CreateAggregateOperatorStatement();
 			LStatement.Line = ALine;
@@ -5187,95 +5242,99 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			FormalParameterList(LStatement.FormalParameters);
 			FLexer.NextToken().CheckSymbol(Keywords.TypeSpecifier);
 			LStatement.ReturnType = TypeSpecifier();
-
-			#if USETYPEINHERITANCE			
-			// [reintroduce] [abstract | virtual | override]
-			switch (FLexer.PeekTokenSymbol(1))
+			
+			if (!AIsDeclarationOnly)
 			{
-				case Keywords.Reintroduce:
-					FLexer.NextToken();
-					LStatement.IsReintroduced = true;
-					switch (FLexer.PeekTokenSymbol(1))
+				#if USETYPEINHERITANCE			
+				// [reintroduce] [abstract | virtual | override]
+				switch (FLexer.PeekTokenSymbol(1))
+				{
+					case Keywords.Reintroduce:
+						FLexer.NextToken();
+						LStatement.IsReintroduced = true;
+						switch (FLexer.PeekTokenSymbol(1))
+						{
+							case Keywords.Abstract:
+								FLexer.NextToken();
+								LStatement.IsAbstract = true;
+							break;
+							
+							case Keywords.Virtual:
+								FLexer.NextToken();
+								LStatement.IsVirtual = true;
+							break;
+							
+							case Keywords.Override:
+								throw new ParserException(ParserException.Codes.InvalidOverrideDirective);
+						}
+					break;
+
+					case Keywords.Abstract:
+						FLexer.NextToken();
+						LStatement.IsAbstract = true;
+					break;
+					
+					case Keywords.Virtual:
+						FLexer.NextToken();
+						LStatement.IsVirtual = true;
+					break;
+					
+					case Keywords.Override:
+						FLexer.NextToken();
+						LStatement.IsOverride = true;
+					break;
+				}
+
+				if (!LStatement.IsAbstract)
+				{
+				#endif
+					FLexer.NextToken().CheckSymbol(Keywords.Initialization);
+					LStatement.Initialization.SetPosition(FLexer);
+					if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+						LStatement.Initialization.ClassDefinition = ClassDefinition();
+					else
 					{
-						case Keywords.Abstract:
-							FLexer.NextToken();
-							LStatement.IsAbstract = true;
-						break;
-						
-						case Keywords.Virtual:
-							FLexer.NextToken();
-							LStatement.IsVirtual = true;
-						break;
-						
-						case Keywords.Override:
-							throw new ParserException(ParserException.Codes.InvalidOverrideDirective);
+						FLexer.NextToken().CheckSymbol(Keywords.Begin);
+						LStatement.Initialization.Block = Block();
+						FLexer.NextToken().CheckSymbol(Keywords.End);
 					}
-				break;
+					LStatement.Initialization.SetEndPosition(FLexer);
+						
+					FLexer.NextToken().CheckSymbol(Keywords.Aggregation);
+					LStatement.Aggregation.SetPosition(FLexer);
+					if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+						LStatement.Aggregation.ClassDefinition = ClassDefinition();
+					else
+					{
+						FLexer.NextToken().CheckSymbol(Keywords.Begin);
+						LStatement.Aggregation.Block = Block();
+						FLexer.NextToken().CheckSymbol(Keywords.End);
+					}
+					LStatement.Aggregation.SetEndPosition(FLexer);
+						
+					FLexer.NextToken().CheckSymbol(Keywords.Finalization);
+					LStatement.Finalization.SetPosition(FLexer);
+					if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
+						LStatement.Finalization.ClassDefinition = ClassDefinition();
+					else
+					{
+						FLexer.NextToken().CheckSymbol(Keywords.Begin);
+						LStatement.Finalization.Block = Block();
+						FLexer.NextToken().CheckSymbol(Keywords.End);
+					}
+					LStatement.Finalization.SetEndPosition(FLexer);
 
-				case Keywords.Abstract:
-					FLexer.NextToken();
-					LStatement.IsAbstract = true;
-				break;
-				
-				case Keywords.Virtual:
-					FLexer.NextToken();
-					LStatement.IsVirtual = true;
-				break;
-				
-				case Keywords.Override:
-					FLexer.NextToken();
-					LStatement.IsOverride = true;
-				break;
+				#if USETYPEINHERITANCE
+				}
+				else
+					if (FLexer.PeekTokenSymbol(1) == Keywords.Initialization)
+						throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
+				#endif
+
+				MetaData(LStatement);
+				LStatement.SetEndPosition(FLexer);
 			}
-
-			if (!LStatement.IsAbstract)
-			{
-			#endif
-				FLexer.NextToken().CheckSymbol(Keywords.Initialization);
-				LStatement.Initialization.SetPosition(FLexer);
-				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-					LStatement.Initialization.ClassDefinition = ClassDefinition();
-				else
-				{
-					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Initialization.Block = Block();
-					FLexer.NextToken().CheckSymbol(Keywords.End);
-				}
-				LStatement.Initialization.SetEndPosition(FLexer);
-					
-				FLexer.NextToken().CheckSymbol(Keywords.Aggregation);
-				LStatement.Aggregation.SetPosition(FLexer);
-				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-					LStatement.Aggregation.ClassDefinition = ClassDefinition();
-				else
-				{
-					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Aggregation.Block = Block();
-					FLexer.NextToken().CheckSymbol(Keywords.End);
-				}
-				LStatement.Aggregation.SetEndPosition(FLexer);
-					
-				FLexer.NextToken().CheckSymbol(Keywords.Finalization);
-				LStatement.Finalization.SetPosition(FLexer);
-				if (FLexer.PeekTokenSymbol(1) == Keywords.Class)
-					LStatement.Finalization.ClassDefinition = ClassDefinition();
-				else
-				{
-					FLexer.NextToken().CheckSymbol(Keywords.Begin);
-					LStatement.Finalization.Block = Block();
-					FLexer.NextToken().CheckSymbol(Keywords.End);
-				}
-				LStatement.Finalization.SetEndPosition(FLexer);
-
-			#if USETYPEINHERITANCE
-			}
-			else
-				if (FLexer.PeekTokenSymbol(1) == Keywords.Initialization)
-					throw new ParserException(ParserException.Codes.InvalidAbstractDirective);
-			#endif
 				
-			MetaData(LStatement);
-			LStatement.SetEndPosition(FLexer);
 			return LStatement;
         }
 		
