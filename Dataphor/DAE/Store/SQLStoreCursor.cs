@@ -829,7 +829,11 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (FCurrentRow == null)
 					FCurrentRow = InternalSelect();
-				LNewRow = FEditingRow;
+					
+				if (Connection.Store.SupportsUpdatableCursor)
+					LNewRow = InternalSelect();
+				else
+					LNewRow = FEditingRow;
 			}
 
 			#if SQLSTORETIMING
