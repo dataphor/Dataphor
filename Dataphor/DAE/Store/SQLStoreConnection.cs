@@ -519,7 +519,7 @@ namespace Alphora.Dataphor.DAE.Store
 		}
 
 		protected virtual string GenerateUpdateStatement(string ATableName, List<string> AColumns, List<string> AKey, object[] AOldRow, object[] ANewRow)
-		{			
+		{
 			StringBuilder LStatement = new StringBuilder();
 			LStatement.AppendFormat("update {0} set", ATableName);
 			for (int LIndex = 0; LIndex < AColumns.Count; LIndex++)
@@ -533,10 +533,7 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (LIndex > 0)
 					LStatement.Append(" and");
-				int LIndexOfColumn = AColumns.IndexOf(AKey[LIndex]);
-				Error.AssertFail(AOldRow != null, "AOldRow must not be null");
-				object LLiteralValue = NativeToLiteralValue(AOldRow[LIndexOfColumn]);
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], LLiteralValue);
+				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(AOldRow[AColumns.IndexOf(AKey[LIndex])]));
 			}
 			return LStatement.ToString();
 		}
