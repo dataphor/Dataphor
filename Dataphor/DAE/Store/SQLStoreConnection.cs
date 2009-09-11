@@ -533,7 +533,9 @@ namespace Alphora.Dataphor.DAE.Store
 			{
 				if (LIndex > 0)
 					LStatement.Append(" and");
-				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], NativeToLiteralValue(AOldRow[AColumns.IndexOf(AKey[LIndex])]));
+				int LIndexOfColumn = AColumns.IndexOf(AKey[LIndex]);
+				object LLiteralValue = NativeToLiteralValue(AOldRow[LIndexOfColumn]);
+				LStatement.AppendFormat(" {0} = {1}", AKey[LIndex], LLiteralValue);
 			}
 			return LStatement.ToString();
 		}
