@@ -24,7 +24,6 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.DAE.Store;
 using Alphora.Dataphor.DAE.Device.Memory;
 using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 using Alphora.Dataphor.DAE.Connection;

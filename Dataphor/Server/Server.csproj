@@ -43,23 +43,13 @@
     <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />
-    <Compile Include="Debug\Breakpoint.cs" />
-    <Compile Include="Debug\CallStackEntry.cs" />
-    <Compile Include="Debug\DebugContext.cs" />
-    <Compile Include="Debug\Debugger.cs" />
-    <Compile Include="Debug\DebugLocator.cs" />
-    <Compile Include="Debug\DebugNodes.cs" />
-    <Compile Include="Debug\DebugProcessInfo.cs" />
-    <Compile Include="Debug\DebugSessionInfo.cs" />
-    <Compile Include="Debug\SourceContext.cs" />
-    <Compile Include="Debug\SourceUtility.cs" />
-    <Compile Include="Debug\StackEntry.cs" />
-    <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs" />
-    <Compile Include="Device.ApplicationTransaction\ApplicationTransactionException.cs" />
     <Compile Include="Language.SQL\Emitter.cs" />
     <Compile Include="Language.SQL\Keywords.cs" />
     <Compile Include="Language.SQL\Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\CatalogCache.cs" />
+    <Compile Include="Server\InstanceManager.cs" />
+    <Compile Include="Server\Listener.cs" />
     <Compile Include="Server\NativeCLIUtility.cs" />
     <Compile Include="Server\NativeMarshal.cs" />
     <Compile Include="Server\NativeServer.cs" />
@@ -74,24 +64,8 @@
     <Compile Include="Server\RemoteServerProcess.cs" />
     <Compile Include="Server\RemoteServerScript.cs" />
     <Compile Include="Server\RemoteServerSession.cs" />
-    <Compile Include="Server\RemoteSession.cs" />
-    <Compile Include="Store\SQLStore.cs" />
-    <Compile Include="Store\SQLStoreConnection.cs" />
-    <Compile Include="Store\SQLStoreCounter.cs" />
-    <Compile Include="Store\SQLStoreCursor.cs" />
-    <Compile Include="Store\StoreException.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Debug\Debug.d4" />
-    <EmbeddedResource Include="Device.ApplicationTransaction\ApplicationTransactionException.resx">
-      <DependentUpon>ApplicationTransactionException.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Store\StoreException.resx">
-      <DependentUpon>StoreException.cs</DependentUpon>
-      <LastGenOutput>StoreException.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <Compile Include="Server\RemoteSessionImplementation.cs" />
+    <Compile Include="Server\ServerHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Language.SQL\BNF.txt" />

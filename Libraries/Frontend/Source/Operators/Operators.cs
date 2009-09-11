@@ -306,32 +306,19 @@ namespace Alphora.Dataphor.Frontend.Server
 			
 			string LDocumentType = LDevice.GetDocumentType(AProgram, LLibraryName, LDocumentName);
 			
-			QueryLanguage LSaveLanguage = AProgram.ServerProcess.ServerSession.SessionInfo.Language;
-			
-			if (LDocumentType == "sql")
-				AProgram.ServerProcess.ServerSession.SessionInfo.Language = QueryLanguage.RealSQL;
-				
-			try
-			{
-				SystemExecuteNode.ExecuteScript
+			SystemExecuteNode.ExecuteScript
+			(
+				AProgram.ServerProcess,
+				AProgram, 
+				this,
+				LDevice.LoadDocument
 				(
-					AProgram.ServerProcess,
 					AProgram, 
-					this,
-					LDevice.LoadDocument
-					(
-						AProgram, 
-						LLibraryName,
-						LDocumentName
-					),
-					new DAE.Debug.DebugLocator("doc:" + LLibraryName + ":" + LDocumentName, 1, 1)
-				);
-			}
-			finally
-			{
-				if (LDocumentType == "sql")
-					AProgram.ServerProcess.ServerSession.SessionInfo.Language = LSaveLanguage;
-			}
+					LLibraryName,
+					LDocumentName
+				),
+				new DAE.Debug.DebugLocator("doc:" + LLibraryName + ":" + LDocumentName, 1, 1)
+			);
 
 			return null;
 		}

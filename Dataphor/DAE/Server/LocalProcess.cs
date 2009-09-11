@@ -343,7 +343,7 @@ namespace Alphora.Dataphor.DAE.Server
 		private ProcessCleanupInfo GetProcessCleanupInfo()
 		{
 			ProcessCleanupInfo LInfo = new ProcessCleanupInfo();
-			LInfo.UnprepareList = new RemoteServerPlan[FUnprepareList.Count];
+			LInfo.UnprepareList = new IRemoteServerPlan[FUnprepareList.Count];
 			for (int LIndex = 0; LIndex < FUnprepareList.Count; LIndex++)
 				LInfo.UnprepareList[LIndex] = (IRemoteServerPlan)FUnprepareList[LIndex];
 				

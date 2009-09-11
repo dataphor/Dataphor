@@ -21,8 +21,11 @@ class "MSSQLDevice.MSSQLDevice"
 // Make sure the device is functional and connected
 EnsureDeviceStarted('TestDevice');
 
-if not exists (DeviceScalarTypes where Device_Name = ObjectName('TestDevice')) then
-	raise Error('WTF');
+//if not exists (DeviceScalarTypes where Device_Name = ObjectName('TestDevice')) then
+//	raise Error('WTF');
+	
+if exists (Objects where Name like 'TestFramework.Coverage.Devices.TestDevice%') then
+	raise Error(Concat({ Name, Delimiter } from (Objects where Name like 'TestFramework.Coverage.Devices.TestDevice%' add { ', ' Delimiter })));
 	
 if not exists (DeviceOperators where Device_Name = ObjectName('TestDevice')) then
 	raise Error('WTF');

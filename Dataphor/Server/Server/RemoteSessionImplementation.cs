@@ -18,12 +18,10 @@ using Alphora.Dataphor.DAE.Runtime.Data;
 namespace Alphora.Dataphor.DAE.Server
 {
 	// RemoteSession    
-    public class RemoteSession : Disposable
+    public class RemoteSessionImplementation : RemoteSession
     {
-		public RemoteSession(ServerProcess AProcess, Schema.ServerLink AServerLink)
+		public RemoteSessionImplementation(ServerProcess AProcess, Schema.ServerLink AServerLink) : base(AProcess, AServerLink)
 		{
-			FServerProcess = AProcess;
-			FServerLink = AServerLink;
 			FNativeCLISession = new NativeCLISession(AServerLink.HostName, AServerLink.InstanceName, AServerLink.OverridePortNumber, GetNativeSessionInfo());
 		}
 		
@@ -34,8 +32,6 @@ namespace Alphora.Dataphor.DAE.Server
 				FNativeCLISession.Dispose();
 				FNativeCLISession = null;
 			}
-			
-			FServerProcess = null;
 			
 			base.Dispose(ADisposing);
 		}
@@ -153,37 +149,4 @@ namespace Alphora.Dataphor.DAE.Server
 			throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
 		}
     }
-
-	#if USETYPEDLIST    
-	public class RemoteSessions : DisposableTypedList
-	{
-		public RemoteSessions() : base()
-		{
-			FItemType = typeof(RemoteSession);
-			FItemsOwned = true;
-		}
-		
-		public new RemoteSession this[int AIndex]
-		{
-			get { return (RemoteSession)base[AIndex]; }
-			set { base[AIndex] = value; }
-		}
-
-	#else
-	public class RemoteSessions : DisposableList<RemoteSession>
-	{
-	#endif
-		public int IndexOf(Schema.ServerLink ALink)
-		{
-			for (int LIndex = 0; LIndex < Count; LIndex++)
-				if (this[LIndex].ServerLink.Equals(ALink))
-					return LIndex;
-			return -1;
-		}
-		
-		public bool Contains(Schema.ServerLink ALink)
-		{
-			return IndexOf(ALink) >= 0;
-		}
-	}
 }

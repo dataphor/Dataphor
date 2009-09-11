@@ -9,7 +9,7 @@
 	The store also manages logging and rollback of nested transactions to make up for the lack of savepoint support in the target DBMS.
 */
 
-//#define SQLSTORETIMING
+//#define STORETIMING
 
 using System;
 using System.IO;
@@ -19,8 +19,6 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Data;
-using System.Data.Common;
 
 using Alphora.Dataphor.DAE.Connection;
 

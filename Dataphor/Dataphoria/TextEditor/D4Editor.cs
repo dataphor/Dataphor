@@ -386,8 +386,6 @@ namespace Alphora.Dataphor.Dataphoria.TextEditor
 				Analyze();
 		}
 
-// TODO: RealSQL support will not work w/ asyncronous execution because we have no guarantees that no other scripts will be executed while in the "other" mode
-
 		private void PrepareForExecute()
 		{
 			Dataphoria.EnsureServerConnection();

@@ -27,7 +27,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 	using Alphora.Dataphor.DAE.Server;
 	using Alphora.Dataphor.DAE.Streams;
 	using D4 = Alphora.Dataphor.DAE.Language.D4;
-	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
 	using Schema = Alphora.Dataphor.DAE.Schema;
 
 	// TODO: Scan isolation levels...
@@ -565,10 +564,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public static PlanNode Compile(Plan APlan, string AStatement, DataParams AParams, bool AIsCursor)
 		{
 			Statement LStatement;
-			if (APlan.Language == QueryLanguage.RealSQL)
-				LStatement = new RealSQL.Compiler().Compile(new RealSQL.Parser().ParseStatement(AStatement));
-			else
-				LStatement = AIsCursor ? new Parser().ParseCursorDefinition(AStatement) : new Parser().ParseScript(AStatement, null);
+			LStatement = AIsCursor ? new Parser().ParseCursorDefinition(AStatement) : new Parser().ParseScript(AStatement, null);
 			return Compile(APlan, LStatement, AParams, AIsCursor);
 		}
 

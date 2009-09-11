@@ -29,7 +29,6 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Streams;
-	using RealSQL = Alphora.Dataphor.DAE.Language.RealSQL;
 	using Alphora.Dataphor.Windows;
 
 	// ServerProcess
@@ -255,8 +254,6 @@ namespace Alphora.Dataphor.DAE.Server
 				#endif
 				
 				FExecutingPrograms = null;
-				FSQLParser = null;
-				FSQLCompiler = null;
 				FStreamManager = null;
 				FValueManager = null;
 				FServerSession = null;
@@ -346,31 +343,14 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// Parsing
 		private Parser FParser;		
-		private RealSQL.Parser FSQLParser;
-		private RealSQL.Compiler FSQLCompiler;
 		
-		private void EnsureSQLCompiler()
-		{
-			if (FSQLParser == null)
-			{
-				FSQLParser = new RealSQL.Parser();
-				FSQLCompiler = new RealSQL.Compiler();
-			}
-		}
-
 		public Statement ParseScript(string AScript, ParserMessages AMessages)
 		{
 			Statement LStatement;								  
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
 			#endif
-			if (FServerSession.SessionInfo.Language == QueryLanguage.RealSQL)
-			{
-				EnsureSQLCompiler();
-				LStatement = FSQLCompiler.Compile(FSQLParser.ParseScript(AScript));
-			}
-			else
-				LStatement = FParser.ParseScript(AScript, AMessages);
+			LStatement = FParser.ParseScript(AScript, AMessages);
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
 			#endif
@@ -383,13 +363,7 @@ namespace Alphora.Dataphor.DAE.Server
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
 			#endif
-			if (FServerSession.SessionInfo.Language == QueryLanguage.RealSQL)
-			{
-				EnsureSQLCompiler();
-				LStatement = FSQLCompiler.Compile(FSQLParser.ParseStatement(AStatement));
-			}
-			else
-				LStatement = FParser.ParseStatement(AStatement, AMessages);
+			LStatement = FParser.ParseStatement(AStatement, AMessages);
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
 			#endif
@@ -402,17 +376,7 @@ namespace Alphora.Dataphor.DAE.Server
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
 			#endif
-			if (FServerSession.SessionInfo.Language == QueryLanguage.RealSQL)
-			{
-				EnsureSQLCompiler();
-				Statement LStatement = FSQLCompiler.Compile(FSQLParser.ParseStatement(AExpression));
-				if (LStatement is SelectStatement)
-					LExpression = ((SelectStatement)LStatement).CursorDefinition;
-				else
-					throw new CompilerException(CompilerException.Codes.TableExpressionExpected);
-			}
-			else
-				LExpression = FParser.ParseCursorDefinition(AExpression);
+			LExpression = FParser.ParseCursorDefinition(AExpression);
 			#if TRACEEVENTS
 			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
 			#endif
@@ -729,12 +693,14 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 		
+		internal string RemoteSessionClassName = "Alphora.Dataphor.DAE.Server.RemoteSessionImplementation,Alphora.Dataphor.Server";
+		
 		internal RemoteSession RemoteConnect(Schema.ServerLink AServerLink)
 		{
 			int LIndex = RemoteSessions.IndexOf(AServerLink);
 			if (LIndex < 0)
 			{
-				RemoteSession LSession = new RemoteSession(this, AServerLink);
+				RemoteSession LSession = (RemoteSession)Activator.CreateInstance(Type.GetType(RemoteSessionClassName), this, AServerLink);
 				try
 				{
 					while (LSession.TransactionCount < FTransactions.Count)

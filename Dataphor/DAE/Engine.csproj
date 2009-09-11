@@ -172,6 +172,19 @@
     <Compile Include="DAEException.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Debug\Breakpoint.cs" />
+    <Compile Include="Debug\CallStackEntry.cs" />
+    <Compile Include="Debug\DebugContext.cs" />
+    <Compile Include="Debug\Debugger.cs" />
+    <Compile Include="Debug\DebugLocator.cs" />
+    <Compile Include="Debug\DebugNodes.cs" />
+    <Compile Include="Debug\DebugProcessInfo.cs" />
+    <Compile Include="Debug\DebugSessionInfo.cs" />
+    <Compile Include="Debug\SourceContext.cs" />
+    <Compile Include="Debug\SourceUtility.cs" />
+    <Compile Include="Debug\StackEntry.cs" />
+    <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs" />
+    <Compile Include="Device.ApplicationTransaction\ApplicationTransactionException.cs" />
     <Compile Include="Device.Catalog\CatalogDevice.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -473,6 +486,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime\Stack.cs" />
+    <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="StackWindow.cs" />
     <Compile Include="Runtime\ValueManager.cs" />
@@ -549,10 +563,7 @@
     <Compile Include="Schema\TableVar.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Server\CatalogCache.cs" />
     <Compile Include="Server\DAERegisterAttribute.cs" />
-    <Compile Include="Server\InstanceManager.cs" />
-    <Compile Include="Server\Listener.cs" />
     <Compile Include="Server\LocalBatch.cs" />
     <Compile Include="Server\LocalCursor.cs" />
     <Compile Include="Server\LocalPlan.cs" />
@@ -580,7 +591,6 @@
     <Compile Include="Server\ServerFactory.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Server\ServerHost.cs" />
     <Compile Include="Server\ServerObject.cs" />
     <Compile Include="Server\ServerPlan.cs" />
     <Compile Include="Server\ServerProcess.cs" />
@@ -598,6 +608,11 @@
       <SubType>Code</SubType>
     </Compile>
     <None Include="app.config" />
+    <Compile Include="Store\SQLStore.cs" />
+    <Compile Include="Store\SQLStoreConnection.cs" />
+    <Compile Include="Store\SQLStoreCounter.cs" />
+    <Compile Include="Store\SQLStoreCursor.cs" />
+    <Compile Include="Store\StoreException.cs" />
     <Compile Include="Streams\Conveyor.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -651,6 +666,10 @@
     <EmbeddedResource Include="Connection\ConnectionException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Device.ApplicationTransaction\ApplicationTransactionException.resx">
+      <DependentUpon>ApplicationTransactionException.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Device.Catalog\CatalogException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -690,6 +709,11 @@
     <EmbeddedResource Include="Server\ServerException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Store\StoreException.resx">
+      <DependentUpon>StoreException.cs</DependentUpon>
+      <LastGenOutput>StoreException.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Streams\ConveyorException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -702,6 +726,7 @@
     <Content Include="Language.D4\BNF.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
+    <EmbeddedResource Include="Debug\Debug.d4" />
     <None Include="Schema\SQLDeviceMappings.d4" />
   </ItemGroup>
   <ItemGroup>
