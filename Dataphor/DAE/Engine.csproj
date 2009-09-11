@@ -162,13 +162,6 @@
     <Compile Include="Compiling\PlanStructures.cs" />
     <Compile Include="Compiling\Symbols.cs" />
     <Compile Include="Connection\ConnectionException.cs" />
-    <Compile Include="Connection\DotNetCommand.cs" />
-    <Compile Include="Connection\DotNetConnection.cs" />
-    <Compile Include="Connection\DotNetCursor.cs" />
-    <Compile Include="Connection\GenericDotNetConnection.cs" />
-    <Compile Include="Connection\MSSQLCommand.cs" />
-    <Compile Include="Connection\MSSQLConnection.cs" />
-    <Compile Include="Connection\MSSQLServerCursor.cs" />
     <Compile Include="Connection\SQLCommand.cs" />
     <Compile Include="Connection\SQLConnection.cs" />
     <Compile Include="Connection\SQLCursor.cs" />
@@ -177,23 +170,6 @@
     <Compile Include="Connection\SQLTypes.cs" />
     <Compile Include="Connection\SQLUtility.cs" />
     <Compile Include="DAEException.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Debug\Breakpoint.cs" />
-    <Compile Include="Debug\CallStackEntry.cs" />
-    <Compile Include="Debug\DebugContext.cs" />
-    <Compile Include="Debug\Debugger.cs" />
-    <Compile Include="Debug\DebugLocator.cs" />
-    <Compile Include="Debug\DebugNodes.cs" />
-    <Compile Include="Debug\DebugProcessInfo.cs" />
-    <Compile Include="Debug\DebugSessionInfo.cs" />
-    <Compile Include="Debug\SourceContext.cs" />
-    <Compile Include="Debug\SourceUtility.cs" />
-    <Compile Include="Debug\StackEntry.cs" />
-    <Compile Include="Device.ApplicationTransaction\ApplicationTransaction.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Device.ApplicationTransaction\ApplicationTransactionException.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Device.Catalog\CatalogDevice.cs">
@@ -233,27 +209,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Language.D4\Parser.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.RealSQL\RealSQLCompiler.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.RealSQL\RealSQLInstructions.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.RealSQL\RealSQLKeywords.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.RealSQL\RealSQLParser.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.SQL\Emitter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.SQL\Keywords.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Language.SQL\Language.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Language\Emitter.cs">
@@ -612,27 +567,12 @@
     <Compile Include="Server\MemberLastDesigner.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Server\NativeCLIUtility.cs" />
-    <Compile Include="Server\NativeMarshal.cs" />
-    <Compile Include="Server\NativeServerCLI.cs" />
-    <Compile Include="Server\NativeServer.cs" />
-    <Compile Include="Server\NativeSession.cs" />
     <Compile Include="Server\PlanCache.cs" />
-    <Compile Include="Server\RemoteServer.cs" />
-    <Compile Include="Server\RemoteServerBatch.cs" />
-    <Compile Include="Server\RemoteServerCursor.cs" />
-    <Compile Include="Server\RemoteServerObject.cs" />
-    <Compile Include="Server\RemoteServerPlan.cs" />
-    <Compile Include="Server\RemoteServerProcess.cs" />
-    <Compile Include="Server\RemoteServerScript.cs" />
-    <Compile Include="Server\RemoteServerSession.cs" />
-    <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerBatch.cs" />
     <Compile Include="Server\ServerConfiguration.cs" />
-    <Compile Include="Server\RemoteServerConnection.cs" />
     <Compile Include="Server\ServerCursor.cs" />
     <Compile Include="Server\ServerException.cs">
       <SubType>Code</SubType>
@@ -658,51 +598,6 @@
       <SubType>Code</SubType>
     </Compile>
     <None Include="app.config" />
-    <None Include="Storage\Database.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\DataFile.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\DataFiles.cs" />
-    <None Include="Storage\FastFile.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\FileGroup.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\Page.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\PageBuffer.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\PageCache.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\ProperFraction.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\ResourceManager.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\StorageException.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\Transaction.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\TransactionLog.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\Utilities.cs">
-      <SubType>Code</SubType>
-    </None>
-    <Compile Include="Store\SQLStore.cs" />
-    <Compile Include="Store\SQLStoreConnection.cs" />
-    <Compile Include="Store\SQLStoreCounter.cs" />
-    <Compile Include="Store\SQLStoreCursor.cs" />
-    <Compile Include="Store\StoreException.cs" />
     <Compile Include="Streams\Conveyor.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -756,9 +651,6 @@
     <EmbeddedResource Include="Connection\ConnectionException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Device.ApplicationTransaction\ApplicationTransactionException.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Device.Catalog\CatalogException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -798,14 +690,6 @@
     <EmbeddedResource Include="Server\ServerException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="Storage\StorageException.resx">
-      <SubType>Designer</SubType>
-    </None>
-    <EmbeddedResource Include="Store\StoreException.resx">
-      <DependentUpon>StoreException.cs</DependentUpon>
-      <LastGenOutput>StoreException.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Streams\ConveyorException.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -816,34 +700,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="Language.D4\BNF.txt" />
-    <Content Include="Language.RealSQL\BNF.txt" />
-    <Content Include="Language.SQL\BNF.txt" />
-    <Content Include="Language.SQL\BNFDifferences.txt" />
     <Content Include="Language\BNF.txt" />
     <Content Include="Language\ManifestoCompliance.txt" />
-    <EmbeddedResource Include="Debug\Debug.d4" />
     <None Include="Schema\SQLDeviceMappings.d4" />
-    <None Include="Storage\AllocationManager.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\AVLTree.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\LockManager.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\PagedStream.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\Semaphore.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\Stream.cs">
-      <SubType>Code</SubType>
-    </None>
-    <None Include="Storage\StreamDirectory.cs">
-      <SubType>Code</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

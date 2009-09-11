@@ -125,9 +125,9 @@
       <Name>Base</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
+    <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
-      <Name>DAE</Name>
+      <Name>Engine</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">

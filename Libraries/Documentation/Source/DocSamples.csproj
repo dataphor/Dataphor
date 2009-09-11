@@ -108,9 +108,9 @@
       <Project>{146ABD06-FA98-4B90-9E85-1B4CE7BE598D}</Project>
       <Name>DAE.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Dataphor\DAE\DAE.csproj">
+    <ProjectReference Include="..\..\..\Dataphor\DAE\Engine.csproj">
       <Project>{8FA5FA37-DC03-4E24-900B-AA863CA9650F}</Project>
-      <Name>DAE</Name>
+      <Name>Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Connection\Source\DAE.Connection.csproj">
       <Project>{8CBB779F-64D4-455F-9E4F-70719408A7CA}</Project>
