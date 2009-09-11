@@ -53,7 +53,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 
 /*		TODO: Finish schema comparison
-			EmissionContext LContext = new EmissionContext(EmitMode.ForCopy, new Hashtable(), FLibraryName, false, false, false, true);
+			EmissionContext LContext = new EmissionContext(EmitMode.ForCopy, new Dictionary<?,?>(), FLibraryName, false, false, false, true);
 
 			Objects LOldObjects = new Objects();
 			LOldObjects.AddRange(FOldServer.Catalog.Objects);

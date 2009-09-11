@@ -788,6 +788,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	}
 	
 /*
+	Incomplete native row hashtable implementation:
+
 	public class NativeRowHashTable : NativeRowIndex
 	{
 		private class NativeRowHashTableHashCodeProvider : IHashCodeProvider
@@ -834,10 +836,10 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		{	
 			FHashCodeProvider = new NativeRowHashTableHashCodeProvider(this);
 			FComparer = new NativeRowHashTableComparer(this);
-			FRows = new Hashtable(FHashCodeProvider, FComparer);
+			FRows = new Dictionary<NativeRow, NativeRow>(FHashCodeProvider, FComparer);
 		}
 		
-		private Hashtable FRows;
+		private Dictionary<NativeRow, NativeRow> FRows;
 		
 		internal IManager FManager; // Only used during the Add and Remove calls
 		

@@ -332,7 +332,7 @@ namespace Alphora.Dataphor.DAE.Schema
 							EmitDependencies(AContext, LRepresentation);
 							foreach (Property LProperty in LRepresentation.Properties)
 								EmitDependencies(AContext, LProperty);
-							if (!AContext.EmittedObjects.Contains(LRepresentation.ID))
+							if (!AContext.EmittedObjects.ContainsKey(LRepresentation.ID))
 							{
 								AContext.Block.Statements.Add(LRepresentation.EmitStatement(AContext.Mode));
 								AContext.EmittedObjects.Add(LRepresentation.ID, LRepresentation);
@@ -348,7 +348,7 @@ namespace Alphora.Dataphor.DAE.Schema
 							EmitDependencies(AContext, LSpecial);
 							EmitDependencies(AContext, LSpecial.Selector);
 							EmitDependencies(AContext, LSpecial.Comparer);
-							if (!AContext.EmittedObjects.Contains(LSpecial.ID))
+							if (!AContext.EmittedObjects.ContainsKey(LSpecial.ID))
 							{
 								AContext.Block.Statements.Add(LSpecial.EmitStatement(AContext.Mode));
 								AContext.EmittedObjects.Add(LSpecial.ID, LSpecial);
@@ -365,7 +365,7 @@ namespace Alphora.Dataphor.DAE.Schema
 					)
 					{
 						EmitDependencies(AContext, LScalarType.Default);
-						if (!AContext.EmittedObjects.Contains(LScalarType.Default.ID))
+						if (!AContext.EmittedObjects.ContainsKey(LScalarType.Default.ID))
 						{
 							AContext.Block.Statements.Add(LScalarType.Default.EmitStatement(AContext.Mode));
 							AContext.EmittedObjects.Add(LScalarType.Default.ID, LScalarType.Default);
@@ -381,7 +381,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						)
 						{
 							EmitDependencies(AContext, LConstraint);
-							if (!AContext.EmittedObjects.Contains(LConstraint.ID))
+							if (!AContext.EmittedObjects.ContainsKey(LConstraint.ID))
 							{
 								AContext.Block.Statements.Add(LConstraint.EmitStatement(AContext.Mode));
 								AContext.EmittedObjects.Add(LConstraint.ID, LConstraint);
@@ -405,7 +405,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						)
 						{
 							EmitDependencies(AContext, LColumn.Default);
-							if (!AContext.EmittedObjects.Contains(LColumn.Default.ID))
+							if (!AContext.EmittedObjects.ContainsKey(LColumn.Default.ID))
 							{
 								AContext.Block.Statements.Add(LColumn.Default.EmitStatement(AContext.Mode));
 								AContext.EmittedObjects.Add(LColumn.Default.ID, LColumn.Default);
@@ -417,7 +417,7 @@ namespace Alphora.Dataphor.DAE.Schema
 						if ((!LConstraint.IsGenerated || AContext.IncludeGenerated || (AContext.Mode == EmitMode.ForStorage)) && (LConstraint.ConstraintType == ConstraintType.Database) && ((AContext.Mode != EmitMode.ForRemote) || LConstraint.IsRemotable) && AContext.ShouldEmitWithLibrary(LConstraint))
 						{
 							EmitDependencies(AContext, LConstraint);
-							if (!AContext.EmittedObjects.Contains(LConstraint.ID))
+							if (!AContext.EmittedObjects.ContainsKey(LConstraint.ID))
 							{
 								AContext.Block.Statements.Add(LConstraint.EmitStatement(AContext.Mode));
 								AContext.EmittedObjects.Add(LConstraint.ID, LConstraint);
@@ -433,13 +433,13 @@ namespace Alphora.Dataphor.DAE.Schema
 			{
 				if (AContext.ShouldEmitWithLibrary(AObject))
 				{
-					if (!AContext.EmittedObjects.Contains(AObject.ID))
+					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
 					{
 						EmitDependencies(AContext, AObject);
 						EmitChildDependencies(AContext, AObject);
 					}
 					
-					if (!AContext.EmittedObjects.Contains(AObject.ID))
+					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
 					{
 						AContext.Block.Statements.Add(AObject.EmitStatement(AContext.Mode));
 						AContext.EmittedObjects.Add(AObject.ID, AObject);
@@ -448,7 +448,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				}
 				else
 				{
-					if (!AContext.EmittedObjects.Contains(AObject.ID))
+					if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
 					{
 						AContext.EmittedObjects.Add(AObject.ID, AObject);
 						EmitChildren(AContext, AObject);
@@ -569,7 +569,7 @@ namespace Alphora.Dataphor.DAE.Schema
         
         protected void ReportDroppedObject(EmissionContext AContext, Schema.Object AObject)
         {
-			if (!AContext.EmittedObjects.Contains(AObject.ID))
+			if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
 				AContext.EmittedObjects.Add(AObject.ID, AObject);
         }
         
@@ -797,7 +797,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 		private void BuildObjectDropList(EmissionContext AContext, ObjectList ADropList, Schema.Object AObject)
 		{
-			if (!AContext.EmittedObjects.Contains(AObject.ID))
+			if (!AContext.EmittedObjects.ContainsKey(AObject.ID))
 			{
 				AContext.EmittedObjects.Add(AObject.ID, AObject);
 
@@ -1372,7 +1372,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		public bool IncludeGenerated;
 		public bool IncludeDependents;
 		public bool IncludeObject;
-		public Hashtable EmittedObjects = new Hashtable();
+		public Dictionary<int, Schema.Object> EmittedObjects = new Dictionary<int, Schema.Object>();
 		public LoadedLibraries EmittedLibraries = new LoadedLibraries();
 		public Block Block = new Block();
 		

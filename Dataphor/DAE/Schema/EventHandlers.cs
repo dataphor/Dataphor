@@ -353,9 +353,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.Adding(AItem, AIndex);
 			EventHandler LHandler = (EventHandler)AItem;
-			object LCount = FHasHandlers[LHandler.EventType];
-			if (LCount != null)
-				FHasHandlers[LHandler.EventType] = (int)LCount + 1;
+			int LCount;
+			if (FHasHandlers.TryGetValue(LHandler.EventType, out LCount))
+				FHasHandlers[LHandler.EventType] = LCount + 1;
 			else
 				FHasHandlers.Add(LHandler.EventType, 1);
 		}
@@ -364,19 +364,19 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			base.Removing(AItem, AIndex);
 			EventHandler LHandler = (EventHandler)AItem;
-			int LCount = (int)FHasHandlers[LHandler.EventType];
-			if (LCount == 1)
+			int LCount;
+			if (FHasHandlers.TryGetValue(LHandler.EventType, out LCount) && LCount == 1)
 				FHasHandlers.Remove(LHandler.EventType);
 			else
 				FHasHandlers[LHandler.EventType] = LCount - 1;
 		}
-		
-		private Hashtable FHasHandlers = new Hashtable(); // key - EventType, value - integer count of events of that type
+
+		private Dictionary<EventType, int> FHasHandlers = new Dictionary<EventType, int>(); // key - EventType, value - integer count of events of that type
 
 		public bool HasHandlers(EventType AEventType)
 		{
-			object LCount = FHasHandlers[AEventType];
-			return (LCount != null) && ((int)LCount > 0);
+			int LCount;
+			return FHasHandlers.TryGetValue(AEventType, out LCount) && LCount > 0;
 		}
 
 		public new EventHandler this[int AIndex]

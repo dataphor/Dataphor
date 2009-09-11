@@ -9,6 +9,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Collections;
+using System.Collections.Generic;
 
 using Alphora.Dataphor.DAE.Language;
 using Alphora.Dataphor.DAE.Language.D4;
@@ -49,9 +50,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			FExtendColumnOffset = TableVar.Columns.Count;
 
 			// This structure will track key columns as a set of sets, and any extended columns that are equivalent to them
-			Hashtable LKeyColumns = new Hashtable();
+			Dictionary<string, Schema.Key> LKeyColumns = new Dictionary<string, Schema.Key>();
 			foreach (Schema.TableVarColumn LTableVarColumn in TableVar.Columns)
-				if (SourceTableVar.Keys.IsKeyColumnName(LTableVarColumn.Name) && !LKeyColumns.Contains(LTableVarColumn.Name))
+				if (SourceTableVar.Keys.IsKeyColumnName(LTableVarColumn.Name) && !LKeyColumns.ContainsKey(LTableVarColumn.Name))
 					LKeyColumns.Add(LTableVarColumn.Name, new Schema.Key(new Schema.TableVarColumn[]{LTableVarColumn}));
 			
 			ApplicationTransaction LTransaction = null;
@@ -118,8 +119,9 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 										Schema.TableVarColumn LReferencedColumn = TableVar.Columns[LColumnName];
 										if (SourceTableVar.Keys.IsKeyColumnName(LReferencedColumn.Name))
 										{
-											if (LKeyColumns.Contains(LReferencedColumn.Name))
-												((Schema.Key)LKeyColumns[LReferencedColumn.Name]).Columns.Add(LNewColumn);
+											Schema.Key LKey;
+											if (LKeyColumns.TryGetValue(LReferencedColumn.Name, out LKey))
+												LKey.Columns.Add(LNewColumn);
 											else
 												LKeyColumns.Add(LReferencedColumn.Name, new Schema.Key(new Schema.TableVarColumn[]{LNewColumn}));
 										}
@@ -164,7 +166,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				LResultKeys.Add(new Schema.Key());
 				
 				foreach (Schema.TableVarColumn LColumn in LKey.Columns)
-					LResultKeys = KeyProduct(LResultKeys, (Schema.Key)LKeyColumns[LColumn.Name]);
+					LResultKeys = KeyProduct(LResultKeys, LKeyColumns[LColumn.Name]);
 					
 				foreach (Schema.Key LResultKey in LResultKeys)
 				{
