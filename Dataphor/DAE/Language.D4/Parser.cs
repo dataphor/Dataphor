@@ -1839,9 +1839,9 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					case Keywords.BeginList :
 						LExpression.TypeSpecifier = new TableTypeSpecifier();
-						System.Drawing.Point LPos = NamedTypeSpecifierList(((TableTypeSpecifier)LExpression.TypeSpecifier).Columns);
-						LExpression.TypeSpecifier.Line = LPos.Y;
-						LExpression.TypeSpecifier.LinePos = LPos.X;
+						LineInfo LLineInfo = NamedTypeSpecifierList(((TableTypeSpecifier)LExpression.TypeSpecifier).Columns);
+						LExpression.TypeSpecifier.Line = LLineInfo.Line;
+						LExpression.TypeSpecifier.LinePos = LLineInfo.LinePos;
 					break;
 					
 					default : LExpression.TypeSpecifier = TypeOfTypeSpecifier(); break;
@@ -1901,7 +1901,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		{
 			RowSelectorExpression LExpression = new RowSelectorExpression();
 
-			System.Drawing.Point LPos;
+			LineInfo LLineInfo;
 			LExpression.SetPosition(FLexer);
 			if (FLexer.PeekTokenSymbol(1) == Keywords.Of)
 			{
@@ -1910,18 +1910,18 @@ namespace Alphora.Dataphor.DAE.Language.D4
 				{
 					case Keywords.BeginList :
 						LExpression.TypeSpecifier = new RowTypeSpecifier();
-						LPos = NamedTypeSpecifierList(((RowTypeSpecifier)LExpression.TypeSpecifier).Columns);
-						LExpression.TypeSpecifier.Line = LPos.Y;
-						LExpression.TypeSpecifier.LinePos = LPos.X;
+						LLineInfo = NamedTypeSpecifierList(((RowTypeSpecifier)LExpression.TypeSpecifier).Columns);
+						LExpression.TypeSpecifier.Line = LLineInfo.Line;
+						LExpression.TypeSpecifier.LinePos = LLineInfo.LinePos;
 					break;
 					
 					default : LExpression.TypeSpecifier = TypeOfTypeSpecifier(); break;
 				}
 			}
 				
-			LPos = OptionallyNamedColumnList(LExpression.Expressions);
-			LExpression.Line = LPos.Y;
-			LExpression.LinePos = LPos.X;
+			LLineInfo = OptionallyNamedColumnList(LExpression.Expressions);
+			LExpression.Line = LLineInfo.Line;
+			LExpression.LinePos = LLineInfo.LinePos;
 			LExpression.SetEndPosition(FLexer);
 			return LExpression;
 		}
@@ -2216,10 +2216,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			} while (!LDone);
 		}
 		
-		protected System.Drawing.Point OptionallyNamedColumnList(NamedColumnExpressions AColumns)
+		protected LineInfo OptionallyNamedColumnList(NamedColumnExpressions AColumns)
 		{
 		    FLexer.NextToken().CheckSymbol(Keywords.BeginList);
-			System.Drawing.Point LResult = new System.Drawing.Point(FLexer[0, false].LinePos, FLexer[0, false].Line);
+			LineInfo LResult = new LineInfo(FLexer[0, false].LinePos, FLexer[0, false].Line, -1, -1);
 			if (FLexer.PeekTokenSymbol(1) == Keywords.EndList)
 				FLexer.NextToken();
 			else
@@ -4904,10 +4904,10 @@ namespace Alphora.Dataphor.DAE.Language.D4
 			return LFormalParameter;
 		}
 
-		protected System.Drawing.Point NamedTypeSpecifierList(NamedTypeSpecifiers ATypeSpecifiers)
+		protected LineInfo NamedTypeSpecifierList(NamedTypeSpecifiers ATypeSpecifiers)
         {
 			FLexer.NextToken().CheckSymbol(Keywords.BeginList);
-			System.Drawing.Point LResult = new System.Drawing.Point(FLexer[0, false].LinePos, FLexer[0, false].Line);
+			LineInfo LResult = new LineInfo(FLexer[0, false].LinePos, FLexer[0, false].Line, -1, -1);
 			if (FLexer.PeekTokenSymbol(1) == Keywords.EndList)
 			{
 				FLexer.NextToken();

@@ -1141,7 +1141,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 		// Default		
 		protected DefaultDefinition FDefault;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.DefaultDefinitionEdit,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.DefaultDefinitionEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public DefaultDefinition Default
 		{
 			get { return FDefault; }
@@ -1158,7 +1158,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		
         // MetaData
         protected MetaData FMetaData;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
         {
 			get { return FMetaData; }
@@ -1173,7 +1173,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
     }
     
-	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.AdornColumnExpressionEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.AdornColumnExpressionEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class AdornColumnExpressions : Expressions
 	{
 		protected override void Validate(object AItem)
@@ -4094,12 +4094,12 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public KeyColumnDefinitions Columns {  get { return FColumns; } }
 	}
 
-    [Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+    [Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class KeyDefinition : KeyDefinitionBase, IMetaData
 	{
         // MetaData
         protected MetaData FMetaData;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
         public MetaData MetaData
         {
 			get { return FMetaData; }
@@ -4107,7 +4107,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         }
 	}
 	
-	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.KeyDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class KeyDefinitions : Statements
 	{
 		protected override void Validate(object AItem)
@@ -4324,7 +4324,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		public OrderColumnDefinitions Columns { get { return FColumns; } }
 	}
 	
-	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class OrderDefinition : OrderDefinitionBase, IMetaData
 	{
         // MetaData
@@ -4336,7 +4336,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         }
 	}
 	
-	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.OrderDefinitionsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class OrderDefinitions : Statements
 	{
 		protected override void Validate(object AItem)
@@ -4433,7 +4433,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         
         // MetaData
         protected MetaData FMetaData;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
         public MetaData MetaData
         {
 			get { return FMetaData; }
@@ -4478,7 +4478,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 		[Description("D4 constraint expression.")]
 		[DefaultValue("")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string ExpressionString
 		{
 			get { return FExpression != null ? ExpressionToString(FExpression) : String.Empty; }
@@ -4491,7 +4491,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		}
    	}
 	
-	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.ConstraintsEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+	[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.ConstraintsEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 	public class ConstraintDefinitions : Statements
 	{
 		protected override void Validate(object AItem)
@@ -5008,7 +5008,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 
 		[Description("Default expression. For example value = 0")]
 		[DefaultValue("")]
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.D4ExpressionEmitEdit,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public string ExpressionString
 		{
 			get { return FExpression != null ? ExpressionToString(FExpression) : String.Empty; }
@@ -5022,7 +5022,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
         
         // MetaData
         protected MetaData FMetaData;
-		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls",typeof(System.Drawing.Design.UITypeEditor))]
+		[Editor("Alphora.Dataphor.DAE.Client.Controls.Design.MetaDataEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
 		public MetaData MetaData
         {
 			get { return FMetaData; }

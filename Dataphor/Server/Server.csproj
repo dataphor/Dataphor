@@ -65,6 +65,8 @@
     <Compile Include="Server\RemoteServerScript.cs" />
     <Compile Include="Server\RemoteServerSession.cs" />
     <Compile Include="Server\RemoteSessionImplementation.cs" />
+    <Compile Include="Server\ServerDTCTransaction.cs" />
+    <Compile Include="Server\ServerFactory.cs" />
     <Compile Include="Server\ServerHost.cs" />
   </ItemGroup>
   <ItemGroup>

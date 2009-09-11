@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
-using System.EnterpriseServices;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -20,33 +19,6 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
-
-	[Transaction(TransactionOption.RequiresNew)]
-	public class ServerDTCTransaction : ServicedComponent
-	{
-		protected override void Dispose(bool ADisposing)
-		{
-			Rollback();
-			base.Dispose(ADisposing);
-		}
-		
-		public void Commit()
-		{
-			ContextUtil.SetComplete();
-		}
-		
-		public void Rollback()
-		{
-			ContextUtil.SetAbort();
-		}
-		
-		private IsolationLevel FIsolationLevel;
-		public IsolationLevel IsolationLevel
-		{
-			get { return FIsolationLevel; }
-			set { FIsolationLevel = value; }
-		}
-	}	
 
 	public class ServerTransaction : Disposable
 	{

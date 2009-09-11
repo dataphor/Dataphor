@@ -6,7 +6,6 @@
 */
 
 //#define SQLSTORETIMING
-#define USESQLCONNECTION
 
 using System;
 using System.IO;
@@ -16,11 +15,6 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-
-#if !USESQLCONNECTION
-using System.Data;
-using System.Data.Common;
-#endif
 
 using Alphora.Dataphor.DAE.Connection;
 
@@ -77,17 +71,10 @@ namespace Alphora.Dataphor.DAE.Store
 		private SQLStoreConnection FConnection;
 		public SQLStoreConnection Connection { get { return FConnection; } }
 		
-		#if USESQLCONNECTION
 		private SQLCommand FReaderCommand;
 		
 		private SQLCursor FReader;
 		protected SQLCursor Reader { get { return FReader; } }
-		#else
-		private DbCommand FReaderCommand;
-
-		private DbDataReader FReader;
-		protected DbDataReader Reader { get { return FReader; } }
-		#endif
 		
 		private string FTableName;
 		public string TableName { get { return FTableName; } }
@@ -137,24 +124,15 @@ namespace Alphora.Dataphor.DAE.Store
 			if (FColumns == null)
 			{
 				FColumns = new List<string>();
-				#if USESQLCONNECTION
 				for (int LIndex = 0; LIndex < FReader.ColumnCount; LIndex++)
 					FColumns.Add(FReader.GetColumnName(LIndex));
-				#else
-				for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
-					FColumns.Add(FReader.GetName(LIndex));
-				#endif
 				FKeyIndexes = new List<int>();
 				for (int LIndex = 0; LIndex < FKey.Count; LIndex++)
 					FKeyIndexes.Add(FColumns.IndexOf(FKey[LIndex]));
 			}
 		}
 		
-		#if USESQLCONNECTION
 		protected virtual SQLCursor InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
-		#else
-		protected virtual DbDataReader InternalCreateReader(object[] AOrigin, bool AForward, bool AInclusive)
-		#endif
 		{
 			return FConnection.ExecuteReader(GetReaderStatement(FTableName, FIndex.Columns, AOrigin, AForward, AInclusive), out FReaderCommand);
 		}
@@ -419,11 +397,7 @@ namespace Alphora.Dataphor.DAE.Store
 			if ((FBuffer != null) && (FBufferIndex >= 0) && (FBufferIndex < FBuffer.Count))
 				return FBuffer[FBufferIndex][AIndex];
 				
-			#if USESQLCONNECTION
 			return StoreToNativeValue(FReader[AIndex]);
-			#else
-			return StoreToNativeValue(FReader.GetValue(AIndex)); 
-			#endif
 		}
 		
 		protected virtual void InternalSetValue(int AIndex, object AValue)
@@ -519,15 +493,9 @@ namespace Alphora.Dataphor.DAE.Store
 		
 		protected virtual object[] InternalReadRow()
 		{
-			#if USESQLCONNECTION
 			object[] LRow = new object[FReader.ColumnCount];
 			for (int LIndex = 0; LIndex < FReader.ColumnCount; LIndex++)
 				LRow[LIndex] = StoreToNativeValue(FReader[LIndex]);
-			#else
-			object[] LRow = new object[FReader.FieldCount];
-			for (int LIndex = 0; LIndex < FReader.FieldCount; LIndex++)
-				LRow[LIndex] = StoreToNativeValue(FReader.GetValue(LIndex));
-			#endif
 				
 			return LRow;
 		}
@@ -555,11 +523,7 @@ namespace Alphora.Dataphor.DAE.Store
 				FBufferIndex = -1;
 			}
 			
-			#if USESQLCONNECTION
 			if (FReader.Next())
-			#else
-			if (FReader.Read())
-			#endif
 			{
 				if (!FIndex.IsUnique)
 				{
@@ -676,11 +640,7 @@ namespace Alphora.Dataphor.DAE.Store
 				FBufferIndex = FBuffer.Count;
 			}
 			
-			#if USESQLCONNECTION
 			if (FReader.Next())
-			#else
-			if (FReader.Read())
-			#endif
 			{
 				if (!FIndex.IsUnique)
 				{

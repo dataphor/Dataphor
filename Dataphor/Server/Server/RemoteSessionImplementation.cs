@@ -93,6 +93,77 @@ namespace Alphora.Dataphor.DAE.Server
 			return LNativeSessionInfo;
 		}
 		
+/*
+ * Previously in Schema.ServerLink
+		private NativeSessionInfo FDefaultNativeSessionInfo;
+		public NativeSessionInfo DefaultNativeSessionInfo
+		{
+			get { return FDefaultNativeSessionInfo; }
+		}
+		
+		private NativeSessionInfo EnsureDefaultNativeSessionInfo()
+		{
+			if (FDefaultNativeSessionInfo == null)
+				FDefaultNativeSessionInfo = new NativeSessionInfo();
+				
+			return FDefaultNativeSessionInfo;
+		}
+		
+		public void ResetServerLink()
+		{
+			FHostName = String.Empty;
+			FInstanceName = String.Empty;
+			FOverridePortNumber = 0;
+			FUseSessionInfo = true;
+			FDefaultNativeSessionInfo = null;
+		}
+		
+		public void ApplyMetaData()
+		{
+			if (MetaData != null)
+			{
+				FHostName = MetaData.Tags.GetTagValue("HostName", "localhost");
+				FInstanceName = MetaData.Tags.GetTagValue("InstanceName", Server.Server.CDefaultServerName);
+				FOverridePortNumber = Convert.ToInt32(MetaData.Tags.GetTagValue("OverridePortNumber", "0"));
+				FUseSessionInfo = Convert.ToBoolean(MetaData.Tags.GetTagValue("UseSessionInfo", "true"));
+				
+				Tag LTag;
+				
+				LTag = MetaData.Tags.GetTag("DefaultIsolationLevel");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultIsolationLevel = (System.Data.IsolationLevel)Enum.Parse(typeof(System.Data.IsolationLevel), LTag.Value);
+					
+				LTag = MetaData.Tags.GetTag("DefaultLibraryName");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultLibraryName = LTag.Value;
+					
+				LTag = MetaData.Tags.GetTag("DefaultMaxCallDepth");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultMaxCallDepth = Convert.ToInt32(LTag.Value);
+					
+				LTag = MetaData.Tags.GetTag("DefaultMaxStackDepth");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultMaxStackDepth = Convert.ToInt32(LTag.Value);
+
+				LTag = MetaData.Tags.GetTag("DefaultUseDTC");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultUseDTC = Convert.ToBoolean(LTag.Value);
+
+				LTag = MetaData.Tags.GetTag("DefaultUseImplicitTransactions");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().DefaultUseImplicitTransactions = Convert.ToBoolean(LTag.Value);
+				
+				LTag = MetaData.Tags.GetTag("ShouldEmitIL");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().ShouldEmitIL = Convert.ToBoolean(LTag.Value);
+				
+				LTag = MetaData.Tags.GetTag("UsePlanCache");
+				if (LTag != Tag.None)
+					EnsureDefaultNativeSessionInfo().UsePlanCache = Convert.ToBoolean(LTag.Value);
+			}
+		}
+*/
+
 		private NativeCLISession FNativeCLISession;
 		
 		public int TransactionCount

@@ -100,17 +100,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data">
-      <Name>System.Data</Name>
-    </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Design">
       <Name>System.Design</Name>
-    </Reference>
-    <Reference Include="System.Drawing">
-      <Name>System.Drawing</Name>
-    </Reference>
-    <Reference Include="System.EnterpriseServices">
-      <Name>System.EnterpriseServices</Name>
     </Reference>
     <Reference Include="System.Runtime.Remoting">
       <Name>System.Runtime.Remoting</Name>
@@ -486,6 +478,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime\Stack.cs" />
+    <Compile Include="Server\IServerDTCTransaction.cs" />
     <Compile Include="Server\RemoteSession.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="StackWindow.cs" />
@@ -564,17 +557,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\DAERegisterAttribute.cs" />
-    <Compile Include="Server\LocalBatch.cs" />
-    <Compile Include="Server\LocalCursor.cs" />
-    <Compile Include="Server\LocalPlan.cs" />
-    <Compile Include="Server\LocalProcess.cs" />
-    <Compile Include="Server\LocalScript.cs" />
-    <Compile Include="Server\LocalServer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Server\LocalServerObject.cs" />
-    <Compile Include="Server\LocalServerStructures.cs" />
-    <Compile Include="Server\LocalSession.cs" />
     <Compile Include="Server\MemberLastDesigner.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -586,9 +568,6 @@
     <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Server\ServerCursor.cs" />
     <Compile Include="Server\ServerException.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Server\ServerFactory.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerObject.cs" />

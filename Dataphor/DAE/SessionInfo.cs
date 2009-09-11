@@ -92,7 +92,7 @@ namespace Alphora.Dataphor.DAE
         [System.ComponentModel.DefaultValue("")]
         [System.ComponentModel.Description("Password used to login to the Dataphor Server.  The default login for the Dataphor Server is Admin with a blank password.")]
         [System.ComponentModel.TypeConverter(typeof(PasswordConverter))]
-        [System.ComponentModel.Editor("Alphora.Dataphor.DAE.Client.Controls.Design.PasswordEditor,Alphora.Dataphor.DAE.Client.Controls", typeof(System.Drawing.Design.UITypeEditor))]
+        [System.ComponentModel.Editor("Alphora.Dataphor.DAE.Client.Controls.Design.PasswordEditor,Alphora.Dataphor.DAE.Client.Controls", "System.Drawing.Design.UITypeEditor,System.Drawing")]
         [BOP.Publish(BOP.PublishMethod.None)]
         public string Password
         {

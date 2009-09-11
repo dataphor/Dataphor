@@ -1218,7 +1218,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 		// Transaction		
-		private ServerDTCTransaction FDTCTransaction;
+		private IServerDTCTransaction FDTCTransaction;
 		private ServerTransactions FTransactions = new ServerTransactions();
 		internal ServerTransactions Transactions { get { return FTransactions; } }
 
@@ -1379,7 +1379,7 @@ namespace Alphora.Dataphor.DAE.Server
 			if (UseDTC && (FDTCTransaction == null))
 			{
 				CloseDeviceSessions();
-				FDTCTransaction = new ServerDTCTransaction();
+				FDTCTransaction = (IServerDTCTransaction)Activator.CreateInstance(Type.GetType("Alphora.Dataphor.DAE.Server.ServerDTCTransaction,Alphora.Dataphor.DAE.Server"));
 				FDTCTransaction.IsolationLevel = AIsolationLevel;
 			}
 			
