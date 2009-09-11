@@ -96,19 +96,8 @@
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Design">
-      <Name>System.Design</Name>
-    </Reference>
-    <Reference Include="System.Runtime.Remoting">
-      <Name>System.Runtime.Remoting</Name>
-    </Reference>
-    <Reference Include="System.ServiceProcess">
-      <Name>System.ServiceProcess</Name>
     </Reference>
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
@@ -124,11 +113,6 @@
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\DAE.NativeCLI\DAE.NativeCLI.csproj">
-      <Project>{7CCBA92D-BB78-49E3-8C11-4CC29B173296}</Project>
-      <Name>DAE.NativeCLI</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Logging\Logging.csproj">
@@ -557,9 +541,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\DAERegisterAttribute.cs" />
-    <Compile Include="Server\MemberLastDesigner.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Server\PlanCache.cs" />
     <Compile Include="Server\Server.cs">
       <SubType>Code</SubType>

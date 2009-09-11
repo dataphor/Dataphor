@@ -142,6 +142,7 @@
     <Compile Include="Design\Editor.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Design\MemberLastDesigner.cs" />
     <Compile Include="Design\Serializer.cs">
       <SubType>Code</SubType>
     </Compile>
