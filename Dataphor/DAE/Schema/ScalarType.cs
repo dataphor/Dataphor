@@ -888,7 +888,7 @@ namespace Alphora.Dataphor.DAE.Schema
 	
 	public class ScalarConversionPathCache : System.Object
 	{
-		private Hashtable FPaths = new Hashtable();
+		private Dictionary<EndPoints, ScalarConversionPath> FPaths = new Dictionary<EndPoints, ScalarConversionPath>();
 		
 		private class EndPoints : System.Object
 		{
@@ -917,7 +917,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public ScalarConversionPath this[Schema.ScalarType ASourceType, Schema.ScalarType ATargetType]
 		{
-			get { return FPaths[new EndPoints(ASourceType, ATargetType)] as ScalarConversionPath; }
+			get 
+			{
+				ScalarConversionPath LResult;
+				if (FPaths.TryGetValue(new EndPoints(ASourceType, ATargetType), out LResult))
+					return LResult;
+				else
+					return null;
+			}
 		}
 		
 		public void Add(Schema.ScalarType ASourceType, Schema.ScalarType ATargetType, Schema.ScalarConversionPath APath)
@@ -935,8 +942,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void Clear(Schema.ScalarType AScalarType)
 		{
 			ArrayList LRemoveList = new ArrayList();
-			foreach (DictionaryEntry LEntry in FPaths)
-				if (((ScalarConversionPath)LEntry.Value).Contains(AScalarType))
+			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
+				if (LEntry.Value.Contains(AScalarType))
 					LRemoveList.Add(LEntry.Key);
 					
 			foreach (EndPoints LEndPoints in LRemoveList)
@@ -947,8 +954,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		public void Clear(Schema.Conversion AConversion)
 		{
 			ArrayList LRemoveList = new ArrayList();
-			foreach (DictionaryEntry LEntry in FPaths)
-				if (((ScalarConversionPath)LEntry.Value).Contains(AConversion))
+			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
+				if (LEntry.Value.Contains(AConversion))
 					LRemoveList.Add(LEntry.Key);
 					
 			foreach (EndPoints LEndPoints in LRemoveList)
@@ -1371,13 +1378,13 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 		
 		private object FNativeRepresentationsHandle = new object(); // sync handle for the native representation cache
-		private Hashtable FNativeRepresentations;
-		protected Hashtable NativeRepresentations 
+		private Dictionary<string, NativeRepresentation> FNativeRepresentations;
+		protected Dictionary<string, NativeRepresentation> NativeRepresentations 
 		{ 
 			get 
 			{ 
-				if (FNativeRepresentations == null) 
-					FNativeRepresentations = new Hashtable(); 
+				if (FNativeRepresentations == null)
+					FNativeRepresentations = new Dictionary<string, NativeRepresentation>(); 
 				return FNativeRepresentations; 
 			} 
 		}
@@ -1423,9 +1430,7 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			lock (FNativeRepresentationsHandle)
 			{
-				LNativeRepresentation = (NativeRepresentation)NativeRepresentations[ANativeAccessor.Name];
-			
-				if (LNativeRepresentation == null)
+				if (!NativeRepresentations.TryGetValue(ANativeAccessor.Name, out LNativeRepresentation))
 				{
 					LNativeRepresentation = FindNativeRepresentation(ANativeAccessor);
 					NativeRepresentations.Add(ANativeAccessor.Name, LNativeRepresentation);
