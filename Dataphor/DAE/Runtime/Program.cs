@@ -46,7 +46,8 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public void BindToProcess(ServerProcess AProcess, Plan APlan)
 		{
 			FServerProcess = AProcess;
-			FCode.BindToProcess(APlan);
+			if (FCode != null)
+				FCode.BindToProcess(APlan);
 			if (FPlan != null)
 				FPlan.BindToProcess(FServerProcess);
 			

@@ -110,6 +110,8 @@ namespace Alphora.Dataphor.DAE.Compiling
 			PopSecurityContext();
 			PushSecurityContext(new SecurityContext(AProcess.ServerSession.User));
 			FServerProcess = AProcess;
+			if (FInternalProgram != null)
+				FInternalProgram.BindToProcess(AProcess, this);
 			
 			// Reset execution statistics
 			FStatistics.ExecuteTime = TimeSpan.Zero;
