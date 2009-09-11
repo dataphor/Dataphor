@@ -275,10 +275,10 @@ select DU.User_ID, C.Name Device_Name, DU.UserID, DU.ConnectionParameters
 					(
 						@"
 select O.Name, D.Name Device_Name, S.Name ScalarType_Name
-	from DAEDeviceObjects DO
-		join DAEObjects O on DO.ID = O.ID
-		join DAECatalogObjects D on DO.Device_ID = D.ID
-		join DAECatalogObjects S on DO.Mapped_Object_ID = S.ID
+	from DAEDeviceObjects DAEDO
+		join DAEObjects O on DAEDO.ID = O.ID
+		join DAECatalogObjects D on DAEDO.Device_ID = D.ID
+		join DAECatalogObjects S on DAEDO.Mapped_Object_ID = S.ID
 			join DAEObjects SO on S.ID = SO.ID
 						"
 					);
@@ -290,10 +290,10 @@ select O.Name, D.Name Device_Name, S.Name ScalarType_Name
 					(
 						@"
 select O.Name, D.Name Device_Name, S.Name Operator_Name
-	from DAEDeviceObjects DO
-		join DAEObjects O on DO.ID = O.ID
-		join DAECatalogObjects D on DO.Device_ID = D.ID
-		join DAECatalogObjects S on DO.Mapped_Object_ID = S.ID
+	from DAEDeviceObjects DAEDO
+		join DAEObjects O on DAEDO.ID = O.ID
+		join DAECatalogObjects D on DAEDO.Device_ID = D.ID
+		join DAECatalogObjects S on DAEDO.Mapped_Object_ID = S.ID
 			join DAEObjects SO on S.ID = SO.ID
 						"
 					);
