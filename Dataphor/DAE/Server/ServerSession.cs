@@ -15,6 +15,7 @@ using Alphora.Dataphor.DAE.Compiling;
 using Alphora.Dataphor.DAE.Debug;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
+using AT=Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -203,8 +204,8 @@ namespace Alphora.Dataphor.DAE.Server
 		public Schema.NameResolutionPath NameResolutionPath { get { return CurrentLibrary.GetNameResolutionPath(FServer.SystemLibrary); } }
 
 		// ApplicationTransactions
-		private Hashtable FApplicationTransactions = new Hashtable();
-		public Hashtable ApplicationTransactions { get { return FApplicationTransactions; } }
+		private Dictionary<Guid, AT.ApplicationTransaction> FApplicationTransactions = new Dictionary<Guid, AT.ApplicationTransaction>();
+		public Dictionary<Guid, AT.ApplicationTransaction> ApplicationTransactions { get { return FApplicationTransactions; } }
 		
 		private void EndApplicationTransactions()
 		{

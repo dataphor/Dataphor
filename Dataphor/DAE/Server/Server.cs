@@ -187,7 +187,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		// ResourceManagers
 		[Reference]
-		private Hashtable FResourceManagers;
+		private Dictionary<int, object> FResourceManagers;
 		private int FNextResourceManagerID;
 		public int GetNextResourceManagerID()
 		{
@@ -226,7 +226,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		public void InitializeResourceManagers()
 		{
-			FResourceManagers = new Hashtable();
+			FResourceManagers = new Dictionary<int, object>();
 			FCatalog = new Schema.Catalog();
 			RegisterResourceManager(CCatalogManagerID, FCatalog);
 			FPlanCache = new PlanCache(CDefaultPlanCacheSize);
@@ -1444,12 +1444,12 @@ namespace Alphora.Dataphor.DAE.Server
 
 		private int FTraceID;
 		private Schema.BaseTableVar FTraceTableVar;
-		private Hashtable FTraceCodes = new Hashtable(); // hashtable key is TraceCode (string), value is boolean indicating whether the trace is on or off, off by default
+		private Dictionary<string, bool> FTraceCodes = new Dictionary<string, bool>(); // hashtable key is TraceCode (string), value is boolean indicating whether the trace is on or off, off by default
         
 		private bool InternalTracing(string ATraceCode)
 		{
-			object LValue = FTraceCodes[ATraceCode];
-			return (LValue is bool) && (bool)LValue;
+			bool LValue;
+			return FTraceCode.TryGetValue(ATraceCode, out LValue) && LValue;
 		}
         
 		public bool Tracing(string ATraceCode)
@@ -1578,8 +1578,8 @@ namespace Alphora.Dataphor.DAE.Server
 				EndTracingCall();
 			}
 		}
-        #endif
-        
+#endif
+
 		// Catalog
 		private Schema.Catalog FCatalog;
 		public Schema.Catalog Catalog { get { return FCatalog; } }

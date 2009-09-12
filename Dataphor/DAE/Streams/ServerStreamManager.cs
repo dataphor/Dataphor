@@ -264,7 +264,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		private MemoryStreamProvider FDefaultProvider;
 		#endif
 		private StreamHeaders FHeaders = new StreamHeaders();
-		private Hashtable FReferencingHeaders = new Hashtable(); // <stream id key> references <stream id value>
+		private Dictionary<StreamID, StreamID> FReferencingHeaders = new Dictionary<StreamID, StreamID>(); // <stream id key> references <stream id value>
 		private UInt64 FNextStreamID = 1; // must be 1 so that no stream could ever be 0 (the Null stream)
 		private LockManager FLockManager;
 		private int FResourceManagerID;
@@ -501,8 +501,8 @@ namespace Alphora.Dataphor.DAE.Streams
 					
 				FHeaders.Remove(AStreamID);
 
-				object LSourceStreamID = FReferencingHeaders[AStreamID];
-				if (LSourceStreamID == null)
+				StreamID LSourceStreamID;;
+				if (!FReferencingHeaders.TryGetValue(AStreamID, out LSourceStreamID))
 				{
 					// if this stream is a referenced stream
 					if (LHeader.References.Count > 0)
@@ -533,7 +533,7 @@ namespace Alphora.Dataphor.DAE.Streams
 				else
 				{
 					// if this stream is a reference stream
-					StreamHeader LSourceHeader = GetStreamHeader((StreamID)LSourceStreamID);
+					StreamHeader LSourceHeader = GetStreamHeader(LSourceStreamID);
 
 					// move all references to this stream to the source stream
 					MoveReferences(LHeader, LSourceHeader);
@@ -562,10 +562,10 @@ namespace Alphora.Dataphor.DAE.Streams
 				StreamHeader LHeader = GetStreamHeader(AStream.StreamID);
 				
 				// if this stream is a reference stream
-				object LSourceStreamID = FReferencingHeaders[AStream.StreamID];
-				if (LSourceStreamID != null)
+				StreamID LSourceStreamID;
+				if (FReferencingHeaders.TryGetValue(AStream.StreamID, out LSourceStreamID))
 				{
-					StreamHeader LSourceHeader = GetStreamHeader((StreamID)LSourceStreamID);
+					StreamHeader LSourceHeader = GetStreamHeader(LSourceStreamID);
 
 					// dereference the source stream
 					FReferencingHeaders.Remove(AStream.StreamID);
@@ -607,9 +607,9 @@ namespace Alphora.Dataphor.DAE.Streams
 		{
 			if (AHeader.Stream == null)
 			{
-				object LSourceStreamID = FReferencingHeaders[AHeader.StreamID];
-				if (LSourceStreamID != null)
-					AHeader.Stream = new ServerStream(this, AHeader.StreamID, InternalOpen(GetStreamHeader((StreamID)LSourceStreamID), true));
+				StreamID LSourceStreamID;
+				if (FReferencingHeaders.TryGetValue(AHeader.StreamID, out LSourceStreamID))
+					AHeader.Stream = new ServerStream(this, AHeader.StreamID, InternalOpen(GetStreamHeader(LSourceStreamID), true));
 				else
 					AHeader.Stream = new ServerStream(this, AHeader.StreamID, AHeader.Provider.Open(AHeader.StreamID));
 			}
@@ -647,13 +647,13 @@ namespace Alphora.Dataphor.DAE.Streams
 			AHeader.StreamCount--;
 			if (AHeader.StreamCount == 0)
 			{
-				object LSourceStreamID = FReferencingHeaders[AHeader.StreamID];
-				if (LSourceStreamID != null)
+				StreamID LSourceStreamID;
+				if (FReferencingHeaders.TryGetValue(AHeader.StreamID, out LSourceStreamID))
 				{
 					Stream LSourceStream = AHeader.Stream.SourceStream;
 					AHeader.Stream.SourceStream = null;
 					LSourceStream.Close();
-					InternalClose(GetStreamHeader((StreamID)LSourceStreamID));
+					InternalClose(GetStreamHeader(LSourceStreamID));
 				}
 				else
 					AHeader.Provider.Close(AHeader.StreamID);
