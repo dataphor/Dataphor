@@ -1226,225 +1226,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		public string OwnerID { get { return FOwnerID; } }
 	}
 	
-	#if USETYPEDLIST
-    public class IntegerList : System.Object
-    {
-		public const int CDefaultInitialCapacity = 4;
-		
-		private int[] FItems;
-
-		private int FCount;
-		public int Count { get { return FCount; } }
-		
-		public IntegerList() : base()
-		{
-			FItems = new int[CDefaultInitialCapacity];
-		}
-		
-		public int this[int AIndex]
-		{
-			get
-			{
-				if ((AIndex < 0) || (AIndex >= FCount))
-					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, AIndex);
-				return FItems[AIndex];
-			}
-			set { FItems[AIndex] = value; }
-		}
-		
-		public int Add(int AValue)
-		{
-			int LIndex = Count;
-			Insert(LIndex, AValue);
-			return LIndex;
-		}
-		
-		public void AddRange(IntegerList ARange)
-		{
-			for (int LIndex = 0; LIndex < ARange.Count; LIndex++)
-				Add(ARange[LIndex]);
-		}
-		
-		public void Insert(int AIndex, int AValue)
-		{
-			if (FCount >= FItems.Length)
-				InternalSetCapacity(FItems.Length * 2);
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FItems[LIndex + 1] = FItems[LIndex];
-			FItems[AIndex] = AValue;
-			FCount++;
-		}
-		
-		protected void InternalSetCapacity(int AValue)
-		{
-			if (FItems.Length != AValue)
-			{
-				int[] LNewItems = new int[AValue];
-				for (int LIndex = 0; LIndex < ((FCount > AValue) ? AValue : FCount); LIndex++)
-					LNewItems[LIndex] = FItems[LIndex];
-
-				if (FCount > AValue)						
-					for (int LIndex = FCount - 1; LIndex > AValue; LIndex--)
-						RemoveAt(LIndex);
-						
-				FItems = LNewItems;
-			}
-		}
-		
-		public int Capacity
-		{
-			get { return FItems.Length; }
-			set { InternalSetCapacity(value); }
-		}
-		
-		public void RemoveAt(int AIndex)
-		{
-			FCount--;			
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FItems[LIndex] = FItems[LIndex + 1];
-			//FItems[FCount] = null; // Clear the last item to prevent a resource leak
-		}
-		
-		public void Remove(int AValue)
-		{
-			RemoveAt(IndexOf(AValue));
-		}
-		
-		public void SafeRemove(int AValue)
-		{
-			int LIndex = IndexOf(AValue);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
-		}
-		
-		public void Clear()
-		{
-			while (FCount > 0)
-				RemoveAt(FCount - 1);
-		}
-		
-		public int IndexOf(int AValue)
-		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FItems[LIndex] == AValue)
-					return LIndex;
-			return -1;
-		}
-		
-		public bool Contains(int AValue)
-		{
-			return IndexOf(AValue) >= 0;
-		}
-    }
-
-    public class Hashtables : System.Object
-    {
-		public const int CDefaultInitialCapacity = 4;
-		
-		private Hashtable[] FItems;
-
-		private int FCount;
-		public int Count { get { return FCount; } }
-		
-		public Hashtables() : base()
-		{
-			FItems = new Hashtable[CDefaultInitialCapacity];
-		}
-		
-		public Hashtable this[int AIndex]
-		{
-			get
-			{
-				if ((AIndex < 0) || (AIndex >= FCount))
-					throw new SchemaException(SchemaException.Codes.IndexOutOfRange, AIndex);
-				return FItems[AIndex];
-			}
-			set { FItems[AIndex] = value; }
-		}
-		
-		public int Add(Hashtable AValue)
-		{
-			int LIndex = Count;
-			Insert(LIndex, AValue);
-			return LIndex;
-		}
-		
-		public void Insert(int AIndex, Hashtable AValue)
-		{
-			if (FCount >= FItems.Length)
-				InternalSetCapacity(FItems.Length * 2);
-			for (int LIndex = FCount - 1; LIndex >= AIndex; LIndex--)
-				FItems[LIndex + 1] = FItems[LIndex];
-			FItems[AIndex] = AValue;
-			FCount++;
-		}
-		
-		protected void InternalSetCapacity(int AValue)
-		{
-			if (FItems.Length != AValue)
-			{
-				Hashtable[] LNewItems = new Hashtable[AValue];
-				for (int LIndex = 0; LIndex < ((FCount > AValue) ? AValue : FCount); LIndex++)
-					LNewItems[LIndex] = FItems[LIndex];
-
-				if (FCount > AValue)						
-					for (int LIndex = FCount - 1; LIndex > AValue; LIndex--)
-						RemoveAt(LIndex);
-						
-				FItems = LNewItems;
-			}
-		}
-		
-		public int Capacity
-		{
-			get { return FItems.Length; }
-			set { InternalSetCapacity(value); }
-		}
-		
-		public void RemoveAt(int AIndex)
-		{
-			FCount--;			
-			for (int LIndex = AIndex; LIndex < FCount; LIndex++)
-				FItems[LIndex] = FItems[LIndex + 1];
-			FItems[FCount] = null; // Clear the last item to prevent a resource leak
-		}
-		
-		public void Remove(Hashtable AValue)
-		{
-			RemoveAt(IndexOf(AValue));
-		}
-		
-		public void SafeRemove(Hashtable AValue)
-		{
-			int LIndex = IndexOf(AValue);
-			if (LIndex >= 0)
-				RemoveAt(LIndex);
-		}
-		
-		public void Clear()
-		{
-			while (FCount > 0)
-				RemoveAt(FCount - 1);
-		}
-		
-		public int IndexOf(Hashtable AValue)
-		{
-			for (int LIndex = 0; LIndex < FCount; LIndex++)
-				if (FItems[LIndex] == AValue)
-					return LIndex;
-			return -1;
-		}
-		
-		public bool Contains(Hashtable AValue)
-		{
-			return IndexOf(AValue) >= 0;
-		}
-    }
-	#else
 	public class IntegerList : BaseList<int> { }
 
-	public class Hashtables : BaseList<Hashtable> { }
-	#endif
+	public class Hashtables : BaseList<Dictionary<string, IntegerList>> { }
 
     public class Objects : System.Object, IList
     {
@@ -1549,8 +1333,12 @@ namespace Alphora.Dataphor.DAE.Schema
 
 			if (IsRolledOver)
 			{
-				IntegerList LNameBucket = (IntegerList)GetNameIndexForDepth(0)[AName];
-				return (LNameBucket == null) || (LNameBucket.Count == 0) ? -1 : LNameBucket[0];
+				var LIndex = GetNameIndexForDepth(0);
+				IntegerList LNameBucket;
+				if (LIndex.TryGetValue(AName, out LNameBucket))
+					return LNameBucket[0];
+				else
+					return -1;
 			}
 			else
 			{
@@ -1596,11 +1384,11 @@ namespace Alphora.Dataphor.DAE.Schema
 				if (LDepth > FNameIndex.Count)
 					return LIndexes;
 					
-				IntegerList LNameBucket;
 				for (int LIndex = FNameIndex.Count - 1 - LDepth; LIndex >= 0; LIndex--)
 				{
-					LNameBucket = (IntegerList)GetNameIndexForDepth(LIndex)[AName];
-					if (LNameBucket != null)
+					var LNameIndex = GetNameIndexForDepth(LIndex);
+					IntegerList LNameBucket;
+					if (LNameIndex.TryGetValue(AName, out LNameBucket))
 						LIndexes.AddRange(LNameBucket);
 				}
 				return LIndexes;
@@ -2055,11 +1843,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			FNameIndex = null;
 		}
-		
-		protected Hashtable GetNameIndexForDepth(int ADepth)
+
+		protected Dictionary<string, IntegerList> GetNameIndexForDepth(int ADepth)
 		{
 			while (ADepth > FNameIndex.Count - 1)
-				FNameIndex.Add(new Hashtable());
+				FNameIndex.Add(new Dictionary<string, IntegerList>());
 			return FNameIndex[ADepth];
 		}
 		
@@ -2068,13 +1856,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Add the object to the name index
 			string LName = AObject.Name;
 			int LDepth = Schema.Object.GetQualifierCount(LName);
-			IntegerList LNameBucket;
-			Hashtable LNameIndex;
 			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
 			{
-				LNameIndex = GetNameIndexForDepth(LIndex);
-				LNameBucket = (IntegerList)LNameIndex[LName];
-				if (LNameBucket == null)
+				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
+				IntegerList LNameBucket;
+				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
 				{
 					LNameBucket = new IntegerList();
 					LNameIndex.Add(LName, LNameBucket);
@@ -2089,13 +1875,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Remove the object from the name index
 			string LName = AObject.Name;
 			int LDepth = Schema.Object.GetQualifierCount(LName);
-			IntegerList LNameBucket;
-			Hashtable LNameIndex;
 			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
 			{
-				LNameIndex = GetNameIndexForDepth(LIndex);
-				LNameBucket = (IntegerList)LNameIndex[LName];
-				if (LNameBucket == null)
+				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
+				IntegerList LNameBucket;
+				if (!LNameIndex.TryGetValue(LName, out LNameBucket))
 					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, LName);
 				LNameBucket.Remove(AIndex);
 				if (LNameBucket.Count == 0)
@@ -2109,13 +1893,11 @@ namespace Alphora.Dataphor.DAE.Schema
 			// Update the objects index in the Name index
 			string LName = AObject.Name;
 			int LDepth = Schema.Object.GetQualifierCount(LName);
-			IntegerList LNameBucket;
-			Hashtable LNameIndex;
 			for (int LIndex = 0; LIndex <= LDepth; LIndex++)
 			{
-				LNameIndex = GetNameIndexForDepth(LIndex);
-				LNameBucket = (IntegerList)LNameIndex[LName];
-				if (LNameBucket == null)
+				IntegerList LNameBucket;
+				Dictionary<string, IntegerList> LNameIndex = GetNameIndexForDepth(LIndex);
+				if (LNameIndex.TryGetValue(LName, out LNameBucket))
 					throw new SchemaException(SchemaException.Codes.IndexBucketNotFound, LName);
 				LNameBucket.Remove(AOldIndex);
 				LNameBucket.Add(ANewIndex);

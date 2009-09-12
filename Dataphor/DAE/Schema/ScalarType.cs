@@ -1389,7 +1389,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			} 
 		}
 
-		private class NativeRepresentation
+		protected class NativeRepresentation
 		{
 			public NativeRepresentation(Representation ARepresentation, bool AExplicit)
 			{
