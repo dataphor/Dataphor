@@ -11072,7 +11072,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		}
 		
 		// Given ADataType, and ATargetDataType guaranteed to be a super type of ADataType, find the casting path to ATargetDataType
-		public static bool FindCastingPath(Schema.ScalarType ADataType, Schema.ScalarType ATargetDataType, ArrayList ACastingPath)
+		public static bool FindCastingPath(Schema.ScalarType ADataType, Schema.ScalarType ATargetDataType, List<Schema.ScalarType> ACastingPath)
 		{
 			ACastingPath.Add(ADataType);
 			if (ADataType.Equals(ATargetDataType))
@@ -11093,7 +11093,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 		{
 			if (!ATargetDataType.Equals(APlan.DataTypes.SystemScalar) && !APlanNode.DataType.Equals(APlan.DataTypes.SystemScalar))
 			{
-				ArrayList LCastingPath = new ArrayList();
+				List<Schema.ScalarType> LCastingPath = new List<Schema.ScalarType>();
 				if (!FindCastingPath(ATargetDataType, (Schema.ScalarType)APlanNode.DataType, LCastingPath))
 					throw new CompilerException(CompilerException.Codes.CastingPathNotFound, APlan.CurrentStatement(), ATargetDataType.Name, APlanNode.DataType.Name);
 					
@@ -11104,7 +11104,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.ScalarType LTargetDataType;
 				for (int LIndex = LCastingPath.Count - 1; LIndex >= 0; LIndex--)
 				{
-					LTargetDataType = (Schema.ScalarType)LCastingPath[LIndex];
+					LTargetDataType = LCastingPath[LIndex];
 					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(APlan.ValueManager.GetConveyor((Schema.ScalarType)APlanNode.DataType).GetType(), APlan.ValueManager.GetConveyor(LTargetDataType).GetType()))
 					{
 						LPlanNode = EmitCallNode(APlan, LTargetDataType.Name, new PlanNode[]{APlanNode}, false);
@@ -11122,7 +11122,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 			// If the target data type is not scalar or alpha
 			if (!ATargetDataType.Equals(APlan.DataTypes.SystemScalar))
 			{
-				ArrayList LCastingPath = new ArrayList();
+				List<Schema.ScalarType> LCastingPath = new List<Schema.ScalarType>();
 				if (!FindCastingPath((Schema.ScalarType)APlanNode.DataType, ATargetDataType, LCastingPath))
 					throw new CompilerException(CompilerException.Codes.CastingPathNotFound, APlan.CurrentStatement(), APlanNode.DataType.Name, ATargetDataType.Name);
 					
@@ -11133,7 +11133,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 				Schema.ScalarType LTargetDataType;
 				for (int LIndex = 0; LIndex < LCastingPath.Count; LIndex++)
 				{
-					LTargetDataType = (Schema.ScalarType)LCastingPath[LIndex];
+					LTargetDataType = LCastingPath[LIndex];
 					if ((LTargetDataType.ClassDefinition != null) && (((Schema.ScalarType)APlanNode.DataType).ClassDefinition != null) && !Object.ReferenceEquals(APlan.ValueManager.GetConveyor((Schema.ScalarType)APlanNode.DataType).GetType(), APlan.ValueManager.GetConveyor(LTargetDataType).GetType()))
 					{
 						LPlanNode = EmitCallNode(APlan, LTargetDataType.Name, new PlanNode[]{APlanNode}, false);
@@ -11697,16 +11697,16 @@ indicative of other problems, a reference will never be attached as an explicit 
 					LPlanNodes
 				);
 		}
-		
-		protected static void GeneratePermutations(int ANumber, ArrayList APermutations)
+
+		protected static void GeneratePermutations(int ANumber, List<int[]> APermutations)
 		{
 			int[] LValue = new int[ANumber];
 			for (int LIndex = 0; LIndex < LValue.Length; LIndex++)
 				LValue[LIndex] = 0;
 			Visit(-1, 0, LValue, APermutations);
 		}
-		
-		protected static void Visit(int ALevel, int ACurrent, int[] AValue, ArrayList APermutations)
+
+		protected static void Visit(int ALevel, int ACurrent, int[] AValue, List<int[]> APermutations)
 		{
 			ALevel = ALevel + 1;
 			AValue[ACurrent] = ALevel;
@@ -11790,13 +11790,13 @@ indicative of other problems, a reference will never be attached as an explicit 
 						if (LOperatorSignatures.Count > 0)
 						{
 							// Compute permutations of the signature
-							ArrayList LPermutations = new ArrayList();
+							List<int[]> LPermutations = new List<int[]>();
 							GeneratePermutations(LTerms.Length, LPermutations);
-							
-							ArrayList LSignatures = new ArrayList();
+
+							List<Schema.Signature> LSignatures = new List<Schema.Signature>();
 							for (int LIndex = 0; LIndex < LPermutations.Count; LIndex++)
 							{
-								int[] LPermutation = (int[])LPermutations[LIndex];
+								int[] LPermutation = LPermutations[LIndex];
 								Schema.SignatureElement[] LPermutationSignature = new Schema.SignatureElement[LPermutation.Length];
 								for (int LPIndex = 0; LPIndex < LPermutation.Length; LPIndex++)
 									LPermutationSignature[LPIndex] = LIndexerSignature[LPermutation[LPIndex] - 1];
@@ -11807,7 +11807,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							OperatorBindingContext[] LContexts = new OperatorBindingContext[LSignatures.Count];
 							for (int LIndex = 0; LIndex < LSignatures.Count; LIndex++)
 							{
-								LContexts[LIndex] = new OperatorBindingContext(new CallExpression(), "Key", APlan.NameResolutionPath, (Schema.Signature)LSignatures[LIndex], false);
+								LContexts[LIndex] = new OperatorBindingContext(new CallExpression(), "Key", APlan.NameResolutionPath, LSignatures[LIndex], false);
 								LOperatorSignatures.Resolve(APlan, LContexts[LIndex]);
 							}
 							
@@ -11849,7 +11849,7 @@ indicative of other problems, a reference will never be attached as an explicit 
 							
 							if (LSignatureIndex >= 0)
 							{
-								int[] LPermutation = (int[])LPermutations[LSignatureIndex];
+								int[] LPermutation = LPermutations[LSignatureIndex];
 								
 								Schema.Key LSignatureKey = LTableNode.TableVar.Keys[Convert.ToInt32(LContexts[LSignatureIndex].Matches.Match.Signature.Operator.OperatorName)];
 								

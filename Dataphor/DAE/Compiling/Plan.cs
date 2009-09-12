@@ -29,7 +29,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public Plan(ServerProcess AServerProcess) : base()
 		{
 			FServerProcess = AServerProcess;
-			FCatalogLocks = new ArrayList();
+			FCatalogLocks = new List<LockID>();
 			FSymbols = new Symbols(FServerProcess.ServerSession.SessionInfo.DefaultMaxStackDepth, FServerProcess.ServerSession.SessionInfo.DefaultMaxCallDepth);
 			PushSecurityContext(new SecurityContext(FServerProcess.ServerSession.User));
 			PushStatementContext(new StatementContext(StatementType.Select));
@@ -197,7 +197,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		
 		// CatalogLocks
-		protected ArrayList FCatalogLocks; // cannot be a hash table because it must be able to contain multiple entries for the same LockID
+		protected List<LockID> FCatalogLocks; // cannot be a hash table because it must be able to contain multiple entries for the same LockID
 		public void AcquireCatalogLock(Schema.Object AObject, LockMode AMode)
 		{
 			#if USECATALOGLOCKS
@@ -379,58 +379,58 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 		
 		// TypeContext
-		protected ArrayList FTypeStack = new ArrayList();
+		protected System.Collections.Generic.Stack<Schema.IDataType> FTypeStack = new System.Collections.Generic.Stack<Schema.IDataType>();
 		
 		public void PushTypeContext(Schema.IDataType ADataType)
 		{
-			FTypeStack.Add(ADataType);
+			FTypeStack.Push(ADataType);
 		}
 		
 		public void PopTypeContext(Schema.IDataType ADataType)
 		{
 			Error.AssertFail(FTypeStack.Count > 0, "Type stack underflow");
-			FTypeStack.RemoveAt(FTypeStack.Count - 1);
+			FTypeStack.Pop();
 		}
 		
 		public bool InScalarTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack[FTypeStack.Count - 1] is Schema.IScalarType);
+			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IScalarType);
 		}
 		
 		public bool InRowTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack[FTypeStack.Count - 1] is Schema.IRowType);
+			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IRowType);
 		}
 		
 		public bool InTableTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack[FTypeStack.Count - 1] is Schema.ITableType);
+			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.ITableType);
 		}
 
 		public bool InListTypeContext()
 		{
-			return (FTypeStack.Count > 0) && (FTypeStack[FTypeStack.Count - 1] is Schema.IListType);
+			return (FTypeStack.Count > 0) && (FTypeStack.Peek() is Schema.IListType);
 		}
 		
 		// CurrentStatement
-		protected ArrayList FStatementStack = new ArrayList();
+		protected System.Collections.Generic.Stack<Statement> FStatementStack = new System.Collections.Generic.Stack<Statement>();
 		
 		public void PushStatement(Statement AStatement)
 		{
-			FStatementStack.Add(AStatement);
+			FStatementStack.Push(AStatement);
 		}
 		
 		public void PopStatement()
 		{
 			Error.AssertFail(FStatementStack.Count > 0, "Statement stack underflow");
-			FStatementStack.RemoveAt(FStatementStack.Count - 1);
+			FStatementStack.Pop();
 		}
 		
 		/// <remarks>Returns the current statement in the abstract syntax tree being compiled.  Will return null if no statement is on the statement stack.</remarks>
 		public Statement CurrentStatement()
 		{
 			if (FStatementStack.Count > 0)
-				return (Statement)FStatementStack[FStatementStack.Count - 1];
+				return FStatementStack.Peek();
 			return null;
 		}
 
