@@ -448,7 +448,7 @@ namespace Alphora.Dataphor.Frontend.Client.Web
 						LTruncateAt = 80;
 						AWriter.RenderBeginTag(HtmlTextWriterTag.B);
 					}
-					AWriter.Write(HttpUtility.HtmlEncode(TruncateTitle(GetFormTitle((IFormInterface)Forms.First.Forms[i]), LTruncateAt)));
+					AWriter.Write(HttpUtility.HtmlEncode(TruncateTitle(GetFormTitle(Forms.First.Forms[i]), LTruncateAt)));
 				}
 				// Assumption: there will never be 0 forms in a form stack
 				AWriter.RenderEndTag();	// B

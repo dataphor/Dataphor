@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Runtime.Data
 {
@@ -17,11 +18,11 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	{
 		public DataTypeList() : base() {}
 		
-		private ArrayList FDataTypes = new ArrayList();
+		private List<Schema.IDataType> FDataTypes = new List<Schema.IDataType>();
 
 		public Schema.IDataType this[int AIndex]
 		{
-			get { return (Schema.IDataType)FDataTypes[AIndex]; }
+			get { return FDataTypes[AIndex]; }
 			set { FDataTypes[AIndex] = value; }
 		}
 		
@@ -50,8 +51,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 		private DataTypeList FDataTypes = new DataTypeList();
 		public DataTypeList DataTypes { get { return FDataTypes; } }
 		
-		private ArrayList FValues = new ArrayList();
-		public ArrayList Values { get { return FValues; } }
+		private List<object> FValues = new List<object>();
+		public List<object> Values { get { return FValues; } }
 	}
 	
 	public class ListValue : DataValue

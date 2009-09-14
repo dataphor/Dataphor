@@ -538,7 +538,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		private int FRunningProcesses = 0;
-		private ArrayList FWaitingProcesses = new ArrayList();
+		private List<Thread> FWaitingProcesses = new List<Thread>();
 		
 		internal void BeginProcessCall(ServerProcess AProcess)
 		{
@@ -579,7 +579,7 @@ namespace Alphora.Dataphor.DAE.Server
 				FRunningProcesses--;
 				while (FWaitingProcesses.Count > 0)
 				{
-					System.Threading.Thread LThread = (System.Threading.Thread)FWaitingProcesses[0];
+					System.Threading.Thread LThread = FWaitingProcesses[0];
 					FWaitingProcesses.RemoveAt(0);
 					if ((LThread.ThreadState & System.Threading.ThreadState.WaitSleepJoin) != 0)
 					{

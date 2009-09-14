@@ -12,6 +12,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using System.Collections.Generic;
 	
 	public class TableValue : DataValue
 	{
@@ -42,8 +43,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 				01-05 -> Number of rows
 				06-XX -> N row values written using Row physical representation
 		*/
-		private ArrayList FRowList;
-		private ArrayList FSizeList;
+		private List<Row> FRowList;
+		private List<int> FSizeList;
 		
 		public override int GetPhysicalSize(bool AExpandStreams)
 		{
@@ -52,8 +53,8 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 			if (!IsNil)
 			{
 				LSize += sizeof(int);
-				FRowList = new ArrayList();
-				FSizeList = new ArrayList();
+				FRowList = new List<Row>();
+				FSizeList = new List<int>();
 				
 				Table LTable = OpenCursor();
 				try
@@ -64,7 +65,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 						int LRowSize = LRow.GetPhysicalSize(AExpandStreams);
 						LSize += LRowSize;
 						FRowList.Add(LRow);
-						FSizeList.Add(LRow);
+						FSizeList.Add(LRowSize);
 					}
 				}
 				finally
@@ -98,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 					LRowSize = (int)FSizeList[LIndex];
 					LInt32Conveyor.Write(LRowSize, ABuffer, AOffset);
 					AOffset += sizeof(int);
-					Row LRow = (Row)FRowList[LIndex];
+					Row LRow = FRowList[LIndex];
 					LRow.WriteToPhysical(ABuffer, AOffset, AExpandStreams);
 					AOffset += LRowSize;
 					LRow.ValuesOwned = false;

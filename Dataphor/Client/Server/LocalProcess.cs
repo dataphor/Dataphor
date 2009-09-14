@@ -297,33 +297,25 @@ namespace Alphora.Dataphor.DAE.Server
         
 		public void EnsureOverflowConsistent(Row ARow)
 		{
-			ArrayList LList = new ArrayList();
+			List<StreamID> LList = new List<StreamID>();
 			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
 				if (ARow.HasNonNativeValue(LIndex))
 					LList.Add(ARow.GetNonNativeStreamID(LIndex));
 
-			StreamID[] LStreamIDArray = new StreamID[LList.Count];
-			for (int LIndex = 0; LIndex < LStreamIDArray.Length; LIndex++)
-				LStreamIDArray[LIndex] = (StreamID)LList[LIndex];
-
-			FStreamManager.FlushStreams(LStreamIDArray);
+			FStreamManager.FlushStreams(LList.ToArray());
 		}
 
 		public void EnsureOverflowReleased(Row ARow)
 		{
-			ArrayList LList = new ArrayList();
+			List<StreamID> LList = new List<StreamID>();
 			for (int LIndex = 0; LIndex < ARow.DataType.Columns.Count; LIndex++)
 				if (ARow.HasNonNativeValue(LIndex)) // TODO: This won't work for non-scalar-valued attributes
 					LList.Add(ARow.GetNonNativeStreamID(LIndex));
 
-			StreamID[] LStreamIDArray = new StreamID[LList.Count];
-			for (int LIndex = 0; LIndex < LStreamIDArray.Length; LIndex++)
-				LStreamIDArray[LIndex] = (StreamID)LList[LIndex];
-
-			FStreamManager.ReleaseStreams(LStreamIDArray);
+			FStreamManager.ReleaseStreams(LList.ToArray());
 		}
-		
-		private ArrayList FUnprepareList = new ArrayList();
+
+		private List<IRemoteServerPlan> FUnprepareList = new List<IRemoteServerPlan>();
 
 		private void ReportCleanup(IRemoteServerPlan APlan)
 		{
@@ -342,24 +334,26 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private ProcessCleanupInfo GetProcessCleanupInfo()
 		{
-			ProcessCleanupInfo LInfo = new ProcessCleanupInfo();
-			LInfo.UnprepareList = new IRemoteServerPlan[FUnprepareList.Count];
-			for (int LIndex = 0; LIndex < FUnprepareList.Count; LIndex++)
-				LInfo.UnprepareList[LIndex] = (IRemoteServerPlan)FUnprepareList[LIndex];
+			ProcessCleanupInfo LInfo = 
+				new ProcessCleanupInfo()
+				{
+					UnprepareList = FUnprepareList.ToArray()
+				};
 				
 			FUnprepareList.Clear();
 			
 			return LInfo;
 		}
-		
-		private ArrayList FTransactionList = new ArrayList();
+
+		private List<IsolationLevel> FTransactionList = new List<IsolationLevel>();
 		
 		internal ProcessCallInfo GetProcessCallInfo()
 		{
-			ProcessCallInfo LInfo = new ProcessCallInfo();
-			LInfo.TransactionList = new IsolationLevel[FTransactionList.Count];
-			for (int LIndex = 0; LIndex < FTransactionList.Count; LIndex++)
-				LInfo.TransactionList[LIndex] = (IsolationLevel)FTransactionList[LIndex];
+			ProcessCallInfo LInfo = 
+				new ProcessCallInfo()
+				{
+					TransactionList = FTransactionList.ToArray()
+				};
 				
 			FTransactionList.Clear();
 			

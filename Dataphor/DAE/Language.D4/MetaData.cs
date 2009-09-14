@@ -686,7 +686,7 @@ namespace Alphora.Dataphor.DAE.Language.D4
 		#if USEHASHTABLEFORTAGS
 		private Dictionary<string, Tag> FTags = new Dictionary<string, Tag>();
 		#else
-		private ArrayList FTags = new ArrayList();
+		private List<Tag> FTags = new List<Tag>();
 		
 		private int IndexOfName(string AName)
 		{

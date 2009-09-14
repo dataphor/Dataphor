@@ -522,14 +522,14 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 			get { return FMenuContainer; }
 		}
 
-		private ArrayList FCustomActions;
+		private List<ToolStripMenuItem> FCustomActions;
 
 		public virtual object AddCustomAction(string AText, System.Drawing.Image AImage, EventHandler AHandler)
 		{
 			ToolStripMenuItem LItem = new ToolStripMenuItem(AText, AImage);
 			LItem.Click += AHandler;
 			if (FCustomActions == null)
-				FCustomActions = new ArrayList();
+				FCustomActions = new List<ToolStripMenuItem>();
 			FCustomActions.Add(LItem);
 			FFormMenu.DropDownItems.Insert(0, LItem);
 			return LItem;
@@ -539,7 +539,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 		{
 			ToolStripMenuItem LItem = (ToolStripMenuItem)AAction;
 			if (FCustomActions != null)
-				FCustomActions.Remove(AAction);
+				FCustomActions.Remove(LItem);
 			FFormMenu.DropDownItems.Remove(LItem);
 			LItem.Dispose();
 		}

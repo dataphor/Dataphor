@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
 using DAE = Alphora.Dataphor.DAE.Server;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.Frontend.Client
 {
@@ -74,7 +75,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext AContext)
 		{
-			ArrayList LCollection = new ArrayList();
+			List<INode> LCollection = new List<INode>();
 			if (AContext != null)
 			{
 				foreach (INode LNode in ((INode)AContext.Instance).HostNode.Children[0].Children) 
@@ -87,7 +88,7 @@ namespace Alphora.Dataphor.Frontend.Client
 		}
 
 		// checks a node and recurses to each of it's children.
-		private void WalkNode(ArrayList ACollection, INode ANode, ITypeDescriptorContext AContext) 
+		private void WalkNode(List<INode> ACollection, INode ANode, ITypeDescriptorContext AContext) 
 		{
 			if (AContext.PropertyDescriptor.PropertyType.IsAssignableFrom(ANode.GetType()) && ANode.Name != String.Empty)
 				ACollection.Add(ANode);
@@ -96,7 +97,7 @@ namespace Alphora.Dataphor.Frontend.Client
 				WalkNode(ACollection, LNode, AContext);
 		}
 
-		protected class NodeReferenceComparer : IComparer
+		protected class NodeReferenceComparer : IComparer<INode>
 		{
 			public NodeReferenceComparer(NodeReferenceConverter AConverter)
 			{
@@ -105,7 +106,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			private NodeReferenceConverter FConverter;
 
-			public int Compare(object AItem1, object AItem2)
+			public int Compare(INode AItem1, INode AItem2)
 			{
 				return String.Compare(FConverter.ConvertToString(AItem1), FConverter.ConvertToString(AItem2));
 			}

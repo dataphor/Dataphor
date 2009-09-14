@@ -748,8 +748,8 @@ namespace Alphora.Dataphor.Frontend.Client
 
 		public class FormStack
 		{
-			private ArrayList FForms = new ArrayList();
-			public ArrayList Forms { get { return FForms; } }
+			private List<IFormInterface> FForms = new List<IFormInterface>();
+			public List<IFormInterface> Forms { get { return FForms; } }
 
 			internal FormStack FNext;
 			public FormStack Next { get { return FNext; } }
@@ -764,7 +764,7 @@ namespace Alphora.Dataphor.Frontend.Client
 
 			public IFormInterface Pop()
 			{
-				IFormInterface LResult = (IFormInterface)FForms[FForms.Count - 1];
+				IFormInterface LResult = FForms[FForms.Count - 1];
 				FForms.RemoveAt(FForms.Count - 1);
 				return LResult;
 			}
@@ -777,7 +777,7 @@ namespace Alphora.Dataphor.Frontend.Client
 			public IFormInterface GetTopmostForm()
 			{
 				if (FForms.Count > 0)
-					return (IFormInterface)FForms[FForms.Count - 1];
+					return FForms[FForms.Count - 1];
 				else
 					return null;
 			}

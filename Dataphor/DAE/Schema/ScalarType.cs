@@ -941,7 +941,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Removes any cache entries for conversion paths which reference the specified scalar type.</summary>
 		public void Clear(Schema.ScalarType AScalarType)
 		{
-			ArrayList LRemoveList = new ArrayList();
+			List<EndPoints> LRemoveList = new List<EndPoints>();
 			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
 				if (LEntry.Value.Contains(AScalarType))
 					LRemoveList.Add(LEntry.Key);
@@ -953,7 +953,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Removes any cache entries for conversion paths which reference the specified conversion.</summary>		
 		public void Clear(Schema.Conversion AConversion)
 		{
-			ArrayList LRemoveList = new ArrayList();
+			List<EndPoints> LRemoveList = new List<EndPoints>();
 			foreach (KeyValuePair<EndPoints, ScalarConversionPath> LEntry in FPaths)
 				if (LEntry.Value.Contains(AConversion))
 					LRemoveList.Add(LEntry.Key);

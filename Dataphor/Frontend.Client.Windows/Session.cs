@@ -598,7 +598,7 @@ namespace Alphora.Dataphor.Frontend.Client.Windows
 					if (LFormStack.Forms[i] == AForm)
 					{
 						for (int j = LFormStack.Forms.Count - 1; j > i; j--)
-							if (!((IFormInterface)LFormStack.Forms[j]).Close(ABehavior))
+							if (!LFormStack.Forms[j].Close(ABehavior))
 								return false;
 						return true;
 					}

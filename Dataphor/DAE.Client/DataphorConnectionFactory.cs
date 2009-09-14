@@ -10,6 +10,7 @@ using System.Runtime.Remoting;
 
 using Alphora.Dataphor.DAE;
 using Alphora.Dataphor.DAE.Server;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -33,7 +34,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 		}
 
-		public ArrayList ServerList = new ArrayList();
+		public List<ServerInfo> ServerList = new List<ServerInfo>();
 		public Hashtable ServerHash = new Hashtable();
 
 		public void AddServer(ServerAlias AAlias, string ALogin, string APassword)
@@ -53,13 +54,13 @@ namespace Alphora.Dataphor.DAE.Client
 			int LStartIndex = FRandom.Next(ServerList.Count);
 
 			// only try to hit a down server every once in a while so that there isn't a 2 second delay on half the pages requests when a server is down.
-			if (((ServerInfo)ServerList[LStartIndex]).LastTryFailed)
+			if ((ServerList[LStartIndex]).LastTryFailed)
 			{
 				LStartIndex = FRandom.Next(ServerList.Count);
-				if (((ServerInfo)ServerList[LStartIndex]).LastTryFailed)
+				if ((ServerList[LStartIndex]).LastTryFailed)
 				{
 					LStartIndex = FRandom.Next(ServerList.Count);
-					if (((ServerInfo)ServerList[LStartIndex]).LastTryFailed)
+					if ((ServerList[LStartIndex]).LastTryFailed)
 					{
 						LStartIndex = FRandom.Next(ServerList.Count);
 					}
@@ -67,7 +68,7 @@ namespace Alphora.Dataphor.DAE.Client
 			}
 			
 			int LServerIndex = LStartIndex;
-			ServerInfo LServerInfo = (ServerInfo)ServerList[LServerIndex];
+			ServerInfo LServerInfo = ServerList[LServerIndex];
 			while (true)
 			{
 				try
@@ -91,7 +92,7 @@ namespace Alphora.Dataphor.DAE.Client
 					LServerIndex++;
 					LServerIndex %= ServerList.Count;
 					if (LServerIndex != LStartIndex)
-						LServerInfo = (ServerInfo)ServerList[LServerIndex];
+						LServerInfo = ServerList[LServerIndex];
 					else
 						throw E;
 				}

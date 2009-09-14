@@ -10,6 +10,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	using System;
 	using System.Threading;
 	using System.Collections;
+	using System.Collections.Generic;
 	
 	/*
 		Note regarding semaphore implementation ->
@@ -98,7 +99,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 	public class Semaphore : Object
 	{
 		private WaitList FWaitList = new WaitList();
-		private ArrayList FOwnerList = new ArrayList();
+		private List<int> FOwnerList = new List<int>();
 		private int FExclusiveIndex = -1; // the index at which the lock was acquired in exclusive mode
 
 		private LockMode FMode = LockMode.Free;
@@ -107,7 +108,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public bool IsSemaphoreOwned(int AOwnerID)
 		{
 			for (int LIndex = 0; LIndex < FOwnerList.Count; LIndex++)
-				if ((int)FOwnerList[LIndex] != AOwnerID)
+				if (FOwnerList[LIndex] != AOwnerID)
 					return false;
 			return true;
 		}
@@ -132,7 +133,10 @@ namespace Alphora.Dataphor.DAE.Runtime
 					{
 						FMode = AMode;
 						if ((FMode == LockMode.Exclusive) && (FExclusiveIndex == -1))
-							FExclusiveIndex = FOwnerList.Add(AOwnerID);
+						{
+							FOwnerList.Add(AOwnerID);
+							FExclusiveIndex = FOwnerList.Count - 1;
+						}
 						else
 							FOwnerList.Add(AOwnerID);
 						return;
@@ -175,7 +179,10 @@ namespace Alphora.Dataphor.DAE.Runtime
 				{
 					FMode = AMode;
 					if ((FMode == LockMode.Exclusive) && (FExclusiveIndex == -1))
-						FExclusiveIndex = FOwnerList.Add(AOwnerID);
+					{
+						FOwnerList.Add(AOwnerID);
+						FExclusiveIndex = FOwnerList.Count - 1;
+					}
 					else
 						FOwnerList.Add(AOwnerID);
 					return true;
@@ -195,7 +202,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				#endif
 				for (int LIndex = FOwnerList.Count - 1; LIndex >= 0; LIndex--)
 				{
-					if ((int)FOwnerList[LIndex] == AOwnerID)
+					if (FOwnerList[LIndex] == AOwnerID)
 					{
 						#if FINDLEAKS
 						LReleased = true;

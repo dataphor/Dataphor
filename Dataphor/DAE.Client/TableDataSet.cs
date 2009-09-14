@@ -19,6 +19,7 @@ using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Client.Design;
 using Schema = Alphora.Dataphor.DAE.Schema;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Client
 {
@@ -150,8 +151,8 @@ namespace Alphora.Dataphor.DAE.Client
 		{
 			// The invariant is the first non-empty intersection of any key of the master table type with the master key
 			if (IsMasterSetup())
-			{					
-				ArrayList LInvariant = new ArrayList();
+			{
+				List<string> LInvariant = new List<string>();
 				foreach (Schema.Key LKey in MasterSource.DataSet.TableVar.Keys)
 				{
 					foreach (Schema.TableVarColumn LColumn in LKey.Columns)
@@ -161,7 +162,7 @@ namespace Alphora.Dataphor.DAE.Client
 							LInvariant.Add(FDetailKey.Columns[LIndex].Name);
 					}
 					if (LInvariant.Count > 0)
-						return (string[])LInvariant.ToArray(typeof(string));
+						return LInvariant.ToArray();
 				}
 			}
 			return new string[]{};

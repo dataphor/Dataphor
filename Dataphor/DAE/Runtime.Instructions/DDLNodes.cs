@@ -1306,7 +1306,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 			}
 		}
 		
-		public static void ReplaceValueNodes(PlanNode ANode, ArrayList AValueNodes, string AColumnName)
+		public static void ReplaceValueNodes(PlanNode ANode, List<PlanNode> AValueNodes, string AColumnName)
 		{
 			if ((ANode is StackReferenceNode) && (Schema.Object.EnsureUnrooted(((StackReferenceNode)ANode).Identifier) == Keywords.Value))
 			{
@@ -1318,7 +1318,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				ReplaceValueNodes(ANode.Nodes[LIndex], AValueNodes, AColumnName);
 		}
 		
-		public static void RestoreValueNodes(ArrayList AValueNodes)
+		public static void RestoreValueNodes(List<PlanNode> AValueNodes)
 		{
 			for (int LIndex = 0; LIndex < AValueNodes.Count; LIndex++)
 				((StackReferenceNode)AValueNodes[LIndex]).Identifier = Schema.Object.EnsureRooted(Keywords.Value);
@@ -1327,7 +1327,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		protected void ValidateConstraint(Program AProgram, Schema.BaseTableVar ATable, Schema.TableVarColumn AColumn, Schema.TableVarColumnConstraint AConstraint)
 		{
 			// Ensure that all values in the given column of the given base table variable satisfy the new constraint
-			ArrayList LValueNodes = new ArrayList();
+			List<PlanNode> LValueNodes = new List<PlanNode>();
 			ReplaceValueNodes(AConstraint.Node, LValueNodes, AColumn.Name);
 			Expression LConstraintExpression = new UnaryExpression(Instructions.Not, (Expression)AConstraint.Node.EmitStatement(EmitMode.ForCopy));
 			RestoreValueNodes(LValueNodes);
@@ -1779,7 +1779,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						if (LColumn.DataType.Equals(AScalarType))
 						{
 							// if exists (table over { column } where not (constraint expression))) then raise
-							ArrayList LValueNodes = new ArrayList();
+							List<PlanNode> LValueNodes = new List<PlanNode>();
 							AlterTableNode.ReplaceValueNodes(AConstraint.Node, LValueNodes, LColumn.Name);
 							Expression LConstraintExpression = new UnaryExpression(Instructions.Not, (Expression)AConstraint.Node.EmitStatement(EmitMode.ForCopy));
 							AlterTableNode.RestoreValueNodes(LValueNodes);
