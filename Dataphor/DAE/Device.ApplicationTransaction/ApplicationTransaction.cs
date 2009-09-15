@@ -1238,7 +1238,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// drop the A/T table vars (safely)
 					// remove the table map
 					
-			if (!AProcess.ServerSession.Server.IsRepository)
+			if (!AProcess.ServerSession.Server.IsEngine)
 			{
 				lock (AProcess.Catalog)
 				{
@@ -1329,7 +1329,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 					// remove the operator map
 					// report table changes on the A/T table vars
 					
-			if (!AProcess.ServerSession.Server.IsRepository)
+			if (!AProcess.ServerSession.Server.IsEngine)
 			{
 				lock (AProcess.Catalog)
 				{

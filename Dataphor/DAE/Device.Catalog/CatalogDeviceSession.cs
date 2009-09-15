@@ -4,7 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
 #define LOGDDLINSTRUCTIONS
 
 using System;
@@ -42,7 +41,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public Schema.Catalog Catalog { get { return ((Server.Server)ServerProcess.ServerSession.Server).Catalog; } }
+		public Schema.Catalog Catalog { get { return ((Server.Engine)ServerProcess.ServerSession.Server).Catalog; } }
 		
 		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
 
@@ -1700,9 +1699,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		protected void UpdateServerSettings(Program AProgram, Schema.TableVar ATableVar, Row AOldRow, Row ANewRow)
 		{
-			if ((bool)AOldRow["TracingEnabled"] ^ (bool)ANewRow["TracingEnabled"])
-				ServerProcess.ServerSession.Server.TracingEnabled = (bool)ANewRow["TracingEnabled"];
-				
 			if ((bool)AOldRow["LogErrors"] ^ (bool)ANewRow["LogErrors"])
 				ServerProcess.ServerSession.Server.LogErrors = (bool)ANewRow["LogErrors"];
 				
@@ -1734,11 +1730,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if ((string)AOldRow["DefaultIsolationLevel"] != (string)ANewRow["DefaultIsolationLevel"])
 				LSession.SessionInfo.DefaultIsolationLevel = (IsolationLevel)Enum.Parse(typeof(IsolationLevel), (string)ANewRow["DefaultIsolationLevel"], true);
 
-			#if TRACEEVENTS
-			if ((bool)AOldRow["TracingEnabled"] ^ (bool)ANewRow["TracingEnabled"])
-				ServerProcess.ServerSession.TracingEnabled = (bool)ANewRow["TracingEnabled"];
-			#endif
-				
 			if ((bool)AOldRow["DefaultUseDTC"] ^ (bool)ANewRow["DefaultUseDTC"])
 				LSession.SessionInfo.DefaultUseDTC = (bool)ANewRow["DefaultUseDTC"];
 				
@@ -2020,7 +2011,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			SystemSetLibraryDescriptorNode.RemoveLibraryFile(AProgram, Schema.Object.EnsureRooted((string)ARow[0]), new FileReference((string)ARow[1], (bool)ARow[2]));
 		}
 		
-		public void SaveServerSettings(Server.Server AServer)
+		public void SaveServerSettings(Server.Engine AServer)
 		{
 			AcquireCatalogStoreConnection(true);
 			try
@@ -2033,7 +2024,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 		
-		public void LoadServerSettings(Server.Server AServer)
+		public void LoadServerSettings(Server.Engine AServer)
 		{
 			AcquireCatalogStoreConnection(false);
 			try
@@ -2754,7 +2745,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Resolves the given name and returns the catalog object, if an unambiguous match is found. Otherwise, returns null.</summary>
 		public Schema.CatalogObject ResolveName(string AName, NameResolutionPath APath, List<string> ANames)
 		{
-			if (ServerProcess.ServerSession.Server.IsRepository)
+			if (ServerProcess.ServerSession.Server.IsEngine)
 			{
 				int LIndex = Catalog.ResolveName(AName, APath, ANames);
 				return LIndex >= 0 ? (Schema.CatalogObject)Catalog[LIndex] : null;
@@ -2846,7 +2837,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		/// <summary>Ensures that any potential match with the given operator name is in the cache so that operator resolution can occur.</summary>
 		public void ResolveOperatorName(string AOperatorName)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				Schema.CatalogObjectHeaders LHeaders = CachedResolveOperatorName(AOperatorName);
 				
@@ -3071,7 +3062,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 
 				// If this is not a repository, and we are not deserializing, and the object should be persisted, save the object to the catalog store
-				if (!ServerProcess.ServerSession.Server.IsRepository && ShouldSerializeCatalogObject(AObject))
+				if (!ServerProcess.ServerSession.Server.IsEngine && ShouldSerializeCatalogObject(AObject))
 					InsertPersistentObject(AObject);
 			}
 		}
@@ -3083,7 +3074,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (!ServerProcess.InLoadingContext())
 			{
 				// If this is not a repository, and we are not deserializing, and the object should be persisted, update the object in the catalog store
-				if (!ServerProcess.ServerSession.Server.IsRepository && ShouldSerializeCatalogObject(AObject))
+				if (!ServerProcess.ServerSession.Server.IsEngine && ShouldSerializeCatalogObject(AObject))
 					UpdatePersistentObject(AObject);
 			}
 		}
@@ -3107,7 +3098,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 
 				// If this is not a repository, and the object should be persisted, remove the object from the catalog store
-				if (!ServerProcess.ServerSession.Server.IsRepository && (!ServerProcess.InLoadingContext()) && ShouldSerializeCatalogObject(AObject))
+				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()) && ShouldSerializeCatalogObject(AObject))
 					DeletePersistentObject(AObject);
 			}
 		}
@@ -3154,7 +3145,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public List<int> SelectOperatorHandlers(int AOperatorID)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(false);
 				try
@@ -3171,7 +3162,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public List<int> SelectObjectHandlers(int ASourceObjectID)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(false);
 				try
@@ -3188,7 +3179,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public Schema.DependentObjectHeaders SelectObjectDependents(int AObjectID, bool ARecursive)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(false);
 				try
@@ -3293,7 +3284,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 
 				// If this is not a repository, save it to the catalog store
-				if (!ServerProcess.ServerSession.Server.IsRepository && (!ServerProcess.InLoadingContext()))
+				if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
 				{
 					AcquireCatalogStoreConnection(true);
 					try
@@ -3325,7 +3316,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 				
 				// If this is not a repository, remove it from the catalog store
-				if (!ServerProcess.ServerSession.Server.IsRepository)
+				if (!ServerProcess.ServerSession.Server.IsEngine)
 				{
 					AcquireCatalogStoreConnection(true);
 					try
@@ -3428,7 +3419,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new CreateUserInstruction(AUser));
 			#endif
 			
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -3460,7 +3451,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -3492,7 +3483,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 			
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -3515,7 +3506,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new DropUserInstruction(AUser));
 			#endif
 
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -3557,7 +3548,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		public bool UserHasRight(string AUserID, string ARightName)
 		{
-			if (ServerProcess.IsLoading() || (String.Compare(AUserID, Server.Server.CSystemUserID, true) == 0) || (String.Compare(AUserID, Server.Server.CAdminUserID, true) == 0))
+			if (ServerProcess.IsLoading() || (String.Compare(AUserID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(AUserID, Server.Engine.CAdminUserID, true) == 0))
 				return true;
 
 			lock (Catalog)
@@ -4073,7 +4064,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 			
 			// If this is not a repository, and we are not deserializing, insert the loaded library in the catalog store
-			if (!ServerProcess.ServerSession.Server.IsRepository && (!ServerProcess.InLoadingContext()))
+			if (!ServerProcess.ServerSession.Server.IsEngine && (!ServerProcess.InLoadingContext()))
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -4099,7 +4090,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#endif
 			
 			// If this is not a repository, delete the loaded library from the catalog store
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(true);
 				try
@@ -4116,7 +4107,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public void ResolveLoadedLibraries()
 		{
 			// TODO: I don't have a better way to ensure that these are always in memory. The footprint should be small, but how else do you answer the question, who's looking at me?
-			if (!ServerProcess.ServerSession.Server.IsRepository)
+			if (!ServerProcess.ServerSession.Server.IsEngine)
 			{
 				AcquireCatalogStoreConnection(false);
 				try
@@ -4149,7 +4140,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			if (LIndex >= 0)
 				return Catalog.LoadedLibraries[LIndex];
 				
-			if (!ServerProcess.ServerSession.Server.IsRepository)	
+			if (!ServerProcess.ServerSession.Server.IsEngine)	
 			{
 				AcquireCatalogStoreConnection(false);
 				try
@@ -4252,7 +4243,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			try
 			{
 				string LOwnerID = CatalogStoreConnection.SelectLibraryOwner(ALibraryName);
-				return LOwnerID == null ? Server.Server.CAdminUserID : LOwnerID;
+				return LOwnerID == null ? Server.Engine.CAdminUserID : LOwnerID;
 			}
 			finally
 			{
@@ -4412,7 +4403,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 			
-			if (!ServerProcess.ServerSession.Server.IsRepository && ServerProcess.IsReconciliationEnabled())
+			if (!ServerProcess.ServerSession.Server.IsEngine && ServerProcess.IsReconciliationEnabled())
 			{
 				CreateDeviceTable(ATable);
 				#if LOGDDLINSTRUCTIONS
@@ -4435,7 +4426,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				#endif
 			}
 			
-			if (!ServerProcess.ServerSession.Server.IsRepository && ServerProcess.IsReconciliationEnabled())
+			if (!ServerProcess.ServerSession.Server.IsEngine && ServerProcess.IsReconciliationEnabled())
 			{
 				DropDeviceTable(ATable);
 				#if LOGDDLINSTRUCTIONS
@@ -4648,7 +4639,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			InsertCatalogObject(AConstraint);
 			
-			if (!ServerProcess.ServerSession.Server.IsRepository && AConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && AConstraint.Enforced)
 			{
 				CreateConstraintNode.AttachConstraint(AConstraint, AConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
@@ -4669,7 +4660,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 		public void AlterConstraint(Schema.CatalogConstraint AOldConstraint, Schema.CatalogConstraint ANewConstraint)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository && AOldConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && AOldConstraint.Enforced)
 			{
 				CreateConstraintNode.DetachConstraint(AOldConstraint, AOldConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
@@ -4703,7 +4694,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				FInstructions.Add(new SetCatalogConstraintNodeInstruction(AOldConstraint, LOriginalNode));
 			#endif
 
-			if (!ServerProcess.ServerSession.Server.IsRepository && AOldConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && AOldConstraint.Enforced)
 			{
 				CreateConstraintNode.AttachConstraint(AOldConstraint, AOldConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
@@ -4717,7 +4708,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			DeleteCatalogObject(AConstraint);
 
-			if (!ServerProcess.ServerSession.Server.IsRepository && AConstraint.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && AConstraint.Enforced)
 			{
 				CreateConstraintNode.DetachConstraint(AConstraint, AConstraint.Node);
 				#if LOGDDLINSTRUCTIONS
@@ -4738,7 +4729,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		private void AttachReference(Schema.Reference AReference)
 		{
-			if (!ServerProcess.ServerSession.Server.IsRepository && AReference.Enforced)
+			if (!ServerProcess.ServerSession.Server.IsEngine && AReference.Enforced)
 			{
 				if ((AReference.SourceTable is Schema.BaseTableVar) && (AReference.TargetTable is Schema.BaseTableVar))
 				{

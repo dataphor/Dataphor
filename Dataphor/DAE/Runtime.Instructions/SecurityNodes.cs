@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Schema.Right LRight = AProgram.CatalogDeviceSession.ResolveRight(ARightName);
 			if (LRight.OwnerID != AProgram.Plan.User.ID)
-				if ((LRight.OwnerID == Server.Server.CSystemUserID) || (AProgram.Plan.User.ID != Server.Server.CAdminUserID))
+				if ((LRight.OwnerID == Server.Engine.CSystemUserID) || (AProgram.Plan.User.ID != Server.Engine.CAdminUserID))
 					throw new ServerException(ServerException.Codes.UnauthorizedUser, ErrorSeverity.Environment, AProgram.Plan.User.ID);
 			if (LRight.IsGenerated)
 				throw new ServerException(ServerException.Codes.CannotDropGeneratedRight, LRight.Name);
@@ -228,7 +228,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		{
 			Schema.User LUser = AProgram.CatalogDeviceSession.ResolveUser((string)AArguments[0]);
 			
-			if ((String.Compare(LUser.ID, Server.Server.CSystemUserID, true) == 0) || (String.Compare(LUser.ID, Server.Server.CAdminUserID, true) == 0))
+			if ((String.Compare(LUser.ID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(LUser.ID, Server.Engine.CAdminUserID, true) == 0))
 				throw new ServerException(ServerException.Codes.CannotDropSystemUsers);
 			else
 				AProgram.Plan.CheckRight(Schema.RightNames.DropUser);

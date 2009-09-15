@@ -46,6 +46,7 @@
     <Compile Include="Connection\MSSQLCommand.cs" />
     <Compile Include="Connection\MSSQLConnection.cs" />
     <Compile Include="Connection\MSSQLServerCursor.cs" />
+    <Compile Include="DAE.Runtime.Instructions\LibraryNodes.cs" />
     <Compile Include="Language.SQL\Emitter.cs" />
     <Compile Include="Language.SQL\Keywords.cs" />
     <Compile Include="Language.SQL\Language.cs" />
@@ -68,6 +69,8 @@
     <Compile Include="Server\RemoteServerScript.cs" />
     <Compile Include="Server\RemoteServerSession.cs" />
     <Compile Include="Server\RemoteSessionImplementation.cs" />
+    <Compile Include="Server\Server.cs" />
+    <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Server\ServerDTCTransaction.cs" />
     <Compile Include="Server\ServerFactory.cs" />
     <Compile Include="Server\ServerHost.cs" />

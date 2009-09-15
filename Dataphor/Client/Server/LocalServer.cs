@@ -44,10 +44,8 @@ namespace Alphora.Dataphor.DAE.Server
 			FServer = AServer;
 			FHostName = AHostName;
 			FReferenceCount = 1;
-			FInternalServer = new Server();
+			FInternalServer = new Engine();
 			FInternalServer.Name = Schema.Object.NameFromGuid(Guid.NewGuid());
-			FInternalServer.TracingEnabled = false;
-			FInternalServer.IsRepository = true;
 			FInternalServer.LoggingEnabled = AClientSideLoggingEnabled;
 			FInternalServer.Start();
 			FServerInstanceID = AServer.InstanceID;
@@ -153,7 +151,7 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 		
 		// An internal server used to evaluate remote proposable calls
-		protected internal Server FInternalServer;
+		protected internal Engine FInternalServer;
 		
 		private string FHostName;
 		
@@ -382,7 +380,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Schema.Catalog LCatalog = FInternalServer.Catalog;
 				FInternalServer.ClearCatalog();
 				foreach (Schema.RegisteredAssembly LAssembly in LCatalog.ClassLoader.Assemblies)
-					if (LAssembly.Library.Name != Server.CSystemLibraryName)
+					if (LAssembly.Library.Name != Engine.CSystemLibraryName)
 						FInternalServer.Catalog.ClassLoader.Assemblies.Add(LAssembly);
 				foreach (Schema.RegisteredClass LClass in LCatalog.ClassLoader.Classes)
 					if (!FInternalServer.Catalog.ClassLoader.Classes.Contains(LClass))
@@ -419,7 +417,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private string GetLocalFileName(string ALibraryName, string AFileName, bool AIsDotNetAssembly)
 		{
-			return Path.Combine(((ALibraryName == Server.CSystemLibraryName) || !AIsDotNetAssembly) ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
+			return Path.Combine(((ALibraryName == Engine.CSystemLibraryName) || !AIsDotNetAssembly) ? PathUtility.GetBinDirectory() : LocalBinDirectory, Path.GetFileName(AFileName));
 		}
 		
 		public string GetFile(LocalProcess AProcess, string ALibraryName, string AFileName, DateTime AFileDate, bool AIsDotNetAssembly, out bool AShouldLoad)
@@ -495,7 +493,7 @@ namespace Alphora.Dataphor.DAE.Server
 						{
 							Assembly LAssembly = Assembly.LoadFrom(LFullFileName);
 							if (LFileInfos[LIndex].ShouldRegister && !AClassLoader.Assemblies.Contains(LAssembly.GetName()))
-								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Server.CSystemLibraryName], LAssembly);
+								AClassLoader.RegisterAssembly(Catalog.LoadedLibraries[Engine.CSystemLibraryName], LAssembly);
 							FAssembliesCached.Add(LFileInfos[LIndex].FileName);
 						}
 					}

@@ -1,4 +1,3 @@
-#define AUTOUPGRADELIBRARIES in Alphora.Dataphor.DAE to have the Dataphor server automatically apply any pending upgrades on startup
 #define DATAVIEWBOOKMARKS in Alphora.Dataphor.DAE.Client to enable the bookmark capabilities of the DataView
 //#define DISALLOWAMBIGUOUSNAMES in Alphora.Dataphor.DAE (currently disabled) // To prevent the compiler from allowing ambiguous names to be defined
 //#define DISALLOWMANYTOMANYOUTERJOINS in Alphora.Dataphor.DAE (currently disabled) // Disables support for many to many outer joins
@@ -18,7 +17,6 @@
 #define RESPECTREADONLY in Alphora.Dataphor.DAE and Frontend.Server to have the library and document sub systems respect read only flag on files
 #define SKIPBETACHECK in Alphora.Dataphor.DAE to skip the beta time bomb check
 //#define SQLSTORETIMING in Alphora.Dataphor.DAE, store assemblies (currently disabled) // Enables timing tracking on the SQL Stores (accessible via the GetStoreCounters() system operator)
-//#define TRACEEVENTS in Alphora.Dataphor.DAE (currently disabled) // Enable this to turn on tracing
 //#define TRACKCALLDEPTH in Alphora.Dataphor.DAE (currently disabled) // Determines whether or not call depth tracking is enabled
 //#define USEADOCONNECTION in MSSQLDevice (currently disabled) // Uses the ADOConnection as the default connectivity implementation for the MSSQL device
 #define USEASYNCSTOPPROCESS in Alphora.Dataphor.DAE.Client to issue the stop process call asynchronously
@@ -44,7 +42,6 @@
 // the same string reference for each tag of a given name.
 // However, early indications are that the amount of memory saved is not significant,
 // even when dealing with large catalogs such as IBAS.
-//#define USETHREADABORT in Alphora.Dataphor.DAE (currently disabled) // Determines whether or not to use Thread.Abort to terminate a running process
 //#define USETYPEDLIST throughout (currently disabled) // Determines whether or not to use the TypedList descendent or the new BaseList<T> and related generics for basic list support
 #define USEUNIFIEDJOINKEYINFERENCE in Alphora.Dataphor.DAE // Unified join key inference uses the same algorithm for all joins. See InferJoinKeys for more information.
 #define USEUPDATEVALUEFLAGS in Alphora.Dataphor.DAE // ??

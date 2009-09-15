@@ -490,7 +490,7 @@ namespace Alphora.Dataphor.DAE.Client
 				if (LInProcessAlias != null)
 				{
 					ServerConfiguration LConfiguration = InstanceManager.GetInstance(LInProcessAlias.InstanceName);
-					FHostedServer = new Server.Server();
+					FHostedServer = new Server.Engine();
 					LConfiguration.ApplyTo(FHostedServer);
 					
 					FHostedServer.IsEmbedded = LInProcessAlias.IsEmbedded;
@@ -541,7 +541,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public event DeviceNotifyEvent OnDeviceStarting;
 		
-		private void FHostedServer_OnDeviceStarting(Server.Server AServer, Schema.Device ADevice)
+		private void FHostedServer_OnDeviceStarting(Server.Engine AServer, Schema.Device ADevice)
 		{
 			if (OnDeviceStarting != null)
 				OnDeviceStarting(AServer, ADevice);
@@ -551,7 +551,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public event DeviceNotifyEvent OnDeviceStarted;
 		
-		private void FHostedServer_OnDeviceStarted(Server.Server AServer, Schema.Device ADevice)
+		private void FHostedServer_OnDeviceStarted(Server.Engine AServer, Schema.Device ADevice)
 		{
 			if (OnDeviceStarted != null)
 				OnDeviceStarted(AServer, ADevice);
@@ -561,7 +561,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public event LibraryNotifyEvent OnLibraryLoading;
 
-		private void FHostedServer_OnLibraryLoading(Server.Server AServer, string ALibraryName)
+		private void FHostedServer_OnLibraryLoading(Server.Engine AServer, string ALibraryName)
 		{
 			if (OnLibraryLoading != null)
 				OnLibraryLoading(AServer, ALibraryName);
@@ -571,7 +571,7 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		public event LibraryNotifyEvent OnLibraryLoaded;
 
-		private void FHostedServer_OnLibraryLoaded(Server.Server AServer, string ALibraryName)
+		private void FHostedServer_OnLibraryLoaded(Server.Engine AServer, string ALibraryName)
 		{
 			if (OnLibraryLoaded != null)
 				OnLibraryLoaded(AServer, ALibraryName);
@@ -616,7 +616,7 @@ namespace Alphora.Dataphor.DAE.Client
 		public ServerAlias Alias { get { return FServerAlias; } }
 		
 		private ServerHost FServerHost;
-		private Server.Server FHostedServer;
+		private Server.Engine FHostedServer;
 		private IServer FRemoteServer;
 		private IServer FExistingServer;
 

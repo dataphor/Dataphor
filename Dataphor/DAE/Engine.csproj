@@ -53,7 +53,7 @@
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION;DISABLE_PERFORMANCE_COUNTERS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;USENATIVE;NATIVEROW;ACCUMULATOR;USEOBJECTVALIDATE;NILPROPOGATION</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
@@ -105,10 +105,6 @@
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <ProjectReference Include="..\Base.Windows\Base.Windows.csproj">
-      <Project>{24D70A7F-F43A-45A3-8C54-EA31764841C7}</Project>
-      <Name>Base.Windows</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Base\Base.csproj">
       <Name>Base</Name>
       <Project>{6EC1F378-510B-48D0-8D00-E36BEF214766}</Project>
@@ -302,9 +298,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime.Data\RowValue.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Runtime.Data\ScalarManager.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Runtime.Data\ScalarValue.cs">
@@ -542,11 +535,10 @@
     </Compile>
     <Compile Include="Server\DAERegisterAttribute.cs" />
     <Compile Include="Server\PlanCache.cs" />
-    <Compile Include="Server\Server.cs">
+    <Compile Include="Server\Engine.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Server\ServerBatch.cs" />
-    <Compile Include="Server\ServerConfiguration.cs" />
     <Compile Include="Server\ServerCursor.cs" />
     <Compile Include="Server\ServerException.cs">
       <SubType>Code</SubType>
@@ -559,9 +551,6 @@
     <Compile Include="Server\ServerStructures.cs" />
     <Compile Include="Server\ServerTransaction.cs" />
     <Compile Include="Server\SignalPool.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Server\TraceCodes.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SessionInfo.cs">

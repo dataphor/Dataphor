@@ -26,8 +26,8 @@ namespace Alphora.Dataphor.DAE.Client
 			LicenseUtility.Validate(this.GetType(), this);
 		}
 		
-		private Server FServer;
-		protected Server Server 
+		private Engine FServer;
+		protected Engine Server 
 		{ 
 			get 
 			{ 
@@ -53,11 +53,10 @@ namespace Alphora.Dataphor.DAE.Client
 		
 		protected override void InternalOpen()
 		{
-			FServer = new Server();
-			FServer.TracingEnabled = false;
+			FServer = new Server.Server();
 			FServer.Start();
 			SessionInfo LSessionInfo = (SessionInfo)SessionInfo.Clone();
-			LSessionInfo.UserID = Server.CAdminUserID;
+			LSessionInfo.UserID = Engine.CAdminUserID;
 			LSessionInfo.Password = String.Empty;
 			//LSessionInfo.DefaultDeviceName = CDefaultDeviceName;
 			FServerSession = ((IServer)FServer).Connect(LSessionInfo);

@@ -279,7 +279,7 @@ namespace Alphora.Dataphor.Dataphoria
 			if (FDataSession == null)
 			{
 				InstanceConfiguration LInstanceConfiguration = InstanceManager.LoadConfiguration();
-				ServerConfiguration LDefaultInstance = LInstanceConfiguration.Instances[Server.CDefaultServerName];
+				ServerConfiguration LDefaultInstance = LInstanceConfiguration.Instances[Engine.CDefaultServerName];
 				if (LInstanceConfiguration.Instances.Count == 0)
 				{
 					LDefaultInstance = ServerConfiguration.DefaultLocalInstance();

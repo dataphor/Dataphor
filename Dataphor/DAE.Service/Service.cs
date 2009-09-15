@@ -33,7 +33,7 @@ namespace Alphora.Dataphor.DAE.Service
 				if ((AArgs[i].ToLower() == "-name") || (AArgs[i].ToLower() == "-n"))
 					return AArgs[i + 1];
 					
-			return Server.Server.CDefaultServerName;
+			return Server.Engine.CDefaultServerName;
 		}
 
 		// The main entry point for the process
@@ -81,7 +81,7 @@ namespace Alphora.Dataphor.DAE.Service
 			);
 		}
 
-		public Server.Server FServer;
+		public Server.Engine FServer;
 		public ServerHost FServerHost;
 		
 		/// <summary>
@@ -104,7 +104,7 @@ namespace Alphora.Dataphor.DAE.Service
 					InstanceManager.Save();
 				}
 				
-				FServer = new Server.Server();
+				FServer = new Server.Engine();
 				LInstance.ApplyTo(FServer);
 				FServerHost = new ServerHost(FServer, LInstance.PortNumber);
 				FServer.Start();

@@ -20,7 +20,7 @@ namespace Alphora.Dataphor.DAE.Service
 
 		public static string GetServiceName(string AInstanceName)
 		{
-			return String.Format("Alphora Dataphor ({0}){1}", AInstanceName, AInstanceName == Server.Server.CDefaultServerName ? " <default instance>" : "");
+			return String.Format("Alphora Dataphor ({0}){1}", AInstanceName, AInstanceName == Server.Engine.CDefaultServerName ? " <default instance>" : "");
 		}
 
 		private static Installer PrepareInstaller(string AInstanceName)

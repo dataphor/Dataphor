@@ -9,7 +9,6 @@ namespace Alphora.Dataphor.DAE.Streams
 	using System.Collections;
 	using System.IO;
 	using System.Runtime.Remoting.Lifetime;
-	using Alphora.Dataphor.Windows;
 	
 	public class FileStreamHeader : Disposable, ISponsor
 	{

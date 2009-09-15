@@ -28,7 +28,7 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 		public void ResetInstance()
 		{
 			// Delete the instance directory
-			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.Server.CDefaultInstanceDirectory), FTestConfiguration.Name);
+			string LInstanceDirectory = Path.Combine(Path.Combine(PathUtility.CommonAppDataPath(string.Empty, VersionModifier.None), Server.Engine.CDefaultInstanceDirectory), FTestConfiguration.Name);
 			if (Directory.Exists(LInstanceDirectory))
 				Directory.Delete(LInstanceDirectory, true);
 			
@@ -36,9 +36,9 @@ namespace Alphora.Dataphor.DAE.ServerTests.Utilities
 
 		
 
-		public Server.Server GetServer()
+		public Server.Engine GetServer()
 		{
-			Server.Server LServer = new Server.Server();
+			Server.Engine LServer = new Server.Engine();
 			FTestConfiguration.ApplyTo(LServer);
 			return LServer;
 		}

@@ -28,7 +28,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.TextBox txtLibraryDirectory;
 		private System.Windows.Forms.Button btnLibraryBrowse;
-		private System.Windows.Forms.CheckBox chkTracingEnabled;
 		private System.Windows.Forms.CheckBox chkLogErrors;
 		private CheckBox cbCatalogStoreShared;
 		private TextBox tbCatalogStorePassword;
@@ -93,12 +92,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			set { txtLibraryDirectory.Text = value; }
 		}
 
-		public bool TracingEnabled
-		{
-			get { return chkTracingEnabled.Checked; }
-			set { chkTracingEnabled.Checked = value; }
-		}
-
 		public bool LogErrors
 		{
 			get { return chkLogErrors.Checked; }
@@ -138,7 +131,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			this.label5 = new System.Windows.Forms.Label();
 			this.txtLibraryDirectory = new System.Windows.Forms.TextBox();
 			this.btnLibraryBrowse = new System.Windows.Forms.Button();
-			this.chkTracingEnabled = new System.Windows.Forms.CheckBox();
 			this.chkLogErrors = new System.Windows.Forms.CheckBox();
 			this.cbCatalogStoreShared = new System.Windows.Forms.CheckBox();
 			this.tbCatalogStorePassword = new System.Windows.Forms.TextBox();
@@ -246,14 +238,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			this.btnLibraryBrowse.Text = "...";
 			this.btnLibraryBrowse.Click += new System.EventHandler(this.button1_Click);
 			// 
-			// chkTracingEnabled
-			// 
-			this.chkTracingEnabled.Location = new System.Drawing.Point(8, 205);
-			this.chkTracingEnabled.Name = "chkTracingEnabled";
-			this.chkTracingEnabled.Size = new System.Drawing.Size(112, 24);
-			this.chkTracingEnabled.TabIndex = 6;
-			this.chkTracingEnabled.Text = "Tracing Enabled";
-			// 
 			// chkLogErrors
 			// 
 			this.chkLogErrors.Location = new System.Drawing.Point(115, 205);
@@ -319,7 +303,6 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.chkLogErrors);
-			this.Controls.Add(this.chkTracingEnabled);
 			this.Controls.Add(this.btnLibraryBrowse);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.txtLibraryDirectory);

@@ -83,7 +83,7 @@ namespace Alphora.Dataphor.DAE.Schema
 			if (LUser == null)
 				LUser = FUsers[CDefaultUserID];
 			if (LUser == null)
-				LUser = new ServerLinkUser(CDefaultUserID, this, Server.Server.CAdminUserID, SecurityUtility.EncryptPassword(String.Empty));
+				LUser = new ServerLinkUser(CDefaultUserID, this, Server.Engine.CAdminUserID, SecurityUtility.EncryptPassword(String.Empty));
 
 			return LUser;
 		}

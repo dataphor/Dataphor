@@ -22,7 +22,7 @@ namespace Alphora.Dataphor.DAE.Server
 			FSession = ASession;
 			FSessionInfo = ASessionInfo;
 			FSessionID = ASession.SessionID;
-			FInternalSession = ((IServer)FServer.FInternalServer).Connect(new SessionInfo(Alphora.Dataphor.DAE.Server.Server.CSystemUserID, String.Empty, DAE.Server.Server.CSystemLibraryName, false));
+			FInternalSession = ((IServer)FServer.FInternalServer).Connect(new SessionInfo(Alphora.Dataphor.DAE.Server.Engine.CSystemUserID, String.Empty, DAE.Server.Engine.CSystemLibraryName, false));
 			StartKeepAlive();
 		}
 

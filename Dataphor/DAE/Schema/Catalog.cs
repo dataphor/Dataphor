@@ -464,7 +464,7 @@ namespace Alphora.Dataphor.DAE.Schema
 				foreach (LoadedLibrary LLibrary in ALibrary.RequiredLibraries)
 					EmitLibrary(AContext, LLibrary);
 
-				if (ALibrary.Name != Server.CSystemLibraryName)
+				if (ALibrary.Name != Engine.CSystemLibraryName)
 				{
 					ExpressionStatement LStatement = new ExpressionStatement();
 					LStatement.Expression = new CallExpression("LoadLibrary", new Expression[]{new ValueExpression(ALibrary.Name)});
@@ -1398,8 +1398,8 @@ namespace Alphora.Dataphor.DAE.Schema
 						(AObject is CatalogObject) && 
 						(
 							IncludeSystem || 
-							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Server.CSystemLibraryName))) ||
-							(LibraryName != Server.CSystemLibraryName)
+							((LibraryName == String.Empty) && ((AObject.Library == null) || (AObject.Library.Name == Engine.CSystemLibraryName))) ||
+							(LibraryName != Engine.CSystemLibraryName)
 						) ||
 						(
 							!(AObject is CatalogObject) &&

@@ -677,7 +677,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		public override object InternalExecute(Program AProgram)
 		{
 			// Validate the catalog level enforcement constraint
-			if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && FReference.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
+			if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && FReference.Enforced && !AProgram.ServerProcess.IsLoading() && AProgram.ServerProcess.IsReconciliationEnabled())
 			{
 				object LObject;
 

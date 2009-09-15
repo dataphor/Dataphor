@@ -29,24 +29,12 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	/// <summary> Library notify event for the Library notification events in the Dataphor Server </summary>	
 	/// <remarks> Note that these events are only surfaced in process, and cannot be used through the remoting boundary. </remarks>
-	public delegate void LibraryNotifyEvent(Server AServer, string ALibraryName);
+	public delegate void LibraryNotifyEvent(Engine AServer, string ALibraryName);
 
 	/// <summary> Device notify event for the Device notification events in the Dataphor Server </summary>
 	/// <remarks> Note that these events are only surfaced in process, and cannot be used through the remoting boundary. </remarks>
-	public delegate void DeviceNotifyEvent(Server AServer, Schema.Device ADevice);
+	public delegate void DeviceNotifyEvent(Engine AServer, Schema.Device ADevice);
 		
-	public enum ServerType 
-	{ 
-		/// <summary>Standard Dataphor Server, the default behavior is used.</summary>
-		Standard, 
-	
-		/// <summary>Embedded Dataphor Server, the server is intended to be used as a single-user data access engine embedded within a client.</summary>
-		Embedded, 
-	
-		/// <summary>Repository, the server is intended to be used as a client-side catalog repository for a client connecting to a remote server.</summary>
-		Repository 
-	}
-
 	public class LoadingContext : System.Object
 	{
 		public LoadingContext(Schema.User AUser, string ALibraryName) : base()

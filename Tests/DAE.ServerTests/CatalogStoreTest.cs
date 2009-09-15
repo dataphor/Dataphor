@@ -68,7 +68,7 @@ namespace Alphora.Dataphor.DAE.ServerTests
 			AServerConfigurationManager.ResetInstance();
 				
 			// Start a server based on the StoreRegression instance
-			Server.Server LServer = AServerConfigurationManager.GetServer();
+			Server.Engine LServer = AServerConfigurationManager.GetServer();
 			LServer.Start();
 			
 			// Stop the server

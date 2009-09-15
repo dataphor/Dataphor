@@ -19,7 +19,7 @@ namespace Alphora.Dataphor.DAE.Server
 {
 	public class ServerHost : Disposable
 	{
-		public ServerHost(Server AServer, int APortNumber)
+		public ServerHost(Engine AServer, int APortNumber)
 		{
 			// Establish a listener to route instance port discovery traffic
 			Listener.EstablishListener();
@@ -103,8 +103,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 
 
-		private Server FServer;
-		public Server Server
+		private Engine FServer;
+		public Engine Server
 		{
 			get { return FServer; }
 		}

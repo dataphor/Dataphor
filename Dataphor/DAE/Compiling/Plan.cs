@@ -580,7 +580,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 		}
 
 		// Catalog		
-		public bool IsRepository { get { return FServerProcess.ServerSession.Server.IsRepository; } }
+		public bool IsRepository { get { return FServerProcess.ServerSession.Server.IsEngine; } }
 		
 		public Schema.Catalog Catalog { get { return FServerProcess.ServerSession.Server.Catalog; } }
 		
@@ -609,10 +609,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 		public IValueManager ValueManager { get { return FServerProcess.ValueManager; } }
 
 		public Schema.Device TempDevice { get { return FServerProcess.ServerSession.Server.TempDevice; } }
-		
-		#if USEHEAPDEVICE
-		public Schema.Device HeapDevice { get { return FServerProcess.ServerSession.Server.HeapDevice; } }
-		#endif
 		
 		public CursorManager CursorManager { get { return FServerProcess.ServerSession.CursorManager; } }
 
@@ -821,7 +817,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 				Schema.Object LObject = (Schema.Object)FCreationObjects[FCreationObjects.Count - 1];
 				if ((LObject != AObject) && (!(AObject is Schema.Reference) || (LObject is Schema.TableVar)) && (!LObject.HasDependencies() || !LObject.Dependencies.Contains(AObject.ID)))
 				{
-					if (!FServerProcess.ServerSession.Server.IsRepository)
+					if (!FServerProcess.ServerSession.Server.IsEngine)
 					{
 						if 
 						(
@@ -834,7 +830,7 @@ namespace Alphora.Dataphor.DAE.Compiling
 							Schema.LoadedLibrary LDependentLibrary = AObject.Library;
 							if (LDependentLibrary == null)
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name);
-							if (!LLibrary.IsRequiredLibrary(LDependentLibrary) && (String.Compare(LDependentLibrary.Name, Server.CSystemLibraryName, false) != 0)) // Ignore dependencies to the system library, these are implicitly available
+							if (!LLibrary.IsRequiredLibrary(LDependentLibrary) && (String.Compare(LDependentLibrary.Name, Engine.CSystemLibraryName, false) != 0)) // Ignore dependencies to the system library, these are implicitly available
 								throw new Schema.SchemaException(Schema.SchemaException.Codes.NonRequiredLibraryDependency, LObject.Name, LLibrary.Name, AObject.Name, LDependentLibrary.Name);
 						}
 						

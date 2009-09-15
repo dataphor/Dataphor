@@ -234,7 +234,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Returns true if AUser is the owner of this right, or is a member of a parent Group of the owner of this right, recursively.</summary>
 		public bool IsOwner(string AUserID)
 		{
-			if ((AUserID == Server.Server.CSystemUserID) || (AUserID == Server.Server.CAdminUserID) || (AUserID == FOwnerID)) 
+			if ((AUserID == Server.Engine.CSystemUserID) || (AUserID == Server.Engine.CAdminUserID) || (AUserID == FOwnerID)) 
 				return true;
 			
 			return false;
@@ -348,12 +348,12 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public bool IsSystemUser()
 		{
-			return (String.Compare(ID, Server.Server.CSystemUserID, true) == 0);
+			return (String.Compare(ID, Server.Engine.CSystemUserID, true) == 0);
 		}
 		
 		public bool IsAdminUser()
 		{
-			return ((String.Compare(ID, Server.Server.CSystemUserID, true) == 0) || (String.Compare(ID, Server.Server.CAdminUserID, true) == 0));
+			return ((String.Compare(ID, Server.Engine.CSystemUserID, true) == 0) || (String.Compare(ID, Server.Engine.CAdminUserID, true) == 0));
 		}
 	}
 	

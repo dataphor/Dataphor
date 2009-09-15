@@ -1987,7 +1987,7 @@ namespace Alphora.Dataphor.DAE.Device.SQL
 						try
 						{
 							CheckSupported(LPlan, ATableVar);
-							if (!AProcess.ServerSession.Server.IsRepository)
+							if (!AProcess.ServerSession.Server.IsEngine)
 								Compiler.CompileTableVarKeyConstraints(LPlan, ATableVar);
 						}
 						finally

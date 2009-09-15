@@ -8,7 +8,7 @@ namespace Alphora.Dataphor.DAE.Service.ConfigurationUtility
 	{
 		public ConfigurationUtilitySettings()
 		{
-			FSelectedInstanceName = Server.Server.CDefaultServerName;
+			FSelectedInstanceName = Server.Engine.CDefaultServerName;
 			FShowTrayIcon = true;
 			FAppAutoStart = false;
 		}

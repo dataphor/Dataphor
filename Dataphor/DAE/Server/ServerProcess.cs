@@ -4,7 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
 #define LOADFROMLIBRARIES
 #define PROCESSSTREAMSOWNED // Determines whether or not the process will deallocate all streams allocated by the process.
 
@@ -29,7 +28,6 @@ namespace Alphora.Dataphor.DAE.Server
 	using Alphora.Dataphor.DAE.Runtime.Data;
 	using Alphora.Dataphor.DAE.Runtime.Instructions;
 	using Alphora.Dataphor.DAE.Streams;
-	using Alphora.Dataphor.Windows;
 
 	// ServerProcess
 	public class ServerProcess : ServerChildObject, IServerProcess
@@ -347,39 +345,21 @@ namespace Alphora.Dataphor.DAE.Server
 		public Statement ParseScript(string AScript, ParserMessages AMessages)
 		{
 			Statement LStatement;								  
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
-			#endif
 			LStatement = FParser.ParseScript(AScript, AMessages);
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
-			#endif
 			return LStatement;
 		}
 		
 		public Statement ParseStatement(string AStatement, ParserMessages AMessages)
 		{
 			Statement LStatement;
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
-			#endif
 			LStatement = FParser.ParseStatement(AStatement, AMessages);
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
-			#endif
 			return LStatement;
 		}
 		
 		public Expression ParseExpression(string AExpression)
 		{
 			Expression LExpression;
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginParse, "Begin Parse");
-			#endif
 			LExpression = FParser.ParseCursorDefinition(AExpression);
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndParse, "End Parse");
-			#endif
 			return LExpression;
 		}
 
@@ -602,7 +582,7 @@ namespace Alphora.Dataphor.DAE.Server
 				Path.IsPathRooted(AFileName) 
 					? AFileName 
 					: 
-						ALibrary.Name == Server.CSystemLibraryName
+						ALibrary.Name == Engine.CSystemLibraryName
 							? PathUtility.GetFullFileName(AFileName)
 							: Path.Combine(ALibrary.GetLibraryDirectory(FServerSession.Server.LibraryDirectory), AFileName);
 			#else
@@ -733,14 +713,6 @@ namespace Alphora.Dataphor.DAE.Server
 				RemoteSessions[0].Dispose();
 		}
 		
-		// Tracing
-		#if TRACEEVENTS
-		public void RaiseTraceEvent(string ATraceCode, string ADescription)
-		{
-			FServerSession.Server.RaiseTraceEvent(this, ATraceCode, ADescription);
-		}
-		#endif
-		
 		// Plans
 		/// <summary>Indicates whether or not warnings encountered during compilation of plans on this process will be reported.</summary>
 		public bool SuppressWarnings
@@ -784,9 +756,6 @@ namespace Alphora.Dataphor.DAE.Server
 			DateTime LStartTime = DateTime.Now;
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile", DateTime.Now.ToString("hh:mm:ss.ffff")));
 			#endif
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginCompile, "Begin Compile");
-			#endif
 			Schema.DerivedTableVar LTableVar = null;
 			LTableVar = new Schema.DerivedTableVar(Schema.Object.GetNextObjectID(), Schema.Object.NameFromGuid(AProgram.ID));
 			LTableVar.SessionObjectName = LTableVar.Name;
@@ -826,9 +795,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				APlan.PopCreationObject();
 			}
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndCompile, "End Compile");
-			#endif
 			#if TIMING
 			System.Diagnostics.Debug.WriteLine(String.Format("{0} -- ServerSession.Compile -- Compile Time: {1}", DateTime.Now.ToString("hh:mm:ss.ffff"), (DateTime.Now - LStartTime).ToString()));
 			#endif
@@ -897,9 +863,6 @@ namespace Alphora.Dataphor.DAE.Server
 			{
 				int LContextHashCode = GetContextHashCode(AParams);
 				IServerStatementPlan LPlan = ServerSession.GetCachedPlan(this, AStatement, LContextHashCode) as IServerStatementPlan;
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
-				#endif
 				if (LPlan != null)
 				{
 					FPlans.Add(LPlan);
@@ -913,9 +876,6 @@ namespace Alphora.Dataphor.DAE.Server
 					if (!LPlan.Messages.HasErrors)
 						ServerSession.AddCachedPlan(this, AStatement, LContextHashCode, (ServerPlan)LPlan);
 				}
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
-				#endif
 				return LPlan;
 			}
 			catch (Exception E)
@@ -1080,16 +1040,10 @@ namespace Alphora.Dataphor.DAE.Server
 				}
 				else
 				{
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.BeginPrepare, "Begin Prepare");
-					#endif
 					ParserMessages LMessages = new ParserMessages();
 					LPlan = (IServerExpressionPlan)CompileExpression(ParseExpression(AExpression), LMessages, AParams, new SourceContext(AExpression, ALocator));
 					if (!LPlan.Messages.HasErrors)
 						ServerSession.AddCachedPlan(this, AExpression, LContextHashCode, (ServerPlan)LPlan);
-					#if TRACEEVENTS
-					RaiseTraceEvent(TraceCodes.EndPrepare, "End Prepare");
-					#endif
 				}
 				return LPlan;
 			}
@@ -1371,9 +1325,6 @@ namespace Alphora.Dataphor.DAE.Server
     
 		protected internal void InternalBeginTransaction(IsolationLevel AIsolationLevel)
 		{
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginBeginTransaction, "Begin BeginTransaction");
-			#endif
 			FTransactions.BeginTransaction(this, AIsolationLevel);
 
 			if (UseDTC && (FDTCTransaction == null))
@@ -1390,18 +1341,11 @@ namespace Alphora.Dataphor.DAE.Server
 			// Begin a transaction on all device sessions
 			foreach (Schema.DeviceSession LDeviceSession in DeviceSessions)
 				LDeviceSession.BeginTransaction(AIsolationLevel);
-				
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndBeginTransaction, "End BeginTransaction");
-			#endif
 		}
 		
 		protected internal void InternalPrepareTransaction()
 		{
 			CheckInTransaction();
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginPrepareTransaction, "Begin PrepareTransaction");
-			#endif
 
 			ServerTransaction LTransaction = FTransactions.CurrentTransaction();
 			if (!LTransaction.Prepared)
@@ -1433,18 +1377,11 @@ namespace Alphora.Dataphor.DAE.Server
 				
 				LTransaction.Prepared = true;
 			}
-
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndPrepareTransaction, "End PrepareTransaction");
-			#endif
 		}
 		
 		protected internal void InternalCommitTransaction()
 		{
 			CheckInTransaction();
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginCommitTransaction, "Begin CommitTransaction");
-			#endif
 
 			// Prepare Commit Phase
 			InternalPrepareTransaction();
@@ -1491,17 +1428,11 @@ namespace Alphora.Dataphor.DAE.Server
 				LCatalogDeviceSession.CommitTransaction();
 				
 			FTransactions.EndTransaction(true);
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndCommitTransaction, "End CommitTransaction");
-			#endif
 		}
 
 		protected internal void InternalRollbackTransaction()
 		{
 			CheckInTransaction();
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginRollbackTransaction, "Begin RollbackTransaction");
-			#endif
 			try
 			{
 				FTransactions.CurrentTransaction().InRollback = true;
@@ -1581,9 +1512,6 @@ namespace Alphora.Dataphor.DAE.Server
 			finally
 			{
 				FTransactions.EndTransaction(false);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndRollbackTransaction, "End RollbackTransaction");
-				#endif
 			}
 		}
 		
@@ -1645,13 +1573,7 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginBeginApplicationTransaction, "Begin BeginApplicationTransaction");
-				#endif
 				Guid LATID = ApplicationTransactionUtility.BeginApplicationTransaction(this);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndBeginApplicationTransaction, "End BeginApplicationTransaction");
-				#endif
 				
 				if (AShouldJoin)
 					JoinApplicationTransaction(LATID, AIsInsert);
@@ -1676,13 +1598,7 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginPrepareApplicationTransaction, "Begin PrepareApplicationTransaction");
-				#endif
 				ApplicationTransactionUtility.PrepareApplicationTransaction(this, AID);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndPrepareApplicationTransaction, "End PrepareApplicationTransaction");
-				#endif
 			}
 			catch (Exception E)
 			{
@@ -1702,13 +1618,7 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginCommitApplicationTransaction, "Begin CommitApplicationTransaction");
-				#endif
 				ApplicationTransactionUtility.CommitApplicationTransaction(this, AID);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndCommitApplicationTransaction, "End CommitApplicationTransaction");
-				#endif
 			}
 			catch (Exception E)
 			{
@@ -1728,13 +1638,7 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginRollbackApplicationTransaction, "Begin RollbackApplicationTransaction");
-				#endif
 				ApplicationTransactionUtility.RollbackApplicationTransaction(this, AID);
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndRollbackApplicationTransaction, "End RollbackApplicationTransaction");
-				#endif
 			}
 			catch (Exception E)
 			{
@@ -1753,15 +1657,9 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginJoinApplicationTransaction, "Begin JoinApplicationTransaction");
-				#endif
 				ApplicationTransactionUtility.JoinApplicationTransaction(this, AID);
 				FApplicationTransactionID = AID;
 				FIsInsert = AIsInsert;
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndJoinApplicationTransaction, "End JoinApplicationTransaction");
-				#endif
 			}
 			catch (Exception E)
 			{
@@ -1780,15 +1678,9 @@ namespace Alphora.Dataphor.DAE.Server
 			int LNestingLevel = BeginTransactionalCall();
 			try
 			{
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.BeginLeaveApplicationTransaction, "Begin LeaveApplicationTransaction");
-				#endif
 				ApplicationTransactionUtility.LeaveApplicationTransaction(this);
 				FApplicationTransactionID = Guid.Empty;
 				FIsInsert = false;
-				#if TRACEEVENTS
-				RaiseTraceEvent(TraceCodes.EndLeaveApplicationTransaction, "End LeaveApplicationTransaction");
-				#endif
 			}
 			catch (Exception E)
 			{

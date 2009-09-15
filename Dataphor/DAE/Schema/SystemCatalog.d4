@@ -785,15 +785,8 @@ begin
 	create operator CommitApplicationTransaction(const AID : Guid) class "System.CommitApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator RollbackApplicationTransaction(const AID : Guid) class "System.RollbackApplicationTransactionNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator SaveLibraryCatalog(const ALibraryName : Name) class "System.SystemSaveLibraryCatalogNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.TraceOn(const ATraceCode : String) class "System.SystemTraceOnNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.TraceOff(const ATraceCode : String) class "System.SystemTraceOffNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.Tracing(const ATraceCode : String) : Boolean class "System.SystemTracingNode" static tags { DAE.IsLiteral = "False", DAE.IsRemotable = "False" };
-	create operator Diagnostics.EnableTracing() class "System.SystemEnableTracingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.DisableTracing() class "System.SystemDisableTracingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.EnableErrorLogging() class "System.SystemEnableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.DisableErrorLogging() class "System.SystemDisableErrorLoggingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.EnableSessionTracing() class "System.SystemEnableSessionTracingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
-	create operator Diagnostics.DisableSessionTracing() class "System.SystemDisableSessionTracingNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.LogError(const AError : Error) class "System.SystemLogErrorNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.LogMessage(const AMessage : String) class "System.SystemLogMessageNode" static tags { DAE.IsRemotable = "False", DAE.IsFunctional = "False" };
 	create operator Diagnostics.ListLogs() : table { Sequence : Integer, LogName : String } class "System.SystemListLogsNode" static tags { DAE.IsRemotable = "False", DAE.IsLiteral = "False" };
@@ -1166,7 +1159,6 @@ begin
 	{
 		Name : Name, 
 		Version : String,
-		TracingEnabled : Boolean, 
 		LogErrors : Boolean,
 		TimeStamp : Long,
 		CacheTimeStamp : Long, 
@@ -1174,8 +1166,7 @@ begin
 		DerivationTimeStamp : Long, 
 		InstanceDirectory : String, 
 		LibraryDirectory : String,
-		IsRepository : Boolean, 
-		IsEmbedded : Boolean,
+		IsEngine : Boolean, 
 		MaxConcurrentProcesses : Integer,
 		ProcessWaitTimeout : TimeSpan,
 		ProcessTerminateTimeout : TimeSpan,
@@ -1408,7 +1399,6 @@ begin
 		Connection_Name : String nil,
 		Current_Library_Name : Name, 
 		DefaultIsolationLevel : String,
-		TracingEnabled : Boolean, 
 		DefaultUseDTC : Boolean,
 		DefaultUseImplicitTransactions : Boolean,
 		Language : String,

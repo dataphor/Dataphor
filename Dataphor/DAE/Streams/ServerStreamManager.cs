@@ -201,23 +201,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			#else
 			FDefaultProvider = new MemoryStreamProvider();
 			#endif
-
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (!(AServer is DAE.Server.Server) || !((DAE.Server.Server)AServer).IsRepository)
-			{
-				FUsePerformanceCounters = true;
-				try
-				{
-					FAllocCounter = new PerformanceCounter(Server.Server.CDataphorServerCategoryName, Server.Server.CStreamsAllocatedCounterName, AServer.Name, false);
-					FAllocCounter.RawValue = 0;
-					FAllocRateCounter = new PerformanceCounter(Server.Server.CDataphorServerCategoryName, Server.Server.CStreamAllocationsPerSecondCounterName, AServer.Name, false);
-					FAllocRateCounter.RawValue = 0;
-				}
-				catch
-				{
-				}
-			}
-			#endif
 		}
 		
 		protected override void Dispose(bool ADisposing)
@@ -232,32 +215,9 @@ namespace Alphora.Dataphor.DAE.Streams
 			FLockManager = null;
 			FResourceManagerID = -1;
 
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.RawValue = 0;
-					FAllocCounter.Dispose();
-					FAllocCounter = null;
-					FAllocRateCounter.RawValue = 0;
-					FAllocRateCounter.Dispose();
-					FAllocRateCounter = null;
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			base.Dispose(ADisposing);
 		}
 
-		#if !DISABLE_PERFORMANCE_COUNTERS
-		private bool FUsePerformanceCounters;
-		private PerformanceCounter FAllocCounter;
-		private PerformanceCounter FAllocRateCounter;
-		#endif
 		#if UseFileStreamProvider		
 		private FileStreamProvider FDefaultProvider;
 		#else
@@ -336,20 +296,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public StreamID Register(IStreamProvider AProvider)
 		{
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.Increment();
-					FAllocRateCounter.Increment();
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			lock (this)
 			{
 				StreamID LStreamID = InternalGetNextStreamID();
@@ -368,19 +314,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public void Unregister(StreamID AStreamID)
 		{
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.Decrement();
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			lock (this)
 			{
 				if (StreamTracingEnabled)
@@ -391,20 +324,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public override StreamID Allocate()
 		{
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.Increment();
-					FAllocRateCounter.Increment();
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			lock (this)
 			{
 				StreamID LStreamID = InternalGetNextStreamID();
@@ -418,20 +337,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public override StreamID Reference(StreamID AStreamID)
 		{
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.Increment();
-					FAllocRateCounter.Increment();
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			lock (this)
 			{
 				StreamID LStreamID = InternalGetNextStreamID();
@@ -470,19 +375,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public override void Deallocate(StreamID AStreamID)
 		{
-			#if !DISABLE_PERFORMANCE_COUNTERS
-			if (FUsePerformanceCounters)
-			{
-				try
-				{
-					FAllocCounter.Decrement();
-				}
-				catch
-				{
-				}
-			}
-			#endif
-
 			lock (this)
 			{
 				StreamHeader LHeader = GetStreamHeader(AStreamID);

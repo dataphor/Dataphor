@@ -1997,14 +1997,14 @@ namespace Alphora.Dataphor.DAE.Schema
 		// IsSystem
 		public override bool IsSystem 
 		{ 
-			get { return (FOwner != null) && (FOwner.ID == Server.Server.CSystemUserID); }
+			get { return (FOwner != null) && (FOwner.ID == Server.Engine.CSystemUserID); }
 			set { throw new RuntimeException(RuntimeException.Codes.InternalError, "Cannot set IsSystem for a Catalog Object"); } 
 		}
 		
 		/// <summary>Returns true if AUser is the owner of this object, or is a member of a parent Group of the owner of this object, recursively.</summary>
 		public bool IsOwner(User AUser)
 		{
-			if ((AUser.ID == Server.Server.CSystemUserID) || (AUser.ID == Server.Server.CAdminUserID) || (AUser.ID == FOwner.ID)) 
+			if ((AUser.ID == Server.Engine.CSystemUserID) || (AUser.ID == Server.Engine.CAdminUserID) || (AUser.ID == FOwner.ID)) 
 				return true;
 				
 			return false;

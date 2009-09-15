@@ -88,7 +88,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		protected override void InternalStart(ServerProcess AProcess)
 		{
 			base.InternalStart(AProcess);
-			if (!AProcess.ServerSession.Server.IsRepository)
+			if (!AProcess.ServerSession.Server.IsEngine)
 			{
 				FStore = new CatalogStore();
 				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
@@ -523,23 +523,21 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 		
 		private void PopulateServerSettings(Program AProgram, NativeTable ANativeTable, Row ARow)
 		{
-			Server.Server LServer = AProgram.ServerProcess.ServerSession.Server;
+			Server.Server LServer = (Server.Server)AProgram.ServerProcess.ServerSession.Server;
 			ARow[0] = LServer.Name;
 			ARow[1] = GetType().Assembly.GetName().Version.ToString();
-			ARow[2] = LServer.TracingEnabled;
-			ARow[3] = LServer.LogErrors;
-			ARow[4] = LServer.Catalog.TimeStamp;
-			ARow[5] = LServer.CacheTimeStamp;
-			ARow[6] = LServer.PlanCacheTimeStamp;
-			ARow[7] = LServer.DerivationTimeStamp;
-			ARow[8] = LServer.InstanceDirectory;
-			ARow[9] = LServer.LibraryDirectory;
-			ARow[10] = LServer.IsRepository;
-			ARow[11] = LServer.IsEmbedded;
-			ARow[12] = LServer.MaxConcurrentProcesses;
-			ARow[13] = LServer.ProcessWaitTimeout;
-			ARow[14] = LServer.ProcessTerminationTimeout;
-			ARow[15] = LServer.PlanCache.Size;
+			ARow[2] = LServer.LogErrors;
+			ARow[3] = LServer.Catalog.TimeStamp;
+			ARow[4] = LServer.CacheTimeStamp;
+			ARow[5] = LServer.PlanCacheTimeStamp;
+			ARow[6] = LServer.DerivationTimeStamp;
+			ARow[7] = LServer.InstanceDirectory;
+			ARow[8] = LServer.LibraryDirectory;
+			ARow[9] = LServer.IsEngine;
+			ARow[10] = LServer.MaxConcurrentProcesses;
+			ARow[11] = LServer.ProcessWaitTimeout;
+			ARow[12] = LServer.ProcessTerminationTimeout;
+			ARow[13] = LServer.PlanCache.Size;
 			ANativeTable.Insert(AProgram.ValueManager, ARow);
 		}
 		
@@ -565,15 +563,14 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 				ARow[3] = LSession.SessionInfo.CatalogCacheName;
 				ARow[4] = LSession.CurrentLibrary.Name;
 				ARow[5] = LSession.SessionInfo.DefaultIsolationLevel.ToString();
-				ARow[6] = LSession.SessionInfo.SessionTracingEnabled;
-				ARow[7] = LSession.SessionInfo.DefaultUseDTC;
-				ARow[8] = LSession.SessionInfo.DefaultUseImplicitTransactions;
-				ARow[9] = LSession.SessionInfo.Language.ToString();
-				ARow[10] = LSession.SessionInfo.FetchCount;
-				ARow[11] = LSession.SessionInfo.DefaultMaxStackDepth;
-				ARow[12] = LSession.SessionInfo.DefaultMaxCallDepth;
-				ARow[13] = LSession.SessionInfo.UsePlanCache;
-				ARow[14] = LSession.SessionInfo.ShouldEmitIL;
+				ARow[6] = LSession.SessionInfo.DefaultUseDTC;
+				ARow[7] = LSession.SessionInfo.DefaultUseImplicitTransactions;
+				ARow[8] = LSession.SessionInfo.Language.ToString();
+				ARow[9] = LSession.SessionInfo.FetchCount;
+				ARow[10] = LSession.SessionInfo.DefaultMaxStackDepth;
+				ARow[11] = LSession.SessionInfo.DefaultMaxCallDepth;
+				ARow[12] = LSession.SessionInfo.UsePlanCache;
+				ARow[13] = LSession.SessionInfo.ShouldEmitIL;
 				ANativeTable.Insert(AProgram.ValueManager, ARow);
 			}
 		}

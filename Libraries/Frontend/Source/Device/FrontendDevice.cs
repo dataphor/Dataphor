@@ -639,7 +639,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 				if (!FLibrariesLoaded)
 				{
 					foreach (Schema.Library LLibrary in AProgram.Catalog.Libraries)
-						if (!Schema.Object.NamesEqual(LLibrary.Name, DAE.Server.Server.CSystemLibraryName) && !FLibraries.ContainsName(LLibrary.Name))
+						if (!Schema.Object.NamesEqual(LLibrary.Name, DAE.Server.Engine.CSystemLibraryName) && !FLibraries.ContainsName(LLibrary.Name))
 							LoadLibrary(AProgram, Schema.Object.EnsureRooted(LLibrary.Name));
 					FLibrariesLoaded = true;
 				}

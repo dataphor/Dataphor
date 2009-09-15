@@ -2456,7 +2456,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					if (LeftKey.Columns.ContainsName(AColumnName))
 					{
-						if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && RetrieveRight)
+						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
 						{
 							LChanged = true;
 							if (IsNatural)
@@ -2521,7 +2521,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 					}
 					else if (RightKey.Columns.ContainsName(AColumnName))
 					{
-						if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && RetrieveLeft)
+						if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
 						{
 							LChanged = true;
 							if (IsNatural)
@@ -3414,7 +3414,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LChangePropagated = true;
 						if (!LIsRowExistsColumn || HasRow(ANewRow))
 						{
-							if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && RetrieveRight)
+							if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveRight)
 							{
 								EnsureRightSelectNode(AProgram.Plan);
 								using (Table LTable = FRightSelectNode.Execute(AProgram) as Table)
@@ -4273,7 +4273,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 							LChangePropagated = true;
 						if (!LIsRowExistsColumn || HasRow(ANewRow))
 						{
-							if (!AProgram.ServerProcess.ServerSession.Server.IsRepository && RetrieveLeft)
+							if (!AProgram.ServerProcess.ServerSession.Server.IsEngine && RetrieveLeft)
 							{
 								EnsureLeftSelectNode(AProgram.Plan);
 								using (Table LTable = FLeftSelectNode.Execute(AProgram) as Table)

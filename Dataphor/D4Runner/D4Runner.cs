@@ -29,7 +29,7 @@ namespace D4Runner
 		public string Host = "localhost";
 		
 		[Argument(ArgumentType.AtMostOnce, HelpText="The name of the instance to use to connect.", DefaultValue="Dataphor")]
-		public string Instance = Server.CDefaultServerName;
+		public string Instance = Engine.CDefaultServerName;
 
 		[Argument(ArgumentType.AtMostOnce, HelpText="Port of Dataphor Server (override to bypass the listener).", DefaultValue=0)]
 		public int Port = 0;

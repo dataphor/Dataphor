@@ -6,7 +6,6 @@
 
 using System;
 using System.IO;
-using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Server
 {
@@ -67,7 +66,7 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return FDeviceSettings; }
 		}
 		
-		public void ApplyTo(Server AServer)
+		public void ApplyTo(Engine AServer)
 		{
 			AServer.Name = FName;
 			AServer.LibraryDirectory = FLibraryDirectories;
@@ -80,9 +79,9 @@ namespace Alphora.Dataphor.DAE.Server
 		public static ServerConfiguration DefaultInstance(string AInstanceName)
 		{
 			ServerConfiguration LInstance = new ServerConfiguration();
-			LInstance.Name = String.IsNullOrEmpty(AInstanceName) ? Server.CDefaultServerName : AInstanceName;
+			LInstance.Name = String.IsNullOrEmpty(AInstanceName) ? Engine.CDefaultServerName : AInstanceName;
 			LInstance.PortNumber = CDefaultPortNumber;
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
+			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Engine.CDefaultLibraryDirectory);
 			return LInstance;
 		}
 		
@@ -91,7 +90,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerConfiguration LInstance = new ServerConfiguration();
 			LInstance.Name = CDefaultLocalInstanceName;
 			LInstance.PortNumber = CDefaultLocalPortNumber; // don't use the same default port as the service
-			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Server.CDefaultLibraryDirectory);
+			LInstance.LibraryDirectories = Path.Combine(PathUtility.GetInstallationDirectory(), Engine.CDefaultLibraryDirectory);
 			return LInstance;
 		}
 	}

@@ -1436,7 +1436,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				try
 				{
 					ARow.CopyTo(LSelectRow);
-					if (((ACheckConcurrency && ShouldCheckConcurrency) || LSelectRow.DataType.Columns.IsProperSupersetOf(ARow.DataType.Columns)) && !AProgram.ServerProcess.ServerSession.Server.IsRepository)
+					if (((ACheckConcurrency && ShouldCheckConcurrency) || LSelectRow.DataType.Columns.IsProperSupersetOf(ARow.DataType.Columns)) && !AProgram.ServerProcess.ServerSession.Server.IsEngine)
 					{
 						Row LRow = Select(AProgram, LSelectRow);
 						if (LRow != null)

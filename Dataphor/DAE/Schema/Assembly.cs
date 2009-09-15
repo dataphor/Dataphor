@@ -9,7 +9,6 @@ using System.Reflection;
 using Alphora.Dataphor.BOP;
 using Alphora.Dataphor.DAE.Language.D4;
 using Alphora.Dataphor.DAE.Server;
-using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Schema
 {

@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Server
 		
 		private static string GetInstanceDirectory()
 		{
-			string LResult = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), Server.CDefaultInstanceDirectory);
+			string LResult = Path.Combine(PathUtility.CommonAppDataPath(String.Empty, VersionModifier.None), Engine.CDefaultInstanceDirectory);
 			Directory.CreateDirectory(LResult);
 			return LResult;
 		}

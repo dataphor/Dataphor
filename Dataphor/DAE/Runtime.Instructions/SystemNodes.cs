@@ -4,7 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
 #define NILPROPOGATION
 
 using System;
@@ -1641,26 +1640,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
     }
     
-    /// <remarks>operator EnableTracing();</remarks>
-    public class SystemEnableTracingNode : InstructionNode
-    {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.Server.TracingEnabled = true;
-			return null;
-		}
-	}
-
-    /// <remarks>operator EnableTracing();</remarks>
-    public class SystemDisableTracingNode : InstructionNode
-    {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.Server.TracingEnabled = false;
-			return null;
-		}
-	}
-
     /// <remarks>operator EnableErrorLogging();</remarks>
     public class SystemEnableErrorLoggingNode : InstructionNode
     {
@@ -1681,26 +1660,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	/// <remarks>operator EnableSessionTracing();</remarks>    
-    public class SystemEnableSessionTracingNode : InstructionNode
-    {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.SessionInfo.SessionTracingEnabled = true;
-			return null;
-		}
-    }
-
-	/// <remarks>operator DisableSessionTracing();</remarks>    
-    public class SystemDisableSessionTracingNode : InstructionNode
-    {
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			AProgram.ServerProcess.ServerSession.SessionInfo.SessionTracingEnabled = false;
-			return null;
-		}
-    }
-    
     /// <remarks>operator System.EncryptPassword(const AString : System.String) : System.String;</remarks>
     public class SystemEncryptPasswordNode : InstructionNode
     {
@@ -2151,43 +2110,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 		}
 	}
 
-	// operator System.Diagnostics.TraceOn(ATraceCode : string);
-	public class SystemTraceOnNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			#if TRACEEVENTS
-			AProgram.ServerProcess.ServerSession.Server.TraceOn((string)AArguments[0]);
-			#endif
-			return null;
-		}
-	}
-
-	// operator System.Diagnostics.TraceOff(ATraceCode : string);
-	public class SystemTraceOffNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			#if TRACEEVENTS
-			AProgram.ServerProcess.ServerSession.Server.TraceOff((string)AArguments[0]);
-			#endif
-			return null;
-		}
-	}
-
-	// operator System.Diagnostics.Tracing(ATraceCode : string) : boolean;
-	public class SystemTracingNode : InstructionNode
-	{
-		public override object InternalExecute(Program AProgram, object[] AArguments)
-		{
-			#if TRACEEVENTS
-			return AProgram.ServerProcess.ServerSession.Server.Tracing((string)AArguments[0]);
-			#else
-			return null;
-			#endif
-		}
-	}
-	
 	// operator System.Diagnostics.LogError(const AError : Error);
 	public class SystemLogErrorNode : InstructionNode
 	{

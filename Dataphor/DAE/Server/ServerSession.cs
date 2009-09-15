@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Server
 	{		
 		internal ServerSession
 		(
-			Server AServer, 
+			Engine AServer, 
 			int ASessionID, 
 			SessionInfo ASessionInfo,
 			Schema.User AUser
@@ -136,8 +136,8 @@ namespace Alphora.Dataphor.DAE.Server
 		internal ServerProcesses Processes { get { return FProcesses; } }		
 
 		// Server
-		private Server FServer;
-		public Server Server { get { return FServer; } }
+		private Engine FServer;
+		public Engine Server { get { return FServer; } }
 		
 		IServer IServerSession.Server { get { return FServer; } }
         

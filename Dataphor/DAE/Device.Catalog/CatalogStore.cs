@@ -121,7 +121,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 		
 		/// <summary>Initializes the catalog store, ensuring the store has been created.</summary>
-		public void Initialize(Server.Server AServer)
+		public void Initialize(Server.Engine AServer)
 		{
 			CreateStore();
 			FStore.Initialize();
@@ -153,9 +153,9 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 						)
 					);
 					
-					LConnection.ExecuteStatement(String.Format("insert into DAELoadedLibraries (Library_Name) values ('{0}')", Server.Server.CSystemLibraryName));
-					LConnection.ExecuteStatement(String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, GetType().Assembly.GetName().Version.ToString()));
-					LConnection.ExecuteStatement(String.Format("insert into DAELibraryOwners (Library_Name, Owner_User_ID) values ('{0}', '{1}')", Server.Server.CSystemLibraryName, Server.Server.CSystemUserID));
+					LConnection.ExecuteStatement(String.Format("insert into DAELoadedLibraries (Library_Name) values ('{0}')", Server.Engine.CSystemLibraryName));
+					LConnection.ExecuteStatement(String.Format("insert into DAELibraryVersions (Library_Name, VersionNumber) values ('{0}', '{1}')", Server.Engine.CSystemLibraryName, GetType().Assembly.GetName().Version.ToString()));
+					LConnection.ExecuteStatement(String.Format("insert into DAELibraryOwners (Library_Name, Owner_User_ID) values ('{0}', '{1}')", Server.Engine.CSystemLibraryName, Server.Engine.CSystemUserID));
 				}
 			}
 			finally
@@ -1038,7 +1038,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		
 		#region API
 		
-		public void LoadServerSettings(Server.Server AServer)
+		public void LoadServerSettings(Server.Engine AServer)
 		{
 			SQLStoreCursor LCursor = OpenCursor("PK_DAEServerInfo", false);
 			try
@@ -1057,7 +1057,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 		}
 
-		public void SaveServerSettings(Server.Server AServer)
+		public void SaveServerSettings(Server.Engine AServer)
 		{
 			SQLStoreCursor LCursor = OpenCursor("PK_DAEServerInfo", true);
 			try

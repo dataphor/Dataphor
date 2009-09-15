@@ -37,7 +37,7 @@ namespace Alphora.Dataphor.DAE.Service
 		{
 			string LServiceName = Context.Parameters["ServiceName"];
 			if (LServiceName == null)
-				LServiceName = Alphora.Dataphor.DAE.Service.ServiceUtility.GetServiceName(Server.Server.CDefaultServerName);
+				LServiceName = Alphora.Dataphor.DAE.Service.ServiceUtility.GetServiceName(Server.Engine.CDefaultServerName);
 
 			FServiceInstaller.DisplayName = LServiceName;
 			FServiceInstaller.ServiceName = LServiceName;

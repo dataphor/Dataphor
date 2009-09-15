@@ -316,9 +316,6 @@ namespace Alphora.Dataphor.DAE.Runtime
 		public object Execute(DataParams AParams)
 		{	
 			object LResult;
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.BeginExecute, "Begin Execute");
-			#endif
 			Start(AParams);
 			try
 			{
@@ -330,9 +327,6 @@ namespace Alphora.Dataphor.DAE.Runtime
 			{
 				Stop(AParams);
 			}
-			#if TRACEEVENTS
-			RaiseTraceEvent(TraceCodes.EndExecute, "End Execute");
-			#endif
 			return LResult;
 		}
 		

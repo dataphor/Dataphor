@@ -4,7 +4,6 @@
 	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
 */
 
-//#define TRACEEVENTS // Enable this to turn on tracing
 #define WRAPRUNTIMEEXCEPTIONS // Determines whether or not runtime exceptions are wrapped
 //#define TRACKCALLDEPTH // Determines whether or not call depth tracking is enabled
 
@@ -208,10 +207,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 								LCurrentChildDevice = LChildDevice;
 							else if (LCurrentChildDevice != LChildDevice)
 							{
-								#if TRACEEVENTS
-								if ((DataType != null) && !IgnoreUnsupported && !APlan.InTypeOfContext)
-									APlan.ServerProcess.ServerSession.Server.RaiseTraceEvent(APlan.ServerProcess, TraceCodes.UnsupportedNode, String.Format(@"Node ""{0}"" not supported because arguments have disparate device sources.", this.GetType().Name));
-								#endif
 								FNoDevice = true;
 								break;
 							}
@@ -248,9 +243,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 						{
 							if ((LDevicePlan != null) && !APlan.SuppressWarnings)
 								APlan.Messages.Add(new CompilerException(CompilerException.Codes.UnsupportedPlan, CompilerErrorLevel.Warning, FDevice.Name, SafeEmitStatementAsString(), LDevicePlan.TranslationMessages.ToString()));
-							#if TRACEEVENTS
-							APlan.ServerProcess.ServerSession.Server.RaiseTraceEvent(APlan.ServerProcess, TraceCodes.UnsupportedNode, String.Format(@"Node ""{0}"" not supported by device ""{1}"".", this.GetType().Name, FDevice.Name));
-							#endif
 						}
 						FDeviceSupported = false;
 						FNoDevice = true;

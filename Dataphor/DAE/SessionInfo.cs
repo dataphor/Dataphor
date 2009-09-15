@@ -35,39 +35,28 @@ namespace Alphora.Dataphor.DAE
 			DefaultLibraryName = ADefaultLibraryName;
         }
         
-        public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ASessionTracingEnabled) : base()
-        {
-			UserID = AUserID;
-			Password = APassword;
-			DefaultLibraryName = ADefaultLibraryName;
-			SessionTracingEnabled = ASessionTracingEnabled;
-        }
-
-		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ASessionTracingEnabled, bool ADefaultUseDTC) : base()
+		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ADefaultUseDTC) : base()
 		{
 			UserID = AUserID;
 			Password = APassword;
 			DefaultLibraryName = ADefaultLibraryName;
-			SessionTracingEnabled = ASessionTracingEnabled;
 			FDefaultUseDTC = ADefaultUseDTC;
 		}
         
-		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ASessionTracingEnabled, bool ADefaultUseDTC, QueryLanguage ALanguage) : base()
+		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ADefaultUseDTC, QueryLanguage ALanguage) : base()
 		{
 			UserID = AUserID;
 			Password = APassword;
 			DefaultLibraryName = ADefaultLibraryName;
-			SessionTracingEnabled = ASessionTracingEnabled;
 			FDefaultUseDTC = ADefaultUseDTC;
 			FLanguage = ALanguage;
 		}
         
-		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ASessionTracingEnabled, bool ADefaultUseDTC, QueryLanguage ALanguage, int AFetchCount) : base()
+		public SessionInfo(string AUserID, string APassword, string ADefaultLibraryName, bool ADefaultUseDTC, QueryLanguage ALanguage, int AFetchCount) : base()
 		{
 			UserID = AUserID;
 			Password = APassword;
 			DefaultLibraryName = ADefaultLibraryName;
-			SessionTracingEnabled = ASessionTracingEnabled;
 			FDefaultUseDTC = ADefaultUseDTC;
 			FLanguage = ALanguage;
 			FFetchCount = AFetchCount;
@@ -137,18 +126,6 @@ namespace Alphora.Dataphor.DAE
 			set { FDefaultLibraryName = value == null ? String.Empty : value; }
         }
 
-		private bool FSessionTracingEnabled;
-		/// <summary> Determines whether the server logs trace information for session based events. </summary>
-		/// <remarks> Defaults to false. </remarks>
-		[System.ComponentModel.DefaultValue(false)]
-		[System.ComponentModel.Description("Whether or not to enable trace logging of server session events.")]
-		[System.ComponentModel.Browsable(false)]
-		public bool SessionTracingEnabled
-		{
-			get { return FSessionTracingEnabled; }
-			set { FSessionTracingEnabled = value; }
-		}
-		
 		private bool FDefaultUseDTC = false;
 		/// <summary> Determines the default UseDTC setting for processes started on this session. Defaults to false.</summary>
 		/// <remarks> Defaults to false. </remarks>
@@ -215,9 +192,9 @@ namespace Alphora.Dataphor.DAE
 			set { FDefaultIsolationLevel = value; }
 		}
 		
-		private int FDefaultMaxStackDepth = DAE.Server.Server.CDefaultMaxStackDepth;
+		private int FDefaultMaxStackDepth = DAE.Server.Engine.CDefaultMaxStackDepth;
 		/// <summary>Determines the default maximum stack depth for processes on this session.</summary>
-		[System.ComponentModel.DefaultValue(DAE.Server.Server.CDefaultMaxStackDepth)]
+		[System.ComponentModel.DefaultValue(DAE.Server.Engine.CDefaultMaxStackDepth)]
 		[System.ComponentModel.Description("Determines the default maximum stack depth for processes on this session.")]
 		public int DefaultMaxStackDepth
 		{
@@ -225,9 +202,9 @@ namespace Alphora.Dataphor.DAE
 			set { FDefaultMaxStackDepth = value; }
 		}
 		
-		private int FDefaultMaxCallDepth = DAE.Server.Server.CDefaultMaxCallDepth;
+		private int FDefaultMaxCallDepth = DAE.Server.Engine.CDefaultMaxCallDepth;
 		/// <summary>Determines the default maximum call depth for processes on this session.</summary>
-		[System.ComponentModel.DefaultValue(DAE.Server.Server.CDefaultMaxCallDepth)]
+		[System.ComponentModel.DefaultValue(DAE.Server.Engine.CDefaultMaxCallDepth)]
 		[System.ComponentModel.Description("Determines the default maximum call depth for processes on this session.")]
 		public int DefaultMaxCallDepth
 		{
@@ -261,7 +238,6 @@ namespace Alphora.Dataphor.DAE
 			LSessionInfo.HostName = FHostName;
 			LSessionInfo.CatalogCacheName = FCatalogCacheName;
 			LSessionInfo.DefaultLibraryName = FDefaultLibraryName;
-			LSessionInfo.SessionTracingEnabled = FSessionTracingEnabled;
 			LSessionInfo.DefaultUseDTC = FDefaultUseDTC;
 			LSessionInfo.DefaultUseImplicitTransactions = FDefaultUseImplicitTransactions;
 			LSessionInfo.Language = FLanguage;
@@ -286,7 +262,6 @@ namespace Alphora.Dataphor.DAE
 			info.AddValue("HostName", HostName);
 			info.AddValue("CatalogCacheName", CatalogCacheName);
 			info.AddValue("DefaultLibraryName", DefaultLibraryName);
-			info.AddValue("SessionTracingEnabled", SessionTracingEnabled);
 			info.AddValue("DefaultUseDTC", DefaultUseDTC);
 			info.AddValue("DefaultUseImplicitTransactions", DefaultUseImplicitTransactions);
 			info.AddValue("Language", Language);
@@ -306,7 +281,6 @@ namespace Alphora.Dataphor.DAE
 			HostName = info.GetString("HostName");
 			CatalogCacheName = info.GetString("CatalogCacheName");
 			DefaultLibraryName = info.GetString("DefaultLibraryName");
-			SessionTracingEnabled = info.GetBoolean("SessionTracingEnabled");
 			DefaultUseDTC = info.GetBoolean("DefaultUseDTC");
 			DefaultUseImplicitTransactions = info.GetBoolean("DefaultUseImplicitTransactions");
 			Language = (QueryLanguage)info.GetValue("Language", typeof(QueryLanguage));

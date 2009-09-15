@@ -331,7 +331,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				for (int LIndex = 0; LIndex < FRedefineColumnOffsets.Length; LIndex++)
 				{
 					Schema.TableVarColumn LColumn = TableVar.Columns[FRedefineColumnOffsets[LIndex]];
-					if ((AIsDefault || LColumn.IsComputed) && (!AProgram.ServerProcess.ServerSession.Server.IsRepository || LColumn.IsChangeRemotable))
+					if ((AIsDefault || LColumn.IsComputed) && (!AProgram.ServerProcess.ServerSession.Server.IsEngine || LColumn.IsChangeRemotable))
 					{
 						LColumnIndex = ARow.DataType.Columns.IndexOfName(LColumn.Name);
 						if (LColumnIndex >= 0)

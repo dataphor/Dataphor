@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.Frontend.Server
 		private static Hashtable FServers = new Hashtable();
 		
 		// returns the frontend server for the given DAE instance
-		public static FrontendServer GetFrontendServer(DAE.Server.Server AServer)
+		public static FrontendServer GetFrontendServer(DAE.Server.Engine AServer)
 		{
 			lock (FServers)
 			{
@@ -37,15 +37,15 @@ namespace Alphora.Dataphor.Frontend.Server
 			}
 		}
 
-		public FrontendServer(DAE.Server.Server AServer)
+		public FrontendServer(DAE.Server.Engine AServer)
 		{
 			FServer = AServer;
 			FServer.Disposed += new EventHandler(ServerDisposed);
 		}
 		
 		[Reference]
-		private DAE.Server.Server FServer;
-		public DAE.Server.Server Server { get { return FServer; } }
+		private DAE.Server.Engine FServer;
+		public DAE.Server.Engine Server { get { return FServer; } }
 		
 		private void ServerDisposed(object ASender, EventArgs AArgs)
 		{

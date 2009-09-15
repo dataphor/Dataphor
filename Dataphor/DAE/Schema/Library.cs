@@ -22,7 +22,6 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
-using Alphora.Dataphor.Windows;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -502,7 +501,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public static string GetInstanceLibraryDirectory(string AInstanceDirectory, string ALibraryName)
 		{
-			string LResult = Path.Combine(Path.Combine(AInstanceDirectory, Server.Server.CDefaultLibraryDataDirectory), ALibraryName);
+			string LResult = Path.Combine(Path.Combine(AInstanceDirectory, Server.Engine.CDefaultLibraryDataDirectory), ALibraryName);
 			System.IO.Directory.CreateDirectory(LResult);
 			return LResult;
 		}

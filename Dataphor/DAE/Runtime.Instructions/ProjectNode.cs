@@ -216,7 +216,7 @@ namespace Alphora.Dataphor.DAE.Runtime.Instructions
 				{
 					ANewRow.CopyTo(LSourceRow);
 					Row LCurrentRow = null;
-					if (!AProgram.ServerProcess.ServerSession.Server.IsRepository)
+					if (!AProgram.ServerProcess.ServerSession.Server.IsEngine)
 						LCurrentRow = SourceNode.Select(AProgram, LSourceRow);
 					try
 					{
