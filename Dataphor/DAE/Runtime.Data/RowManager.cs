@@ -51,11 +51,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 	
 	public class RowManager : System.Object
 	{
-		public RowManager(int AResourceManagerID) : base() 
-		{
-			FResourceManagerID = AResourceManagerID;
-		}
-
 		private RowLinkChain FAvailable = new RowLinkChain();
 		private RowLinkChain FLinkBuffer = new RowLinkChain();		
 
@@ -71,9 +66,6 @@ namespace Alphora.Dataphor.DAE.Runtime.Data
 
 		private int FUsedRowCount = 0;		
 		public int UsedRowCount { get { return FUsedRowCount; } }
-		
-		private int FResourceManagerID;
-		public int ResourceManagerID { get { return FResourceManagerID; } }
 		
 		private Row AllocateRow()
 		{

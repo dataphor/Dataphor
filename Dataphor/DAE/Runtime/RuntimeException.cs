@@ -317,7 +317,7 @@ using Alphora.Dataphor.DAE.Debug;
 			/// <summary>Error code 104202: "Timed out waiting for semaphore."</summary>
 			SemaphoreTimeout = 104202,
 			
-			/// <summary>Error code 104203: "Timed out waiting for {0} lock on "{1}" in resource manager ({2})."</summary>
+			/// <summary>Error code 104203: "Timed out waiting for {0} lock on "{1}" owned by "{2}"."</summary>
 			LockTimeout = 104203,
 			
 			/// <summary>Error code 104204: "Maximum lock count exceeded in lock manager."</summary>

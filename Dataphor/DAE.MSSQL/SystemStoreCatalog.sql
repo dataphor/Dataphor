@@ -468,7 +468,6 @@ go
 create table DAEDevices
 (
 	ID int not null,
-	ResourceManagerID int not null,
 	ReconciliationMaster nvarchar(20) not null,
 	ReconciliationMode nvarchar(80) not null,
 	constraint PK_DAEDevices primary key (ID)

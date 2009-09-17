@@ -23,7 +23,7 @@ namespace Alphora.Dataphor.DAE.Device.Memory
 	/// <summary> In-memory storage device. </summary>
 	public class MemoryDevice : Schema.Device
 	{
-		public MemoryDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID) 
+		public MemoryDevice(int AID, string AName) : base(AID, AName) 
 		{
 			IgnoreUnsupported = true;
 			RequiresAuthentication = false;

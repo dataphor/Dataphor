@@ -102,7 +102,7 @@ namespace Alphora.Dataphor.DAE.Device.Simple
 	{
 		public const string CDataDirectoryName = "Data";
 	
-		public SimpleDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
+		public SimpleDevice(int AID, string AName) : base(AID, AName)
 		{
 		}
 		

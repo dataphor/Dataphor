@@ -56,7 +56,7 @@ namespace Alphora.Dataphor.DAE.Device.DB2
 	*/
 	public class DB2Device : SQLDevice
 	{
-		public DB2Device(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID) {}
+		public DB2Device(int AID, string AName) : base(AID, AName) {}
 
 		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
 		{

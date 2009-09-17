@@ -99,15 +99,6 @@ namespace Alphora.Dataphor.DAE.Server
 		public const int CATDeviceMaxRowCount = 100;
 		public const int CMaxLogs = 9;
 		public const int CSystemSessionID = 0;
-		public const int CLockManagerID = 1; // lock manager resource manager id
-		public const int CTempDeviceManagerID = 3; // temp device resource manager id
-		public const int CCatalogDeviceManagerID = 4; // catalog device resource manager id
-		public const int CStreamManagerID = 5; // stream manager resource manager id
-		public const int CCatalogManagerID = 6; // catalog resource manager id
-		public const int CRowManagerID = 7; // row manager resource manager id
-		public const int CScalarManagerID = 8; // scalar manager resource manager id
-		public const int CATDeviceManagerID = 9; // application transaction device resource manager id
-		public const int CBaseResourceManagerID = 100; // base resource manager id
 		public const int CDefaultMaxConcurrentProcesses = 200;
 		public const int CDefaultMaxStackDepth = 32767; // Also specified in the base stack
 		public const int CDefaultMaxCallDepth = 1024; // Also specified in the base window stack
@@ -169,6 +160,10 @@ namespace Alphora.Dataphor.DAE.Server
 			get { return true; }
 		}
 
+		// InstanceID
+		private Guid FInstanceID = Guid.NewGuid();
+		public Guid InstanceID { get { return FInstanceID; } }
+
 		#region Devices
 		
 		// TempDevice		
@@ -213,7 +208,104 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			get { return FDeviceSettings; }
 		}
-		
+
+		public event DeviceNotifyEvent OnDeviceStarting;
+
+		private void DoDeviceStarting(Schema.Device ADevice)
+		{
+			if (OnDeviceStarting != null)
+				OnDeviceStarting(this, ADevice);
+		}
+
+		public event DeviceNotifyEvent OnDeviceStarted;
+
+		private void DoDeviceStarted(Schema.Device ADevice)
+		{
+			if (OnDeviceStarted != null)
+				OnDeviceStarted(this, ADevice);
+		}
+
+		public void StartDevice(ServerProcess AProcess, Schema.Device ADevice)
+		{
+			if (!ADevice.Running)
+			{
+				// TODO: It's not at all clear that this would have had any effect.
+				// 
+				//AProcess.Plan.PushSecurityContext(new SecurityContext(ADevice.Owner));
+				//try
+				//{
+				DoDeviceStarting(ADevice);
+				try
+				{
+					AProcess.CatalogDeviceSession.StartDevice(ADevice);
+					AProcess.CatalogDeviceSession.RegisterDevice(ADevice);
+				}
+				catch (Exception LException)
+				{
+					throw new ServerException(ServerException.Codes.DeviceStartupError, LException, ADevice.Name);
+				}
+
+				if ((ADevice.ReconcileMode & ReconcileMode.Startup) != 0)
+				{
+					try
+					{
+						ADevice.Reconcile(AProcess);
+					}
+					catch (Exception LException)
+					{
+						throw new ServerException(ServerException.Codes.StartupReconciliationError, LException, ADevice.Name);
+					}
+				}
+
+				DoDeviceStarted(ADevice);
+				//}
+				//finally
+				//{
+				//	AProcess.Plan.PopSecurityContext();
+				//}
+			}
+		}
+
+		private void StartDevices()
+		{
+			// Perform startup reconciliation as configured for each device
+			foreach (Schema.Object LObject in FCatalog)
+				if (LObject is Schema.Device)
+					try
+					{
+						StartDevice(FSystemProcess, (Schema.Device)LObject);
+					}
+					catch (Exception LException)
+					{
+						LogError(LException);
+					}
+		}
+
+		private void StopDevices()
+		{
+			// Perform shutdown processing as configured for each device
+			if (FCatalog != null)
+			{
+				Schema.Device LDevice;
+				foreach (Schema.Object LObject in FCatalog)
+				{
+					if (LObject is Schema.Device)
+					{
+						LDevice = (Schema.Device)LObject;
+						try
+						{
+							if (LDevice.Running)
+								LDevice.Stop(FSystemProcess);
+						}
+						catch (Exception LException)
+						{
+							LogError(new ServerException(ServerException.Codes.DeviceShutdownError, LException, LDevice.Name));
+						}
+					}
+				}
+			}
+		}
+
 		#endregion
 		
 		#region Plan Cache
@@ -674,6 +766,70 @@ namespace Alphora.Dataphor.DAE.Server
 			EnsureGeneralLibraryLoaded();
 		}
 
+		protected virtual void LoadServerState()
+		{
+			// abstract
+		}
+
+		private void RegisterCoreSystemObjects()
+		{
+			// Creates and registers the core system objects required to compile and execute any D4 statements
+			// This will only be called if this is a repository, or if this is a first-time startup for a new server
+
+			FSystemProcess.BeginTransaction(IsolationLevel.Isolated);
+			try
+			{
+				InternalRegisterCoreSystemObjects();
+
+				FSystemProcess.CommitTransaction();
+			}
+			catch
+			{
+				FSystemProcess.RollbackTransaction();
+				throw;
+			}
+		}
+
+		protected virtual void InternalRegisterCoreSystemObjects()
+		{
+			// Create the Admin user
+			FAdminUser = new Schema.User(CAdminUserID, "Administrator", String.Empty);
+
+			// Register the System and Admin users
+			FSystemProcess.CatalogDeviceSession.InsertUser(FSystemUser);
+			FSystemProcess.CatalogDeviceSession.InsertUser(FAdminUser);
+
+			FUserRole = new Schema.Role(CUserRoleName);
+			FUserRole.Owner = FSystemUser;
+			FUserRole.Library = FSystemLibrary;
+			FSystemProcess.CatalogDeviceSession.InsertRole(FUserRole);
+
+			// Register the Catalog device
+			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
+
+			// Create the Temp Device
+			FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName, CTempDeviceManagerID);
+			FTempDevice.Owner = FSystemUser;
+			FTempDevice.Library = FSystemLibrary;
+			FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
+			FTempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CTempDeviceMaxRowCount.ToString()));
+			FTempDevice.MaxRowCount = CTempDeviceMaxRowCount;
+			FTempDevice.Start(FSystemProcess);
+			FTempDevice.Register(FSystemProcess);
+			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
+
+			// Create the A/T Device
+			FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName, CATDeviceManagerID);
+			FATDevice.Owner = FSystemUser;
+			FATDevice.Library = FSystemLibrary;
+			FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
+			FATDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CATDeviceMaxRowCount.ToString()));
+			FATDevice.MaxRowCount = CATDeviceMaxRowCount;
+			FATDevice.Start(FSystemProcess);
+			FATDevice.Register(FSystemProcess);
+			FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FATDevice);
+		}
+
 		#endregion
 
 		#region Stop
@@ -958,27 +1114,25 @@ namespace Alphora.Dataphor.DAE.Server
 
 		#endregion
 		
-		// InstanceID
-		private Guid FInstanceID = Guid.NewGuid();
-		public Guid InstanceID { get { return FInstanceID; } }
-		
+		#region Internal API calls
+
 		public void RunScript(string AScript)
 		{
 			RunScript(FSystemProcess, AScript, String.Empty, null);
 		}
-		
+
 		/// <summary> Runs the given script as the specified library. </summary>
 		/// <remarks> LibraryName may be the empty string. </remarks>
 		public void RunScript(string AScript, string ALibraryName)
 		{
 			RunScript(FSystemProcess, AScript, ALibraryName, null);
 		}
-		
+
 		public void RunScript(ServerProcess AProcess, string AScript)
 		{
 			RunScript(AProcess, AScript, String.Empty, null);
 		}
-		
+
 		public void RunScript(ServerProcess AProcess, string AScript, string ALibraryName, DAE.Debug.DebugLocator ALocator)
 		{
 			if (ALibraryName != String.Empty)
@@ -994,10 +1148,7 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		protected virtual void LoadServerState()
-		{
-			// abstract
-		}
+		#endregion
 		
 		#region Libraries
 
@@ -1068,6 +1219,28 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
+		private void EnsureGeneralLibraryLoaded()
+		{
+			if (!IsEngine)
+			{
+				// Ensure the general library is loaded
+				if (!FCatalog.LoadedLibraries.Contains(CGeneralLibraryName))
+				{
+					Program LProgram = new Program(FSystemProcess);
+					LProgram.Start(null);
+					try
+					{
+						SystemEnsureLibraryRegisteredNode.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
+						FSystemSession.CurrentLibrary = FSystemLibrary; // reset current library of the system session because it will be set by registering General
+					}
+					finally
+					{
+						LProgram.Stop(null);
+					}
+				}
+			}
+		}
+
 		#endregion
 		
 		#region Catalog
@@ -1084,6 +1257,41 @@ namespace Alphora.Dataphor.DAE.Server
 				FLockManager = new LockManager();
 			if (FStreamManager == null)
 				FStreamManager = new ServerStreamManager(CStreamManagerID, FLockManager, this);
+		}
+
+		private bool FCatalogRegistered;
+		private void RegisterCatalog()
+		{
+			// Startup the catalog
+			if (!FCatalogRegistered)
+			{
+				FCatalogRegistered = true;
+
+				if (!IsEngine)
+				{
+					if (FFirstRun)
+					{
+						LogMessage("Registering system catalog...");
+						using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
+						{
+							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
+						}
+						LogMessage("System catalog registered.");
+						LogMessage("Registering debug operators...");
+						using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
+						{
+							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
+						}
+						LogMessage("Debug operators registered.");
+					}
+				}
+			}
+		}
+
+		internal Schema.Objects GetBaseCatalogObjects()
+		{
+			CheckState(ServerState.Started);
+			return FSystemProcess.CatalogDeviceSession.GetBaseCatalogObjects();
 		}
 
 		private bool FFirstRun; // Indicates whether or not this is the first time this server has run on the configured store
@@ -1147,8 +1355,6 @@ namespace Alphora.Dataphor.DAE.Server
 				FCatalogDevice.Owner = FSystemUser;
 				FCatalogDevice.Library = FSystemLibrary;
 				FCatalogDevice.ClassDefinition = new ClassDefinition("System.CatalogDevice");
-				FCatalogDevice.MetaData = new MetaData();
-				FCatalogDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CCatalogDeviceManagerID.ToString()));
 				FCatalogDevice.Start(FSystemProcess);
 				FCatalogDevice.Register(FSystemProcess);
 
@@ -1186,150 +1392,6 @@ namespace Alphora.Dataphor.DAE.Server
 			}
 		}
 
-		public void ClearCatalog()
-		{
-			InternalCreateCatalog();
-			FCatalogInitialized = false;
-			InitializeCatalog();
-			FCatalogRegistered = false;
-			RegisterCatalog();
-			LoadServerState();
-			EnsureGeneralLibraryLoaded();
-		}
-
-		// CacheTimeStamp
-		public long CacheTimeStamp { get { return FCatalog.CacheTimeStamp; } }
-
-		// PlanCacheTimeStamp
-		public long PlanCacheTimeStamp { get { return FCatalog.PlanCacheTimeStamp; } }
-
-		// DerivationTimeStamp
-		public long DerivationTimeStamp { get { return FCatalog.DerivationTimeStamp; } }
-
-		/// <summary> Emits the creation script for the catalog and returns it as a string. </summary>
-		public string ScriptCatalog(CatalogDeviceSession ASession)
-		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, false));
-		}
-
-		public string ScriptLibrary(CatalogDeviceSession ASession, string ALibraryName)
-		{
-			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, ALibraryName, false));
-		}
-
-		public string ScriptDropCatalog(CatalogDeviceSession ASession)
-		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession));
-		}
-
-		public string ScriptDropLibrary(CatalogDeviceSession ASession, string ALibraryName)
-		{
-			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession, new string[] { }, ALibraryName, false, false, true, true));
-		}
-
-		#endregion
-		
-		private void RegisterCoreSystemObjects()
-		{
-			// Creates and registers the core system objects required to compile and execute any D4 statements
-			// This will only be called if this is a repository, or if this is a first-time startup for a new server
-			
-			FSystemProcess.BeginTransaction(IsolationLevel.Isolated);
-			try
-			{
-				// Create the Admin user
-				FAdminUser = new Schema.User(CAdminUserID, "Administrator", String.Empty);
-
-				// Register the System and Admin users
-				FSystemProcess.CatalogDeviceSession.InsertUser(FSystemUser);
-				FSystemProcess.CatalogDeviceSession.InsertUser(FAdminUser);
-				
-				FUserRole = new Schema.Role(CUserRoleName);
-				FUserRole.Owner = FSystemUser;
-				FUserRole.Library = FSystemLibrary;
-				FSystemProcess.CatalogDeviceSession.InsertRole(FUserRole);
-				
-				// Register the Catalog device
-				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FCatalogDevice);
-				
-				// Create the Temp Device
-				FTempDevice = new MemoryDevice(Schema.Object.GetNextObjectID(), CTempDeviceName, CTempDeviceManagerID);
-				RegisterResourceManager(CTempDeviceManagerID, FTempDevice);
-				FTempDevice.Owner = FSystemUser;
-				FTempDevice.Library = FSystemLibrary;
-				FTempDevice.ClassDefinition = new ClassDefinition("System.MemoryDevice");
-				FTempDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CTempDeviceMaxRowCount.ToString()));
-				FTempDevice.MaxRowCount = CTempDeviceMaxRowCount;
-				FTempDevice.MetaData = new MetaData();
-				FTempDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CTempDeviceManagerID.ToString()));
-				FTempDevice.Start(FSystemProcess);			
-				FTempDevice.Register(FSystemProcess);
-				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FTempDevice);
-				
-				// Create the A/T Device
-				FATDevice = new ApplicationTransactionDevice(Schema.Object.GetNextObjectID(), CATDeviceName, CATDeviceManagerID);
-				RegisterResourceManager(CATDeviceManagerID, FATDevice);
-				FATDevice.Owner = FSystemUser;
-				FATDevice.Library = FSystemLibrary;
-				FATDevice.ClassDefinition = new ClassDefinition("System.ApplicationTransactionDevice");
-				FATDevice.ClassDefinition.Attributes.Add(new ClassAttributeDefinition("MaxRowCount", CATDeviceMaxRowCount.ToString()));
-				FATDevice.MaxRowCount = CATDeviceMaxRowCount;
-				FATDevice.MetaData = new MetaData();
-				FATDevice.MetaData.Tags.Add(new Tag("DAE.ResourceManagerID", CATDeviceManagerID.ToString()));
-				FATDevice.Start(FSystemProcess);			
-				FATDevice.Register(FSystemProcess);
-				FSystemProcess.CatalogDeviceSession.InsertCatalogObject(FATDevice);
-
-				if (!IsEngine)
-				{
-					// Grant usage rights on the Temp and A/T devices to the User role
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FTempDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
-						
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.CreateStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.AlterStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.DropStore), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Read), FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(FATDevice.GetRight(Schema.RightNames.Write), FUserRole.ID);
-					
-					// Create and register the system rights
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateType, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateTable, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateView, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateOperator, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateDevice, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateConstraint, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateReference, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateUser, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.CreateRole, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.AlterUser, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.DropUser, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainSystemDeviceUsers, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.MaintainUserSessions, FSystemUser.ID);
-					FSystemProcess.CatalogDeviceSession.InsertRight(Schema.RightNames.HostImplementation, FSystemUser.ID);
-					
-					// Grant create rights to the User role
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateType, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateTable, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateView, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateOperator, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateDevice, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateConstraint, FUserRole.ID);
-					FSystemProcess.CatalogDeviceSession.GrantRightToRole(Schema.RightNames.CreateReference, FUserRole.ID);
-				}
-
-				FSystemProcess.CommitTransaction();
-			}
-			catch
-			{
-				FSystemProcess.RollbackTransaction();
-				throw;
-			}
-		}
-		
 		private void ResolveCoreSystemObjects()
 		{
 			// Use the persistent catalog store to resolve references to the core catalog objects
@@ -1348,7 +1410,7 @@ namespace Alphora.Dataphor.DAE.Server
 				RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
 			}
 		}
-		
+
 		private void ResolveSystemDataTypes()
 		{
 			// Note that these (and the native type references set in BindNativeTypes) are also set in the CatalogDevice (FixupSystemTypeReferences)
@@ -1397,158 +1459,47 @@ namespace Alphora.Dataphor.DAE.Server
 			FCatalog.DataTypes.SystemGraphic.NativeType = typeof(byte[]);
 		}
 		
-		private bool FCatalogRegistered;
-		private void RegisterCatalog()
+		public void ClearCatalog()
 		{
-			// Startup the catalog
-			if (!FCatalogRegistered)
-			{
-				FCatalogRegistered = true;
-				
-				if (!IsEngine)
-				{
-					if (FFirstRun)
-					{
-						LogMessage("Registering system catalog...");
-						using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Schema.SystemCatalog.d4"))
-						{
-							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-						}
-						LogMessage("System catalog registered.");
-						LogMessage("Registering debug operators...");
-						using (Stream LStream = GetType().Assembly.GetManifestResourceStream("Alphora.Dataphor.DAE.Debug.Debug.d4"))
-						{
-							RunScript(new StreamReader(LStream).ReadToEnd(), CSystemLibraryName);
-						}
-						LogMessage("Debug operators registered.");
-					}
-				}
-			}
-		}
-		
-		internal Schema.Objects GetBaseCatalogObjects()
-		{
-			CheckState(ServerState.Started);
-			return FSystemProcess.CatalogDeviceSession.GetBaseCatalogObjects();
-		}
-		
-		private void EnsureGeneralLibraryLoaded()
-		{
-			if (!IsEngine)
-			{
-				// Ensure the general library is loaded
-				if (!FCatalog.LoadedLibraries.Contains(CGeneralLibraryName))
-				{
-					Program LProgram = new Program(FSystemProcess);
-					LProgram.Start(null);
-					try
-					{
-						SystemEnsureLibraryRegisteredNode.EnsureLibraryRegistered(LProgram, CGeneralLibraryName, true);
-						FSystemSession.CurrentLibrary = FSystemLibrary; // reset current library of the system session because it will be set by registering General
-					}
-					finally
-					{
-						LProgram.Stop(null);
-					}
-				}
-			}
+			InternalCreateCatalog();
+			FCatalogInitialized = false;
+			InitializeCatalog();
+			FCatalogRegistered = false;
+			RegisterCatalog();
+			LoadServerState();
+			EnsureGeneralLibraryLoaded();
 		}
 
-		public event DeviceNotifyEvent OnDeviceStarting;
-		
-		private void DoDeviceStarting(Schema.Device ADevice)
-		{
-			if (OnDeviceStarting != null)
-				OnDeviceStarting(this, ADevice);
-		}
-				
-		public event DeviceNotifyEvent OnDeviceStarted;
-		
-		private void DoDeviceStarted(Schema.Device ADevice)
-		{
-			if (OnDeviceStarted != null)
-				OnDeviceStarted(this, ADevice);
-		}
-		
-		public void StartDevice(ServerProcess AProcess, Schema.Device ADevice)
-		{
-			if (!ADevice.Running)
-			{
-				// TODO: It's not at all clear that this would have had any effect.
-				// 
-				//AProcess.Plan.PushSecurityContext(new SecurityContext(ADevice.Owner));
-				//try
-				//{
-					DoDeviceStarting(ADevice);
-					try
-					{
-						AProcess.CatalogDeviceSession.StartDevice(ADevice);
-						AProcess.CatalogDeviceSession.RegisterDevice(ADevice);
-					}
-					catch (Exception LException)
-					{
-						throw new ServerException(ServerException.Codes.DeviceStartupError, LException, ADevice.Name);
-					}
-					
-					if ((ADevice.ReconcileMode & ReconcileMode.Startup) != 0)
-					{
-						try
-						{
-							ADevice.Reconcile(AProcess);
-						}
-						catch (Exception LException)
-						{
-							throw new ServerException(ServerException.Codes.StartupReconciliationError, LException, ADevice.Name);
-						}
-					}
+		// CacheTimeStamp
+		public long CacheTimeStamp { get { return FCatalog.CacheTimeStamp; } }
 
-					DoDeviceStarted(ADevice);
-				//}
-				//finally
-				//{
-				//	AProcess.Plan.PopSecurityContext();
-				//}
-			}
-		}
-		
-		private void StartDevices()
+		// PlanCacheTimeStamp
+		public long PlanCacheTimeStamp { get { return FCatalog.PlanCacheTimeStamp; } }
+
+		// DerivationTimeStamp
+		public long DerivationTimeStamp { get { return FCatalog.DerivationTimeStamp; } }
+
+		/// <summary> Emits the creation script for the catalog and returns it as a string. </summary>
+		public string ScriptCatalog(CatalogDeviceSession ASession)
 		{
-			// Perform startup reconciliation as configured for each device
-			foreach (Schema.Object LObject in FCatalog)
-				if (LObject is Schema.Device)
-					try
-					{
-						StartDevice(FSystemProcess, (Schema.Device)LObject);
-					}
-					catch (Exception LException)
-					{
-						LogError(LException);
-					}
+			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, false));
 		}
-		
-		private void StopDevices()
+
+		public string ScriptLibrary(CatalogDeviceSession ASession, string ALibraryName)
 		{
-			// Perform shutdown processing as configured for each device
-			if (FCatalog != null)
-			{
-				Schema.Device LDevice;
-				foreach (Schema.Object LObject in FCatalog)
-				{
-					if (LObject is Schema.Device)
-					{
-						LDevice = (Schema.Device)LObject;
-						try
-						{
-							if (LDevice.Running)
-								LDevice.Stop(FSystemProcess);
-						}
-						catch (Exception LException)
-						{
-							LogError(new ServerException(ServerException.Codes.DeviceShutdownError, LException, LDevice.Name));
-						}
-					}
-				}
-			}
+			return new D4TextEmitter().Emit(FCatalog.EmitStatement(ASession, EmitMode.ForCopy, ALibraryName, false));
 		}
+
+		public string ScriptDropCatalog(CatalogDeviceSession ASession)
+		{
+			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession));
+		}
+
+		public string ScriptDropLibrary(CatalogDeviceSession ASession, string ALibraryName)
+		{
+			return new D4TextEmitter().Emit(FCatalog.EmitDropStatement(ASession, new string[] { }, ALibraryName, false, false, true, true));
+		}
+
+		#endregion
 	}
 }

@@ -41,8 +41,8 @@ if not exists (select * from pg_database where datname = '{0}')
         protected bool FShouldReconcileRowGUIDCol;
         protected bool FUseIntegratedSecurity;
 
-        public PostgreSQLDevice(int AID, string AName, int AResourceManagerID)
-            : base(AID, AName, AResourceManagerID)
+        public PostgreSQLDevice(int AID, string AName)
+            : base(AID, AName)
         {
             IsOrderByInContext = false;
             // T-SQL allows items in the order by list to reference the column aliases used in the query

@@ -49,7 +49,7 @@ namespace Alphora.Dataphor.DAE.Device.SAS
 	
 	public class SASDevice : SQLDevice
 	{
-		public SASDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
+		public SASDevice(int AID, string AName) : base(AID, AName)
 		{
 			FSupportsTransactions = false;
 			UseTransactions = false; // The SAS CLI does not support explicit transactions

@@ -418,7 +418,7 @@
     <value>Timed out waiting for semaphore.</value>
   </data>
   <data name="104203" xml:space="preserve">
-    <value>Timed out waiting for {0} lock on "{1}" in resource manager ({2}).</value>
+    <value>Timed out waiting for {0} lock on "{1}" owned by "{2}".</value>
   </data>
   <data name="104204" xml:space="preserve">
     <value>Maximum lock count exceeded in lock manager.</value>

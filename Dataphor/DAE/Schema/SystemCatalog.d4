@@ -1434,12 +1434,12 @@ begin
 /*
 	create table Locks in Catalog
 	{
-		ResourceManagerID : Integer, 
+		OwnerName : String, 
 		LockName : String, 
 		LockMode : String, 
 		GrantCount : Integer, 
 		WaitCount : Integer, 
-		key { ResourceManagerID, LockName } static tags { DAE.Enforced = "False" }
+		key { OwnerName, LockName } static tags { DAE.Enforced = "False" }
 	} tags { Frontend.UseList = "True" } static tags { Catalog.CacheLevel = "None" };
 	
 	grant usage on Locks to role CatalogUser;
@@ -1609,7 +1609,6 @@ begin
 		Owner_User_ID : UserID,
 		IsSystem : Boolean,
 		IsGenerated : Boolean,
-		ResourceManagerID : Integer,
 		ReconciliationMaster : String,
 		ReconciliationMode : String,
 		key { ID } static tags { DAE.Enforced = "False" },

@@ -32,7 +32,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	public class CatalogDevice : MemoryDevice
 	{
-		public CatalogDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID){}
+		public CatalogDevice(int AID, string AName) : base(AID, AName){}
 		
 		protected override DeviceSession InternalConnect(ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo)
 		{
@@ -251,7 +251,7 @@ select O.Name Role_Name, A.Right_Name, A.IsGranted
 					AStatement.Append
 					(
 						@"
-select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated, D.ResourceManagerID, D.ReconciliationMaster, D.ReconciliationMode
+select C.ID, C.Name, C.Library_Name, C.Owner_User_ID, O.IsSystem, O.IsGenerated, D.ReconciliationMaster, D.ReconciliationMode
 	from DAEDevices D
 		join DAECatalogObjects C on D.ID = C.ID
 		join DAEObjects O on D.ID = O.ID
@@ -610,7 +610,7 @@ select O.Name, D.Name Device_Name, S.Name Operator_Name
 			foreach (KeyValuePair<LockID, LockHeader> LEntry in LEntries)
 			{
 				LockHeader LLockHeader = LEntry.Value;
-				ARow[0] = LLockHeader.LockID.ResourceManagerID;
+				ARow[0] = LLockHeader.LockID.Owner.ToString();
 				ARow[1] = LLockHeader.LockID.LockName;
 				ARow[2] = LLockHeader.Semaphore.Mode.ToString();
 				ARow[3] = LLockHeader.Semaphore.GrantCount();

@@ -8602,10 +8602,9 @@ indicative of other problems, a reference will never be attached as an explicit 
 			string LDeviceName = Schema.Object.Qualify(LStatement.DeviceName, APlan.CurrentLibrary.Name);
 			CheckValidCatalogObjectName(APlan, AStatement, LDeviceName);
 			CreateDeviceNode LNode = new CreateDeviceNode();
-			int LResourceManagerID = Int32.Parse(MetaData.GetTag(LStatement.MetaData, "DAE.ResourceManagerID", APlan.GetNextResourceManagerID().ToString()));
 			APlan.CheckRight(Schema.RightNames.HostImplementation);
 			APlan.CheckClassDependency(APlan.CurrentLibrary, LStatement.ClassDefinition);
-			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[]{Schema.Object.GetObjectID(LStatement.MetaData), LDeviceName, LResourceManagerID});
+			object LObject = APlan.Catalog.ClassLoader.CreateObject(LStatement.ClassDefinition, new object[]{Schema.Object.GetObjectID(LStatement.MetaData)});
 			if (!(LObject is Schema.Device))
 				throw new CompilerException(CompilerException.Codes.DeviceClassExpected, LStatement.ClassDefinition, LObject == null ? "null" : LObject.GetType().AssemblyQualifiedName);
 			LNode.NewDevice = (Schema.Device)LObject;

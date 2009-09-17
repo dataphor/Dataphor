@@ -52,7 +52,7 @@ namespace Alphora.Dataphor.Frontend.Server.Device
 		public const string CDocumentsTableVarName = @".Frontend.Documents";
 		public const string CDfdxDocumentID = @"dfdx";
 		
-		public FrontendDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID){}
+		public FrontendDevice(int AID, string AName) : base(AID, AName){}
 		
 		protected override void InternalStart(ServerProcess AProcess)
 		{

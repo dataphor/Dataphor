@@ -420,7 +420,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 
 				case "DAEDevices" : 
 					LColumns.Add("ID");
-					LColumns.Add("ResourceManagerID");
 					LColumns.Add("ReconciliationMaster");
 					LColumns.Add("ReconciliationMode");
 					return new StoreTableHeader(ATableName, LColumns, "PK_DAEDevices");
@@ -2230,7 +2229,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				// Insert the DAEDevices row
 				Schema.Device LDevice = AObject as Schema.Device;
 				if (LDevice != null)
-					InsertRow("DAEDevices", LDevice.ID, LDevice.ResourceManagerID, LDevice.ReconcileMaster.ToString(), LDevice.ReconcileMode.ToString());
+					InsertRow("DAEDevices", LDevice.ID, LDevice.ReconcileMaster.ToString(), LDevice.ReconcileMode.ToString());
 				
 				Schema.DeviceScalarType LDeviceScalarType = AObject as Schema.DeviceScalarType;
 				if (LDeviceScalarType != null)
@@ -2277,9 +2276,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				{
 					if (LDevices.Next())
 					{
-						LDevices[1] = LDevice.ResourceManagerID;
-						LDevices[2] = LDevice.ReconcileMaster.ToString();
-						LDevices[3] = LDevice.ReconcileMode.ToString();
+						LDevices[1] = LDevice.ReconcileMaster.ToString();
+						LDevices[2] = LDevice.ReconcileMode.ToString();
 						LDevices.Update();
 					}
 				}

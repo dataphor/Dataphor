@@ -71,7 +71,7 @@ if not exists (select * from sysdatabases where name = '{0}')
         protected bool FShouldReconcileRowGUIDCol;
         protected bool FUseIntegratedSecurity;
 
-        public MSSQLDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
+        public MSSQLDevice(int AID, string AName) : base(AID, AName)
         {
             IsOrderByInContext = false;
             // T-SQL allows items in the order by list to reference the column aliases used in the query

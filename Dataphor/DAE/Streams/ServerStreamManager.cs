@@ -15,12 +15,12 @@ namespace Alphora.Dataphor.DAE.Streams
 {
 	public class StreamHeader
 	{
-		public StreamHeader(int AResourceManagerID, StreamID AStreamID, IStreamProvider AProvider) : base()
+		public StreamHeader(StreamID AStreamID, IStreamProvider AProvider) : base()
 		{
 			FStreamID = AStreamID;
 			FProvider = AProvider;
 			#if LOCKSTREAMS
-			FLockID = new LockID(AResourceManagerID, AStreamID.ToString());
+			FLockID = new LockID(this, AStreamID.ToString());
 			#endif
 		}
 		
@@ -72,6 +72,11 @@ namespace Alphora.Dataphor.DAE.Streams
 		public override bool Equals(object AObject)
 		{
 			return (AObject is StreamHeader) && (((StreamHeader)AObject).StreamID == FStreamID);
+		}
+
+		public override string ToString()
+		{
+			return String.Format("StreamHeader (StreamID: {0}, Count: {1})", FStreamID, FStreamCount);
 		}
 	}
 	
@@ -192,9 +197,8 @@ namespace Alphora.Dataphor.DAE.Streams
 	
 	public class ServerStreamManager : StreamManager
 	{
-		public ServerStreamManager(int AResourceManagerID, LockManager ALockManager, IServer AServer) : base()
+		public ServerStreamManager(LockManager ALockManager, IServer AServer) : base()
 		{
-			FResourceManagerID = AResourceManagerID;
 			FLockManager = ALockManager;
 			#if UseFileStreamProvider
 			FDefaultProvider = new FileStreamProvider();
@@ -213,7 +217,6 @@ namespace Alphora.Dataphor.DAE.Streams
 			
 			FHeaders = null;
 			FLockManager = null;
-			FResourceManagerID = -1;
 
 			base.Dispose(ADisposing);
 		}
@@ -227,7 +230,6 @@ namespace Alphora.Dataphor.DAE.Streams
 		private Dictionary<StreamID, StreamID> FReferencingHeaders = new Dictionary<StreamID, StreamID>(); // <stream id key> references <stream id value>
 		private UInt64 FNextStreamID = 1; // must be 1 so that no stream could ever be 0 (the Null stream)
 		private LockManager FLockManager;
-		private int FResourceManagerID;
 		
 		private StreamEvents FStreamEvents;
 		public StreamEvents StreamEvents { get { return FStreamEvents; } }
@@ -291,7 +293,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		private void InternalRegister(StreamID AStreamID, IStreamProvider AProvider)
 		{
-			FHeaders.Add(new StreamHeader(FResourceManagerID, AStreamID, AProvider));
+			FHeaders.Add(new StreamHeader(AStreamID, AProvider));
 		}
 		
 		public StreamID Register(IStreamProvider AProvider)

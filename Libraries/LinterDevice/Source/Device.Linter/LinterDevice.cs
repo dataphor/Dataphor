@@ -54,7 +54,7 @@ namespace Alphora.Dataphor.DAE.Device.Linter
 
 	public class LinterDevice : SQLDevice
 	{
-		public LinterDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID){}
+		public LinterDevice(int AID, string AName) : base(AID, AName){}
 		
 		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
 		{

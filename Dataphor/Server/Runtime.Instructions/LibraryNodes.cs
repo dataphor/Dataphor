@@ -1,7 +1,28 @@
-﻿using System;
+﻿/*
+	Dataphor
+	© Copyright 2000-2008 Alphora
+	This file is licensed under a modified BSD-license which can be found here: http://dataphor.org/dataphor_license.txt
+*/
+#define NILPROPOGATION
+#define LOADFROMLIBRARIES
 
-namespace Server.DAE.Runtime.Instructions
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text;
+
+namespace Alphora.Dataphor.DAE.Runtime.Instructions
 {
+	using System.Collections.Generic;
+	using Alphora.Dataphor.DAE.Compiling;
+	using Alphora.Dataphor.DAE.Language;
+	using Alphora.Dataphor.DAE.Language.D4;
+	using Alphora.Dataphor.DAE.Runtime;
+	using Alphora.Dataphor.DAE.Runtime.Data;
+	using Alphora.Dataphor.DAE.Server;
+	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.Windows;
+
 	// operator CreateLibrary(const ALibraryDescriptor : LibraryDescriptor);
 	public class SystemCreateLibraryNode : InstructionNode
 	{
@@ -16,28 +37,20 @@ namespace Server.DAE.Runtime.Instructions
 
 					if (ALibrary.Directory != String.Empty)
 					{
-						AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = true;
-						try
-						{		
-							string LExistingLibraryDirectory = LExistingLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
-							if (Directory.Exists(LExistingLibraryDirectory))
-							{
-								#if !RESPECTREADONLY
-								PathUtility.EnsureWriteable(LExistingLibraryDirectory, true);
-								#endif
-								Directory.Delete(LExistingLibraryDirectory, true);
-							}
-							
-							LExistingLibrary.Directory = ALibrary.Directory;
-
-							if (!Directory.Exists(LLibraryDirectory))
-								Directory.CreateDirectory(LLibraryDirectory);
-							LExistingLibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LExistingLibrary.Name)));
-						}
-						finally
+						string LExistingLibraryDirectory = LExistingLibrary.GetLibraryDirectory(AProgram.ServerProcess.ServerSession.Server.LibraryDirectory);
+						if (Directory.Exists(LExistingLibraryDirectory))
 						{
-							AProgram.ServerProcess.ServerSession.Server.MaintainedLibraryUpdate = false;
+							#if !RESPECTREADONLY
+							PathUtility.EnsureWriteable(LExistingLibraryDirectory, true);
+							#endif
+							Directory.Delete(LExistingLibraryDirectory, true);
 						}
+						
+						LExistingLibrary.Directory = ALibrary.Directory;
+
+						if (!Directory.Exists(LLibraryDirectory))
+							Directory.CreateDirectory(LLibraryDirectory);
+						LExistingLibrary.SaveToFile(Path.Combine(LLibraryDirectory, Schema.Library.GetFileName(LExistingLibrary.Name)));
 
 						AProgram.CatalogDeviceSession.SetLibraryDirectory(ALibrary.Name, LLibraryDirectory);
 					}

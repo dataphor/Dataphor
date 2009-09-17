@@ -628,9 +628,8 @@ namespace Alphora.Dataphor.DAE.Schema
 	public abstract class Device : CatalogObject
     {						        
 		// constructor
-		public Device(int AID, string AName, int AResourceManagerID) : base(AID, AName)
+		public Device(int AID, string AName) : base(AID, AName)
 		{
-			FResourceManagerID = AResourceManagerID;
 			IsRemotable = false;
 			FReconcileMode = ReconcileMode.Command;
 			FRequiresAuthentication = true;
@@ -657,10 +656,6 @@ namespace Alphora.Dataphor.DAE.Schema
 		// Sessions
         private DeviceSessions FSessions;
         public DeviceSessions Sessions { get { return FSessions; } }
-        
-        // ResourceManagerID
-        private int FResourceManagerID;
-        public int ResourceManagerID { get { return FResourceManagerID; } }
         
         // Start
         protected virtual void ApplyDeviceSettings(ServerProcess AProcess)

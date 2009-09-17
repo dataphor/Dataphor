@@ -468,7 +468,6 @@ create index IDX_DAEUserRightAssignments_Right_Name on DAEUserRightAssignments (
 create table DAEDevices
 (
 	ID int not null,
-	ResourceManagerID int not null,
 	ReconciliationMaster character varying(20) not null,
 	ReconciliationMode character varying(80) not null,
 	constraint PK_DAEDevices primary key (ID)

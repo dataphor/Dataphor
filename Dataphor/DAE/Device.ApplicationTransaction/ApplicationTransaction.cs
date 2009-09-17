@@ -1044,7 +1044,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 	
 	public class ApplicationTransactionDevice : MemoryDevice
 	{
-		public ApplicationTransactionDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID)
+		public ApplicationTransactionDevice(int AID, string AName) : base(AID, AName)
 		{
 			IgnoreUnsupported = true;
 		}

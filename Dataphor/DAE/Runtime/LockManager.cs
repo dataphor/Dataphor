@@ -13,18 +13,22 @@ namespace Alphora.Dataphor.DAE.Runtime
 	
 	public struct LockID
 	{
-		public LockID(int AResourceManagerID, string ALockName)
+		/// <summary> Creates a lock ID. </summary>
+		/// <param name="AOwner"> The object which owns this resource.  This object should implement a unique ToString(). </param>
+		/// <param name="ALockName"> A lock name, which should be unique within an owner. </param>
+		public LockID(object AOwner, string ALockName)
 		{
-			ResourceManagerID = AResourceManagerID;
+			Error.AssertFail(AOwner != null, "LockID cannot have a null owner");
+			Owner = AOwner;
 			LockName = ALockName;
 		}
 		
-		public int ResourceManagerID;
-		public string LockName;
+		public readonly object Owner;
+		public readonly string LockName;
 		
 		public override int GetHashCode()
 		{
-			return ResourceManagerID.GetHashCode() ^ LockName.GetHashCode();
+			return Owner.GetHashCode() ^ LockName.GetHashCode();
 		}
 		
 		public override bool Equals(object AObject)
@@ -32,14 +36,14 @@ namespace Alphora.Dataphor.DAE.Runtime
 			if (AObject is LockID)
 			{
 				LockID LLockID = (LockID)AObject;
-				return (LLockID.ResourceManagerID == ResourceManagerID) && (LLockID.LockName == LockName);
+				return (Object.ReferenceEquals(LLockID.Owner, Owner)) && (LLockID.LockName == LockName);
 			}
 			return false;
 		}
 		
 		public override string ToString()
 		{
-			return String.Format("{0}.{1}", ResourceManagerID.ToString(), LockName);
+			return String.Format("{0}.{1}", Owner.ToString(), LockName);
 		}
 	}
 	
@@ -229,7 +233,7 @@ namespace Alphora.Dataphor.DAE.Runtime
 				catch (RuntimeException E)
 				{
 					if (E.Code == (int)RuntimeException.Codes.SemaphoreTimeout)
-						throw new RuntimeException(RuntimeException.Codes.LockTimeout, ALockMode.ToString(), ALockID.LockName, ALockID.ResourceManagerID.ToString());
+						throw new RuntimeException(RuntimeException.Codes.LockTimeout, ALockMode.ToString(), ALockID.LockName, ALockID.Owner.ToString());
 					else
 						throw;
 				}
@@ -273,19 +277,19 @@ namespace Alphora.Dataphor.DAE.Runtime
 			return ListLocks(-1, -1, LockMode.Shared);
 		}
 		
-		public string ListLocks(int AResourceManagerID, int AOwnerID, LockMode AMode)
+		public string ListLocks(int AOwner, int AOwnerID, LockMode AMode)
 		{
 			StringBuilder LResult = new StringBuilder();
 			foreach (KeyValuePair<LockID, LockHeader> LEntry in FLocks)
 			{
 				LockHeader LLock = LEntry.Value;
-				if ((AResourceManagerID == -1) || (LLock.LockID.ResourceManagerID == AResourceManagerID))
+				if ((AOwner == null) || Object.ReferenceEquals(LLock.LockID.Owner, AOwner))
 					if (LLock.Semaphore.Mode >= AMode)
 						if ((AOwnerID == -1) || ((LLock.Semaphore.Mode > LockMode.Free) && (LLock.Semaphore.IsSemaphoreOwned(AOwnerID))))
 							LResult.AppendFormat
 							(
-								"Resource Manager ID: {0} Lock Name: {1} Current Lock Mode: {2} Grant Count: {3} Wait Count: {4}\r\n", 
-								LLock.LockID.ResourceManagerID.ToString(), 
+								"Owner: {0} Lock Name: {1} Current Lock Mode: {2} Grant Count: {3} Wait Count: {4}\r\n", 
+								LLock.LockID.Owner.ToString(), 
 								LLock.LockID.LockName,
 								LLock.Semaphore.Mode.ToString(),
 								LLock.Semaphore.GrantCount().ToString(),

@@ -80,7 +80,7 @@ namespace Alphora.Dataphor.DAE.Device.MySQL
 
     public class MySQLDevice : SQLDevice
     {        
-		public MySQLDevice(int AID, string AName, int AResourceManagerID) : base(AID, AName, AResourceManagerID){}
+		public MySQLDevice(int AID, string AName) : base(AID, AName){}
 
 		protected override void RegisterSystemObjectMaps(ServerProcess AProcess)
 		{

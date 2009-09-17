@@ -574,11 +574,6 @@ namespace Alphora.Dataphor.DAE.Compiling
 		
 		public int SessionID { get { return FServerProcess.ServerSession.SessionID; } }
 		
-		public int GetNextResourceManagerID()
-		{
-			return FServerProcess.ServerSession.Server.GetNextResourceManagerID();
-		}
-
 		// Catalog		
 		public bool IsRepository { get { return FServerProcess.ServerSession.Server.IsEngine; } }
 		
