@@ -11,6 +11,85 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 {
 	class ServerCatalogDeviceSession : CatalogDeviceSession
 	{
+		protected override void Dispose(bool ADisposing)
+		{
+			base.Dispose(ADisposing);
+
+			DisposeCatalogStoreConnection();
+		}
+
+		#region Catalog Store
+
+		private bool FIsUpdatable;
+		private int FAcquireCount;
+		private CatalogStoreConnection FCatalogStoreConnection;
+
+		public CatalogStoreConnection CatalogStoreConnection
+		{
+			get
+			{
+				Error.AssertFail(FCatalogStoreConnection != null, "Internal Error: No catalog store connection established.");
+				return FCatalogStoreConnection;
+			}
+		}
+
+		/// <summary>Requests that the session acquire a connection to the catalog store.</summary>
+		/// <remarks>		
+		/// If the connection is requested updatable, this will be a dedicated connection owned by the session.
+		/// Otherwise, the connection is acquired from a pool of connections maintained by the store,
+		/// and must be released by a call to ReleaseCatalogConnection. Calling ReleaseCatalogConnection
+		/// with the dedicated updatable connection will have no affect.
+		/// </remarks>
+		protected void AcquireCatalogStoreConnection(bool AIsUpdatable)
+		{
+			FAcquireCount++;
+
+			if (FCatalogStoreConnection == null)
+			{
+				if (AIsUpdatable)
+					FCatalogStoreConnection = Device.Store.Connect();
+				else
+					FCatalogStoreConnection = Device.Store.AcquireConnection();
+			}
+
+			if (AIsUpdatable)
+			{
+				if (FIsUpdatable != AIsUpdatable)
+				{
+					FIsUpdatable = true;
+					for (int LIndex = 0; LIndex < ServerProcess.TransactionCount; LIndex++)
+						FCatalogStoreConnection.BeginTransaction(ServerProcess.Transactions[LIndex].IsolationLevel);
+				}
+			}
+		}
+
+		/// <summary>Releases a previously acquired catalog store connection back to the connection pool.</summary>
+		/// <remarks>
+		/// Note that if the given connection was acquired updatable, then this call will have no affect, because
+		/// the store connection is owned by the device session.
+		/// </remarks>
+		protected void ReleaseCatalogStoreConnection()
+		{
+			FAcquireCount--;
+
+			if ((FAcquireCount == 0) && !FIsUpdatable)
+			{
+				Device.Store.ReleaseConnection(FCatalogStoreConnection);
+				FCatalogStoreConnection = null;
+			}
+		}
+
+		private void DisposeCatalogStoreConnection()
+		{
+			if (FCatalogStoreConnection != null)
+			{
+				FCatalogStoreConnection.Dispose();
+				FCatalogStoreConnection = null;
+			}
+		}
+
+		#endregion
+
 		#region Libraries
 		
 		protected void InsertLibrary(Program AProgram, Schema.TableVar ATableVar, Row ARow)
@@ -666,5 +745,56 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		}
 
 		#endregion
+
+		#region Transaction
+		
+		protected override void InternalBeginTransaction(IsolationLevel AIsolationLevel)
+		{
+			base.InternalBeginTransaction(AIsolationLevel);
+
+			if ((FCatalogStoreConnection != null) && FIsUpdatable)
+				FCatalogStoreConnection.BeginTransaction(AIsolationLevel);
+		}
+
+		protected override void InternalAfterCommitTransaction()
+		{
+			base.InternalAfterCommitTransaction();
+			
+			if ((FCatalogStoreConnection != null) && FIsUpdatable)
+				FCatalogStoreConnection.CommitTransaction();
+		}
+
+		protected override void InternalAfterRollbackTransaction()
+		{
+			base.InternalAfterRollbackTransaction();
+			
+			if ((FCatalogStoreConnection != null) && FIsUpdatable)
+				FCatalogStoreConnection.RollbackTransaction();
+		}
+		
+		#endregion
+		
+		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
+		{
+			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
+			if (LDevicePlan.IsStorePlan)
+			{
+				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, AProgram, this);
+				try
+				{
+					LTable.Open();
+					return LTable;
+				}
+				catch
+				{
+					LTable.Dispose();
+					throw;
+				}
+			}
+			else
+				return base.InternalExecute(AProgram, ADevicePlan);
+		}
+		
+		
 	}
 }

@@ -30,80 +30,10 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 	{		
 		protected internal CatalogDeviceSession(Schema.Device ADevice, ServerProcess AServerProcess, DeviceSessionInfo ADeviceSessionInfo) : base(ADevice, AServerProcess, ADeviceSessionInfo){}
 		
-		protected override void Dispose(bool ADisposing)
-		{
-			base.Dispose(ADisposing);
-			
-			if (FCatalogStoreConnection != null)
-			{
-				FCatalogStoreConnection.Dispose();
-				FCatalogStoreConnection = null;
-			}
-		}
-		
 		public Schema.Catalog Catalog { get { return ((Server.Engine)ServerProcess.ServerSession.Server).Catalog; } }
 		
 		public new CatalogDevice Device { get { return (CatalogDevice)base.Device; } }
 
-		/// <summary>Requests that the session acquire a connection to the catalog store.</summary>
-		/// <remarks>		
-		/// If the connection is requested updatable, this will be a dedicated connection owned by the session.
-		/// Otherwise, the connection is acquired from a pool of connections maintained by the store,
-		/// and must be released by a call to ReleaseCatalogConnection. Calling ReleaseCatalogConnection
-		/// with the dedicated updatable connection will have no affect.
-		/// </remarks>
-		protected void AcquireCatalogStoreConnection(bool AIsUpdatable)
-		{
-			FAcquireCount++;
-			
-			if (FCatalogStoreConnection == null)
-			{
-				if (AIsUpdatable)
-					FCatalogStoreConnection = Device.Store.Connect();
-				else
-					FCatalogStoreConnection = Device.Store.AcquireConnection();
-			}
-
-			if (AIsUpdatable)
-			{
-				if (FIsUpdatable != AIsUpdatable)
-				{
-					FIsUpdatable = true;
-					for (int LIndex = 0; LIndex < ServerProcess.TransactionCount; LIndex++)
-						FCatalogStoreConnection.BeginTransaction(ServerProcess.Transactions[LIndex].IsolationLevel);
-				}
-			}
-		}
-		
-		/// <summary>Releases a previously acquired catalog store connection back to the connection pool.</summary>
-		/// <remarks>
-		/// Note that if the given connection was acquired updatable, then this call will have no affect, because
-		/// the store connection is owned by the device session.
-		/// </remarks>
-		protected void ReleaseCatalogStoreConnection()
-		{
-			FAcquireCount--;
-			
-			if ((FAcquireCount == 0) && !FIsUpdatable)
-			{
-				Device.Store.ReleaseConnection(FCatalogStoreConnection);
-				FCatalogStoreConnection = null;
-			}
-		}
-		
-		private bool FIsUpdatable;
-		private int FAcquireCount;
-		private CatalogStoreConnection FCatalogStoreConnection;
-
-		public CatalogStoreConnection CatalogStoreConnection
-		{
-			get
-			{
-				Error.AssertFail(FCatalogStoreConnection != null, "Internal Error: No catalog store connection established.");
-				return FCatalogStoreConnection;
-			}
-		}
-		
 		#if LOGDDLINSTRUCTIONS
 		private abstract class DDLInstruction 
 		{
@@ -1480,9 +1410,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			#if LOGDDLINSTRUCTIONS
 			FInstructions.Add(new BeginTransactionInstruction());
 			#endif
-
-			if ((FCatalogStoreConnection != null) && FIsUpdatable)
-				FCatalogStoreConnection.BeginTransaction(AIsolationLevel);
 		}
 
 		protected override void InternalPrepareTransaction()
@@ -1503,10 +1430,14 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				}
 			#endif
 
-			if ((FCatalogStoreConnection != null) && FIsUpdatable)
-				FCatalogStoreConnection.CommitTransaction();
+			InternalAfterCommitTransaction();
 				
 			ExecuteDeferredDeviceStops();
+		}
+
+		protected virtual void InternalAfterCommitTransaction()
+		{
+			// virtual
 		}
 
 		protected override void InternalRollbackTransaction()
@@ -1540,69 +1471,55 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			}
 			finally
 			{
-				if ((FCatalogStoreConnection != null) && FIsUpdatable)
-					FCatalogStoreConnection.RollbackTransaction();
+				InternalAfterRollbackTransaction();
 					
 				ClearDeferredDeviceStops();
 			}
 		}
+
+		protected virtual void InternalAfterRollbackTransaction()
+		{
+			// virtual
+		}
 		
 		protected override object InternalExecute(Program AProgram, Schema.DevicePlan ADevicePlan)
 		{
-			CatalogDevicePlan LDevicePlan = (CatalogDevicePlan)ADevicePlan;
-			if (LDevicePlan.IsStorePlan)
+			if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
 			{
-				CatalogDeviceTable LTable = new CatalogDeviceTable(LDevicePlan.Node.DeviceNode as CatalogDevicePlanNode, AProgram, this);
-				try
+				Schema.TableVar LTableVar = null;
+				if (ADevicePlan.Node is BaseTableVarNode)
+					LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
+				else if (ADevicePlan.Node is OrderNode)
+					LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
+				if (LTableVar != null)
 				{
-					LTable.Open();
-					return LTable;
-				}
-				catch
-				{
-					LTable.Dispose();
-					throw;
-				}
-			}
-			else
-			{
-				if ((ADevicePlan.Node is BaseTableVarNode) || (ADevicePlan.Node is OrderNode))
-				{
-					Schema.TableVar LTableVar = null;
-					if (ADevicePlan.Node is BaseTableVarNode)
-						LTableVar = ((BaseTableVarNode)ADevicePlan.Node).TableVar;
-					else if (ADevicePlan.Node is OrderNode)
-						LTableVar = ((BaseTableVarNode)ADevicePlan.Node.Nodes[0]).TableVar;
-					if (LTableVar != null)
+					lock (Device.Headers)
 					{
-						lock (Device.Headers)
+						CatalogHeader LHeader = Device.Headers[LTableVar];
+						if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
 						{
-							CatalogHeader LHeader = Device.Headers[LTableVar];
-							if ((LHeader.CacheLevel == CatalogCacheLevel.None) || ((LHeader.CacheLevel == CatalogCacheLevel.Normal) && (Catalog.TimeStamp > LHeader.TimeStamp)) || ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached))
-							{
-								Device.PopulateTableVar(AProgram, LHeader);
-								if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
-									LHeader.Cached = true;
-							}
+							Device.PopulateTableVar(AProgram, LHeader);
+							if ((LHeader.CacheLevel == CatalogCacheLevel.Maintained) && !LHeader.Cached)
+								LHeader.Cached = true;
 						}
 					}
 				}
-				object LResult = base.InternalExecute(AProgram, ADevicePlan);
-				if (ADevicePlan.Node is CreateTableNode)
+			}
+			object LResult = base.InternalExecute(AProgram, ADevicePlan);
+			if (ADevicePlan.Node is CreateTableNode)
+			{
+				Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
+				CatalogCacheLevel LCacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(LTableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
+				if (!((LCacheLevel == CatalogCacheLevel.StoreTable) || (LCacheLevel == CatalogCacheLevel.StoreView)))
 				{
-					Schema.TableVar LTableVar = ((CreateTableNode)ADevicePlan.Node).Table;
-					CatalogCacheLevel LCacheLevel = (CatalogCacheLevel)Enum.Parse(typeof(CatalogCacheLevel), MetaData.GetTag(LTableVar.MetaData, "Catalog.CacheLevel", "Normal"), true);
-					if (!((LCacheLevel == CatalogCacheLevel.StoreTable) || (LCacheLevel == CatalogCacheLevel.StoreView)))
+					lock (Device.Headers)
 					{
-						lock (Device.Headers)
-						{
-							CatalogHeader LHeader = new CatalogHeader(LTableVar, Device.Tables[LTableVar], Int64.MinValue, LCacheLevel);
-							Device.Headers.Add(LHeader);
-						}
+						CatalogHeader LHeader = new CatalogHeader(LTableVar, Device.Tables[LTableVar], Int64.MinValue, LCacheLevel);
+						Device.Headers.Add(LHeader);
 					}
 				}
-				return LResult;
 			}
+			return LResult;
 		}
 		
 		protected override void InternalInsertRow(Program AProgram, Schema.TableVar ATableVar, Row ARow, BitArray AValueFlags)
