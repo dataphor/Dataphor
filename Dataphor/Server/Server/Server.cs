@@ -14,7 +14,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 
-namespace DAE.Server
+namespace Alphora.Dataphor.DAE.Server
 {
 	using Alphora.Dataphor.DAE.Device.ApplicationTransaction;
 	using Alphora.Dataphor.DAE.Device.Catalog;
@@ -27,6 +27,7 @@ namespace DAE.Server
 	using Alphora.Dataphor.DAE.Streams;
 	using Alphora.Dataphor.Logging;
 	using Schema = Alphora.Dataphor.DAE.Schema;
+	using Alphora.Dataphor.Windows;
 
 	public class Server : Engine
 	{
