@@ -80,11 +80,9 @@ namespace Alphora.Dataphor.DAE.Streams
 		}
 	}
 	
-	public class StreamHeaders : Hashtable
+	public class StreamHeaders : Dictionary<StreamID, StreamHeader>
 	{
 		public StreamHeaders() : base(){}
-		
-		public StreamHeader this[StreamID AStreamID] { get { return (StreamHeader)base[AStreamID]; } }
 		
 		public void Add(StreamHeader AStreamHeader)
 		{
@@ -277,8 +275,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		private StreamHeader GetStreamHeader(StreamID AStreamID)
 		{
-			StreamHeader LHeader = FHeaders[AStreamID];
-			if (LHeader == null)
+			StreamHeader LHeader;
+			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
 				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
 			return LHeader;
 		}

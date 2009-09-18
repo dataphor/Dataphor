@@ -31,8 +31,8 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		/// <summary>Gets the application transaction and acquires a lock on it. The caller is responsible for releasing the lock.</summary>
 		public static ApplicationTransaction GetTransaction(ServerProcess AProcess, Guid AID)
 		{
-			ApplicationTransaction LTransaction = AProcess.ServerSession.Server.ATDevice.ApplicationTransactions[AID];
-			if (LTransaction == null)
+			ApplicationTransaction LTransaction;
+			if (!AProcess.ServerSession.Server.ATDevice.ApplicationTransactions.TryGetValue(AID, out LTransaction))
 				throw new ApplicationTransactionException(ApplicationTransactionException.Codes.InvalidApplicationTransactionID, AID);
 				
 			Monitor.Enter(LTransaction);
@@ -1007,27 +1007,29 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 		}
 	}
 	
-	public class ApplicationTransactions : Hashtable
+	public class ApplicationTransactions : Dictionary<Guid, ApplicationTransaction>
 	{
 		public ApplicationTransactions() : base() {}
 		
-		public new ApplicationTransaction this[object AKey]
+		private object FSyncRoot = new System.Object();
+		
+		public new ApplicationTransaction this[Guid AKey]
 		{
-			get { return (ApplicationTransaction)base[AKey]; }
-			set { lock(SyncRoot) { base[AKey] = value; } }
+			get { return base[AKey]; }
+			set { lock(FSyncRoot) { base[AKey] = value; } }
 		}
 		
-		public override void Add(object AKey, object AValue)
+		public override void Add(Guid AKey, ApplicationTransaction AValue)
 		{
-			lock (SyncRoot)
+			lock (FSyncRoot)
 			{
 				base.Add(AKey, AValue);
 			}
 		}
 		
-		public override void Remove(object AKey)
+		public override void Remove(Guid AKey)
 		{
-			lock (SyncRoot)
+			lock (FSyncRoot)
 			{
 				base.Remove(AKey);
 			}
@@ -1035,7 +1037,7 @@ namespace Alphora.Dataphor.DAE.Device.ApplicationTransaction
 
 		public override void Clear()
 		{
-			lock (SyncRoot)
+			lock (FSyncRoot)
 			{
 				base.Clear();
 			}

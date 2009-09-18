@@ -2695,8 +2695,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser == null)
+				Schema.User LUser;
+				if (!Device.UsersCache.TryGetValue(AUserID, out LUser))
 				{
 					AcquireCatalogStoreConnection(false);
 					try
@@ -2938,8 +2938,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
-			Schema.User LUser = Device.UsersCache[AUserID];
-			if (LUser != null)
+			Schema.User LUser;
+			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 				LUser.ClearCachedRightAssignments();
 		}
 		
@@ -2955,8 +2955,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 				ReleaseCatalogStoreConnection();
 			}
 
-			Schema.User LUser = Device.UsersCache[AUserID];
-			if (LUser != null)
+			Schema.User LUser;
+			if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 				LUser.ClearCachedRightAssignments();
 			
 			if (!ServerProcess.IsLoading())
@@ -3029,8 +3029,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser != null)
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 					LUser.ClearCachedRightAssignment(ARightName);
 			}
 			
@@ -3075,8 +3075,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser != null)
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 					LUser.ClearCachedRightAssignment(ARightName);
 			}
 			
@@ -3120,8 +3120,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser != null)
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 					LUser.ClearCachedRightAssignment(ARightName);
 			}
 			
@@ -3143,8 +3143,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser != null)
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 					LUser.ClearCachedRightAssignments();
 			}
 			
@@ -3166,8 +3166,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (Catalog)
 			{
-				Schema.User LUser = Device.UsersCache[AUserID];
-				if (LUser != null)
+				Schema.User LUser;
+				if (Device.UsersCache.TryGetValue(AUserID, out LUser))
 					LUser.ClearCachedRightAssignments();
 			}
 			
@@ -3186,8 +3186,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			lock (ADevice.Users)
 			{
-				Schema.DeviceUser LDeviceUser = ADevice.Users[AUser.ID];
-				if (LDeviceUser == null)
+				Schema.DeviceUser LDeviceUser;
+				if (!ADevice.Users.TryGetValue(AUser.ID, out LDeviceUser))
 				{
 					AcquireCatalogStoreConnection(false);
 					try

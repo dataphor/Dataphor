@@ -21,6 +21,7 @@ using Alphora.Dataphor.DAE.Runtime;
 using Alphora.Dataphor.DAE.Runtime.Data;
 using Alphora.Dataphor.DAE.Runtime.Instructions;
 using D4 = Alphora.Dataphor.DAE.Language.D4;
+using System.Collections.Generic;
 
 namespace Alphora.Dataphor.DAE.Schema
 {
@@ -246,7 +247,7 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public class Rights : Hashtable
+	public class Rights : Dictionary<string, Right>
 	{		
 		public Rights() : base(){}
 		
@@ -254,8 +255,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		{
 			get
 			{
-				Right LResult = (Right)base[AName];
-				if (LResult == null)
+				Right LResult;
+				if (!base.TryGetValue(AName, out LResult))
 					throw new SchemaException(SchemaException.Codes.RightNotFound, AName);
 				return LResult;
 			}
@@ -286,11 +287,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public class RightAssignments : Hashtable
+	public class RightAssignments : Dictionary<string, RightAssignment>
 	{
 		public RightAssignments() : base(){}
-		
-		public RightAssignment this[string AName] { get { return (RightAssignment)base[AName]; } }
 		
 		public void Add(RightAssignment ARightAssignment)
 		{
@@ -329,10 +328,11 @@ namespace Alphora.Dataphor.DAE.Schema
 		
 		public RightAssignment FindCachedRightAssignment(string ARightName)
 		{
-			if (FRightsCache != null)
-				return FRightsCache[ARightName];
-				
-			return null;
+			RightAssignment LResult;
+			if (FRightsCache != null && FRightsCache.TryGetValue(ARightName, out LResult))
+				return LResult;
+			else
+				return null;
 		}
 		
 		public void ClearCachedRightAssignment(string ARightName)
@@ -357,11 +357,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
 	}
 	
-	public class Users : Hashtable
+	public class Users : Dictionary<string, User>
 	{		
 		public Users() : base(StringComparer.OrdinalIgnoreCase){}
-		
-		public User this[string AID] { get { return (User)base[AID]; } }
 		
 		public void Add(User AUser)
 		{

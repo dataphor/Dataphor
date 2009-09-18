@@ -180,18 +180,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-	public class DeviceOperators : Hashtable
+	public class DeviceOperators : Dictionary<Operator, DeviceOperator>
 	{		
 		public DeviceOperators() : base(){}
-		
-		public DeviceOperator this[Operator AOperator]
-		{
-			get
-			{
-				DeviceOperator LResult = (DeviceOperator)base[AOperator];
-				return LResult;
-			}
-		}
 		
 		public void Add(DeviceOperator AOperator)
 		{
@@ -280,18 +271,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		}
     }
     
-	public class DeviceScalarTypes : Hashtable
+	public class DeviceScalarTypes : Dictionary<ScalarType, DeviceScalarType>
 	{
 		public DeviceScalarTypes() : base(){}
-		
-		public DeviceScalarType this[ScalarType AScalarType]
-		{
-			get
-			{
-				DeviceScalarType LResult = (DeviceScalarType)base[AScalarType];
-				return LResult;
-			}
-		}
 		
 		public void Add(DeviceScalarType AScalarType)
 		{
@@ -937,8 +919,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Resolves the operator map for the given operator, caching it if it exists. Returns null if the operator is not mapped.</summary>
         public DeviceOperator ResolveDeviceOperator(Plan APlan, Schema.Operator AOperator)
         {
-			Schema.DeviceOperator LDeviceOperator = FDeviceOperators[AOperator];
-			if (LDeviceOperator == null)
+			Schema.DeviceOperator LDeviceOperator;
+			if (!FDeviceOperators.TryGetValue(AOperator, out LDeviceOperator))
 				LDeviceOperator = APlan.CatalogDeviceSession.ResolveDeviceOperator(this, AOperator);
 			if (LDeviceOperator != null)
 				APlan.AttachDependency(LDeviceOperator);
@@ -951,7 +933,7 @@ namespace Alphora.Dataphor.DAE.Schema
         /// </remarks>
         public bool HasDeviceOperator(Schema.Operator AOperator)
         {
-			return FDeviceOperators.Contains(AOperator);
+			return FDeviceOperators.ContainsKey(AOperator);
         }
         
         /// <summary>Adds the given operator map to the cache.</summary>
@@ -972,8 +954,8 @@ namespace Alphora.Dataphor.DAE.Schema
 		/// <summary>Returns the scalar type map for the given scalar type, caching it if it exists. Returns null if the scalar type is not mapped.</summary>
         public DeviceScalarType ResolveDeviceScalarType(Plan APlan, Schema.ScalarType AScalarType)
         {
-			Schema.DeviceScalarType LDeviceScalarType = FDeviceScalarTypes[AScalarType];
-			if (LDeviceScalarType == null)
+			Schema.DeviceScalarType LDeviceScalarType;
+			if (!FDeviceScalarTypes.TryGetValue(AScalarType, out LDeviceScalarType))
 				LDeviceScalarType = APlan.CatalogDeviceSession.ResolveDeviceScalarType(this, AScalarType);
 			if (LDeviceScalarType != null)
 				APlan.AttachDependency(LDeviceScalarType);
@@ -986,7 +968,7 @@ namespace Alphora.Dataphor.DAE.Schema
         /// </remarks>
         public bool HasDeviceScalarType(Schema.ScalarType AScalarType)
         {
-			return FDeviceScalarTypes.Contains(AScalarType);
+			return FDeviceScalarTypes.ContainsKey(AScalarType);
         }
         
 		/// <summary>Adds the given scalar type map to the cache.</summary>
@@ -1791,11 +1773,9 @@ namespace Alphora.Dataphor.DAE.Schema
 		public string ConnectionParameters { get { return FConnectionParameters; } set { FConnectionParameters = value == null ? String.Empty : value; } } 
 	}
 	
-	public class DeviceUsers : Hashtable
+	public class DeviceUsers : Dictionary<string, DeviceUser>
 	{		
 		public DeviceUsers() : base(StringComparer.OrdinalIgnoreCase){}
-		
-		public DeviceUser this[string AID] { get { return (DeviceUser)base[AID]; } }
 		
 		public void Add(DeviceUser ADeviceUser)
 		{

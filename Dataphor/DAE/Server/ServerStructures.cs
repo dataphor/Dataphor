@@ -88,9 +88,8 @@ namespace Alphora.Dataphor.DAE.Server
 	
 	public class LoadingContexts : List<LoadingContext> { }
 	
-	internal class Bookmarks : System.Collections.Hashtable
+	internal class Bookmarks : Dictionary<Guid, Row>
 	{
-		public Row this[Guid AKey] { get { return (Row)base[AKey]; } }
 	}
 	
 	[Serializable]

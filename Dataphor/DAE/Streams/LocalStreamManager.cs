@@ -10,6 +10,7 @@ namespace Alphora.Dataphor.DAE.Streams
 	using System.Collections;
 	
 	using Alphora.Dataphor.DAE.Runtime;
+	using System.Collections.Generic;
 	
 	public class LocalStreamHeader : Disposable
 	{
@@ -46,11 +47,9 @@ namespace Alphora.Dataphor.DAE.Streams
 		}
 	}
 	
-	public class LocalStreamHeaders : Hashtable, IDisposable
+	public class LocalStreamHeaders : Dictionary<StreamID, LocalStreamHeader>, IDisposable
 	{
 		public LocalStreamHeaders() : base(){}
-		
-		public LocalStreamHeader this[StreamID AStreamID] { get { return (LocalStreamHeader)base[AStreamID]; } }
 		
 		#if USEFINALIZER
 		~LocalStreamHeaders()
@@ -73,8 +72,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		protected void Dispose(bool ADisposing)
 		{
-			foreach (DictionaryEntry LEntry in this)
-				((LocalStreamHeader)LEntry.Value).Dispose();
+			foreach (KeyValuePair<StreamID, LocalStreamHeader> LEntry in this)
+				LEntry.Value.Dispose();
 			Clear();
 		}
 
@@ -139,8 +138,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		public StreamID Reference(StreamID AStreamID)
 		{
-			LocalStreamHeader LTargetHeader = FHeaders[AStreamID];
-			if ((LTargetHeader != null) && (LTargetHeader.Stream != null) && LTargetHeader.Stream.Modified)
+			LocalStreamHeader LTargetHeader;
+			if (!FHeaders.TryGetValue(AStreamID, out LTargetHeader) && (LTargetHeader.Stream != null) && LTargetHeader.Stream.Modified)
 			{
 				StreamID LStreamID = Allocate();
 				Stream LStream = Open(LStreamID, LockMode.Exclusive);
@@ -175,8 +174,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		public void Deallocate(StreamID AStreamID)
 		{
 			// Deallocates the given stream in the source stream manager, and removes the header and local cache for it locally, without flushing
-			LocalStreamHeader LHeader = FHeaders[AStreamID];
-			if (LHeader != null)
+			LocalStreamHeader LHeader;
+			if (FHeaders.TryGetValue(AStreamID, out LHeader))
 			{
 				if (LHeader.Stream != null)
 				{
@@ -199,8 +198,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		public Stream Open(StreamID AStreamID, LockMode AMode)
 		{
 			// Ensures that the given stream is supported by a local cache and returns a stream accessing it
-			LocalStreamHeader LHeader = FHeaders[AStreamID];
-			if (LHeader == null)
+			LocalStreamHeader LHeader;
+			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
 			{
 				LHeader = new LocalStreamHeader(AStreamID, new LocalStream(this, AStreamID, AMode)); //FSourceStreamManager.Open(AStreamID, AMode)));
 				FHeaders.Add(LHeader);
@@ -235,16 +234,16 @@ namespace Alphora.Dataphor.DAE.Streams
 		public void Flush(StreamID AStreamID)
 		{
 			// Ensures that the given local cache is flushed to the source stream manager
-			LocalStreamHeader LHeader = FHeaders[AStreamID];
-			if ((LHeader != null) && (LHeader.Stream != null))
+			LocalStreamHeader LHeader;
+			if (FHeaders.TryGetValue(AStreamID, out LHeader) && (LHeader.Stream != null))
 				LHeader.Stream.Flush();
 		}
 
 		public void Release(StreamID AStreamID)
 		{
 			// Ensures that the given local cache is flushed and closes the stream obtained from the source stream manager
-			LocalStreamHeader LHeader = FHeaders[AStreamID];
-			if (LHeader != null)
+			LocalStreamHeader LHeader;
+			if (FHeaders.TryGetValue(AStreamID, out LHeader))
 			{
 				if (LHeader.Stream != null)
 				{

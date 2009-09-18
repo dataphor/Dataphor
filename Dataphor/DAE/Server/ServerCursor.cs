@@ -264,8 +264,8 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected bool InternalGotoBookmark(Guid ABookmark, bool AForward)
 		{
-			Row LRow = FBookmarks[ABookmark];
-			if (LRow == null)
+			Row LRow;
+			if (!FBookmarks.TryGetValue(ABookmark, out LRow))
 				throw new ServerException(ServerException.Codes.InvalidBookmark, ABookmark);
 			return FSourceTable.GotoBookmark(FBookmarks[ABookmark], AForward);
 		}
@@ -277,7 +277,8 @@ namespace Alphora.Dataphor.DAE.Server
 
 		protected void InternalDisposeBookmark(Guid ABookmark)
 		{
-			Row LInternalBookmark = FBookmarks[ABookmark];
+			Row LInternalBookmark = null;
+			FBookmarks.TryGetValue(ABookmark, out LInternalBookmark);
 			FBookmarks.Remove(ABookmark);
 			if (LInternalBookmark != null)
 				LInternalBookmark.Dispose();

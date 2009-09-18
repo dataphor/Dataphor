@@ -42,16 +42,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		private CatalogHeaders FHeaders = new CatalogHeaders();
 		public CatalogHeaders Headers { get { return FHeaders; } }
 		
-		private CatalogStore FStore;
-		internal CatalogStore Store 
-		{ 
-			get 
-			{ 
-				Error.AssertFail(FStore != null, "Server is configured as a repository and has no catalog store."); 
-				return FStore; 
-			} 
-		}
-
 		// Users cache, maintained exclusively through the catalog maintenance API on the CatalogDeviceSession		
 		private Users FUsersCache = new Users();
 		internal Users UsersCache { get { return FUsersCache; } }
@@ -77,24 +67,6 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			get { return FOperatorNameCache.Size; }
 			set { FOperatorNameCache.Resize(value); }
-		}
-		
-		public int MaxStoreConnections
-		{
-			get { return FStore.MaxConnections; }
-			set { FStore.MaxConnections = value; }
-		}
-		
-		protected override void InternalStart(ServerProcess AProcess)
-		{
-			base.InternalStart(AProcess);
-			if (!AProcess.ServerSession.Server.IsEngine)
-			{
-				FStore = new CatalogStore();
-				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
-				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
-				FStore.Initialize(AProcess.ServerSession.Server);
-			}
 		}
 		
 		protected void TranslateOrderNode(CatalogDevicePlan ADevicePlan, CatalogDevicePlanNode ADevicePlanNode, OrderNode AOrderNode)

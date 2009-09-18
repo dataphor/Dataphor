@@ -76,7 +76,7 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		public bool Cached;
 	}
 	
-	public class CatalogHeaders : Hashtable
+	public class CatalogHeaders : Dictionary<Schema.TableVar, CatalogHeader>
 	{		
 		public CatalogHeaders() : base(){}
 		
@@ -84,8 +84,8 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 		{
 			get
 			{
-				CatalogHeader LResult = (CatalogHeader)base[ATableVar];
-				if (LResult == null)
+				CatalogHeader LResult;
+				if (!base.TryGetValue(ATableVar, out LResult))
 					throw new CatalogException(CatalogException.Codes.CatalogHeaderNotFound, ATableVar.Name);
 				return LResult;
 			}

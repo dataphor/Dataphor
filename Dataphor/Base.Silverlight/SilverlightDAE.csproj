@@ -8,8 +8,8 @@
     <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Base.Silverlight</RootNamespace>
-    <AssemblyName>Base.Silverlight</AssemblyName>
+    <RootNamespace>Alphora.Dataphor</RootNamespace>
+    <AssemblyName>SilverlightDAE</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <SilverlightApplication>false</SilverlightApplication>
     <ValidateXaml>true</ValidateXaml>
@@ -47,13 +47,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Base\Base.cs">
-      <Link>Base.cs</Link>
+      <Link>Base\Base.cs</Link>
     </Compile>
     <Compile Include="..\Base\BaseException.cs">
-      <Link>BaseException.cs</Link>
+      <Link>Base\BaseException.cs</Link>
     </Compile>
     <Compile Include="..\Base\BaseList.cs">
-      <Link>BaseList.cs</Link>
+      <Link>Base\BaseList.cs</Link>
     </Compile>
     <Compile Include="..\Base\BOP\Attributes.cs">
       <Link>BOP\Attributes.cs</Link>
@@ -83,67 +83,68 @@
       <Link>BOP\Structures.cs</Link>
     </Compile>
     <Compile Include="..\Base\ByteArrayUtility.cs">
-      <Link>ByteArrayUtility.cs</Link>
+      <Link>Base\ByteArrayUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\CRC32.cs">
-      <Link>CRC32.cs</Link>
+      <Link>Base\CRC32.cs</Link>
     </Compile>
     <Compile Include="..\Base\DataphorException.cs">
-      <Link>DataphorException.cs</Link>
+      <Link>Base\DataphorException.cs</Link>
     </Compile>
     <Compile Include="..\Base\DisposableList.cs">
-      <Link>DisposableList.cs</Link>
+      <Link>Base\DisposableList.cs</Link>
     </Compile>
     <Compile Include="..\Base\ExceptionUtility.cs">
-      <Link>ExceptionUtility.cs</Link>
+      <Link>Base\ExceptionUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\FixedSizeCache.cs">
-      <Link>FixedSizeCache.cs</Link>
+      <Link>Base\FixedSizeCache.cs</Link>
     </Compile>
     <Compile Include="..\Base\IndexList.cs">
-      <Link>IndexList.cs</Link>
+      <Link>Base\IndexList.cs</Link>
     </Compile>
     <Compile Include="..\Base\MemoryUtility.cs">
-      <Link>MemoryUtility.cs</Link>
+      <Link>Base\MemoryUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\NonNullList.cs">
-      <Link>NonNullList.cs</Link>
+      <Link>Base\NonNullList.cs</Link>
     </Compile>
     <Compile Include="..\Base\NotifyingBaseList.cs">
-      <Link>NotifyingBaseList.cs</Link>
+      <Link>Base\NotifyingBaseList.cs</Link>
     </Compile>
     <Compile Include="..\Base\ReflectionUtility.cs">
-      <Link>ReflectionUtility.cs</Link>
+      <Link>Base\ReflectionUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\Set.cs">
-      <Link>Set.cs</Link>
+      <Link>Base\Set.cs</Link>
     </Compile>
     <Compile Include="..\Base\StreamUtility.cs">
-      <Link>StreamUtility.cs</Link>
+      <Link>Base\StreamUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\TemporaryStream.cs">
-      <Link>TemporaryStream.cs</Link>
+      <Link>Base\TemporaryStream.cs</Link>
     </Compile>
     <Compile Include="..\Base\ThreadUtility.cs">
-      <Link>ThreadUtility.cs</Link>
+      <Link>Base\ThreadUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\TimingUtility.cs">
-      <Link>TimingUtility.cs</Link>
+      <Link>Base\TimingUtility.cs</Link>
     </Compile>
     <Compile Include="..\Base\ValidatingBaseList.cs">
-      <Link>ValidatingBaseList.cs</Link>
+      <Link>Base\ValidatingBaseList.cs</Link>
     </Compile>
-    <Compile Include="MD5CryptoServiceProvider.cs" />
+    <Compile Include="System\Component.cs" />
+    <Compile Include="System\MD5CryptoServiceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Stopwatch.cs" />
+    <Compile Include="System\Stopwatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Base\Base.resx">
-      <Link>Base.resx</Link>
+      <Link>Base\Base.resx</Link>
       <DependentUpon>Base.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="..\Base\BaseException.resx">
-      <Link>BaseException.resx</Link>
+      <Link>Base\BaseException.resx</Link>
       <DependentUpon>BaseException.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>

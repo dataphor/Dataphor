@@ -9,6 +9,7 @@ namespace Alphora.Dataphor.DAE.Streams
 	using System.IO;
 	using System.Collections;
 	using System.Runtime.Remoting.Lifetime;
+	using System.Collections.Generic;
 	
 	public class MemoryStreamHeader : Disposable, ISponsor
 	{
@@ -39,7 +40,7 @@ namespace Alphora.Dataphor.DAE.Streams
 		public Stream Stream;
 	}
 	
-	public class MemoryStreamHeaders : Hashtable, IDisposable
+	public class MemoryStreamHeaders : Dictionary<StreamID, MemoryStreamHeader>, IDisposable
 	{
 		public MemoryStreamHeaders() : base(){}
 		
@@ -66,8 +67,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		protected void Dispose(bool ADisposing)
 		{
-			foreach (DictionaryEntry LEntry in this)
-				((MemoryStreamHeader)LEntry.Value).Dispose();
+			foreach (KeyValuePair<StreamID, MemoryStreamHeader> LEntry in this)
+				LEntry.Value.Dispose();
 			Clear();
 		}
 
@@ -102,8 +103,8 @@ namespace Alphora.Dataphor.DAE.Streams
 		
 		private MemoryStreamHeader GetStreamHeader(StreamID AStreamID)
 		{
-			MemoryStreamHeader LHeader = FHeaders[AStreamID];
-			if (LHeader == null)
+			MemoryStreamHeader LHeader;
+			if (!FHeaders.TryGetValue(AStreamID, out LHeader))
 				throw new StreamsException(StreamsException.Codes.StreamIDNotFound, AStreamID.ToString());
 			return LHeader;
 		}

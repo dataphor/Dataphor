@@ -33,5 +33,32 @@ namespace Alphora.Dataphor.DAE.Device.Catalog
 			ANativeTable.Insert(AProgram.ValueManager, ARow);
 		}
 
+		private CatalogStore FStore;
+		internal CatalogStore Store
+		{
+			get
+			{
+				Error.AssertFail(FStore != null, "Server is configured as a repository and has no catalog store.");
+				return FStore;
+			}
+		}
+
+		public int MaxStoreConnections
+		{
+			get { return FStore.MaxConnections; }
+			set { FStore.MaxConnections = value; }
+		}
+
+		protected override void InternalStart(ServerProcess AProcess)
+		{
+			base.InternalStart(AProcess);
+			if (!AProcess.ServerSession.Server.IsEngine)
+			{
+				FStore = new CatalogStore();
+				FStore.StoreClassName = AProcess.ServerSession.Server.GetCatalogStoreClassName();
+				FStore.StoreConnectionString = AProcess.ServerSession.Server.GetCatalogStoreConnectionString();
+				FStore.Initialize(AProcess.ServerSession.Server);
+			}
+		}
 	}
 }

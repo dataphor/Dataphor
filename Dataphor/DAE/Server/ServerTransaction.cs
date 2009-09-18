@@ -243,7 +243,7 @@ namespace Alphora.Dataphor.DAE.Server
 			ServerTableVar LServerTableVar = null;
 			ServerTransaction LCurrentTransaction = CurrentTransaction();
 
-			if (!FTableVars.Contains(ATableVar))
+			if (!FTableVars.ContainsKey(ATableVar))
 			{
 				LServerTableVar = new ServerTableVar(LCurrentTransaction.Process, ATableVar);
 				FTableVars.Add(ATableVar, LServerTableVar);
@@ -251,7 +251,7 @@ namespace Alphora.Dataphor.DAE.Server
 			else
 				LServerTableVar = FTableVars[ATableVar];
 
-			if (!LCurrentTransaction.TableVars.Contains(ATableVar))
+			if (!LCurrentTransaction.TableVars.ContainsKey(ATableVar))
 				LCurrentTransaction.TableVars.Add(ATableVar, LServerTableVar);
 				
 			return LServerTableVar;
@@ -276,11 +276,11 @@ namespace Alphora.Dataphor.DAE.Server
 		{
 			if (FTableVars != null)
 			{
-				ServerTableVar LTableVar = FTableVars[ATableVar];
-				if (LTableVar != null)
+				ServerTableVar LTableVar;
+				if (FTableVars.TryGetValue(ATableVar, out LTableVar))
 				{
 					foreach (ServerTransaction LTransaction in this)
-						if (LTransaction.TableVars.Contains(ATableVar))
+						if (LTransaction.TableVars.ContainsKey(ATableVar))
 							LTransaction.TableVars.Remove(ATableVar);
 					FTableVars.Remove(ATableVar);
 					LTableVar.Dispose();
@@ -1001,9 +1001,8 @@ namespace Alphora.Dataphor.DAE.Server
 		}
 	}
 	
-	public class ServerTableVars : Hashtable
+	public class ServerTableVars : Dictionary<Schema.TableVar, ServerTableVar>
 	{
-		public ServerTableVar this[Schema.TableVar ATableVar] { get { return (ServerTableVar)base[ATableVar]; } }
 	}
 	
 	public abstract class ServerHandler : System.Object
