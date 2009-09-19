@@ -8,7 +8,7 @@ namespace Alphora.Dataphor.Logging
 {
     internal class Logger : ILogger
     {
-        private static TraceSwitch SFTraceSwitch;
+        private TraceSwitch FTraceSwitch;
         private Type FType;
 
         public Logger(string ADisplayName):this(ADisplayName,"TraceSwitch for "+ADisplayName)
@@ -18,7 +18,7 @@ namespace Alphora.Dataphor.Logging
 
         public Logger(string ADisplayName, string ADescription)
         {
-            SFTraceSwitch=new TraceSwitch(ADisplayName,ADescription);
+            FTraceSwitch=new TraceSwitch(ADisplayName,ADescription);
         }
 
         public Logger(Type AType) : this(AType.FullName)
@@ -28,13 +28,13 @@ namespace Alphora.Dataphor.Logging
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat)
         {
-            bool LWillWriteLine = SFTraceSwitch.Level >= ATraceLevel;
+            bool LWillWriteLine = FTraceSwitch.Level >= ATraceLevel;
             if (LWillWriteLine)
             {
                 String LCategoryName;
                 if(FType==null)
                 {
-                    LCategoryName = SFTraceSwitch.DisplayName;
+                    LCategoryName = FTraceSwitch.DisplayName;
                 }
                 else
                 {
@@ -49,13 +49,13 @@ namespace Alphora.Dataphor.Logging
 
         public void WriteLine(TraceLevel ATraceLevel, string AFormat, params object[] AArgs)
         {
-            bool LWillWriteLine = SFTraceSwitch.Level >= ATraceLevel;
+            bool LWillWriteLine = FTraceSwitch.Level >= ATraceLevel;
             if (LWillWriteLine)
             {
                 String LCategoryName;
                 if (FType == null)
                 {
-                    LCategoryName = SFTraceSwitch.DisplayName;
+                    LCategoryName = FTraceSwitch.DisplayName;
                 }
                 else
                 {
